@@ -1,12 +1,14 @@
 #!/bin/bash
-#SBATCH --job-name=bench_3v4_smallSMP_Run_0
-#SBATCH --output=/bgfs/jdurrant/jspiegel/Benchmarks/bench_3v4_Run_0.conf.out
+#SBATCH --job-name=exhautive_dock
+#SBATCH --output=/bgfs/jdurrant/jspiegel/docked_source/exhautive_dock.txt
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=24
 #SBATCH --time=23:59:00                                                                       
 #SBATCH --cluster=invest                                                                            
 #SBATCH --partition=jdurrant                                                                        
 
+#SBATCH --mail-type BEGIN,END,FAIL,ARRAY_TASKS  
+#SBATCH --mail-user jako134j@gmail.com       
 ## Define the environment
 #py2.7 settings 
 module purge
@@ -34,7 +36,6 @@ do
     start_time="$(date +%s%N | cut -b1-13)"
     date +%s%N | cut -b1-13
 
-    mpirun -n $SLURM_NTASKS \
     ~/miniconda3/envs/py37/bin/python /bgfs/jdurrant/jspiegel/autogrow/RunAutogrow.py \
         --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
         --center_x -70.76 --center_y  21.82 --center_z 28.33 \
