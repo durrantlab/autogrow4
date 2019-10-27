@@ -35,7 +35,7 @@ class RankingSelectorTests(unittest.TestCase):
 
 
         self.str = '4'
-        self.vars = {'filename_of_receptor': "/home/jacob/Documents/autogrow/cdc73/3v46.pdb", 'Dock_choice': 'QuickVina2Docking', \
+        self.vars = {'filename_of_receptor': "/home/jacob/Documents/autogrow4/cdc73/3v46.pdb", 'Dock_choice': 'QuickVina2Docking', \
         'nn1_script': '/home/jacob/Documents/autogrow4/autogrow/Docking/Scoring/NNScore_exe/nnscore1/NNScore.py',\
         'docking_executable': '/home/jacob/Documents/autogrow4/autogrow/Docking/Docking_Executables/QVina02/qvina02', 'size_y': 30.0, 'size_z': 30.0, 'Rxn_library': 'ClickChem', \
         'rxn_library_file': '', 'output_directory': '/home/jacob/Desktop/Outputfolder/Run_1/', \

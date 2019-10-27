@@ -13,11 +13,11 @@ do
     start_time="$(date +%s%N | cut -b1-13)"
     date +%s%N | cut -b1-13
     
-    time python /home/jacob/Documents/autogrow/RunAutogrow.py \
-        --filename_of_receptor /home/jacob/Documents/autogrow/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
+    time python /home/jacob/Documents/autogrow4/RunAutogrow.py \
+        --filename_of_receptor /home/jacob/Documents/autogrow4/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
         --center_x -70.76 --center_y  21.82 --center_z 28.33 \
         --size_x 25.0 --size_y 16.0 --size_z 25.0 \
-        --source_compound_file /home/jacob/Documents/autogrow/source_compounds/ZINC_fragments.smi \
+        --source_compound_file /home/jacob/Documents/autogrow4/source_compounds/ZINC_fragments.smi \
         --root_output_folder $outfolder_four \
         --number_of_mutants_first_generation 60 \
         --number_of_crossovers_first_generation 60 \

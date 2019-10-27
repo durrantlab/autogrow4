@@ -1,5 +1,5 @@
 python /home/jacob/Documents/old_autogrow/autogrow4/autogrow/autogrow_3_1_2.py \
-     -filename_of_receptor /home/jacob/Documents/autogrow/tutorial/3v46.pdb \
+     -filename_of_receptor /home/jacob/Documents/autogrow4/tutorial/3v46.pdb \
      -center_x 39.5 -center_y 23.7 -center_z 15.0 \
      -size_x 30.0 -size_y 30.0 -size_z 20.0 \
      -additional_autoclickchem_parameters "-all_reactions +azide_and_alkyne_to_azole" \
@@ -22,13 +22,13 @@ python /home/jacob/Documents/old_autogrow/autogrow4/autogrow/autogrow_3_1_2.py \
 
 
 time python ./test_run_autogrow.py \
-     -filename_of_receptor /home/jacob/Documents/autogrow/tutorial/1xdn_receptor.pdb \
+     -filename_of_receptor /home/jacob/Documents/autogrow4/tutorial/1xdn_receptor.pdb \
      -center_x 39.5 -center_y 23.7 -center_z 15.0 \
      -size_x 30.0 -size_y 30.0 -size_z 20.0 \
      -additional_autoclickchem_parameters "-all_reactions +azide_and_alkyne_to_azole" \
      -allow_modification_without_frag_addition FALSE \
-     -directory_of_source_compounds /home/jacob/Documents/autogrow/tutorial/starting_compounds/ \
-     -directory_of_fragments /home/jacob/Documents/autogrow/fragments/MW_250/ \
+     -directory_of_source_compounds /home/jacob/Documents/autogrow4/tutorial/starting_compounds/ \
+     -directory_of_fragments /home/jacob/Documents/autogrow4/fragments/MW_250/ \
      -number_of_mutants_first_generation 2 -number_of_crossovers_first_generation 2 \
      -number_of_mutants 2 -number_of_crossovers 2 \
      -top_ones_to_advance_to_next_generation 2 -num_generations 2 \

@@ -9,7 +9,7 @@ folder = "/home/jacob/Documents/autogrow4/autogrow/Operators/Mutation/SmileClick
 folder2 = "/home/jacob/Documents/autogrow4/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/ClickChem/complimentary_mol_dir/"
 
 
-output_file = "/home/jacob/Documents/autogrow/source_compounds/ZINC_fragments.smi"
+output_file = "/home/jacob/Documents/autogrow4/source_compounds/ZINC_fragments.smi"
 
 
 def handle_one_file(filename):

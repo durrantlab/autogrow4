@@ -38,14 +38,14 @@ do
     start_time="$(date +%s%N | cut -b1-13)"
     date +%s%N | cut -b1-13
 
-    time timeout 6000 python /bgfs/jdurrant/jspiegel/test_old_autogrow/autogrow/3.1.2/autogrow/autogrow_3_1_2.py \
+    time timeout 6000 python /bgfs/jdurrant/jspiegel/test_old_autogrow4/autogrow/3.1.2/autogrow/autogrow_3_1_2.py \
         --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
         -center_x -70.76 -center_y  21.82 -center_z 28.33 \
         -size_x 25.0 -size_y 16.0 -size_z 25.0 \
         -additional_autoclickchem_parameters "-all_reactions +azide_and_alkyne_to_azole" \
         -allow_modification_without_frag_addition FALSE \
-        -directory_of_source_compounds /bgfs/jdurrant/jspiegel/test_old_autogrow/autogrow/3.1.2/autogrow/tutorial/starting_compounds/ \
-        -directory_of_fragments /bgfs/jdurrant/jspiegel/test_old_autogrow/autogrow/3.1.2/autogrow/fragments/MW_250/ \
+        -directory_of_source_compounds /bgfs/jdurrant/jspiegel/test_old_autogrow4/autogrow/3.1.2/autogrow/tutorial/starting_compounds/ \
+        -directory_of_fragments /bgfs/jdurrant/jspiegel/test_old_autogrow4/autogrow/3.1.2/autogrow/fragments/MW_250/ \
         -number_of_mutants_first_generation 100 \
         -number_of_crossovers_first_generation 100 \
         -number_of_mutants 100 -number_of_crossovers 100 \

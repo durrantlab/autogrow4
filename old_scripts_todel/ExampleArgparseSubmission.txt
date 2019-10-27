@@ -1,10 +1,10 @@
 ######################################################### 
 # cdc73 
 time python RunAutogrow.py \
-    --filename_of_receptor /home/jacob/Documents/autogrow/tutorial/3v46.pdb \
+    --filename_of_receptor /home/jacob/Documents/autogrow4/tutorial/3v46.pdb \
     --center_x 13.21 --center_y 11.84 --center_z 16.57 \
     --size_x 30.0 --size_y 30.0 --size_z 30.0 \
-    --source_compound_file /home/jacob/Documents/autogrow/source_compounds/small_mol_library.smi \
+    --source_compound_file /home/jacob/Documents/autogrow4/source_compounds/small_mol_library.smi \
     --root_output_folder /home/jacob/Desktop/Outputfolder/ \
     --number_of_mutants_first_generation 2 \
     --number_of_crossovers_first_generation 2 \
@@ -81,8 +81,8 @@ time python ~/projects/autogrow/RunAutogrow.py \
 
 
 # run over weekend
-/home/jacob/Documents/autogrow/cdc73
-/home/jacob/Documents/autogrow/source_compounds/small_mol_library.smi
+/home/jacob/Documents/autogrow4/cdc73
+/home/jacob/Documents/autogrow4/source_compounds/small_mol_library.smi
      
 source activate py27
 cd projects/autogrow/

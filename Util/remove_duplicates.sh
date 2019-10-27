@@ -3,7 +3,7 @@
 # awk '!seen[$1]++' $filename >> output.txt
 # awk '!seen[$2]++' output.txt >> output2.txt
 
-filename=/home/jacob/Documents/autogrow/source_compounds/ZINC_fragments.smi
+filename=/home/jacob/Documents/autogrow4/source_compounds/ZINC_fragments.smi
 tmp_str=_tmp_dummy.smi
 no_dup_str=_no_dup.smi
 tmp_filename=$filename$tmp_str
