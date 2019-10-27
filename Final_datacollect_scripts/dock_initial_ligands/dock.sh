@@ -2,10 +2,10 @@
 #SBATCH --job-name=exhautive_dock
 #SBATCH --output=/bgfs/jdurrant/jspiegel/docked_source/exhautive_dock.txt
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=24
-#SBATCH --time=23:59:00                                                                       
-#SBATCH --cluster=invest                                                                            
-#SBATCH --partition=jdurrant                                                                        
+#SBATCH --ntasks-per-node=12
+#SBATCH --time=10:59:00                                                                       
+#SBATCH --cluster=smp                                                                            
+#SBATCH --partition=high-mem                                                                        
 
 #SBATCH --mail-type BEGIN,END,FAIL,ARRAY_TASKS  
 #SBATCH --mail-user jako134j@gmail.com       
