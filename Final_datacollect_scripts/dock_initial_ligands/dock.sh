@@ -21,7 +21,6 @@ module load gcc/8.2.0
 # module load mgltools
 # module load gcc/8.2.0
 # module load python/anaconda3.7-2018.12_westpa
-source activate py37
 
 highest_folder="/bgfs/jdurrant/jspiegel/docked_source/"
 mkdir $highest_folder
