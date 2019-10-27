@@ -15,9 +15,9 @@ This is essential to use Bash Timeout function in Autogrow.
 Traceback (most recent call last):
   File "RunAutogrow.py", line 210, in <module>
     vars,printout = UserVars.load_in_commandline_parameters(INPUTS)
-  File "/Users/jdurrant/Documents/Work/durrant_git/autogrow/autogrow/UserVars.py", line 353, in load_in_commandline_parameters
+  File "/Users/jdurrant/Documents/Work/durrant_git/autogrow4/autogrow/UserVars.py", line 353, in load_in_commandline_parameters
     check_dependencies()
-  File "/Users/jdurrant/Documents/Work/durrant_git/autogrow/autogrow/UserVars.py", line 134, in check_dependencies
+  File "/Users/jdurrant/Documents/Work/durrant_git/autogrow4/autogrow/UserVars.py", line 134, in check_dependencies
     raise ImportError(printout)
 ImportError: Need to install GNU tools for Bash to work. 
 This is essential to use Bash Timeout function in Autogrow. 

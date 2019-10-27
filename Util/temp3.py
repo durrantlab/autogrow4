@@ -666,20 +666,20 @@ def test_substructures(mol_set, substructure_list):
 
 
 if __name__ == "__main__":
-    folder = "/mnt/data_1/DataB/jspiegel/projects/autogrow/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/Robust_Rxns/complimentary_mol_dir/"
+    folder = "/mnt/data_1/DataB/jspiegel/projects/autogrow4/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/Robust_Rxns/complimentary_mol_dir/"
     output_folder = "/home/jspiegel/DataB/jspiegel/FILTER_FOR_AUTO/"
     source_pickle_folder = "/home/jspiegel/DataB/jspiegel/FILTER_FOR_AUTO/source_pickled_lib/"
     modified_pickle_folder = "/home/jspiegel/DataB/jspiegel/FILTER_FOR_AUTO/modified_pickled_lib/"
     good_mols_folder = "/home/jspiegel/DataB/jspiegel/FILTER_FOR_AUTO/Final/"
     
-    # folder = "/home/jacob/Documents/autogrow/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/Robust_Rxns/complimentary_mol_dir/"
+    # folder = "/home/jacob/Documents/autogrow4/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/Robust_Rxns/complimentary_mol_dir/"
     # output_folder = "/home/jacob/Desktop/folder_for_mols/"
     # source_pickle_folder = "/home/jacob/Desktop/folder_for_mols/source_pickled_lib/"
     # modified_pickle_folder = "/home/jacob/Desktop/folder_for_mols//modified_pickled_lib/"
     # good_mols_folder = "/home/jacob/Desktop/folder_for_mols//Final/"
     
     
-    # folder = "/bgfs/jdurrant/jspiegel/autogrow/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/Robust_Rxns/complimentary_mol_dir/"
+    # folder = "/bgfs/jdurrant/jspiegel/autogrow4/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/Robust_Rxns/complimentary_mol_dir/"
     # output_folder = "/ihome/jdurrant/jspiegel/folder_for_mols/"
     # source_pickle_folder = "/ihome/jdurrant/jspiegel/folder_for_mols/source_pickled_lib/"
     # modified_pickle_folder = "/ihome/jdurrant/jspiegel/folder_for_mols/modified_pickled_lib/"

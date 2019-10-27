@@ -91,7 +91,7 @@ def run_filter(mol):
 
 if __name__ == "__main__":
     #################################### 
-    folder_name = "/home/jspiegel/DataB/jspiegel/projects/autogrow/autogrow/Operators/Mutation/SmileClickChem/Complimentary_mol_dict/"
+    folder_name = "/home/jspiegel/DataB/jspiegel/projects/autogrow4/autogrow/Operators/Mutation/SmileClickChem/Complimentary_mol_dict/"
 
 
     files = glob.glob(folder_name + "*.smi")

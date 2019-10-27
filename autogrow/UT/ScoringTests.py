@@ -32,14 +32,14 @@ class ScoringTests(unittest.TestCase):
         self.other_num = 4
         self.str = '4'
         self.vars = {'filename_of_receptor': "/home/jacob/Documents/autogrow/cdc73/3v46.pdb", 'Dock_choice': 'QuickVina2Docking', \
-        'nn1_script': '/home/jacob/Documents/autogrow/autogrow/Docking/Scoring/NNScore_exe/nnscore1/NNScore.py',\
-        'docking_executable': '/home/jacob/Documents/autogrow/autogrow/Docking/Docking_Executables/QVina02/qvina02', 'size_y': 30.0, 'size_z': 30.0, 'Rxn_library': 'ClickChem', \
+        'nn1_script': '/home/jacob/Documents/autogrow4/autogrow/Docking/Scoring/NNScore_exe/nnscore1/NNScore.py',\
+        'docking_executable': '/home/jacob/Documents/autogrow4/autogrow/Docking/Docking_Executables/QVina02/qvina02', 'size_y': 30.0, 'size_z': 30.0, 'Rxn_library': 'ClickChem', \
         'rxn_library_file': '', 'output_directory': '/home/jacob/Desktop/Outputfolder/Run_1/', \
         'num_generations': 2, 'top_mols_to_seed_next_generation': 1, 'scoring_function': 'VINA', \
         'root_output_folder': '/home/jacob/Desktop/Outputfolder/', 'diversity_seed_depreciation_per_gen': 1, \
         'size_x': 30.0, \
         'mgl_python': '/home/jacob/MGLTools-1.5.6/bin/pythonsh',\
-        'nn2_script': '/home/jacob/Documents/autogrow/autogrow/Docking/Scoring/NNScore_exe/nnscore2/NNScore2.py',\
+        'nn2_script': '/home/jacob/Documents/autogrow4/autogrow/Docking/Scoring/NNScore_exe/nnscore2/NNScore2.py',\
         'Custom_scoring_script': '', 'redock_advance_from_previous_gen': False, \
         'Selector_Choice': 'Roulette_Selector', 'number_of_processors': -1}
 

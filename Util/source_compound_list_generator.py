@@ -4,9 +4,9 @@ import os
 import sys
 import random
 
-folder = "/home/jacob/Documents/autogrow/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/Robust_Rxns/complimentary_mol_dir/"
+folder = "/home/jacob/Documents/autogrow4/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/Robust_Rxns/complimentary_mol_dir/"
 
-folder2 = "/home/jacob/Documents/autogrow/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/ClickChem/complimentary_mol_dir/"
+folder2 = "/home/jacob/Documents/autogrow4/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/ClickChem/complimentary_mol_dir/"
 
 
 output_file = "/home/jacob/Documents/autogrow/source_compounds/ZINC_fragments.smi"

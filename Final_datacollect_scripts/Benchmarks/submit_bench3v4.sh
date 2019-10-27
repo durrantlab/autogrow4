@@ -53,14 +53,14 @@ do
     start_time="$(date +%s%N | cut -b1-13)"
     date +%s%N | cut -b1-13
 
-    time timeout 86400 python /bgfs/jdurrant/jspiegel/test_old_autogrow/autogrow/autogrow/autogrow_3_1_3.py \
+    time timeout 86400 python /bgfs/jdurrant/jspiegel/test_old_autogrow/autogrow4/autogrow/autogrow_3_1_3.py \
         --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
         -center_x -70.76 -center_y  21.82 -center_z 28.33 \
         -size_x 25.0 -size_y 16.0 -size_z 25.0 \
         -additional_autoclickchem_parameters "-all_reactions +azide_and_alkyne_to_azole" \
         -allow_modification_without_frag_addition FALSE \
-        -directory_of_source_compounds /bgfs/jdurrant/jspiegel/test_old_autogrow/autogrow/autogrow/tutorial/starting_compounds/ \
-        -directory_of_fragments /bgfs/jdurrant/jspiegel/test_old_autogrow/autogrow/autogrow/fragments/MW_150/ \
+        -directory_of_source_compounds /bgfs/jdurrant/jspiegel/test_old_autogrow/autogrow4/autogrow/tutorial/starting_compounds/ \
+        -directory_of_fragments /bgfs/jdurrant/jspiegel/test_old_autogrow/autogrow4/autogrow/fragments/MW_150/ \
         -number_of_mutants_first_generation 50 \
         -number_of_crossovers_first_generation 50 \
         -number_of_mutants 85 \
@@ -70,7 +70,7 @@ do
         -use_lipinski_filter TRUE -use_strict_lipinski_filter FALSE -use_ghose_filter TRUE \
         -scoring_function VINA -score_by_ligand_efficiency FALSE -maintain_core FALSE \
         -minimum_core_atoms_required 4 \
-        -vina_executable /bgfs/jdurrant/jspiegel/autogrow/autogrow/Docking/Docking_Executables/Vina/autodock_vina_1_1_2_linux_x86/bin/vina \
+        -vina_executable /bgfs/jdurrant/jspiegel/autogrow4/autogrow/Docking/Docking_Executables/Vina/autodock_vina_1_1_2_linux_x86/bin/vina \
         -openbabel_bin_directory /ihome/crc/install/python/anaconda2.7-4.2.0/bin/ \
         -mgltools_directory $MGLTOOLS_HOME/ \
         -num_processors -1 -output_dir $outfolder \

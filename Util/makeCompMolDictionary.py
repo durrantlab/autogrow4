@@ -369,7 +369,7 @@ if __name__ == "__main__":
     # number_of_processors = -1
     # functional_group_json_file = sys.argv[3]
 
-    # functional_group_json_file = "/home/jspiegel/DataB/jspiegel/projects/autogrow/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/Robust_Rxns/Robust_Rxns_functional_groups.json"
+    # functional_group_json_file = "/home/jspiegel/DataB/jspiegel/projects/autogrow4/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/Robust_Rxns/Robust_Rxns_functional_groups.json"
     # infile = "/home/jspiegel/DataB/jspiegel/small_Zinc_subset/zinc15_available/pass_sanitize_all.smi_no_dup.smi"
     # outfolder = "/home/jspiegel/DataB/jspiegel/small_Zinc_subset/zinc15_available/compound_lib/"
     # number_of_processors = -1
@@ -377,13 +377,13 @@ if __name__ == "__main__":
     outfolder = "/home/jacob/Downloads/zinc15_available/compound_lib/"
     number_of_processors = -1
     #LAptop
-    functional_group_json_file = "/home/jacob/Documents/autogrow/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/Robust_Rxns/Robust_Rxns_functional_groups.json"
+    functional_group_json_file = "/home/jacob/Documents/autogrow4/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/Robust_Rxns/Robust_Rxns_functional_groups.json"
     infile = "/home/jacob/Downloads/zinc15_available/concatinated_all.smi_no_dup.smi"
     outfolder = "/home/jacob/Downloads/zinc15_available/"
     number_of_processors = -1
 
     #Bob
-    functional_group_json_file = "/home/jspiegel/DataB/jspiegel/projects/autogrow/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/Robust_Rxns/Robust_Rxns_functional_groups.json"
+    functional_group_json_file = "/home/jspiegel/DataB/jspiegel/projects/autogrow4/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/Robust_Rxns/Robust_Rxns_functional_groups.json"
     infile = "/home/jspiegel/DataB/jspiegel/small_Zinc_subset/zinc15_data/zinc15_data/concatinated_all.smi"
     outfolder = "/home/jspiegel/DataB/jspiegel/zinc15_data/compound_lib/"
     number_of_processors = 22
@@ -403,12 +403,12 @@ if __name__ == "__main__":
 
     # # Run on Barry 15million
     # number_of_processors = 21
-    # functional_group_json_file = "/mnt/c/Users/kcc35/Desktop/JAKE/autogrow/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/Robust_Rxns/Robust_Rxns_functional_groups.json"
+    # functional_group_json_file = "/mnt/c/Users/kcc35/Desktop/JAKE/autogrow4/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/Robust_Rxns/Robust_Rxns_functional_groups.json"
     # infile = "/mnt/c/Users/kcc35/Desktop/JAKE/zinc15_data/pass_filters.smi"
     # outfolder = "/mnt/c/Users/kcc35/Desktop/JAKE/zinc15_data/compound_lib/"
 
 
-    # functional_group_json_file = "/home/jspiegel/DataB/jspiegel/projects/autogrow/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/Robust_Rxns/Robust_Rxns_functional_groups.json"
+    # functional_group_json_file = "/home/jspiegel/DataB/jspiegel/projects/autogrow4/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/Robust_Rxns/Robust_Rxns_functional_groups.json"
     # infile = "/home/jspiegel/DataB/jspiegel/small_Zinc_subset/zinc15_available/pass_sanitize_all.smi_no_dup.smi"
     # outfolder = "/home/jspiegel/DataB/jspiegel/small_Zinc_subset/zinc15_available/compound_lib/"
     # number_of_processors = -1

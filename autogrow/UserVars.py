@@ -398,10 +398,10 @@ def define_defaults():
     # Some variables which can be manually replaced but defaults point to prepackaged locations.
     ## Neural Network executable for scoring binding
     vars['nn1_script'] = os.path.join(script_dir,"Docking","Scoring","NNScore_exe", "nnscore1", "NNScore.py")
-    # Example: vars['nn1_script'] = "/PATH/autogrow/autogrow/Docking/Scoring/NNScore_exe/nnscore1/NNScore.py"
+    # Example: vars['nn1_script'] = "/PATH/autogrow4/autogrow/Docking/Scoring/NNScore_exe/nnscore1/NNScore.py"
     
     vars['nn2_script'] =  os.path.join(script_dir,"Docking","Scoring","NNScore_exe", "nnscore2", "NNScore2.py")
-    # Example: vars['nn2_script'] = "/PATH/autogrow/autogrow/Docking/Scoring/nnscore2/NNScore2.py"
+    # Example: vars['nn2_script'] = "/PATH/autogrow4/autogrow/Docking/Scoring/nnscore2/NNScore2.py"
 
     #### OPTIONAL FILE-LOCATION VARIABLES #### 
     # (RECOMMEND SETTING TO "" SO AUTOGROW CAN AUTOLOCATE THESE FILES)# 

@@ -590,7 +590,7 @@ def conduct_reaction_two(mols_sets, rxn, subs):
 
 
 if __name__ == "__main__":
-    folder = "/mnt/data_1/DataB/jspiegel/projects/autogrow/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/Robust_Rxns/complimentary_mol_dir/"
+    folder = "/mnt/data_1/DataB/jspiegel/projects/autogrow4/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/Robust_Rxns/complimentary_mol_dir/"
 
     output_folder = "/home/jspiegel/DataB/jspiegel/FILTER_FOR_AUTO/pickled_lib/"
     list_files = [x for x in glob.glob(folder+"*.smi")]
