@@ -35,7 +35,7 @@ do
     start_time="$(date +%s%N | cut -b1-13)"
     date +%s%N | cut -b1-13
 
-    ~/miniconda3/envs/py37/bin/python /bgfs/jdurrant/jspiegel/autogrow4/RunAutogrow.py \
+    ~/miniconda3/envs/py37/bin/python /bgfs/jdurrant/jspiegel/autogrow/RunAutogrow.py \
         --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow4/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
         --center_x -70.76 --center_y  21.82 --center_z 28.33 \
         --size_x 25.0 --size_y 16.0 --size_z 25.0 \
@@ -66,6 +66,7 @@ do
         --Rxn_library All_Rxns \
         --docking_exhaustiveness 50 \
         --generate_plot True \
+        --multithread_mode multithreading \
         >>  $outfolder_four"test_output_$i.txt" 2>>  $outfolder_four"test_error_$i.txt"
 
 done
