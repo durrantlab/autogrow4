@@ -1,0 +1,25 @@
+(RE)STARTING AUTOGROW 4.0: 2018-08-30 12:57:35.341703
+AutoGrow Version 4.0.0
+ ================== 
+If you use AutoGrow 4.0.0 in your research, please cite the following reference:
+Spiegel, J, Ropp, P. J., Durrant, J. D. 
+ ================== 
+
+
+Use the -h tag to get detailed help regarding program usage.
+
+Need to install GNU tools for Bash to work. 
+This is essential to use Bash Timeout function in Autogrow. 
+     Please run: sudo brew install coreutils 
+
+Traceback (most recent call last):
+  File "RunAutogrow.py", line 210, in <module>
+    vars,printout = UserVars.load_in_commandline_parameters(INPUTS)
+  File "/Users/jdurrant/Documents/Work/durrant_git/autogrow/autogrow/UserVars.py", line 353, in load_in_commandline_parameters
+    check_dependencies()
+  File "/Users/jdurrant/Documents/Work/durrant_git/autogrow/autogrow/UserVars.py", line 134, in check_dependencies
+    raise ImportError(printout)
+ImportError: Need to install GNU tools for Bash to work. 
+This is essential to use Bash Timeout function in Autogrow. 
+     Please run: sudo brew install coreutils 
+

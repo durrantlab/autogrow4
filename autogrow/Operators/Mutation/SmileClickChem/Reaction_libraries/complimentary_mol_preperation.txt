@@ -1,0 +1,23 @@
+###################################################################################################################
+All ligands started from Retrieved on 10/17/19
+
+We retrieved ligands from the Zinc15 database.
+    The ligands retrieved were limited to:
+        1) commercially available
+        2) MW<250Da
+        3) between 1 and 4.5 logP
+        4) Any level of reactivity level.
+
+    This resulted in 53,427,687 substances and 331 Tranches
+
+
+This list was further filtered to ensure that the SMILES could be converted to rdkit mol object and filtered with Lipinski_Strict', 'Ghose', and 'Mozziconacci'.
+We populated the functional group libraries using this list. 
+
+Libraries exceeding 50,000 ligands were reduced to a maximum size of 50,000 ligands.
+
+###################################################################################################################
+The complimentary molecule libraries used in Robust_Rxns and ClickChem were copied to form the All_Rxns complimentary molecule library
+###################################################################################################################
+
+The resulting libraries (when removing redundancies) uses:

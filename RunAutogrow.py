@@ -1,0 +1,323 @@
+# !/usr/bin/env python
+# This is the executable file for Autogrow 4.0.0
+# This script should come first. It should obtain and verify all the parameters work. 
+# This than should pass these parameters variables to the main execution function
+# titled AutogrowMainExecute.py found in MainFunctions
+
+import __future__
+
+import sys
+import argparse
+import copy
+
+# Imports of files are burried below to prevent EOF issues in MPI mode
+
+################ 
+# Run AutoGrow #                                                                                             
+################ 
+
+PARSER = argparse.ArgumentParser()
+
+# Allows the run commands to be submitted via a .json file.
+PARSER.add_argument('--json', '-j', metavar='param.json',
+                    help='Name of a json file containing all parameters. \
+                        Overrides other arguments.')
+
+# Allows the run in debug mode. Doesn't delete temp files.
+PARSER.add_argument('--debug_mode', '-d', action = 'store_true', default=False,
+                    help='Run Autogrow in Debug mode. This keeps all temporary files.')
+
+# receptor information
+PARSER.add_argument('--filename_of_receptor', '-r', metavar = 'receptor.pdb',
+                    help = 'The path to the receptor file. Should be .pdb file.')
+PARSER.add_argument('--center_x', '-x', type = float,
+                    help = 'x-coordinate for the center of the pocket to be tested.')
+PARSER.add_argument('--center_y', '-y', type = float,
+                    help = 'y-coordinate for the center of the pocket to be tested.')
+PARSER.add_argument('--center_z', '-z', type = float,
+                    help = 'z-coordinate for the center of the pocket to be tested.')
+
+PARSER.add_argument('--size_x', type = float,
+                    help = 'dimension of box to dock into in the x-axis')
+PARSER.add_argument('--size_y', type = float,
+                    help = 'dimension of box to dock into in the y-axis')
+PARSER.add_argument('--size_z', type = float,
+                    help = 'dimension of box to dock into in the z-axis')
+
+
+# Input/Output directories
+PARSER.add_argument('--root_output_folder', '-o', type = str, 
+                    help = 'The Path to the folder which all output files will be placed.')
+PARSER.add_argument('--source_compound_file', '-s', type = str, 
+                    help = 'PATH to the file containing the source compounds. \
+                        It must be tab-deliniated .smi file. These ligands will seed the first generation.')
+PARSER.add_argument('--filter_source_compounds', choices = [True,False,"True","False","true","false"], default=True,
+                    help = 'If True source ligands from source_compound_file will be filter using the user defined filter choices \
+                        prior to the 1st generation being created. If False, ligands which would fail the ligand filters could seed \
+                        the 1st generation. Default is True.')
+PARSER.add_argument('--use_docked_source_compounds', choices = [True,False,"True","False","true","false"], default=False,
+                    help = 'If True source ligands will be docked prior to seeding generation 1. \
+                        If True and the source_compound file already has docking/fitness metric score in -2 column of .smi file, it will not redock but reuse the scores from the source_compound_file.\
+                        If True and no fitness metric score in -2 column of .smi file, it will dock each ligand from the source_compound_file and displayed as generation 0.\
+                        If False, generation 1 will be randomly seeded by the source compounds with no preference and there will be no generation 0. \
+                        If performing multiple simulations using same source compounds and protein, we recommend running once this and using the generation 0 ranked file as the source_compound_file for future simulations. \
+                        Default is True.')
+PARSER.add_argument('--start_a_new_run', action = 'store_true', default=False,
+                    help = 'If False make a new folder and start a fresh simulation with Generation 0.  \
+                        If True find the last generation in the root_output_folder and continue to fill.\
+                        Default is False.')
+
+
+
+# SmilesMerge Settings
+PARSER.add_argument('--max_time_MCS_prescreen', type = int, default = 1,
+                    help = 'amount time the pre-screen MCS times out. Time out doesnt prevent mcs matching \
+                        just takes what it has up to that point')
+PARSER.add_argument('--max_time_MCS_thorough', type = int, default = 1,
+                    help = 'amount time the thorough MCS times out. Time out doesnt prevent mcs matching \
+                        just takes what it has up to that point')
+PARSER.add_argument('--min_atom_match_MCS', type = int, default = 4,
+                    help = 'Determines the minimum number of atoms in common for a substructurematch. \
+                        The higher the more restrictive, but the more likely for 2 ligands not to match')
+PARSER.add_argument('--protanate_step', action = 'store_true', default=False,
+                    help = 'Indicates if Smilesmerge uses protanated mols (if true) or deprot (if False) \
+                        SmilesMerge is 10x faster when deprotanated')
+
+
+# Mutation Settings
+PARSER.add_argument('--Rxn_library', choices = ["ClickChem","Robust_Rxns","All_Rxns","Custom"], default="ClickChem", \
+                    help = 'This set of reactions to be used in Mutation. \
+                        If Custom, one must also provide rxn_file Path and function_group_library path')
+PARSER.add_argument('--rxn_library_file', type=str, default="", \
+                    help = 'This PATH to a Custom SMIRKS reactions to use for Mutation. \
+                        Only provide if using the Custom option for Rxn_library.')
+PARSER.add_argument('--function_group_library', type=str, default="", \
+                    help = 'This PATH for a dictionary of functional groups to be used for Mutation. \
+                        Only provide if using the Custom option for Rxn_library.')
+PARSER.add_argument('--complimentary_mol_directory', type=str, default="", \
+                    help = 'This PATH to the directory containing all the molecules being used to react with.\
+                        The directory should contain .smi files contain SMILES of molecules containing the functional group represented by that file.\
+                        Each file should be named with the same title as the functional groups described in rxn_library_file & function_group_library +.smi \
+                        All Functional groups specified function_group_library must have its own .smi file.\
+                        We recommend you filter these dictionaries prior to Autogrow for the Drug-likeliness and size filters you will Run Autogrow with.')
+
+
+# processors and multithread mode
+PARSER.add_argument('--number_of_processors', '-p', type = int, metavar='N', default = 1,
+                    help='Number of processors to use for parallel calculations.')
+PARSER.add_argument('--multithread_mode', default='multithreading', choices = ["mpi","multithreading","serial"],
+                    help='Determine what style multithreading: mpi, multithreading, or serial.\
+                        If this program is being used by a program in MPI mode we recommend setting this to serial.\
+                        serial will override num_processors and force it to be on a single processor.')
+
+
+# Genetic Algorithm Options
+PARSER.add_argument('--Selector_Choice', choices = ["Roulette_Selector","Rank_Selector", "Tournement_Selector"], default="Roulette_Selector", 
+                    help = 'This determines whether the fitness criteria are chosen by a Weighted Roulette, Ranked, or Tournement \
+                        style Selector. The Rank option is a non-redudant Elitist selector. Roulette and Tournement chose without replacement \
+                        and are stoichastic options. \
+                        Warning do not use Rank_Selector for small runs as there is potential that the number of desired ligands exceed the \
+                        number of ligands to chose from.')
+PARSER.add_argument('--tourn_size', type=float, default=0.1,
+                    help = 'If using the Tournement_Selector this determines the size of each tournement. The number of \
+                        ligands used for each tournement will the tourn_size * the number of considered ligands.')     
+
+# Seeding next gen and diversity
+PARSER.add_argument('--top_mols_to_seed_next_generation_first_generation', type = int,
+                    help = 'Number of mols that seed next generation, for the first generation.\
+                        Should be less than number_of_crossovers_first_generation + number_of_mutations_first_generation\
+                        If not defined it will default to top_mols_to_seed_next_generation')
+PARSER.add_argument('--top_mols_to_seed_next_generation', type = int, default = 10, 
+                    help = 'Number of mols that seed next generation, for all generations after the first.\
+                        Should be less than number_of_crossovers_first_generation + number_of_mutations_first_generation')
+PARSER.add_argument('--diversity_mols_to_seed_first_generation', type = int, default = 10, 
+                    help = 'Should be less than number_of_crossovers_first_generation + number_of_mutations_first_generation')
+PARSER.add_argument('--diversity_seed_depreciation_per_gen', type = int, default = 2, 
+                    help = 'each gen diversity_mols_to_seed_first_generation will decrease this amount')
+
+# Populations settings
+PARSER.add_argument('--num_generations', type = int, default = 10,
+                    help = 'The number of generations to be created.')
+PARSER.add_argument('--number_of_crossovers_first_generation', type = int,
+                    help = 'The number of ligands which will be created via crossovers in the first generation. \
+                        If not defined it will default to number_of_crossovers')
+PARSER.add_argument('--number_of_mutants_first_generation', type = int,
+                    help = 'The number of ligands which will be created via mutation in the first generation. \
+                        If not defined it will default to number_of_mutants')
+PARSER.add_argument('--number_to_advance_from_previous_gen_first_generation', type = int,
+                    help = 'The number of ligands which will advance from the previous generation, for the first generation, directly into the next generation.\
+                        This is purely advancing based on Docking/Rescore fitness. This does not select for diversity.\
+                        If not defined it will default to number_to_advance_from_previous_gen')
+PARSER.add_argument('--number_of_crossovers', type = int, default = 10,
+                    help = 'The number of ligands which will be created via crossover in each generation besides the first')
+PARSER.add_argument('--number_of_mutants', type = int, default = 10,
+                    help = 'The number of ligands which will be created via mutation in each generation besides the first.')
+PARSER.add_argument('--number_to_advance_from_previous_gen', type = int, default = 10,
+                    help = 'The number of ligands which will advance from the previous generation, for the first generations after the first, directly into the next generation.\
+                        This is purely advancing based on Docking/Rescore fitness. This does not select for diversity.')
+PARSER.add_argument('--redock_advance_from_previous_gen', choices = [True,False,"True","False","true","false"], default=False,
+                    help = 'If True than ligands from the previous generation which advance to the next generation \
+                        will be passed through Gypsum and docked again. This provides a better exploration of conformer space \
+                        but also requires more computation time. If False, advancing ligands are simply carried forward by \
+                        copying the PDBQT files.')
+
+####### FILTER VARIABLES
+PARSER.add_argument('--Lipinski_Strict', action = 'store_true', default=False,
+                    help = '')
+PARSER.add_argument('--Lipinski_Lenient', action = 'store_true', default=False,
+                    help = '')
+PARSER.add_argument('--Ghose', action = 'store_true', default=False,
+                    help = '')
+PARSER.add_argument('--Mozziconacci', action = 'store_true', default=False,
+                    help = '')
+PARSER.add_argument('--VandeWaterbeemd', action = 'store_true', default=False,
+                    help = '')
+PARSER.add_argument('--PAINS_Filter', action = 'store_true', default=False,
+                    help = '')
+PARSER.add_argument('--NIH_Filter', action = 'store_true', default=False,
+                    help = '')
+PARSER.add_argument('--BRENK_Filter', action = 'store_true', default=False,
+                    help = '')
+PARSER.add_argument('--No_Filters', action = 'store_true', default=False,
+                    help = '')
+PARSER.add_argument('--Alternative_filter', action = 'append', 
+                    help = 'If you want to add Custom filters to the filter child classes \
+                            Must be a list of lists [[name_filter1, Path/to/name_filter1.py],[name_filter2, Path/to/name_filter2.py]]')
+
+# dependency variables
+# DOCUMENT THE file conversion for docking inputs
+PARSER.add_argument('--Conversion_choice', choices = ["MGLTools_Conversion","obabel_Conversion","Custom"], default="MGLTools_Conversion",
+                    help = 'Determines how .pdb files will be converted to the final format for docking. \
+                            For Autodock Vina and QuickVina style docking software, files must be in .pdbqt format. \
+                            MGLTools_Conversion: uses MGLTools and is the recommended converter. It is required for NNScore1/2 rescoring. \
+                            obabel_Conversion: uses commandline obabel. Easier to install but Vina docking has been optimized with MGLTools conversion.')
+PARSER.add_argument('--Custom_Conversion_script', metavar = 'Custom_Conversion_script', default="",
+                    help = 'The path to a python script for which is used to convert ligands. This is required for Custom Conversion_choice choices\
+                    Must be a list of strings [name_Custom_Conversion_class, Path/to/name_Custom_Conversion_class.py]')
+PARSER.add_argument('--mgltools_directory', metavar = 'mgltools_directory',
+                    help = 'required if using MGLTools conversion option (Conversion_choice=MGLTools_Conversion) \
+                    Path may look like: /home/user/MGLTools-1.5.6/')
+PARSER.add_argument('--mgl_python', metavar = 'mgl_python',required = False,
+                    help = '/home/user/MGLTools-1.5.4/bin/pythonsh')
+PARSER.add_argument('--prepare_ligand4.py', metavar = 'prepare_ligand4.py',required = False,
+                    help = '/home/user/MGLTools-1.5.4/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_ligand4.py')
+PARSER.add_argument('--prepare_receptor4.py', metavar = 'prepare_receptor4.py',required = False,
+                    help = '/home/userMGLTools-1.5.4/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_receptor4.py')
+PARSER.add_argument('--obabel_path', default="/home/jacob/miniconda3/envs/py37/bin/obabel",
+                    help = 'required if using obabel conversion option (Conversion_choice=obabel_Conversion) \
+                    Path may look like PATH/envs/py37/bin/obabel; may be found on Linux by running: which obabel')
+   
+# docking
+PARSER.add_argument('--Dock_choice', metavar = 'Dock_choice',default="QuickVina2Docking", choices = ["VinaDocking", "QuickVina2Docking","Custom"],
+                    help = 'Dock_choice')
+PARSER.add_argument('--docking_executable', metavar = 'docking_executable', default=None,
+                    help = 'path to the docking_executable')
+PARSER.add_argument('--docking_exhaustiveness', metavar = 'docking_exhaustiveness', default=None,
+                    help = 'exhaustiveness of the global search (roughly proportional to time. \
+                        see docking software for settings. Unless specified Autogrow uses the \
+                        docking softwares default setting. For AutoDock Vina 1.1.2 that is 8')
+PARSER.add_argument('--docking_num_modes', metavar = 'docking_num_modes', default=None,
+                    help = ' maximum number of binding modes to generate in docking. \
+                        See docking software for settings. Unless specified Autogrow uses the \
+                        docking softwares default setting. For AutoDock Vina 1.1.2 that is 9')
+PARSER.add_argument('--docking_timeout_limit', type=float, default = 200,
+                    help='The maximum amount of time allowed to dock a single ligand into a pocket in seconds. \
+                        Many factors influence the time required to dock, such as: \
+                            processor speed, the docking software, # rotatable bonds, exhaustiveness docking, and number of docking modes... \
+                        The default docking_timeout_limit is 200 seconds, which is excess for most docking events using QuickVina2Docking under default settings. \
+                        If run with more exhaustive settings or with highly flexible ligands, consider increasing docking_timeout_limit to accommodate.\
+                        Default docking_timeout_limit is 200 seconds')
+PARSER.add_argument('--Custom_docking_script', metavar = 'Custom_docking_script', default="",
+                    help = 'The name and path to a python script for which is used to dock ligands. This is required for Custom docking choices\
+                            Must be a list of strings [name_Custom_Conversion_class, Path/to/name_Custom_Conversion_class.py]')
+                    
+
+# scoring
+PARSER.add_argument('--Scoring_choice', metavar = 'Scoring_choice', choices = ["VINA","NN1","NN2","Custom"], default="VINA",
+                    help = 'The Scoring_choice to use to assess the ligands docking fitness. Default is using Vina/QuickVina2 ligand affinity \
+                        while NN1/NN2 use a Neural Network to assess the docking pose. Custom requires providing a file path for a Custom scoring funciton.\
+                        If Custom scoring function, confirm it selects properly, Autogrow is largely set to select for a more negative score.')                  
+PARSER.add_argument('--rescore_Lig_Efficiency', action = 'store_true', default=False,
+                    help = 'This will divide the final Scoring_choice output by the number of non-Hydrogen atoms in the ligand. This adjusted\
+                        ligand efficiency score will override the Scoring_choice value. This is compatible with all Scoring_choice options.')                  
+PARSER.add_argument('--Custom_scoring_script', metavar = 'Custom_scoring_script', type=str, default="",
+                    help = 'The path to a python script for which is used to assess the ligands docking fitness. \
+                        Autogrow is largely set to select for a most negative scores (ie binding affinity the more negative is best)\
+                        Must be a list of strings [name_Custom_Conversion_class, Path/to/name_Custom_Conversion_class.py]')
+                    
+# gypsum # max variance is the number of conformers made per ligand
+PARSER.add_argument('--max_variants_per_compound', type = int, default = 3,
+                    help = 'number of conformers made per ligand. \
+                        See Gypsum-DL publication for details')
+PARSER.add_argument('--gypsum_thoroughness', '-t', type=str,
+                    help='How widely Gypsum-DL will search for \
+                        low-energy conformers. Larger values increase \
+                        run times but can produce better results. \
+                        See Gypsum-DL publication for details')
+PARSER.add_argument('--min_ph', metavar='MIN', type=float, default = 6.4,
+                    help='Minimum pH to consider.See Gypsum-DL \
+                        and Dimorphite-D publication for details.')
+PARSER.add_argument('--max_ph', metavar='MAX', type=float, default = 8.4, 
+                    help='Maximum pH to consider.See Gypsum-DL \
+                        and Dimorphite-D publication for details.')
+PARSER.add_argument('--pka_precision', metavar='D', type=float, default = 1.0,
+                    help='Size of pH substructure ranges. See Dimorphite-DL \
+                        publication for details.')
+PARSER.add_argument('--gypsum_timeout_limit', type=float, default = 30,
+                    help='Maximum time gypsum is allowed to run for a given ligand in seconds. \
+                        On average Gypsum-DL takes on several seconds to run for a given ligand, but factors such as mol size, # rotatable bonds, \
+                        processor speed, and gypsum settings (ie gypsum_thoroughness or max_variants_per_compound) will change how long it takes to run.\
+                        If increasing gypsum settings it is best to increase the gypsum_timeout_limit. Default gypsum_timeout_limit is 30 seconds')
+                    
+# Reduce files down. This compiles and compresses the files in the PDBs folder (contains docking outputs, pdb,pdbqt...)
+#This reduces the data size and makes data transfer quicker, but requires running the file_concatination_and_compression.py in the Utility script folder
+# to seperate these files out for readability.
+PARSER.add_argument('--reduce_files_sizes', choices = [True,False,"True","False","true","false"], default=True,
+            help='Run this combines all files in the PDBs folder into a single text file. Useful when data needs to be transfered.')
+
+# Make a histogram of the simulation at the end of the run.
+PARSER.add_argument('--generate_plot', choices = [True,False,"True","False","true","false"], default=True,
+                    help='Make a histogram of the simulation at the end of the run.')
+
+# mpi mode pre-Run so there are python cache files without EOF Errors
+PARSER.add_argument('--cache_prerun', '-c', action='store_true',
+                    help='Run this before running gypsum in mpi-mode.')
+
+
+ARGS_DICT = vars(PARSER.parse_args())
+
+# copying ARGS_DICT so we can delete out of while iterating through
+# the original ARGS_DICT
+INPUTS = copy.deepcopy(ARGS_DICT)
+
+for k, v in ARGS_DICT.items():
+    if v is None:
+        del INPUTS[k]
+
+if ARGS_DICT["cache_prerun"]==False:
+    # load the commandline parameters
+    from autogrow.UserVars import load_in_commandline_parameters
+    vars,printout = load_in_commandline_parameters(INPUTS)
+
+    # print out the UserVars for the record
+    for key in list(vars.keys()):
+        print(key, vars[key])
+
+    # Run AUTOGROW
+    # Import move here to prevent EOF in MPI mode
+    #   importing files before the Parallelizer class is established in MPI mode can have errors
+    import autogrow.AutogrowMainExecute as AutogrowMainExecute
+    AutogrowMainExecute.Main_Execute(vars)
+
+    print("AUTOGROW FINISHED")
+
+    # # kill mpi workers
+    vars["Parallelizer"].end(vars["multithread_mode"])
+
+    
+else:
+    import autogrow.UserVars
+    import autogrow.AutogrowMainExecute as AutogrowMainExecute
+    import autogrow.Operators.ConvertFiles.gypsum_dl.gypsum_dl.Parallelizer
+    pass
+
