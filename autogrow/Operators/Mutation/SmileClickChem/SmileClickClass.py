@@ -394,11 +394,13 @@ class SmilesClickChem(object):
         """
         infile = self.complimentary_mol_dict[functional_group]
 
+
         with open(infile, 'r') as f:
             random_comp_mol_line = random.choice(f.readlines())
-            random_comp_mol_line = random_comp_mol_line.replace("\n","").replace("\t"," ")
+            random_comp_mol_line = random_comp_mol_line.replace("\n","").replace("\t"," ").replace("    "," ")
             for i in range(10): random_comp_mol_line.replace("  "," ")
             parts = random_comp_mol_line.split(" ")     # split line into parts seperated by 4-spaces
+                        # parts = [x for x in random_comp_mol_line.split(" ") if x!= ""]     # split line into parts seperated by 4-spaces
 
             smile_list = parts[0]
             zinc_name_list = parts[1]
