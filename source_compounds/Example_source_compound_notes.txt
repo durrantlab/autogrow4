@@ -26,3 +26,4 @@ ZINC molecules:
         3) 150da > MW >=200da   :  autogrow4/source_compounds/Fragment_MW_150_to_200.smi
         4) 200da > MW >=250da   :  autogrow4/source_compounds/Fragment_MW_200_to_250.smi
 
+
