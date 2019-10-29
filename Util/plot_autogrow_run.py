@@ -62,7 +62,7 @@ def get_average_score_per_gen(infolder, folder_list):
 
     average_affinity_dict = {}
     for gen_folder in folder_list:
-        gen_folder_name = infolder + gen_folder + "/"
+        gen_folder_name = infolder + gen_folder + os.sep
         ranked_file = glob.glob(gen_folder_name + "*_ranked.smi")
 
         for rank_file in ranked_file:
@@ -83,7 +83,7 @@ def get_average_score_per_gen(infolder, folder_list):
                     num_lines_counter = num_lines_counter + float(1.0)
 
 
-            gen_affinity_average = gen_affinity_sum/num_lines_counter
+            gen_affinity_average = float(gen_affinity_sum/num_lines_counter)
             
             gen_num = os.path.basename(rank_file).split("_")[1]
             gen_name = "generation_{}".format(gen_num)
@@ -108,7 +108,7 @@ def get_average_top_score_per_gen(infolder, folder_list, top_score_per_gen):
     average_affinity_dict = {}
 
     for gen_folder in folder_list:
-        gen_folder_name = infolder + gen_folder + "/"
+        gen_folder_name = infolder + gen_folder + os.sep
         ranked_file = glob.glob(gen_folder_name + "*_ranked.smi")
 
         for rank_file in ranked_file:
@@ -135,7 +135,7 @@ def get_average_top_score_per_gen(infolder, folder_list, top_score_per_gen):
 
                         gen_affinity_sum = gen_affinity_sum + float(choice_list[-2])
                         
-                    gen_affinity_average = gen_affinity_sum/top_score_per_gen
+                    gen_affinity_average = float(gen_affinity_sum/top_score_per_gen)
 
                     gen_num = os.path.basename(rank_file).split("_")[1]
                     gen_name = "generation_{}".format(gen_num)
@@ -418,7 +418,7 @@ def run_everything(infolder, autogrow_output_file,outfile):
         topfolder_list = [x for x in all_folders_list if "__pycache__" not in x]
         all_folders_list = []
         for topfolder in topfolder_list:
-            tempfolder = "{}/{}/".format(infolder,topfolder)
+            tempfolder = "{}{}{}{}".format(infolder,os.sep,topfolder,os.sep)
             all_folders_list = [f for f in sorted(os.listdir(tempfolder)) if os.path.isdir(tempfolder+f)]
             right_level = False
             for i in all_folders_list:
@@ -438,22 +438,25 @@ if __name__ == "__main__":
     
     #
     # SPECIFY WHICH RUN NUMBER
-    infolder = "/home/jspiegel/DataB/jspiegel/projects/Autogrow_output/Run_0/"
+    # infolder = "/$PATH/Autogrow_output_dir/Run_0/"
+    
+    try:
+        topfolder = sys.argv[1]
+    except:
+        raise Exception("This script takes a folder which contains AutoGrow 4 \
+             data and a folder to ouput a text file and histogram plot")
+    try: 
+        autogrow_output_file = sys.argv[2]
+    except:
+        autogrow_output_file = infolder + "/test_output.txt"
 
-    # infolder = sys.argv[1]
-    # try: 
-    #     autogrow_output_file = sys.argv[2]
-    # except:
-    #     autogrow_output_file = infolder + "/test_output.txt"
-
-    infolder = "/home/jacob/Desktop/PARP_AUTOGROW_DATA/new_data/"
-    topfolder = "/home/jacob/Desktop/PARP_AUTOGROW_DATA/new_data/Run_0/"
+        
         
 
     topfolder = sys.argv[1]
     for infolder in glob.glob(topfolder):
-        autogrow_output_file = infolder + "/test_output.txt"
-        outfile = infolder + "/data_histogram.png"
+        autogrow_output_file = infolder + os.sep + "test_output.txt"
+        outfile = infolder + os.sep + "data_histogram.png"
         print(topfolder)
         print(infolder)
         print(outfile)

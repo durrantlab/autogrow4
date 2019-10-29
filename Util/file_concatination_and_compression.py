@@ -1,3 +1,27 @@
+"""
+This script is used to decompress or recompress AutoGrow data.
+
+If you use the reduce_files_sizes option AutoGrow will convert concatinate and compress
+all files in the PDBs directory of each generation. This is useful when doing larger runs as
+data transfer is faster and data storage is reduced when files are merged and compressed.
+    -The concatination script that is run in AutoGrow 4 can be found at:
+            autogrow4/autogrow/Docking/Concatinate_files.py
+This script will either:
+    1) Return the files back to their original uncompressed and deconcatinated formating 
+                or 
+    2) Concatinate and then compress the files into a single file.
+
+
+The formating of the concatination is:
+    "\n##############################File_name: {}\n".format(os.path.basename(file_name_1))
+    ... Content of the 1st file...    
+    "\n##############################$$END_FILE$$ {}".format(os.path.basename(file_name_1))
+    "\n##############################File_name: {}\n".format(os.path.basename(file_name_2))
+    ... Content of the 2nd file...    
+    "\n##############################$$END_FILE$$ {}".format(os.path.basename(file_name_2))
+
+This concatinated file is tar.gz compressed.
+"""
 
 import __future__
 
@@ -34,6 +58,10 @@ def decompress_file(decompressed_file):
 
 #######
 def seperate_files(compressed_file, outfolder):
+    """
+    This will seperate a compressed and concatinated file into seperated decompressed files.
+
+    """
     directory = os.path.abspath(compressed_file.split(os.path.basename(compressed_file))[0]) + os.sep
 
     compressed_file = os.path.abspath(compressed_file)
@@ -79,22 +107,44 @@ def seperate_files(compressed_file, outfolder):
     if all_are_made == True:
         torun = "rm {}".format(decompressed_file)
         os.system(torun)
-
 #######
 def get_file_info(file_name):
     file_name_insert = "\n##############################File_name: {}\n".format(os.path.basename(file_name))
     file_termination_insert = "\n##############################$$END_FILE$$ {}".format(os.path.basename(file_name))
     concat = file_name_insert + open(file_name).read() + file_termination_insert
     return concat
-
 #######
-def del_files(file_name):
-    if os.path.exists(file_name):
-        try:
-            os.system("rm {}".format(file_name))
-        except:
-            print("couldn't delete file: {}".format(file_name))
+def del_files(file_or_folder):
+    """
+    This deletes all temporary files.
 
+    Input:
+    :param str file_or_folder: the file or folder to delete
+    
+    """
+    if os.path.exists(file_or_folder) == True:
+        if os.path.isdir(file_or_folder) == True:
+            try:
+                shutil.rmtree(file_or_folder)
+            except:
+                pass
+        else:
+            try:
+                os.remove(command)
+            except:
+                pass
+
+        # If it failed to delete try via bash command
+        if os.path.exists(file_or_folder) == True:
+            command = "rm -rf {}".format(file_or_folder)
+            try:
+                os.system(command)
+            except:
+                pass
+    else:
+        pass
+    if os.path.exists(file_or_folder):
+        print("couldn't delete file: {}".format(file_name))
 #######
 def run_concatination(directory):
     concat_file = directory + os.sep + "compresed_PDBS.txt"
@@ -115,9 +165,6 @@ def run_concatination(directory):
     if os.path.exists(concat_file  + ".gz"):
         del_files(concat_file)
     print("Finished Compression")
-
-
-
 #######
 if __name__ == "__main__":
     try:
@@ -131,11 +178,11 @@ if __name__ == "__main__":
                 2) python concatinate_file.py concat $PATH/Dir/")
 
     directory = os.path.abspath(directory)
-    lig_list = glob.glob(directory + "/*")
+    lig_list = glob.glob(directory +os.sep+ "*")
     lig_list = [os.path.abspath(x) for x in lig_list]
 
     print("BEFORE")
-    print(os.system("du -sh {}".format(directory)))
+    print(os.path.getsize(directory))
 
 
     concat_file = directory + os.sep + "PDB_concated.txt"
@@ -145,7 +192,7 @@ if __name__ == "__main__":
         run_concatination(directory)
         print("FINISH CONCAT")
         print("After concate")
-        print(os.system("du -sh {}".format(directory)))
+        print(os.path.getsize(directory))
     elif sys.argv[1] == "deconcat":
         compressed_file = sys.argv[2]
         if os.path.exists(compressed_file)==False:
@@ -160,12 +207,12 @@ if __name__ == "__main__":
         directory = os.path.abspath(compressed_file.split(os.path.basename(compressed_file))[0]) + os.sep
 
         print("BEFORE")
-        print(os.system("du -sh {}".format(directory)))
+        print(os.path.getsize(directory))
 
         seperate_files(compressed_file,outfolder)
         print("After deconcate")
-        print(os.system("du -sh {}".format(directory)))
+        print(os.path.getsize(directory))
 
         del_files(compressed_file)
         print("After deconcate")
-        print(os.system("du -sh {}".format(directory)))
+        print(os.path.getsize(directory))

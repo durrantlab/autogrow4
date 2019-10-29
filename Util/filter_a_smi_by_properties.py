@@ -21,8 +21,6 @@ import run_filter as rf
 import glob
 
 
-import support_scripts.MolObjectHandling as MOH
-import support_scripts.Multiprocess as mp
 
 import rdkit
 import rdkit.Chem as Chem

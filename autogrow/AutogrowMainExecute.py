@@ -3,6 +3,7 @@ import __future__
 import os
 import glob
 import sys
+import shutil
 
 import autogrow.Docking.ExecuteDocking as DockingClass
 import autogrow.Operators.Operations as Operations
@@ -280,13 +281,19 @@ def delete_temporary_files_and_folders(file_or_folder):
     """
     if os.path.exists(file_or_folder) == True:
         if os.path.isdir(file_or_folder) == True:
-            command = "rm -rf {}".format(file_or_folder)
             try:
-                os.system(command)
+                shutil.rmtree(file_or_folder)
             except:
                 pass
         else:
-            command = "rm {}".format(file_or_folder)
+            try:
+                os.remove(command)
+            except:
+                pass
+
+        # If it failed to delete try via bash command
+        if os.path.exists(file_or_folder) == True:
+            command = "rm -rf {}".format(file_or_folder)
             try:
                 os.system(command)
             except:
