@@ -27,7 +27,7 @@ highest_folder="/bgfs/jdurrant/jspiegel/PARPi_leadopt/"
 mkdir $highest_folder
 
 # run precache
-~/miniconda3/envs/py37/bin/python /bgfs/jdurrant/jspiegel/autogrow/RunAutogrow.py -c
+~/miniconda3/envs/py37/bin/python /bgfs/jdurrant/jspiegel/autogrow4/RunAutogrow.py -c
 
 average_time=0
 for i in 1
@@ -40,11 +40,11 @@ do
     date +%s%N | cut -b1-13
 
     mpirun -n $SLURM_NTASKS \
-    ~/miniconda3/envs/py37/bin/python -m mpi4py /bgfs/jdurrant/jspiegel/autogrow/RunAutogrow.py \
-        --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
+    ~/miniconda3/envs/py37/bin/python -m mpi4py /bgfs/jdurrant/jspiegel/autogrow4/RunAutogrow.py \
+        --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow4/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
         --center_x -70.76 --center_y  21.82 --center_z 28.33 \
         --size_x 25.0 --size_y 16.0 --size_z 25.0 \
-        --source_compound_file /bgfs/jdurrant/jspiegel/autogrow/source_compounds/PARPI_BRICS_frags.smi \
+        --source_compound_file /bgfs/jdurrant/jspiegel/autogrow4/source_compounds/PARPI_BRICS_frags.smi \
         --root_output_folder $outfolder_four \
         --number_of_mutants_first_generation 500 \
         --number_of_crossovers_first_generation 500 \

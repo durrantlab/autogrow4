@@ -41,7 +41,7 @@ do
     date +%s%N | cut -b1-13
 
     time python /bgfs/jdurrant/jspiegel/test_old_autogrow/autogrow4/autogrow/autogrow_3_1_2.py \
-            -filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow/4.0.0/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
+            -filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow4/4.0.0/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
             -center_x -70.76 -center_y  21.82 -center_z 28.33 \
             -size_x 25.0 -size_y 16.0 -size_z 25.0 \
             -additional_autoclickchem_parameters "-all_reactions +azide_and_alkyne_to_azole" \
@@ -99,11 +99,11 @@ do
     start_time="$(date +%s%N | cut -b1-13)"
     date +%s%N | cut -b1-13
 
-    time python /bgfs/jdurrant/jspiegel/autogrow/RunAutogrow.py \
-        --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
+    time python /bgfs/jdurrant/jspiegel/autogrow4/RunAutogrow.py \
+        --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow4/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
         --center_x -70.76 --center_y  21.82 --center_z 28.33 \
         --size_x 25.0 --size_y 16.0 --size_z 25.0 \
-        --source_compound_file /bgfs/jdurrant/jspiegel/autogrow/source_compounds/ZINC_fragments.smi \
+        --source_compound_file /bgfs/jdurrant/jspiegel/autogrow4/source_compounds/ZINC_fragments.smi \
         --root_output_folder $outfolder_four \
         --number_of_mutants_first_generation 100 \
         --number_of_crossovers_first_generation 100 \

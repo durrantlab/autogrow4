@@ -34,7 +34,7 @@ do
     start_time="$(date +%s%N | cut -b1-13)"
     date +%s%N | cut -b1-13
     
-    python /bgfs/jdurrant/jspiegel/autogrow/RunAutogrow.py -j /bgfs/jdurrant/jspiegel/autogrow/sample_sub_scripts/PARP_SMP.json \
+    python /bgfs/jdurrant/jspiegel/autogrow4/RunAutogrow.py -j /bgfs/jdurrant/jspiegel/autogrow4/sample_sub_scripts/PARP_SMP.json \
         >  $outfolder_four"test_output.txt" 2>  $outfolder_four"test_error.txt"
 
 done    

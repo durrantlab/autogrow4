@@ -38,8 +38,8 @@ do
     start_time="$(date +%s%N | cut -b1-13)"
     date +%s%N | cut -b1-13
     
-    python -m mpi4py /bgfs/jdurrant/jspiegel/autogrow/RunAutogrow.py \
-        --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
+    python -m mpi4py /bgfs/jdurrant/jspiegel/autogrow4/RunAutogrow.py \
+        --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow4/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
         --center_x -70.76 --center_y  21.82 --center_z 28.33 \
         --size_x 25.0 --size_y 16.0 --size_z 25.0 \
         --source_compound_file /ihome/jdurrant/jspiegel/to_dock/LGMNB_PAINS.smi \

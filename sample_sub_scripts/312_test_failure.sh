@@ -39,7 +39,7 @@ do
     date +%s%N | cut -b1-13
 
     time timeout 6000 python /bgfs/jdurrant/jspiegel/test_old_autogrow4/autogrow/3.1.2/autogrow/autogrow_3_1_2.py \
-        --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
+        --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow4/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
         -center_x -70.76 -center_y  21.82 -center_z 28.33 \
         -size_x 25.0 -size_y 16.0 -size_z 25.0 \
         -additional_autoclickchem_parameters "-all_reactions +azide_and_alkyne_to_azole" \

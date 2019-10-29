@@ -1,6 +1,6 @@
 import os
 
-file_path = "/bgfs/jdurrant/jspiegel/autogrow/submit_PARP_SMP_run.sh"
+file_path = "/bgfs/jdurrant/jspiegel/autogrow4/submit_PARP_SMP_run.sh"
 out_folder = "/bgfs/jdurrant/jspiegel/test_autogrow/"
 
 if os.path.exists(out_folder) == False:
