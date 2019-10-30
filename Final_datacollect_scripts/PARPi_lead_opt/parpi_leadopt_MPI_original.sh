@@ -51,7 +51,7 @@ do
         --number_to_advance_from_previous_gen_first_generation 40 \
         --number_of_mutants 2500 \
         --number_of_crossovers 2500 \
-        --number_to_advance_from_previous_gen 250 \
+        --number_to_advance_from_previous_gen 500 \
         --top_mols_to_seed_next_generation_first_generation 50 \
         --top_mols_to_seed_next_generation 500 \
         --diversity_mols_to_seed_first_generation 500 \
