@@ -248,7 +248,7 @@ def make_smifile_and_gyspum_submitfile(gen_smiles_file, folder_path, gypsum_outp
     #
 #
 
-def run_gypsum_multiprocessing_MPI(gypsum_log_path, json_path, timeout_option, gypsum_timeout_limit):
+def run_gypsum_multiprocessing_MPI(gypsum_log_path, json_path, timeout_option, gypsum_timeout_limit, python_path):
     """
     This converts the a single ligand from a SMILE to a 3D SDF using Gypsum. This is used within a multithread. 
     
@@ -261,6 +261,7 @@ def run_gypsum_multiprocessing_MPI(gypsum_log_path, json_path, timeout_option, g
     :param str timeout_option: this is taken from vars["timeout_vs_gtimeout"]. This tells the Bash system whether
                 to use "timeout" or "gtimeout". gtimeout is used on most MacOS, while timeout is used on most Linux OS.
     :param int gypsum_timeout_limit: this is taken from vars["gypsum_timeout_limit"]. It determines the maximum amount of time to run Gypsum per ligand
+    :param str python_path: Taken from vars["python_path"]. Not used here but for symetry with run_gypsum_multiprocessing
 
     Returns:
     :returns: str lig_id: the name of the ligand if it failed or None if it successfully converted to 3D sdf.
