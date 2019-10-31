@@ -56,6 +56,8 @@ do
         --No_Filters \
         --reduce_files_sizes True \
         --max_variants_per_compound 25 \
+        --gypsum_timeout_limit 60 \
+        --docking_timeout_limit 600 \
         --redock_advance_from_previous_gen False \
         --filter_source_compounds False \
         --use_docked_source_compounds True \

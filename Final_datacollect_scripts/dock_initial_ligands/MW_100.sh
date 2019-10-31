@@ -40,7 +40,8 @@ do
     start_time="$(date +%s%N | cut -b1-13)"
     date +%s%N | cut -b1-13
 
-    /ihome/jdurrant/jspiegel/miniconda3/envs/py37/bin/python /bgfs/jdurrant/jspiegel/autogrow4/RunAutogrow.py \
+    mpirun -n $SLURM_NTASKS \
+    /ihome/jdurrant/jspiegel/miniconda3/envs/py37/bin/python -m mpi4py /bgfs/jdurrant/jspiegel/autogrow4/RunAutogrow.py \
         --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow4/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
         --center_x -70.76 --center_y  21.82 --center_z 28.33 \
         --size_x 25.0 --size_y 16.0 --size_z 25.0 \
@@ -56,6 +57,8 @@ do
         --No_Filters \
         --reduce_files_sizes True \
         --max_variants_per_compound 25 \
+        --gypsum_timeout_limit 60 \
+        --docking_timeout_limit 600 \
         --redock_advance_from_previous_gen False \
         --filter_source_compounds False \
         --use_docked_source_compounds True \
