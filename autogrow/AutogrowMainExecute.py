@@ -94,7 +94,7 @@ def Main_Execute(vars):
                 files_to_del.extend(glob.glob(folder+"*"))    
 
             job_input = tuple([tuple([x]) for x in files_to_del if os.path.isfile(x)==True])
-            vars['Parallelizer'].run(job_input, delete_temporary_files_and_folders)
+            vars["parallelizer"].run(job_input, delete_temporary_files_and_folders)
             # Delete Folders in an ordered manor incase folders are nested
             for i in range(0,len(folders_to_del)):
                 delete_temporary_files_and_folders(folders_to_del[i])
@@ -105,7 +105,7 @@ def Main_Execute(vars):
             # And makes it easier to transfer the data
             pdbs_folder = "{}{}PDBs{}".format(current_generation_dir, os.sep, os.sep)
             if os.path.exists(pdbs_folder)==True:
-                Concatinate_files.run_concatination(vars["Parallelizer"], pdbs_folder)
+                Concatinate_files.run_concatination(vars["parallelizer"], pdbs_folder)
             else:
                 print("\nNo PDB folder to concatinate and compress. This is likely generation 0 seeded with a Ranked .smi file.\n")
         print("")
@@ -126,7 +126,7 @@ def Main_Execute(vars):
             print('plotting')
             import autogrow.Plotting.generate_histogram as plot
             plot.generate_figures(vars)
-    print("HI")
+
     sys.stdout.flush()
         
 # 

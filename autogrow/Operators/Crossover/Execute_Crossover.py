@@ -192,7 +192,7 @@ def make_Crossovers(vars, generation_num, number_of_processors, num_crossovers_t
         temp_vars[key]= vars[key]
 
     new_ligands_list = []
-    number_of_processors = int(vars['Parallelizer'].return_node())
+    number_of_processors = int(vars["parallelizer"].return_node())
     
     loop_counter = 0 
     while loop_counter < 2000 and len(new_ligands_list) < num_crossovers_to_make:
@@ -229,7 +229,7 @@ def make_Crossovers(vars, generation_num, number_of_processors, num_crossovers_t
             # Lig2_smile_pair = ["NCCCO","zinc456"]
             # Lig1 and lig 2 were used to generate the Ligand_new_smiles
 
-            results = vars['Parallelizer'].run(job_input, do_Crossovers_smiles_Merge)
+            results = vars["parallelizer"].run(job_input, do_Crossovers_smiles_Merge)
             results =  [x for x in results if x is not None]
 
             for index, i in enumerate(results):

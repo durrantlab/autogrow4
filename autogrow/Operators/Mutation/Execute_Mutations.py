@@ -45,7 +45,7 @@ def make_mutants(vars, generation_num, number_of_processors, num_mutants_to_make
     
     loop_counter = 0 
 
-    number_of_processors = int(vars['Parallelizer'].return_node())
+    number_of_processors = int(vars["parallelizer"].return_node())
 
     # initialize the smileclickclass
     aSmilesClickChem = SmileClickClass.SmilesClickChem(rxn_library_variables, new_mutation_smiles_list, vars["Filter_Object_Dict"])
@@ -73,7 +73,7 @@ def make_mutants(vars, generation_num, number_of_processors, num_mutants_to_make
             job_input = tuple([tuple([smile, aSmilesClickChem]) for smile in smile_inputs])
 
             ######################################## 
-            results = vars['Parallelizer'].run(job_input, run_Smile_Click_for_multithread)
+            results = vars["parallelizer"].run(job_input, run_Smile_Click_for_multithread)
             
             for index,i in enumerate(results):
                 if i is not None:

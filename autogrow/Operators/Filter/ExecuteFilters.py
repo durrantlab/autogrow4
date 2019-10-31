@@ -70,7 +70,7 @@ def run_filter(vars, list_of_new_ligands):
     job_input = tuple(job_input)
         
     ######################################## 
-    results = vars['Parallelizer'].run(job_input, run_filter_mol)
+    results = vars["parallelizer"].run(job_input, run_filter_mol)
 
     # remove mols which fail the filter
     ligands_which_passed_filter = [x for x in results if x!=None]

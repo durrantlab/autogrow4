@@ -125,11 +125,11 @@ def convert_smi_to_sdfs_with_gypsum(vars, gen_smiles_file, smile_file_directory)
     # create a the job_inputs to run gypsum in multithread
     job_input = tuple([tuple([gypsum_log_path, json_path, timeout_option, gypsum_timeout_limit]) for json_path in list_of_jsons])
         
-    if vars['Parallelizer'].return_mode() == "mpi":
-        failed_to_convert = vars['Parallelizer'].run(job_input, run_gypsum_multiprocessing_MPI)
+    if vars["parallelizer"].return_mode() == "mpi":
+        failed_to_convert = vars["parallelizer"].run(job_input, run_gypsum_multiprocessing_MPI)
         sys.stdout.flush()
     else:
-        failed_to_convert = vars['Parallelizer'].run(job_input, run_gypsum_multiprocessing)
+        failed_to_convert = vars["parallelizer"].run(job_input, run_gypsum_multiprocessing)
       
     lig_failed_to_convert = [x for x in failed_to_convert if x is not None]
     lig_failed_to_convert = list(set(lig_failed_to_convert))

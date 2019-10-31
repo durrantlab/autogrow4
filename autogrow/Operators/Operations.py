@@ -480,7 +480,7 @@ def get_complete_list_prev_gen_or_source_compounds(vars, generation_num):
     # SMILES will be excluded if they are fragmented, contain atoms with no atomic number (*), or do not sanitize
     job_input = tuple([tuple([i]) for i in usable_list_of_smiles])
 
-    usable_list_of_smiles = vars['Parallelizer'].run(job_input, test_source_smiles_convert)
+    usable_list_of_smiles = vars["parallelizer"].run(job_input, test_source_smiles_convert)
     usable_list_of_smiles = [x for x in usable_list_of_smiles if x is not None]
     print_errors = [x for x in usable_list_of_smiles if type(x) is str]
     usable_list_of_smiles = [x for x in usable_list_of_smiles if type(x) is list]

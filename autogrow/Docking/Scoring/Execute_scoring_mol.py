@@ -88,7 +88,7 @@ def run_scoring_common(vars, smile_file, folder_to_search):
     job_input_files_to_score = tuple([tuple([scoringObject, file_path, rescore_lig_efficiency, rescore_lig_efficiency_scoringObject]) for file_path in files_to_score])
 
     # Format for list_of_raw_data must be [lig_id_shortname, any_details, fitness_score_to_use] 
-    list_of_list_of_lig_data = vars['Parallelizer'].run(job_input_files_to_score, score_files_multithread)
+    list_of_list_of_lig_data = vars["parallelizer"].run(job_input_files_to_score, score_files_multithread)
 
     # Convert all list_of_list_of_lig_data to a searchable dictionary
     # This removes redundancies from multiple conformations and any Nones.
@@ -129,7 +129,7 @@ def run_rescoring(vars, scoringObject, files_to_score):
     job_input_files_to_score = tuple([tuple([file_path, scoringObject]) for file_path in files_to_score])
     
     # Format for list_of_raw_data must be [lig_id_shortname, any_details, fitness_score_to_use] 
-    results_rescore = vars['Parallelizer'].run(job_input_files_to_score, rescore_single_file)
+    results_rescore = vars["parallelizer"].run(job_input_files_to_score, rescore_single_file)
     
     if len(results_rescore) == 0:
         return files_to_score

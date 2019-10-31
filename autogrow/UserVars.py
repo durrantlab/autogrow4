@@ -43,14 +43,15 @@ def multiprocess_handling(vars):
 
     # Handle Serial overriding number_of_processors
     # serial fixes it to 1 processor
-    if vars["multithread_mode"] == "serial" or vars["multithread_mode"]=="Serial":
-        
+    if vars["multithread_mode"].lower() == "serial":
+        vars["multithread_mode"] = "serial"
         if vars["number_of_processors"] != 1:
             print("Because --multithread_mode was set to serial, this will be run on a single processor.")
         vars["number_of_processors"] = 1
 
     # Handle mpi errors if mpi4py isn't installed
-    if vars["multithread_mode"] == "mpi" or vars["multithread_mode"] == "MPI":
+    if vars["multithread_mode"].lower() == "mpi":
+        vars["multithread_mode"] = "mpi"
         try:
             import mpi4py
         except:
@@ -69,9 +70,9 @@ def multiprocess_handling(vars):
         # Avoid EOF error
         from autogrow.Operators.ConvertFiles.gypsum_dl.gypsum_dl.Parallelizer import Parallelizer
     
-        vars["Parallelizer"] = Parallelizer(vars["multithread_mode"], vars["number_of_processors"])
+        vars["parallelizer"] = Parallelizer(vars["multithread_mode"], vars["number_of_processors"])
 
-        if vars["Parallelizer"] == None:
+        if vars["parallelizer"] == None:
             printout = "EOF ERRORS FAILED TO CREATE A PARALLIZER OBJECT"
             print(printout)
             raise Exception(printout)
@@ -83,7 +84,7 @@ def multiprocess_handling(vars):
         # This is a saftey precaution
         from autogrow.Operators.ConvertFiles.gypsum_dl.gypsum_dl.Parallelizer import Parallelizer
                 
-        vars["Parallelizer"] = Parallelizer(vars["multithread_mode"], vars["number_of_processors"], True)
+        vars["parallelizer"] = Parallelizer(vars["multithread_mode"], vars["number_of_processors"], True)
 
 
 
@@ -92,8 +93,8 @@ def multiprocess_handling(vars):
     # print("###########################")
     # print("number_of_processors  :  ", vars["number_of_processors"])
     # print("chosen mode  :  ", vars["multithread_mode"])
-    # print("Parallel style:  ", vars["Parallelizer"].return_mode())
-    # print("Number Nodes:  ", vars["Parallelizer"].return_node())
+    # print("Parallel style:  ", vars["parallelizer"].return_mode())
+    # print("Number Nodes:  ", vars["parallelizer"].return_node())
     # print("###########################")
     # print("")
     return vars
@@ -113,9 +114,10 @@ def check_for_required_inputs(input_params):
     """
     keys_from_input = list(input_params.keys())
 
-    list_of_required_inputs = ["filename_of_receptor","center_x","center_y","center_z",\
-        "size_x","size_y","size_z","root_output_folder","source_compound_file",\
-        "mgltools_directory"]
+    list_of_required_inputs = ["filename_of_receptor",\
+        "center_x","center_y","center_z", \
+        "size_x","size_y","size_z","root_output_folder", \
+        "source_compound_file", "mgltools_directory"]
 
     missing_variables = []
     for variable in list_of_required_inputs:
@@ -125,7 +127,8 @@ def check_for_required_inputs(input_params):
             missing_variables.append(variable)
 
     if len(missing_variables) != 0:
-        printout = "\nRequired variables are missing from the input. A description of each of these can be found by running python ./RunAutogrow -h"
+        printout = "\nRequired variables are missing from the input. A description \
+            of each of these can be found by running python ./RunAutogrow -h"
         printout = printout + "\nThe following required variables are missing: "
         for variable in missing_variables:
             printout = printout + "\n\t" + variable
@@ -157,7 +160,8 @@ def check_for_required_inputs(input_params):
                 pass
             if type(input_params["docking_exhaustiveness"]) != int and type(input_params["docking_exhaustiveness"]) != float:
                 raise Exception("docking_exhaustiveness needs to be an interger. \
-                    If you do not know what to use, leave this blank and the default for the docking software will be used.")
+                    If you do not know what to use, leave this blank and the \
+                    default for the docking software will be used.")
     if "docking_num_modes" in list(input_params.keys()):
         if input_params["docking_num_modes"] == "None":
             input_params["docking_num_modes"] = None
@@ -169,7 +173,8 @@ def check_for_required_inputs(input_params):
 
             if type(input_params["docking_num_modes"]) != int and type(input_params["docking_num_modes"]) != float:
                 raise Exception("docking_num_modes needs to be an interger. \
-                    If you do not know what to use, leave this blank and the default for the docking software will be used.")
+                    If you do not know what to use, leave this blank and the \
+                    default for the docking software will be used.")
 
     # Check numbers which may be defined by first generation
     if "top_mols_to_seed_next_generation_first_generation" not in list(input_params.keys()):
@@ -223,38 +228,45 @@ def check_for_required_inputs(input_params):
 
     # Check root_output_folder exists
     if os.path.exists(input_params["root_output_folder"]) == False:
-        # If the output directory doesn't exist, then make ithe output directory doesn't exist, then make it
+        # If the output directory doesn't exist, then make ithe output 
+        # directory doesn't exist, then make it
         try:
             os.makedirs(vars['root_output_folder'])
         except:
-            raise NotImplementedError("root_output_folder could not be created. Please manual create desired directory or check input parameters")
+            raise NotImplementedError("root_output_folder could not be created. \
+            Please manual create desired directory or check input parameters")
             
         if os.path.exists(input_params["root_output_folder"]) == False:
             raise NotImplementedError("root_output_folder does not exist")
     if os.path.isdir(input_params["root_output_folder"]) == False:
-        raise NotImplementedError("root_output_folder is not a directory. Check your input parameters.")
+        raise NotImplementedError("root_output_folder is not a directory. \
+        Check your input parameters.")
 
     # Check source_compound_file exists
     if os.path.isfile(input_params["source_compound_file"]) == False:
-        raise NotImplementedError("source_compound_file can not be found. File must be a tab delineated .smi file.")
+        raise NotImplementedError("source_compound_file can not be found. \
+        File must be a tab delineated .smi file.")
     if ".smi" not in input_params["source_compound_file"]:
-        raise NotImplementedError("source_compound_file must be a tab delineated .smi file.")
+        raise NotImplementedError("source_compound_file must be a \
+        tab delineated .smi file.")
 
     # Check mgltools_directory exists
     if os.path.exists(input_params["mgltools_directory"]) == False:
         raise NotImplementedError("mgltools_directory does not exist")
     if os.path.isdir(input_params["mgltools_directory"]) == False:
-        raise NotImplementedError("mgltools_directory is not a directory. Check your input parameters.")
+        raise NotImplementedError("mgltools_directory is not a directory. \
+        Check your input parameters.")
 #
 
 def determine_bash_timeout_vs_gtimeout():
     """
-    This function tests whether we should use the BASH command "timeout" (for linux) or
-        the homebrew function "gtimeout" for MacOS
+    This function tests whether we should use the BASH command "timeout" (for linux)
+     or the coreutils function "gtimeout" for MacOS which can be obtained 
+     through homebrew
 
     Returns:
-    :returns: str timeout_option: A string either "timeout" or "gtimeout" describing whether
-            the bash terminal is able to use the bash function timeout or gtimeout
+    :returns: str timeout_option: A string either "timeout" or "gtimeout" describing
+     whether the bash terminal is able to use the bash function timeout or gtimeout
     """
 
     if platform.system() == "Linux":
@@ -269,7 +281,8 @@ def determine_bash_timeout_vs_gtimeout():
     try:  # timeout or gtimeout
         timeout_result = os.system(command)
     except:
-        raise Exception("Something is very wrong. This OS may not be supported by Autogrow or you may need to execute through Bash.")
+        raise Exception("Something is very wrong. This OS may not be supported by \
+            Autogrow or you may need to execute through Bash.")
     if timeout_result == 0:
         timeout_option = "timeout"
         return timeout_option
@@ -278,7 +291,8 @@ def determine_bash_timeout_vs_gtimeout():
         try:  # timeout or gtimeout
             timeout_result = os.system("g" + command)
         except:
-            raise Exception("Something is very wrong. This OS may not be supported by Autogrow or you may need to execute through Bash.")
+            raise Exception("Something is very wrong. This OS may not be supported \
+                by Autogrow or you may need to execute through Bash.")
         if timeout_result == 0:
             timeout_option = "gtimeout"
             return timeout_option
@@ -287,7 +301,8 @@ def determine_bash_timeout_vs_gtimeout():
             printout = printout + "This is essential to use Bash Timeout function in Autogrow. \n"
             printout = printout + "\t This will require 1st installing homebrew. \n"
             printout = printout + "\t\t Instructions found at: https://brew.sh/ \n"
-            printout = printout + "\t Once brew is installed, please run: sudo brew install coreutils \n\n"
+            printout = printout + "\t Once brew is installed, please run:"
+            printout = printout + " sudo brew install coreutils \n\n"
             print(printout)
             raise Exception(printout)
 # 
@@ -302,7 +317,8 @@ def check_dependencies():
     # Linux uses timeout while MacOS uses gtimeout
     timeout_option = determine_bash_timeout_vs_gtimeout()
     if timeout_option != "timeout" and timeout_option != "gtimeout":
-        raise Exception("Something is very wrong. This OS may not be supported by Autogrow or you may need to execute through Bash.")
+        raise Exception("Something is very wrong. This OS may not be supported by \
+        Autogrow \or you may need to execute through Bash.")
         
     try:
         import rdkit
@@ -350,8 +366,10 @@ def check_dependencies():
         import multiprocessing
         import time
     except:
-            print("Missing a Python Dependency. Could be import: os,sys,glob,subprocess,multiprocess, time.")
-            raise ImportError("Missing a Python Dependency. Could be import: os,sys,glob,subprocess,multiprocess, time.")
+            print("Missing a Python Dependency. Could be import: os,sys,glob,\
+                subprocess,multiprocess, time.")
+            raise ImportError("Missing a Python Dependency. Could be import: \
+                os,sys,glob,subprocess,multiprocess, time.")
             
     try:
         import copy
@@ -369,8 +387,10 @@ def check_dependencies():
         import itertools
         import unittest
     except:
-        print("Missing a Python Dependency. Could be import: collections,webbrowser,argparse,itertools,unittest")
-        raise ImportError("Missing a Python Dependency. Could be import: collections,webbrowser,argparse,itertools,unittest")
+        print("Missing a Python Dependency. Could be import: collections,\
+            webbrowser,argparse,itertools,unittest")
+        raise ImportError("Missing a Python Dependency. Could be import: \
+            collections,webbrowser,argparse,itertools,unittest")
 
     try:
         import textwrap
@@ -378,7 +398,8 @@ def check_dependencies():
         import json
     except:
         print("Missing a Python Dependency. Could be import: textwrap, pickle,json")
-        raise ImportError("Missing a Python Dependency. Could be import: textwrap, pickle,json")
+        raise ImportError("Missing a Python Dependency. Could be import: \
+            textwrap, pickle,json")
 #
  
 def define_defaults(): 
@@ -395,7 +416,8 @@ def define_defaults():
     # used for relative pathings
     script_dir = os.path.dirname(os.path.realpath(__file__))
     
-    # Some variables which can be manually replaced but defaults point to prepackaged locations.
+    # Some variables which can be manually replaced but defaults 
+    # point to prepackaged locations.
     ## Neural Network executable for scoring binding
     vars['nn1_script'] = os.path.join(script_dir,"Docking","Scoring","NNScore_exe", "nnscore1", "NNScore.py")
     # Example: vars['nn1_script'] = "/PATH/autogrow4/autogrow/Docking/Scoring/NNScore_exe/nnscore1/NNScore.py"
@@ -411,9 +433,12 @@ def define_defaults():
     vars['conversion_choice'] = "MGLTools_Conversion"  
     vars['obabel_path'] = "obabel"   
     vars["custom_conversion_script"] = ""
-    vars['prepare_ligand4.py'] = ""    # vars['prepare_ligand4.py'] = "/PATH/MGLTools-1.5.4/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_ligand4.py"
-    vars['prepare_receptor4.py'] = ""  # vars['prepare_receptor4.py'] = "/PATH/MGLTools-1.5.4/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_receptor4.py"
-    vars['mgl_python'] = ""        # vars['mgl_python'] = "/PATH/MGLTools-1.5.4/bin/pythonsh"
+    # vars['prepare_ligand4.py'] = "/PATH/MGLTools-1.5.4/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_ligand4.py"
+    vars['prepare_ligand4.py'] = ""    
+    # vars['prepare_receptor4.py'] = "/PATH/MGLTools-1.5.4/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_receptor4.py"
+    vars['prepare_receptor4.py'] = ""  
+    # vars['mgl_python'] = "/PATH/MGLTools-1.5.4/bin/pythonsh"
+    vars['mgl_python'] = ""        
 
 
     # Crossover function
@@ -500,7 +525,8 @@ def define_defaults():
     if timeout_option == "timeout" or timeout_option == "gtimeout":
         vars["timeout_vs_gtimeout"] = timeout_option
     else:
-        raise Exception("Something is very wrong. This OS may not be supported by Autogrow or you may need to execute through Bash.")
+        raise Exception("Something is very wrong. This OS may not be supported by \
+             Autogrow or you may need to execute through Bash.")
         
     return vars
 # 
@@ -539,34 +565,41 @@ def convert_json_params_from_unicode(params_unicode):
 
 def check_value_types(vars, argv):
     """
-    This checks that all the user variables loaded in use that same or comparable datatypes
-    as the defaults in vars. This prevents type issues later in the simulation.
+    This checks that all the user variables loaded in use that same or comparable
+    datatypes as the defaults in vars. This prevents type issues later in the 
+    simulation.
     
-    Given the many uservars and the possibility for intentional differences, especially as the program is developed,
-    this function tries to be NOT OPINIONATED, only correcting for several obvious and easy to correct issues
+    Given the many uservars and the possibility for intentional differences, 
+    especially as the program is developed, this function tries to be 
+    NOT OPINIONATED, only correcting for several obvious and easy to correct issues
     of type discrepencies occur between argv[key] and vars[key]
         ie 
             1) argv[key] = "true" and vars[key] = False 
-                this script will not change argv[key] to False... it will convert "true" to True
+                this script will not change argv[key] to False... it will 
+                convert "true" to True
                 ---> argv[key]=True
             2) argv[key] = "1.01" and vars[key] = 2.1 
                 this script will change argv[key] from "1.01" to float(1.01)       
 
     Input:
-    :param dict vars: Dictionary of program defaults, which will later be overwriten by argv values
+    :param dict vars: Dictionary of program defaults, which will later be 
+        overwriten by argv values
     :param dict argv: Dictionary of User specified variables
     Returns:
-    :returns: dict vars: Dictionary of program defaults, which will later be overwriten by argv values
+    :returns: dict vars: Dictionary of program defaults, which will later 
+        be overwriten by argv values
     :returns: dict argv: Dictionary of User specified variables
     """
     for key in list(argv.keys()):
         if key not in list(vars.keys()):
-            # Examples may be things like filename_of_receptor or dimensions of the docking box
+            # Examples may be things like filename_of_receptor or 
+            # dimensions of the docking box
             #   Just skip these
             continue
         
         if type(argv[key]) != type(vars[key]):
-            # Several variable default is None which means checks are processed elsewhere...
+            # Several variable default is None which means checks are 
+            # processed elsewhere...
             if vars[key] == None:
                 # check argv[key] is "none" or "None"
                 if type(argv[key])==str:
@@ -585,16 +618,22 @@ def check_value_types(vars, argv):
                         if type(temp_item) == float:
                             argv[key] = temp_item
                         else:
-                            printout = "This parameter is the wrong type. \n \t Check : {} type={}\n".format(key,type(argv[key]))
-                            printout = printout + "\t Should be type={}\n\tPlease check Autogrow documentation using -h".format(type(vars[key]))
+                            printout = "This parameter is the wrong type.\n \t Check : "
+                            printout = printout + "{} type={}\n".format(key,type(argv[key]))
+                            printout = printout + "\t Should be type={}\n\t".format(type(vars[key]))
+                            printout = printout + "Please check Autogrow documentation using -h"
                             raise IOError(printout)
                     except:
-                        printout = "This parameter is the wrong type. \n \t Check : {} type={}\n".format(key,type(argv[key]))
-                        printout = printout + "\t Should be type={}\n\tPlease check Autogrow documentation using -h".format(type(vars[key]))
+                        printout = "This parameter is the wrong type. \n \t Check :"
+                        printout = printout + " {} type={}\n".format(key,type(argv[key]))
+                        printout = printout + "\t Should be type={}\n\t".format(type(vars[key]))
+                        printout = printout + "Please check Autogrow documentation using -h"
                         raise IOError(printout)
                 else:
-                    printout = "This parameter is the wrong type. \n \t Check : {} type={}\n".format(key,type(argv[key]))
-                    printout = printout + "\t Should be type={}\n\tPlease check Autogrow documentation using -h".format(type(vars[key]))
+                    printout = "This parameter is the wrong type. \n \t Check :"
+                    printout = printout + " {} type={}\n".format(key,type(argv[key]))
+                    printout = printout + "\t Should be type={}\n\t".format(type(vars[key]))
+                    printout = printout + "Please check Autogrow documentation using -h"
                     raise IOError(printout)
             elif type(vars[key]) == bool:
                 if argv[key] == None:
@@ -608,12 +647,16 @@ def check_value_types(vars, argv):
                     elif argv[key].lower() in ["none"]:
                         argv[key] = None
                     else: 
-                        printout = "This parameter appears to be the wrong type. \n \t Check : {} type={}\n".format(key,type(argv[key]))
-                        printout = printout + "\t Should be type={}\n\tPlease check Autogrow documentation using -h".format(type(vars[key]))
+                        printout = "This parameter is the wrong type. \n \t Check :"
+                        printout = printout + " {} type={}\n".format(key,type(argv[key]))
+                        printout = printout + "\t Should be type={}\n\t".format(type(vars[key]))
+                        printout = printout + "Please check Autogrow documentation using -h"
                         raise IOError(printout)
                 else: 
-                    printout = "This parameter appears to be the wrong type. \n \t Check : {} type={}\n".format(key,type(argv[key]))
-                    printout = printout + "\t Should be type={}\n\tPlease check Autogrow documentation using -h".format(type(vars[key]))
+                    printout = "This parameter is the wrong type. \n \t Check :"
+                    printout = printout + " {} type={}\n".format(key,type(argv[key]))
+                    printout = printout + "\t Should be type={}\n\t".format(type(vars[key]))
+                    printout = printout + "Please check Autogrow documentation using -h"
                     raise IOError(printout)
     return vars, argv
 #
@@ -664,75 +707,75 @@ def load_in_commandline_parameters(argv):
     ########## Check variables Exist ##########
     ###########################################
 
-    # Check if Custom docking option if so there's a few things which need to also be specified
+    # Check if Custom docking option if so there's a few things which 
+    # need to also be specifie
     # if not lets flag the error
     if vars["dock_choice"] == "Custom":
         if vars["docking_executable"] is None:
-            raise ValueError("TO USE Custom DOCKING OPTION, MUST SPECIFY THE PATH TO THE docking_executable AND THE DOCKING_CLASS") 
+            raise ValueError("TO USE Custom DOCKING OPTION, MUST SPECIFY THE \
+                PATH TO THE docking_executable AND THE DOCKING_CLASS") 
         if os.path.exists(vars["docking_executable"])==False:
-            raise ValueError("Custom docking_executable could not be found at: {}".format(vars["docking_executable"])) 
+            raise ValueError("Custom docking_executable could not be found at:\
+                {}".format(vars["docking_executable"])) 
         if type(vars["custom_docking_script"]) !=list or os.path.exists(vars["custom_docking_script"][1])!=True:
-            raise ValueError("TO USE Custom DOCKING OPTION, MUST SPECIFY THE PATH TO THE Custom DOCKING SCRIPT") 
+            raise ValueError("TO USE Custom DOCKING OPTION, MUST SPECIFY THE \
+                PATH TO THE Custom DOCKING SCRIPT") 
 
     if vars["conversion_choice"] == "Custom":
         if type(vars["custom_conversion_script"]) != list or os.path.exists(vars["custom_conversion_script"][1])!=True:
 
-            raise ValueError("TO USE Custom conversion_choice OPTION, MUST SPECIFY THE PATH \
-                            TO THE Custom Conversion SCRIPT") 
+            raise ValueError("TO USE Custom conversion_choice OPTION, \
+                MUST SPECIFY THE PATH TO THE Custom Conversion SCRIPT") 
 
     if vars["scoring_choice"] == "Custom":
         if type(vars["custom_scoring_script"]) != list or os.path.exists(vars["custom_scoring_script"][1])!=True:
 
-            raise ValueError("TO USE Custom scoring_choice OPTION, MUST SPECIFY THE PATH \
-                            TO THE Custom SCORING SCRIPT") 
+            raise ValueError("TO USE Custom scoring_choice OPTION, \
+                MUST SPECIFY THE PATH TO THE Custom SCORING SCRIPT") 
 
     if vars["conversion_choice"] == "Custom" or vars["dock_choice"] == "Custom" or vars["scoring_choice"] == "Custom":
         vars = handle_Custom_dock_and_Conversion_Scoring_options(vars)
 
     # Mutation Settings
     if vars['rxn_library'] == "Custom":
-        if vars['rxn_library_file'] == "":
-            raise ValueError("TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY THE PATH \
-                            TO THE REACTION LIBRARY USING INPUT PARAMETER rxn_library") 
+        if vars['rxn_library_file'] == "" or vars['function_group_library'] == "":
+            raise ValueError("TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY \
+                 THE PATH TO THE REACTION LIBRARY USING INPUT PARAMETER rxn_library") 
         else:
             if os.path.exists(vars['rxn_library_file']) == False:
-                raise ValueError("TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY THE PATH \
-                                TO THE REACTION LIBRARY USING INPUT PARAMETER rxn_library") 
-
-        if vars['function_group_library'] == "":
-                raise ValueError("TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY THE PATH \
-                            TO THE REACTION LIBRARY USING INPUT PARAMETER function_group_library") 
-        else:
-            if os.path.exists(vars['rxn_library_file']) == False:
-                raise ValueError("TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY THE PATH \
-                            TO THE REACTION LIBRARY USING INPUT PARAMETER function_group_library") 
-
+                raise ValueError("TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY \
+                    THE PATH TO THE REACTION LIBRARY USING INPUT PARAMETER rxn_library") 
 
         if vars['complimentary_mol_directory'] == "":
             raise ValueError("TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY THE PATH \
-                        TO THE REACTION LIBRARY USING INPUT PARAMETER function_group_library") 
+                TO THE REACTION LIBRARY USING INPUT PARAMETER function_group_library") 
         else:
             if os.path.isdir(vars['complimentary_mol_directory']) == False:
                 raise ValueError("TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY THE PATH \
-                            TO THE REACTION LIBRARY USING INPUT PARAMETER complimentary_mol_directory") 
+                    TO THE REACTION LIBRARY USING INPUT PARAMETER complimentary_mol_directory") 
     else:   # Using default settings
         if vars['rxn_library_file'] != "":
-            raise ValueError("You have selected a Custom rxn_library_file group library but not chosen to use \
-                            the Custom option for rxn_library. Please use either the provided rxn_library options or \
-                            chose the Custom option for rxn_library") 
+            raise ValueError("You have selected a Custom rxn_library_file group \
+            library but not chosen to use the Custom option for rxn_library. \
+            Please use either the provided rxn_library options or chose the Custom \
+            option for rxn_library") 
         if vars['function_group_library'] != "":
-            raise ValueError("You have selected a Custom function_group_library but not chosen to use \
-                            the Custom option for rxn_library. Please use either the provided rxn_library options or \
-                            chose the Custom option for rxn_library") 
+            raise ValueError("You have selected a Custom function_group_library but \
+            not chosen to use the Custom option for rxn_library. Please use \
+            either the provided rxn_library options or chose the Custom option \
+            for rxn_library") 
         if vars['complimentary_mol_directory'] != "":
-            raise ValueError("You have selected a Custom complimentary_mol_directory but not chosen to use \
-                            the Custom option for rxn_library. Please use either the provided rxn_library options or \
-                            chose the Custom option for rxn_library") 
+            raise ValueError("You have selected a Custom complimentary_mol_directory\
+            but not chosen to use the Custom option for rxn_library. \
+            Please use either the provided rxn_library options or chose the Custom\
+            option for rxn_library") 
     
     # Check if the Operating System is Windows, if so turn off Multiprocessing.
-    if os.name == "nt" or os.name == "ce": # so it's running under windows. multiprocessing disabled
+    if os.name == "nt" or os.name == "ce":
+        # so it's running under windows. multiprocessing disabled
         vars['number_of_processors'] = 1
-        printout = printout + "\nWARNING: Multiprocessing is disabled on windows machines.\n"
+        printout = printout + "\nWARNING: Multiprocessing is disabled on\
+            windows machines.\n"
 
     # convert paths to abspath, in case necessary
     vars['nn1_script'] = os.path.abspath(vars['nn1_script'])
@@ -746,15 +789,21 @@ def load_in_commandline_parameters(argv):
     
     # find other mgltools-related scripts
     if vars['prepare_ligand4.py'] == "": 
-        vars['prepare_ligand4.py'] = vars['mgltools_directory'] + 'MGLToolsPckgs' + os.sep + 'AutoDockTools' + os.sep + 'Utilities24' + os.sep + 'prepare_ligand4.py'
+        vars['prepare_ligand4.py'] = vars['mgltools_directory'] + 'MGLToolsPckgs' \
+            + os.sep + 'AutoDockTools' + os.sep + 'Utilities24' \
+            + os.sep + 'prepare_ligand4.py'
     if vars['prepare_receptor4.py'] == "": 
-        vars['prepare_receptor4.py'] = vars['mgltools_directory'] + 'MGLToolsPckgs' + os.sep + 'AutoDockTools' + os.sep + 'Utilities24' + os.sep + 'prepare_receptor4.py'
+        vars['prepare_receptor4.py'] = vars['mgltools_directory'] \
+            + 'MGLToolsPckgs' + os.sep + 'AutoDockTools' + os.sep \
+            + 'Utilities24' + os.sep + 'prepare_receptor4.py'
     if vars['mgl_python'] == "": 
-        vars['mgl_python'] = vars['mgltools_directory'] + 'bin' + os.sep + 'pythonsh'
+        vars['mgl_python'] = vars['mgltools_directory'] + 'bin' \
+            + os.sep + 'pythonsh'
         
     # More Handling for Windows OS
     # convert path names with spaces if this is windows
-    if os.name == "nt" or os.name == "ce": # so it's running under windows. multiprocessing disabled
+    if os.name == "nt" or os.name == "ce": 
+        # so it's running under windows. multiprocessing disabled
 
         if " " in vars['filename_of_receptor']: 
             vars['filename_of_receptor'] = '"' + vars['filename_of_receptor'] + '"'
@@ -809,10 +858,13 @@ def load_in_commandline_parameters(argv):
     # CHECK THAT NN1/NN2 are using only traditional Vina Docking
     if vars['scoring_choice'] == "NN1" or  vars['scoring_choice'] == "NN2":
         if vars['dock_choice'] != "VinaDocking":
-            printout = "\nNeural Networks 1 and 2 (NN1/NN2) are trained on data using PDBQT files converted by MGLTools \n"
+            printout = "\nNeural Networks 1 and 2 (NN1/NN2) are trained on data "
+            printout = printout + "using PDBQT files converted by MGLTools \n"
             printout = printout + "and docked using Autodock Vina 1.1.2.\n"
-            printout = printout + "Using conversion or docking software besides these will not work. \n"
-            printout = printout + "Please switch dock_choice option to VinaDocking or deselect NN1/NN2 as the scoring_choice.\n"
+            printout = printout + "Using conversion or docking software besides \
+                these will not work. \n"
+            printout = printout + "Please switch dock_choice option to VinaDocking \
+                or deselect NN1/NN2 as the scoring_choice.\n"
             print(printout)
             raise Exception(printout)
 
@@ -839,8 +891,8 @@ def find_previous_runs(folder_name_path):
         - If there are no previous Run folders it returns None.
         
     Input:
-    :param str folder_name_path: is the path of the root output folder. We will make a directory within
-                this folder to store our output files
+    :param str folder_name_path: is the path of the root output folder. We will 
+        make a directory within this folder to store our output files
 
     Returns:
     :returns: int last_run_number: the int of the last run number or None if no previous runs.
@@ -869,20 +921,25 @@ def set_run_directory(root_folder_path, start_a_new_run):
     """
     Determine and make the folder for the run directory. 
         If start_a_new_run == True    Start a frest new run. 
-            -If no previous runs exist in the root_folder_path then make a new folder named root_folder_path + "Run_0"
+            -If no previous runs exist in the root_folder_path then make a new 
+                folder named root_folder_path + "Run_0"
             -If there are previous runs in the root_folder_path then make a 
-                new folder incremental increasing the name by 1 from the last run in the same output directory.
+                new folder incremental increasing the name by 1 from the last 
+                run in the same output directory.
         If start_a_new_run == False    Find the last run folder and return that path
-            -If no previous runs exist in the root_folder_path then make a new folder named root_folder_path + "Run_0"
+            -If no previous runs exist in the root_folder_path then make a new 
+            folder named root_folder_path + "Run_0"
 
     Input:
-    :param str root_folder_path: is the path of the root output folder. We will make a directory within
-                this folder to store our output files        
-    :param bol start_a_new_run: True or False to determine if we continue from the last run or start a new run
+    :param str root_folder_path: is the path of the root output folder. We will 
+        make a directory within this folder to store our output files        
+    :param bol start_a_new_run: True or False to determine if we continue from 
+        the last run or start a new run
         - This is set as a vars["start_a_new_run"] 
         - The default is vars["start_a_new_run"] = True
     Returns:
-    :returns: str folder_path: the string of the newly created directory for puting output folders
+    :returns: str folder_path: the string of the newly created directory for 
+        puting output folders
     """
 
     folder_name_path = root_folder_path + "Run_"
@@ -907,7 +964,8 @@ def set_run_directory(root_folder_path, start_a_new_run):
             folder_path = "{}{}{}".format(folder_name_path, last_run_number,os.sep)
         else:   #start_a_new_run == True
             # Start a new fresh simulation
-            # Make a directory for the new run by increasing run number by +1 from last_run_number
+            # Make a directory for the new run by increasing run number by +1
+            # from last_run_number
             run_number = last_run_number + 1
             folder_path = "{}{}{}".format(folder_name_path, run_number,os.sep)
             os.makedirs(folder_path)
@@ -924,18 +982,20 @@ def set_run_directory(root_folder_path, start_a_new_run):
 def handle_Custom_inputs_if_argparsed(input_params):
     """
     There are several Custom options such as filters, docking software 
-    which take a list of information. Because Filters can use multiple options at once it takes a list of list information. 
-    This function is used to properly import and parse those user variables if using the commandline argparse
+    which take a list of information. Because Filters can use multiple options
+    at once it takes a list of list information. 
+    This function is used to properly import and parse those user variables if
+     using the commandline argparse
 
     This function will handle those if there are used and return 
     the modified input_parpams dict
 
     Inputs:
-    :param dict input_params: The parameters. A dictionary of {parameter name:
-                value}.
+    :param dict input_params: The parameters. A dictionary of 
+        {parameter name: value}.
     Returns:
-    :returns: dict input_params: The parameters. A dictionary of {parameter name:
-                value}.
+    :returns: dict input_params: The parameters. A dictionary of 
+        {parameter name: value}.
     """
 
     # Custom Filters
@@ -1004,42 +1064,53 @@ def handle_Alternative_filters(vars, filter_list):
     Input:
     :param dict vars: Dictionary of User variables
     :param list filter_list: a list of the class of filter which will be used 
-                                later to check for drug likeliness for a generation.
-                                If a User adds their own filter they just need to follow the same nominclature and enter
-                                    that filter in the user vars["Alternative_filters"] as the name of that class and place
-                                    that file in the same folder as the other filter classes.
+        later to check for drug likeliness for a generation.
+        If a User adds their own filter they just need to follow the same
+        nominclature and enter that filter in the user vars["Alternative_filters"] 
+        as the name of that class and place that file in the same folder as the 
+        other filter classes.
 
     Returns:
     :returns: list filter_list: a list of the class of filter which will be used 
-                                later to check for drug likeliness for a generation.
-                                If a User adds their own filter they just need to follow the same nominclature and enter
-                                    that filter in the user vars["Alternative_filters"] as the name of that class and place
-                                    that file in the same folder as the other filter classes.
+        later to check for drug likeliness for a generation.
+        If a User adds their own filter they just need to follow the same 
+        nominclature and enter that filter in the user vars["Alternative_filters"] 
+        as the name of that class and place that file in the same folder as the 
+        other filter classes.
     """
     if vars["alternative_filter"]!= None:
         if type(vars["alternative_filter"]) != list:
-            raise Exception('If you want to add Custom filters to the filter child classes \
-                            Must be a list of lists [[name_filter1, Path/to/name_filter1.py],[name_filter2, Path/to/name_filter2.py]]')
+            raise Exception('If you want to add Custom filters to the filter \
+                child classes Must be a list of lists \
+                [[name_filter1, Path/to/name_filter1.py],[name_filter2, Path/to/name_filter2.py]]')
         if type(vars["alternative_filter"][0]) != list:
             print(vars["alternative_filter"])
-            raise Exception('If you want to add Custom filters to the filter child classes \
-                            Must be a list of lists [[name_filter1, Path/to/name_filter1.py],[name_filter2, Path/to/name_filter2.py]]')
-
+            raise Exception('If you want to add Custom filters to the filter \
+                child classes Must be a list of lists \
+                [[name_filter1, Path/to/name_filter1.py],[name_filter2, Path/to/name_filter2.py]]')
         
         full_children_dict = make_complete_children_dict("Filter")
         scripts_to_copy = []  
         for Custom_class in vars["alternative_filter"]:
             if Custom_class[0] not in full_children_dict.keys():
-                if os.path.exists(Custom_class[1])==False: # Check that the path to the original script exists.
-                    raise Exception('File can not be found for alternative_filter {}\n If you want to add Custom filters to the filter child classes \
-                                Must be a list of lists [[name_filter1, Path/to/name_filter1.py],[name_filter2, Path/to/name_filter2.py]]'.format(Custom_class[1]))
+                if os.path.exists(Custom_class[1])==False: 
+                    # Check that the path to the original script exists.
+                    raise Exception('File can not be found for alternative_filter \
+                        {}\n If you want to add Custom filters to the filter child \
+                        classes Must be a list of lists \
+                        [[name_filter1, Path/to/name_filter1.py],\
+                        [name_filter2, Path/to/name_filter2.py]]'.format(Custom_class[1]))
 
                 new_file = os.sep.join([os.path.abspath(os.path.dirname(__file__)),"Operators","Filter","Filter_classes","FilterClasses",os.path.basename(Custom_class[0]) + ".py"]) 
 
-                if os.path.exists(new_file)==True: # File has been copied to proper dir but is not being found by the code
-                    printout = "A copy of the custom script {} has been moved to {}\n".format(Custom_class[1],new_file)
-                    printout = printout + "Unfortunately this could not be imported by the Filter module."
-                    printout = printout + "Please check the file naming corresponding to: {}\n\n".format(Custom_class)
+                if os.path.exists(new_file)==True: 
+                    # File has been copied to proper dir but is not being found by the code
+                    printout = "A copy of the custom script {} has been moved \
+                        to {}\n".format(Custom_class[1],new_file)
+                    printout = printout + "Unfortunately this could not be  \
+                        imported by the Filter module."
+                    printout = printout + "Please check the file naming \
+                        corresponding to: {}\n\n".format(Custom_class)
                     print(printout)
                     raise Exception(printout)
                 else:
@@ -1051,9 +1122,13 @@ def handle_Alternative_filters(vars, filter_list):
             for filter_info in scripts_to_copy:
                 print("copying Custom class file into the FilterClasses folder:")
                 print("\t Copying : {}\n\t New file: {}\n".format(Custom_class[1], new_file))
-                print("AutoGrow will need to be restarted once all custom scripts have been copied to their required location.")
-                print("This is done once so if the script needs to be changed please either remove or replace the script within the FilterClasses folder.")
-                print("Please ensure you unit test this code properly before incorprating.\n")
+                print("AutoGrow will need to be restarted once all custom scripts \
+                    have been copied to their required location.")
+                print("This is done once so if the script needs to be changed \
+                    please either remove or replace the script within the \
+                    FilterClasses folder.")
+                print("Please ensure you unit test this code properly before \
+                    incorprating.\n")
                 copyfile(filter_info[0],filter_info[1])
 
             print("\n#############################################################################")
@@ -1067,12 +1142,15 @@ def handle_Alternative_filters(vars, filter_list):
 def make_complete_children_dict(purpose_of_object):
     """
     This will retrieve all the names of every child class of the parent class 
-    This can be either Filter, ParentPDBQTConverter, ParentDocking, or ParentScoring
+    This can be either Filter, ParentPDBQTConverter, ParentDocking, 
+    or ParentScoring
     
     Input:
-    :param str purpose_of_object: either Filter, ParentPDBQTConverter, ParentDocking, or ParentScoring
+    :param str purpose_of_object: either Filter, ParentPDBQTConverter, 
+        ParentDocking, or ParentScoring
     Returns:
-    :returns: dict child_dict: Dictionary of all the class objects for either Filtering, Docking, Dockingfile conversion or Scoring
+    :returns: dict child_dict: Dictionary of all the class objects for either 
+        Filtering, Docking, Dockingfile conversion or Scoring
     """
     if purpose_of_object == "Filter":
         import autogrow.Operators.Filter.Filter_classes.FilterClasses
@@ -1108,47 +1186,62 @@ def handle_custom_conversion_script(vars):
     Input:
     :param dict vars: Dictionary of User variables
     Returns:
-    :returns: dict vars: Dictionary of User variables modified with the vars["conversion_choice"] set to the new custom conversion_choice
-    :returns: bool need_restart: If True AutoGrow will need to be restarted after all other files are incorporated
-    :returns: str printout: "" or a message to be print prior to being restarted if needed
+    :returns: dict vars: Dictionary of User variables modified with 
+        the vars["conversion_choice"] set to the new custom conversion_choice
+    :returns: bool need_restart: If True AutoGrow will need to be restarted 
+        after all other files are incorporated
+    :returns: str printout: "" or a message to be print prior to being 
+        restarted if needed
     """
     need_restart=False
     printout = ""
     if vars["custom_conversion_script"]!= None:
         if type(vars["custom_conversion_script"]) != list:
             print(vars["custom_conversion_script"])
-            raise Exception('If you want to add Custom Conversion_script to the Conversion_script child classes \
-                            Must be a list of [name_Conversion_script1, Path/to/name_Conversion_script1.py]')
+            raise Exception('If you want to add Custom Conversion_script \
+                to the Conversion_script child classes Must be a list of \
+                [name_Conversion_script1, Path/to/name_Conversion_script1.py]')
         if type(vars["custom_conversion_script"][0]) != str:
             print("")
             print(vars["custom_conversion_script"])
             print("")
-            raise Exception('If you want to add Custom Conversion_script to the Conversion_script child classes \
-                            Must be a list of [name_Conversion_script1, Path/to/name_Conversion_script1.py]')
+            raise Exception('If you want to add Custom Conversion_script \
+                to the Conversion_script child classes Must be a list of \
+                [name_Conversion_script1, Path/to/name_Conversion_script1.py]')
 
         full_children_dict = make_complete_children_dict("ParentPDBQTConverter")
         Custom_class = vars["custom_conversion_script"]
         if Custom_class[0] not in full_children_dict.keys():
             if os.path.exists(Custom_class[1])==False:
                 print(Custom_class)
-                raise Exception('File can not be found for custom_conversion_script {}\n If you want to add Custom Conversion_scripts to the Conversion_script child classes \
-                    Must be a list of [name_Conversion_script1, Path/to/name_Conversion_script1.py]'.format(Custom_class[1]))
+                raise Exception('File can not be found for custom_conversion_script \
+                    {}\n If you want to add Custom Conversion_scripts to the \
+                    Conversion_script child classes Must be a list of \
+                    [name_Conversion_script1, Path/to/name_Conversion_script1.py]'.format(Custom_class[1]))
             
             new_file = os.sep.join([os.path.abspath(os.path.dirname(__file__)),"Docking","Docking_Class","Docking_File_Conversion",os.path.basename(Custom_class[0]) + ".py"]) 
 
-            if os.path.exists(new_file)==True: # File has been copied to proper dir but is not being found by the code
-                printout = "A copy of the custom script {} has been moved to {}\n".format(Custom_class[1],new_file)
-                printout = printout + "Unfortunately this could not be imported by the Conversion_script module."
-                printout = printout + "Please check the file naming corresponding to: {}\n\n".format(Custom_class)
+            if os.path.exists(new_file)==True: 
+                # File has been copied to proper dir but is not being found by the code
+                printout = "A copy of the custom script {} has been moved \
+                    to {}\n".format(Custom_class[1],new_file)
+                printout = printout + "Unfortunately this could not be \
+                    imported by the Conversion_script module."
+                printout = printout + "Please check the file naming corresponding \
+                    to: {}\n\n".format(Custom_class)
                 print(printout)
                 raise Exception(printout)
             else:
                 # Add copy the script to the Docking_File_Conversion folder
                 print("copying Custom class file into the Conversion_script folder:")
                 print("\t Copying : {}\n\t New file: {}\n".format(Custom_class[1], new_file))
-                print("AutoGrow will need to be restarted once the custom script has been copied to their required location.")
-                print("This is done once so if the script needs to be changed please either remove or replace the script within the Docking_File_Conversion folder.")
-                print("Please ensure you unit test this code properly before incorprating.")
+                print("AutoGrow will need to be restarted once the custom script \
+                    has been copied to their required location.")
+                print("This is done once so if the script needs to be changed \
+                    please either remove or replace the script within the \
+                    Docking_File_Conversion folder.")
+                print("Please ensure you unit test this code properly before \
+                    incorprating.")
                 copyfile(Custom_class[1], new_file)
 
 
@@ -1170,38 +1263,48 @@ def handle_custom_docking_script(vars):
     Input:
     :param dict vars: Dictionary of User variables
     Returns:
-    :returns: dict vars: Dictionary of User variables modified with the vars["dock_choice"] set to the new custom dock_choice
-    :returns: bool need_restart: If True AutoGrow will need to be restarted after all other files are incorporated
-    :returns: str printout: "" or a message to be print prior to being restarted if needed
+    :returns: dict vars: Dictionary of User variables modified with the 
+        vars["dock_choice"] set to the new custom dock_choice
+    :returns: bool need_restart: If True AutoGrow will need to be estarted
+         after all other files are incorporated
+    :returns: str printout: "" or a message to be print prior to being 
+        restarted if needed
     """
     need_restart=False
     printout = ""
     if vars["custom_docking_script"]!= None:
         if type(vars["custom_docking_script"]) != list:
             print(vars["custom_docking_script"])
-            raise Exception('If you want to add Custom Docking_script to the Docking_script child classes \
-                            Must be a list of [name_Docking_script1, Path/to/name_Docking_script1.py]')
+            raise Exception('If you want to add Custom Docking_script to the \
+                Docking_script child classes Must be a list of \
+                [name_Docking_script1, Path/to/name_Docking_script1.py]')
         if type(vars["custom_docking_script"][0]) != str:
             print("")
             print(vars["custom_docking_script"])
             print("")
-            raise Exception('If you want to add Custom Docking_script to the Docking_script child classes \
-                            Must be a list of [name_Docking_script1, Path/to/name_Docking_script1.py]')
+            raise Exception('If you want to add Custom Docking_script to the \
+                Docking_script child classes Must be a list of \
+                [name_Docking_script1, Path/to/name_Docking_script1.py]')
 
         full_children_dict = make_complete_children_dict("ParentDocking")
         Custom_class = vars["custom_docking_script"]
         if Custom_class[0] not in full_children_dict.keys():
             if os.path.exists(Custom_class[1])==False:
                 print(Custom_class)
-                raise Exception('File can not be found for custom_docking_script {}\n If you want to add Custom Docking_scripts to the Docking_script child classes \
-                    Must be a list of [name_Docking_script1, Path/to/name_Docking_script1.py]'.format(Custom_class[1]))
+                raise Exception('File can not be found for custom_docking_script \
+                    {}\n If you want to add Custom Docking_scripts to the \
+                    Docking_script child classes Must be a list of \
+                    [name_Docking_script1, Path/to/name_Docking_script1.py]'.format(Custom_class[1]))
 
             new_file = os.sep.join([os.path.abspath(os.path.dirname(__file__)),"Docking","Docking_Class","DockingClassChildren",os.path.basename(Custom_class[0]) + ".py"]) 
             
             if os.path.exists(new_file)==True: # File has been copied to proper dir but is not being found by the code
-                printout = "A copy of the custom script {} has been moved to {}\n".format(Custom_class[1],new_file)
-                printout = printout + "Unfortunately this could not be imported by the Docking module."
-                printout = printout + "Please check the file naming corresponding to: {}\n\n".format(Custom_class)
+                printout = "A copy of the custom script {} has been moved \
+                    to {}\n".format(Custom_class[1],new_file)
+                printout = printout + "Unfortunately this could not be imported \
+                    by the Docking module."
+                printout = printout + "Please check the file naming corresponding \
+                    to: {}\n\n".format(Custom_class)
                 print(printout)
                 raise Exception(printout)
 
@@ -1210,8 +1313,11 @@ def handle_custom_docking_script(vars):
                 # Add copy the script to the DockingClassChildren folder
                 print("copying Custom class file into the DockingClassChildren folder:")
                 print("\t Copying : {}\n\t New file: {}\n".format(Custom_class[1], new_file))
-                print("AutoGrow will need to be restarted once the custom script has been copied to their required location.")
-                print("This is done once so if the script needs to be changed please either remove or replace the script within the DockingClassChildren folder.")
+                print("AutoGrow will need to be restarted once the custom \
+                    script has been copied to their required location.")
+                print("This is done once so if the script needs to be changed \
+                    please either remove or replace the script within the \
+                    DockingClassChildren folder.")
                 print("Please ensure you unit test this code properly before incorprating.")
                 copyfile(Custom_class[1], new_file)
 
@@ -1228,40 +1334,48 @@ def handle_custom_docking_script(vars):
 # 
 def handle_custom_scoring_script(vars):
     """
-    This will handle Custom Scoring_scripts
+    This will handle Custom scoring_scripts
 
     Input:
     :param dict vars: Dictionary of User variables
     Returns:
-    :returns: dict vars: Dictionary of User variables modified with the vars["dock_choice"] set to the new custom dock_choice
-    :returns: bool need_restart: If True AutoGrow will need to be restarted after all other files are incorporated
-    :returns: str printout: "" or a message to be print prior to being restarted if needed
+    :returns: dict vars: Dictionary of User variables modified with the 
+        vars["dock_choice"] set to the new custom dock_choice
+    :returns: bool need_restart: If True AutoGrow will need to be restarted 
+        after all other files are incorporated
+    :returns: str printout: "" or a message to be print prior to 
+        being restarted if needed
     """
     need_restart=False
     printout = ""
     if vars["custom_scoring_script"]!= None:
         if type(vars["custom_scoring_script"]) != list:
             print(vars["custom_scoring_script"])
-            raise Exception('If you want to add Custom Scoring_script to the Scoring_script child classes \
-                            Must be a list of [name_Scoring_script1, Path/to/name_Scoring_script1.py]')
+            raise Exception('If you want to add Custom scoring_script \
+                to the scoring_script child classes Must be a list of \
+                [name_scoring_script1, Path/to/name_scoring_script1.py]')
         if type(vars["custom_scoring_script"][0]) != str:
             print("")
             print(vars["custom_scoring_script"])
             print("")
-            raise Exception('If you want to add Custom Scoring_script to the Scoring_script child classes \
-                            Must be a list of [name_Scoring_script1, Path/to/name_Scoring_script1.py]')
+            raise Exception('If you want to add Custom scoring_script \
+                to the scoring_script child classes Must be a list of \
+                [name_scoring_script1, Path/to/name_scoring_script1.py]')
 
         full_children_dict = make_complete_children_dict("ParentScoring")
         Custom_class = vars["custom_scoring_script"]
         if Custom_class[0] not in full_children_dict.keys():
             if os.path.exists(Custom_class[1])==False:
                 print(Custom_class) 
-                raise Exception('File can not be found for custom_scoring_script {}\n If you want to add Custom Scoring_scripts to the Scoring_script child classes \
-                    Must be a list of [name_Scoring_script1, Path/to/name_Scoring_script1.py]'.format(Custom_class[1]))
+                raise Exception('File can not be found for custom_scoring_script \
+                    {}\n If you want to add Custom scoring_scripts to the \
+                    scoring_script child classes Must be a list of \
+                    [name_scoring_script1, Path/to/name_scoring_script1.py]'.format(Custom_class[1]))
 
             new_file = os.sep.join([os.path.abspath(os.path.dirname(__file__)),"Docking","Scoring","Scoring_classes","Scoring_functions",os.path.basename(Custom_class[0]) + ".py"]) 
 
-            if os.path.exists(new_file)==True: # File has been copied to proper dir but is not being found by the code
+            if os.path.exists(new_file)==True: 
+                # File has been copied to proper dir but is not being found by the code
                 printout = "A copy of the custom script {} has been moved to {}\n".format(Custom_class[1],new_file)
                 printout = printout + "Unfortunately this could not be imported by the Scoring module."
                 printout = printout + "Please check the file naming corresponding to: {}\n\n".format(Custom_class)
@@ -1273,8 +1387,11 @@ def handle_custom_scoring_script(vars):
                 # Add copy the script to the scoring_choices folder
                 print("copying Custom class file into the scoring_choices folder:")
                 print("\t Copying : {}\n\t New file: {}\n".format(Custom_class[1], new_file))
-                print("AutoGrow will need to be restarted once the custom script has been copied to their required location.")
-                print("This is done once so if the script needs to be changed please either remove or replace the script within the scoring_choices folder.")
+                print("AutoGrow will need to be restarted once the custom script \
+                    has been copied to their required location.")
+                print("This is done once so if the script needs to be changed \
+                    please either remove or replace the script within \
+                    the scoring_choices folder.")
                 print("Please ensure you unit test this code properly before incorprating.")
                 copyfile(Custom_class[1], new_file)
 
@@ -1291,7 +1408,8 @@ def handle_custom_scoring_script(vars):
 # 
 def handle_Custom_dock_and_Conversion_Scoring_options(vars):
     """
-    This function handles selecting the user defined Custom options for Custom docking Conversion, and Scoring scripts.
+    This function handles selecting the user defined Custom options 
+    for Custom docking Conversion, and Scoring scripts.
 
     Input:
     :param dict vars: Dictionary of User variables
@@ -1332,7 +1450,8 @@ def filter_choice_handling(vars):
     Input:
     :param dict vars: Dictionary of User variables
     Returns:
-    :returns: dict vars: Dictionary of User variables with the Chosen_Ligand_Filters added
+    :returns: dict vars: Dictionary of User variables with the 
+        Chosen_Ligand_Filters added
     """
     if "No_Filters" in list(vars.keys()):
         if vars["No_Filters"] is True:
@@ -1352,17 +1471,18 @@ def filter_choice_handling(vars):
 # 
 def picked_filters(vars):
     """
-    This will take the user vars and return a list of the filters which a molecule must pass
-    to move into the next generation.
+    This will take the user vars and return a list of the filters 
+    which a molecule must pass to move into the next generation.
 
     Input:
     :param dict vars: Dictionary of User variables
     Returns:
     :returns: list filter_list: a list of the class of filter which will be used 
-                                later to check for drug likeliness for a generation.
-                                If a User adds their own filter they just need to follow the same nominclature and enter
-                                    that filter in the user vars["Alternative_filters"] as the name of that class and place
-                                    that file in the same folder as the other filter classes.
+        later to check for drug likeliness for a generation.
+        If a User adds their own filter they just need to follow 
+        the same nominclature and enter that filter in the user 
+        vars["Alternative_filters"] as the name of that class and place
+        that file in the same folder as the other filter classes.
     """
     filter_list = []
     vars_keys = list(vars.keys())

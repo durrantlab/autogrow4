@@ -105,7 +105,7 @@ def run_docking_common(vars, current_gen_int, current_generation_dir, smile_file
 
     print("####################")
     print("Convert Ligand to PDBQT format Begun")
-    smiles_names_failed_to_convert = vars['Parallelizer'].run(job_input_convert_lig, lig_convert_multithread)
+    smiles_names_failed_to_convert = vars["parallelizer"].run(job_input_convert_lig, lig_convert_multithread)
     
     print("Convert Ligand to PDBQT format Completed")
     deleted_smiles_names_list_convert = [x for x in smiles_names_failed_to_convert if x is not None]
@@ -123,7 +123,7 @@ def run_docking_common(vars, current_gen_int, current_generation_dir, smile_file
     job_input_dock_lig = tuple([tuple([dockingObject, pdbqt]) for pdbqt in pdbqts_in_folder])
     print("####################")
     print("Docking Begun")
-    smiles_names_failed_to_dock = vars['Parallelizer'].run(job_input_dock_lig, run_dock_multithread)
+    smiles_names_failed_to_dock = vars["parallelizer"].run(job_input_dock_lig, run_dock_multithread)
 
     print("")
     print("")
