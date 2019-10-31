@@ -21,7 +21,7 @@ PARSER = argparse.ArgumentParser()
 # Allows the run commands to be submitted via a .json file.
 PARSER.add_argument('--json', '-j', metavar='param.json',
     help='Name of a json file containing all parameters. \
-        Overrides other arguments.')
+    Overrides other arguments.')
 
 # Allows the run in debug mode. Doesn't delete temp files.
 PARSER.add_argument('--debug_mode', '-d', action = 'store_true', default=False,
@@ -71,8 +71,8 @@ PARSER.add_argument('--use_docked_source_compounds', choices = [True,False,"True
     Default is True.')
 PARSER.add_argument('--start_a_new_run', action = 'store_true', default=False,
     help = 'If False make a new folder and start a fresh simulation with Generation 0.  \
-        If True find the last generation in the root_output_folder and continue to fill.\
-        Default is False.')
+    If True find the last generation in the root_output_folder and continue to fill.\
+    Default is False.')
 
 PARSER.add_argument('--python_path', type=str, default="python",
     help = 'On some systems there may be multiple enviorments. AutoGrow executes \
@@ -131,7 +131,7 @@ PARSER.add_argument('--multithread_mode', default='multithreading',
 
 # Genetic Algorithm Options
 PARSER.add_argument('--selector_choice', 
-    choices = ["Roulette_Selector","Rank_Selector", "Tournement_Selector"], default="Roulette_Selector", 
+    choices = ["Roulette_Selector","Rank_Selector", "Tournement_Selector"], default="Roulette_Selector",   
     help = 'This determines whether the fitness criteria are chosen by a Weighted Roulette, \
     Ranked, or Tournement style Selector. The Rank option is a non-redudant Elitist selector.\
     Roulette and Tournement chose without replacement and are stoichastic options. \
@@ -140,7 +140,7 @@ PARSER.add_argument('--selector_choice',
 PARSER.add_argument('--tourn_size', type=float, default=0.1,
     help = 'If using the Tournement_Selector this determines the size of each \
     tournement. The number of ligands used for each tournement will the \
-    tourn_size * the number of considered ligands.')     
+    tourn_size * the number of considered ligands.')
 
 # Seeding next gen and diversity
 PARSER.add_argument('--top_mols_to_seed_next_generation_first_generation', type = int,
@@ -157,7 +157,7 @@ PARSER.add_argument('--diversity_seed_depreciation_per_gen', type = int, default
 
 # Populations settings
 PARSER.add_argument('--num_generations', type = int, default = 10,
-    help = 'The number of generations to be created.')
+                    help = 'The number of generations to be created.')
 PARSER.add_argument('--number_of_crossovers_first_generation', type = int,
     help = 'The number of ligands which will be created via crossovers in the \
     first generation. If not defined it will default to number_of_crossovers')
@@ -237,7 +237,7 @@ PARSER.add_argument('--obabel_path', help = 'required if using obabel conversion
     may be found on Linux by running: which obabel')
 
 # docking
-PARSER.add_argument('--dock_choice', metavar = 'dock_choice',default="QuickVina2Docking", 
+PARSER.add_argument('--dock_choice', metavar = 'dock_choice',default="QuickVina2Docking",
     choices = ["VinaDocking", "QuickVina2Docking","Custom"],
     help = 'dock_choice is to chose which docking software module to use.')
 PARSER.add_argument('--docking_executable', metavar = 'docking_executable', default=None,
@@ -259,14 +259,14 @@ PARSER.add_argument('--docking_timeout_limit', type=float, default = 200,
     docking events using QuickVina2Docking under default settings. If run with \
     more exhaustive settings or with highly flexible ligands, consider increasing \
     docking_timeout_limit to accommodate. Default docking_timeout_limit is 200 seconds')
-PARSER.add_argument('--custom_docking_script', metavar = 'custom_docking_script', 
+PARSER.add_argument('--custom_docking_script', metavar = 'custom_docking_script',
     default="", help = 'The name and path to a python script for which is used to \
     dock ligands. This is required for Custom docking choices Must be a list of \
     strings [name_custom_conversion_class, Path/to/name_custom_conversion_class.py]')
-    
+                    
 
 # scoring
-PARSER.add_argument('--scoring_choice', metavar = 'scoring_choice', 
+PARSER.add_argument('--scoring_choice', metavar = 'scoring_choice',
     choices = ["VINA","NN1","NN2","Custom"], default="VINA", 
     help = 'The scoring_choice to use to assess the ligands docking fitness. \
     Default is using Vina/QuickVina2 ligand affinity while NN1/NN2 use a Neural Network \
@@ -277,12 +277,12 @@ PARSER.add_argument('--rescore_lig_efficiency', action = 'store_true', default=F
     help = 'This will divide the final scoring_choice output by the number of \
     non-Hydrogen atoms in the ligand. This adjusted ligand efficiency score will \
     override the scoring_choice value. This is compatible with all scoring_choice options.')                  
-PARSER.add_argument('--custom_scoring_script', metavar = 'custom_scoring_script', 
+PARSER.add_argument('--custom_scoring_script', metavar = 'custom_scoring_script',
     type=str, default="", help = 'The path to a python script for which is used to \
     assess the ligands docking fitness. Autogrow is largely set to select for a most \
     negative scores (ie binding affinity the more negative is best). Must be a list of \
     strings [name_custom_conversion_class, Path/to/name_custom_conversion_class.py]')
-    
+                        
 # gypsum # max variance is the number of conformers made per ligand
 PARSER.add_argument('--max_variants_per_compound', type = int, default = 3,
     help = 'number of conformers made per ligand. \

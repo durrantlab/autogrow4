@@ -1017,13 +1017,13 @@ def handle_Custom_inputs_if_argparsed(input_params):
     if input_params["alternative_filter"] != None and input_params["alternative_filter"]!=[]:
         orginal = input_params["alternative_filter"][0]
         orginal = orginal.replace("[[","[").replace("]]","]")
-        new_Alternative_filter = []
+        new_alternative_filter = []
         for Custom_filter in orginal.split("]"):
             Custom_filter = Custom_filter.replace("[","").replace("]","")
             Custom_filter = [x for x in Custom_filter.split(",") if x!=""]
             if len(Custom_filter) ==2:
-                new_Alternative_filter.append(Custom_filter)
-        input_params["alternative_filter"] = new_Alternative_filter
+                new_alternative_filter.append(Custom_filter)
+        input_params["alternative_filter"] = new_alternative_filter
 
     # custom_conversion_script
     if "custom_conversion_script" not in input_params.keys():
@@ -1070,7 +1070,7 @@ def handle_Custom_inputs_if_argparsed(input_params):
         
     return input_params
 #
-def handle_Alternative_filters(vars, filter_list):
+def handle_alternative_filters(vars, filter_list):
     """
     This will handle Custom Filters
 
@@ -1079,7 +1079,7 @@ def handle_Alternative_filters(vars, filter_list):
     :param list filter_list: a list of the class of filter which will be used 
         later to check for drug likeliness for a generation.
         If a User adds their own filter they just need to follow the same
-        nominclature and enter that filter in the user vars["Alternative_filters"] 
+        nominclature and enter that filter in the user vars["alternative_filters"] 
         as the name of that class and place that file in the same folder as the 
         other filter classes.
 
@@ -1087,7 +1087,7 @@ def handle_Alternative_filters(vars, filter_list):
     :returns: list filter_list: a list of the class of filter which will be used 
         later to check for drug likeliness for a generation.
         If a User adds their own filter they just need to follow the same 
-        nominclature and enter that filter in the user vars["Alternative_filters"] 
+        nominclature and enter that filter in the user vars["alternative_filters"] 
         as the name of that class and place that file in the same folder as the 
         other filter classes.
     """
@@ -1494,7 +1494,7 @@ def picked_filters(vars):
         later to check for drug likeliness for a generation.
         If a User adds their own filter they just need to follow 
         the same nominclature and enter that filter in the user 
-        vars["Alternative_filters"] as the name of that class and place
+        vars["alternative_filters"] as the name of that class and place
         that file in the same folder as the other filter classes.
     """
     filter_list = []
@@ -1549,7 +1549,7 @@ def picked_filters(vars):
         vars['BRENK_Filter'] = False
        
     if "alternative_filter" in vars_keys:
-        filter_list = handle_Alternative_filters(vars, filter_list)
+        filter_list = handle_alternative_filters(vars, filter_list)
     else:
         vars['alternative_filter'] = None
         
