@@ -304,12 +304,12 @@ Running AutoGrow:
                     --num_generations 5 \
                     --mgltools_directory $PATH/mgltools_x86_64Linux2_1.5.6/ \
                     --number_of_processors -1 \
-                    --Scoring_choice VINA \
+                    --scoring_choice VINA \
                     --Lipinski_Lenient \
                     --start_a_new_run \
-                    --Rxn_library ClickChem \
-                    --Selector_Choice Rank_Selector \
-                    --Dock_choice VinaDocking \
+                    --rxn_library ClickChem \
+                    --selector_choice Rank_Selector \
+                    --dock_choice VinaDocking \
                     --max_variants_per_compound 5 \
                     --redock_advance_from_previous_gen False \
                     --generate_plot True \
@@ -369,15 +369,15 @@ Providing Custom options:
 
         Running custom Filters:
             Example shown is to submit multiple custom filters:
-                Alternative_filter [["custom_filter_1","$PATH/custom_filter_1.py"],["custom_filter_2","$PATH//custom_filter_2.py"]]
+                alternative_filter [["custom_filter_1","$PATH/custom_filter_1.py"],["custom_filter_2","$PATH//custom_filter_2.py"]]
             To sumbit for a single custom filter it should be:
-                Alternative_filter [["custom_filter_1","$PATH/custom_filter_1.py"]]
+                alternative_filter [["custom_filter_1","$PATH/custom_filter_1.py"]]
                 
             Submission through .json format: 
 
                 {
                     ... ,
-                    "Alternative_filter": [["custom_filter_1","$PATH/custom_filter_1.py"],["custom_filter_2","$PATH/custom_filter_2.py"]]
+                    "alternative_filter": [["custom_filter_1","$PATH/custom_filter_1.py"],["custom_filter_2","$PATH/custom_filter_2.py"]]
                 }
 
                 python RunAutogrow.py -j $PATH/To/json_file_with_variable.json
@@ -386,7 +386,7 @@ Providing Custom options:
             Commandline submission format: 
                 python RunAutogrow.py \
                     ... \
-                    --Alternative_filter [["custom_filter_1","$PATH/custom_filter_1.py"],["custom_filter_2","$PATH/custom_filter_2.py"]]
+                    --alternative_filter [["custom_filter_1","$PATH/custom_filter_1.py"],["custom_filter_2","$PATH/custom_filter_2.py"]]
 
             
 
@@ -457,8 +457,8 @@ Providing Custom options:
                 {
                     ...
                     "docking_executable": "$PATH/To/executable/for/custom_docking",
-                    "Dock_choice": "Custom",
-                    "Custom_docking_script": ["custom_docking", "$PATH/To/class_object/for/custom_docking.py"]
+                    "dock_choice": "Custom",
+                    "custom_docking_script": ["custom_docking", "$PATH/To/class_object/for/custom_docking.py"]
                 }
 
                 python RunAutogrow.py -j $PATH/To/json_file_with_variable.json
@@ -468,8 +468,8 @@ Providing Custom options:
                 python RunAutogrow.py \
                     ... \
                     --docking_executable "$PATH/To/executable/for/custom_docking" \
-                    --Dock_choice Custom \
-                    --Alternative_filter ["custom_docking", "$PATH/To/class_object/for/custom_docking.py"]
+                    --dock_choice Custom \
+                    --alternative_filter ["custom_docking", "$PATH/To/class_object/for/custom_docking.py"]
         #
     3) Custom ligand conversion code from PDB to dockable format (ie PDBQT) ***
         If using a docking software other than VINA/QuickVina is being used, one may need to convert the pdb format ligands into a different format or it may take .pdb files.
@@ -523,8 +523,8 @@ Providing Custom options:
 
                 {
                     ...
-                    "Conversion_choice": "Custom",
-                    "Custom_Conversion_script": ["custom_Conversion", "$PATH/To/class_object/for/custom_Conversion.py"]
+                    "conversion_choice": "Custom",
+                    "custom_conversion_script": ["custom_conversion", "$PATH/To/class_object/for/custom_conversion.py"]
                 }
 
                 python RunAutogrow.py -j $PATH/To/json_file_with_variable.json
@@ -532,8 +532,8 @@ Providing Custom options:
             Commandline submission format: 
                 python RunAutogrow.py \
                     ... \
-                    --Conversion_choice Custom \
-                    --Custom_Conversion_script ["custom_Conversion", "$PATH/To/class_object/for/custom_Conversion.py"]
+                    --conversion_choice Custom \
+                    --custom_conversion_script ["custom_conversion", "$PATH/To/class_object/for/custom_conversion.py"]
 
     4) Custom Scoring/Rescoring code ***
     

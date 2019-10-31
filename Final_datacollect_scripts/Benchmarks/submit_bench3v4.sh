@@ -155,13 +155,13 @@ then
             --num_generations 5 \
             --mgltools_directory $MGLTOOLS_HOME/ \
             --number_of_processors -1 \
-            --Scoring_choice VINA \
+            --scoring_choice VINA \
             --Lipinski_Lenient \
             --Ghose \
             --start_a_new_run \
-            --Rxn_library ClickChem \
-            --Selector_Choice Rank_Selector \
-            --Dock_choice VinaDocking \
+            --rxn_library ClickChem \
+            --selector_choice Rank_Selector \
+            --dock_choice VinaDocking \
             --max_variants_per_compound 1 \
             --redock_advance_from_previous_gen False \
             --generate_plot False \
@@ -231,13 +231,13 @@ then
             --num_generations 5 \
             --mgltools_directory $MGLTOOLS_HOME/ \
             --number_of_processors -1 \
-            --Scoring_choice VINA \
+            --scoring_choice VINA \
             --Lipinski_Lenient \
             --Ghose \
             --start_a_new_run \
-            --Rxn_library ClickChem \
-            --Selector_Choice Rank_Selector \
-            --Dock_choice VinaDocking \
+            --rxn_library ClickChem \
+            --selector_choice Rank_Selector \
+            --dock_choice VinaDocking \
             --max_variants_per_compound 3 \
             --redock_advance_from_previous_gen False \
             --generate_plot False \
@@ -310,13 +310,13 @@ then
             --num_generations 5 \
             --mgltools_directory $MGLTOOLS_HOME/ \
             --number_of_processors -1 \
-            --Scoring_choice VINA \
+            --scoring_choice VINA \
             --Lipinski_Lenient \
             --Ghose \
             --start_a_new_run \
-            --Rxn_library ClickChem \
-            --Selector_Choice Rank_Selector \
-            --Dock_choice VinaDocking \
+            --rxn_library ClickChem \
+            --selector_choice Rank_Selector \
+            --dock_choice VinaDocking \
             --max_variants_per_compound 5 \
             --redock_advance_from_previous_gen False \
             --generate_plot False \
@@ -391,13 +391,13 @@ then
             --num_generations 5 \
             --mgltools_directory $MGLTOOLS_HOME/ \
             --number_of_processors -1 \
-            --Scoring_choice VINA \
+            --scoring_choice VINA \
             --Lipinski_Lenient \
             --Ghose \
             --start_a_new_run \
-            --Rxn_library ClickChem \
-            --Selector_Choice Rank_Selector \
-            --Dock_choice QuickVina2Docking \
+            --rxn_library ClickChem \
+            --selector_choice Rank_Selector \
+            --dock_choice QuickVina2Docking \
             --max_variants_per_compound 1 \
             --redock_advance_from_previous_gen False \
             --generate_plot False \
@@ -467,13 +467,13 @@ then
             --num_generations 5 \
             --mgltools_directory $MGLTOOLS_HOME/ \
             --number_of_processors -1 \
-            --Scoring_choice VINA \
+            --scoring_choice VINA \
             --Lipinski_Lenient \
             --Ghose \
             --start_a_new_run \
-            --Rxn_library ClickChem \
-            --Selector_Choice Rank_Selector \
-            --Dock_choice QuickVina2Docking \
+            --rxn_library ClickChem \
+            --selector_choice Rank_Selector \
+            --dock_choice QuickVina2Docking \
             --max_variants_per_compound 3 \
             --redock_advance_from_previous_gen False \
             --generate_plot False \
@@ -546,13 +546,13 @@ then
             --num_generations 5 \
             --mgltools_directory $MGLTOOLS_HOME/ \
             --number_of_processors -1 \
-            --Scoring_choice VINA \
+            --scoring_choice VINA \
             --Lipinski_Lenient \
             --Ghose \
             --start_a_new_run \
-            --Rxn_library ClickChem \
-            --Selector_Choice Rank_Selector \
-            --Dock_choice QuickVina2Docking \
+            --rxn_library ClickChem \
+            --selector_choice Rank_Selector \
+            --dock_choice QuickVina2Docking \
             --max_variants_per_compound 5 \
             --redock_advance_from_previous_gen False \
             --generate_plot False \

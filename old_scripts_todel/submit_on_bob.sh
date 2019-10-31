@@ -15,13 +15,13 @@ nohup time python RunAutogrow.py \
     --num_generations 5 \
     --mgltools_directory /home/jspiegel/DataB/spinel/programs/MGLTools-1.5.6/ \
     --number_of_processors 40 \
-    --Dock_choice QuickVina2Docking \
-    --Scoring_choice VINA \
+    --dock_choice QuickVina2Docking \
+    --scoring_choice VINA \
     --Lipinski_Strict \
     --Ghose \
     --filter_source_compounds True \
-    --Rxn_library Robust_Rxns \
-    --Selector_Choice Rank_Selector \
+    --rxn_library Robust_Rxns \
+    --selector_choice Rank_Selector \
     --max_variants_per_compound 3 \
     --reduce_files_sizes True \
     --generate_plot True \

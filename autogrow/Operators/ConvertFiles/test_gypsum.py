@@ -80,16 +80,3 @@ def run_gypsum(json_path,gypsum_log_path):
 
 
 
-
-if __name__ == "__main__":
-    folder = "/home/jacob/Desktop/Outputfolder/Run_10/generation_0/gypsum_submission_files/"
-    gypsum_output_folder_path = "/home/jacob/Desktop/Outputfolder/Run_9/generation_0/test_gypsum/"
-    gypsum_log_path = "{}log{}".format(gypsum_output_folder_path, os.sep)
-
-    for file_path in glob.glob(folder+"*.json"):
-        print("")
-        print("############")
-        print(file_path)
-        run_gypsum(file_path,gypsum_log_path)
-        print("############")
-        print("")

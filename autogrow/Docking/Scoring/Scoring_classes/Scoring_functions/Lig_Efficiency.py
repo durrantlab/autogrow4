@@ -144,7 +144,7 @@ def append_lig_effeciency(list_of_lig_info):
 
 if __name__ == "__main__":
     vars = {}
-    # vars["Scoring_choice"] = 'VINA'
+    # vars["scoring_choice"] = 'VINA'
     # folder_to_search = os.sep + os.path.join("home", "jspiegel", "DataB", "jspiegel", "projects", "output_autogrow_testing", "Run_11", "generation_0", "PDBs") + os.sep
     # run_scoring_common(vars, folder_to_search)
     smile_dict = {'Gen_0_Mutant_5_203493': ['COC1OC(CO)C(O)C(O)C1n1nnc(CCO)c1-c1ccc(-c2cccs2)s1', '(ZINC04530731+ZINC01529972)Gen_0_Mutant_5_203493'], 'Gen_0_Cross_452996': ['CC(=O)OCC(O)CN=[N+]=[N-]', '(ZINC44117885+ZINC34601304)Gen_0_Cross_452996'], 'ZINC13526729': ['[N-]=[N+]=NCC1OC(O)CC1O', 'ZINC13526729']}

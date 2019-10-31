@@ -51,15 +51,15 @@ do
         --num_generations 40 \
         --mgltools_directory $MGLTOOLS_HOME/ \
         --number_of_processors -1 \
-        --Scoring_choice VINA \
+        --scoring_choice VINA \
         --Lipinski_Strict \
         --Ghose \
         --PAINS_Filter \
         --start_a_new_run \
         --filter_source_compounds False \
-        --Rxn_library Robust_Rxns \
-        --Selector_Choice Rank_Selector \
-        --Dock_choice QuickVina2Docking \
+        --rxn_library Robust_Rxns \
+        --selector_choice Rank_Selector \
+        --dock_choice QuickVina2Docking \
         --max_variants_per_compound 3 \
         --multithread_mode mpi
         >  $outfolder_four"test_output.txt" 2>  $outfolder_four"test_error.txt"

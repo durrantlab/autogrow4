@@ -76,7 +76,7 @@ def populate_generation(vars, generation_num):
     # Making Mutations
 
     # Package user vars specifying the Reaction library to use for mutation 
-    rxn_library_variables = [vars['Rxn_library'], vars['rxn_library_file'], vars['function_group_library'], vars['complimentary_mol_directory']]
+    rxn_library_variables = [vars['rxn_library'], vars['rxn_library_file'], vars['function_group_library'], vars['complimentary_mol_directory']]
 
     # List of SMILES from mutation
     new_mutation_smiles_list = []  
@@ -581,10 +581,10 @@ def make_seed_list(vars, source_compounds_list, generation_num, num_seed_diversi
         random.shuffle(usable_list_of_smiles)
 
     else:
-        Selector_Choice = vars['Selector_Choice']
+        selector_choice = vars['selector_choice']
         tourn_size = vars['tourn_size']
         # Get subset of the source_file based on diversity scores and Docking scores
-        usable_list_of_smiles = Ranking.create_seed_list(usable_list_of_smiles, generation_num, num_seed_diversity, num_seed_dock_fitness, Selector_Choice, tourn_size)
+        usable_list_of_smiles = Ranking.create_seed_list(usable_list_of_smiles, generation_num, num_seed_diversity, num_seed_dock_fitness, selector_choice, tourn_size)
     
     random.shuffle(usable_list_of_smiles)
 

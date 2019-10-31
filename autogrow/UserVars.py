@@ -407,11 +407,10 @@ def define_defaults():
     # (RECOMMEND SETTING TO "" SO AUTOGROW CAN AUTOLOCATE THESE FILES)# 
 
 
-    # PARSER.add_argument('--Conversion_choice', choices = ["MGLTools","obabel"], default="MGLTools",
-    #                 help = '@@@@@@ JAKE CHOICE')
-    vars['Conversion_choice'] = "MGLTools_Conversion"  
+    # PARSER.add_argument('--conversion_choice', choices = ["MGLTools","obabel"], default="MGLTools",
+    vars['conversion_choice'] = "MGLTools_Conversion"  
     vars['obabel_path'] = "obabel"   
-    vars["Custom_Conversion_script"] = ""
+    vars["custom_conversion_script"] = ""
     vars['prepare_ligand4.py'] = ""    # vars['prepare_ligand4.py'] = "/PATH/MGLTools-1.5.4/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_ligand4.py"
     vars['prepare_receptor4.py'] = ""  # vars['prepare_receptor4.py'] = "/PATH/MGLTools-1.5.4/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_receptor4.py"
     vars['mgl_python'] = ""        # vars['mgl_python'] = "/PATH/MGLTools-1.5.4/bin/pythonsh"
@@ -425,7 +424,7 @@ def define_defaults():
     vars["protanate_step"] = False
 
     # Mutation Settings
-    vars["Rxn_library"] ="ClickChem"
+    vars["rxn_library"] ="ClickChem"
     vars["rxn_library_file"] =""
     vars["function_group_library"] = ""
     vars["complimentary_mol_directory"] = ""
@@ -435,7 +434,7 @@ def define_defaults():
     vars["multithread_mode"] = "multithreading"
 
     # Genetic Algorithm Components
-    vars["Selector_Choice"] = "Roulette_Selector"
+    vars["selector_choice"] = "Roulette_Selector"
     vars["tourn_size"] = 0.1
 
     # Seeding next gen and diversity
@@ -466,20 +465,20 @@ def define_defaults():
     vars["NIH_Filter"] = False
     vars["BRENK_Filter"] = False
     vars["No_Filters"] = False
-    vars["Alternative_filter"] = None
+    vars["alternative_filter"] = None
 
     # docking
-    vars["Dock_choice"] = "QuickVina2Docking"
+    vars["dock_choice"] = "QuickVina2Docking"
     vars["docking_executable"] = None
     vars["docking_exhaustiveness"] = None
     vars["docking_num_modes"] = None
     vars["docking_timeout_limit"] = 200
-    vars["Custom_docking_script"] = ""
+    vars["custom_docking_script"] = ""
 
     # scoring
-    vars["Scoring_choice"] = "VINA"
-    vars["rescore_Lig_Efficiency"] = False
-    vars["Custom_scoring_script"] = ""
+    vars["scoring_choice"] = "VINA"
+    vars["rescore_lig_efficiency"] = False
+    vars["custom_scoring_script"] = ""
 
     # gypsum # max variance is the number of conformers made per ligand
     vars["max_variants_per_compound"] = 3
@@ -667,38 +666,38 @@ def load_in_commandline_parameters(argv):
 
     # Check if Custom docking option if so there's a few things which need to also be specified
     # if not lets flag the error
-    if vars["Dock_choice"] == "Custom":
+    if vars["dock_choice"] == "Custom":
         if vars["docking_executable"] is None:
-            raise ValueError("TO USE Custom DOCKING OPTION, MUST SPECIFY THE PATH TO THE DOCKING_EXECUTABLE AND THE DOCKING_CLASS") 
+            raise ValueError("TO USE Custom DOCKING OPTION, MUST SPECIFY THE PATH TO THE docking_executable AND THE DOCKING_CLASS") 
         if os.path.exists(vars["docking_executable"])==False:
             raise ValueError("Custom docking_executable could not be found at: {}".format(vars["docking_executable"])) 
-        if type(vars["Custom_docking_script"]) !=list or os.path.exists(vars["Custom_docking_script"][1])!=True:
+        if type(vars["custom_docking_script"]) !=list or os.path.exists(vars["custom_docking_script"][1])!=True:
             raise ValueError("TO USE Custom DOCKING OPTION, MUST SPECIFY THE PATH TO THE Custom DOCKING SCRIPT") 
 
-    if vars["Conversion_choice"] == "Custom":
-        if type(vars["Custom_Conversion_script"]) != list or os.path.exists(vars["Custom_Conversion_script"][1])!=True:
+    if vars["conversion_choice"] == "Custom":
+        if type(vars["custom_conversion_script"]) != list or os.path.exists(vars["custom_conversion_script"][1])!=True:
 
-            raise ValueError("TO USE Custom Conversion_choice OPTION, MUST SPECIFY THE PATH \
+            raise ValueError("TO USE Custom conversion_choice OPTION, MUST SPECIFY THE PATH \
                             TO THE Custom Conversion SCRIPT") 
 
-    if vars["Scoring_choice"] == "Custom":
-        if type(vars["Custom_scoring_script"]) != list or os.path.exists(vars["Custom_scoring_script"][1])!=True:
+    if vars["scoring_choice"] == "Custom":
+        if type(vars["custom_scoring_script"]) != list or os.path.exists(vars["custom_scoring_script"][1])!=True:
 
-            raise ValueError("TO USE Custom Scoring_choice OPTION, MUST SPECIFY THE PATH \
+            raise ValueError("TO USE Custom scoring_choice OPTION, MUST SPECIFY THE PATH \
                             TO THE Custom SCORING SCRIPT") 
 
-    if vars["Conversion_choice"] == "Custom" or vars["Dock_choice"] == "Custom" or vars["Scoring_choice"] == "Custom":
+    if vars["conversion_choice"] == "Custom" or vars["dock_choice"] == "Custom" or vars["scoring_choice"] == "Custom":
         vars = handle_Custom_dock_and_Conversion_Scoring_options(vars)
 
     # Mutation Settings
-    if vars['Rxn_library'] == "Custom":
+    if vars['rxn_library'] == "Custom":
         if vars['rxn_library_file'] == "":
             raise ValueError("TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY THE PATH \
-                            TO THE REACTION LIBRARY USING INPUT PARAMETER Rxn_library") 
+                            TO THE REACTION LIBRARY USING INPUT PARAMETER rxn_library") 
         else:
             if os.path.exists(vars['rxn_library_file']) == False:
                 raise ValueError("TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY THE PATH \
-                                TO THE REACTION LIBRARY USING INPUT PARAMETER Rxn_library") 
+                                TO THE REACTION LIBRARY USING INPUT PARAMETER rxn_library") 
 
         if vars['function_group_library'] == "":
                 raise ValueError("TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY THE PATH \
@@ -719,16 +718,16 @@ def load_in_commandline_parameters(argv):
     else:   # Using default settings
         if vars['rxn_library_file'] != "":
             raise ValueError("You have selected a Custom rxn_library_file group library but not chosen to use \
-                            the Custom option for Rxn_library. Please use either the provided Rxn_library options or \
-                            chose the Custom option for Rxn_library") 
+                            the Custom option for rxn_library. Please use either the provided rxn_library options or \
+                            chose the Custom option for rxn_library") 
         if vars['function_group_library'] != "":
             raise ValueError("You have selected a Custom function_group_library but not chosen to use \
-                            the Custom option for Rxn_library. Please use either the provided Rxn_library options or \
-                            chose the Custom option for Rxn_library") 
+                            the Custom option for rxn_library. Please use either the provided rxn_library options or \
+                            chose the Custom option for rxn_library") 
         if vars['complimentary_mol_directory'] != "":
             raise ValueError("You have selected a Custom complimentary_mol_directory but not chosen to use \
-                            the Custom option for Rxn_library. Please use either the provided Rxn_library options or \
-                            chose the Custom option for Rxn_library") 
+                            the Custom option for rxn_library. Please use either the provided rxn_library options or \
+                            chose the Custom option for rxn_library") 
     
     # Check if the Operating System is Windows, if so turn off Multiprocessing.
     if os.name == "nt" or os.name == "ce": # so it's running under windows. multiprocessing disabled
@@ -808,12 +807,12 @@ def load_in_commandline_parameters(argv):
 
 
     # CHECK THAT NN1/NN2 are using only traditional Vina Docking
-    if vars['Scoring_choice'] == "NN1" or  vars['Scoring_choice'] == "NN2":
-        if vars['Dock_choice'] != "VinaDocking":
+    if vars['scoring_choice'] == "NN1" or  vars['scoring_choice'] == "NN2":
+        if vars['dock_choice'] != "VinaDocking":
             printout = "\nNeural Networks 1 and 2 (NN1/NN2) are trained on data using PDBQT files converted by MGLTools \n"
             printout = printout + "and docked using Autodock Vina 1.1.2.\n"
             printout = printout + "Using conversion or docking software besides these will not work. \n"
-            printout = printout + "Please switch Dock_choice option to VinaDocking or deselect NN1/NN2 as the Scoring_choice.\n"
+            printout = printout + "Please switch dock_choice option to VinaDocking or deselect NN1/NN2 as the scoring_choice.\n"
             print(printout)
             raise Exception(printout)
 
@@ -940,10 +939,10 @@ def handle_Custom_inputs_if_argparsed(input_params):
     """
 
     # Custom Filters
-    if "Alternative_filter" not in input_params.keys():
-        input_params["Alternative_filter"] = None
-    if input_params["Alternative_filter"] != None and input_params["Alternative_filter"]!=[]:
-        orginal = input_params["Alternative_filter"][0]
+    if "alternative_filter" not in input_params.keys():
+        input_params["alternative_filter"] = None
+    if input_params["alternative_filter"] != None and input_params["alternative_filter"]!=[]:
+        orginal = input_params["alternative_filter"][0]
         orginal = orginal.replace("[[","[").replace("]]","]")
         new_Alternative_filter = []
         for Custom_filter in orginal.split("]"):
@@ -951,13 +950,13 @@ def handle_Custom_inputs_if_argparsed(input_params):
             Custom_filter = [x for x in Custom_filter.split(",") if x!=""]
             if len(Custom_filter) ==2:
                 new_Alternative_filter.append(Custom_filter)
-        input_params["Alternative_filter"] = new_Alternative_filter
+        input_params["alternative_filter"] = new_Alternative_filter
 
-    # Custom_Conversion_script
-    if "Custom_Conversion_script" not in input_params.keys():
-        input_params["Custom_Conversion_script"] = None
-    if input_params["Custom_Conversion_script"] not in [None, [],"","[]"]:
-        orginal = input_params["Custom_Conversion_script"][0]
+    # custom_conversion_script
+    if "custom_conversion_script" not in input_params.keys():
+        input_params["custom_conversion_script"] = None
+    if input_params["custom_conversion_script"] not in [None, [],"","[]"]:
+        orginal = input_params["custom_conversion_script"][0]
         orginal = orginal.replace("[[","[").replace("]]","]")
         new_Alternative_conversion = []
         for Custom_converter in orginal.split("]"):
@@ -965,13 +964,13 @@ def handle_Custom_inputs_if_argparsed(input_params):
             Custom_converter = [x for x in Custom_converter.split(",") if x!=""]
             if len(Custom_converter) ==2:
                 new_Alternative_conversion.append(Custom_converter)
-        input_params["Custom_Conversion_script"] = new_Alternative_conversion
+        input_params["custom_conversion_script"] = new_Alternative_conversion
 
-    # Custom_docking_script
-    if "Custom_docking_script" not in input_params.keys():
-        input_params["Custom_docking_script"] = None
-    if input_params["Custom_docking_script"] not in [None, [],"","[]"]:
-        orginal = input_params["Custom_docking_script"][0]
+    # custom_docking_script
+    if "custom_docking_script" not in input_params.keys():
+        input_params["custom_docking_script"] = None
+    if input_params["custom_docking_script"] not in [None, [],"","[]"]:
+        orginal = input_params["custom_docking_script"][0]
         orginal = orginal.replace("[[","[").replace("]]","]")
         new_Alternative_docking = []
         for Custom_docking in orginal.split("]"):
@@ -979,13 +978,13 @@ def handle_Custom_inputs_if_argparsed(input_params):
             Custom_docking = [x for x in Custom_docking.split(",") if x!=""]
             if len(Custom_docking) ==2:
                 new_Alternative_docking.append(Custom_docking)
-        input_params["Custom_docking_script"] = new_Alternative_docking
+        input_params["custom_docking_script"] = new_Alternative_docking
 
     # Custom_Scoring script
-    if "Custom_scoring_script" not in input_params.keys():
-        input_params["Custom_scoring_script"] = None
-    if input_params["Custom_scoring_script"] not in [None, [],"","[]"]:
-        orginal = input_params["Custom_scoring_script"][0]
+    if "custom_scoring_script" not in input_params.keys():
+        input_params["custom_scoring_script"] = None
+    if input_params["custom_scoring_script"] not in [None, [],"","[]"]:
+        orginal = input_params["custom_scoring_script"][0]
         orginal = orginal.replace("[[","[").replace("]]","]")
         new_Alternative_scoring = []
         for Custom_scoring in orginal.split("]"):
@@ -993,7 +992,7 @@ def handle_Custom_inputs_if_argparsed(input_params):
             Custom_scoring = [x for x in Custom_scoring.split(",") if x!=""]
             if len(Custom_scoring) ==2:
                 new_Alternative_scoring.append(Custom_scoring)
-        input_params["Custom_scoring_script"] = new_Alternative_scoring
+        input_params["custom_scoring_script"] = new_Alternative_scoring
 
         
     return input_params
@@ -1017,22 +1016,22 @@ def handle_Alternative_filters(vars, filter_list):
                                     that filter in the user vars["Alternative_filters"] as the name of that class and place
                                     that file in the same folder as the other filter classes.
     """
-    if vars["Alternative_filter"]!= None:
-        if type(vars["Alternative_filter"]) != list:
+    if vars["alternative_filter"]!= None:
+        if type(vars["alternative_filter"]) != list:
             raise Exception('If you want to add Custom filters to the filter child classes \
                             Must be a list of lists [[name_filter1, Path/to/name_filter1.py],[name_filter2, Path/to/name_filter2.py]]')
-        if type(vars["Alternative_filter"][0]) != list:
-            print(vars["Alternative_filter"])
+        if type(vars["alternative_filter"][0]) != list:
+            print(vars["alternative_filter"])
             raise Exception('If you want to add Custom filters to the filter child classes \
                             Must be a list of lists [[name_filter1, Path/to/name_filter1.py],[name_filter2, Path/to/name_filter2.py]]')
 
         
         full_children_dict = make_complete_children_dict("Filter")
         scripts_to_copy = []  
-        for Custom_class in vars["Alternative_filter"]:
+        for Custom_class in vars["alternative_filter"]:
             if Custom_class[0] not in full_children_dict.keys():
                 if os.path.exists(Custom_class[1])==False: # Check that the path to the original script exists.
-                    raise Exception('File can not be found for Alternative_filter {}\n If you want to add Custom filters to the filter child classes \
+                    raise Exception('File can not be found for alternative_filter {}\n If you want to add Custom filters to the filter child classes \
                                 Must be a list of lists [[name_filter1, Path/to/name_filter1.py],[name_filter2, Path/to/name_filter2.py]]'.format(Custom_class[1]))
 
                 new_file = os.sep.join([os.path.abspath(os.path.dirname(__file__)),"Operators","Filter","Filter_classes","FilterClasses",os.path.basename(Custom_class[0]) + ".py"]) 
@@ -1102,37 +1101,37 @@ def make_complete_children_dict(purpose_of_object):
 
     return child_dict
 #
-def handle_Custom_Conversion_script(vars):
+def handle_custom_conversion_script(vars):
     """
     This will handle Custom Conversion_scripts
 
     Input:
     :param dict vars: Dictionary of User variables
     Returns:
-    :returns: dict vars: Dictionary of User variables modified with the vars["Conversion_choice"] set to the new custom Conversion_choice
+    :returns: dict vars: Dictionary of User variables modified with the vars["conversion_choice"] set to the new custom conversion_choice
     :returns: bool need_restart: If True AutoGrow will need to be restarted after all other files are incorporated
     :returns: str printout: "" or a message to be print prior to being restarted if needed
     """
     need_restart=False
     printout = ""
-    if vars["Custom_Conversion_script"]!= None:
-        if type(vars["Custom_Conversion_script"]) != list:
-            print(vars["Custom_Conversion_script"])
+    if vars["custom_conversion_script"]!= None:
+        if type(vars["custom_conversion_script"]) != list:
+            print(vars["custom_conversion_script"])
             raise Exception('If you want to add Custom Conversion_script to the Conversion_script child classes \
                             Must be a list of [name_Conversion_script1, Path/to/name_Conversion_script1.py]')
-        if type(vars["Custom_Conversion_script"][0]) != str:
+        if type(vars["custom_conversion_script"][0]) != str:
             print("")
-            print(vars["Custom_Conversion_script"])
+            print(vars["custom_conversion_script"])
             print("")
             raise Exception('If you want to add Custom Conversion_script to the Conversion_script child classes \
                             Must be a list of [name_Conversion_script1, Path/to/name_Conversion_script1.py]')
 
         full_children_dict = make_complete_children_dict("ParentPDBQTConverter")
-        Custom_class = vars["Custom_Conversion_script"]
+        Custom_class = vars["custom_conversion_script"]
         if Custom_class[0] not in full_children_dict.keys():
             if os.path.exists(Custom_class[1])==False:
                 print(Custom_class)
-                raise Exception('File can not be found for Custom_Conversion_script {}\n If you want to add Custom Conversion_scripts to the Conversion_script child classes \
+                raise Exception('File can not be found for custom_conversion_script {}\n If you want to add Custom Conversion_scripts to the Conversion_script child classes \
                     Must be a list of [name_Conversion_script1, Path/to/name_Conversion_script1.py]'.format(Custom_class[1]))
             
             new_file = os.sep.join([os.path.abspath(os.path.dirname(__file__)),"Docking","Docking_Class","Docking_File_Conversion",os.path.basename(Custom_class[0]) + ".py"]) 
@@ -1161,40 +1160,40 @@ def handle_Custom_Conversion_script(vars):
 
                 need_restart = True
 
-        vars["Conversion_choice"] =  Custom_class[0]
+        vars["conversion_choice"] =  Custom_class[0]
     return vars, need_restart, printout
 # 
-def handle_Custom_Docking_script(vars):
+def handle_custom_docking_script(vars):
     """
     This will handle Custom Docking_scripts
 
     Input:
     :param dict vars: Dictionary of User variables
     Returns:
-    :returns: dict vars: Dictionary of User variables modified with the vars["Dock_choice"] set to the new custom Dock_choice
+    :returns: dict vars: Dictionary of User variables modified with the vars["dock_choice"] set to the new custom dock_choice
     :returns: bool need_restart: If True AutoGrow will need to be restarted after all other files are incorporated
     :returns: str printout: "" or a message to be print prior to being restarted if needed
     """
     need_restart=False
     printout = ""
-    if vars["Custom_docking_script"]!= None:
-        if type(vars["Custom_docking_script"]) != list:
-            print(vars["Custom_docking_script"])
+    if vars["custom_docking_script"]!= None:
+        if type(vars["custom_docking_script"]) != list:
+            print(vars["custom_docking_script"])
             raise Exception('If you want to add Custom Docking_script to the Docking_script child classes \
                             Must be a list of [name_Docking_script1, Path/to/name_Docking_script1.py]')
-        if type(vars["Custom_docking_script"][0]) != str:
+        if type(vars["custom_docking_script"][0]) != str:
             print("")
-            print(vars["Custom_docking_script"])
+            print(vars["custom_docking_script"])
             print("")
             raise Exception('If you want to add Custom Docking_script to the Docking_script child classes \
                             Must be a list of [name_Docking_script1, Path/to/name_Docking_script1.py]')
 
         full_children_dict = make_complete_children_dict("ParentDocking")
-        Custom_class = vars["Custom_docking_script"]
+        Custom_class = vars["custom_docking_script"]
         if Custom_class[0] not in full_children_dict.keys():
             if os.path.exists(Custom_class[1])==False:
                 print(Custom_class)
-                raise Exception('File can not be found for Custom_docking_script {}\n If you want to add Custom Docking_scripts to the Docking_script child classes \
+                raise Exception('File can not be found for custom_docking_script {}\n If you want to add Custom Docking_scripts to the Docking_script child classes \
                     Must be a list of [name_Docking_script1, Path/to/name_Docking_script1.py]'.format(Custom_class[1]))
 
             new_file = os.sep.join([os.path.abspath(os.path.dirname(__file__)),"Docking","Docking_Class","DockingClassChildren",os.path.basename(Custom_class[0]) + ".py"]) 
@@ -1224,40 +1223,40 @@ def handle_Custom_Docking_script(vars):
 
                 need_restart = True
 
-        vars["Dock_choice"] =  Custom_class[0]
+        vars["dock_choice"] =  Custom_class[0]
     return vars, need_restart, printout
 # 
-def handle_Custom_scoring_script(vars):
+def handle_custom_scoring_script(vars):
     """
     This will handle Custom Scoring_scripts
 
     Input:
     :param dict vars: Dictionary of User variables
     Returns:
-    :returns: dict vars: Dictionary of User variables modified with the vars["Dock_choice"] set to the new custom Dock_choice
+    :returns: dict vars: Dictionary of User variables modified with the vars["dock_choice"] set to the new custom dock_choice
     :returns: bool need_restart: If True AutoGrow will need to be restarted after all other files are incorporated
     :returns: str printout: "" or a message to be print prior to being restarted if needed
     """
     need_restart=False
     printout = ""
-    if vars["Custom_scoring_script"]!= None:
-        if type(vars["Custom_scoring_script"]) != list:
-            print(vars["Custom_scoring_script"])
+    if vars["custom_scoring_script"]!= None:
+        if type(vars["custom_scoring_script"]) != list:
+            print(vars["custom_scoring_script"])
             raise Exception('If you want to add Custom Scoring_script to the Scoring_script child classes \
                             Must be a list of [name_Scoring_script1, Path/to/name_Scoring_script1.py]')
-        if type(vars["Custom_scoring_script"][0]) != str:
+        if type(vars["custom_scoring_script"][0]) != str:
             print("")
-            print(vars["Custom_scoring_script"])
+            print(vars["custom_scoring_script"])
             print("")
             raise Exception('If you want to add Custom Scoring_script to the Scoring_script child classes \
                             Must be a list of [name_Scoring_script1, Path/to/name_Scoring_script1.py]')
 
         full_children_dict = make_complete_children_dict("ParentScoring")
-        Custom_class = vars["Custom_scoring_script"]
+        Custom_class = vars["custom_scoring_script"]
         if Custom_class[0] not in full_children_dict.keys():
             if os.path.exists(Custom_class[1])==False:
                 print(Custom_class) 
-                raise Exception('File can not be found for Custom_scoring_script {}\n If you want to add Custom Scoring_scripts to the Scoring_script child classes \
+                raise Exception('File can not be found for custom_scoring_script {}\n If you want to add Custom Scoring_scripts to the Scoring_script child classes \
                     Must be a list of [name_Scoring_script1, Path/to/name_Scoring_script1.py]'.format(Custom_class[1]))
 
             new_file = os.sep.join([os.path.abspath(os.path.dirname(__file__)),"Docking","Scoring","Scoring_classes","Scoring_functions",os.path.basename(Custom_class[0]) + ".py"]) 
@@ -1271,11 +1270,11 @@ def handle_Custom_scoring_script(vars):
 
 
             else:
-                # Add copy the script to the Scoring_choices folder
-                print("copying Custom class file into the Scoring_choices folder:")
+                # Add copy the script to the scoring_choices folder
+                print("copying Custom class file into the scoring_choices folder:")
                 print("\t Copying : {}\n\t New file: {}\n".format(Custom_class[1], new_file))
                 print("AutoGrow will need to be restarted once the custom script has been copied to their required location.")
-                print("This is done once so if the script needs to be changed please either remove or replace the script within the Scoring_choices folder.")
+                print("This is done once so if the script needs to be changed please either remove or replace the script within the scoring_choices folder.")
                 print("Please ensure you unit test this code properly before incorprating.")
                 copyfile(Custom_class[1], new_file)
 
@@ -1287,7 +1286,7 @@ def handle_Custom_scoring_script(vars):
                 
                 need_restart = True
 
-        vars["Scoring_choice"] =  Custom_class[0]
+        vars["scoring_choice"] =  Custom_class[0]
     return vars, need_restart, printout
 # 
 def handle_Custom_dock_and_Conversion_Scoring_options(vars):
@@ -1301,18 +1300,18 @@ def handle_Custom_dock_and_Conversion_Scoring_options(vars):
     """
     master_need_restart = False
     master_printout = ""
-    if vars["Conversion_choice"] == "Custom": 
-        vars, need_restart, printout = handle_Custom_Conversion_script(vars)
+    if vars["conversion_choice"] == "Custom": 
+        vars, need_restart, printout = handle_custom_conversion_script(vars)
         if need_restart==True:
             master_need_restart = True
             master_printout = master_printout +printout
-    if vars["Dock_choice"] == "Custom":
-        vars, need_restart, printout = handle_Custom_Docking_script(vars)
+    if vars["dock_choice"] == "Custom":
+        vars, need_restart, printout = handle_custom_docking_script(vars)
         if need_restart==True:
             master_need_restart = True
             master_printout = master_printout +printout
-    if vars["Scoring_choice"] == "Custom":
-        vars, need_restart, printout = handle_Custom_scoring_script(vars)
+    if vars["scoring_choice"] == "Custom":
+        vars, need_restart, printout = handle_custom_scoring_script(vars)
         if need_restart==True:
             master_need_restart = True
             master_printout = master_printout +printout
@@ -1416,10 +1415,10 @@ def picked_filters(vars):
     else:
         vars['BRENK_Filter'] = False
        
-    if "Alternative_filter" in vars_keys:
+    if "alternative_filter" in vars_keys:
         filter_list = handle_Alternative_filters(vars, filter_list)
     else:
-        vars['Alternative_filter'] = None
+        vars['alternative_filter'] = None
         
     # if there is no user specified ligand filters but they haven't set
     # filters to None ---> set filter to default of Lipinski_Lenient.

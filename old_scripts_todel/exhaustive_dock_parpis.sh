@@ -55,9 +55,9 @@ do
         --num_generations 1 \
         --mgltools_directory $MGLTOOLS_HOME/ \
         --number_of_processors -1 \
-        --Dock_choice VinaDocking \
-        --Scoring_choice NN1 \
-        --Selector_Choice Rank_Selector \
+        --dock_choice VinaDocking \
+        --scoring_choice NN1 \
+        --selector_choice Rank_Selector \
         --docking_exhaustiveness 100 \
         --docking_num_modes 25 \
         --max_variants_per_compound 10 \

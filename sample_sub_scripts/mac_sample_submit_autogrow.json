@@ -19,7 +19,7 @@
     "num_generations": 2,
     "mgltools_directory": "/Library/MGLTools/1.5.6/",
     "number_of_processors": -1,
-    "Dock_choice": "QuickVina2Docking",
+    "dock_choice": "QuickVina2Docking",
     "scoring_function": "VINA",
     "max_variants_per_compound": 1,
     "start_a_new_run": true,

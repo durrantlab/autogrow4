@@ -16,16 +16,16 @@ from autogrow.Docking.Docking_Class.ParentPDBQTConverter import ParentPDBQTConve
 # from autogrow.Docking.Docking_Class.Docking_File_Conversion import Convert_with_MGLTOOLS, Convert_with_obabel
 
 
-def pick_docking_class_dict(Dock_choice):
+def pick_docking_class_dict(dock_choice):
     """
     This will retrieve all the names of every child class of the parent class ParentDocking
 
     
     Input:
-    :param list Dock_choice: List with the User specified docking choices
+    :param list dock_choice: List with the User specified docking choices
     
     Return:
-    :returns: object child_dict[Dock_choice]: the class for running the chosen docking method
+    :returns: object child_dict[dock_choice]: the class for running the chosen docking method
     """ 
     children = get_all_subclasses(ParentDocking)
 
@@ -34,19 +34,19 @@ def pick_docking_class_dict(Dock_choice):
         childName = child.__name__
         child_dict[childName] = child
 
-    return child_dict[Dock_choice]
+    return child_dict[dock_choice]
 #
 
-def pick_run_conversion_class_dict(Conversion_choice):
+def pick_run_conversion_class_dict(conversion_choice):
     """
     This will retrieve all the names of every child class of the parent class ParentDocking
 
     
     Input:
-    :param list Conversion_choice: List with the User specified docking choices
+    :param list conversion_choice: List with the User specified docking choices
     
     Return:
-    :returns: object child_dict[Conversion_choice]: the class for running the chosen docking method
+    :returns: object child_dict[conversion_choice]: the class for running the chosen docking method
     """ 
     children = get_all_subclasses(ParentPDBQTConverter)
 
@@ -55,7 +55,7 @@ def pick_run_conversion_class_dict(Conversion_choice):
         childName = child.__name__
         child_dict[childName] = child
     
-    return child_dict[Conversion_choice]
+    return child_dict[conversion_choice]
 #
 
 def run_docking_common(vars, current_gen_int, current_generation_dir, smile_file_new_gen):
@@ -76,8 +76,8 @@ def run_docking_common(vars, current_gen_int, current_generation_dir, smile_file
     # Get directory string of PDB files for Ligands
     current_generation_PDB_dir = current_generation_dir + "PDBs" + os.sep
 
-    Dock_choice = vars["Dock_choice"]
-    Conversion_choice = vars["Conversion_choice"]
+    dock_choice = vars["dock_choice"]
+    conversion_choice = vars["conversion_choice"]
     receptor = vars["filename_of_receptor"]
 
     # Use a temp vars dict so you don't put mpi multiprocess info through itself...
@@ -87,12 +87,12 @@ def run_docking_common(vars, current_gen_int, current_generation_dir, smile_file
             continue
         temp_vars[key]= vars[key]
 
-    file_conversion_class_object = pick_run_conversion_class_dict(Conversion_choice)
+    file_conversion_class_object = pick_run_conversion_class_dict(conversion_choice)
     file_conversion_class_object = file_conversion_class_object(temp_vars, receptor, test_boot=False)
 
 
     
-    dock_class = pick_docking_class_dict(Dock_choice)
+    dock_class = pick_docking_class_dict(dock_choice)
     dockingObject = dock_class(temp_vars, receptor, file_conversion_class_object,test_boot=False)
 
     if vars["docking_executable"] == None:

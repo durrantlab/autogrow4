@@ -35,17 +35,17 @@ class RankingSelectorTests(unittest.TestCase):
 
 
         self.str = '4'
-        self.vars = {'filename_of_receptor': "/home/jacob/Documents/autogrow4/cdc73/3v46.pdb", 'Dock_choice': 'QuickVina2Docking', \
+        self.vars = {'filename_of_receptor': "/home/jacob/Documents/autogrow4/cdc73/3v46.pdb", 'dock_choice': 'QuickVina2Docking', \
         'nn1_script': '/home/jacob/Documents/autogrow4/autogrow/Docking/Scoring/NNScore_exe/nnscore1/NNScore.py',\
-        'docking_executable': '/home/jacob/Documents/autogrow4/autogrow/Docking/Docking_Executables/QVina02/qvina02', 'size_y': 30.0, 'size_z': 30.0, 'Rxn_library': 'ClickChem', \
+        'docking_executable': '/home/jacob/Documents/autogrow4/autogrow/Docking/Docking_Executables/QVina02/qvina02', 'size_y': 30.0, 'size_z': 30.0, 'rxn_library': 'ClickChem', \
         'rxn_library_file': '', 'output_directory': '/home/jacob/Desktop/Outputfolder/Run_1/', \
         'num_generations': 2, 'top_mols_to_seed_next_generation': 1, 'scoring_function': 'VINA', \
         'root_output_folder': '/home/jacob/Desktop/Outputfolder/', 'diversity_seed_depreciation_per_gen': 1, \
         'size_x': 30.0, \
         'mgl_python': '/home/jacob/MGLTools-1.5.6/bin/pythonsh',\
         'nn2_script': '/home/jacob/Documents/autogrow4/autogrow/Docking/Scoring/NNScore_exe/nnscore2/NNScore2.py',\
-        'Custom_scoring_script': '', 'redock_advance_from_previous_gen': False, \
-        'Selector_Choice': 'Roulette_Selector', 'number_of_processors': -1}
+        'custom_scoring_script': '', 'redock_advance_from_previous_gen': False, \
+        'selector_choice': 'Roulette_Selector', 'number_of_processors': -1}
 
         self.smile_dict = {'Gen_0_Mutant_5_203493': ['COC1OC(CO)C(O)C(O)C1n1nnc(CCO)c1-c1ccc(-c2cccs2)s1', '(ZINC04530731+ZINC01529972)Gen_0_Mutant_5_203493'], 'Gen_0_Cross_452996': ['CC(=O)OCC(O)CN=[N+]=[N-]', '(ZINC44117885+ZINC34601304)Gen_0_Cross_452996'], 'ZINC13526729': ['[N-]=[N+]=NCC1OC(O)CC1O', 'ZINC13526729']}
 

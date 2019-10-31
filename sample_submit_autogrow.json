@@ -19,7 +19,7 @@
     "num_generations": 2,
     "mgltools_directory": "/home/jacob/MGLTools-1.5.6/",
     "number_of_processors": -1,
-    "Selector_Choice": "Rank_Selector",
+    "selector_choice": "Rank_Selector",
     "max_variants_per_compound": 1,
     "filter_source_compounds": true,
     "Lipinski_Lenient": true,
@@ -27,7 +27,7 @@
     "start_a_new_run": true,
     "use_docked_source_compounds":false,
     "generate_plot": "True",
-    "Rxn_library": "All_Rxns",
-    "rescore_Lig_Efficiency": true,
-    "Dock_choice": "VinaDocking"
+    "rxn_library": "All_Rxns",
+    "rescore_lig_efficiency": true,
+    "dock_choice": "VinaDocking"
 }

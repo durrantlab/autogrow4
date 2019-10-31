@@ -47,7 +47,7 @@ def run_scoring_common(vars, smile_file, folder_to_search):
     """
     
     # Retrieve a list of all files with the proper information within folder_to_search
-    scoring_choice = vars['Scoring_choice']
+    scoring_choice = vars['scoring_choice']
     scoring_class = pick_run_class_dict(scoring_choice)
 
     # Make a dictionary of all ligands which may have been docked. 
@@ -75,17 +75,17 @@ def run_scoring_common(vars, smile_file, folder_to_search):
 
     # Determine if the values from the Scoring function should be adjusted by the number of non-H atoms in the ligand
     # ie) rescoring_lig_efficiency
-    rescore_Lig_Efficiency = vars["rescore_Lig_Efficiency"]
+    rescore_lig_efficiency = vars["rescore_lig_efficiency"]
 
-    # create rescore_Lig_Efficiency object if needed
-    if rescore_Lig_Efficiency == True:
-        rescore_Lig_Efficiency_class = pick_run_class_dict("Lig_Efficiency")
+    # create rescore_lig_efficiency object if needed
+    if rescore_lig_efficiency == True:
+        rescore_lig_efficiency_class = pick_run_class_dict("Lig_Efficiency")
         # Initialize the scoring class
-        rescore_Lig_Efficiency_scoringObject = rescore_Lig_Efficiency_class(temp_vars, smiles_dict, test_boot=False)
+        rescore_lig_efficiency_scoringObject = rescore_lig_efficiency_class(temp_vars, smiles_dict, test_boot=False)
     else:
-        rescore_Lig_Efficiency_scoringObject = None
+        rescore_lig_efficiency_scoringObject = None
         
-    job_input_files_to_score = tuple([tuple([scoringObject, file_path, rescore_Lig_Efficiency, rescore_Lig_Efficiency_scoringObject]) for file_path in files_to_score])
+    job_input_files_to_score = tuple([tuple([scoringObject, file_path, rescore_lig_efficiency, rescore_lig_efficiency_scoringObject]) for file_path in files_to_score])
 
     # Format for list_of_raw_data must be [lig_id_shortname, any_details, fitness_score_to_use] 
     list_of_list_of_lig_data = vars['Parallelizer'].run(job_input_files_to_score, score_files_multithread)
@@ -212,14 +212,14 @@ def make_lig_score_dictionary(list_of_list_of_lig_data):
     return lig_dict
 #
 
-def score_files_multithread(scoringObject, file_path, rescore_Lig_Efficiency, Lig_Efficiency_scoringObject):
+def score_files_multithread(scoringObject, file_path, rescore_lig_efficiency, Lig_Efficiency_scoringObject):
     """
     Run the scoring of a single molecule.
 
     Input:
     :param object scoringObject: the class for running the chosen scoring method
     :param str file_path: the path to the file to be scored
-    :param bol rescore_Lig_Efficiency: if True than the final score will be adjusted to the ligand efficieny score, 
+    :param bol rescore_lig_efficiency: if True than the final score will be adjusted to the ligand efficieny score, 
         otherwise it will remain the output of the scoringObject
     :param object Lig_Efficiency_scoringObject: the class for running the rescoring by ligand efficieny
 
@@ -228,7 +228,7 @@ def score_files_multithread(scoringObject, file_path, rescore_Lig_Efficiency, Li
                             (ie. [SMILES, lig_id, lig_id_shortname, any_details, fitness_score_to_use] )
     """
     list_of_lig_data = scoringObject.run_scoring(file_path)
-    if rescore_Lig_Efficiency == True:
+    if rescore_lig_efficiency == True:
         
         list_of_lig_data = Lig_Efficiency_scoringObject.get_lig_efficiency_rescore_from_a_file(file_path, list_of_lig_data)
 
@@ -281,6 +281,6 @@ def make_dict_of_smiles(smile_file):
 
 if __name__ == "__main__":
     vars = {}
-    vars['Scoring_choice'] = 'VINA'
+    vars['scoring_choice'] = 'VINA'
     folder_to_search = os.sep + os.path.join("home", "jspiegel", "DataB", "jspiegel", "projects", "output_autogrow_testing", "Run_11", "generation_0", "PDBs") + os.sep
     run_scoring_common(vars, folder_to_search)

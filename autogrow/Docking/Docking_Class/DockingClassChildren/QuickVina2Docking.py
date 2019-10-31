@@ -63,7 +63,7 @@ class QuickVina2Docking(VinaDocking):
         Returns:
         :returns: str docking_executable: String for the docking executable file path
         """
-        # This must already be true if we are here vars["Dock_choice"] == "QuickVina2Docking"
+        # This must already be true if we are here vars["dock_choice"] == "QuickVina2Docking"
         
         if vars["docking_executable"] is None: 
             # get default docking_executable for QuickVina2

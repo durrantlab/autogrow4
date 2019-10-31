@@ -54,12 +54,12 @@ do
         --num_generations 5 \
         --mgltools_directory $MGLTOOLS_HOME/ \
         --number_of_processors -1 \
-        --Dock_choice QuickVina2Docking \
-        --Scoring_choice VINA \
+        --dock_choice QuickVina2Docking \
+        --scoring_choice VINA \
         --Lipinski_Lenient \
         --start_a_new_run \
-        --Rxn_library ClickChem \
-        --Selector_Choice Rank_Selector \
+        --rxn_library ClickChem \
+        --selector_choice Rank_Selector \
         --max_variants_per_compound 3 \
         --filter_source_compounds False \
         --redock_advance_from_previous_gen False \

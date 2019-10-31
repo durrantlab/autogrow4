@@ -126,7 +126,7 @@ def Main_Execute(vars):
             print('plotting')
             import autogrow.Plotting.generate_histogram as plot
             plot.generate_figures(vars)
-
+    print("HI")
     sys.stdout.flush()
         
 # 

@@ -17,8 +17,8 @@ time python RunAutogrow.py \
     --num_generations 2 \
     --mgltools_directory /home/jacob/MGLTools-1.5.6/ \
     --number_of_processors -1 \
-    --Dock_choice QuickVina2Docking \
-    --Scoring_choice VINA \
+    --dock_choice QuickVina2Docking \
+    --scoring_choice VINA \
     --max_variants_per_compound 3 \
     --start_a_new_run \
     --docking_executable /home/jacob/Downloads/qvina2.1
@@ -43,11 +43,11 @@ time python ~/projects/autogrow/RunAutogrow.py \
     --num_generations 1 \
     --mgltools_directory /home/jspiegel/DataB/spinel/programs/MGLTools-1.5.6/ \
     --number_of_processors -1 \
-    --Dock_choice QuickVina2Docking \
-    --Scoring_choice VINA \
+    --dock_choice QuickVina2Docking \
+    --scoring_choice VINA \
     --max_variants_per_compound 3 \
     --start_a_new_run \
-    --Rxn_library Robust_Rxns \
+    --rxn_library Robust_Rxns \
     > /home/jspiegel/projects/autogrow_testing/test_gypsum/output.txt 2> /home/jspiegel/projects/autogrow_testing/test_gypsum//error.txt
 
 # ON BOB PARP1
@@ -69,8 +69,8 @@ time python ~/projects/autogrow/RunAutogrow.py \
     --mgltools_directory /home/jspiegel/DataB/spinel/programs/MGLTools-1.5.6/ \
     --number_of_processors -1 \
     --Lipinski_Strict \
-    --Dock_choice QuickVina2Docking \
-    --Scoring_choice VINA \
+    --dock_choice QuickVina2Docking \
+    --scoring_choice VINA \
     --max_variants_per_compound 2 \
     --start_a_new_run \
     > output.txt 2> error.txt
@@ -108,8 +108,8 @@ time python RunAutogrow.py \
     --Ghose \
     --Lipinski_Strict \
     --Mozziconacci \
-    --Dock_choice QuickVina2Docking \
-    --Scoring_choice VINA \
+    --dock_choice QuickVina2Docking \
+    --scoring_choice VINA \
     --max_variants_per_compound 1 5 \
     > output.txt 2> error.txt
 
@@ -135,7 +135,7 @@ time python RunAutogrow.py \
     --Ghose \
     --Lipinski_Strict \
     --Mozziconacci \
-    --Dock_choice QuickVina2Docking \
-    --Scoring_choice VINA \
+    --dock_choice QuickVina2Docking \
+    --scoring_choice VINA \
     --max_variants_per_compound 5 \
     > output.txt 2> error.txt

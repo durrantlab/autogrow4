@@ -59,9 +59,9 @@ do
         --num_generations 30 \
         --mgltools_directory $MGLTOOLS_HOME/ \
         --number_of_processors -1 \
-        --Dock_choice QuickVina2Docking \
-        --Scoring_choice VINA \
-        --Selector_Choice Rank_Selector \
+        --dock_choice QuickVina2Docking \
+        --scoring_choice VINA \
+        --selector_choice Rank_Selector \
         --Lipinski_Strict \
         --Ghose \
         --PAINS_Filter \
@@ -70,7 +70,7 @@ do
         --redock_advance_from_previous_gen False \
         --filter_source_compounds False \
         --use_docked_source_compounds True \
-        --Rxn_library All_Rxns \
+        --rxn_library All_Rxns \
         --generate_plot True \
         --multithread_mode mpi \
         >>  $outfolder_four"test_output_$i.txt" 2>>  $outfolder_four"test_error_$i.txt"

@@ -6,7 +6,7 @@ import sys
 
 import numpy as np
 import matplotlib as matplotlib
-matplotlib.use('agg')
+
 import matplotlib.pyplot as plt
 
 def get_usable_fomat(infile):
@@ -256,8 +256,8 @@ def run_plotter(vars, dict_of_averages, outfile):
     ax.set_ylim()
 
     receptor_name = os.path.basename(vars["filename_of_receptor"])
-    scoring_type = vars["Scoring_choice"]
-    docking_type = vars["Scoring_choice"]
+    scoring_type = vars["scoring_choice"]
+    docking_type = vars["scoring_choice"]
     num_lig = int(vars["number_of_mutants"]) +  int(vars["number_of_crossovers"]) +  int(vars["number_to_advance_from_previous_gen"])
     number_of_conf_per_lig = str(vars["max_variants_per_compound"])
 
@@ -270,7 +270,7 @@ def run_plotter(vars, dict_of_averages, outfile):
     ax.legend(loc='center left', bbox_to_anchor=(1, 0.274),fontsize='small')
     number_of_lig_per_gen = str(num_lig)
 
-    output = str(number_of_lig_per_gen) + " lig/gen" + "\n" + str(number_of_conf_per_lig) +" conformer/lig"
+    output = str(number_of_lig_per_gen) + " lig/gen" + "\n" + str(number_of_conf_per_lig) +" variants/lig"
     
     plt.text(5.4,-8.5, output, bbox=dict(facecolor="white", alpha=0.5),fontsize='small')
 
@@ -282,8 +282,6 @@ def run_plotter(vars, dict_of_averages, outfile):
 
     ax.set_ylim()
 
-
-
     if "VINA" in str(scoring_type):
         y_label = 'Docking Affinity (kcal/mol'
     else: 
@@ -294,6 +292,7 @@ def run_plotter(vars, dict_of_averages, outfile):
     plt.xlabel("Generation Number",fontweight='semibold')
 
     plt.savefig(outfile,bbox_inches='tight',dpi=1000)
+
 
 def print_data_table(infolder, folder_list):
     """
@@ -368,12 +367,3 @@ def generate_figures(vars):
     run_plotter(vars, dict_of_averages, outfile)
 
 
-
-
-if __name__ == "__main__":
-
-    vars= {'Selector_Choice': 'Rank_Selector', 'tourn_size': 0.1, 'top_mols_to_seed_next_generation_first_generation': 2, 'top_mols_to_seed_next_generation': 2, 'diversity_mols_to_seed_first_generation': 2, 'diversity_seed_depreciation_per_gen': 2, 'filter_source_compounds': True, 'num_generations': 2, 'number_of_crossovers_first_generation': 2, 'number_of_mutants_first_generation': 2, 'number_of_crossovers': 2, 'number_of_mutants': 2, 'number_to_advance_from_previous_gen': 2, 'number_to_advance_from_previous_gen_first_generation': 2, 'redock_advance_from_previous_gen': False, 'Lipinski_Strict': True, 'Lipinski_Lenient': False, 'Ghose': True, 'Mozziconacci': False, 'VandeWaterbeemd': False, 'PAINS_Filter': False, 'NIH_Filter': False, 'BRENK_Filter': False, 'No_Filters': False, 'Alternative_filter': None, 'Dock_choice': 'QuickVina2Docking', 'docking_executable': '/home/jacob/Documents/autogrow4/autogrow/Docking/Docking_Executables/QVina02/qvina2.1','docking_exhaustiveness': None, 'docking_num_modes': None, 'docking_timeout_limit': 200, 'scoring_function': 'VINA', 'rescore_Lig_Efficiency': False, 'Custom_scoring_script': '', 'max_variants_per_compound': 2, 'gypsum_thoroughness': 3, 'min_ph': 6.4, 'max_ph': 8.4, 'pka_precision': 1.0, 'gypsum_timeout_limit': 30, 'debug_mode': True, 'reduce_files_sizes': True, 'generate_plot': True, 'timeout_vs_gtimeout': 'timeout', 'filename_of_receptor': '/home/jacob/Documents/autogrow4/tutorial/3v46.pdb', 'center_x': 13.21, 'center_y': 11.84, 'center_z': 16.57, 'size_x': 30.0, 'size_y': 30.0, 'size_z': 30.0, 'source_compound_file': '/home/jacob/Documents/autogrow4/source_compounds/small_mol_library.smi', 'root_output_folder': '/home/jacob/Desktop/Outputfolder/', 'mgltools_directory': '/home/jacob/MGLTools-1.5.6/', 'Chosen_Ligand_Filters': ['Lipinski_Strict', 'Ghose'], 'output_directory': '/home/jacob/Desktop/Outputfolder/Run_7/'}
-
-    generate_figures(vars)
-
-    

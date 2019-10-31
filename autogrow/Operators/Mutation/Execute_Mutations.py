@@ -30,9 +30,9 @@ def make_mutants(vars, generation_num, number_of_processors, num_mutants_to_make
     :param list ligands_list: list of ligand/name pairs which are the order in which to be sampled
     :param list new_mutation_smiles_list: is the list of mutants made for the current generation being populated 
                                             but in a previous iteration of the loop in Operations
-    :param list rxn_library_variables: a list of user variables which define the Rxn_library, rxn_library_file,     
+    :param list rxn_library_variables: a list of user variables which define the rxn_library, rxn_library_file,     
                                     and function_group_library. 
-                                    ie. rxn_library_variables = [vars['Rxn_library'], vars['rxn_library_file'], vars['function_group_library']]
+                                    ie. rxn_library_variables = [vars['rxn_library'], vars['rxn_library_file'], vars['function_group_library']]
     returns:
     :returns: list new_ligands_list: ligand/name pairs OR returns None if sufficient number was not generated.
               None: bol    if mutations failed
