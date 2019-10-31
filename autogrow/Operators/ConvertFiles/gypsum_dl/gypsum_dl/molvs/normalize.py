@@ -97,7 +97,7 @@ class Normalizer(object):
     """
 
     def __init__(self, normalizations=NORMALIZATIONS, max_restarts=MAX_RESTARTS):
-        """Initialize a Normalizer with an optional Custom list of :class:`~molvs.normalize.Normalization` transforms.
+        """Initialize a Normalizer with an optional custom list of :class:`~molvs.normalize.Normalization` transforms.
 
         :param normalizations: A list of  :class:`~molvs.normalize.Normalization` transforms to apply.
         :param int max_restarts: The maximum number of times to attempt to apply the series of normalizations (default

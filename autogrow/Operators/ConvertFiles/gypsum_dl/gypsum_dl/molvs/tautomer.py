@@ -27,7 +27,7 @@ class TautomerTransform(object):
     Each TautomerTransform is defined by a SMARTS pattern where the transform involves moving a hydrogen from the first
     atom in the pattern to the last atom in the pattern. By default, alternating single and double bonds along the
     pattern are swapped accordingly to account for the hydrogen movement. If necessary, the transform can instead define
-    Custom resulting bond orders and also resulting atom charges.
+    custom resulting bond orders and also resulting atom charges.
     """
 
     BONDMAP = {'-': BondType.SINGLE, '=': BondType.DOUBLE, '#': BondType.TRIPLE, ':': BondType.AROMATIC}
@@ -39,8 +39,8 @@ class TautomerTransform(object):
         The SMARTS pattern match is applied to a Kekule form of the molecule, so use explicit single and double bonds
         rather than aromatic.
 
-        Specify Custom bonds as a string of ``-``, ``=``, ``#``, ``:`` for single, double, triple and aromatic bonds
-        respectively. Specify Custom charges as ``+``, ``0``, ``-`` for +1, 0 and -1 charges respectively.
+        Specify custom bonds as a string of ``-``, ``=``, ``#``, ``:`` for single, double, triple and aromatic bonds
+        respectively. Specify custom charges as ``+``, ``0``, ``-`` for +1, 0 and -1 charges respectively.
 
         :param string name: A name for this TautomerTransform.
         :param string smarts: SMARTS pattern to match for the transform.

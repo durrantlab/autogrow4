@@ -121,7 +121,7 @@ class DichloroethaneValidation(SmartsValidation):
 class FragmentValidation(Validation):
     """Logs if certain fragments are present.
 
-    Subclass and override the ``fragments`` class attribute to Customize the list of
+    Subclass and override the ``fragments`` class attribute to customize the list of
     :class:`FragmentPatterns <molvs.fragment.FragmentPattern>`.
     """
 
@@ -203,7 +203,7 @@ VALIDATIONS = (
 
 
 
-# Allow definition of MolSchema to set Custom validations on e.g.
+# Allow definition of MolSchema to set custom validations on e.g.
 
 # People can define a filterer
 # This has a series of validations, and the required output - e.g. no error or no warns?

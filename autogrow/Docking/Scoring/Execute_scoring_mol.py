@@ -58,7 +58,7 @@ def run_scoring_common(vars, smile_file, folder_to_search):
     # Use a temp vars dict so you don't put mpi multiprocess info through itself...
     temp_vars = {}
     for key in list(vars.keys()):
-        if key =="Parallelizer":
+        if key == "parallelizer":
             continue
         temp_vars[key]= vars[key]
     

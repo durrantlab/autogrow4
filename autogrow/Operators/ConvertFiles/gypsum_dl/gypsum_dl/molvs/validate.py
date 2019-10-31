@@ -106,7 +106,7 @@ def validate_smiles(smiles):
     """Return log messages for a given SMILES string using the default validations.
 
     Note: This is a convenience function for quickly validating a single SMILES string. It is more efficient to use
-    the :class:`~molvs.validate.Validator` class directly when working with many molecules or when Custom options
+    the :class:`~molvs.validate.Validator` class directly when working with many molecules or when custom options
     are needed.
 
     :param string smiles: The SMILES for the molecule.

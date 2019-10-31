@@ -136,7 +136,7 @@ class FragmentRemover(object):
     """A class for filtering out fragments using SMARTS patterns."""
 
     def __init__(self, fragments=REMOVE_FRAGMENTS, leave_last=LEAVE_LAST):
-        """Initialize a FragmentRemover with an optional Custom list of :class:`~molvs.fragment.FragmentPattern`.
+        """Initialize a FragmentRemover with an optional custom list of :class:`~molvs.fragment.FragmentPattern`.
 
         Setting leave_last to True will ensure at least one fragment is left in the molecule, even if it is matched by a
         :class:`~molvs.fragment.FragmentPattern`. Fragments are removed in the order specified in the list, so place

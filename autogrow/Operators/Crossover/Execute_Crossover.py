@@ -187,7 +187,7 @@ def make_Crossovers(vars, generation_num, number_of_processors, num_crossovers_t
     # Use a temp vars dict so you don't put mpi multiprocess info through itself...
     temp_vars = {}
     for key in list(vars.keys()):
-        if key =="Parallelizer":
+        if key == "parallelizer":
             continue
         temp_vars[key]= vars[key]
 

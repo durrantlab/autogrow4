@@ -45,7 +45,7 @@ class Standardizer(object):
                  charge_corrections=CHARGE_CORRECTIONS, tautomer_transforms=TAUTOMER_TRANSFORMS,
                  tautomer_scores=TAUTOMER_SCORES, max_restarts=MAX_RESTARTS, max_tautomers=MAX_TAUTOMERS,
                  prefer_organic=PREFER_ORGANIC):
-        """Initialize a Standardizer with optional Custom parameters.
+        """Initialize a Standardizer with optional custom parameters.
 
         :param normalizations: A list of Normalizations to apply (default: :data:`~molvs.normalize.NORMALIZATIONS`).
         :param acid_base_pairs: A list of AcidBasePairs for competitive reionization (default:
@@ -290,7 +290,7 @@ def standardize_smiles(smiles):
     """Return a standardized canonical SMILES string given a SMILES string.
 
     Note: This is a convenience function for quickly standardizing a single SMILES string. It is more efficient to use
-    the :class:`~molvs.standardize.Standardizer` class directly when working with many molecules or when Custom options
+    the :class:`~molvs.standardize.Standardizer` class directly when working with many molecules or when custom options
     are needed.
 
     :param string smiles: The SMILES for the molecule.
@@ -322,7 +322,7 @@ def canonicalize_tautomer_smiles(smiles):
 
     Note: This is a convenience function for quickly standardizing and finding the canonical tautomer for a single
     SMILES string. It is more efficient to use the :class:`~molvs.standardize.Standardizer` class directly when working
-    with many molecules or when Custom options are needed.
+    with many molecules or when custom options are needed.
 
     :param string smiles: The SMILES for the molecule.
     :returns: The SMILES for the standardize canonical tautomer.
