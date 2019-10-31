@@ -35,7 +35,7 @@ do
     start_time="$(date +%s%N | cut -b1-13)"
     date +%s%N | cut -b1-13
 
-    /ihome/jdurrant/jspiegel/miniconda3/envs/py37/bin /bgfs/jdurrant/jspiegel/autogrow4/RunAutogrow.py \
+    /ihome/jdurrant/jspiegel/miniconda3/envs/py37/bin/python /bgfs/jdurrant/jspiegel/autogrow4/RunAutogrow.py \
         --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow4/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
         --center_x -70.76 --center_y  21.82 --center_z 28.33 \
         --size_x 25.0 --size_y 16.0 --size_z 25.0 \
@@ -47,7 +47,7 @@ do
         --dock_choice QuickVina2Docking \
         --scoring_choice VINA \
         --selector_choice Rank_Selector \
-        --python_path /ihome/jdurrant/jspiegel/miniconda3/envs/py37/bin \
+        --python_path /ihome/jdurrant/jspiegel/miniconda3/envs/py37/bin/python \
         --No_Filters \
         --reduce_files_sizes True \
         --max_variants_per_compound 25 \
