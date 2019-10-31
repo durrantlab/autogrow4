@@ -3,7 +3,9 @@
 #SBATCH --output=/bgfs/jdurrant/jspiegel/docked_source/exhautive_dock_MW_100.txt
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=12
-#SBATCH --time=20:59:00
+#SBATCH --time=20:59:00                                                  
+#SBATCH --cluster=invest                                                        
+#SBATCH --partition=jdurrant   
 
 ## Define the environment
 #py2.7 settings 
