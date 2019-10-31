@@ -183,6 +183,7 @@ def populate_generation(vars, generation_num):
 
         raise Exception(printout)
     sys.stdout.flush()
+
     # save chosen_mol_to_pass_through_list
     save_ligand_list(vars['output_directory'], generation_num, chosen_mol_to_pass_through_list, "Chosen_To_Advance")
 
@@ -657,13 +658,15 @@ def make_pass_through_list(vars, smiles_from_previous_gen_list, num_to_advance_f
         printout = printout +"\n len(smiles_from_previous_gen_list): {} ; num_to_advance_from_previous_gen: {}".format(len(smiles_from_previous_gen_list),num_to_advance_from_previous_gen)
         return printout
 
-    smiles_from_previous_gen = [x for x in smiles_from_previous_gen_list if x!=None]
-    
-    # Run Filters on ligand list
-    ligands_which_passed_filters = Filter.run_filter(vars, smiles_from_previous_gen_list) 
-    # Remove Nones:
-    ligands_which_passed_filters = [x for x in ligands_which_passed_filters if x!=None]
+    smiles_from_previous_gen = [x for x in smiles_from_previous_gen_list if type(x)==list]
 
+    if generation_num == 0 and vars["filter_source_compounds"] == True:
+        # Run Filters on ligand list
+        ligands_which_passed_filters = Filter.run_filter(vars, smiles_from_previous_gen_list) 
+        # Remove Nones:
+        ligands_which_passed_filters = [x for x in ligands_which_passed_filters if x!=None]
+    else:
+        ligands_which_passed_filters = [x for x in smiles_from_previous_gen_list if x!=None]
     # If not enough of your previous generation sanitize to make the list 
     # Return None and trigger an Error    
     if  generation_num!=0 and len(ligands_which_passed_filters) < num_to_advance_from_previous_gen:
@@ -673,7 +676,6 @@ def make_pass_through_list(vars, smiles_from_previous_gen_list, num_to_advance_f
     # Save seed list of all ligands which passed which will serve as the seed list.
     save_ligand_list(vars['output_directory'], generation_num, ligands_which_passed_filters, "Previous_Gen_To_Advance_Seed_List")
     
-        
     #check if ligands_which_passed_filters has docking scores
     has_dock_score = False
     try:
