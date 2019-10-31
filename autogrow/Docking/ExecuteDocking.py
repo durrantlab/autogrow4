@@ -96,7 +96,7 @@ def run_docking_common(vars, current_gen_int, current_generation_dir, smile_file
     dockingObject = dock_class(temp_vars, receptor, file_conversion_class_object,test_boot=False)
 
     if vars["docking_executable"] == None:
-        docking_executable = dockingObject.get_docking_executable_file(vars)
+        docking_executable = dockingObject.get_docking_executable_file(temp_vars)
         vars["docking_executable"] = docking_executable
 
     # Find PDB's
