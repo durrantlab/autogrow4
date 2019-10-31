@@ -1,6 +1,6 @@
 #!/bin/bash
-#SBATCH --job-name=exhautive_dock_MW_150
-#SBATCH --output=/bgfs/jdurrant/jspiegel/docked_source/exhautive_dock_MW_150.txt
+#SBATCH --job-name=exhautive_dock_MW_250
+#SBATCH --output=/bgfs/jdurrant/jspiegel/docked_source/exhautive_dock_MW_250.txt
 #SBATCH --time=23:55:00
 #SBATCH --nodes=10
 #SBATCH --ntasks-per-node=28
@@ -32,7 +32,7 @@ highest_folder="/bgfs/jdurrant/jspiegel/docked_source/"
 average_time=0
 for i in 1
 do
-    outfolder_four=$highest_folder"MW_150_to_200/"
+    outfolder_four=$highest_folder"MW_200_to_250/"
     mkdir $outfolder_four
     
     echo "START Autogrow 4.0 Run number $i  STABILITY RUN USING with Rank_QVINA2_3"
@@ -44,7 +44,7 @@ do
         --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow4/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
         --center_x -70.76 --center_y  21.82 --center_z 28.33 \
         --size_x 25.0 --size_y 16.0 --size_z 25.0 \
-        --source_compound_file /bgfs/jdurrant/jspiegel/autogrow4/source_compounds/Fragment_MW_150_to_200.smi \
+        --source_compound_file /bgfs/jdurrant/jspiegel/autogrow4/source_compounds/Fragment_MW_200_to_250.smi \
         --root_output_folder $outfolder_four \
         --num_generations 0 \
         --mgltools_directory $MGLTOOLS_HOME/ \
