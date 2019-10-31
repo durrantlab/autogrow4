@@ -23,8 +23,11 @@ module load gcc/8.2.0
 # module load python/anaconda3.7-2018.12_westpa
 source activate py37
 
+highest_folder="/bgfs/jdurrant/jspiegel/PARPi_leadopt/"
+mkdir $highest_folder
+
 # run precache
-/ihome/jdurrant/jspiegel/miniconda3/envs/py37/bin/python /bgfs/jdurrant/jspiegel/autogrow4/RunAutogrow.py -c
+~/miniconda3/envs/py37/bin/python /bgfs/jdurrant/jspiegel/autogrow4/RunAutogrow.py -c
 
 highest_folder="/bgfs/jdurrant/jspiegel/docked_source/"
 # mkdir $highest_folder
@@ -60,7 +63,7 @@ do
         --filter_source_compounds False \
         --use_docked_source_compounds True \
         --docking_exhaustiveness 50 \
-        --multithread_mode multithreading \
+        --multithread_mode mpi \
         >>  $outfolder_four"test_output_$i.txt" 2>>  $outfolder_four"test_error_$i.txt"
 
 done
