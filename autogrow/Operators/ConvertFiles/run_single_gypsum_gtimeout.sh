@@ -17,8 +17,9 @@
 executegypsum_path=$1
 json_path=$2
 timeout_limit=$3
+python_path=$4
 
-gtimeout $timeout_limit python $executegypsum_path -j $json_path
+gtimeout $timeout_limit $python_path $executegypsum_path -j $json_path
 
 # Test if it timed out. If it did it will append TIMEOUT to the end of the log file
 exit_status=$?

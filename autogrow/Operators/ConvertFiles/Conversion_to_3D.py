@@ -121,9 +121,21 @@ def convert_smi_to_sdfs_with_gypsum(vars, gen_smiles_file, smile_file_directory)
 
     timeout_option = vars["timeout_vs_gtimeout"]
     gypsum_timeout_limit = vars["gypsum_timeout_limit"]
+    if "python_path" not in vars.keys():
+        python_path = "python"
+    else:
+        if vars["python_path"] != "python" and os.path.exists(vars["python_path"]) == False:
+            printout = "python path provided was not found."
+            printout = printout  + "\n\t{}".format(vars["python_path"])
+            printout = printout  + "\nPlease either leave blank or provide proper \
+                path to python enviorment."
+            print(printout)
+            raise Exception(printout)
+        else:
+            python_path = vars["python_path"]
 
     # create a the job_inputs to run gypsum in multithread
-    job_input = tuple([tuple([gypsum_log_path, json_path, timeout_option, gypsum_timeout_limit]) for json_path in list_of_jsons])
+    job_input = tuple([tuple([gypsum_log_path, json_path, timeout_option, gypsum_timeout_limit, python_path]) for json_path in list_of_jsons])
         
     if vars["parallelizer"].return_mode() == "mpi":
         failed_to_convert = vars["parallelizer"].run(job_input, run_gypsum_multiprocessing_MPI)
@@ -316,7 +328,7 @@ def run_gypsum_multiprocessing_MPI(gypsum_log_path, json_path, timeout_option, g
         return None
 #
 
-def run_gypsum_multiprocessing(gypsum_log_path, json_path, timeout_option, gypsum_timeout_limit):
+def run_gypsum_multiprocessing(gypsum_log_path, json_path, timeout_option, gypsum_timeout_limit, python_path):
     """
     This converts the a single ligand from a SMILE to a 3D SDF using Gypsum. This is used within a multithread. 
     
@@ -329,7 +341,8 @@ def run_gypsum_multiprocessing(gypsum_log_path, json_path, timeout_option, gypsu
     :param str timeout_option: this is taken from vars["timeout_vs_gtimeout"]. This tells the Bash system whether
                 to use "timeout" or "gtimeout". gtimeout is used on most MacOS, while timeout is used on most Linux OS.
     :param int gypsum_timeout_limit: this is taken from vars["gypsum_timeout_limit"]. It determines the maximum amount of time to run Gypsum per ligand
-
+    :param str python_path: Taken from vars["python_path"]. It is the path to the python enviorment to use. If not provided it will defer to using just python
+    
     Returns:
     :returns: str lig_id: the name of the ligand if it failed or None if it successfully converted to 3D sdf.
     """   
@@ -347,7 +360,7 @@ def run_gypsum_multiprocessing(gypsum_log_path, json_path, timeout_option, gypsu
     # but we add an extra 30 second timeout limit wrapped around for security 
     # since we are using the os.system function anyway
     # timeout or gtimeout
-    command = timeout_option +" " + str(gypsum_timeout_limit +30) + " bash {} {} {} {} >> {} 2>> {}".format(run_single_gypsum_executable, gypsum_dl_py_executable, json_path, gypsum_timeout_limit, log_file, log_file)
+    command = timeout_option +" " + str(gypsum_timeout_limit +30) + " bash {} {} {} {} {} >> {} 2>> {}".format(run_single_gypsum_executable, gypsum_dl_py_executable, json_path, gypsum_timeout_limit, python_path, log_file, log_file)
     try:
         os.system(command)
     except:
