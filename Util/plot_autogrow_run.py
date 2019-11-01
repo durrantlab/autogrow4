@@ -3,6 +3,7 @@ import __future__
 import os
 import glob
 import sys
+import json
 
 import numpy as np
 import matplotlib as matplotlib
@@ -353,34 +354,19 @@ def print_data_table(infolder, folder_list):
 
     return dict_of_averages
 
-def make_vars_dict(autogrow_output_file):
-
-    vars={}
-
-    list_info = ["filename_of_receptor","scoring_function","number_of_mutants","number_of_crossovers","number_to_advance_from_previous_gen","max_variants_per_compound"] 
-    count_of_vars = 0
-    with open(autogrow_output_file, 'r') as f:
-        for line in f.readlines():
-            if len(vars.keys()) == len(list_info):
-                break
-            for i in list_info:
-                if i in line:
-                    item = line.split(", ")[-1]
-                    item = item.replace(")\n","")
-                    if '"' in item:
-
-                        new_item = item.replace('"',"")
-                    if "'" in item:
-
-                        new_item = item.replace("'","")
-                    else:
-                        try:
-                            new_item = int(item)
-                        except:
-                            new_item = str(item)
-                        
-                    vars[i] = new_item
+def make_vars_dict(autogrow_vars_json):
+    if os.path.exists(autogrow_vars_json) == False:
+        raise Exception("variable file could not be found. It should be the \
+            vars.json file written by AutoGrow in the output folder of the run.")
+    try:
+        with open(autogrow_vars_json, 'r') as f:
+            vars = json.load(f)
+    except:
+        raise Exception("variable file would not import. It should be the \
+            vars.json file written by AutoGrow in the output folder of the run.")
     return vars
+# 
+
 # Run Everything
 def run_a_single_folder(vars,infolder,outfile, all_folders_list):
     folder_list = []
@@ -392,21 +378,15 @@ def run_a_single_folder(vars,infolder,outfile, all_folders_list):
     folder_list.sort(key=lambda x: int(x.split('_')[1]))
     print(folder_list)
     dict_of_averages = print_data_table(infolder, folder_list)
+    print(vars)
+    print("\n")
+    print("\n")
     run_plotter(vars,dict_of_averages, outfile)
 
-def run_everything(infolder, autogrow_output_file,outfile):
+def run_everything(infolder, autogrow_vars_json,outfile):
 
-    vars = make_vars_dict(autogrow_output_file)
-    
-    for v in vars.keys():
-        if "num" in v or "max_var" in v:
-            if type(vars[v])!=int:
-                vars[v] = int(vars[v].split(" ")[1].strip())
+    vars = make_vars_dict(autogrow_vars_json)
 
-    print("")
-    print(infolder)
-    print("")
-     
     all_folders_list = [f for f in sorted(os.listdir(infolder)) if os.path.isdir(infolder+f)]
     right_level = False
     for i in all_folders_list:
@@ -441,28 +421,17 @@ if __name__ == "__main__":
     # infolder = "/$PATH/Autogrow_output_dir/Run_0/"
     
     try:
-        topfolder = sys.argv[1]
+        infolder = sys.argv[1]
     except:
         raise Exception("This script takes a folder which contains AutoGrow 4 \
              data and a folder to ouput a text file and histogram plot")
     try: 
-        autogrow_output_file = sys.argv[2]
+        autogrow_vars_json = sys.argv[2]
     except:
-        autogrow_output_file = infolder + "/test_output.txt"
+        autogrow_vars_json = infolder + "/vars.json"
 
-        
-        
-
-    topfolder = sys.argv[1]
-    for infolder in glob.glob(topfolder):
-        autogrow_output_file = infolder + os.sep + "test_output.txt"
-        outfile = infolder + os.sep + "data_histogram.png"
-        print(topfolder)
-        print(infolder)
-        print(outfile)
-
-        print(infolder)
-        run_everything(infolder, autogrow_output_file, outfile)
-        print("FINISHED {}".format(infolder))
+    outfile = infolder + os.sep + "data_histogram.png"
+    run_everything(infolder, autogrow_vars_json, outfile)
+    print("FINISHED {}".format(infolder))
 
     print("finished")

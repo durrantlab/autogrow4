@@ -8,6 +8,7 @@ import __future__
 
 import glob
 import os
+import copy
 import datetime
 import time
 import json
@@ -30,6 +31,47 @@ def program_info():
     
     return program_output
 #
+def save_vars_as_json(vars):
+    """
+    This function saves the vars dictionary as a json file. This can be used
+    later to track experiments and is necessary for several of the utility
+    scripts.
+    It saves all variables except the parallelizer class object.
+
+    It saves the file to the output_directory + "vars.json"
+        -If AutoGrow has been run multiple times for the same directory it 
+        will save the new vars file as append a number to the file name
+        starting with 2. The util scripts will only look at the original "vars.json"
+            ie) output_directory + "vars_2.json"
+
+    Input:
+    :param dict vars: dict of user variables which will govern how the programs runs
+    """
+    output_directory = vars["output_directory"]
+    
+    vars_file = output_directory + os.sep + "vars.json"
+    if os.path.exists(vars_file):
+        # vars.json already exist
+        # lets make the next file
+        path_exists = True
+        i = 2
+        while path_exists is True:
+            vars_file = "{}{}vars_{}.json".format(output_directory, os.sep, i)
+            if os.path.exists(vars_file):
+                i = i + 1
+            else:
+                path_exists = False
+
+    temp_vars = {}
+    for k in vars.keys():
+        if "parallelizer" in k or k=="Filter_Object_Dict": continue
+
+        temp_vars[k] = copy.deepcopy(vars[k])
+
+
+    with open(vars_file, 'w') as fp:
+        json.dump(temp_vars, fp)
+# 
 
 def multiprocess_handling(vars):
     """
@@ -86,17 +128,6 @@ def multiprocess_handling(vars):
                 
         vars["parallelizer"] = Parallelizer(vars["multithread_mode"], vars["number_of_processors"], True)
 
-
-
-    # For Debugging
-    # print("")
-    # print("###########################")
-    # print("number_of_processors  :  ", vars["number_of_processors"])
-    # print("chosen mode  :  ", vars["multithread_mode"])
-    # print("Parallel style:  ", vars["parallelizer"].return_mode())
-    # print("Number Nodes:  ", vars["parallelizer"].return_node())
-    # print("###########################")
-    # print("")
     return vars
 #
 
@@ -889,6 +920,16 @@ def load_in_commandline_parameters(argv):
             path to python enviorment."
         print(printout)
         raise Exception(printout)
+
+
+
+    # Save variables in vars dict to a .json file for later usage and reference
+    # It saves the file to the output_directory + "vars.json"
+    # -If AutoGrow has been run multiple times for the same directory it 
+    # will save the new vars file as append a number to the file name
+    # starting with 2. The util scripts will only look at the original "vars.json"
+    #     ie) output_directory + "vars_2.json"
+    save_vars_as_json(vars)
 
     return vars, printout
 # 

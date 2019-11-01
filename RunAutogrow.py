@@ -131,7 +131,7 @@ PARSER.add_argument('--multithread_mode', default='multithreading',
 
 # Genetic Algorithm Options
 PARSER.add_argument('--selector_choice', 
-    choices = ["Roulette_Selector","Rank_Selector", "Tournement_Selector"], default="Roulette_Selector",   
+    choices = ["Roulette_Selector","Rank_Selector", "Tournement_Selector"], default="Roulette_Selector", 
     help = 'This determines whether the fitness criteria are chosen by a Weighted Roulette, \
     Ranked, or Tournement style Selector. The Rank option is a non-redudant Elitist selector.\
     Roulette and Tournement chose without replacement and are stoichastic options. \

@@ -127,8 +127,7 @@ def Main_Execute(vars):
             import autogrow.Plotting.generate_histogram as plot
             plot.generate_figures(vars)
 
-    sys.stdout.flush()
-        
+    sys.stdout.flush()   
 # 
 
 def determine_current_gen(output_directory):
@@ -199,7 +198,6 @@ def determine_current_gen(output_directory):
                 printout = "Renaming folder: {} \
                             to: {}".format(folder_path,failed_folder_rename)
                 print(printout)
-
 #
 
 def find_last_generation(folder_path_string_no_gen):
@@ -270,7 +268,6 @@ def determine_if_gen_completed(gen_dir_path, gen_number):
         return False
 #
 
-
 def delete_temporary_files_and_folders(file_or_folder):
     """
     This deletes all temporary files.
@@ -300,5 +297,4 @@ def delete_temporary_files_and_folders(file_or_folder):
                 pass
     else:
         pass
-        
 #
