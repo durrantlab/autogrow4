@@ -2,7 +2,7 @@
 #SBATCH --job-name=exhautive_dock_MW_150
 #SBATCH --output=/bgfs/jdurrant/jspiegel/docked_source/exhautive_dock_MW_150.txt
 #SBATCH --time=23:55:00
-#SBATCH --nodes=10
+#SBATCH --nodes=25
 #SBATCH --ntasks-per-node=28
 #SBATCH --cluster=mpi
 #SBATCH --partition=opa
