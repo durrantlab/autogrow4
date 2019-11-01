@@ -32,7 +32,7 @@ highest_folder="/bgfs/jdurrant/jspiegel/docked_source/"
 average_time=0
 for i in 1
 do
-    outfolder_four=$highest_folder"MW_150_to_200/"
+    outfolder_four=$highest_folder"MW_100_to_150/"
     mkdir $outfolder_four
     
     echo "START Autogrow 4.0 Run number $i  STABILITY RUN USING with Rank_QVINA2_3"
