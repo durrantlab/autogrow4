@@ -67,7 +67,7 @@ do
         -number_of_crossovers 85 \
         -top_ones_to_advance_to_next_generation 70 \
         -num_generations 6 -max_seconds_per_generation 21600 \
-        -use_lipinski_filter TRUE -use_strict_lipinski_filter FALSE -use_ghose_filter TRUE \
+        -use_lipinski_filter TRUE -use_strict_lipinski_filter TRUE -use_ghose_filter TRUE \
         -scoring_function VINA -score_by_ligand_efficiency FALSE -maintain_core FALSE \
         -minimum_core_atoms_required 4 \
         -vina_executable /bgfs/jdurrant/jspiegel/autogrow4/autogrow/Docking/Docking_Executables/Vina/autodock_vina_1_1_2_linux_x86/bin/vina \
