@@ -156,7 +156,7 @@ then
             --mgltools_directory $MGLTOOLS_HOME/ \
             --number_of_processors -1 \
             --scoring_choice VINA \
-            --Lipinski_Lenient \
+            --Lipinski_Strict \
             --Ghose \
             --start_a_new_run \
             --rxn_library ClickChem \
@@ -232,7 +232,7 @@ then
             --mgltools_directory $MGLTOOLS_HOME/ \
             --number_of_processors -1 \
             --scoring_choice VINA \
-            --Lipinski_Lenient \
+            --Lipinski_Strict \
             --Ghose \
             --start_a_new_run \
             --rxn_library ClickChem \
@@ -311,7 +311,7 @@ then
             --mgltools_directory $MGLTOOLS_HOME/ \
             --number_of_processors -1 \
             --scoring_choice VINA \
-            --Lipinski_Lenient \
+            --Lipinski_Strict \
             --Ghose \
             --start_a_new_run \
             --rxn_library ClickChem \
@@ -392,7 +392,7 @@ then
             --mgltools_directory $MGLTOOLS_HOME/ \
             --number_of_processors -1 \
             --scoring_choice VINA \
-            --Lipinski_Lenient \
+            --Lipinski_Strict \
             --Ghose \
             --start_a_new_run \
             --rxn_library ClickChem \
@@ -468,7 +468,7 @@ then
             --mgltools_directory $MGLTOOLS_HOME/ \
             --number_of_processors -1 \
             --scoring_choice VINA \
-            --Lipinski_Lenient \
+            --Lipinski_Strict \
             --Ghose \
             --start_a_new_run \
             --rxn_library ClickChem \
@@ -547,7 +547,7 @@ then
             --mgltools_directory $MGLTOOLS_HOME/ \
             --number_of_processors -1 \
             --scoring_choice VINA \
-            --Lipinski_Lenient \
+            --Lipinski_Strict \
             --Ghose \
             --start_a_new_run \
             --rxn_library ClickChem \
