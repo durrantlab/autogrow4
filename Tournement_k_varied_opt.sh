@@ -30,10 +30,10 @@ mkdir $highest_folder
 mpirun -n 1 ~/miniconda3/envs/py37/bin/python -m mpi4py /bgfs/jdurrant/jspiegel/autogrow4/RunAutogrow.py -c
 
 average_time=0
-for i in 4
+for i in [1 2 4 6 8]
 do
     outfolder_k_dir=$highest_folder"k_00$i/"
-    mkdir $outfolder_k_dir
+    # mkdir $outfolder_k_dir
     outfolder_four=$highest_folder"Run_1/"
     mkdir $outfolder_four
     
@@ -50,15 +50,15 @@ do
         --root_output_folder $outfolder_four \
         --number_of_mutants_first_generation 250 \
         --number_of_crossovers_first_generation 250 \
-        --number_to_advance_from_previous_gen_first_generation 100 \
+        --number_to_advance_from_previous_gen_first_generation 50 \
         --number_of_mutants 250 \
         --number_of_crossovers 250 \
-        --number_to_advance_from_previous_gen 100 \
+        --number_to_advance_from_previous_gen 50 \
         --top_mols_to_seed_next_generation_first_generation 50 \
         --top_mols_to_seed_next_generation 50 \
         --diversity_mols_to_seed_first_generation 50 \
         --diversity_seed_depreciation_per_gen 0 \
-        --num_generations 15 \
+        --num_generations 10 \
         --mgltools_directory $MGLTOOLS_HOME/ \
         --number_of_processors -1 \
         --dock_choice QuickVina2Docking \
@@ -76,6 +76,7 @@ do
         --rxn_library All_Rxns \
         --generate_plot True \
         --multithread_mode mpi \
+        --start_a_new_run \
         >>  $outfolder_four"test_output_$i.txt" 2>>  $outfolder_four"test_error_$i.txt"
 
 done

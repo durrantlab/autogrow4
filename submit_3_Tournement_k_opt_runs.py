@@ -15,8 +15,8 @@ for i in [1,2,3]:
                 line = line.replace("_0\n","_{}\n".format(i))
             elif "#SBATCH --output=" in line:
                 line = line.replace("0.conf.out\n","{}.conf.out\n".format(i))
-            elif "for i in 1" in line:
-                line = "for i in {}\n".format(i)
+            # elif "for i in 1" in line:
+            #     line = "for i in {}\n".format(i)
             elif 'outfolder_four=$highest_folder"Run_1/"' in line:
                 line = 'outfolder_four=$highest_folder"Run_{}/"\n'.format(i)
             printout = printout + line
