@@ -168,6 +168,7 @@ then
             --debug_mode \
             --reduce_files_sizes False \
             --use_docked_source_compounds False \
+            --gypsum_timeout_limit 60 \
             >  $outfolder_four"test_output.txt" 2>  $outfolder_four"test_error.txt"
 
         end_time="$(date +%s%N | cut -b1-13)"
@@ -244,6 +245,7 @@ then
             --debug_mode \
             --reduce_files_sizes False \
             --use_docked_source_compounds False \
+            --gypsum_timeout_limit 60 \
             >  $outfolder_four"test_output.txt" 2>  $outfolder_four"test_error.txt"
 
         end_time="$(date +%s%N | cut -b1-13)"
@@ -323,6 +325,7 @@ then
             --debug_mode \
             --reduce_files_sizes False \
             --use_docked_source_compounds False \
+            --gypsum_timeout_limit 60 \
             >  $outfolder_four"test_output.txt" 2>  $outfolder_four"test_error.txt"
 
         end_time="$(date +%s%N | cut -b1-13)"
@@ -404,6 +407,7 @@ then
             --debug_mode \
             --reduce_files_sizes False \
             --use_docked_source_compounds False \
+            --gypsum_timeout_limit 60 \
             >  $outfolder_four"test_output.txt" 2>  $outfolder_four"test_error.txt"
 
         end_time="$(date +%s%N | cut -b1-13)"
@@ -480,6 +484,7 @@ then
             --debug_mode \
             --reduce_files_sizes False \
             --use_docked_source_compounds False \
+            --gypsum_timeout_limit 60 \
             >  $outfolder_four"test_output.txt" 2>  $outfolder_four"test_error.txt"
 
         end_time="$(date +%s%N | cut -b1-13)"
@@ -559,6 +564,7 @@ then
             --debug_mode \
             --reduce_files_sizes False \
             --use_docked_source_compounds False \
+            --gypsum_timeout_limit 60 \
             >  $outfolder_four"test_output.txt" 2>  $outfolder_four"test_error.txt"
 
         end_time="$(date +%s%N | cut -b1-13)"
