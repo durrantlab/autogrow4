@@ -2,7 +2,7 @@
 #SBATCH --job-name=Tournement_k_vary_Run_0
 #SBATCH --output=/bgfs/jdurrant/jspiegel/Luxury_Run/Tournement_k_vary/Tournement_k_vary_Run_0.conf.out
 #SBATCH --time=47:55:00
-#SBATCH --nodes=5
+#SBATCH --nodes=10
 #SBATCH --ntasks-per-node=28
 #SBATCH --cluster=mpi
 #SBATCH --partition=opa
@@ -30,7 +30,7 @@ mkdir $highest_folder
 mpirun -n 1 ~/miniconda3/envs/py37/bin/python -m mpi4py /bgfs/jdurrant/jspiegel/autogrow4/RunAutogrow.py -c
 
 average_time=0
-for i in [1 2 4 6 8]
+for i in 1 2 4 6 8
 do
     outfolder_k_dir=$highest_folder"k_00$i/"
     # mkdir $outfolder_k_dir
@@ -48,15 +48,15 @@ do
         --size_x 25.0 --size_y 16.0 --size_z 25.0 \
         --source_compound_file /bgfs/jdurrant/jspiegel/autogrow4/source_compounds/Fragment_MW_100_to_150_docked.smi \
         --root_output_folder $outfolder_four \
-        --number_of_mutants_first_generation 250 \
-        --number_of_crossovers_first_generation 250 \
-        --number_elitism_advance_from_previous_gen_first_generation 50 \
-        --number_of_mutants 250 \
-        --number_of_crossovers 250 \
-        --number_elitism_advance_from_previous_gen 50 \
-        --top_mols_to_seed_next_generation_first_generation 50 \
-        --top_mols_to_seed_next_generation 50 \
-        --diversity_mols_to_seed_first_generation 50 \
+        --number_of_mutants_first_generation 125 \
+        --number_of_crossovers_first_generation 125 \
+        --number_elitism_advance_from_previous_gen_first_generation 25 \
+        --number_of_mutants 125 \
+        --number_of_crossovers 125 \
+        --number_elitism_advance_from_previous_gen 25 \
+        --top_mols_to_seed_next_generation_first_generation 25 \
+        --top_mols_to_seed_next_generation 25 \
+        --diversity_mols_to_seed_first_generation 25 \
         --diversity_seed_depreciation_per_gen 0 \
         --num_generations 10 \
         --mgltools_directory $MGLTOOLS_HOME/ \
