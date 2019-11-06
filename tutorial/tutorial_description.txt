@@ -297,8 +297,8 @@ Running AutoGrow:
                     --number_of_mutants 50 \
                     --number_of_crossovers 50 \
                     --top_mols_to_seed_next_generation 50 \
-                    --number_to_advance_from_previous_gen 50 \
-                    --number_to_advance_from_previous_gen_first_generation 10 \
+                    --number_elitism_advance_from_previous_gen 50 \
+                    --number_elitism_advance_from_previous_gen_first_generation 10 \
                     --diversity_mols_to_seed_first_generation 10 \
                     --diversity_seed_depreciation_per_gen 10 \
                     --num_generations 5 \
@@ -311,7 +311,7 @@ Running AutoGrow:
                     --selector_choice Rank_Selector \
                     --dock_choice VinaDocking \
                     --max_variants_per_compound 5 \
-                    --redock_advance_from_previous_gen False \
+                    --redock_elite_from_previous_gen False \
                     --generate_plot True \
                     --reduce_files_sizes True \
                     --use_docked_source_compounds True \

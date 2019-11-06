@@ -148,8 +148,8 @@ then
             --number_of_mutants 50 \
             --number_of_crossovers 50 \
             --top_mols_to_seed_next_generation 50 \
-            --number_to_advance_from_previous_gen 50 \
-            --number_to_advance_from_previous_gen_first_generation 0 \
+            --number_elitism_advance_from_previous_gen 50 \
+            --number_elitism_advance_from_previous_gen_first_generation 0 \
             --diversity_mols_to_seed_first_generation 0 \
             --diversity_seed_depreciation_per_gen 0 \
             --num_generations 5 \
@@ -163,7 +163,7 @@ then
             --selector_choice Rank_Selector \
             --dock_choice VinaDocking \
             --max_variants_per_compound 1 \
-            --redock_advance_from_previous_gen False \
+            --redock_elite_from_previous_gen False \
             --generate_plot False \
             --debug_mode \
             --reduce_files_sizes False \
@@ -225,8 +225,8 @@ then
             --number_of_mutants 50 \
             --number_of_crossovers 50 \
             --top_mols_to_seed_next_generation 50 \
-            --number_to_advance_from_previous_gen 50 \
-            --number_to_advance_from_previous_gen_first_generation 0 \
+            --number_elitism_advance_from_previous_gen 50 \
+            --number_elitism_advance_from_previous_gen_first_generation 0 \
             --diversity_mols_to_seed_first_generation 0 \
             --diversity_seed_depreciation_per_gen 0 \
             --num_generations 5 \
@@ -240,7 +240,7 @@ then
             --selector_choice Rank_Selector \
             --dock_choice VinaDocking \
             --max_variants_per_compound 3 \
-            --redock_advance_from_previous_gen False \
+            --redock_elite_from_previous_gen False \
             --generate_plot False \
             --debug_mode \
             --reduce_files_sizes False \
@@ -305,8 +305,8 @@ then
             --number_of_mutants 50 \
             --number_of_crossovers 50 \
             --top_mols_to_seed_next_generation 50 \
-            --number_to_advance_from_previous_gen 50 \
-            --number_to_advance_from_previous_gen_first_generation 0 \
+            --number_elitism_advance_from_previous_gen 50 \
+            --number_elitism_advance_from_previous_gen_first_generation 0 \
             --diversity_mols_to_seed_first_generation 0 \
             --diversity_seed_depreciation_per_gen 0 \
             --num_generations 5 \
@@ -320,7 +320,7 @@ then
             --selector_choice Rank_Selector \
             --dock_choice VinaDocking \
             --max_variants_per_compound 5 \
-            --redock_advance_from_previous_gen False \
+            --redock_elite_from_previous_gen False \
             --generate_plot False \
             --debug_mode \
             --reduce_files_sizes False \
@@ -387,8 +387,8 @@ then
             --number_of_mutants 50 \
             --number_of_crossovers 50 \
             --top_mols_to_seed_next_generation 50 \
-            --number_to_advance_from_previous_gen 50 \
-            --number_to_advance_from_previous_gen_first_generation 0 \
+            --number_elitism_advance_from_previous_gen 50 \
+            --number_elitism_advance_from_previous_gen_first_generation 0 \
             --diversity_mols_to_seed_first_generation 0 \
             --diversity_seed_depreciation_per_gen 0 \
             --num_generations 5 \
@@ -402,7 +402,7 @@ then
             --selector_choice Rank_Selector \
             --dock_choice QuickVina2Docking \
             --max_variants_per_compound 1 \
-            --redock_advance_from_previous_gen False \
+            --redock_elite_from_previous_gen False \
             --generate_plot False \
             --debug_mode \
             --reduce_files_sizes False \
@@ -464,8 +464,8 @@ then
             --number_of_mutants 50 \
             --number_of_crossovers 50 \
             --top_mols_to_seed_next_generation 50 \
-            --number_to_advance_from_previous_gen 50 \
-            --number_to_advance_from_previous_gen_first_generation 0 \
+            --number_elitism_advance_from_previous_gen 50 \
+            --number_elitism_advance_from_previous_gen_first_generation 0 \
             --diversity_mols_to_seed_first_generation 0 \
             --diversity_seed_depreciation_per_gen 0 \
             --num_generations 5 \
@@ -479,7 +479,7 @@ then
             --selector_choice Rank_Selector \
             --dock_choice QuickVina2Docking \
             --max_variants_per_compound 3 \
-            --redock_advance_from_previous_gen False \
+            --redock_elite_from_previous_gen False \
             --generate_plot False \
             --debug_mode \
             --reduce_files_sizes False \
@@ -544,8 +544,8 @@ then
             --number_of_mutants 50 \
             --number_of_crossovers 50 \
             --top_mols_to_seed_next_generation 50 \
-            --number_to_advance_from_previous_gen 50 \
-            --number_to_advance_from_previous_gen_first_generation 0 \
+            --number_elitism_advance_from_previous_gen 50 \
+            --number_elitism_advance_from_previous_gen_first_generation 0 \
             --diversity_mols_to_seed_first_generation 0 \
             --diversity_seed_depreciation_per_gen 0 \
             --num_generations 5 \
@@ -559,7 +559,7 @@ then
             --selector_choice Rank_Selector \
             --dock_choice QuickVina2Docking \
             --max_variants_per_compound 5 \
-            --redock_advance_from_previous_gen False \
+            --redock_elite_from_previous_gen False \
             --generate_plot False \
             --debug_mode \
             --reduce_files_sizes False \

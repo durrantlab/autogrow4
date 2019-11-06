@@ -48,7 +48,7 @@ do
         --number_of_crossovers_first_generation 0 \
         --number_of_mutants 0 \
         --number_of_crossovers 0 \
-        --number_to_advance_from_previous_gen 6312 \
+        --number_elitism_advance_from_previous_gen 6312 \
         --top_mols_to_seed_next_generation 6312 \
         --diversity_mols_to_seed_first_generation 0 \
         --diversity_seed_depreciation_per_gen 0 \
@@ -66,7 +66,7 @@ do
         --reduce_files_sizes True \
         --multithread_mode mpi \
         --generate_plot False \
-        --redock_advance_from_previous_gen True \
+        --redock_elite_from_previous_gen True \
         --filter_source_compounds False \
         >  $outfolder_four"test_output.txt" 2>  $outfolder_four"test_error.txt"
 

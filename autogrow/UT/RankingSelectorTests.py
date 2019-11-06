@@ -44,7 +44,7 @@ class RankingSelectorTests(unittest.TestCase):
         'size_x': 30.0, \
         'mgl_python': '/home/jacob/MGLTools-1.5.6/bin/pythonsh',\
         'nn2_script': '/home/jacob/Documents/autogrow4/autogrow/Docking/Scoring/NNScore_exe/nnscore2/NNScore2.py',\
-        'custom_scoring_script': '', 'redock_advance_from_previous_gen': False, \
+        'custom_scoring_script': '', 'redock_elite_from_previous_gen': False, \
         'selector_choice': 'Roulette_Selector', 'number_of_processors': -1}
 
         self.smile_dict = {'Gen_0_Mutant_5_203493': ['COC1OC(CO)C(O)C(O)C1n1nnc(CCO)c1-c1ccc(-c2cccs2)s1', '(ZINC04530731+ZINC01529972)Gen_0_Mutant_5_203493'], 'Gen_0_Cross_452996': ['CC(=O)OCC(O)CN=[N+]=[N-]', '(ZINC44117885+ZINC34601304)Gen_0_Cross_452996'], 'ZINC13526729': ['[N-]=[N+]=NCC1OC(O)CC1O', 'ZINC13526729']}

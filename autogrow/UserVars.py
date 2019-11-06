@@ -232,13 +232,13 @@ def check_for_required_inputs(input_params):
         else:
             input_params["number_of_mutants_first_generation"] = input_params["number_of_mutants"]
 
-    if "number_to_advance_from_previous_gen_first_generation" not in list(input_params.keys()):
-        if "number_to_advance_from_previous_gen" not in list(input_params.keys()):
+    if "number_elitism_advance_from_previous_gen_first_generation" not in list(input_params.keys()):
+        if "number_elitism_advance_from_previous_gen" not in list(input_params.keys()):
             # Use defined default of 10
-            input_params["number_to_advance_from_previous_gen"] = 10
-            input_params["number_to_advance_from_previous_gen_first_generation"] = 10
+            input_params["number_elitism_advance_from_previous_gen"] = 10
+            input_params["number_elitism_advance_from_previous_gen_first_generation"] = 10
         else:
-            input_params["number_to_advance_from_previous_gen_first_generation"] = input_params["number_to_advance_from_previous_gen"]
+            input_params["number_elitism_advance_from_previous_gen_first_generation"] = input_params["number_elitism_advance_from_previous_gen"]
 
     #######################################
     # Check that all required files exist #
@@ -507,9 +507,9 @@ def define_defaults():
     vars["number_of_mutants_first_generation"] = 10
     vars["number_of_crossovers"] = 10
     vars["number_of_mutants"] = 10
-    vars["number_to_advance_from_previous_gen"] = 10
-    vars["number_to_advance_from_previous_gen_first_generation"] = 10
-    vars["redock_advance_from_previous_gen"] = False
+    vars["number_elitism_advance_from_previous_gen"] = 10
+    vars["number_elitism_advance_from_previous_gen_first_generation"] = 10
+    vars["redock_elite_from_previous_gen"] = False
     
     # Filters
     vars["Lipinski_Strict"] = False

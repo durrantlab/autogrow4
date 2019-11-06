@@ -258,7 +258,7 @@ def run_plotter(vars, dict_of_averages, outfile):
     receptor_name = os.path.basename(vars["filename_of_receptor"])
     scoring_type = vars["scoring_choice"]
     docking_type = vars["scoring_choice"]
-    num_lig = int(vars["number_of_mutants"]) +  int(vars["number_of_crossovers"]) +  int(vars["number_to_advance_from_previous_gen"])
+    num_lig = int(vars["number_of_mutants"]) +  int(vars["number_of_crossovers"]) +  int(vars["number_elitism_advance_from_previous_gen"])
     number_of_conf_per_lig = str(vars["max_variants_per_compound"])
 
 

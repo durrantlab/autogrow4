@@ -47,7 +47,7 @@ do
         --number_of_crossovers_first_generation 60 \
         --number_of_mutants 60 \
         --number_of_crossovers 60 \
-        --number_to_advance_from_previous_gen 60 \
+        --number_elitism_advance_from_previous_gen 60 \
         --top_mols_to_seed_next_generation 30 \
         --diversity_mols_to_seed_first_generation 30 \
         --diversity_seed_depreciation_per_gen 0 \
@@ -62,7 +62,7 @@ do
         --selector_choice Rank_Selector \
         --max_variants_per_compound 3 \
         --filter_source_compounds False \
-        --redock_advance_from_previous_gen False \
+        --redock_elite_from_previous_gen False \
         --generate_plot False \
         >  $outfolder_four"test_output.txt" 2>  $outfolder_four"test_error.txt"
 

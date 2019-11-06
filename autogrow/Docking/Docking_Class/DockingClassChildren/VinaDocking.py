@@ -370,14 +370,14 @@ class VinaDocking(ParentDocking):
         smiles_list = Scoring.run_scoring_common(vars, smile_file, folder_with_pdbqts)
 
         # Before ranking these we need to handle Pass-Through ligands from the last generation
-        # If it's current_gen_int==1 or if vars['redock_advance_from_previous_gen']==True
+        # If it's current_gen_int==1 or if vars['redock_elite_from_previous_gen']==True
         #       -Both of these states dock all ligands from the last generation so all of the pass-through lig
         #           are already in the PDB's folder thus they should be accounted for in smiles_list 
-        # If vars['redock_advance_from_previous_gen']==False and current_gen_int != 1
+        # If vars['redock_elite_from_previous_gen']==False and current_gen_int != 1
         #       - We need to append the scores form the last gen to smiles_list
         
         # Only add these when we haven't already redocked the ligand
-        if self.vars['redock_advance_from_previous_gen'] == False and current_gen_int != 0:
+        if self.vars['redock_elite_from_previous_gen'] == False and current_gen_int != 0:
             # Go to previous generation folder
             prev_gen_num = str(current_gen_int - 1)
             run_folder = self.vars['output_directory']
@@ -398,7 +398,7 @@ class VinaDocking(ParentDocking):
                 prev_gen_data_list = Ranking.get_usable_fomat(ranked_smi_file_prev_gen)
 
                 # Get the list of pass through ligands
-                current_gen_pass_through_smi = current_generation_dir + "SeedFolder{}Chosen_To_Advance_Gen_{}.smi".format(os.sep, str(current_gen_int))
+                current_gen_pass_through_smi = current_generation_dir + "SeedFolder{}Chosen_Elite_To_advance_Gen_{}.smi".format(os.sep, str(current_gen_int))
                 pass_through_list = Ranking.get_usable_fomat(current_gen_pass_through_smi)
 
                 # Convert lists to searchable Dictionaries.

@@ -50,10 +50,10 @@ do
         --root_output_folder $outfolder_four \
         --number_of_mutants_first_generation 250 \
         --number_of_crossovers_first_generation 250 \
-        --number_to_advance_from_previous_gen_first_generation 50 \
+        --number_elitism_advance_from_previous_gen_first_generation 50 \
         --number_of_mutants 250 \
         --number_of_crossovers 250 \
-        --number_to_advance_from_previous_gen 50 \
+        --number_elitism_advance_from_previous_gen 50 \
         --top_mols_to_seed_next_generation_first_generation 50 \
         --top_mols_to_seed_next_generation 50 \
         --diversity_mols_to_seed_first_generation 50 \
@@ -70,7 +70,7 @@ do
         --PAINS_Filter \
         --reduce_files_sizes True \
         --max_variants_per_compound 3 \
-        --redock_advance_from_previous_gen False \
+        --redock_elite_from_previous_gen False \
         --filter_source_compounds False \
         --use_docked_source_compounds True \
         --rxn_library All_Rxns \

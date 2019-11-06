@@ -10,7 +10,7 @@ time python RunAutogrow.py \
     --number_of_crossovers_first_generation 2 \
     --number_of_mutants 2  \
     --number_of_crossovers 2 \
-    --number_to_advance_from_previous_gen 1 \
+    --number_elitism_advance_from_previous_gen 1 \
     --top_mols_to_seed_next_generation 1 \
     --diversity_mols_to_seed_first_generation 1 \
     --diversity_seed_depreciation_per_gen 1 \
@@ -36,7 +36,7 @@ time python ~/projects/autogrow/RunAutogrow.py \
     --number_of_crossovers_first_generation 5 \
     --number_of_mutants 5 \
     --number_of_crossovers 5 \
-    --number_to_advance_from_previous_gen 5 \
+    --number_elitism_advance_from_previous_gen 5 \
     --top_mols_to_seed_next_generation 5  \
     --diversity_mols_to_seed_first_generation 5 \
     --diversity_seed_depreciation_per_gen 1 \
@@ -61,7 +61,7 @@ time python ~/projects/autogrow/RunAutogrow.py \
     --number_of_crossovers_first_generation 10 \
     --number_of_mutants 10 \
     --number_of_crossovers 10 \
-    --number_to_advance_from_previous_gen 10 \
+    --number_elitism_advance_from_previous_gen 10 \
     --top_mols_to_seed_next_generation 5 \
     --diversity_mols_to_seed_first_generation 5 \
     --diversity_seed_depreciation_per_gen 5 \
@@ -98,7 +98,7 @@ time python RunAutogrow.py \
     --number_of_crossovers_first_generation 750 \
     --number_of_mutants 750 \
     --number_of_crossovers 750 \
-    --number_to_advance_from_previous_gen 750 \
+    --number_elitism_advance_from_previous_gen 750 \
     --top_mols_to_seed_next_generation 500\
     --diversity_mols_to_seed_first_generation 500 \
     --diversity_seed_depreciation_per_gen 25\
@@ -125,7 +125,7 @@ time python RunAutogrow.py \
     --number_of_crossovers_first_generation 10 \
     --number_of_mutants 10 \
     --number_of_crossovers 10 \
-    --number_to_advance_from_previous_gen 10 \
+    --number_elitism_advance_from_previous_gen 10 \
     --top_mols_to_seed_next_generation 10 \
     --diversity_mols_to_seed_first_generation 10 \
     --diversity_seed_depreciation_per_gen 2 \

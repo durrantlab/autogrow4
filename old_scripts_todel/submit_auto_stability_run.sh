@@ -109,7 +109,7 @@ do
         --number_of_crossovers_first_generation 100 \
         --number_of_mutants 100 \
         --number_of_crossovers 100 \
-        --number_to_advance_from_previous_gen 0 \
+        --number_elitism_advance_from_previous_gen 0 \
         --top_mols_to_seed_next_generation 100 \
         --diversity_mols_to_seed_first_generation 100 \
         --diversity_seed_depreciation_per_gen 0 \

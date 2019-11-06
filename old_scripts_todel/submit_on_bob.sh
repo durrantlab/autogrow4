@@ -8,7 +8,7 @@ nohup time python RunAutogrow.py \
     --number_of_crossovers_first_generation 50 \
     --number_of_mutants 50 \
     --number_of_crossovers 50 \
-    --number_to_advance_from_previous_gen 50 \
+    --number_elitism_advance_from_previous_gen 50 \
     --top_mols_to_seed_next_generation 50 \
     --diversity_mols_to_seed_first_generation 50 \
     --diversity_seed_depreciation_per_gen 10 \

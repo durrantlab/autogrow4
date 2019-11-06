@@ -45,3 +45,17 @@ Several modifications included:
     The modern version of still reacts aromatic and acyl halides but not vinyl halides
         -vinyl halides are not good for substitution reactions
 
+
+
+
+Additional Notes:
+1) Acid Anhydrides were restricted to non-cyclic Anhydrides:
+    Cylcic anhydrides can react (ex silico) in these reactions but are not compatible with the current 
+    version of the reaction SMARTS. This is because these reactions would break rings but not break 
+    the molecule graph in the reaction. Cyclic breaks are difficult in SMARTS reaction notation.
+    
+    This is not a modifications as AutoClickChem and AutoGrow 3 also excluded cyclic acid anhydrides
+    from these reactions. 
+
+
+    

@@ -12,7 +12,7 @@
     "number_of_crossovers_first_generation": 500,
     "number_of_mutants": 500,
     "number_of_crossovers": 500,
-    "number_to_advance_from_previous_gen": 500,
+    "number_elitism_advance_from_previous_gen": 500,
     "top_mols_to_seed_next_generation": 500,
     "diversity_mols_to_seed_first_generation": 500,
     "diversity_seed_depreciation_per_gen": 25,

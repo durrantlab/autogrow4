@@ -12,7 +12,7 @@
     "number_of_crossovers_first_generation": 3,
     "number_of_mutants": 3,
     "number_of_crossovers": 3,
-    "number_to_advance_from_previous_gen": 3,
+    "number_elitism_advance_from_previous_gen": 3,
     "top_mols_to_seed_next_generation": 1,
     "diversity_mols_to_seed_first_generation": 3,
     "diversity_seed_depreciation_per_gen": 0,

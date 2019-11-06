@@ -164,24 +164,25 @@ PARSER.add_argument('--number_of_crossovers_first_generation', type = int,
 PARSER.add_argument('--number_of_mutants_first_generation', type = int,
     help = 'The number of ligands which will be created via mutation in \
     the first generation. If not defined it will default to number_of_mutants')
-PARSER.add_argument('--number_to_advance_from_previous_gen_first_generation', type = int,
-    help = 'The number of ligands which will advance from the previous generation, \
-    for the first generation, directly into the next generation. This is purely advancing \
-    based on Docking/Rescore fitness. This does not select for diversity. \
-    If not defined it will default to number_to_advance_from_previous_gen')
+PARSER.add_argument('--number_elitism_advance_from_previous_gen_first_generation', type = int,
+    help = 'The number of ligands chosen for elitism for the first generation \
+    These will advance from the previous generation directly into the next \
+    generation.  This is purely advancing based on Docking/Rescore fitness. \
+    This does not select for diversity. If not defined it will default to \
+    number_elitism_advance_from_previous_gen')
 PARSER.add_argument('--number_of_crossovers', type = int, default = 10,
     help = 'The number of ligands which will be created via crossover in each \
     generation besides the first')
 PARSER.add_argument('--number_of_mutants', type = int, default = 10,
     help = 'The number of ligands which will be created via mutation in each \
     generation besides the first.')
-PARSER.add_argument('--number_to_advance_from_previous_gen', type = int, default = 10,
-    help = 'The number of ligands which will advance from the previous generation, \
-    for the first generations after the first, directly into the next generation.\
-    This is purely advancing based on Docking/Rescore fitness. This does not \
-    select for diversity.')
-PARSER.add_argument('--redock_advance_from_previous_gen', choices = [True,False,"True","False","true","false"],
-    default=False, help = 'If True than ligands from the previous generation which advance to the next generation \
+PARSER.add_argument('--number_elitism_advance_from_previous_gen', type = int, default = 10,
+    help = 'The number of ligands chosen for elitism. These will advance from \
+    the previous generation directly into the next generation. \
+    This is purely advancing based on Docking/Rescore \
+    fitness. This does not select for diversity.')
+PARSER.add_argument('--redock_elite_from_previous_gen', choices = [True,False,"True","False","true","false"],
+    default=False, help = 'If True than ligands chosen via Elitism (ie advanced from last generation) \
     will be passed through Gypsum and docked again. This provides a better exploration of conformer space \
     but also requires more computation time. If False, advancing ligands are simply carried forward by \
     copying the PDBQT files.')
