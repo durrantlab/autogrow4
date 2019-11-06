@@ -36,8 +36,10 @@ def Run_Rank_selector(usable_list_of_smiles, number_to_chose, column_idx_to_sele
 
     if len(sorted_list) < number_to_chose:
 
-        raise Exception("There are more ligands to chose to seed the list than ligands to select from. \
-                        Please lower the top_mols_to_seed_next_generation and/or diversity_mols_to_seed_first_generation")
+        raise Exception("Asked for {} but only {} availabe to chose from \
+            There are more ligands to chose to seed the list than ligands to select from. \
+            Please lower the top_mols_to_seed_next_generation and/or \
+            diversity_mols_to_seed_first_generation".format(number_to_chose, len(sorted_list)))
 
     top_choice_smile_order = []
     for i in range(0, number_to_chose):

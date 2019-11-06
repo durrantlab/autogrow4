@@ -63,9 +63,9 @@ do
         -directory_of_fragments /bgfs/jdurrant/jspiegel/old_autogrow/autogrow/autogrow/fragments/MW_150/ \
         -number_of_mutants_first_generation 50 \
         -number_of_crossovers_first_generation 50 \
-        -number_of_mutants 85 \
-        -number_of_crossovers 85 \
-        -top_ones_to_advance_to_next_generation 70 \
+        -number_of_mutants 75 \
+        -number_of_crossovers 75 \
+        -top_ones_to_advance_to_next_generation 50 \
         -num_generations 6 -max_seconds_per_generation 21600 \
         -use_lipinski_filter TRUE -use_strict_lipinski_filter TRUE -use_ghose_filter TRUE \
         -scoring_function VINA -score_by_ligand_efficiency FALSE -maintain_core FALSE \
@@ -147,8 +147,8 @@ then
             --number_of_crossovers_first_generation 50 \
             --number_of_mutants 50 \
             --number_of_crossovers 50 \
-            --top_mols_to_seed_next_generation 70 \
-            --number_to_advance_from_previous_gen 70 \
+            --top_mols_to_seed_next_generation 50 \
+            --number_to_advance_from_previous_gen 50 \
             --number_to_advance_from_previous_gen_first_generation 0 \
             --diversity_mols_to_seed_first_generation 0 \
             --diversity_seed_depreciation_per_gen 0 \
@@ -224,8 +224,8 @@ then
             --number_of_crossovers_first_generation 50 \
             --number_of_mutants 50 \
             --number_of_crossovers 50 \
-            --top_mols_to_seed_next_generation 70 \
-            --number_to_advance_from_previous_gen 70 \
+            --top_mols_to_seed_next_generation 50 \
+            --number_to_advance_from_previous_gen 50 \
             --number_to_advance_from_previous_gen_first_generation 0 \
             --diversity_mols_to_seed_first_generation 0 \
             --diversity_seed_depreciation_per_gen 0 \
@@ -304,8 +304,8 @@ then
             --number_of_crossovers_first_generation 50 \
             --number_of_mutants 50 \
             --number_of_crossovers 50 \
-            --top_mols_to_seed_next_generation 70 \
-            --number_to_advance_from_previous_gen 70 \
+            --top_mols_to_seed_next_generation 50 \
+            --number_to_advance_from_previous_gen 50 \
             --number_to_advance_from_previous_gen_first_generation 0 \
             --diversity_mols_to_seed_first_generation 0 \
             --diversity_seed_depreciation_per_gen 0 \
@@ -386,8 +386,8 @@ then
             --number_of_crossovers_first_generation 50 \
             --number_of_mutants 50 \
             --number_of_crossovers 50 \
-            --top_mols_to_seed_next_generation 70 \
-            --number_to_advance_from_previous_gen 70 \
+            --top_mols_to_seed_next_generation 50 \
+            --number_to_advance_from_previous_gen 50 \
             --number_to_advance_from_previous_gen_first_generation 0 \
             --diversity_mols_to_seed_first_generation 0 \
             --diversity_seed_depreciation_per_gen 0 \
@@ -463,8 +463,8 @@ then
             --number_of_crossovers_first_generation 50 \
             --number_of_mutants 50 \
             --number_of_crossovers 50 \
-            --top_mols_to_seed_next_generation 70 \
-            --number_to_advance_from_previous_gen 70 \
+            --top_mols_to_seed_next_generation 50 \
+            --number_to_advance_from_previous_gen 50 \
             --number_to_advance_from_previous_gen_first_generation 0 \
             --diversity_mols_to_seed_first_generation 0 \
             --diversity_seed_depreciation_per_gen 0 \
@@ -543,8 +543,8 @@ then
             --number_of_crossovers_first_generation 50 \
             --number_of_mutants 50 \
             --number_of_crossovers 50 \
-            --top_mols_to_seed_next_generation 70 \
-            --number_to_advance_from_previous_gen 70 \
+            --top_mols_to_seed_next_generation 50 \
+            --number_to_advance_from_previous_gen 50 \
             --number_to_advance_from_previous_gen_first_generation 0 \
             --diversity_mols_to_seed_first_generation 0 \
             --diversity_seed_depreciation_per_gen 0 \
