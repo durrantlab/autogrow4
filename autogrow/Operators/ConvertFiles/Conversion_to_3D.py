@@ -73,7 +73,7 @@ def convert_to_3d(vars, smi_file, smile_file_directory):
 
     print("CONVERTING SDF TO PDB")
     # convert sdf files to PDBs using rdkit
-    convert_sdf_to_PDBs(smile_file_directory, gypsum_output_folder_path)
+    convert_sdf_to_PDBs(vars, smile_file_directory, gypsum_output_folder_path)
     print("CONVERTING SDF TO PDB COMPLETED")
 # 
 
@@ -416,12 +416,13 @@ def check_gypsum_log_did_complete(log_file_path):
         return True    
 #
 
-def convert_sdf_to_PDBs(gen_folder_path, SDFs_folder_path):
+def convert_sdf_to_PDBs(vars, gen_folder_path, SDFs_folder_path):
     """
     It will find any .sdf files within the folder_path and convert them to .pdb types using rdkit.Chem.
     It also makes a subfolder to store the pdb files if one doesn't already exist in the folder_path.
    
     Input:
+    :param dict vars: User variables which will govern how the programs runs
     :param str gen_folder_path: Path of the folder for the current generation
     :param str SDFs_folder_path: Path of the folder with all of the 3D .sdf files to convert
     """
@@ -445,70 +446,84 @@ def convert_sdf_to_PDBs(gen_folder_path, SDFs_folder_path):
     if not os.path.isdir(pdb_subfolder_path):
         os.makedirs(pdb_subfolder_path)
         
+    job_inputs = []
     for file_path in files:
-        
-        if "params" not in file_path:
-
-            file_basename = basename(file_path)
-            file_basename = file_basename.split("__input1")[0]
-
-            file_output_name = "{}{}_".format(pdb_subfolder_path, file_basename)
-        else:
-            continue    
+        if "params" in file_path: 
+            continue
+        job_inputs.append(tuple([pdb_subfolder_path, file_path]))
+    job_inputs = tuple(job_inputs)
     
-    #
+    # Convert sdf files to pdbs in multithread
+    vars["parallelizer"].run(job_inputs, convert_single_sdf_to_pdb)
+
+def convert_single_sdf_to_pdb(pdb_subfolder_path, sdf_file_path):
+    """
+    This will convert a given .sdf into seperate .pdb files.
+   
+    Input:
+    :param str pdb_subfolder_path: Path of the folder to place all created pdb files
+    :param str sdf_file_path: Path of the sdf_file_path to convert to pdb files
+    """
+    if os.path.exists(sdf_file_path) == True:
+
+        file_basename = basename(sdf_file_path)
+        file_basename = file_basename.split("__input1")[0]
+
+        file_output_name = "{}{}_".format(pdb_subfolder_path, file_basename)
+
         try:
-            mols = Chem.SDMolSupplier(file_path, sanitize=False, removeHs=False, strictParsing=False)
+            mols = Chem.SDMolSupplier(sdf_file_path, sanitize=False, removeHs=False, strictParsing=False)
         except:
             mols = None
         try:
-            mols_noH = Chem.SDMolSupplier(file_path, sanitize=True, removeHs=True, strictParsing=False)
+            mols_noH = Chem.SDMolSupplier(sdf_file_path, sanitize=True, removeHs=True, strictParsing=False)
         except:
             mols_noH = [None for x in range(0,len(mols))]
         
         if mols is None:
-            continue
+            pass
         elif len(mols)==0:
-            # This can happen if gypsum output a blank file by accident
-            continue
+            pass
+        else:
+            # if len(mols)==0 gypsum output a blank file by accident
+            # if mols is None rdkit couldn't import the sdf 
+            if len(mols) != 0:
+                counter = 0
+                for i in range(0,len(mols)):
+                    mol = mols[i]
+                    # Extra precaution to prevent None's within a set of good mols
+                    if mol is None:
+                        continue
 
-        if mols is not None:
-            
-            counter = 0
-            for i in range(0,len(mols)):
-                mol = mols[i]
-                # Extra precaution to prevent None's within a set of good mols
-                if mol is None:
-                    continue
+                    mol= MOH.check_sanitization(mol)
+                    # Filter out any which failed
+                    if mol is None:
+                        continue
+                        
+                    # pdb_name indexed to 1    
+                    pdb_name = "{}_{}.pdb".format(file_output_name, counter+1)
+                    if mol is not None:     #For extra precaution...
+                        Chem.MolToPDBFile(mol, pdb_name, flavor = 32)
+                        # Add header to PDB file with SMILES containing protanation and stereochem
+                        
+                        no_H_Smiles = mols_noH[i]
+                        if no_H_Smiles == None:
+                            no_H_Smiles = Chem.MolToSmiles(mol)
 
-                mol= MOH.check_sanitization(mol)
-                # Filter out any which failed
-                if mol is None:
-                    continue
-                    
-                # pdb_name indexed to 1    
-                pdb_name = "{}_{}.pdb".format(file_output_name, counter+1)
-                if mol is not None:     #For extra precaution...
-                    Chem.MolToPDBFile(mol, pdb_name, flavor = 32)
-                    # Add header to PDB file with SMILES containing protanation and stereochem
-                    
-                    no_H_Smiles = mols_noH[i]
-                    if no_H_Smiles == None:
-                        no_H_Smiles = Chem.MolToSmiles(mol)
+                        if no_H_Smiles==None:
+                            print("SMILES was None for: ", pdb_name)
+                            printout = "REMARK Final SMILES string: {}\n".format("None")
+                        elif type(no_H_Smiles)==str:
+                            printout = "REMARK Final SMILES string: {}\n".format(no_H_Smiles)
+                        elif type(no_H_Smiles)==type(Chem.MolFromSmiles("C")):
+                            printout = "REMARK Final SMILES string: {}\n".format(Chem.MolToSmiles(no_H_Smiles))
+                        
+                        with open(pdb_name) as f:
+                            printout = printout + f.read()
+                        with open(pdb_name,'w') as f:
+                            f.write(printout)
+                        printout = ""
 
-                    if no_H_Smiles==None:
-                        print("SMILES was None for: ",pdb_name)
-                        printout = "REMARK Final SMILES string: {}\n".format("None")
-                    elif type(no_H_Smiles)==str:
-                        printout = "REMARK Final SMILES string: {}\n".format(no_H_Smiles)
-                    elif type(no_H_Smiles)==type(Chem.MolFromSmiles("C")):
-                        printout = "REMARK Final SMILES string: {}\n".format(Chem.MolToSmiles(no_H_Smiles))
-                    
-                    with open(pdb_name) as f:
-                        printout = printout + f.read()
-                    with open(pdb_name,'w') as f:
-                        f.write(printout)
-                    printout = ""
-
-                counter = counter + 1
+                    counter = counter + 1
+            else:pass
 #
