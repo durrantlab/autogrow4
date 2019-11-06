@@ -90,8 +90,6 @@ def run_docking_common(vars, current_gen_int, current_generation_dir, smile_file
     file_conversion_class_object = pick_run_conversion_class_dict(conversion_choice)
     file_conversion_class_object = file_conversion_class_object(temp_vars, receptor, test_boot=False)
 
-
-    
     dock_class = pick_docking_class_dict(dock_choice)
     dockingObject = dock_class(temp_vars, receptor, file_conversion_class_object,test_boot=False)
 
