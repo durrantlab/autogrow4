@@ -34,16 +34,30 @@ def Run_Rank_selector(usable_list_of_smiles, number_to_chose, column_idx_to_sele
     # Sort by chosen idx property
     sorted_list = sorted(usable_list_of_smiles, key=lambda x: float(x[column_idx_to_select]), reverse=reverse_sort)
 
-    if len(sorted_list) < number_to_chose:
+    # remove any redundants
+    new_sorted_list = []
+    temp_list_info = []
+    for i in range(len(sorted_list)):
+        info = sorted_list[i]
+        if "\t".join(info) in temp_list_info:
+            continue
+        else:
+            temp_list_info.append("\t".join(info))
+            new_sorted_list.append(info)
+    del(sorted_list)   
+    del(temp_list_info)   
+    if len(new_sorted_list) < number_to_chose:
 
         raise Exception("Asked for {} but only {} availabe to chose from \
             There are more ligands to chose to seed the list than ligands to select from. \
             Please lower the top_mols_to_seed_next_generation and/or \
-            diversity_mols_to_seed_first_generation".format(number_to_chose, len(sorted_list)))
+            diversity_mols_to_seed_first_generation".format(number_to_chose, len(new_sorted_list)))
+    
+    new_sorted_list = sorted(new_sorted_list, key=lambda x: float(x[column_idx_to_select]), reverse=reverse_sort)
 
     top_choice_smile_order = []
     for i in range(0, number_to_chose):
-        smile = sorted_list[i]
+        smile = new_sorted_list[i]
         top_choice_smile_order.append(smile[0])
         
     return top_choice_smile_order
