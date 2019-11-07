@@ -1,9 +1,9 @@
 Authors:
-    Jacob Spiegel
-    Patrick Ropp
-    Jacob Durrant
+    Jacob O. Spiegel
+    Jacob D. Durrant
 
 Acknowledgments:
-    Erich Helleman
     Kevin Cassidy
-    Harrison Green    
+    Harrison Green 
+    Erich Helleman
+    Patrick J. Ropp   
