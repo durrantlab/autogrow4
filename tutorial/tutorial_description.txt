@@ -9,16 +9,12 @@ Computer Requirements:
 
     Autogrow has not been configured for Windows OS, but a docker image capable of running on Windows can be found:
 #
-
-ADD SECTION FOR GIT INSTALL/DOWNLOAD 
--ADD TO README
-#
-
-Installing AutoGrow:
+Installing AutoGrow :
     AutoGrow 4.0.0 can be install by git clone command: 
         1) cd PATH/desired_dir/
         2) git clone https://git.durrantlab.pitt.edu/jdurrant/autogrow
 
+# 
 Dependencies:
     Autogrow has many dependencies which may need to be installed.
 
@@ -191,11 +187,6 @@ Dependencies:
                         >>> mpi4py.__version__
                             3.0.1
 
-                    
-
-
-
-
     MPI dependencies:
         To run jobs in mpi mode we require an additional installation of the python library mpi4py,
         as well as an MPI-enabled computer environment. OpenMPI was used by the authors. 
@@ -324,8 +315,12 @@ Running AutoGrow:
         Examples of the json files can be found in the tutorial folder.
 #   
 Understanding Autogrow parameters:
-    A basic explanation of the parameters can be retrieved by running:
-        python /PATH/autogrow/RunAutogrow.py --help
+    A explanation of every parameter can be retrieved by running:
+        python $PATH/autogrow4/RunAutogrow.py --help
+    
+#
+Docker submission: For Windows users
+    @@@@@@@@@JAKE Fill in with how to use once it has been included
 #
 Providing Custom options:
     AutoGrow was designed to be modular. This allows for the easy swaping of code.
@@ -338,6 +333,7 @@ Providing Custom options:
         3) Custom ligand conversion code from PDB to dockable format (ie PDBQT) ***
         4) Custom Scoring/Rescoring code ***
         5) Custom Reaction libraries
+        6) Custom complimentary molecules libraries
     
     *** Indicates that when using this feature the code is automatically copied into the 
         directory that is required to house that code. This is only done once so please unittest
@@ -352,6 +348,8 @@ Providing Custom options:
                     -If a custom script scores ligands such that the most fit ligand has the highest score,
                          Autogrow may inadvertently be favoring ligands that are least fit.  
 
+    
+    # 
     1) Custom ligands filters: ***
         This feature allows the user to incorporate custom python scripts for filtering ligands.
         These filters are applied to ligands after they are created by Mutation/Crossover 
@@ -390,6 +388,8 @@ Providing Custom options:
 
             
 
+    
+    # 
     2) Custom docking code: ***
         This feature allows the user to incorporate custom python scripts for docking ligands.
         Currently AutoGrow is configured to dock using Autodock Vina and QuickVina2, but AutoGrow is not limited to these docking softwares.
@@ -471,6 +471,8 @@ Providing Custom options:
                     --dock_choice Custom \
                     --alternative_filter ["custom_docking", "$PATH/To/class_object/for/custom_docking.py"]
         #
+    
+    # 
     3) Custom ligand conversion code from PDB to dockable format (ie PDBQT) ***
         If using a docking software other than VINA/QuickVina is being used, one may need to convert the pdb format ligands into a different format or it may take .pdb files.
         If taking a format other than .pdbqt users will need to provide a custom script to convert ligands (or simply do nothing if it takes .pdbs).
@@ -485,33 +487,33 @@ Providing Custom options:
                 Currently files named: Convert_with_MGLTOOLS.py and Convert_with_obabel.py
                 Classes named obabel_Conversion and MGLTools_Conversion
 
-            3) Must have atleast have three functions following the below formating:
-                    def convert_receptor_pdb_files_to_pdbqt(self, receptor_file, mgl_python, receptor_template, number_of_processors):
-                        """
-                        Make sure a PDB file is properly formatted for conversion to pdbqt
+            3) Must have atleast have two functions following the below formating:
+                    # def convert_receptor_pdb_files_to_pdbqt(self, receptor_file, mgl_python, receptor_template, number_of_processors):
+                    #     """
+                    #     Make sure a PDB file is properly formatted for conversion to pdbqt
                         
-                        Inputs:
-                        :param str receptor_file:  the file path of the receptor
-                        :param str mgl_python: file path of the pythonsh file of mgl tools
-                        :param str receptor_template: the receptor4.py file path from mgl tools.
-                        :param int number_of_processors: number of processors to multithread
-                        """    
-                        raise NotImplementedError("convert_receptor_pdb_files_to_pdbqt() not implemented")
-                    #
+                    #     Inputs:
+                    #     :param str receptor_file:  the file path of the receptor
+                    #     :param str mgl_python: file path of the pythonsh file of mgl tools
+                    #     :param str receptor_template: the receptor4.py file path from mgl tools.
+                    #     :param int number_of_processors: number of processors to multithread
+                    #     """
+                    #     raise NotImplementedError("convert_receptor_pdb_files_to_pdbqt() not implemented")
+                    # #
 
-                    def convert_ligand_pdb_file_to_pdbqt(self, pdb_file):
-                        """
-                        Convert the ligands of a given directory from pdb to pdbqt format
+                    # def convert_ligand_pdb_file_to_pdbqt(self, pdb_file):
+                    #     """
+                    #     Convert the ligands of a given directory from pdb to pdbqt format
                         
-                        Inputs:
-                        :param str pdb_file: the file name, a string.
-                        Returns:
-                        :returns: bool bool: True if it worked; 
-                                            False if its the gypsum param file or if it failed to make PDBQT
-                        :returns: str smile_name: name of the SMILES string from a pdb file
-                                                    None if its the param file 
-                        """
-                        raise NotImplementedError("rank_and_save_output_smi() not implemented")
+                    #     Inputs:
+                    #     :param str pdb_file: the file name, a string.
+                    #     Returns:
+                    #     :returns: bool bool: True if it worked; 
+                    #                         False if its the gypsum param file or if it failed to make PDBQT
+                    #     :returns: str smile_name: name of the SMILES string from a pdb file
+                    #                                 None if its the param file 
+                    #     """
+                    #     raise NotImplementedError("rank_and_save_output_smi() not implemented")
                     #
 
             
@@ -535,10 +537,218 @@ Providing Custom options:
                     --conversion_choice Custom \
                     --custom_conversion_script ["custom_conversion", "$PATH/To/class_object/for/custom_conversion.py"]
 
-    4) Custom Scoring/Rescoring code ***
     
+    # 
+    4) Custom Scoring/Rescoring code ***
+        This feature allows the user to incorporate custom python scripts for scoring and rescoring ligands.
+        Currently AutoGrow is configured to dock using Autodock Vina and QuickVina2 and there are two provided options to rescore a ligand
+        using either NNScore 1 or NNScore 2. Additionally, ligand efficiency (dividing the score/rescore value by the number of non-Hydrogen atoms)
+        can be applied with any float based scoring value.
+        
+        Users can incorporate custom scoring and rescoring options into AutoGrow. 
+        
+        This custom code will be copied to the directory: $PATH/autogrow4/autogrow/Docking/Scoring/Scoring_classes/
+        Script formating:    
+            These conversion scripts use a class-based inheritance architecture which require:
+            1) Conversion class object must be instanced off of the ParentScoringClass located:
+                - $PATH/autogrow4/autogrow/Docking/Scoring/Scoring_classes/ParentScoringClass.py
+            2) Have a unique name: class unique_name(ParentScoringClass)
+                -unique_name can not be one of the predefined docking scripts 
+                Currently files named: VINA.py, NN1.py, NN2.py, and Lig_Efficiency.py
+                Classes named VINA.py, NN1, NN2, and Lig_Efficiency
+            3) Must have atleast have two functions following the below formating:
+                    # def get_name(self):
+                    #     """
+                    #     Returns the current class name.    
+                    #     Returns:
+                    #     :returns: str self.__class__.__name__: the current class name.
+                    #     """
+                    #     return self.__class__.__name__
+                    # #
+                    # def run_scoring(self, input_string):
+                    #     """
+                    #     run_scoring is needs to be implimented in each class.
+                    #     Inputs:
+                    #     :param str input_string:  A string to raise an exception
+                    #     """
+                    #     raise NotImplementedError("run_scoring() not implemented")
+
+        Running custom scoring/rescoring scripts:
+        
+            AutoGrow will need to be restarted once after this has been incorporated into the code base.
+
+            Submission through .json format: 
+
+                {
+                    ...
+                    "scoring_choice": "Custom",
+                    "custom_scoring_script": ["custom_scoring_name", "$PATH/To/class_object/for/custom_scoring.py"]
+                }
+
+                python RunAutogrow.py -j $PATH/To/json_file_with_variable.json
+
+            Commandline submission format: 
+                python RunAutogrow.py \
+                    ... \
+                    --conversion_choice Custom \
+                    --custom_conversion_script ["custom_scoring_name", "$PATH/To/class_object/for/custom_scoring.py"]
+
+    # 
     5) Custom Reaction libraries
-#
+
+        AutoGrow assumes all custom scripts have been unittested by its creators. Please ensure all
+        reactions and libraries are accurate before using this option.
+        
+        Unlike the other custom options, reaction libraries are stored in human readable json dictionaries;
+            all other custom options use inherited class scripts. 
+        These json files do not need to be incorporated into AutoGrow and thus require no restarting or copying of files.
+
+        Reaction Libraries are stored in .json files and are dictionaries of dictionaries.
+        The outer dictionary uses the reaction's name as the key and the subdictionary contiaining all information
+        about the reaction as the item. 
+
+        If using this you will need three pieces of information each explained below:
+        1) Reaction library .json file: Contains reactions and all reaction information
+ 
+
+            Each subdictionary must contain the following information:
+                "reaction_name": "Name of the reaction",
+                "example_rxn_product": "SMILES of Product using example example_rxn_reactants", 
+                "example_rxn_reactants": ["SMILES of example reactant_1"], # if two or more reactants in reaction ["SMILES of example reactant_1","SMILES of example reactant_2",...]
+                "functional_groups": ["functional group name reactant_1"], # if two or more reactants in reaction ["functional group name reactant_1","functional group name reactant_2",...]
+                "group_smarts": ["functional_group SMARTS reactant_1"],# if two or more reactants in reaction ["functional_group SMARTS reactant_1","functional_group SMARTS reactant_2",...]
+                "num_reactants": 1, # (int) if 2 or more reactants change accordingly
+                "reaction_string": "reaction string ie reactant_1_smart.reactant_2_smart>>product_SMART", # This uses Daylights SMARTS reaction notation
+                "RXN_NUM": 3 # (int) a unique reaction number. This is used in naming products of mutation: ie ) a ligand named Gen_1_Mutant_72_867328 is a ligand from generation 1 created by the 72 reaction in a reaction library
+
+            An example libraries can be found: 
+
+                autogrow4/autogrow/Operators/Mutation/SmileClickChem/SmileClickChem/Reaction_libraries/All_Rxns/All_Rxns_rxn_library.json
+                autogrow4/autogrow/Operators/Mutation/SmileClickChem/SmileClickChem/Reaction_libraries/ClickChem/ClickChem_rxn_library.json
+                autogrow4/autogrow/Operators/Mutation/SmileClickChem/SmileClickChem/Reaction_libraries/Robust_Rxns/Robust_Rxns_rxn_library.json            
+            
+            Reaction libraries identify ligands capable of reacting in a given reaction using the information
+            found in the subdictionary's items "functional_groups" and "group_smarts". 
+
+        2) Functional group library .json file: simple json diction containing each functional group and its SMARTS definition.
+ 
+
+            Functional group library are simple dictionaries of the functional groups used by a reaction library.
+            Every moiety used by the reaction library must have an entry in the Functional group library.
+            
+            Functional group library are formated as such:
+                {
+                    "Acid_Anhydride_Noncyclic": "[*]C(=O)-[O;R0]-C(=O)[*]",
+                    "Alcohol": "[#6&$([CR0,R1X3,R1X4])&!$([#6](=,-[OR0,SR0])[OR0])]-[OR0;H1,-]",
+                    "Alkene": "[CR0;X3,X2H1,X1H2]=[CR0;X3,X2H1,X1H2]",
+                    "Alkyne": "[CR0;X2,X1H1]#[CR0;X2,X1H1]",
+                    "Amine_2R":  "[#7;$([#7;H3+,H2R0X1]-[#6]),$([#7&!H3;H1R1X3](:,-[#6R1]):,-[#6R1,#7R1]),$([#7&!H3;H2]-[#6]),$([#7&!H3;H0R1X2](:,-[#6R1;X3H1]):,-[#6R1X3H1]),$([#7&!H3;H0R1X2](:,-[#6R1;X3]):,-[#7R1X3]),$([#7&!H3;H1R0X3](-[#6])-[#6R0])]", 
+                    "Azide_1R": "[*;#6]-[$(N=[N+]=[N-]),$([N-][N+]#N)]",
+                    "Carbonochloridate": "Cl[C;X3](=O)-O[*]",
+                    "Carboxylate": "[*;!O]-[$([CR0;X3](=[OR0&D1])[OR0&H1]),$([CR0;X3](=[OR0&D1])[OR0-])]",
+                    "Epoxide": "[CR1;H2,H1X4,H0X4]1O[CR1;H2,H1X4,H0X4]1",
+                    "Ester": "[*;#6]C(=O)-O[*]",
+                    "Halide": "[Cl,Br,I][$([CX4,c]),$([#6X3]=[O,S])]",
+                    "Isocyanate": "[#6]N=C=O",
+                    "Isothiocyanate": "[#6]N=C=S",
+                    "Primary_Amine_1R": "[#7;$([H3+]),$([H2R0;!+])]-[#6]",
+                    "Sulfonyl_Azide": "[*]S(=O)(=O)-[$(N=[N+]=[N-]),$([N-][N+]#N)]",
+                    "Thio_Acid": "[C]-[$([CX3R0]([S;H1,X1])=[OX1]),$([CX3R0]([O;H1,X1])=[SX1])]",
+                    "Thiol_1R": "[#6&$([CR0,R1X3,R1X4])&!$([#6](=,-[OR0,SR0])[SR0])]-[SR0;H1,-]"
+                }
+            Examples can be found: 
+
+                autogrow4/autogrow/Operators/Mutation/SmileClickChem/SmileClickChem/Reaction_libraries/All_Rxns/All_Rxns_functional_groups.json
+                autogrow4/autogrow/Operators/Mutation/SmileClickChem/SmileClickChem/Reaction_libraries/ClickChem/ClickChem_functional_groups.json
+                autogrow4/autogrow/Operators/Mutation/SmileClickChem/SmileClickChem/Reaction_libraries/Robust_Rxns/Robust_Rxns_functional_groups.json
+
+            The SMARTS strings provided in this file should also be present in each subdirctionary of the Reaction library .json file
+            that references that functional group, 
+            placing the name of the group in the list of functional group names of reactants found under subdictionary key "functional_groups" 
+                    and 
+            placing the SMARTS string of the group in the list of functional group SMARTS of reactants found under subdictionary key "group_smarts" 
+
+     
+        3) Directory of complimentary molecule libraries: directory of .smi files
+            Any reaction containing more than one reactant will require a complimentary molecule to suppliment the reaction.
+            For this reason we require a directory populated with .smi files containing small molecules that match each functional group.
+
+            The name of each .smi file should be the name of the functional group (the keys of the Functional group library .json file) +.smi
+                Example the .smi file for the functional group "Acid_Anhydride_Noncyclic" should be $PATH/complimentary_mol_directory/Acid_Anhydride_Noncyclic.smi
+
+            THERE MUST BE ONE ENTRY PER FUNCTIONAL GROUP. NAMES ARE CAP SENSITIVE.
+
+            Important formating notes about the .smi file for complimentary_mol_directory:
+                1) No headers are allowed in the file.                 
+                2) .smi files can be either tab or 4-space delineated. 
+                3) The only columns are the 1st two columns.
+                    Column 1: SMILES string
+                    Column 2: ligand name/identifier (1 WORD, NO SPACES)
+            
+            We strongly recommend thoroughly checking that each molecule in each library matches the intended functional group.
+            If a ligand does not match the inteded functional group the reaction will fail and it will slow the process of mutant creation.
+
+    
+        Running Custom reactions:
+
+            Running a custom reaction library requires 4 parameters to be set:
+                rxn_library, rxn_library_file, function_group_library, complimentary_mol_directory
+
+            Submission through .json format: 
+
+                {
+                    ...
+                    "rxn_library": "Custom",
+                    "rxn_library_file": "$PATH/To/rxn_library_file.json",
+                    "function_group_library": "$PATH/To/function_group_library.json",
+                    "complimentary_mol_directory": "$PATH/To/complimentary_mol_directory/",
+                }
+
+                python RunAutogrow.py -j $PATH/To/json_file_with_variable.json
+
+            Commandline submission format: 
+                python RunAutogrow.py \
+                    ... \
+                    --rxn_library Custom \
+                    --rxn_library_file $PATH/To/rxn_library_file.json \
+                    --function_group_library $PATH/To/function_group_library.json \
+                    --complimentary_mol_directory $PATH/To/complimentary_mol_directory/ 
+    # 
+    6) Custom Complimentary molecule libraries for Mutation:
+        One can provide custom libraries of molecules to suppliment reactions by using the --complimentary_mol_directory option.
+
+        This can be used in conjunction with any of the predefined reactions sets (ie ClickChem, Robust_Rxns, All_Rxns), but this requires that
+        all functional groups used by those reaction libraries have a .smi file contained within the custom complimentary_mol_directory
+        
+        THERE MUST BE ONE ENTRY PER FUNCTIONAL GROUP. NAMES ARE CAP SENSITIVE.
+
+            Important formating notes about the .smi file for complimentary_mol_directory:
+                1) No headers are allowed in the file.                 
+                2) .smi files can be either tab or 4-space delineated. 
+                3) The only columns are the 1st two columns.
+                    Column 1: SMILES string
+                    Column 2: ligand name/identifier (1 WORD, NO SPACES)
+            
+        We strongly recommend thoroughly checking that each molecule in each library matches the intended functional group.
+        If a ligand does not match the inteded functional group the reaction will fail and it will slow the process of mutant creation.
+
+        Running Custom reactions:
+
+            Submission through .json format: 
+
+                {
+                    ...
+                    "complimentary_mol_directory": "$PATH/To/complimentary_mol_directory/",
+                }
+
+                python RunAutogrow.py -j $PATH/To/json_file_with_variable.json
+
+            Commandline submission format: 
+                python RunAutogrow.py \
+                    ... \
+                    --complimentary_mol_directory $PATH/To/complimentary_mol_directory/ 
+    # 
+# 
 Prepping Receptor:
     Autogrow takes a single .pdb file for the receptor. Although not required we recommend doing some preparation
     to the receptor file prior to submitting to Autogrow. 
@@ -660,7 +870,7 @@ Other Factors for consideration prior to running Autogrow:
                 We recommend setting the number_of_processors=-1 and defining the number of processors in an SBATCH type submission script.
 
         If you struggle to have enough computational power to sucessfully run Autogrow, try using our free webserver at:
-            @@@@@@INSERT BIOTITE WEBSERVER
+            @@@@@@@@@JAKE INSERT BIOTITE WEBSERVER
 
 
 #

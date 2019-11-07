@@ -25,24 +25,24 @@ PARSER.add_argument('--json', '-j', metavar='param.json',
 
 # Allows the run in debug mode. Doesn't delete temp files.
 PARSER.add_argument('--debug_mode', '-d', action = 'store_true', default=False,
-    help='Run Autogrow in Debug mode. This keeps all temporary files.')
+    help='Run Autogrow in Debug mode. This keeps all temporary files and adds extra print statements.')
 
 # receptor information
 PARSER.add_argument('--filename_of_receptor', '-r', metavar = 'receptor.pdb',
     help = 'The path to the receptor file. Should be .pdb file.')
 PARSER.add_argument('--center_x', '-x', type = float,
-    help = 'x-coordinate for the center of the pocket to be tested.')
+    help = 'x-coordinate for the center of the pocket to be tested by docking. (Angstrom)')
 PARSER.add_argument('--center_y', '-y', type = float,
-    help = 'y-coordinate for the center of the pocket to be tested.')
+    help = 'y-coordinate for the center of the pocket to be tested by docking. (Angstrom)')
 PARSER.add_argument('--center_z', '-z', type = float,
-    help = 'z-coordinate for the center of the pocket to be tested.')
+    help = 'z-coordinate for the center of the pocket to be tested by docking. (Angstrom)')
 
 PARSER.add_argument('--size_x', type = float,
-    help = 'dimension of box to dock into in the x-axis')
+    help = 'dimension of box to dock into in the x-axis (Angstrom)')
 PARSER.add_argument('--size_y', type = float,
-    help = 'dimension of box to dock into in the y-axis')
+    help = 'dimension of box to dock into in the y-axis (Angstrom)')
 PARSER.add_argument('--size_z', type = float,
-    help = 'dimension of box to dock into in the z-axis')
+    help = 'dimension of box to dock into in the z-axis (Angstrom)')
 
 
 # Input/Output directories
@@ -73,7 +73,6 @@ PARSER.add_argument('--start_a_new_run', action = 'store_true', default=False,
     help = 'If False make a new folder and start a fresh simulation with Generation 0.  \
     If True find the last generation in the root_output_folder and continue to fill.\
     Default is False.')
-
 PARSER.add_argument('--python_path', type=str, default="python",
     help = 'On some systems there may be multiple enviorments. AutoGrow executes \
     several os.system calls that may open additional python shells. In some rare \
@@ -92,7 +91,7 @@ PARSER.add_argument('--max_time_MCS_thorough', type = int, default = 1,
     mcs matching just takes what it has up to that point')
 PARSER.add_argument('--min_atom_match_MCS', type = int, default = 4,
     help = 'Determines the minimum number of atoms in common for a substructurematch. \
-    The higher the more restrictive, but the more likely for 2 ligands not to match')
+    The higher the more restrictive, but the more likely for two ligands not to match')
 PARSER.add_argument('--protanate_step', action = 'store_true', default=False,
     help = 'Indicates if Smilesmerge uses protanated mols (if true) or deprot \
     (if False) SmilesMerge is 10x faster when deprotanated')
@@ -121,19 +120,18 @@ PARSER.add_argument('--complimentary_mol_directory', type=str, default="", \
 
 # processors and multithread mode
 PARSER.add_argument('--number_of_processors', '-p', type = int, metavar='N', default = 1,
-    help='Number of processors to use for parallel calculations.')
+    help='Number of processors to use for parallel calculations. Set to -1 for all availble CPUs.')
 PARSER.add_argument('--multithread_mode', default='multithreading',
     choices = ["mpi","multithreading","serial"], help='Determine what style \
-    multithreading: mpi, multithreading, or serial. If this program is being \
-    used by a program in MPI mode we recommend setting this to serial. serial \
-    will override num_processors and force it to be on a single processor.')
+    multithreading: mpi, multithreading, or serial. serial will override \
+    num_processors and force it to be on a single processor.')
 
 
 # Genetic Algorithm Options
 PARSER.add_argument('--selector_choice', 
     choices = ["Roulette_Selector","Rank_Selector", "Tournement_Selector"], default="Roulette_Selector", 
     help = 'This determines whether the fitness criteria are chosen by a Weighted Roulette, \
-    Ranked, or Tournement style Selector. The Rank option is a non-redudant Elitist selector.\
+    Ranked, or Tournement style Selector. The Rank option is a non-redudant selector.\
     Roulette and Tournement chose without replacement and are stoichastic options. \
     Warning do not use Rank_Selector for small runs as there is potential that \
     the number of desired ligands exceed the number of ligands to chose from.')
@@ -153,11 +151,11 @@ PARSER.add_argument('--top_mols_to_seed_next_generation', type = int, default = 
 PARSER.add_argument('--diversity_mols_to_seed_first_generation', type = int, default = 10, 
     help = 'Should be less than number_of_crossovers_first_generation + number_of_mutations_first_generation')
 PARSER.add_argument('--diversity_seed_depreciation_per_gen', type = int, default = 2, 
-    help = 'each gen diversity_mols_to_seed_first_generation will decrease this amount')
+    help = 'Each gen diversity_mols_to_seed_first_generation will decrease this amount')
 
 # Populations settings
 PARSER.add_argument('--num_generations', type = int, default = 10,
-                    help = 'The number of generations to be created.')
+    help = 'The number of generations to be created.')
 PARSER.add_argument('--number_of_crossovers_first_generation', type = int,
     help = 'The number of ligands which will be created via crossovers in the \
     first generation. If not defined it will default to number_of_crossovers')
@@ -189,23 +187,33 @@ PARSER.add_argument('--redock_elite_from_previous_gen', choices = [True,False,"T
 
 ####### FILTER VARIABLES
 PARSER.add_argument('--Lipinski_Strict', action = 'store_true', default=False,
-    help = '')
+    help = 'Lipinski filters for orally available drugs following Lipinski rule of fives. \
+    Filters by molecular weight, logP and number of hydrogen bond donors and acceptors. \
+    Strict implimentation means a ligand must pass all requirements.')
 PARSER.add_argument('--Lipinski_Lenient', action = 'store_true', default=False,
-    help = '')
+    help = 'Lipinski filters for orally available drugs following Lipinski rule of fives. \
+    Filters by molecular weight, logP and number of hydrogen bond donors and acceptors. \
+    Lenient implimentation means a ligand may fail all but one requirement and still passs.')
 PARSER.add_argument('--Ghose', action = 'store_true', default=False,
-    help = '')
+    help = 'Ghose filters for drug-likeliness; filters by molecular weight,\
+    logP and number of atoms.')
 PARSER.add_argument('--Mozziconacci', action = 'store_true', default=False,
-    help = '')
+    help = 'Mozziconacci filters for drug-likeliness; filters by the number of \
+    rotatable bonds, rings, oxygens, and halogens.')
 PARSER.add_argument('--VandeWaterbeemd', action = 'store_true', default=False,
-    help = '')
+    help = 'VandeWaterbeemd filters for drug likely to be blood brain barrier permeable. \
+    Filters by the number of molecular weight and Polar Sureface Area (PSA).')
 PARSER.add_argument('--PAINS_Filter', action = 'store_true', default=False,
-    help = '')
+    help = 'PAINS filteres against Pan Assay Interference Compounds using \
+    substructure a search.')
 PARSER.add_argument('--NIH_Filter', action = 'store_true', default=False,
-    help = '')
+    help = 'NIH filteres against molecules with undersirable functional groups \
+    using substructure a search.')
 PARSER.add_argument('--BRENK_Filter', action = 'store_true', default=False,
-    help = '')
+    help = 'BRENK filter for lead-likeliness, by matching common false positive \
+    molecules to the current mol.')
 PARSER.add_argument('--No_Filters', action = 'store_true', default=False,
-    help = '')
+    help = 'No filters will be applied to compounds.')
 PARSER.add_argument('--alternative_filter', action = 'append', 
     help = 'If you want to add Custom filters to the filter child classes \
     Must be a list of lists \
@@ -225,7 +233,7 @@ PARSER.add_argument('--custom_conversion_script', metavar = 'custom_conversion_s
     ligands. This is required for custom conversion_choice choices. \
     Must be a list of strings [name_custom_conversion_class, Path/to/name_custom_conversion_class.py]')
 PARSER.add_argument('--mgltools_directory', metavar = 'mgltools_directory',
-    help = 'required if using MGLTools conversion option (conversion_choice=MGLTools_Conversion) \
+    help = 'Required if using MGLTools conversion option (conversion_choice=MGLTools_Conversion) \
     Path may look like: /home/user/MGLTools-1.5.6/')
 PARSER.add_argument('--mgl_python', metavar = 'mgl_python',required = False,
     help = '/home/user/MGLTools-1.5.4/bin/pythonsh')
@@ -240,7 +248,7 @@ PARSER.add_argument('--obabel_path', help = 'required if using obabel conversion
 # docking
 PARSER.add_argument('--dock_choice', metavar = 'dock_choice',default="QuickVina2Docking",
     choices = ["VinaDocking", "QuickVina2Docking","Custom"],
-    help = 'dock_choice is to chose which docking software module to use.')
+    help = 'dock_choice assigns which docking software module to use.')
 PARSER.add_argument('--docking_executable', metavar = 'docking_executable', default=None,
     help = 'path to the docking_executable')
 PARSER.add_argument('--docking_exhaustiveness', metavar = 'docking_exhaustiveness', default=None,
