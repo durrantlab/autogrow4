@@ -138,14 +138,15 @@ dependencies are required to run Autogrow.
         RDKit can be downloaded via conda/pip. To install using conda use the command:
             conda install -c rdkit rdkit   
         We use the following RDKit sublibraries in AutoGrow:
-            import rdkit
-            from rdkit import RDLogger, Chem, DataStructs
-            from rdkit.Chem import MolSurf, Crippen, rdFMCS, Descriptors, AllChem, FilterCatalog,  Lipinski, rdDepictor
-            from rdkit.Chem.Draw import PrepareMolForDrawing, rdMolDraw2D
-            from rdkit.Chem.rdMolDescriptors import GetMorganFingerprint
-            from rdkit.Chem.FilterCatalog import FilterCatalogParams
-            from rdkit.Chem.rdchem import BondStereo
-
+```python
+import rdkit
+from rdkit import RDLogger, Chem, DataStructs
+from rdkit.Chem import MolSurf, Crippen, rdFMCS, Descriptors, AllChem, FilterCatalog,  Lipinski, rdDepictor
+from rdkit.Chem.Draw import PrepareMolForDrawing, rdMolDraw2D
+from rdkit.Chem.rdMolDescriptors import GetMorganFingerprint
+from rdkit.Chem.FilterCatalog import FilterCatalogParams
+from rdkit.Chem.rdchem import BondStereo
+```
     NumPy: mathematical functions
         NumPy can be downloaded via conda/pip. It can be conda installed using the command:
             conda install -c anaconda numpy

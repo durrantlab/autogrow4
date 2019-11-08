@@ -36,10 +36,14 @@ def run_conversion_for_a_vina_file(vina_file, output_folder, max_num_of_poses, m
 
     If criteria such as  max_num_of_poses, max_docking_score, min_docking_score a pose must meet all criteria to be converted
 
-
+    Input:
+    :param str vina_file: Path to vina file to convert
+    :param str output_folder: Path to vina file to output folder
+    :param int max_num_of_poses: Max number of poses to convert to pdb
+    :param float max_docking_score: Most positive docking score to be converted; float or None
+    :param float min_docking_score: Most negative docking score to be converted; float or None
     """
     
-
     if os.path.exists(vina_file) == False:
         raise Exception("CANT FIND FILE:",vina_file)
 
@@ -259,7 +263,7 @@ PARSER.add_argument('--min_docking_score', type = float, required = False, defau
     
 
 ARGS_DICT = vars(PARSER.parse_args())
-# ARGS_DICT = get_arguments_from_argparse(ARGS_DICT)
+ARGS_DICT = get_arguments_from_argparse(ARGS_DICT)
 
 
 
