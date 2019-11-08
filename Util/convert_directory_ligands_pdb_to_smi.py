@@ -29,9 +29,36 @@ import argparse
 from rdkit import Chem
        
 import support_scripts.MolObjectHandling as MOH
+import support_scripts.Multiprocess as mp
 
+def run_convert_on_single_pdb(pdb):
 
-def make_smile_list(sub_folder):
+    """
+    This function converts a ligand into SMILES
+    and returns the list with the smiles with a name. 
+    The names are the basename of the file minus the .pdb
+
+    Inputs:
+    :param str pdb: path to the folder to a pdb file
+    Returns:
+    :returns: list output_data: A list containing all SMILES info from the file
+    """
+    
+    try:
+        mol = Chem.MolFromPDBFile(pdb)
+
+        mol_sanitized = MOH.check_sanitization(mol)
+        if mol_sanitized is not None:
+            smiles = Chem.MolToSmiles(mol_sanitized, isomericSmiles=True)
+            fileName = os.path.basename(pdb)
+            fileStripped = fileName.replace(".pdb","")
+            output_data = smiles + "\t" + fileStripped
+    except:
+        pass
+    return output_data
+# 
+
+def make_smile_list(sub_folder, number_of_processors):
     """
     This function converts every ligand within a folder into SMILES
     and returns the list of smiles with a name. 
@@ -47,21 +74,13 @@ def make_smile_list(sub_folder):
     smilesList = []
     pdb_list = glob.glob(os.sep + sub_folder+"*.pdb")
     pdb_list.extend(glob.glob(os.sep + sub_folder+"*.PDB"))
-    
-    for pdb in glob.glob(os.sep + sub_folder+"*.pdb"):
-        try:
-            mol = Chem.MolFromPDBFile(pdb)
+    pdb_list = tuple([tuple([pdb]) for pdb in pdb_list])
 
-            mol_sanitized = MOH.check_sanitization(mol)
-            if mol_sanitized is not None:
-                smiles = Chem.MolToSmiles(mol_sanitized, isomericSmiles=True)
-                fileName = os.path.basename(pdb)
-                fileStripped = fileName.replace(".pdb","")
-                output_data = smiles + "\t" + fileStripped
-        except:
-            pass
-        smilesList.append(output_data)
+    # run convert in multithread
+    smilesList = mp.MultiThreading(pdb_list, -1,  run_convert_on_single_pdb)
+
     return smilesList
+# 
 
 def get_arguments_from_argparse(ARGS_DICT):
     """
@@ -100,7 +119,7 @@ def get_arguments_from_argparse(ARGS_DICT):
             ARGS_DICT["output_folder"] = os.path.abspath(ARGS_DICT["output_folder"]) + os.sep
 
     return ARGS_DICT
-
+# 
 
 # Argment parsing
 PARSER = argparse.ArgumentParser()
@@ -121,7 +140,7 @@ ARGS_DICT = vars(PARSER.parse_args())
 ARGS_DICT = get_arguments_from_argparse(ARGS_DICT)
 
 # Running converter
-smilesList = make_smile_list(ARGS_DICT["source_folder"])
+smilesList = make_smile_list(ARGS_DICT["source_folder"], ARGS_DICT["number_of_processors"])
 name = [x for x in ARGS_DICT["source_folder"].split(os.sep)if x!=""][-1] 
 outputFile = ARGS_DICT["output_folder"] + os.sep + name + ".smi"
 with open(outputFile,"w") as f:

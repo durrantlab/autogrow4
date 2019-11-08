@@ -29,11 +29,10 @@ def convert_pdbqt_to_pdb(pdbqt_file_in, pdb_file_out):
     """
     printout = ""
     line_index_range = [x for x in range(0,61)] + [x for x in range(70,80)] 
-    print(line_index_range)
+
     with open(pdbqt_file_in) as f:
         for line in f.readlines():
             if "ATOM" in line:
-                print(line)
                 short_line = ""
                 for i in line_index_range:
                     # print(i)
@@ -42,13 +41,23 @@ def convert_pdbqt_to_pdb(pdbqt_file_in, pdb_file_out):
                     else:
                         short_line = short_line + line[i]
 
-                print(short_line)
                 printout = printout + short_line 
+            elif "REMARK                            x       y       z     vdW  Elec       q    Type" in line \
+            or "REMARK                         _______ _______ _______ _____ _____    ______ ____" in line:
+                short_line = ""
+                for i in line_index_range:
+                    # print(i)
+                    if i >= len(line):continue
+                        
+                    else:
+                        short_line = short_line + line[i] 
+
+                printout = printout + short_line + "\n"
             else:
                 printout = printout + line
     with open(pdb_file_out,'w') as f:
         f.write(printout)
-
+# 
 
 def get_arguments_from_argparse(ARGS_DICT):
     """
@@ -89,7 +98,7 @@ def get_arguments_from_argparse(ARGS_DICT):
             ARGS_DICT["pdbqt_file"].replace(".pdbqt", ".pdb").replace(".PDBQT", ".pdb")
 
     return ARGS_DICT
-
+# 
 
 
 # Argment parsing
