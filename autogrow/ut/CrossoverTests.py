@@ -48,7 +48,7 @@ class CrossoverTests(unittest.TestCase):
                 raise Exception(printout)
         self.mol1 = Chem.MolFromSmiles("SCCCCCCCc1ccccc1CCCCCCCC")
         self.mol2 = Chem.MolFromSmiles("NCCCCCCCc1ccccc1CCCCCCCCN")
-        self.mcs_results = rdFMCS.FindMCS([self.mol1, self.mol2], matchValences = False, ringMatchesRingOnly = True, completeRingsOnly = True)
+        self.mcs_results = rdFMCS.FindMCS([self.mol1, self.mol2], matchValences=False, ringMatchesRingOnly=True, completeRingsOnly=True)
         self.mcs_mol = Chem.MolFromSmarts(self.mcs_results.smartsString)
         self.index_tuple = ((10, 9, 8, 7, 5, 6), (0, 1, 2, 3, 4, 5), (0, 1, 2, 3, 4, 5))
         self.mol_1 = Chem.MolFromSmiles('CC1=C(OC[10000CH]([10001OH])[10002CH2][10003N]=[10004N+]=[10005N-])C(C)SC1=O')
@@ -208,14 +208,14 @@ class CrossoverTests(unittest.TestCase):
             from preexisting frags or frags which would be created if we deleted an atom in the original list
         """
         
-        frag = Chem.GetMolFrags(self.CB_frag, asMols = True, sanitizeFrags = False)
+        frag = Chem.GetMolFrags(self.CB_frag, asMols=True, sanitizeFrags=False)
         biggest_frag, idx_big_frag = ANB.find_biggest_frag(frag)
         self.assertEqual(idx_big_frag, 0)
         self.assertEqual(Chem.MolToSmiles(biggest_frag[0]), '[10000CH3][10001CH2][10002CH2][10003CH2][10004CH2][10005CH2][10006CH2][10007CH2][10008CH2][10009CH2][10010CH2][10011CH2][10012CH2][10013CH]([10014CH2][10015CH2][10016OH])[10017c]([10018CH3])[10019cH2]') 
-        frag = Chem.GetMolFrags(self.CB_frag, asMols = True, sanitizeFrags = False)
+        frag = Chem.GetMolFrags(self.CB_frag, asMols=True, sanitizeFrags=False)
     
         #test with a mol with no fragments
-        mol = Chem.GetMolFrags(self.mol1, asMols = True, sanitizeFrags = False)
+        mol = Chem.GetMolFrags(self.mol1, asMols=True, sanitizeFrags=False)
         biggest_frag, idx_big_frag = ANB.find_biggest_frag(mol)
         self.assertEqual(idx_big_frag, 0)
         self.assertEqual(Chem.MolToSmiles(biggest_frag[0]), 'CCCCCCCCc1ccccc1CCCCCCCS')     
@@ -613,7 +613,7 @@ class CrossoverTests(unittest.TestCase):
     def test_r_groups_dict(self):
 
         mol = Chem.MolFromSmiles("[10005*]=[1007O].[10003*][1008c]1[1009cH][1010cH][1011c]([1012OH])[1013cH][1014cH]1")
-        mol_frags = Chem.GetMolFrags(mol, asMols = True, sanitizeFrags = False)
+        mol_frags = Chem.GetMolFrags(mol, asMols=True, sanitizeFrags=False)
 
         lig_number_for_multiplier = 1
 

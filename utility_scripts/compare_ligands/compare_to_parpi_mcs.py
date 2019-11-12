@@ -41,7 +41,7 @@ def add_mol_to_list(usable_list_line):
 
 def mcs_mols(two_mols_list, list_for_mol2):
     
-    mcs_results = rdFMCS.FindMCS(two_mols_list, matchValences = False, ringMatchesRingOnly = True, completeRingsOnly = True)
+    mcs_results = rdFMCS.FindMCS(two_mols_list, matchValences=False, ringMatchesRingOnly=True, completeRingsOnly=True)
     num_mcs = str(mcs_results.numAtoms)
     list_for_mol2.append(num_mcs)
 

@@ -412,7 +412,7 @@ def test_source_smiles_convert(smile_info):
         return printout
     
     # Check for fragments.
-    if len(Chem.GetMolFrags(mol, asMols = True, sanitizeFrags = False)) != 1:
+    if len(Chem.GetMolFrags(mol, asMols=True, sanitizeFrags=False)) != 1:
 
         printout = "REMOVING SMILES FROM SOURCE LIST: SMILES string was fragmented.\n"
         printout = printout + "\t Removed SMILE string is: {} \n".format(smile_str)

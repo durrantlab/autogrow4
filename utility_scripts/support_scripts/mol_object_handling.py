@@ -267,7 +267,7 @@ def handle_frag_check(mol):
         return None
 
     try:
-        frags = Chem.GetMolFrags(mol, asMols = True, sanitizeFrags = False)
+        frags = Chem.GetMolFrags(mol, asMols=True, sanitizeFrags=False)
     except:
         return None
 

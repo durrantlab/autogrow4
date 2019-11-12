@@ -193,7 +193,7 @@ def make_list_of_all_unique_frags(fragment_list):
     """
     clean_frag_list = []
     for fragments in fragment_list:
-        frags = Chem.GetMolFrags(fragments, asMols = True, sanitizeFrags = False)
+        frags = Chem.GetMolFrags(fragments, asMols=True, sanitizeFrags=False)
         for frag in frags:
             frag = MOH.check_sanitization(frag)
             if frag == None:
