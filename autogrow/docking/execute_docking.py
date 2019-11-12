@@ -8,11 +8,11 @@ import autogrow.docking.delete_failed_mol as Delete
 from autogrow.docking.docking_class.get_child_class import get_all_subclasses
 
 from autogrow.docking.docking_class.docking_class_children import *
-from autogrow.docking.docking_class.ParentDockClass import ParentDocking
+from autogrow.docking.docking_class.parent_dock_class import ParentDocking
 # from autogrow.docking.docking_class.docking_class_children import VinaDocking, QuickVina2Docking
 
 from autogrow.docking.docking_class.docking_file_conversion import *
-from autogrow.docking.docking_class.ParentPDBQTConverter import ParentPDBQTConverter
+from autogrow.docking.docking_class.parent_pdbqt_converter import ParentPDBQTConverter
 # from autogrow.docking.docking_class.docking_file_conversion import convert_with_obabel, convert_with_mgltools
 
 

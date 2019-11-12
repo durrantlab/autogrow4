@@ -9,7 +9,7 @@ from rdkit import Chem
 #Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog('rdApp.*')
 
-import autogrow.operators.crossover.smiles_merge.merge_functions.MappingClass as MappingClass
+import autogrow.operators.crossover.smiles_merge.merge_functions.mapping_class as mapping_class
 
 
 def handle_dicts_and_select_b_groups(mol_1, mol_2, mcs_mol):
@@ -58,7 +58,7 @@ def handle_dicts_and_select_b_groups(mol_1, mol_2, mcs_mol):
     # example Anchor_to_B_master = {10008:['1B1','2B1'],10000:['1B2','2B2']}
     Anchor_to_B_master = invert_dictionary(B_to_Anchor_master)
 
-    bs_chosen = MappingClass.run_mapping(B_to_Anchor_master, Anchor_to_B_master)
+    bs_chosen = mapping_class.run_mapping(B_to_Anchor_master, Anchor_to_B_master)
 
     # Get the R groups which correspond to the chosen B's
     # ['1R1', '1R5', '2R2']

@@ -11,7 +11,7 @@ import rdkit.Chem.rdFMCS as rdFMCS
 
 from autogrow.operators.crossover.smiles_merge.merge_functions import alignment_and_breaks as ANB
 import autogrow.operators.crossover.smiles_merge.merge_functions.dict_and_r_groups as DnR
-from autogrow.operators.crossover.smiles_merge.merge_functions import MappingClass as MC
+from autogrow.operators.crossover.smiles_merge.merge_functions import mapping_class as MC
 from autogrow.operators.crossover.smiles_merge.merge_functions import merge_w_core as MWC
 
 from autogrow.operators.crossover import execute_crossover as EC
@@ -331,7 +331,7 @@ class CrossoverTests(unittest.TestCase):
         self.assertNotEqual(mol_2_order_str_before, mol_2_order_str_after)
 
 
-    # # MappingClass.py tests
+    # # mapping_class.py tests
     def test_mapping_locate_bs(self):
         aMapping = copy.deepcopy(self.aMapping) 
         

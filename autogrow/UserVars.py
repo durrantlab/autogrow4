@@ -1208,19 +1208,19 @@ def make_complete_children_dict(purpose_of_object):
     """
     if purpose_of_object == "Filter":
         import autogrow.operators.filter.filter_classes.filter_children_classes
-        from autogrow.operators.filter.filter_classes.ParentFilterClass import ParentFilter as parent_object
+        from autogrow.operators.filter.filter_classes.parent_filter_class import ParentFilter as parent_object
         from autogrow.operators.filter.filter_classes.get_child_filter_class import get_all_subclasses
     elif purpose_of_object == "ParentPDBQTConverter":
         import autogrow.docking.docking_class.docking_file_conversion
-        from autogrow.docking.docking_class.ParentPDBQTConverter import ParentPDBQTConverter as parent_object
+        from autogrow.docking.docking_class.parent_pdbqt_converter import ParentPDBQTConverter as parent_object
         from autogrow.docking.docking_class.get_child_class import get_all_subclasses
     elif purpose_of_object == "ParentDocking":
         import autogrow.docking.docking_class.docking_class_children
-        from autogrow.docking.docking_class.ParentDockClass import ParentDocking as parent_object
+        from autogrow.docking.docking_class.parent_dock_class import ParentDocking as parent_object
         from autogrow.docking.docking_class.get_child_class import get_all_subclasses 
     elif purpose_of_object == "ParentScoring":
         import autogrow.docking.scoring.scoring_classes.scoring_functions
-        from autogrow.docking.scoring.scoring_classes.ParentScoringClass import ParentScoring as parent_object
+        from autogrow.docking.scoring.scoring_classes.parent_scoring_class import ParentScoring as parent_object
         from autogrow.docking.docking_class.get_child_class import get_all_subclasses
 
 

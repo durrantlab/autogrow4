@@ -6,7 +6,7 @@ import copy
 from autogrow.docking.docking_class.get_child_class import get_all_subclasses
 
 import autogrow.docking.scoring.scoring_classes.scoring_functions
-from autogrow.docking.scoring.scoring_classes.ParentScoringClass import ParentScoring
+from autogrow.docking.scoring.scoring_classes.parent_scoring_class import ParentScoring
 
 
 def pick_run_class_dict(scoring_choice):

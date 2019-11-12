@@ -26,7 +26,7 @@ import rdkit.Chem.Descriptors as Descriptors
 #Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog('rdApp.*')
 
-from autogrow.operators.filter.filter_classes.ParentFilterClass import ParentFilter
+from autogrow.operators.filter.filter_classes.parent_filter_class import ParentFilter
 
 
 class MozziconacciFilter(ParentFilter):

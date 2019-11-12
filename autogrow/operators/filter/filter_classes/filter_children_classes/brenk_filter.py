@@ -16,7 +16,7 @@ import __future__
 from rdkit.Chem import FilterCatalog
 from rdkit.Chem.FilterCatalog import FilterCatalogParams
 
-from autogrow.operators.filter.filter_classes.ParentFilterClass import ParentFilter
+from autogrow.operators.filter.filter_classes.parent_filter_class import ParentFilter
 
 
 class BRENKFilter(ParentFilter):

@@ -9,7 +9,7 @@ import copy
 import sys
 
 
-import autogrow.operators.mutation.smiles_click_chem.SmileClickClass as SmileClickClass
+import autogrow.operators.mutation.smiles_click_chem.smiles_click_chem as SmileClickClass
 
 
 

@@ -185,7 +185,7 @@ class Mapping(object):
         #  then we add a Null B-group. This Null group means nothing can be
         #  added to that anchor. 
         #  
-        #  This could be implimented in this step in MappingClass.py or this  
+        #  This could be implimented in this step in mapping_class.py or this  
         #  could be implimented at the R-groups to B-group consolidation step
         #  -implimented it at the R-group to B-group consolidation may be
         #    a better option because it will simplify issues of when is it

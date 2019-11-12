@@ -354,7 +354,7 @@ from rdkit.Chem.rdchem import BondStereo
 #####   Script formating:
     These filters use a class-based inheritance architecture which require:
     1) Filter must be instanced off of the ParentFilterClass located:
-        - $PATH/autogrow4/autogrow/operators/filter/filter_classes/ParentFilterClass.py
+        - $PATH/autogrow4/autogrow/operators/filter/filter_classes/parent_filter_class.py
     2) Have a unique name: class unique_name(ParentFilter)
         -unique_name cannot be one of the predefined filters
     3) Must have at least one function called run_filter
@@ -390,7 +390,7 @@ from rdkit.Chem.rdchem import BondStereo
 #####   Script formating:    
     These docking scripts use a class-based inheritance architecture which require:
     1) Docking class object must be instanced off of the ParentDocking located:
-        - $PATH/autogrow4/autogrow/docking/docking_class/ParentDockClass.py
+        - $PATH/autogrow4/autogrow/docking/docking_class/parent_dock_class.py
     2) Have a unique name: class unique_name(ParentDocking)
         -unique_name can not be one of the predefined docking scripts (currently just VinaDocking and QuickVina2Docking)
     3) Must have atleast have three functions following the below formating:
@@ -470,7 +470,7 @@ from rdkit.Chem.rdchem import BondStereo
 #####   Script formating:    
     These conversion scripts use a class-based inheritance architecture which require:
     1) Conversion class object must be instanced off of the ParentPDBQTConverter located:
-        - $PATH/autogrow4/autogrow/docking/docking_class/ParentPDBQTConverter.py
+        - $PATH/autogrow4/autogrow/docking/docking_class/parent_pdbqt_converter.py
     2) Have a unique name: class unique_name(ParentPDBQTConverter)
         -unique_name can not be one of the predefined docking scripts 
         Currently files named: convert_with_mgltools.py and convert_with_obabel.py
@@ -538,12 +538,12 @@ from rdkit.Chem.rdchem import BondStereo
     This custom code will be copied to the directory: $PATH/autogrow4/autogrow/docking/scoring/scoring_classes/
 #####   Script formating:    
     These conversion scripts use a class-based inheritance architecture which require:
-    1) Conversion class object must be instanced off of the ParentScoringClass located:
-        - $PATH/autogrow4/autogrow/docking/scoring/scoring_classes/ParentScoringClass.py
-    2) Have a unique name: class unique_name(ParentScoringClass)
+    1) Conversion class object must be instanced off of the parent_scoring_class located:
+        - $PATH/autogrow4/autogrow/docking/scoring/scoring_classes/parent_scoring_class.py
+    2) Have a unique name: class unique_name(parent_scoring_class)
         -unique_name can not be one of the predefined docking scripts 
-        Currently files named: VINA.py, NN1.py, NN2.py, and Lig_Efficiency.py
-        Classes named VINA.py, NN1, NN2, and LigEfficiency
+        Currently files named: vina.py, nn1.py, nn2.py, and lig_efficiency.py
+        Classes named VINA, NN1, NN2, and LigEfficiency
     3) Must have atleast have two functions following the below formating:
             # def get_name(self):
             #     """

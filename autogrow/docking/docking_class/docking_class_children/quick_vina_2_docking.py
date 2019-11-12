@@ -11,7 +11,7 @@ import subprocess
 import time
 
 import autogrow.docking.delete_failed_mol as Delete
-from autogrow.docking.docking_class.docking_class_children.VinaDocking import VinaDocking
+from autogrow.docking.docking_class.docking_class_children.vina_docking import VinaDocking
 
 
 class QuickVina2Docking(VinaDocking):
