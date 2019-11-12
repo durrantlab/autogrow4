@@ -9,7 +9,7 @@ printout = ""
 
 new_rxn_num = 37
 original_rxn_num = 1
-with open(path,'r') as f:
+with open(path, "r") as f:
     for line in f.readlines():
         if '": {' in line or "reaction_name" in line:
             line = line.replace("{}_".format(original_rxn_num),"{}_".format(new_rxn_num))
@@ -20,5 +20,5 @@ with open(path,'r') as f:
         
         printout = printout + line
 
-with open(new_path,'w') as f:
+with open(new_path, "w") as f:
     f.write(printout)

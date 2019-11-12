@@ -332,7 +332,7 @@ class PDB:
             print(line)
 
     def SavePDB(self, filename):
-        f = open(filename, 'w')
+        f = open(filename, "w")
         towrite = self.SavePDBString()
         if towrite.strip() == "": towrite = "ATOM      1  X   XXX             0.000   0.000   0.000                       X" # just so no PDB is empty, VMD will load them all
         f.write(towrite)
@@ -2250,7 +2250,7 @@ def calculate_score(lig, rec, cmd_params, actual_filename_if_lig_is_list="", act
 print("\nLOADING THE RECEPTOR")
 print("====================\n")
 
-#f2 = open(rec,'r')
+#f2 = open(rec, "r")
 #rec_array = f2.readlines()
 #f2.close()
 receptor = PDB()
@@ -2262,7 +2262,7 @@ print("=========================================================================
 
 # determine if the ligand input file is a single pdbqt or an autodock vina output file. Both are acceptable inputs.
 
-f = open(lig,'r')
+f = open(lig, "r")
 
 lig_array = []
 line = "NULL"
@@ -2277,7 +2277,7 @@ while len(line) != 0:
         if len(lig_array) != 0 and lig_array != ['']:
             temp_filename = lig + ".MODEL_" + str(model_id) + ".pdbqt"
 
-            temp_f = open(temp_filename, 'w')
+            temp_f = open(temp_filename, "w")
             for ln in lig_array: temp_f.write(ln)
             temp_f.close()
 

@@ -21,10 +21,10 @@ def pick_docking_class_dict(dock_choice):
     This will retrieve all the names of every child class of the parent class ParentDocking
 
     
-    Input:
+    Inputs:
     :param list dock_choice: List with the User specified docking choices
     
-    Return:
+    Returns:
     :returns: object child_dict[dock_choice]: the class for running the chosen docking method
     """ 
     children = get_all_subclasses(ParentDocking)
@@ -42,10 +42,10 @@ def pick_run_conversion_class_dict(conversion_choice):
     This will retrieve all the names of every child class of the parent class ParentDocking
 
     
-    Input:
+    Inputs:
     :param list conversion_choice: List with the User specified docking choices
     
-    Return:
+    Returns:
     :returns: object child_dict[conversion_choice]: the class for running the chosen docking method
     """ 
     children = get_all_subclasses(ParentPDBQTConverter)
@@ -65,12 +65,12 @@ def run_docking_common(vars, current_gen_int, current_generation_dir, smile_file
     IF ONE INCORPORATES A NEW DOCKING SOFTWARE, CONFIRM THAT ITS INPUT/OUTPUTS CONFORM TO THIS SECTION.
     ############## VERY IMPORTANT SECTION######################## 
 
-    Input:
+    Inputs:
     :param dict vars: User variables which will govern how the programs runs
     :param int current_gen_int: the interger of the current generation indexed to zero
     :param str current_generation_dir: the current generation directory to find the subfolder with pdb files
     :param str smile_file_new_gen: the name of the file containing the molecules in the new population
-    Return:
+    Returns:
     :returns: str unweighted_ranked_smile_file: the name of the unweighted-ranked SMILES with their docking score
     """
     # Get directory string of PDB files for Ligands
@@ -163,11 +163,11 @@ def lig_convert_multithread(docking_object, pdb):
     If it failed failed_smiles_name will be a string of the SMILE which failed to convert
     If it converts failed_smiles_name will be a None. 
 
-    Input:
+    Inputs:
     :param object docking_object: the class for running the chosen docking method
     :param str pdb: the path to the pdb of a molecule
 
-    Return:
+    Returns:
     :returns: list failed_smiles_name: if the molecule failed to convert to final format. 
                             (ie. pdbqt conversion fail)
     """
@@ -179,11 +179,11 @@ def run_dock_multithread(docking_object, pdb):
     """
     Run the docking of a single molecule.
 
-    Input:
+    Inputs:
     :param object docking_object: the class for running the chosen docking method
     :param str pdb: the path to the pdb of a molecule
 
-    Return:
+    Returns:
     :returns: list failed_smiles_names: any smiles which were deleted 
                             (ie. docking failed)
     """

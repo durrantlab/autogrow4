@@ -47,7 +47,7 @@ class VINA(ParentScoring):
 
         Inputs:
         :param str file_path: the path to the file to be scored
-        Return:
+        Returns:
         :returns: list list_of_files: list of all files to be scored within the dir
         """    
         self.file_path = file_path
@@ -109,7 +109,7 @@ class VINA(ParentScoring):
     
         affinity = None
 
-        with open(file_path, 'r') as f:
+        with open(file_path, "r") as f:
             for line in f.readlines():
                 if "REMARK VINA" in line:
                     line_stripped = line.replace("REMARK VINA RESULT:","").replace("\n","")
@@ -158,7 +158,7 @@ class VINA(ParentScoring):
         pdb_path = self.file_path + lig_info[1] + ".pdb"
         if os.path.exists(pdb_path):
             new_smiles_string = None
-            with open(pdb_path,'r') as f:
+            with open(pdb_path, "r") as f:
                 for line in f.readlines():
                     if "REMARK Final SMILES string: " in line:
                         new_smiles_string = line.replace("REMARK Final SMILES string: ","").replace("\n","")

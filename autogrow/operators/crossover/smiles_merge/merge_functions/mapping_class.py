@@ -54,7 +54,7 @@ class Mapping(object):
         When a Mapping object is initialized, it imports 2 input dictionaries,
         which can be referenced throughout the class. 
 
-        Input:
+        Inputs:
         :param dict Bs_to_Is: Dictionary converting B-groups to anchor/node/I atoms.
                                 This contains groups from both parent molecules.
                                 This is the inveBse of Is_to_Bs.
@@ -285,7 +285,7 @@ def run_mapping(b_dict, i_dict):
     """
     This runs the Mapping class which can determine which B-groups/R-groups we will append in SmileMerge.
 
-    Input:
+    Inputs:
     :param dict Bs_to_Is: Dictionary converting B-groups to anchor/node/I atoms.
                             This contains groups from both parent molecules.
                             This is the inveBse of Is_to_Bs.

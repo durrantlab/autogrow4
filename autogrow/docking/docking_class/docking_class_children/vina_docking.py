@@ -256,7 +256,7 @@ class VinaDocking(ParentDocking):
         printout_info = ""
         retry = False
         line_count = 0
-        with open(lig_pdbqt_filename, 'r') as f:
+        with open(lig_pdbqt_filename, "r") as f:
             for line in f.readlines():
                 line_count = line_count + 1
                 if "HETATM" in line:
@@ -270,7 +270,7 @@ class VinaDocking(ParentDocking):
 
         if retry == True:
             print(printout_info)
-            with open(lig_pdbqt_filename, 'w') as f:
+            with open(lig_pdbqt_filename, "w") as f:
                 f.write(printout_of_file)
         else:
             printout_info = "\nCheck the docking message for 'Parse error on'"
@@ -287,7 +287,7 @@ class VinaDocking(ParentDocking):
         
         Inputs:
         :param str command: string of command to run.
-        Return:
+        Returns:
         :returns: int result: the exit output for the command. If its None of 256 it failed.
         """
         
@@ -359,7 +359,7 @@ class VinaDocking(ParentDocking):
         :param str smile_file:  File path for the file with the ligands for the generation which will be a .smi file
         :param list deleted_smiles_names_list: list of SMILES which may have failed the conversion process
 
-        Return:
+        Returns:
         :returns: str output_ranked_smile_file: the path of the output ranked .smi file
         """
 

@@ -624,7 +624,7 @@ class CrossoverTests(unittest.TestCase):
 
         self.assertEqual(r_chain_dictionary, known_r_chain_dictionary)
         self.assertEqual(R_Smiles_dictionary, Known_R_Smiles_dictionary)
-    def test_iso_to_IDX_replace_dictionary(self):
+    def test_iso_to_idX_replace_dictionary(self):
 
         mol = Chem.MolFromSmiles("[10000N-]=[10001N+]=[10002N][10003CH2][2004CH]1[2005NH2+][2006CH2][2007CH]([2008OH])[2009CH]([2010OH])[2011CH]1[2012OH]")
         mcs = Chem.MolFromSmiles("[10003CH3][10002N]=[10001N+]=[10000NH]")

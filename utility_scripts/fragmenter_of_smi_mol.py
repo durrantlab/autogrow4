@@ -394,7 +394,7 @@ if __name__ == "__main__":
     print("Importing .smi file")
 
     list_of_ligands = []
-    with open(smi_file_name, 'r') as smiles_file:
+    with open(smi_file_name, "r") as smiles_file:
         line_counter = 0
         for line in smiles_file:
             line_counter = line_counter + 1
@@ -486,7 +486,7 @@ if __name__ == "__main__":
     
     print("####")
     print("\nSaving list to file")
-    with open(output_smi_file_name, 'w') as f:
+    with open(output_smi_file_name, "w") as f:
         f.write(printout)
 
     

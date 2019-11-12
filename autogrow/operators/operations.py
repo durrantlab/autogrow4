@@ -26,11 +26,11 @@ def populate_generation(vars, generation_num):
     This will run all of the mutations, crossovers, and filters for a single generation.
         Populates a new generation of ligands.
 
-    Input:
+    Inputs:
     :param dict vars: a dictionary of all user variables
     :param int generation_num: the generation number    
 
-    Return:
+    Returns:
     :returns: str full_generation_smiles_file: the name of the .smi file containing the new population
     :returns: list full_generation_smiles_list: list with the new population of ligands
     :returns: bool None: returns None twice if any step failed. This will result in the program ending
@@ -242,11 +242,11 @@ def populate_generation_0(vars, generation_num=0):
     """
     This will handle all that is required for generation 0redock and handle the generation 0
 
-    Input:
+    Inputs:
     :param dict vars: a dictionary of all user variables
     :param int generation_num: the generation number    
 
-    Return:
+    Returns:
     :returns: str full_generation_smiles_file: the name of the .smi file containing the new population
     :returns: list full_generation_smiles_list: list with the new population of ligands.
     :returns: bool already_docked: if true we won't redock the source ligands. If False we will dock the source ligands.
@@ -318,7 +318,7 @@ def populate_generation_0(vars, generation_num=0):
         # Write all the ligands to a ranked file
         full_generation_smiles_list_printout = "\n".join(full_generation_smiles_list_printout)
         ranked_file = new_gen_folder_path + os.sep + "generation_0_ranked.smi"
-        with open(ranked_file, 'w') as f:
+        with open(ranked_file, "w") as f:
             f.write(full_generation_smiles_list_printout)
         return already_docked, full_generation_smiles_file, full_generation_smiles_list
     
@@ -341,11 +341,11 @@ def test_source_smiles_convert(smile_info):
          of being converted
         - it also checks that the SMILES string is able to be sanitized
 
-    Input:
+    Inputs:
     :param list smile_info: a list containing the SMILES of a ligand, its ID 
                         and potentially additional information about the ligand
 
-    Return:
+    Returns:
     :returns: list smile_info: If it passed the test, it returns the list containing the SMILES of a ligand,
                     its ID and potentially additional information about the ligand
     :returns: str printout: If it failed to convert it returns the error message. This passess out to prevent MPI print issues
@@ -371,7 +371,7 @@ def test_source_smiles_convert(smile_info):
 
     # Try importing it into RDKit with Sanitization off. Tests for errors in having the wrong data type
     try:
-        mol = Chem.MolFromSmiles(str(smile_str), sanitize = False)
+        mol = Chem.MolFromSmiles(str(smile_str), sanitize=False)
     except:
         printout = "REMOVING SMILES FROM SOURCE LIST: SMILES string failed to import into RDKit.\n"
         printout = printout + "\t Removed SMILE string is: {} \n".format(smile_str)
@@ -393,7 +393,7 @@ def test_source_smiles_convert(smile_info):
     # This will try protanating and Deprotanating the mol. If it can't handle that 
     # We reject it as many functions will require this sort of manipulation.
     # More advanced sanitization issues will also be removed in this step
-    mol = Chem.MolFromSmiles(str(smile_str), sanitize = False)
+    mol = Chem.MolFromSmiles(str(smile_str), sanitize=False)
     mol = MOH.handleHs(mol, True)
    
     if mol is None:
@@ -434,11 +434,11 @@ def get_complete_list_prev_gen_or_source_compounds(vars, generation_num):
     If generation is >1 than use the previous generations top ligands.
     This takes an .smi file
 
-    Input:
+    Inputs:
     :param dict vars: a dictionary of all user variables
     :param int generation_num: the interger of the current generation
 
-    Return:
+    Returns:
     :returns: list usable_list_of_smiles: a list with SMILES strings, names, and information about the smiles
                                         from the previous generation or the source compound list
     """
@@ -532,7 +532,7 @@ def make_seed_list(vars, source_compounds_list, generation_num, num_seed_diversi
     If generation is >0 than use the previous generations top ligands.
     This takes an .smi file
 
-    Input:
+    Inputs:
     :param dict vars: a dictionary of all user variables
     :param list source_compounds_list: a list with SMILES strings, names, and information about the smiles
                                         from either the previous generation or the source compound list
@@ -540,7 +540,7 @@ def make_seed_list(vars, source_compounds_list, generation_num, num_seed_diversi
     :param int num_seed_diversity: the number of seed molecules which come from diversity selection
     :param int num_seed_dock_fitness: the number of seed molecules which come from eite selection by docking score
     
-    Return:
+    Returns:
     :returns: list usable_list_of_smiles: a list with SMILES strings, names, and information about the smiles
                                         which will be used to seed the next generation
     """
@@ -597,11 +597,11 @@ def determine_seed_population_sizes(vars, generation_num):
     This function determines how many molecules will be chosen to seed a generation 
     because of their docking score and how many will assess because of their diversity score.
 
-    Input:
+    Inputs:
     :param dict vars: a dictionary of all user variables
     :param int generation_num: the interger of the current generation
 
-    Return:
+    Returns:
     :returns:  int num_seed_diversity: the number of seed molecules which come from diversity selection
     :returns:  int num_seed_dock_fitness: the number of seed molecules which come from eite selection by docking score
 
@@ -635,7 +635,7 @@ def make_pass_through_list(vars, smiles_from_previous_gen_list, num_elite_to_adv
     This function determines the molecules which elite ligands will advance from the previous generation
     without being altered into the next generation.
 
-    Input:
+    Inputs:
     :param dict vars: a dictionary of all user variables
     :param list smiles_from_previous_gen_list: List of SMILES from the last generation chosen to seed the 
                 list of molecules to advance to the next generation without modification via elitism.
@@ -643,7 +643,7 @@ def make_pass_through_list(vars, smiles_from_previous_gen_list, num_elite_to_adv
                 generation without modifications.
     :param int generation_num: the interger of the current generation
     
-    Return:
+    Returns:
     :returns: list list_of_ligands_to_advance: a list of ligands which should advance 
         into the new generation without modifications, via elitism from the last generation.
         Returns a printout of why it failed if it fails
@@ -731,7 +731,7 @@ def save_generation_smi(output_directory, generation_num, formatted_smile_list, 
     .smi file column 1 is the SMILES string and column 2 is its smile ID
 
 
-    Input:
+    Inputs:
     :param dict output_directory: the directory of the run to save the generation 
     :param int generation_num: the interger of the current generation
     :param list formatted_smile_list: list of the newly generated population of ligands
@@ -740,7 +740,7 @@ def save_generation_smi(output_directory, generation_num, formatted_smile_list, 
                             If it says '_to_convert' its the list of ligands which will need to be converted to 3D
                                 -this may or may not have the ligands which pass through from the last gen.
     
-    Return:
+    Returns:
     :returns: str output_file_name: name of the output file
     :returns: str new_gen_folder_path: the path to the folder containing all that will be in this generation
     """
@@ -754,7 +754,7 @@ def save_generation_smi(output_directory, generation_num, formatted_smile_list, 
         output_file_name = new_gen_folder_path + "generation_{}{}.smi".format(generation_num,nominclature_tag)
 
     # write as a tab delineated .smi file
-    with open(output_file_name, 'w') as f:
+    with open(output_file_name, "w") as f:
         for smile in formatted_smile_list:
             smile_string = smile[0]
             smile_id = smile[1]
@@ -772,7 +772,7 @@ def save_ligand_list(output_directory, generation_num, list_of_chosen_ligands, n
         describing what this data is used for. If it says seeding it is the chosen mols from the previous
         generation being used to seed the next generation
     
-    Input:
+    Inputs:
     :param dict output_directory: the directory of the run to save the generation 
     :param int generation_num: The generation number
     :param list list_of_chosen_ligands: The formatted list of ligands to seed a generation

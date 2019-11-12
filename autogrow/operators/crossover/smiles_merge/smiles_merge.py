@@ -16,7 +16,7 @@ def run_main_smiles_merge(vars, lig_string_1, lig_string_2):
     """
     This runs the main script for SmileMerge.
 
-    Input:
+    Inputs:
     :param dict vars: User variables which will govern how the programs runs
     
     :param str lig_string_1: smile string for lig 1
@@ -32,12 +32,12 @@ def run_main_smiles_merge(vars, lig_string_1, lig_string_2):
     # lig_string_2 = "C# CCOc1ccc2ccccc2c1CO"
     # lig_string_1 = "C1 = CC = CC = C1"
 
-    lig_smile_1 = Chem.MolFromSmiles(lig_string_1, sanitize = False)
-    lig_smile_2 = Chem.MolFromSmiles(lig_string_2, sanitize = False)
+    lig_smile_1 = Chem.MolFromSmiles(lig_string_1, sanitize=False)
+    lig_smile_2 = Chem.MolFromSmiles(lig_string_2, sanitize=False)
 
     # Sanitize
-    lig_smile_1 = Chem.MolFromSmiles(lig_string_1, sanitize = False)
-    lig_smile_2 = Chem.MolFromSmiles(lig_string_2, sanitize = False)
+    lig_smile_1 = Chem.MolFromSmiles(lig_string_1, sanitize=False)
+    lig_smile_2 = Chem.MolFromSmiles(lig_string_2, sanitize=False)
 
     # Sanitize, deprotanate, and reprotanate both molecules    
     mol_1 = MOH.check_sanitization(lig_smile_1)
@@ -118,7 +118,7 @@ def run_main_smiles_merge(vars, lig_string_1, lig_string_2):
     if Ligand_new_mol is None:
         return None
 
-    Ligand_new_smiles = Chem.MolToSmiles(Ligand_new_mol, isomericSmiles = True)
+    Ligand_new_smiles = Chem.MolToSmiles(Ligand_new_mol, isomericSmiles=True)
 
     return Ligand_new_smiles
 

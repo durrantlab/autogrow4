@@ -11,7 +11,7 @@ def spin_roulette_selector(usable_list_of_smiles, number_to_chose, docking_or_di
     """
     make a list of ligands chosen by a random weighted roulette selection, without replacement, weighted by its docking score 
 
-    Input:
+    Inputs:
     :param list usable_list_of_smiles: a list with all the information of all the mols 
                                             in the previous generation
     :param int number_to_chose: the number of molecules to chose based on docking score    

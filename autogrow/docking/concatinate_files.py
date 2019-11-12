@@ -16,7 +16,7 @@ def compress_file(file_name):
     Inputs:
     :param str file_name: the path to the file to compress.    
     """
-    with open(file_name, 'r') as f:
+    with open(file_name, "r") as f:
         printout = f.read()
     printout = printout.encode('utf-8')
     with gzip.open(file_name + ".gz", 'wb') as f:
@@ -28,7 +28,7 @@ def decompress_file(decompressed_file):
         counter of def compress_file(file_name) 
     Inputs:
     :param str decompressed_file: the path to the file to decompress.    
-    Return:
+    Returns:
     :returns: str decompressed_file: the path to the file to decompress.    
     """
     out_file = decompressed_file.replace('.gz',"")
@@ -56,11 +56,11 @@ def seperate_files(compressed_file):
     printout = ""
     list_of_new_files = []
     out_file = None    
-    with open(decompressed_file, 'r') as f:
+    with open(decompressed_file, "r") as f:
         for line in f.readlines():
             if "$$END_FILE$$" in line:
                 if out_file != None and os.path.exists(out_file)==False:
-                    with open(out_file, 'w') as f:
+                    with open(out_file, "w") as f:
                         f.write(printout + "\n")
                 out_file = None
                 printout = ""
@@ -98,7 +98,7 @@ def get_file_info(file_name):
         It returns it as a string
     Inputs:
     :param str file_name: the path to the file to compress.    
-    Return:
+    Returns:
     :returns: str concat: the text of the file file_name with a seperator 
             and label before and after the file text.    
     """

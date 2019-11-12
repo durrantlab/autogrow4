@@ -1924,7 +1924,7 @@ def dothing(file):
     smile_list = []
 
 
-    with open(file,'r') as f:
+    with open(file, "r") as f:
         for line in f.readlines():
         
 
@@ -1979,7 +1979,7 @@ def get_mols(file_name):
 
     job_input = [] 
     # counter = 0
-    with open(file_name,'r') as f:
+    with open(file_name, "r") as f:
 
         for line in f.readlines():
             
@@ -2096,10 +2096,10 @@ def write_to_badmol_library(missing_substructure,failed_reaction, output_folder,
         mol_info = "\t".join(temp_list)
         printout = printout + mol_info + "\n"
     if os.path.exists(missing_sub_file)==True:
-        with open(missing_sub_file, 'a') as f:
+        with open(missing_sub_file, "a") as f:
             f.write(printout) 
     else:
-        with open(missing_sub_file, 'w') as f:
+        with open(missing_sub_file, "w") as f:
             f.write(printout) 
 
     # failed_reaction
@@ -2115,10 +2115,10 @@ def write_to_badmol_library(missing_substructure,failed_reaction, output_folder,
         printout = printout + mol_info + "\n"
         
     if os.path.exists(failed_reaction_file)==True:
-        with open(failed_reaction_file, 'a') as f:
+        with open(failed_reaction_file, "a") as f:
             f.write(printout) 
     else:
-        with open(failed_reaction_file, 'w') as f:
+        with open(failed_reaction_file, "w") as f:
             f.write(printout) 
 
 
@@ -2133,7 +2133,7 @@ def write_to_goodmol_library(mols_dict, final_output_folder, functional_group_na
         temp = [mols_dict[key][0],mols_dict[key][1]]
         printout = printout + "\t".join(temp) + "\n"
 
-    with open(missing_sub_file, 'w') as f:
+    with open(missing_sub_file, "w") as f:
         f.write(printout) 
 
 def get_mols_dict_from_pickle(file_path):

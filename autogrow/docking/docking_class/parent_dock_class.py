@@ -52,7 +52,7 @@ class ParentDocking(object):
         :param str smile_file:  File path for the file with the ligands for the generation which will be a .smi file
         :param list deleted_smiles_names_list: list of SMILES which may have failed the conversion process
 
-        Return:
+        Returns:
         :returns: str output_ranked_smile_file: the path of the output ranked .smi file
         """
         raise NotImplementedError("rank_and_save_output_smi() not implemented")

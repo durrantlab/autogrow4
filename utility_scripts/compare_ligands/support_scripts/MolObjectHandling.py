@@ -133,7 +133,7 @@ def try_deprotanation(sanitized_mol):
         raise TypeError(printout)
     
     try:
-        mol = Chem.RemoveHs(sanitized_mol, sanitize = False)
+        mol = Chem.RemoveHs(sanitized_mol, sanitize=False)
     except:
         return None
     

@@ -13,10 +13,10 @@ def pick_run_class_dict(scoring_choice):
     """
     This will retrieve all the names of every child class of the parent class ParentScoring
     
-    Input:
+    Inputs:
     :param list scoring_choice: List with the User specified scoring choices
     
-    Return:
+    Returns:
     :returns: object child_dict[scoring_choice]: the class for running the chosen scoring method
     """ 
     children = get_all_subclasses(ParentScoring)
@@ -37,11 +37,11 @@ def run_scoring_common(vars, smile_file, folder_to_search):
     IF ONE INCORPORATES A NEW DOCKING OR SCORING SOFTWARE, CONFIRM THAT ITS INPUT/OUTPUTS CONFORM TO THIS SECTION.
     ############## VERY IMPORTANT SECTION########################    
 
-    Input:
+    Inputs:
     :param dict vars: User variables which will govern how the programs runs
     :param str smile_file: File path for the file with the ligands for the generation which will be a .smi file
     :param str folder_to_search: a directory to search containing docked ligands
-    Return:
+    Returns:
     :returns: dict lig_dict: a dictionary where the keys are the ligand shorthand names and the items are a list of any information about the ligand
                                 with the fitness measure as the -1 idx in each list
     """
@@ -116,11 +116,11 @@ def run_rescoring(vars, scoring_object, files_to_score):
     """
     Run a rescoring function on docked ligands.
 
-    Input:
+    Inputs:
     :param dict vars: User variables which will govern how the programs runs
     :param object scoring_object: the class for running the chosen scoring method
     :param list files_to_score: list of files to rescores
-        Return:
+        Returns:
     :returns: list completed_rescore: a list of all ligands which passed a scoring function.   
     """
     files_to_score = [x for x in files_to_score if x != None]
@@ -188,7 +188,7 @@ def make_lig_score_dictionary(list_of_list_of_lig_data):
 
     Returns:
     :returns: dict lig_dict: a dictionary containing the information of all ligands from list_of_list_of_lig_data
-                this dictionary has the short_ID as the key and the item is a list from list_of_list_of_lig_data 
+                this dictionary has the short_id as the key and the item is a list from list_of_list_of_lig_data 
                 for that ligand. Because there can be multiple files for multiple conformations of a given ligand,
                 this will reduce down multiple confirmations to a single ligand with the most negative fitness score.
         
@@ -216,14 +216,14 @@ def score_files_multithread(scoring_object, file_path, rescore_lig_efficiency, l
     """
     Run the scoring of a single molecule.
 
-    Input:
+    Inputs:
     :param object scoring_object: the class for running the chosen scoring method
     :param str file_path: the path to the file to be scored
     :param bol rescore_lig_efficiency: if True than the final score will be adjusted to the ligand efficieny score, 
         otherwise it will remain the output of the scoring_object
     :param object lig_efficiency_scoring_object: the class for running the rescoring by ligand efficieny
 
-    Return:
+    Returns:
     :returns: list list_of_lig_data: information about the scored ligand. Score is last index
                             (ie. [SMILES, lig_id, lig_id_shortname, any_details, fitness_score_to_use] )
     """

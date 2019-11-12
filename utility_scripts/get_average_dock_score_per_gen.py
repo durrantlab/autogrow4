@@ -38,7 +38,7 @@ def get_average_score_per_gen(infolder, folder_list):
         print("")
         for rank_file in ranked_file:
             # write as a tab delineated .smi file
-            with open(rank_file, 'r') as f:
+            with open(rank_file, "r") as f:
                 gen_affinity_sum = float(0.0)
                 num_lines_counter = float(0.0)
                 for line in f:
@@ -76,11 +76,11 @@ def get_average_top_score_per_gen(infolder, folder_list, top_score_per_gen):
 
         for rank_file in ranked_file:
             # Check number of lines
-            num_lines = sum(1 for line in open(rank_file,'r')) 
+            num_lines = sum(1 for line in open(rank_file, "r")) 
        
             if num_lines >= top_score_per_gen:
                 # read as a tab delineated .smi file
-                with open(rank_file, 'r') as f:
+                with open(rank_file, "r") as f:
                     gen_affinity_sum = float(0.0)
             
                     for i,line in enumerate(f.readlines()):

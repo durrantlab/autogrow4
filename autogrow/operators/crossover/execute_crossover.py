@@ -140,7 +140,7 @@ def convert_mol_from_smiles(smiles_string):
                         and None
     """
     try:
-        mol = Chem.MolFromSmiles(smiles_string, sanitize = False)  
+        mol = Chem.MolFromSmiles(smiles_string, sanitize=False)  
     except:
         return None
     
@@ -163,7 +163,7 @@ def make_crossovers(vars, generation_num, number_of_processors, num_crossovers_t
     
     This runs SmileClick and returns a list of new molecules.
     
-    Input:
+    Inputs:
     :param dict vars: User variables which will govern how the programs runs
     :param int generation_num: the generation number indexed by 0
     :param int number_of_processors: number of processors to multithread with
@@ -240,21 +240,21 @@ def make_crossovers(vars, generation_num, number_of_processors, num_crossovers_t
                 child_lig_smile = i[0]
 
                 # get the ID for the parent of a child mol
-                parent_lig_1_ID = i[1][1]
-                parent_lig_2_ID = i[2][1]
+                parent_lig_1_id = i[1][1]
+                parent_lig_2_id = i[2][1]
 
                 # get the unique ID (last few diget ID of the parent mol)
-                parent_lig_1_ID = parent_lig_1_ID.split(")")[-1]
-                parent_lig_2_ID = parent_lig_2_ID.split(")")[-1]
+                parent_lig_1_id = parent_lig_1_id.split(")")[-1]
+                parent_lig_2_id = parent_lig_2_id.split(")")[-1]
 
-                # Make a list of all smiles and smile_ID's of all previously made smiles in this generation
+                # Make a list of all smiles and smile_id's of all previously made smiles in this generation
                 list_of_already_made_smiles = []
-                list_of_already_made_ID = []
+                list_of_already_made_id = []
 
-                # fill lists of all smiles and smile_ID's of all previously made smiles in this generation
+                # fill lists of all smiles and smile_id's of all previously made smiles in this generation
                 for x in new_ligands_list:
                     list_of_already_made_smiles.append(x[0])
-                    list_of_already_made_ID.append(x[1])
+                    list_of_already_made_id.append(x[1])
 
                 if child_lig_smile not in list_of_already_made_smiles:
                     # if the smiles string is unique to the list of previous smile strings
@@ -263,22 +263,22 @@ def make_crossovers(vars, generation_num, number_of_processors, num_crossovers_t
                     is_name_unique = False
                     while is_name_unique is False:     
 
-                        # make unique ID with the 1st number being the ligand_ID_Name for the derived mol
+                        # make unique ID with the 1st number being the ligand_id_Name for the derived mol
                         # second being the lig2 number
                         # Followed by Cross 
                         # folowed by the generationnumber
                         # followed by a  unique 
 
                         random_id_num = random.randint(100,1000000)
-                        new_lig_ID = "({}+{})Gen_{}_Cross_{}".format(parent_lig_1_ID,parent_lig_2_ID,generation_num,random_id_num)
+                        new_lig_id = "({}+{})Gen_{}_Cross_{}".format(parent_lig_1_id,parent_lig_2_id,generation_num,random_id_num)
                         
                         # check name is unique
-                        if new_lig_ID not in list_of_already_made_ID:
+                        if new_lig_id not in list_of_already_made_id:
                             is_name_unique = True
 
                     # make a temporary list containing the smiles string of the new product
                     # and the unique ID
-                    ligand_info = [child_lig_smile, new_lig_ID]
+                    ligand_info = [child_lig_smile, new_lig_id]
 
                     # append the new ligand smile and ID to the list of all newly made ligands
                     new_ligands_list.append(ligand_info)
@@ -343,7 +343,7 @@ def do_crossovers_smiles_merge(vars, lig1_smile_pair, ligands_list):
     This pair of ligands will be passed off to the smiles_merge.run_main_smiles_merge function
     which will execute a crossover and return a new molecule 
 
-    Input:
+    Inputs:
     :param dict vars: User variables which will govern how the programs runs
     :param list lig1_smile_pair: a list with the SMILES string and info for lig1
     :param list ligands_list: a list of all the seed ligands from the previous generation

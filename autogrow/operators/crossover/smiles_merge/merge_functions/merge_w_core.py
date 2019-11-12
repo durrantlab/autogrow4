@@ -54,10 +54,10 @@ def merge_smiles_with_core(rs_chosen_smiles, mcs_mol):
             # Dicts will be passed into functions within the for loop which should handle 
             # the merging of each R-group to the MCS.
             # Note that making mols with the sanitize=True will kill most of these fragmented mols
-            # So always Chem.MolFromSmiles(frag, sanitize = False)
+            # So always Chem.MolFromSmiles(frag, sanitize=False)
             
             # make a rdkit mol out of the smiles string of the R-group frag
-            mol_frag = Chem.MolFromSmiles(frag, sanitize = False)
+            mol_frag = Chem.MolFromSmiles(frag, sanitize=False)
 
             # Try to sanitize the mol_frag
             # It often fails but lets try on some
@@ -177,7 +177,7 @@ def make_dict_all_atoms_iso_to_idx_dict(mol):
     """
     Make a dictionary of every atom in a molecule with Iso as the key and the Idx as its value.
 
-    Input:
+    Inputs:
     :param rdkit.Chem.rdchem.Mol mol: an rdkit molecule
                                         
     Return

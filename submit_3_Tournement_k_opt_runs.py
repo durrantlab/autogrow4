@@ -9,7 +9,7 @@ if os.path.exists(output_dir)==False:
     
 for i in [1,2,3]:
     printout = ""
-    with open(sub_script_original,'r') as f:
+    with open(sub_script_original, "r") as f:
         for line in f.readlines():
             if "#SBATCH --job-name=" in line:
                 line = line.replace("_0\n","_{}\n".format(i))
@@ -23,7 +23,7 @@ for i in [1,2,3]:
     
 
     output_subscript = "{}Tournement_k_varied_opt_Run_{}.sh".format(output_dir,i)
-    with open(output_subscript, 'w') as f:
+    with open(output_subscript, "w") as f:
         f.write(printout) 
 
     command = "sbatch {}".format(output_subscript)

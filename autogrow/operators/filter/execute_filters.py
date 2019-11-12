@@ -20,7 +20,7 @@ def make_run_class_dict(filters_to_use):
     This will retrieve all the names of every child class of the parent class
     ParentFilter
 
-    Input:
+    Inputs:
     :param list filters_to_use: list of filters to be used.
             defined in vars["chosen_ligand_filters"]
 
@@ -54,7 +54,7 @@ def run_filter(vars, list_of_new_ligands):
     This will take a list of lists of ligands to filter. list_of_new_ligands =
     [["CCC","Zinc123],["CCCC","Zinc1234]]
 
-    Input:
+    Inputs:
     :param dict vars: User variables which will govern how the programs runs
     :param list list_of_new_ligands: list of lists containing all the newly
         generated ligands and their names
@@ -102,7 +102,7 @@ def run_filter_mol(smile_info, child_dict):
 
     smiles_string = smile_info[0]
 
-    mol = Chem.MolFromSmiles(smiles_string, sanitize = False)
+    mol = Chem.MolFromSmiles(smiles_string, sanitize=False)
     # try sanitizing, which is necessary later
     mol = MOH.check_sanitization(mol)
     if mol is None:
@@ -146,7 +146,7 @@ def run_filter_on_just_smiles(smile_string, child_dict):
         False If the mol fails a filter.
     """
 
-    mol = Chem.MolFromSmiles(smile_string, sanitize = False)
+    mol = Chem.MolFromSmiles(smile_string, sanitize=False)
     # try sanitizing, which is necessary later
     mol = MOH.check_sanitization(mol)
     if mol is None:
@@ -175,13 +175,13 @@ def run_all_selected_filters(mol, child_dict):
     molecule. returns True if the mol passes all the chosen filters. returns
     False if the mol fails any of the filters.
 
-    Input:
+    Inputs:
     :param rdkit.Chem.rdchem.Mol object mol: An rdkit mol object to be tested
         if it passes the filters
     :param dict child_dict: This dictionary contains all the names of the
         chosen filters as keys and the the filter objects as the items
 
-    Return:
+    Returns:
     returns bol bol: True if the mol passes all the filters. False if the mol
         fails any filters.
     """

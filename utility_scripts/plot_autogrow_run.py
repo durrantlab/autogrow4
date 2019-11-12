@@ -29,9 +29,9 @@ def get_usable_fomat(infile):
             Any other information MUST be between part 2 and part -2 (this allows for the 
                 expansion of features without disrupting the rest of the code)
 
-    Input:
+    Inputs:
     :param str infile: the string of the PATHname of a formatted .smi file to be read into the program
-    Return:
+    Returns:
     :returns: list usable_list_of_smiles: list of SMILES and their associated information formated into a list
                                     which is usable by the rest of Autogrow
     """   
@@ -53,10 +53,10 @@ def get_average_score_per_gen(infolder, folder_list):
     """
     This script will get the average docking score from the ranked .smi file from each generation.
 
-    Input:
+    Inputs:
     :param str infolder: the path of the folder which has all of the generation folders
     :param list folder_list: a list of generation folders for each generation within infolder
-    Return:
+    Returns:
     :returns: list usable_list_of_smiles: list of SMILES and their associated information formated into a list
                                     which is usable by the rest of Autogrow
     """ 
@@ -68,7 +68,7 @@ def get_average_score_per_gen(infolder, folder_list):
 
         for rank_file in ranked_file:
             # write as a tab delineated .smi file
-            with open(rank_file, 'r') as f:
+            with open(rank_file, "r") as f:
                 gen_affinity_sum = float(0.0)
                 num_lines_counter = float(0.0)
                 for line in f:
@@ -98,12 +98,12 @@ def get_average_top_score_per_gen(infolder, folder_list, top_score_per_gen):
     This script will get the average docking score of the top N number of ligands 
      ranked .smi file from each generation.
 
-    Input:
+    Inputs:
     :param str infolder: the path of the folder which has all of the generation folders
     :param list folder_list: a list of generation folders for each generation within infolder
     :param int top_score_per_gen: the number of ligands to determine the average score.
                 ie) if top_score_per_gen=50 it will return the average of the top 50 scores.
-    Return:
+    Returns:
     :returns: dict average_affinity_dict: dictionary of average affinity scores for top_score_per_gen number of ligands
     """ 
     average_affinity_dict = {}
@@ -115,13 +115,13 @@ def get_average_top_score_per_gen(infolder, folder_list, top_score_per_gen):
         for rank_file in ranked_file:
             # Check number of lines
             num_lines=0 
-            with open(rank_file,'r') as rf:
+            with open(rank_file, "r") as rf:
                 for line in rf:
                     num_lines=num_lines+1
        
             if num_lines >= top_score_per_gen:
                 # read as a tab delineated .smi file
-                with open(rank_file, 'r') as f:
+                with open(rank_file, "r") as f:
                     gen_affinity_sum = float(0.0)
             
                     for i,line in enumerate(f.readlines()):
@@ -154,7 +154,7 @@ def print_gens(average_affinity_dict):
     """
     This prints out the average scores for each generation
 
-    Input:
+    Inputs:
     :param dict average_affinity_dict: dictionary of average affinity scores for top_score_per_gen number of ligands
     """ 
     print("generation_number              average affinity score")
@@ -168,9 +168,9 @@ def make_graph(dictionary):
     Because some generations may not have 50 ligands this basically checks to see if 
     theres enough ligands and prepares lists to be plotted
     
-    Input:
+    Inputs:
     :param dict dictionary: dictionary of average affinity scores for top_score_per_gen number of ligands
-    Return:
+    Returns:
     :returns: list list_generations: list of ints for each generation to be plotted.
         if a generation lacks ligands to generate the average it will return "N/A"
     :returns: list list_of_scores: list of averages for each generation; 
@@ -359,7 +359,7 @@ def make_vars_dict(autogrow_vars_json):
         raise Exception("variable file could not be found. It should be the \
             vars.json file written by AutoGrow in the output folder of the run.")
     try:
-        with open(autogrow_vars_json, 'r') as f:
+        with open(autogrow_vars_json, "r") as f:
             vars = json.load(f)
     except:
         raise Exception("variable file would not import. It should be the \

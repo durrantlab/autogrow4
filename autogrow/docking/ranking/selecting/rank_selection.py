@@ -8,7 +8,7 @@ def run_rank_selector(usable_list_of_smiles, number_to_chose, column_idx_to_sele
 
     This is an alternative to the weight roulette style selectors. 
 
-    Input:
+    Inputs:
     :param list usable_list_of_smiles: a list with all the information of all the mols in the previous generation
     :param int number_to_chose: the number of molecules to chose based on diversity score
     :param int column_idx_to_select: the idx to use as the criteria for selection.

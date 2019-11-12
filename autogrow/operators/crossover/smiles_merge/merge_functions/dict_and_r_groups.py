@@ -138,7 +138,7 @@ def mol_handling_of_fragmenting_labeling_and_indexing(mol, mcs_mol, lig_number):
     list_r_groups = []
     i = 0
     while i < len(mol_frags):
-        val = Chem.MolToSmiles(mol_frags[i],isomericSmiles = True)
+        val = Chem.MolToSmiles(mol_frags[i],isomericSmiles=True)
         list_r_groups.append(val)
         i = i + 1
         
@@ -316,7 +316,7 @@ def r_groups_dict(mol_frags, lig_number_for_multiplier):
         R_list_idx = []
         r_list_temp = []
         r_list_smiles = []
-        r_list_smiles = Chem.MolToSmiles(frag, isomericSmiles = True)
+        r_list_smiles = Chem.MolToSmiles(frag, isomericSmiles=True)
         for atoms in frag.GetAtoms():
             iso = atoms.GetIsotope()
             if 3000> iso >100:
@@ -374,7 +374,7 @@ def get_idx_using_unique_iso(mol, iso_val):
     which has that isotope label. This assumes there is only 1 atom in a mol
     with the same isotope value
     
-    Input:
+    Inputs:
     :param rdkit.Chem.rdchem.Mol mol: a molecule whose atom's have unique isotope labels
     :param int iso_val:  the isotope value to search by
     
@@ -456,7 +456,7 @@ def invert_dictionary(old_dic):
     This will invert any dictionary so that the keys are the values and the values are the keys.
     Inputs: 
     :param dict old_dic: a dictionary to invert 
-    Return: 
+    Returns: 
     :returns: dict inverted_dic: old_dict dict inverted so the keys are the items and the items are the keys
     """
     

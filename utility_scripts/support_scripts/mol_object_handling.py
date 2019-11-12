@@ -122,7 +122,7 @@ def try_deprotanation(sanitized_mol):
                                             it returns None if H's can't be added or if sanitation fails
     """
     try:
-        mol = Chem.RemoveHs(sanitized_mol, sanitize = False)
+        mol = Chem.RemoveHs(sanitized_mol, sanitize=False)
     except:
         return None
 

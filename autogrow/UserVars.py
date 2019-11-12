@@ -44,7 +44,7 @@ def save_vars_as_json(vars):
         starting with 2. The util scripts will only look at the original "vars.json"
             ie) output_directory + "vars_2.json"
 
-    Input:
+    Inputs:
     :param dict vars: dict of user variables which will govern how the programs runs
     """
     output_directory = vars["output_directory"]
@@ -69,7 +69,7 @@ def save_vars_as_json(vars):
         temp_vars[k] = copy.deepcopy(vars[k])
 
 
-    with open(vars_file, 'w') as fp:
+    with open(vars_file, "w") as fp:
         json.dump(temp_vars, fp)
 # 
 
@@ -77,7 +77,7 @@ def multiprocess_handling(vars):
     """
     This function handles the multiprocessing functions. It establishes a Paralellizer object
     and adds it to the vars dictionary.
-    Input:
+    Inputs:
     :param dict vars: dict of user variables which will govern how the programs runs
     Returns:
     :returns: dict vars: dict of user variables which will govern how the programs runs
@@ -613,7 +613,7 @@ def check_value_types(vars, argv):
             2) argv[key] = "1.01" and vars[key] = 2.1 
                 this script will change argv[key] from "1.01" to float(1.01)       
 
-    Input:
+    Inputs:
     :param dict vars: Dictionary of program defaults, which will later be 
         overwriten by argv values
     :param dict argv: Dictionary of User specified variables
@@ -697,7 +697,7 @@ def load_in_commandline_parameters(argv):
     """
     Load in the command-line parameters
     
-    Input:
+    Inputs:
     :param dict argv: Dictionary of User specified variables
 
     Returns:
@@ -944,7 +944,7 @@ def find_previous_runs(folder_name_path):
             - ie if there are folders Run_0, Run_1, Run_2 the function will return int(2)
         - If there are no previous Run folders it returns None.
         
-    Input:
+    Inputs:
     :param str folder_name_path: is the path of the root output folder. We will 
         make a directory within this folder to store our output files
 
@@ -984,7 +984,7 @@ def set_run_directory(root_folder_path, start_a_new_run):
             -If no previous runs exist in the root_folder_path then make a new 
             folder named root_folder_path + "Run_0"
 
-    Input:
+    Inputs:
     :param str root_folder_path: is the path of the root output folder. We will 
         make a directory within this folder to store our output files        
     :param bol start_a_new_run: True or False to determine if we continue from 
@@ -1115,7 +1115,7 @@ def handle_alternative_filters(vars, filter_list):
     """
     This will handle Custom Filters
 
-    Input:
+    Inputs:
     :param dict vars: Dictionary of User variables
     :param list filter_list: a list of the class of filter which will be used 
         later to check for drug likeliness for a generation.
@@ -1199,7 +1199,7 @@ def make_complete_children_dict(purpose_of_object):
     This can be either Filter, ParentPDBQTConverter, ParentDocking, 
     or ParentScoring
     
-    Input:
+    Inputs:
     :param str purpose_of_object: either Filter, ParentPDBQTConverter, 
         ParentDocking, or ParentScoring
     Returns:
@@ -1237,7 +1237,7 @@ def handle_custom_conversion_script(vars):
     """
     This will handle Custom Conversion_scripts
 
-    Input:
+    Inputs:
     :param dict vars: Dictionary of User variables
     Returns:
     :returns: dict vars: Dictionary of User variables modified with 
@@ -1314,7 +1314,7 @@ def handle_custom_docking_script(vars):
     """
     This will handle Custom Docking_scripts
 
-    Input:
+    Inputs:
     :param dict vars: Dictionary of User variables
     Returns:
     :returns: dict vars: Dictionary of User variables modified with the 
@@ -1390,7 +1390,7 @@ def handle_custom_scoring_script(vars):
     """
     This will handle Custom scoring_scripts
 
-    Input:
+    Inputs:
     :param dict vars: Dictionary of User variables
     Returns:
     :returns: dict vars: Dictionary of User variables modified with the 
@@ -1465,7 +1465,7 @@ def handle_custom_dock_and_conversion_scoring_options(vars):
     This function handles selecting the user defined Custom options 
     for Custom docking Conversion, and Scoring scripts.
 
-    Input:
+    Inputs:
     :param dict vars: Dictionary of User variables
     Returns:
     :returns: dict vars: Dictionary of User variables with the added options
@@ -1501,7 +1501,7 @@ def filter_choice_handling(vars):
     """
     This function handles selecting the user defined Ligand filters.
 
-    Input:
+    Inputs:
     :param dict vars: Dictionary of User variables
     Returns:
     :returns: dict vars: Dictionary of User variables with the 
@@ -1528,7 +1528,7 @@ def picked_filters(vars):
     This will take the user vars and return a list of the filters 
     which a molecule must pass to move into the next generation.
 
-    Input:
+    Inputs:
     :param dict vars: Dictionary of User variables
     Returns:
     :returns: list filter_list: a list of the class of filter which will be used 

@@ -27,7 +27,7 @@ class StdoutRedirection:
 
     def __init__(self, path):
         """
-        Input:
+        Inputs:
         :param str path: the path 
         """
         self._path = path
@@ -48,7 +48,7 @@ class StdoutRedirection:
     def __exit__(self, exc_type, exc_val, exc_tb):
         """
         exit the output piping
-        Input:
+        Inputs:
         :param obj exc_type: exc_type 
         :param obj exc_val: exc_val 
         :param obj exc_tb: exc_tb 
@@ -64,7 +64,7 @@ def convert_to_3d(vars, smi_file, smile_file_directory):
     Gypsum converts SMILES in an .smi file to 3D .sdf files
     Then rdkit converts the sdfs to PDB files.
 
-    Input:
+    Inputs:
     :param dict vars: User variables which will govern how the programs runs
     :param str smi_file: the file name of the .smi file
     :param srt smile_file_directory: the directory path which contains the .smi file 
@@ -424,7 +424,7 @@ def convert_sdf_to_pdbs(vars, gen_folder_path, sdf_folder_path):
     It will find any .sdf files within the folder_path and convert them to .pdb types using rdkit.Chem.
     It also makes a subfolder to store the pdb files if one doesn't already exist in the folder_path.
    
-    Input:
+    Inputs:
     :param dict vars: User variables which will govern how the programs runs
     :param str gen_folder_path: Path of the folder for the current generation
     :param str sdf_folder_path: Path of the folder with all of the 3D .sdf files to convert
@@ -463,7 +463,7 @@ def convert_single_sdf_to_pdb(pdb_subfolder_path, sdf_file_path):
     """
     This will convert a given .sdf into seperate .pdb files.
    
-    Input:
+    Inputs:
     :param str pdb_subfolder_path: Path of the folder to place all created pdb files
     :param str sdf_file_path: Path of the sdf_file_path to convert to pdb files
     """
@@ -523,7 +523,7 @@ def convert_single_sdf_to_pdb(pdb_subfolder_path, sdf_file_path):
                         
                         with open(pdb_name) as f:
                             printout = printout + f.read()
-                        with open(pdb_name,'w') as f:
+                        with open(pdb_name, "w") as f:
                             f.write(printout)
                         printout = ""
 

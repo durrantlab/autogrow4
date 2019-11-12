@@ -21,12 +21,12 @@ def handle_mcs_align_labeling_and_cyclicbreaks(mol_1, mol_2, mcs_mol):
         renumber and isotope atoms in mol_1, mol_2, mcs_mol to be tractable
             and consistent amongst the three
             
-    Input:
+    Inputs:
     :param rdkit.Chem.rdchem.Mol mol_1: an rdkit molecule 
     :param rdkit.Chem.rdchem.Mol mol_2: an rdkit molecule 
     :param Chem.MolFromSmarts(mcs_res_SMART) mcs_mol: a result object from rdkits MCS function
          
-    Return:
+    Returns:
     :returns: rdkit.Chem.rdchem.Mol mol_1: an rdkit molecule isolabeled and renumbered or None if it fails
     :returns: rdkit.Chem.rdchem.Mol mol_2: an rdkit molecule isolabeled  and renumbered or None if it fails
     :returns: mcs_res_Mol mcs_mol: an MCS result isolabeled and no breaks or None if it fails
@@ -230,11 +230,11 @@ def ringbreak_frag_handling(new_core, mcs_ringbreak_idx):
     can cause fragmenation. so this step handles that and takes the largest fragment as the 
     new common core.
     
-    Input:
+    Inputs:
     :param rdkit.Chem.rdchem.Mol new_core: common core mol object
     :param list mcs_ringbreak_idx: list of the idx's of the common core for iso labels and later 
                                     adjustment iso labels and idx numbers
-    Return:
+    Returns:
     :returns: list iso_core_frag_list: list of the idx's of common core; same as mcs_ringbreak_idx unless there was fragmentation
                                 that needed to be handled.
     """
@@ -292,9 +292,9 @@ def find_biggest_frag(frag_mols_obj):
     This will take a frag mol object and return the largest fragment and the index in
     frag_mols_obj.
     
-    Input:
+    Inputs:
     :param tuple frag_mols_obj: A tuple containing all the fragments of an rdkit mol.
-    Return:
+    Returns:
     :returns: rdkit.Chem.rdchem.Mol frag_mols_obj: The largest rdkit mol obj in the provided tuple
     :returns: int idx_of_max: the idx number of the largest rdkit mol obj in the provided tuple.
     """
@@ -325,7 +325,7 @@ def remove_iso_labels(mol, list_of_idx_to_remove):
     Given a molecule and a set of idx numbers this will remove the 
     isotope labels for atoms with the idx numbers in the list.
 
-    Input:
+    Inputs:
     :param rdkit.Chem.rdchem.Mol mol: rdkit mol which needs the iso labeles removed
     :param list list_of_idx_to_remove: a list of the idx's which need the isolabels removed
     """
@@ -382,7 +382,7 @@ def pick_mcs_alignment(mol_1, mol_2, common_core):
                         to the atom in the common substructure index as 1
                         
 
-    Input:
+    Inputs:
     :param rdkit.Chem.rdchem.Mol mol_1: rdkit mol for ligand 1
     :param rdkit.Chem.rdchem.Mol mol_2: rdkit mol for ligand 2
     :param rdkit.Chem.rdchem.Mol common_core: rdkit mol for the shared core between mol_1 and mol_2
@@ -442,7 +442,7 @@ def add_mcs_isolabels(mol_1, mol_2, common_core, picked_alignment):
                                         Thus the IDx atom in mol_2 which corresponds to the 3rd atom in the common_core
                                         is 10.
                                     
-    Return:
+    Returns:
     :returns: tuple final_index: tuple with three sublists which are the same as picked_alignment[2]).
     """
     i = 0    
@@ -465,7 +465,7 @@ def renumber_to_mcs(mol, tuple_order_list):
     """
     This renumbers the indexes of the atoms in a lig to that of the MCS and returns a renumbered atom.
     
-    Input:
+    Inputs:
     :param rdkit.Chem.rdchem.Mol mol: an rdkit molecule 
     :param tuple tuple_order_list: a tuple with 3 subtuples for mol_1,mol_2,common_core
                                 The numbers within the sublist is the atom IDx for a given atom in a ligand.

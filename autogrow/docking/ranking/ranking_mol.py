@@ -30,7 +30,7 @@ def create_seed_list(usable_list_of_smiles, generation_num, num_seed_diversity, 
 
     It will return this list with the complete information of each chosen mol (weighted_order_list)
 
-    Input:
+    Inputs:
     :param list usable_list_of_smiles: a list with SMILES strings, names, and information about the smiles
                                         from either the previous generation or the source compound list
     :param int generation_num: the generation of the current population
@@ -119,7 +119,7 @@ def get_chosen_mol_full_data_list(chosen_mol_list, usable_list_of_smiles):
 
     It will return that list of the chosen molecules in a randomly shuffled order.
 
-    Input:  
+    Inputs:  
     :param list chosen_mol_list: a list of chosen molecules 
     :param list usable_list_of_smiles: List of all the possibly chosen ligs and all the of the info about it
                                                 (ie. ligand name, SMILES string, docking score, diversity score...)
@@ -163,9 +163,9 @@ def get_usable_fomat(infile):
             Any other information MUST be between part 2 and part -2 (this allows for the 
                 expansion of features without disrupting the rest of the code)
 
-    Input:
+    Inputs:
     :param str infile: the string of the PATHname of a formatted .smi file to be read into the program
-    Return:
+    Returns:
     :returns: list usable_list_of_smiles: list of SMILES and their associated information formated into a list
                                     which is usable by the rest of Autogrow
     """   
@@ -196,7 +196,7 @@ def convert_usable_list_to_lig_dict(usable_list_of_smiles):
     This will convert a list created by get_usable_fomat() to a dictionary using 
     the ligand smile+lig_id as the key. This makes for faster searching in larger Autogrow runs.
     
-    Input:
+    Inputs:
     :param list usable_list_of_smiles: list of SMILES and their associated information formated into a list
                                     which is usable by the rest of Autogrow
     Returns:

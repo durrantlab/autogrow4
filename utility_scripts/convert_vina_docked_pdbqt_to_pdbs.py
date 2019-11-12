@@ -36,7 +36,7 @@ def run_conversion_for_a_vina_file(vina_file, output_folder, max_num_of_poses, m
 
     If criteria such as  max_num_of_poses, max_docking_score, min_docking_score a pose must meet all criteria to be converted
 
-    Input:
+    Inputs:
     :param str vina_file: Path to vina file to convert
     :param str output_folder: Path to vina file to output folder
     :param int max_num_of_poses: Max number of poses to convert to pdb
@@ -52,7 +52,7 @@ def run_conversion_for_a_vina_file(vina_file, output_folder, max_num_of_poses, m
 
     short_name = os.path.basename(vina_file).replace(".pdbqt.vina","")
 
-    with open(vina_file,'r') as f:
+    with open(vina_file, "r") as f:
         pose_number = 1
         printout_list = []
         score = 0.0
@@ -105,7 +105,7 @@ def run_conversion_for_a_vina_file(vina_file, output_folder, max_num_of_poses, m
                     # write to a file
                     outfile = output_folder + os.sep + short_name + "_pose_{}.pdb".format(pose_number)
 
-                    with open(outfile, 'w') as f:
+                    with open(outfile, "w") as f:
                         f.write(printout_pdb)
                     
                 # Reset variables for the next iteration
@@ -124,7 +124,7 @@ def run_conversion_for_a_vina_file(vina_file, output_folder, max_num_of_poses, m
 def convert_pdbqt_to_pdb(list_of_lines):
     """
     Converts lines from a pdbqt.vina file pose to pdb format.
-    Input:
+    Inputs:
     :param list list_of_lines: list of lines of a docked pdbqt pose
     Returns:
     :returns: str printout: A string for a .pdb to write to a file

@@ -39,7 +39,7 @@ def compress_file(file_name):
     """
     Compress the concatinated file
     """
-    with open(file_name, 'r') as f:
+    with open(file_name, "r") as f:
         printout = f.read()
     printout = printout.encode('utf-8')
     with gzip.open(file_name + ".gz", 'wb') as f:
@@ -75,11 +75,11 @@ def seperate_files(compressed_file, outfolder):
     printout = ""
     list_of_new_files = []
     out_file = None    
-    with open(decompressed_file, 'r') as f:
+    with open(decompressed_file, "r") as f:
         for line in f.readlines():
             if "$$END_FILE$$" in line:
                 if out_file != None and os.path.exists(out_file)==False:
-                    with open(out_file, 'w') as f:
+                    with open(out_file, "w") as f:
                         f.write(printout + "\n")
                 out_file = None
                 printout = ""
@@ -118,7 +118,7 @@ def del_files(file_or_folder):
     """
     This deletes all temporary files.
 
-    Input:
+    Inputs:
     :param str file_or_folder: the file or folder to delete
     
     """

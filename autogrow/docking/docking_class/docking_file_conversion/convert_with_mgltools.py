@@ -232,7 +232,7 @@ class MGLToolsConversion(ParentPDBQTConverter):
         """  
         # read in the file
         output_lines = []
-        with open(filename,'r') as f:
+        with open(filename, "r") as f:
             for line in f.readlines():
                 line = line.replace("\n","")
                 if line[:5] == "ATOM " or line[:7] == "HETATM ":
@@ -272,7 +272,7 @@ class MGLToolsConversion(ParentPDBQTConverter):
                     output_lines.append(line)
                     
 
-        with open(filename,'w') as f:
+        with open(filename, "w") as f:
             
             for line in output_lines:
                 f.write(line + "\n")
@@ -292,7 +292,7 @@ class MGLToolsConversion(ParentPDBQTConverter):
                                 with the new lines and COMPND removed
         """   
         if os.path.exists(pdb_file):  
-            with open(pdb_file, 'r') as f:
+            with open(pdb_file, "r") as f:
                 for line in f.readlines():
                     if "COMPND" in line:
                         line_stripped = line.replace("COMPND","").strip()   #Need to remove whitespaces on both ends

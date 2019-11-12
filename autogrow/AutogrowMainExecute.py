@@ -14,7 +14,7 @@ def main_execute(vars):
     """
     This function takes the user variables and runs Autogrow
 
-    Input:
+    Inputs:
     :param dict vars: dict of user variables which will govern how the programs runs
     """   
 
@@ -144,7 +144,7 @@ def determine_current_gen(output_directory):
             -ie if a failed generation directory was named PATH/generation_3 it will be rename Path/generation_3_Failed_0
                 -if Path/generation_3_Failed_0 already exists it will be name Path/generation_3_Failed_1 or so on until unique
 
-    Input:
+    Inputs:
     :param str output_directory: is the path of the Run folder within root output folder. 
 
     Returns:
@@ -211,7 +211,7 @@ def find_last_generation(folder_path_string_no_gen):
 
     folder_path_string_no_gen = output_directory + "generation_"
 
-    Input:
+    Inputs:
     :param str folder_path_string_no_gen: the folder to check. 
 
     Returns:
@@ -250,7 +250,7 @@ def determine_if_gen_completed(gen_dir_path, gen_number):
     between the word generation and ranked).
         -If a Run failed due to either a hard crash or a soft crash, there should not be a ranked .smi file.
     
-    Input:
+    Inputs:
     :param str gen_dir_path: is the path of the generation folder within a Run folder. 
     :param int gen_number: The generation number of the folder.
 
@@ -272,7 +272,7 @@ def delete_temporary_files_and_folders(file_or_folder):
     """
     This deletes all temporary files.
 
-    Input:
+    Inputs:
     :param str file_or_folder: the file or folder to delete
     
     """

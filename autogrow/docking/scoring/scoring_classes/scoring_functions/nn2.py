@@ -52,7 +52,7 @@ class NN2(VINA):
 
         Inputs:
         :param str file_path: the path to the file to be scored
-        Return:
+        Returns:
         :returns: list list_of_NN2_files: list of all files to be scored within the dir
         """   
          
@@ -130,7 +130,7 @@ class NN2(VINA):
 
         score = None
 
-        with open(file_path, 'r') as f:
+        with open(file_path, "r") as f:
             while True:
                 line = f.readline()
                 if len(line) == 0: break
@@ -192,10 +192,10 @@ def run_nn_rescoring(vars, vina_output_file):
     #     [PATH, True] means it passed
     #     [PATH, False] means it failed a results of all NN2 files
     
-    Input:
+    Inputs:
     :param dict vars: User variables which will govern how the programs runs
     :param str vina_output_file: Path to a vina output file to be rescored
-    Return:
+    Returns:
     :returns: list results: of the rescoring function: [file_path, it_rescored]
         [PATH, True] means it passed
         [PATH, False] means it failed a results of all NN2 files
@@ -233,10 +233,10 @@ def execute_nn_scoring(command, file_path):
     returns None if it worked
     If it failes to rescore it returns the NN2 output file which failed to be produced.
 
-    Input:
+    Inputs:
     :param str command: the rescoring bash style command to execute
     :param str file_path: Path to a vina output file to be rescored
-    Return:
+    Returns:
     :returns: list results: of the rescoring function: [file_path, it_rescored]
         [PATH, True] means it passed
         [PATH, False] means it failed a results of all NN2 files
@@ -254,16 +254,16 @@ def confirm_file_has_scoring(file_path):
     """
     Check the file has a rescore value
      
-    Input:
+    Inputs:
     :param str file_path: Path to a vina output file to be rescored
-    Return:
+    Returns:
     :returns: bol has_scoring: True if has score;
         False if no score found
     """
     if os.path.exists(file_path) == False:
         return False
 
-    with open(file_path, 'r') as f:
+    with open(file_path, "r") as f:
         has_scoring = False
         for line in f.readlines():
 

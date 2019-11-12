@@ -23,7 +23,7 @@ import argparse
 def convert_pdbqt_to_pdb(pdbqt_file_in, pdb_file_out):
     """
     Converts a pdbqt file to a pdb file by removing the 3rd to last column.
-    Input:
+    Inputs:
     :param str pdbqt_file_in: the string of .pdbqt to be formated
     :param str pdb_file_out: the string of the output .pdb
     """
@@ -55,7 +55,7 @@ def convert_pdbqt_to_pdb(pdbqt_file_in, pdb_file_out):
                 printout = printout + short_line + "\n"
             else:
                 printout = printout + line
-    with open(pdb_file_out,'w') as f:
+    with open(pdb_file_out, "w") as f:
         f.write(printout)
 # 
 

@@ -645,7 +645,7 @@ class Complex:
 
         entropy_count = ligand.entropy_count
 
-        '''file = open(ligand_name,'r')
+        '''file = open(ligand_name, "r")
         entropy_count = 0
         for line in file.readlines():
             if "between atoms" in line and " A " in line:
