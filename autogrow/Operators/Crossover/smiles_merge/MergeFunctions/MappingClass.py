@@ -158,7 +158,7 @@ class Mapping(object):
             -Lack of an B-groups bound to an anchor is not considered a B-group 
             
         Inputs:
-        :param int I:   An interger representing the isolabel for an anchor/node/I atom.
+        :param int i:   An interger representing the isolabel for an anchor/node/I atom.
                         This function choses which B-group will be bound to this anchor in
                         the child molecule.
         Returns:
