@@ -19,19 +19,20 @@ class ParentFilter(object):
     """
     def get_name(self):
         """
-        Returns the current class name.    
+        Returns the current class name.
+
         Returns:
         :returns: str self.__class__.__name__: the current class name.
-
         """
+
         return self.__class__.__name__
-    #
+
     def run_filter(self, input_string):
         """
         run_filter is needs to be implimented in each class.
+
         Inputs:
         :param str input_string:  A string to raise an exception
         """
+
         raise NotImplementedError("run_filter() not implemented")
-    #
-    
