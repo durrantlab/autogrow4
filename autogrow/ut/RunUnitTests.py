@@ -5,11 +5,11 @@ import warnings
 import unittest
 
 
-import autogrow.UT.ScoringTests as ST
-import autogrow.UT.MOHTests as MOHT
-import autogrow.UT.RankingSelectorTests as RST
+import autogrow.ut.ScoringTests as ST
+import autogrow.ut.MOHTests as MOHT
+import autogrow.ut.RankingSelectorTests as RST
 
-import autogrow.UT.CrossoverTests as CT
+import autogrow.ut.CrossoverTests as CT
 
 
 class UnitTests(object):
