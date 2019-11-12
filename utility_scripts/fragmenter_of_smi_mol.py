@@ -13,7 +13,7 @@ from rdkit import RDLogger
 RDLogger.DisableLog('rdApp.*')
 
 import support_scripts.Multiprocess as mp
-import support_scripts.MolObjectHandling as MOH
+import support_scripts.mol_object_handling as MOH
 
 def get_atom_w_iso_num(mol, iso_num):
     for atom in mol.GetAtoms():
@@ -435,7 +435,7 @@ if __name__ == "__main__":
     # create a set of jobs to multithread the fragmentation
     job_input = [tuple([mol_info, frags_per_seed_lig, run_brics, run_frag, c_c_bonds_off]) for mol_info in list_of_ligands]
     list_of_ligands = None
-    output = mp.MultiThreading(job_input, number_of_processors,  make_frag_list_for_one_mol)
+    output = mp.multi_threading(job_input, number_of_processors,  make_frag_list_for_one_mol)
     
 
     print("Finish multithread\n")

@@ -291,6 +291,6 @@ else:
     
     job_input = tuple([tuple([vina_docked_pdbqt_file, output_folder, max_num_of_poses, max_docking_score, min_docking_score]) for vina_docked_pdbqt_file in pdbqt_files])
     # run convert in multithread
-    mol_usable_list = mp.MultiThreading(job_input, -1,  run_conversion_for_a_vina_file)
+    mol_usable_list = mp.multi_threading(job_input, -1,  run_conversion_for_a_vina_file)
 
 print("finished")

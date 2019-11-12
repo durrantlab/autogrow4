@@ -1951,7 +1951,7 @@ def dothing(file):
         raise Exception("FAIL NO LIGANDS!!!!!!!")
     job_input = [[smile_list[i], zinc_list[i]]  for i in range(0,len(smile_list))]
         
-    output = mp.MultiThreading(job_input, num_processors,  dothing_to_mol)
+    output = mp.multi_threading(job_input, num_processors,  dothing_to_mol)
 
     output = [x for x in output if x is not None]
     if len(output)==0:
@@ -2006,7 +2006,7 @@ def get_mols(file_name):
     print("Multithread testing: ", file_name)
     print("      len multithread:", len(job_input))
     # job_input = [[smile_list[i], zinc_list[i]] for i in range(0,len(smile_list))]
-    output = mp.MultiThreading(job_input, num_processors,  dothing_to_mol)
+    output = mp.multi_threading(job_input, num_processors,  dothing_to_mol)
 
     mol_dic = {}
     for x in output:
@@ -2329,9 +2329,9 @@ if __name__ == "__main__":
             mols = []
             substructure = None
             rxn = None
-            print("     Multithreading onestep")
+            print("     multi_threading onestep")
             print("          {} Number of reactions to perform.".format(len(job_input)))
-            output = mp.MultiThreading(job_input, num_processors,  conduct_reaction_one)
+            output = mp.multi_threading(job_input, num_processors,  conduct_reaction_one)
             job_input = None
             output = [x for x in output if x is not None]
 
@@ -2376,10 +2376,10 @@ if __name__ == "__main__":
             mols_dict = {}
             mols = []
             substructure = None
-            print("     Multithreading mol_1 as variable, mol_2 as control")
+            print("     multi_threading mol_1 as variable, mol_2 as control")
             print("          {} Number of reactions to perform.".format(len(job_input)))
             
-            output = mp.MultiThreading(job_input, num_processors,  conduct_reaction_two_mol2control)
+            output = mp.multi_threading(job_input, num_processors,  conduct_reaction_two_mol2control)
             job_input = None
             print("     Removing bad mols")
 
@@ -2423,9 +2423,9 @@ if __name__ == "__main__":
             mols = None
             substructure = None
             rxn = None
-            print("     Multithreading mol_2 as variable, mol_1 as control")
+            print("     multi_threading mol_2 as variable, mol_1 as control")
             print("          {} Number of reactions to perform.".format(len(job_input)))
-            output = mp.MultiThreading(job_input, num_processors,  conduct_reaction_two_mol1control)
+            output = mp.multi_threading(job_input, num_processors,  conduct_reaction_two_mol1control)
             job_input = None
             print("     Removing bad mols")
 
@@ -2455,7 +2455,7 @@ if __name__ == "__main__":
         job_input.append(temp)
 
 
-    output = mp.MultiThreading(job_input, -1,  write_final_outputs)
+    output = mp.multi_threading(job_input, -1,  write_final_outputs)
 
 
     print("finished!")

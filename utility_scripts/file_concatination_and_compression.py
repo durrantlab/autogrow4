@@ -159,7 +159,7 @@ def run_concatination(directory):
     job_list = [(file_path,) for file_path in file_list]
     print("\tFinish Concatination")
     print("\tRemoving files that were concatinated")
-    mp.MultiThreading(job_list, -1, del_files)
+    mp.multi_threading(job_list, -1, del_files)
     print("\tCompressing file")
     compress_file(concat_file)
     if os.path.exists(concat_file  + ".gz"):

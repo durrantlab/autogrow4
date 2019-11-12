@@ -4,12 +4,16 @@ Run commands on multiple processors in python.
 Adapted from examples on https://docs.python.org/2/library/multiprocessing.html
 """
 
+# These functions are also borrow from the Gypsum-DL script Parallelizer.py
+# These functions were renamed to be pep8 compliant
+# ie )
+# def multi_threading became def multi_threading
 
 
 import multiprocessing
 
 
-def MultiThreading(inputs, num_processors, task_name):
+def multi_threading(inputs, num_processors, task_name):
     """Initialize this object.
 
     Args:

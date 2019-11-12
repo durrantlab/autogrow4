@@ -28,7 +28,7 @@ import argparse
 
 from rdkit import Chem
        
-import support_scripts.MolObjectHandling as MOH
+import support_scripts.mol_object_handling as MOH
 import support_scripts.Multiprocess as mp
 
 def run_convert_on_single_pdb(pdb):
@@ -77,7 +77,7 @@ def make_smile_list(sub_folder, number_of_processors):
     pdb_list = tuple([tuple([pdb]) for pdb in pdb_list])
 
     # run convert in multithread
-    smilesList = mp.MultiThreading(pdb_list, -1,  run_convert_on_single_pdb)
+    smilesList = mp.multi_threading(pdb_list, -1,  run_convert_on_single_pdb)
 
     return smilesList
 # 

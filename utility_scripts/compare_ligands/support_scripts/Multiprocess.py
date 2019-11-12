@@ -9,7 +9,7 @@ Adapted from examples on https://docs.python.org/2/library/multiprocessing.html
 import multiprocessing
 
 
-def MultiThreading(inputs, num_processors, task_name):
+def multi_threading(inputs, num_processors, task_name):
     """Initialize this object.
 
     Args:

@@ -69,7 +69,7 @@ if __name__ == "__main__":
     
     # Convert Strings to RDKIT mol objects and append to end of each ligands list
     job_input = [[line] for line in usable_list]
-    mol_usable_list = mp.MultiThreading(job_input, -1,  add_mol_to_list)
+    mol_usable_list = mp.multi_threading(job_input, -1,  add_mol_to_list)
     mol_usable_list = [x for x in mol_usable_list if x!= None]
     # This will be used to check rdkit types later
     rdkit_obj_type = type(mol_usable_list[0][-1])
@@ -80,7 +80,7 @@ if __name__ == "__main__":
         counter = counter-1
         job_input = [[[inhib, mol_list[counter]], mol_list] for mol_list in mol_usable_list]
         
-        mol_usable_list = mp.MultiThreading(job_input, -1,  mcs_mols)
+        mol_usable_list = mp.multi_threading(job_input, -1,  mcs_mols)
         print(inhib_name)
         print(-7 - counter)
         print("")
