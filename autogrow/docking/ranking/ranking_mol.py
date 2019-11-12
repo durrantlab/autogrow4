@@ -14,9 +14,9 @@ from rdkit import DataStructs
 rdkit.RDLogger.DisableLog('rdApp.*')
 
 import autogrow.Operators.ConvertFiles.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
-import autogrow.docking.ranking.selecting.Rank_Selection as Rank_Sel
-import autogrow.docking.ranking.selecting.Roulette_Selection as Roulette_Sel
-import autogrow.docking.ranking.selecting.Tournement_Selection as Tournement_Sel
+import autogrow.docking.ranking.selecting.rank_selection as Rank_Sel
+import autogrow.docking.ranking.selecting.roulette_selection as Roulette_Sel
+import autogrow.docking.ranking.selecting.tournement_selection as Tournement_Sel
 
 def create_seed_list(usable_list_of_smiles, generation_num, num_seed_diversity, num_seed_dock_fitness, selector_choice, tourn_size):
     """

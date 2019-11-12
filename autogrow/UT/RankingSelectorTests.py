@@ -10,9 +10,9 @@ import glob
 
 import autogrow.docking.ranking.ranking_mol as Ranking
 
-import autogrow.docking.ranking.selecting.Tournement_Selection as TourSel
-import autogrow.docking.ranking.selecting.Roulette_Selection as RoulSel
-import autogrow.docking.ranking.selecting.Rank_Selection as RankSel
+import autogrow.docking.ranking.selecting.tournement_selection as TourSel
+import autogrow.docking.ranking.selecting.roulette_selection as RoulSel
+import autogrow.docking.ranking.selecting.rank_selection as RankSel
 
 
 class RankingSelectorTests(unittest.TestCase):
