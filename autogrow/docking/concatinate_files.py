@@ -1,6 +1,7 @@
 """
-This script compresses files which makes it easier to transfer data
-    To decompress the files use the script in $PATH/autogrow/utility_scripts/file_concatination_and_compression.py .
+This script compresses files which makes it easier to transfer data To
+    decompress the files use the script in
+    $PATH/autogrow/utility_scripts/file_concatination_and_compression.py .
 """
 import __future__
 
@@ -10,43 +11,55 @@ import copy
 import gzip
 import shutil
 
+
 def compress_file(file_name):
     """
     Compress the concatinated file
+
     Inputs:
-    :param str file_name: the path to the file to compress.    
+    :param str file_name: the path to the file to compress.
     """
+
     with open(file_name, "r") as f:
         printout = f.read()
-    printout = printout.encode('utf-8')
-    with gzip.open(file_name + ".gz", 'wb') as f:
+    printout = printout.encode("utf-8")
+    with gzip.open(file_name + ".gz", "wb") as f:
         f.write(printout)
+
+
 #######
 def decompress_file(decompressed_file):
     """
-    Decompress a file. Not used in running the program but is the 
-        counter of def compress_file(file_name) 
+    Decompress a file. Not used in running the program but is the counter of
+    def compress_file(file_name)
+
     Inputs:
-    :param str decompressed_file: the path to the file to decompress.    
+    :param str decompressed_file: the path to the file to decompress.
+
     Returns:
-    :returns: str decompressed_file: the path to the file to decompress.    
+    :returns: str decompressed_file: the path to the file to decompress.
     """
-    out_file = decompressed_file.replace('.gz',"")
-    with gzip.open(decompressed_file, 'rb') as f_comp:
-        with open(out_file, 'wb') as f_decomp:
+    out_file = decompressed_file.replace(".gz", "")
+    with gzip.open(decompressed_file, "rb") as f_comp:
+        with open(out_file, "wb") as f_decomp:
             shutil.copyfileobj(f_comp, f_decomp)
     return out_file
+
 
 #######
 def seperate_files(compressed_file):
     """
-    Seperate a concatinated file. Not used in running the program but is the 
-        counter of def compress_file(file_name) 
+    Seperate a concatinated file. Not used in running the program but is the
+    counter of def compress_file(file_name)
+
     Inputs:
-    :param str compressed_file: the path to the file to seperate/decompress.    
+    :param str compressed_file: the path to the file to seperate/decompress.
     """
 
-    directory = os.path.abspath(compressed_file.split(os.path.basename(compressed_file))[0]) + os.sep
+    directory = (
+        os.path.abspath(compressed_file.split(os.path.basename(compressed_file))[0])
+        + os.sep
+    )
     compressed_file = os.path.abspath(compressed_file)
 
     decompressed_file = decompress_file(directory, compressed_file)
@@ -55,11 +68,11 @@ def seperate_files(compressed_file):
 
     printout = ""
     list_of_new_files = []
-    out_file = None    
+    out_file = None
     with open(decompressed_file, "r") as f:
         for line in f.readlines():
             if "$$END_FILE$$" in line:
-                if out_file != None and os.path.exists(out_file)==False:
+                if out_file != None and os.path.exists(out_file) == False:
                     with open(out_file, "w") as f:
                         f.write(printout + "\n")
                 out_file = None
@@ -69,74 +82,95 @@ def seperate_files(compressed_file):
 
                 printout = ""
 
-                # Split the line up and grab the relative file path
-                # convert to absolute path
-                out_file = directory + os.sep + line.split("##############################File_name: ")[1].replace("\n","")
+                # Split the line up and grab the relative file path convert to
+                # absolute path
+                out_file = (
+                    directory
+                    + os.sep
+                    + line.split("##############################File_name: ")[
+                        1
+                    ].replace("\n", "")
+                )
                 out_file = os.path.abspath(out_file)
                 list_of_new_files.append(out_file)
                 continue
             else:
                 printout = printout + line
                 continue
-    
 
     all_are_made = True
     for f in list_of_new_files:
-        if os.path.exists(f)==False:
+        if os.path.exists(f) == False:
             print("file failed to decompress: {}".format(f))
             all_are_made = False
     if all_are_made == True:
         torun = "rm {}".format(decompressed_file)
         os.system(torun)
 
+
 #######
 def get_file_info(file_name):
     """
-    Used for concatinating files together. 
-    This function appends a seperator and the filename of a file
-        before and after the text of the file file_name.
-        It returns it as a string
+    Used for concatinating files together. This function appends a seperator
+    and the filename of a file before and after the text of the file
+    file_name. It returns it as a string
+
     Inputs:
-    :param str file_name: the path to the file to compress.    
+    :param str file_name: the path to the file to compress.
+
     Returns:
-    :returns: str concat: the text of the file file_name with a seperator 
-            and label before and after the file text.    
+    :returns: str concat: the text of the file file_name with a seperator and
+        label before and after the file text.
     """
-    file_name_insert = "\n##############################File_name: {}\n".format(os.path.basename(file_name))
-    file_termination_insert = "\n##############################$$END_FILE$$ {}".format(os.path.basename(file_name))
+    file_name_insert = "\n##############################File_name: {}\n".format(
+        os.path.basename(file_name)
+    )
+    file_termination_insert = "\n##############################$$END_FILE$$ {}".format(
+        os.path.basename(file_name)
+    )
     concat = file_name_insert + open(file_name).read() + file_termination_insert
     return concat
+
 
 #######
 def del_files(file_name):
     """
     This function deletes a given file file_name.
+
     Inputs:
-    :param str file_name: the path to delete.    
+    :param str file_name: the path to delete.
     """
+
     if os.path.exists(file_name):
         try:
             os.system("rm {}".format(file_name))
         except:
             print("couldn't delete file: {}".format(file_name))
 
+
 #######
 def run_concatination(parallelizer_object, directory):
-    """    
-    This function concatinates and compresses every file in a directory.
-        This makes data transfer easier later on.
-
-    To decompress the folder please script in $PATH/autogrow/utility_scripts/file_concatination_and_compression.py 
-
-    parallelizer_object type is <class 'autogrow.operators.convert_files.gypsum_dl.gypsum_dl.Parallelizer.Parallelizer'>
-   
-    Inputs:
-    :param Parallelizer_obj parallelizer_object: a paralellizer object used to multiprocess.
-            initialized from autogrow/operators/convert_files/gypsum_dl/gypsum_dl/Parallelizer.py. 
-    :param str directory: the path to the folder which will be compiled and compressed.    
     """
+    This function concatinates and compresses every file in a directory. This
+    makes data transfer easier later on.
+
+    To decompress the folder please script in
+    $PATH/autogrow/utility_scripts/file_concatination_and_compression.py 
+
+    parallelizer_object type is <class
+    'autogrow.operators.convert_files.gypsum_dl.gypsum_dl.Parallelizer.Parallelizer'>
+
+    Inputs:
+    :param Parallelizer_obj parallelizer_object: a paralellizer object used to
+        multiprocess. initialized from
+        autogrow/operators/convert_files/gypsum_dl/gypsum_dl/Parallelizer.py.
+    :param str directory: the path to the folder which will be compiled and compressed.
+    """
+
     concat_file = directory + os.sep + "compresed_PDBS.txt"
-    print("Start Concatination: To seperate files use the file_concatination_and_compression.py in the Utility script folder.")
+    print(
+        "Start Concatination: To seperate files use the file_concatination_and_compression.py in the Utility script folder."
+    )
     file_list = glob.glob(directory + os.sep + "*")
     file_list = [os.path.abspath(x) for x in file_list]
 
@@ -150,8 +184,6 @@ def run_concatination(parallelizer_object, directory):
     parallelizer_object.run(job_list, del_files)
     print("\tCompressing file")
     compress_file(concat_file)
-    if os.path.exists(concat_file  + ".gz"):
+    if os.path.exists(concat_file + ".gz"):
         del_files(concat_file)
     print("Finished Compression")
-
-
