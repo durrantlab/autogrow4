@@ -10,44 +10,46 @@ import autogrow.operators.operations as operations
 import autogrow.docking.ranking.ranking_mol as Ranking
 import autogrow.docking.concatinate_files as concatinate_files
 
-def main_execute(vars):    
+def main_execute(vars):
     """
     This function takes the user variables and runs Autogrow
 
     Inputs:
-    :param dict vars: dict of user variables which will govern how the programs runs
-    """   
+    :param dict vars: dict of user variables which will govern how the
+        programs runs
+    """
 
     # Unpack necessary variables
-    output_directory = vars['output_directory'] # This is the directory for the run within the root output folder
-    num_gens_to_make = vars['num_generations']
- 
+    output_directory = vars["output_directory"] # This is the directory for the run within the root output folder
+    num_gens_to_make = vars["num_generations"]
+
     # Determine what was the last completed generation in the Run directory
     last_generation = determine_current_gen(output_directory)
     if last_generation == None:
-        # Check to see if there's a Run 0 based on the seed. 
+        # Check to see if there's a Run 0 based on the seed.
         if vars["use_docked_source_compounds"] == True:
-            # This will assess and rank the source compounds prior to generation 1. 
-            # Thus using the source compounds as a generation 0
+            # This will assess and rank the source compounds prior to
+            # generation 1. Thus using the source compounds as a generation 0
             starting_generation_num = 0
         else:
             starting_generation_num = 1
 
     else:
         starting_generation_num = last_generation + 1
-        
+
     if starting_generation_num > num_gens_to_make:
         print("This simulation has already been completed to the user defined number \
                 of generations. Please check your user variables.")
         raise Exception("This simulation has already been completed to the user defined number \
                 of generations. Please check your user variables.")
-   
-    # This is the main loop which will control and execute all commands
-    # This is broken into 3 main sections:
+
+    # This is the main loop which will control and execute all commands This
+    # is broken into 3 main sections:
     # 1)  operations which populating the new generation with ligands which
-    # both pass the userdefined filter and convert from 1D smiles to 3D PDB
-    # 2)  Docking which handles converting from PDBs to Docking specific formats and
-    #  running the actual Docking simulations   
+    #     both pass the userdefined filter and convert from 1D smiles to 3D
+    #     PDB
+    # 2)  Docking which handles converting from PDBs to Docking specific
+    #     formats and running the actual Docking simulations
     # 3)  Ranking the generation based on the Docking scores
     for current_generation_number in range(starting_generation_num, num_gens_to_make+1):
         sys.stdout.flush()
@@ -61,12 +63,13 @@ def main_execute(vars):
             if os.path.exists(current_generation_dir + os.sep + "generation_0_ranked.smi") == True:
                 continue
 
-            already_docked, smile_file_new_gen, new_gen_ligands_list = operations.populate_generation_0(vars, generation_num=0)
+            already_docked, smile_file_new_gen, new_gen_ligands_list = operations.populate_generation_zero(vars, generation_num=0)
             sys.stdout.flush()
 
             if already_docked == False:
-                # Run file conversions of PDB to docking specific file type and Begin Docking
-                # unweighted_ranked_smile_file is the file name where the unweighted ranked but score .smi file resides
+                # Run file conversions of PDB to docking specific file type
+                # and Begin Docking unweighted_ranked_smile_file is the file
+                # name where the unweighted ranked but score .smi file resides
                 unweighted_ranked_smile_file = DockingClass.run_docking_common(vars, current_generation_number, current_generation_dir, smile_file_new_gen)
 
         else:
@@ -78,12 +81,13 @@ def main_execute(vars):
                                     Errors could include not enough diversity, too few seeds to the generation, \
                                     the seed mols are unable to cross-over due to lack of similariy,\
                                     or all of the seed lack functional groups for performing reactions.")
-                
-            # Run file conversions of PDB to docking specific file type and Begin Docking
-            # unweighted_ranked_smile_file is the file name where the unweighted ranked but score .smi file resides
+
+            # Run file conversions of PDB to docking specific file type and
+            # Begin Docking unweighted_ranked_smile_file is the file name
+            # where the unweighted ranked but score .smi file resides
             unweighted_ranked_smile_file = DockingClass.run_docking_common(vars, current_generation_number, current_generation_dir, smile_file_new_gen)
 
-        #Delete all temporary files; Skip if in Debugging Mode
+        # Delete all temporary files; Skip if in Debugging Mode
         if vars["debug_mode"] == False:
             print("Deleting temporary files and directories")
             files_to_del = []
@@ -91,18 +95,19 @@ def main_execute(vars):
             for folder in folders_to_del:
                 if os.path.exists(folder) == False:
                     continue
-                files_to_del.extend(glob.glob(folder+"*"))    
+                files_to_del.extend(glob.glob(folder+"*"))
 
             job_input = tuple([tuple([x]) for x in files_to_del if os.path.isfile(x)==True])
             vars["parallelizer"].run(job_input, delete_temporary_files_and_folders)
             # Delete Folders in an ordered manor incase folders are nested
             for i in range(0,len(folders_to_del)):
                 delete_temporary_files_and_folders(folders_to_del[i])
-        
+
         sys.stdout.flush()
-        if vars['reduce_files_sizes'] == True:
-            # Reduce the files in the PDBs folder to a single compiled file. This reduces the data size
-            # And makes it easier to transfer the data
+        if vars["reduce_files_sizes"] == True:
+            # Reduce the files in the PDBs folder to a single compiled file.
+            # This reduces the data size And makes it easier to transfer the
+            # data
             pdbs_folder = "{}{}PDBs{}".format(current_generation_dir, os.sep, os.sep)
             if os.path.exists(pdbs_folder)==True:
                 concatinate_files.run_concatination(vars["parallelizer"], pdbs_folder)
@@ -123,32 +128,42 @@ def main_execute(vars):
         if matplotlib_is_callable == False:
             print("Can not make figure as matplotlib is not installed")
         else:
-            print('plotting')
+            print("plotting")
             import autogrow.plotting.generate_histogram as plot
             plot.generate_figures(vars)
 
-    sys.stdout.flush()   
-# 
+    sys.stdout.flush()
+#
 
 def determine_current_gen(output_directory):
     """
-    Check if there has been any previous runs in the output directory. Returns an integer of the last completed 
-    generation folder. The last completed generation folder will be what seeds the next generation.
-    If no previous runs exist which completed (have a ranked.smi file) then it returns a None which 
-        causes the program to start off at generation 0 using the source_compound_file to seed generation 1.
+    Check if there has been any previous runs in the output directory. Returns
+    an integer of the last completed generation folder. The last completed
+    generation folder will be what seeds the next generation. If no previous
+    runs exist which completed (have a ranked.smi file) then it returns a None
+    which causes the program to start off at generation 0 using the
+    source_compound_file to seed generation 1.
 
-    If the last two generation folders were incomplete (ie both lack a ranked.smi file) then we will raise Exception.
+    If the last two generation folders were incomplete (ie both lack a
+    ranked.smi file) then we will raise Exception.
 
-    Additionally, if a generation failed to complete in a previous attempt, than that generation directory will be
-        renamed so that we can make a new generation in its place without losing that data
-            -ie if a failed generation directory was named PATH/generation_3 it will be rename Path/generation_3_Failed_0
-                -if Path/generation_3_Failed_0 already exists it will be name Path/generation_3_Failed_1 or so on until unique
+    Additionally, if a generation failed to complete in a previous attempt,
+    than that generation directory will be renamed so that we can make a new
+    generation in its place without losing that data
+
+    -ie if a failed generation directory was named PATH/generation_3 it will
+    be rename Path/generation_3_Failed_0
+
+    -if Path/generation_3_Failed_0 already exists it will be name
+    Path/generation_3_Failed_1 or so on until unique
 
     Inputs:
-    :param str output_directory: is the path of the Run folder within root output folder. 
+    :param str output_directory: is the path of the Run folder within root
+        output folder.
 
     Returns:
-    :returns: int last_gen_number: the int of the last generation number or None if no previous generations were completed.
+    :returns: int last_gen_number: the int of the last generation number or
+        None if no previous generations were completed.
     """
 
     folder_path_gen = output_directory + "generation_"
@@ -159,7 +174,6 @@ def determine_current_gen(output_directory):
 
             raise Exception("The last 2 generations in this Run have failed to complete. \
                             Please check that the Run folder that there is something to continue off of.")
-        #
 
         last_gen_number = find_last_generation(folder_path_gen)
         if last_gen_number == None:
@@ -173,12 +187,14 @@ def determine_current_gen(output_directory):
             is_completed = determine_if_gen_completed(folder_path, last_gen_number)
 
             if is_completed == True:
-                # The last generation (last_gen_number) completed and we will continue our run from that
+                # The last generation (last_gen_number) completed and we will
+                # continue our run from that
                 return last_gen_number
 
             else:
-                # The last generation in the folder crashed before completing. 
-                # So we will rename the directory by appending _FAILED to the folder name
+                # The last generation in the folder crashed before completing.
+                # So we will rename the directory by appending _FAILED to the
+                # folder name
 
                 printout = "Generation {} in {} failed in the previous simulation.".format(last_gen_number,folder_path)
                 print(printout)
@@ -188,11 +204,11 @@ def determine_current_gen(output_directory):
                 while dir_exists == True:
                     failed_folder_rename = "{}_FAILED".format(folder_path)
                     failed_folder_rename_count = "{}_{}".format(failed_folder_rename,counter)
-                                   
+
                     if os.path.isdir(failed_folder_rename_count) == True:
                         counter = counter + 1
                     else:
-                        dir_exists = False                
+                        dir_exists = False
 
                 os.rename(folder_path, failed_folder_rename_count)
                 printout = "Renaming folder: {} \
@@ -202,20 +218,23 @@ def determine_current_gen(output_directory):
 
 def find_last_generation(folder_path_string_no_gen):
     """
-    This will take a folder path which is missing an interger at the end, and find if
-    there are any folders which exist with that path with an interger.
-    If there are it will return the highest interger that when added to the path exists as a directory.
-    
-    If no directories exist with that path+0 then we return None 
-        This causes the starting generation of this attempt to run to be generation_0. Starting fresh.
+    This will take a folder path which is missing an interger at the end, and
+    find if there are any folders which exist with that path with an interger.
+    If there are it will return the highest interger that when added to the
+    path exists as a directory.
+
+    If no directories exist with that path+0 then we return None. This causes
+    the starting generation of this attempt to run to be generation_0.
+    Starting fresh.
 
     folder_path_string_no_gen = output_directory + "generation_"
 
     Inputs:
-    :param str folder_path_string_no_gen: the folder to check. 
+    :param str folder_path_string_no_gen: the folder to check.
 
     Returns:
-    :returns: int last_gen_number: the int of the last generation number or None if no previous runs.
+    :returns: int last_gen_number: the int of the last generation number or
+        None if no previous runs.
     """
 
     path_exists = True
@@ -227,10 +246,10 @@ def find_last_generation(folder_path_string_no_gen):
 
         else:
             path_exists = False
-    
+
     if i == 1:
         # Check to see if there's a Run 0 based on the seed.
-        i = 0 
+        i = 0
         folder_path = "{}{}{}".format(folder_path_string_no_gen, i, os.sep)
         if os.path.exists(folder_path)==False:
             return None
@@ -239,29 +258,32 @@ def find_last_generation(folder_path_string_no_gen):
         last_gen_number = None
         return None
     else:
-        last_gen_number = i - 1 
+        last_gen_number = i - 1
         return last_gen_number
 #
 
 def determine_if_gen_completed(gen_dir_path, gen_number):
     """
-    Check if this generation has completed or if it failed.
-    Every generation which completes has a .smi file title generation_0_ranked.smi (with the number of the generation
-    between the word generation and ranked).
-        -If a Run failed due to either a hard crash or a soft crash, there should not be a ranked .smi file.
-    
+    Check if this generation has completed or if it failed. Every generation
+    which completes has a .smi file title generation_0_ranked.smi (with the
+    number of the generation between the word generation and ranked).
+    -If a Run failed due to either a hard crash or a soft crash, there should
+        not be a ranked .smi file.
+
     Inputs:
-    :param str gen_dir_path: is the path of the generation folder within a Run folder. 
+    :param str gen_dir_path: is the path of the generation folder within a Run
+        folder.
     :param int gen_number: The generation number of the folder.
 
     Returns:
-    :returns: bool os.path.isfile(file_path): Returns True if the gen_dir_path has a ranked.smi file
-                                            Returns False if the gen_dir_path does not have a ranked.smi file
+    :returns: bool os.path.isfile(file_path): Returns True if the gen_dir_path
+        has a ranked.smi file. Returns False if the gen_dir_path does not have a
+        ranked.smi file
     """
-    
+
     ranked_file_name = "generation_{}_ranked.smi".format(gen_number)
     file_path = "{}{}{}".format(gen_dir_path, os.sep, ranked_file_name)
-    
+
     if os.path.isfile(file_path) == True:
         return True
     else:
@@ -274,7 +296,7 @@ def delete_temporary_files_and_folders(file_or_folder):
 
     Inputs:
     :param str file_or_folder: the file or folder to delete
-    
+
     """
     if os.path.exists(file_or_folder) == True:
         if os.path.isdir(file_or_folder) == True:
