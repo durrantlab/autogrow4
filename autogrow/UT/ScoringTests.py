@@ -9,7 +9,7 @@ import glob
 # ES = __import__(scoring_folder+'Execute_Scoring.py')
 from autogrow.Docking.Scoring import Execute_Scoring  as ES
 from autogrow.Docking.Scoring.Scoring_classes.Scoring_functions import VINA as VINA
-from autogrow.Docking.Scoring.Scoring_classes.Scoring_functions import Lig_Efficiency  as Lig_Eff
+from autogrow.Docking.Scoring.Scoring_classes.Scoring_functions import LigEfficiency  as LigEfficiency
 from autogrow.Docking.Scoring.Scoring_classes.Scoring_functions import NN1 as NN1
 from autogrow.Docking.Scoring.Scoring_classes.Scoring_functions import NN2 as NN2
 
@@ -119,50 +119,50 @@ class ScoringTests(unittest.TestCase):
         
 
     # Test VinaLigEFF scoring function
-    def test_VINA_Lig_EFF_outside_class_functions(self):
+    def test_VINA_lig_EFF_outside_class_functions(self):
         """
         Make a vina class object and retrieve a single score for a file
 
         The return object from run_scoring is supposed to be a list containing 
         short smile name and the docking score
         """
-        vina_obj = VINA_Lig_Eff.Lig_Efficiency(self.vars, self.smile_dict)
+        vina_obj = VINA_lig_Eff.LigEfficiency(self.vars, self.smile_dict)
 
 
         # The smile string is 'CC(=O)OCC(O)CN=[N+]=[N-]' which has 3N 3O and 5C 
         # this is a total of 11 non-Hydrogens
-        self.assertEqual(VINA_Lig_Eff.get_number_heavy_atoms(self.Gen_0_Cross_452996_smile),11)
+        self.assertEqual(VINA_lig_Eff.get_number_heavy_atoms(self.Gen_0_Cross_452996_smile),11)
 
 
         # Same SMILES with Hydrogens explicit [CH3][C](=[O])[O][CH2][CH]([OH])[CH2][N]=[N+]=[N-]
         # this is a total of 11 non-Hydrogens
-        self.assertEqual(VINA_Lig_Eff.get_number_heavy_atoms('[CH3][C](=[O])[O][CH2][CH]([OH])[CH2][N]=[N+]=[N-]'),11)
+        self.assertEqual(VINA_lig_Eff.get_number_heavy_atoms('[CH3][C](=[O])[O][CH2][CH]([OH])[CH2][N]=[N+]=[N-]'),11)
         
 
 
         # A viable but Bad Smile string is 'CC(=O)OCC(O)CN=[N]=[N]' which has 3N 3O and 5C 
         # this is a total of 11 non-Hydrogens
-        self.assertEqual(VINA_Lig_Eff.get_number_heavy_atoms('CC(=O)OCC(O)CN=[N]=[N]'),11)
+        self.assertEqual(VINA_lig_Eff.get_number_heavy_atoms('CC(=O)OCC(O)CN=[N]=[N]'),11)
 
 
         # A NON Viable Smile string is 123456 Should return None
-        self.assertEqual(VINA_Lig_Eff.get_number_heavy_atoms(123455), None)
+        self.assertEqual(VINA_lig_Eff.get_number_heavy_atoms(123455), None)
 
         # A NON Viable Smile string is None Should return None
-        self.assertEqual(VINA_Lig_Eff.get_number_heavy_atoms(None), None)
+        self.assertEqual(VINA_lig_Eff.get_number_heavy_atoms(None), None)
 
         
-        self.assertEqual(VINA_Lig_Eff.append_lig_effeciency(['CC(=O)OCC(O)CN=[N+]=[N-]', '(ZINC44117885+ZINC34601304)Gen_0_Cross_452996',str(-5.4)]), ['CC(=O)OCC(O)CN=[N+]=[N-]', '(ZINC44117885+ZINC34601304)Gen_0_Cross_452996', str(-5.4), str(-0.490909090909)])
+        self.assertEqual(VINA_lig_Eff.append_lig_effeciency(['CC(=O)OCC(O)CN=[N+]=[N-]', '(ZINC44117885+ZINC34601304)Gen_0_Cross_452996',str(-5.4)]), ['CC(=O)OCC(O)CN=[N+]=[N-]', '(ZINC44117885+ZINC34601304)Gen_0_Cross_452996', str(-5.4), str(-0.490909090909)])
 
 
-    def test_VINA_Lig_EFF_class(self):
+    def test_VINA_lig_EFF_class(self):
         """
         Make a vina class object and retrieve a single score for a file
 
         The return object from run_scoring is supposed to be a list containing 
         short smile name and the docking score
         """
-        vina_obj = VINA_Lig_Eff.Lig_Efficiency(self.vars, self.smile_dict)
+        vina_obj = VINA_lig_Eff.LigEfficiency(self.vars, self.smile_dict)
         
         # 2nd item in list should be -0.490909090909 from demo
         self.assertEqual(float(vina_obj.run_scoring(self.pdbqtvina_file)[-1]), float(-0.490909090909))
@@ -173,23 +173,23 @@ class ScoringTests(unittest.TestCase):
         # return type should be list
         self.assertEqual(type(vina_obj.run_scoring(self.pdbqtvina_file)), type([]))
 
-    def test_VINA_Lig_EFF_class_fails(self):
+    def test_VINA_lig_EFF_class_fails(self):
         """
         Make a vina class object and retrieve a single score for a file
 
         The return object from run_scoring is supposed to be a list containing 
         short smile name and the docking score
         """
-        vina_obj = VINA_Lig_Eff.Lig_Efficiency(self.vars, self.smile_dict)
+        vina_obj = VINA_lig_Eff.LigEfficiency(self.vars, self.smile_dict)
 
         # return type should be list
         self.assertEqual(vina_obj.run_scoring(self.pdbqtvina_file_fail), None)
         
-    def test_get_all_VINA_Lig_EFF_files(self):
+    def test_get_all_VINA_lig_EFF_files(self):
         
         all_pdbqt_vina_files = glob.glob(self.pdb_folder + "*.pdbqt.vina")
 
-        vina_obj = VINA_Lig_Eff.Lig_Efficiency(self.vars, self.smile_dict)
+        vina_obj = VINA_lig_Eff.LigEfficiency(self.vars, self.smile_dict)
 
 
 
@@ -209,7 +209,7 @@ class ScoringTests(unittest.TestCase):
 
         # The smile string is 'CC(=O)OCC(O)CN=[N+]=[N-]' which has 3N 3O and 5C 
         # this is a total of 11 non-Hydrogens
-        self.assertEqual(NN1.run_NN_rescoring(self.vars,['/home/jacob/Desktop/UnittestExample/Vina_tests/Run_5/generation_0/PDBs/Gen_0_Cross_452996__1.pdbqt.vina']),['/home/jacob/Desktop/UnittestExample/Vina_tests/Run_5/generation_0/PDBs/Gen_0_Cross_452996__1.pdbqt.vina.nn1'])
+        self.assertEqual(NN1.run_nn_rescoring(self.vars,['/home/jacob/Desktop/UnittestExample/Vina_tests/Run_5/generation_0/PDBs/Gen_0_Cross_452996__1.pdbqt.vina']),['/home/jacob/Desktop/UnittestExample/Vina_tests/Run_5/generation_0/PDBs/Gen_0_Cross_452996__1.pdbqt.vina.nn1'])
 
         #
       
@@ -265,7 +265,7 @@ class ScoringTests(unittest.TestCase):
         """
         NN2_obj = NN2.NN2(self.vars, self.smile_dict)
 
-        self.assertEqual(NN2.run_NN_rescoring(self.vars, ['/home/jacob/Desktop/UnittestExample/Vina_tests/Run_5/generation_0/PDBs/Gen_0_Cross_452996__1.pdbqt']),['/home/jacob/Desktop/UnittestExample/Vina_tests/Run_5/generation_0/PDBs/Gen_0_Cross_452996__1.pdbqt.nn2'])
+        self.assertEqual(NN2.run_nn_rescoring(self.vars, ['/home/jacob/Desktop/UnittestExample/Vina_tests/Run_5/generation_0/PDBs/Gen_0_Cross_452996__1.pdbqt']),['/home/jacob/Desktop/UnittestExample/Vina_tests/Run_5/generation_0/PDBs/Gen_0_Cross_452996__1.pdbqt.nn2'])
 
         
         # 2nd item in list should be -0.490909090909 from demo

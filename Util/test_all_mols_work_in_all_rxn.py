@@ -1940,9 +1940,9 @@ def dothing(file):
                         print("")
                         raise Exception("Fail because line could split in {}".format(file))
             smile = parts[0]
-            zincID = parts[1]
+            zinc_id = parts[1]
 
-            zinc_list.append(zincID)
+            zinc_list.append(zinc_id)
             smile_list.append(smile)
        
 
@@ -1967,12 +1967,12 @@ def dothing(file):
     return file
     #
      
-def dothing_to_mol(smile,zincID):       
+def dothing_to_mol(smile,zinc_id):       
     mol = Chem.MolFromSmiles(smile)
     mol = Chem.AddHs(mol) 
     Chem.SanitizeMol(mol)
     
-    return [zincID, [smile,zincID, mol]]
+    return [zinc_id, [smile,zinc_id, mol]]
 
 
 def get_mols(file_name):
@@ -2166,7 +2166,7 @@ def write_final_outputs(out_file, pickle_file):
 def check_id_in_list(zinc_id, list_to_remove):
     """
     if in list return None (will be excluded)
-    if NOT IN LIST RETURN ZINCID
+    if NOT IN LIST RETURN zinc_id
     """
     if zinc_id in list_to_remove:
         return None
@@ -2176,7 +2176,7 @@ def check_id_in_list(zinc_id, list_to_remove):
 def run_post_multithread(output, functional_group, output_folder, modified_pickle_folder):
     """
     if in list return None (will be excluded)
-    if NOT IN LIST RETURN ZINCID
+    if NOT IN LIST RETURN zinc_id
     """
     missing_substructure = [x for x in output if x[0]=="Missing"]
     failed_reaction = [x for x in output if x[0]==False]

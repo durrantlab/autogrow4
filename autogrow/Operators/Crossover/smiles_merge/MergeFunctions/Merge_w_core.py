@@ -12,10 +12,10 @@ import autogrow.Operators.ConvertFiles.gypsum_dl.gypsum_dl.MolObjectHandling as 
 
 # HANDLE THE MERGING OF THE R-groups and the MCS And cleanup
 # Final steps########## 
-def Merge_smiles_with_core(Rs_chosen_smiles, MCS_Mol):
+def merge_smiles_with_core(rs_chosen_smiles, mcs_mol):
     """
     This function runs most of the ligand merger portion of the script.
-    It merges the chosen R-groups (Rs_chosen_smiles) with the common core (MCS_Mol) by bonding anchors in the core to the 
+    It merges the chosen R-groups (rs_chosen_smiles) with the common core (mcs_mol) by bonding anchors in the core to the 
     atoms bound to the respective anchor in the R-group fragment.
     
         Variables used in this function
@@ -28,25 +28,25 @@ def Merge_smiles_with_core(Rs_chosen_smiles, MCS_Mol):
                                             1017: 9, 1018: 6, 1019: 4, 1020: 2})
             
     Inputs:
-    :param list Rs_chosen_smiles: A list containing the  SMILES strings for the chosen R-groups to add
-    :param rdkit.Chem.rdchem.Mol MCS_Mol: an rdkit molecule representing the Most common substructure (MCS)
+    :param list rs_chosen_smiles: A list containing the  SMILES strings for the chosen R-groups to add
+    :param rdkit.Chem.rdchem.Mol mcs_mol: an rdkit molecule representing the Most common substructure (MCS)
                                         which will be expanded by adding R-groups to make the child molecule
 
     Returns:
-    :returns: rdkit.Chem.rdchem.Mol RW_Core_merg: The child molecule with the added R-groups built onto the MCS_Mol
+    :returns: rdkit.Chem.rdchem.Mol rw_core_merg: The child molecule with the added R-groups built onto the mcs_mol
                                                 returns None if the process fails or if a None-type makes it through
     """
     # convert to RWMOL class of molecule which are able to add and remove bonds
     # RWMOL class is the Read and Write-Mol Class in rdkit
-    RW_Core_merg = Chem.RWMol(MCS_Mol)
+    rw_core_merg = Chem.RWMol(mcs_mol)
 
     # sanitize the mol_frag
-    RW_Core_merg = MOH.check_sanitization(RW_Core_merg)
-    if RW_Core_merg is None:
-        # ("RW_Core_merg failed to be sanitizable (Merge_smiles_with_core)")
+    rw_core_merg = MOH.check_sanitization(rw_core_merg)
+    if rw_core_merg is None:
+        # ("rw_core_merg failed to be sanitizable (merge_smiles_with_core)")
         return None
 
-    for r_groups in Rs_chosen_smiles:
+    for r_groups in rs_chosen_smiles:
 
         for frag in r_groups:
             
@@ -64,7 +64,7 @@ def Merge_smiles_with_core(Rs_chosen_smiles, MCS_Mol):
             mol_frag_copy = copy.deepcopy(mol_frag)
             mol_frag = MOH.check_sanitization(mol_frag)
             if mol_frag is None:
-                # ("mol_frag failed to be sanitizable (Merge_smiles_with_core)")
+                # ("mol_frag failed to be sanitizable (merge_smiles_with_core)")
                 # It often fails so if it didn't work lets just go back to it. 
                 # Most often it fails when there is a broken ring group...
                 mol_frag = mol_frag_copy
@@ -78,7 +78,7 @@ def Merge_smiles_with_core(Rs_chosen_smiles, MCS_Mol):
             # Make Dict of all atoms in mol_frag, keys are isotope label, value is Idx
             # example mol_frag_iso_to_Idx_dict = {10007: 0, 10008: 8, 1013: 1, 1014: 3, 1015: 5,
             #                        1016: 7, 1017: 9, 1018: 6, 1019: 4, 1020: 2})
-            mol_frag_iso_to_Idx_dict = make_dict_all_atoms_iso_to_Idx_dict(mol_frag)
+            mol_frag_iso_to_Idx_dict = make_dict_all_atoms_iso_to_idx_dict(mol_frag)
            
             # Make list of atoms idx to remove the anchor atoms from the frag
             # this is necessary to prevent the redundancy of multiple of the same anchors
@@ -95,19 +95,19 @@ def Merge_smiles_with_core(Rs_chosen_smiles, MCS_Mol):
             # Merge the frag with the core
             # ie) mol1="CCC" and mol2="CCCCCC" mol3 = Chem.CombineMols(mol1,mol2)
             #       mol3 == "CCC.CCCCCC"
-            RW_Core_merg = Chem.CombineMols(RW_Core_merg, mol_frag)    
+            rw_core_merg = Chem.CombineMols(rw_core_merg, mol_frag)    
 
             # convert to RWMOL class of molecule which are able to add and remove bonds
-            RW_Core_merg = Chem.RWMol(RW_Core_merg)
+            rw_core_merg = Chem.RWMol(rw_core_merg)
 
-            # make a dictionary of every atom in RW_Core_merg with Iso as the key and the Idx as its value
-            CoreMerg_iso_to_Idx_dict = make_dict_all_atoms_iso_to_Idx_dict(RW_Core_merg) 
+            # make a dictionary of every atom in rw_core_merg with Iso as the key and the Idx as its value
+            core_merg_iso_to_idx_dict = make_dict_all_atoms_iso_to_idx_dict(rw_core_merg) 
 
             for anchor_atom_iso in list(anchor_to_connection_dict.keys()):
                 # Idx of the anchor in merged core
-                idx_for_anchor = CoreMerg_iso_to_Idx_dict[anchor_atom_iso]     
+                idx_for_anchor = core_merg_iso_to_idx_dict[anchor_atom_iso]     
                 # unpack list of atom to connect idx and bond types
-                list_of_atom_idx, list_of_bond_types = unpack_lists_of_atoms_and_bond_type(anchor_to_connection_dict, anchor_atom_iso, CoreMerg_iso_to_Idx_dict)
+                list_of_atom_idx, list_of_bond_types = unpack_lists_of_atoms_and_bond_type(anchor_to_connection_dict, anchor_atom_iso, core_merg_iso_to_idx_dict)
 
                 # USING THE BOND INFO DRAW BONDS TO MAKE NEW CHILD MOL
                 # THIS IS AN ITERATIVE PROCESS FOR EACH R-GROUP
@@ -115,11 +115,11 @@ def Merge_smiles_with_core(Rs_chosen_smiles, MCS_Mol):
                     # ai is the atom Idx 
                     # bt is the bondtype
                     try:
-                        RW_Core_merg.AddBond(idx_for_anchor, ai, bt)
+                        rw_core_merg.AddBond(idx_for_anchor, ai, bt)
                     except:
                         return None
                         
-    return RW_Core_merg
+    return rw_core_merg
 #
 
 def make_anchor_to_bonds_and_type_for_frag(mol_frag):
@@ -173,7 +173,7 @@ def make_anchor_to_bonds_and_type_for_frag(mol_frag):
     return anchor_to_connection_dict
 # 
 
-def make_dict_all_atoms_iso_to_Idx_dict(mol):
+def make_dict_all_atoms_iso_to_idx_dict(mol):
     """
     Make a dictionary of every atom in a molecule with Iso as the key and the Idx as its value.
 
@@ -193,7 +193,7 @@ def make_dict_all_atoms_iso_to_Idx_dict(mol):
     return mol_iso_to_Idx_dict
 #
 
-def unpack_lists_of_atoms_and_bond_type(anchor_to_connection_dict, anchor_atom_iso, CoreMerg_iso_to_Idx_dict):        
+def unpack_lists_of_atoms_and_bond_type(anchor_to_connection_dict, anchor_atom_iso, core_merg_iso_to_idx_dict):        
     """
     Iterate through all atoms which will be bound to the anchor
     and unpackage all the bond types in a list.
@@ -205,7 +205,7 @@ def unpack_lists_of_atoms_and_bond_type(anchor_to_connection_dict, anchor_atom_i
                                             ie) {10004: [1007, rdkit.Chem.rdchem.BondType.SINGLE]}
     :param int anchor_atom_iso: the interger of an anchor atom's isotope label
                                             ie) 10004
-    :param dict CoreMerg_iso_to_Idx_dict: a dictionary of atom's isotope labels as keys and their corresponding Idx as the items
+    :param dict core_merg_iso_to_idx_dict: a dictionary of atom's isotope labels as keys and their corresponding Idx as the items
                                             ie){1008: 14, 1014: 11, 1009: 15, 1010: 7, 1007: 13, 10000: 0, 10001: 1, 10002: 2, 10003: 3, 10004: 4}
     Returns:
     :returns: list list_of_atom_idx: a list containing the atom idx 
@@ -227,7 +227,7 @@ def unpack_lists_of_atoms_and_bond_type(anchor_to_connection_dict, anchor_atom_i
         atom_iso = anchor_to_connection_dict[anchor_atom_iso][0]
 
         # get the atoms idx in the merged core 
-        atom_idx = CoreMerg_iso_to_Idx_dict[atom_iso]
+        atom_idx = core_merg_iso_to_idx_dict[atom_iso]
 
         # get bond type
         bond_type = anchor_to_connection_dict[anchor_atom_iso][1]
@@ -245,7 +245,7 @@ def unpack_lists_of_atoms_and_bond_type(anchor_to_connection_dict, anchor_atom_i
                 atom_iso = anchor_to_connection_dict[anchor_atom_iso][i][0]
 
                 # get the atoms idx in the merged core 
-                atom_idx = CoreMerg_iso_to_Idx_dict[atom_iso]
+                atom_idx = core_merg_iso_to_idx_dict[atom_iso]
 
                 # get bond type
                 bond_type = anchor_to_connection_dict[anchor_atom_iso][i][1]
@@ -257,31 +257,31 @@ def unpack_lists_of_atoms_and_bond_type(anchor_to_connection_dict, anchor_atom_i
     return list_of_atom_idx, list_of_bond_types    
 #
 
-def remove_all_isolabels(RW_Core_merg):        
+def remove_all_isolabels(rw_core_merg):        
     """
     Remove all the isotope labels from a molecule. One of the finalizing steps used when LigSmiles is nearly complete.
 
     Inputs:
-    :param rdkit.Chem.rdchem.RWMol RW_Core_merg: a read-write rdkit molecule of the child molecule (after R-groups have been added)
+    :param rdkit.Chem.rdchem.RWMol rw_core_merg: a read-write rdkit molecule of the child molecule (after R-groups have been added)
                                                 to have the isotopes to be removed
      Returns:
-    :returns: rdkit.Chem.rdchem.RWMol RW_Core_merg: the read-write rdkit molecule of the child molecule with all
+    :returns: rdkit.Chem.rdchem.RWMol rw_core_merg: the read-write rdkit molecule of the child molecule with all
                                                     the isotope labels removed
     """
     # None's often end up in a pipeline use of RDKit so we handle this data type as return None
     # instead of raise TypeError
-    if RW_Core_merg is None:
+    if rw_core_merg is None:
         return None
 
     # If mol is wrong data type (excluding None) raise TypeError
-    if type(RW_Core_merg) != rdkit.Chem.rdchem.Mol and type(RW_Core_merg) != rdkit.Chem.rdchem.RWMol:
-        printout = "RW_Core_merg is the wrong data type. \n"
+    if type(rw_core_merg) != rdkit.Chem.rdchem.Mol and type(rw_core_merg) != rdkit.Chem.rdchem.RWMol:
+        printout = "rw_core_merg is the wrong data type. \n"
         printout = printout + "Input should be a rdkit.Chem.rdchem.Mol or rdkit.Chem.rdchem.RWMol\n"
-        printout = printout + "Input mol was {} type.".format(type(RW_Core_merg))
+        printout = printout + "Input mol was {} type.".format(type(rw_core_merg))
         raise TypeError(printout)
 
-    for atom in RW_Core_merg.GetAtoms():
+    for atom in rw_core_merg.GetAtoms():
         atom.SetIsotope(0)
         
-    return RW_Core_merg
+    return rw_core_merg
 # 

@@ -152,12 +152,12 @@ class VinaDocking(ParentDocking):
 
 
     # Finding PDBs for ligands in a folder
-    def find_pdb_ligands(self, current_generation_PDB_dir):    
+    def find_pdb_ligands(self, current_generation_pdb_dir):    
         """
         This finds all the pdb files of ligands in a directory
 
         Inputs:
-        :param str current_generation_PDB_dir: the dir path which contains the pdb files
+        :param str current_generation_pdb_dir: the dir path which contains the pdb files
                                                 of ligands to be converted
         Returns:
         :returns: list pdbs_in_folder: a list of all PDB's in the dir 
@@ -165,26 +165,26 @@ class VinaDocking(ParentDocking):
 
         # make list of every pdb in the current generations pdb folder
         pdbs_in_folder = []
-        for filename in glob.glob(current_generation_PDB_dir + "*.pdb"): 
+        for filename in glob.glob(current_generation_pdb_dir + "*.pdb"): 
             pdbs_in_folder.append(filename)
 
         return pdbs_in_folder
     #
 
     # Find ligands which converted to PDBQT
-    def find_converted_ligands(self, current_generation_PDB_dir):        
+    def find_converted_ligands(self, current_generation_pdb_dir):        
         """
         This finds all the pdbqt files of ligands in a directory
 
         Inputs:
-        :param str current_generation_PDB_dir: the dir path which contains the pdbqt files
+        :param str current_generation_pdb_dir: the dir path which contains the pdbqt files
                                                 of ligands to be docked
         Returns:
         :returns: list pdbqts_in_folder: a list of all PDBqt's in the dir 
         """
         # make list of every pdbqt in the current generations pdb folder
         pdbqts_in_folder = []
-        for filename in glob.glob(current_generation_PDB_dir + "*.pdbqt"): 
+        for filename in glob.glob(current_generation_pdb_dir + "*.pdbqt"): 
             pdbqts_in_folder.append(filename)
 
         return pdbqts_in_folder
@@ -318,7 +318,7 @@ class VinaDocking(ParentDocking):
             # PDB file doesn't exist
             return False, None
         else:
-            smile_name = self.file_conversion_class_object.get_smile_name_from_PDB(pdb_file)
+            smile_name = self.file_conversion_class_object.get_smile_name_from_pdb(pdb_file)
         if not os.path.exists(pdb_file + "qt.vina"): # so this pdbqt.vina file didn't exist
             if self.debug_mode ==False:
                 print("Docking unsuccessful: Deleting " + os.path.basename(pdb_file) + "...")

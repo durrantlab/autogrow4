@@ -48,7 +48,7 @@ def make_mutants(vars, generation_num, number_of_processors, num_mutants_to_make
     number_of_processors = int(vars["parallelizer"].return_node())
 
     # initialize the smileclickclass
-    aSmilesClickChem = SmileClickClass.SmilesClickChem(rxn_library_variables, new_mutation_smiles_list, vars["Filter_Object_Dict"])
+    a_smiles_click_chem_object = SmileClickClass.SmilesClickChem(rxn_library_variables, new_mutation_smiles_list, vars["filter_object_dict"])
 
     while loop_counter < 2000 and len(new_ligands_list) < num_mutants_to_make:
 
@@ -56,7 +56,7 @@ def make_mutants(vars, generation_num, number_of_processors, num_mutants_to_make
         
         while len(new_ligands_list) < num_mutants_to_make and len(react_list) > 0:
             
-            aSmilesClickChem.update_list_of_already_made_smiles(new_ligands_list)
+            a_smiles_click_chem_object.update_list_of_already_made_smiles(new_ligands_list)
             num_to_grab = num_mutants_to_make - len(new_ligands_list)
             num_to_make = num_to_grab
 
@@ -70,10 +70,10 @@ def make_mutants(vars, generation_num, number_of_processors, num_mutants_to_make
             smile_inputs = [x[0] for x in smile_pairs]
             smile_names = [x[1] for x in smile_pairs]
 
-            job_input = tuple([tuple([smile, aSmilesClickChem]) for smile in smile_inputs])
+            job_input = tuple([tuple([smile, a_smiles_click_chem_object]) for smile in smile_inputs])
 
             ######################################## 
-            results = vars["parallelizer"].run(job_input, run_Smile_Click_for_multithread)
+            results = vars["parallelizer"].run(job_input, run_smiles_click_for_multithread)
             
             for index,i in enumerate(results):
                 if i is not None:
@@ -140,7 +140,7 @@ def make_mutants(vars, generation_num, number_of_processors, num_mutants_to_make
         return new_ligands_list
 #
 
-def run_Smile_Click_for_multithread(smile, aSmilesClickChem):
+def run_smiles_click_for_multithread(smile, a_smiles_click_chem_object):
     """
     This function takes a single smilestring and performs SmileClick on it.
 
@@ -153,7 +153,7 @@ def run_Smile_Click_for_multithread(smile, aSmilesClickChem):
     :returns: str result_of_run: either a smile string of a child mol or None if the reactions failed
     """
     
-    result_of_run = aSmilesClickChem.run_Smile_Click(smile)
+    result_of_run = a_smiles_click_chem_object.run_smiles_click(smile)
 
     return result_of_run
 #

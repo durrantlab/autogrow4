@@ -31,7 +31,7 @@ rdkit.RDLogger.DisableLog('rdApp.*')
 from autogrow.Operators.Filter.Filter_classes.ParentFilterClass import ParentFilter
 
 
-class Lipinski_Strict(ParentFilter):
+class LipinskiStrictFilter(ParentFilter):
     """
     This runs a Strict Lipinski filter.
     Lipinski filter refines for orally available drugs. 
@@ -51,7 +51,9 @@ class Lipinski_Strict(ParentFilter):
 
     Inputs:
     :param class ParentFilter: a parent class to initialize off
-    """    
+    Returns:
+    :returns: bool bool: True if the mol passes the filter; False if it fails the filter
+    """
     def run_filter(self, mol):
         """
         This runs a Strict Lipinski filter.

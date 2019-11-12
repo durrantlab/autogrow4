@@ -22,7 +22,7 @@ from rdkit.Chem.FilterCatalog import FilterCatalogParams
 from autogrow.Operators.Filter.Filter_classes.ParentFilterClass import ParentFilter
 
 
-class PAINS_Filter(ParentFilter):
+class PAINSFilter(ParentFilter):
     """
     This will filter a ligand using a PAINS filter. PAINS 
     eliminates of Pan Assay Interference Compounds 
@@ -41,6 +41,8 @@ class PAINS_Filter(ParentFilter):
 
     Inputs:
     :param class ParentFilter: a parent class to initialize off
+    Returns:
+    :returns: bool bool: True if the mol passes the filter; False if it fails the filter
     """        
     def __init__(self):
         """

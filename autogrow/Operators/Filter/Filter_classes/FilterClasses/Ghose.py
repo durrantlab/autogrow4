@@ -28,7 +28,7 @@ rdkit.RDLogger.DisableLog('rdApp.*')
 from autogrow.Operators.Filter.Filter_classes.ParentFilterClass import ParentFilter
 
 
-class Ghose(ParentFilter):
+class GhoseFilter(ParentFilter):
     """
     This runs a Ghose filter for drug-likeliness.
     Ghose filter filters molecules by Molecular weight (MW),

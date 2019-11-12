@@ -22,7 +22,7 @@
     "selector_choice": "Rank_Selector",
     "max_variants_per_compound": 1,
     "filter_source_compounds": true,
-    "Lipinski_Lenient": true,
+    "LipinskiLenient": true,
     "docking_exhaustiveness": 1,
     "start_a_new_run": true,
     "use_docked_source_compounds":false,

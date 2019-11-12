@@ -62,10 +62,10 @@ do
         --dock_choice QuickVina2Docking \
         --scoring_choice VINA \
         --selector_choice Rank_Selector \
-        --Lipinski_Strict \
-        --Ghose \
-        --PAINS_Filter \
-        --Mozziconacci \
+        --LipinskiStrictFilter \
+        --GhoseFilter \
+        --PAINSFilter \
+        --MozziconacciFilter \
         --reduce_files_sizes True \
         --docking_exhaustiveness 25 \
         --max_variants_per_compound 5 \

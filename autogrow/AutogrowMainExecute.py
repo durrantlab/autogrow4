@@ -10,7 +10,7 @@ import autogrow.Operators.Operations as Operations
 import autogrow.Docking.Ranking.Ranking_mol as Ranking
 import autogrow.Docking.Concatinate_files as Concatinate_files
 
-def Main_Execute(vars):    
+def main_execute(vars):    
     """
     This function takes the user variables and runs Autogrow
 
@@ -284,7 +284,7 @@ def delete_temporary_files_and_folders(file_or_folder):
                 pass
         else:
             try:
-                os.remove(command)
+                os.remove(file_or_folder)
             except:
                 pass
 

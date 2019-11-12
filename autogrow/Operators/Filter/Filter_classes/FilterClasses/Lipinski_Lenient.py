@@ -31,7 +31,7 @@ rdkit.RDLogger.DisableLog('rdApp.*')
 from autogrow.Operators.Filter.Filter_classes.ParentFilterClass import ParentFilter
 
 
-class Lipinski_Lenient(ParentFilter):
+class LipinskiLenient(ParentFilter):
     """
     This runs a Lenient Lipinski filter.
     Lipinski filter refines for orally available drugs. 

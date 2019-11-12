@@ -72,13 +72,13 @@ class Mapping(object):
         self.Is_to_Bs = copy.deepcopy(Is_to_Bs) # I-B mapping dictionary from outside class
     #
 
-    def locate_Bs(self, I):
+    def locate_b(self, i):
         """
         Given a specified anchor/I return a list of all the B-groups
         from both parent ligands, bound to that anchor 
 
         Inputs:
-        :param int I: the isolabel of an anchor atom which will be used
+        :param int i: the isolabel of an anchor atom which will be used
                         to search for B-groups within self.Is_to_Bs.
 
         Returns
@@ -87,60 +87,60 @@ class Mapping(object):
                                         are bound to that anchor.
                                         ie) ['1B1','2B1']
         """
-        return self.Is_to_Bs[I]
+        return self.Is_to_Bs[i]
     # 
 
-    def locate_Is(self, B):
+    def locate_i(self, b):
         """
         Given a specified B-group return the anchor/I/node
         it connects to.
 
         Inputs:
-        :param str B: the name of a B-groups within self.Bs_to_Is.
+        :param str b: the name of a B-groups within self.Bs_to_Is.
 
         Returns
-        :returns: list self.Bs_to_Is[B]: A list of the anchor the given
+        :returns: list self.Bs_to_Is[b]: A list of the anchor the given
                                          B-groups is bound.
                                         ie) [10001]
         """
-        return self.Bs_to_Is[B]
+        return self.Bs_to_Is[b]
     # 
 
-    def delete_B(self, B):
+    def delete_b(self, b):
         """
-        Removes the B from Bs_to_Is and all references to B in Is_to_Bs.
-            -B is a Key in Bs_to_Is
-            -B is one or more items in Is_to_Bs.
+        Removes the b from Bs_to_Is and all references to b in Is_to_Bs.
+            -b is a Key in Bs_to_Is
+            -b is one or more items in Is_to_Bs.
         
         Inputs:
-        :param str B:   A B-group to be removed from the Bs_to_Is and B in Is_to_Bs dicts.
+        :param str b:   A B-group to be removed from the Bs_to_Is and B in Is_to_Bs dicts.
         """
-        Is_to_modify = self.locate_Is(B)
+        Is_to_modify = self.locate_i(b)
         for i in Is_to_modify:
-            blank = self.Is_to_Bs[i].remove(B) 
-        del self.Bs_to_Is[B]
+            blank = self.Is_to_Bs[i].remove(b) 
+        del self.Bs_to_Is[b]
     # 
 
-    def delete_I(self, I):
+    def delete_i(self, i):
         """
-        Removes the I from Is_to_Bs and all references to I in Bs_to_Is.
-            -I is a Key in Is_to_Bs.
-            -I is one or more items in Bs_to_Is.
+        Removes the I from Is_to_Bs and all references to i in Bs_to_Is.
+            -i is a Key in Is_to_Bs.
+            -i is one or more items in Bs_to_Is.
         
         Inputs:
-        :param int I:   An interger representing the isolabel for an anchor/node/I atom
-                        to be removed from the Bs_to_Is and B in Is_to_Bs dicts.
+        :param int i:   An interger representing the isolabel for an anchor/node/i atom
+                        to be removed from the Bs_to_Is and b in Is_to_Bs dicts.
         """
         
-        Bs_to_modify = self.locate_Bs(I)
+        Bs_to_modify = self.locate_b(i)
         for b in Bs_to_modify:
-            self.Bs_to_Is[b].remove(I) 
-        del self.Is_to_Bs[I]
+            self.Bs_to_Is[b].remove(i) 
+        del self.Is_to_Bs[i]
     # 
 
-    def chose_B_from_I(self, I):
+    def chose_b_from_i(self, i):
         """
-        Chose your B from a given I.
+        Chose your B from a given i.
         This makes the decision which B-group will be chosen for a specific I.
 
         Current implimentation is that there are no null choice options.
@@ -235,9 +235,9 @@ class Mapping(object):
         # against shrinking the child molecule
 
         # Select an B to keep
-        if I in list(self.Is_to_Bs.keys()):
+        if i in list(self.Is_to_Bs.keys()):
             
-            options = self.locate_Bs(I)
+            options = self.locate_b(i)
             if len(options) > 1:
                 B_x = random.choice(options)
             elif len(options) == 1:
@@ -245,19 +245,19 @@ class Mapping(object):
             else:
                 return 'None'
                 
-            list_Is = self.locate_Is(B_x)
+            list_Is = self.locate_i(B_x)
             list_Bs = []
-            for i in list_Is:
-                list_Bs.append(self.locate_Bs(i))
+            for x in list_Is:
+                list_Bs.append(self.locate_b(x))
 
             flattened = [val for sublist in list_Bs for val in sublist]
             unique_Bs = list(set(flattened))       # convert list to set to list to remove redundant B's
             # delete the B's and I's
             for b in unique_Bs:            
-                self.delete_B(b)
+                self.delete_b(b)
 
-            for i in list_Is:
-                self.delete_I(i)
+            for x in list_Is:
+                self.delete_i(x)
             return B_x
         else:
             return 'None'
@@ -279,11 +279,11 @@ class Mapping(object):
         """
         return self.Bs_to_Is, self.Is_to_Bs
 
-# I_dict = {10000: ['1B1', '2B1'], 10004: ['2B2'], 10005: ['2B3'], 10006: ['2B4'], 10007: ['1B3'], 10008: ['1B2']}
-# B_dict = {'1B1': [10000], '1B2': [10008], '1B3': [10007], '2B4': [10006], '2B3': [10005], '2B2': [10004], '2B1': [10000]}
-def run_mapping(B_dict, I_dict):
+# i_dict = {10000: ['1B1', '2B1'], 10004: ['2B2'], 10005: ['2B3'], 10006: ['2B4'], 10007: ['1B3'], 10008: ['1B2']}
+# b_dict = {'1B1': [10000], '1B2': [10008], '1B3': [10007], '2B4': [10006], '2B3': [10005], '2B2': [10004], '2B1': [10000]}
+def run_mapping(b_dict, i_dict):
     """
-    This runs the mapping class which can determine which B-groups/R-groups we will append in SmileMerge.
+    This runs the Mapping class which can determine which B-groups/R-groups we will append in SmileMerge.
 
     Input:
     :param dict Bs_to_Is: Dictionary converting B-groups to anchor/node/I atoms.
@@ -298,21 +298,21 @@ def run_mapping(B_dict, I_dict):
                             ie) {10002: ['2B1'], 10003: ['1B1', '2B2'], 10005: ['2B3']}
 
     Returns:
-    :returns: list Bs_chosen: A list of all the chosen B-groups to be used to
+    :returns: list bs_chosen: A list of all the chosen B-groups to be used to
                             generate a child molecule later.
     """
-    aMapping = Mapping(B_dict, I_dict)
-    Bs_chosen = []
-    for i in I_dict:
-        B_choice = aMapping.chose_B_from_I(i)
-        Bs_chosen.append(B_choice)
+    aMapping = Mapping(b_dict, i_dict)
+    bs_chosen = []
+    for i in i_dict:
+        B_choice = aMapping.chose_b_from_i(i)
+        bs_chosen.append(B_choice)
 
-    Bs_chosen = list(set(Bs_chosen))
+    bs_chosen = list(set(bs_chosen))
 
-    for i in Bs_chosen:
+    for i in bs_chosen:
         if i == "None":
-            Bs_chosen.remove(i)
+            bs_chosen.remove(i)
 
-    return Bs_chosen
+    return bs_chosen
     #
 #

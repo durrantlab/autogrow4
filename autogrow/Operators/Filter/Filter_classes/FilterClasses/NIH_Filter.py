@@ -18,7 +18,7 @@ from rdkit.Chem.FilterCatalog import FilterCatalogParams
 from autogrow.Operators.Filter.Filter_classes.ParentFilterClass import ParentFilter
 
 
-class NIH_Filter(ParentFilter):
+class NIHFilter(ParentFilter):
     """
     This will filter a ligand using a NIH screening filter.
     This script relies on the RDKit predefined FilterCatalog.
@@ -33,6 +33,8 @@ class NIH_Filter(ParentFilter):
 
     Inputs:
     :param class ParentFilter: a parent class to initialize off of.
+    Returns:
+    :returns: bool bool: True if the mol passes the filter; False if it fails the filter
     """
     def __init__(self):
         """

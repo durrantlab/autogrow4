@@ -34,6 +34,9 @@ class StdoutRedirection:
 
     def __enter__(self):
         """
+        This will return the class self object
+        and flush the print statements.
+    
         Returns:
         :returns: self self: class self object
         """
@@ -73,7 +76,7 @@ def convert_to_3d(vars, smi_file, smile_file_directory):
 
     print("CONVERTING SDF TO PDB")
     # convert sdf files to PDBs using rdkit
-    convert_sdf_to_PDBs(vars, smile_file_directory, gypsum_output_folder_path)
+    convert_sdf_to_pdbs(vars, smile_file_directory, gypsum_output_folder_path)
     print("CONVERTING SDF TO PDB COMPLETED")
 # 
 
@@ -138,7 +141,7 @@ def convert_smi_to_sdfs_with_gypsum(vars, gen_smiles_file, smile_file_directory)
     job_input = tuple([tuple([gypsum_log_path, json_path, timeout_option, gypsum_timeout_limit, python_path]) for json_path in list_of_jsons])
         
     if vars["parallelizer"].return_mode() == "mpi":
-        failed_to_convert = vars["parallelizer"].run(job_input, run_gypsum_multiprocessing_MPI)
+        failed_to_convert = vars["parallelizer"].run(job_input, run_gypsum_multiprocessing_mpi)
         sys.stdout.flush()
     else:
         failed_to_convert = vars["parallelizer"].run(job_input, run_gypsum_multiprocessing)
@@ -248,7 +251,7 @@ def make_smifile_and_gyspum_submitfile(gen_smiles_file, folder_path, gypsum_outp
     #
 #
 
-def run_gypsum_multiprocessing_MPI(gypsum_log_path, json_path, timeout_option, gypsum_timeout_limit, python_path):
+def run_gypsum_multiprocessing_mpi(gypsum_log_path, json_path, timeout_option, gypsum_timeout_limit, python_path):
     """
     This converts the a single ligand from a SMILE to a 3D SDF using Gypsum. This is used within a multithread. 
     
@@ -416,7 +419,7 @@ def check_gypsum_log_did_complete(log_file_path):
         return True    
 #
 
-def convert_sdf_to_PDBs(vars, gen_folder_path, SDFs_folder_path):
+def convert_sdf_to_pdbs(vars, gen_folder_path, sdf_folder_path):
     """
     It will find any .sdf files within the folder_path and convert them to .pdb types using rdkit.Chem.
     It also makes a subfolder to store the pdb files if one doesn't already exist in the folder_path.
@@ -424,15 +427,15 @@ def convert_sdf_to_PDBs(vars, gen_folder_path, SDFs_folder_path):
     Input:
     :param dict vars: User variables which will govern how the programs runs
     :param str gen_folder_path: Path of the folder for the current generation
-    :param str SDFs_folder_path: Path of the folder with all of the 3D .sdf files to convert
+    :param str sdf_folder_path: Path of the folder with all of the 3D .sdf files to convert
     """
     files = []
 
-    if os.path.isdir(SDFs_folder_path): # so it's a directory, go through the directory and find all the sdf files
-        if SDFs_folder_path[-1:]!= os.sep: SDFs_folder_path = SDFs_folder_path + os.sep # so add a / to the end of the directory
+    if os.path.isdir(sdf_folder_path): # so it's a directory, go through the directory and find all the sdf files
+        if sdf_folder_path[-1:]!= os.sep: sdf_folder_path = sdf_folder_path + os.sep # so add a / to the end of the directory
         
-        files.extend(glob.glob(SDFs_folder_path + '*.sdf'))
-        files.extend(glob.glob(SDFs_folder_path + '*.SDF'))
+        files.extend(glob.glob(sdf_folder_path + '*.sdf'))
+        files.extend(glob.glob(sdf_folder_path + '*.SDF'))
     files = list(set(files))
     if len(files) == 0:
         printout = "\nThere are no sdf's to convert to PDB's. There may be an issue with Gypsum.\n"

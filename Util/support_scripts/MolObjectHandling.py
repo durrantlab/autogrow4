@@ -76,7 +76,7 @@ def handleHs(mol, protanate_step):
     Inputs:
     :param rdkit.Chem.rdchem.Mol sanitized_deprotanated_mol: an rdkit molecule already sanitized and deprotanated.
     :param bol protanate_step: True if mol needs to be protanated; False if deprotanated
-                                -Note if Protanated, SmilesMerge takes up to 10times longer
+                                -Note if Protanated, smiles_merge takes up to 10times longer
 
     Returns:
     :returns: rdkit.Chem.rdchem.Mol mol: an rdkit molecule with H's handled (either added or removed) and sanitized.

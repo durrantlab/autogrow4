@@ -121,17 +121,17 @@ def del_files(file_name):
             print("couldn't delete file: {}".format(file_name))
 
 #######
-def run_concatination(Parallelizer_object, directory):
+def run_concatination(parallelizer_object, directory):
     """    
     This function concatinates and compresses every file in a directory.
         This makes data transfer easier later on.
 
     To decompress the folder please script in $PATH/autogrow/Util/file_concatination_and_compression.py 
 
-    Parallelizer_object type is <class 'autogrow.Operators.ConvertFiles.gypsum_dl.gypsum_dl.Parallelizer.Parallelizer'>
+    parallelizer_object type is <class 'autogrow.Operators.ConvertFiles.gypsum_dl.gypsum_dl.Parallelizer.Parallelizer'>
    
     Inputs:
-    :param Parallelizer_obj Parallelizer_object: a paralellizer object used to multiprocess.
+    :param Parallelizer_obj parallelizer_object: a paralellizer object used to multiprocess.
             initialized from autogrow/Operators/ConvertFiles/gypsum_dl/gypsum_dl/Parallelizer.py. 
     :param str directory: the path to the folder which will be compiled and compressed.    
     """
@@ -147,7 +147,7 @@ def run_concatination(Parallelizer_object, directory):
     job_list = tuple([(file_path,) for file_path in file_list])
     print("\tFinish Concatination")
     print("\tRemoving files that were concatinated")
-    Parallelizer_object.run(job_list, del_files)
+    parallelizer_object.run(job_list, del_files)
     print("\tCompressing file")
     compress_file(concat_file)
     if os.path.exists(concat_file  + ".gz"):

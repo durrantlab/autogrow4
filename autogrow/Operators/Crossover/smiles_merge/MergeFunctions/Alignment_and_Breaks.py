@@ -11,87 +11,87 @@ rdkit.RDLogger.DisableLog('rdApp.*')
 import autogrow.Operators.ConvertFiles.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
 
 
-# handle_MCS_alignments_labeling_and_cyclicbreaks
-def handle_MCS_align_labeling_and_cyclicbreaks(mol_1, mol_2, MCS_Mol):
+# handle_mcs_alignments_labeling_and_cyclicbreaks
+def handle_mcs_align_labeling_and_cyclicbreaks(mol_1, mol_2, mcs_mol):
     """
     This will:
         take 2 aligned molecules and pick a specific alignment, 
         check for any ring and cyclic breaks and fragmentation
             -removing any atoms from the common core which caused those issues
-        renumber and isotope atoms in mol_1, mol_2, MCS_Mol to be tractable
+        renumber and isotope atoms in mol_1, mol_2, mcs_mol to be tractable
             and consistent amongst the three
             
     Input:
     :param rdkit.Chem.rdchem.Mol mol_1: an rdkit molecule 
     :param rdkit.Chem.rdchem.Mol mol_2: an rdkit molecule 
-    :param Chem.MolFromSmarts(MCS_res_SMART) MCS_Mol: a result object from rdkits MCS function
+    :param Chem.MolFromSmarts(mcs_res_SMART) mcs_mol: a result object from rdkits MCS function
          
     Return:
     :returns: rdkit.Chem.rdchem.Mol mol_1: an rdkit molecule isolabeled and renumbered or None if it fails
     :returns: rdkit.Chem.rdchem.Mol mol_2: an rdkit molecule isolabeled  and renumbered or None if it fails
-    :returns: MCS_res_Mol MCS_Mol: an MCS result isolabeled and no breaks or None if it fails
+    :returns: mcs_res_Mol mcs_mol: an MCS result isolabeled and no breaks or None if it fails
     """
 
     if type(mol_1) is not rdkit.Chem.rdchem.Mol:
         return None, None, None
     if type(mol_2) is not rdkit.Chem.rdchem.Mol:
         return None, None, None
-    if type(MCS_Mol) is not rdkit.Chem.rdchem.Mol:
+    if type(mcs_mol) is not rdkit.Chem.rdchem.Mol:
         return None, None, None
 
     # Set Alignment, Isotope label, and Handle breaks
-    picked_alignment = pick_MCS_alignment(mol_1, mol_2, MCS_Mol)
+    picked_alignment = pick_mcs_alignment(mol_1, mol_2, mcs_mol)
     if picked_alignment == None:
         return None, None, None
 
     # Isotope label the MCS core
-    index_tuple = add_MCS_Isolabels(mol_1, mol_2, MCS_Mol, picked_alignment)
+    index_tuple = add_mcs_isolabels(mol_1, mol_2, mcs_mol, picked_alignment)
 
     ## Reorder all atoms within ligands to be consistent
-    mol_1 = renumber_to_MCS(mol_1, picked_alignment[0])
-    mol_2 = renumber_to_MCS(mol_2, picked_alignment[1])
+    mol_1 = renumber_to_mcs(mol_1, picked_alignment[0])
+    mol_2 = renumber_to_mcs(mol_2, picked_alignment[1])
    
     #### CHECK FOR RING BREAKS AND FRAGMENTATION BEFORE CONTINUING FORWARD
     # SYSTEM ERRORS MAY OCCUR HERE WHEN MCS IS BAD
     # Check cyclic ring breaks, if break remove atoms from common core
-    MCS_Mol, new_index, are_there_breaks = check_cyclic_breaks(index_tuple, mol_1, mol_2, MCS_Mol)
+    mcs_mol, new_index, are_there_breaks = check_cyclic_breaks(index_tuple, mol_1, mol_2, mcs_mol)
 
     # prevents None type errors
-    if MCS_Mol is None:
+    if mcs_mol is None:
         return None, None, None
         
     # Check cyclic ring breaks, if break remove atoms from common core   
     if are_there_breaks is True:
         # Run cyclic ring break again, if there are still breaks create sys error and abort merge
-        MCS_M3, new_index2, are_there_breaks_2 = check_cyclic_breaks(new_index, mol_1, mol_2, MCS_Mol)
+        mcs_M3, new_index2, are_there_breaks_2 = check_cyclic_breaks(new_index, mol_1, mol_2, mcs_mol)
         if are_there_breaks_2 is True:
             return None, None, None 
 
     # prevents None type errors
-    if MCS_Mol is None:
+    if mcs_mol is None:
         return None, None, None
     
     # Check for any additional fragmentation issues
-    confirm_no_frag = Chem.GetMolFrags(MCS_Mol, asMols = True, sanitizeFrags = False)
+    confirm_no_frag = Chem.GetMolFrags(mcs_mol, asMols = True, sanitizeFrags = False)
     if len(confirm_no_frag) != 1:
         return None, None, None 
 
     ## Renumber all atoms within both ligands to be consistent with the core
-    mol_1 = renumber_to_MCS(mol_1, new_index[0])
-    mol_2 = renumber_to_MCS(mol_2, new_index[1])
+    mol_1 = renumber_to_mcs(mol_1, new_index[0])
+    mol_2 = renumber_to_mcs(mol_2, new_index[1])
 
     # Add correct isolabels to the core atoms
-    # requires 1 final fake alignment tuple of range(0,len(MCS_mol.GetNumAtoms()))
+    # requires 1 final fake alignment tuple of range(0,len(mcs_mol.GetNumAtoms()))
     final_alignment = (new_index[2],new_index[2],new_index[2])
     # Isotope label the core
-    index_tuple = add_MCS_Isolabels(mol_1, mol_2, MCS_Mol, final_alignment)
+    index_tuple = add_mcs_isolabels(mol_1, mol_2, mcs_mol, final_alignment)
 
     # label the 1st atom in R-group with its idx + (1000 for lig1 and 2000 for lig 2)
     # the 1000 vs 2000 label will be used to deconvelute later
     # these will be the iso values assigned to the 1st atom in an R-group
-    add_R_atom_Isolabels(mol_1, mol_2)
+    add_r_atom_isolabels(mol_1, mol_2)
 
-    return mol_1, mol_2, MCS_Mol
+    return mol_1, mol_2, mcs_mol
 #
 
 ########################## 
@@ -138,7 +138,7 @@ def check_cyclic_breaks(alignment_tuple, mol_1, mol_2, core):
         return None, None, None
 
 
-    MCS_ringbreak_idx = []
+    mcs_ringbreak_idx = []
     mol_1_ringbreak_idx = []
     mol_2_ringbreak_idx = []
     for l1,l2,c1 in zip(alignment_tuple[0],alignment_tuple[1],alignment_tuple[2]):
@@ -149,11 +149,11 @@ def check_cyclic_breaks(alignment_tuple, mol_1, mol_2, core):
         # ring breaks can occur when an atom in either lig is a ring atom
         # but the common substructure has that as a non-ring atom
         if atomC.IsInRing() is False and (atom1.IsInRing() is True or atom2.IsInRing() is True):
-            MCS_ringbreak_idx.append(l1)
+            mcs_ringbreak_idx.append(l1)
             mol_1_ringbreak_idx.append(l2)
             mol_2_ringbreak_idx.append(c1)
             
-    if len(MCS_ringbreak_idx)>0:
+    if len(mcs_ringbreak_idx)>0:
         new_align_list_l1 = []
         new_align_list_l2 = []
         new_align_list_c1 = []
@@ -177,11 +177,11 @@ def check_cyclic_breaks(alignment_tuple, mol_1, mol_2, core):
         temp_core_removed_breaks = copy.deepcopy(core)
 
         # delete atoms causing ringbreaks
-        temp_core_removed_breaks = MOH.remove_atoms(temp_core_removed_breaks, MCS_ringbreak_idx)
+        temp_core_removed_breaks = MOH.remove_atoms(temp_core_removed_breaks, mcs_ringbreak_idx)
         if temp_core_removed_breaks is None:
             return None, None, None
         # check for fragmentation and add the smallest fragments indexes to the to delete list
-        all_atoms_to_delete = ringbreak_frag_handling(temp_core_removed_breaks, MCS_ringbreak_idx)
+        all_atoms_to_delete = ringbreak_frag_handling(temp_core_removed_breaks, mcs_ringbreak_idx)
         if all_atoms_to_delete is None:
             return None, None, None
 
@@ -221,7 +221,7 @@ def check_cyclic_breaks(alignment_tuple, mol_1, mol_2, core):
         return core, alignment_tuple, did_a_ring_break
 # 
 
-def ringbreak_frag_handling(new_core, MCS_ringbreak_idx):
+def ringbreak_frag_handling(new_core, mcs_ringbreak_idx):
     """
     This takes a rdkit mol of the core (after atoms were removed to resolve cyclic breaks).
     It then tests and handles ringbreaks and fragmentation.
@@ -232,10 +232,10 @@ def ringbreak_frag_handling(new_core, MCS_ringbreak_idx):
     
     Input:
     :param rdkit.Chem.rdchem.Mol new_core: common core mol object
-    :param list MCS_ringbreak_idx: list of the idx's of the common core for iso labels and later 
+    :param list mcs_ringbreak_idx: list of the idx's of the common core for iso labels and later 
                                     adjustment iso labels and idx numbers
     Return:
-    :returns: list iso_core_frag_list: list of the idx's of common core; same as MCS_ringbreak_idx unless there was fragmentation
+    :returns: list iso_core_frag_list: list of the idx's of common core; same as mcs_ringbreak_idx unless there was fragmentation
                                 that needed to be handled.
     """
     ########################## 
@@ -244,7 +244,7 @@ def ringbreak_frag_handling(new_core, MCS_ringbreak_idx):
 
     check_fragmentation = Chem.GetMolFrags(new_core, asMols = True, sanitizeFrags = False)
     num_frag_len = len(check_fragmentation)
-    iso_core_frag_list = copy.deepcopy(MCS_ringbreak_idx)
+    iso_core_frag_list = copy.deepcopy(mcs_ringbreak_idx)
             
     
     if num_frag_len > 1:
@@ -334,7 +334,7 @@ def remove_iso_labels(mol, list_of_idx_to_remove):
         atom.SetIsotope(0)
 #
 
-def add_R_atom_Isolabels(mol_1, mol_2):
+def add_r_atom_isolabels(mol_1, mol_2):
     """
     Label the 1st atom in R-group with its idx + (1000 for lig1 and 2000 for lig 2)
     the 1000 vs 2000 label will be used to deconvelute later.
@@ -358,7 +358,7 @@ def add_R_atom_Isolabels(mol_1, mol_2):
 #
 
 # alignment and labeling
-def pick_MCS_alignment(mol_1, mol_2, common_core):
+def pick_mcs_alignment(mol_1, mol_2, common_core):
     """
     This will take the common substructure (aka the common_core) and find every match to it within
     each of the two ligands and produce to list of tuples for the atom index (Idx) relative 
@@ -423,7 +423,7 @@ def pick_MCS_alignment(mol_1, mol_2, common_core):
 #
 
 ###### Index and convert Ligs w isotope labels
-def add_MCS_Isolabels(mol_1, mol_2, common_core, picked_alignment):
+def add_mcs_isolabels(mol_1, mol_2, common_core, picked_alignment):
     """
     This will modify every atom in mol_1, mol_2, and the common_core to have
     the same isotope labels based on the index of the common_core atoms.
@@ -433,7 +433,7 @@ def add_MCS_Isolabels(mol_1, mol_2, common_core, picked_alignment):
     Input
     :param rdkit.Chem.rdchem.Mol mol_1: an rdkit molecule 
     :param rdkit.Chem.rdchem.Mol mol_2: an rdkit molecule 
-    :param Chem.MolFromSmarts(MCS_res_SMART) common_core: MCS_res_Mol    
+    :param Chem.MolFromSmarts(mcs_res_SMART) common_core: mcs_res_Mol    
     :param tupple picked_alignment: a tuple with 3 subtuples for mol_1,mol_2,common_core
                                     The numbers within the sublist is the atom IDx for a given atom in a ligand.
                                     The sublist index for each atom in for picked_alignment corresponds to the Idx
@@ -461,7 +461,7 @@ def add_MCS_Isolabels(mol_1, mol_2, common_core, picked_alignment):
     return final_index
 #
  
-def renumber_to_MCS(mol, tuple_order_list):
+def renumber_to_mcs(mol, tuple_order_list):
     """
     This renumbers the indexes of the atoms in a lig to that of the MCS and returns a renumbered atom.
     

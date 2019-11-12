@@ -29,7 +29,7 @@ rdkit.RDLogger.DisableLog('rdApp.*')
 from autogrow.Operators.Filter.Filter_classes.ParentFilterClass import ParentFilter
 
 
-class Mozziconacci(ParentFilter):
+class MozziconacciFilter(ParentFilter):
     """
     This runs a Mozziconacci filter.
     Mozziconacci filter is a filter for Drug-likeliness which
@@ -49,6 +49,8 @@ class Mozziconacci(ParentFilter):
 
     Inputs:
     :param class ParentFilter: a parent class to initialize off
+    Returns:
+    :returns: bool bool: True if the mol passes the filter; False if it fails the filter
     """
     def run_filter(self, mol):
         """

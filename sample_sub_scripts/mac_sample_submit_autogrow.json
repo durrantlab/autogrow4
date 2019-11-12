@@ -23,5 +23,5 @@
     "scoring_function": "VINA",
     "max_variants_per_compound": 1,
     "start_a_new_run": true,
-    "Lipinski_Strict": true
+    "LipinskiStrictFilter": true
 }

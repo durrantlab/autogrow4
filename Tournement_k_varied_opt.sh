@@ -65,9 +65,9 @@ do
         --scoring_choice VINA \
         --selector_choice Tournement_Selector \
         --tourn_size 0.0$i \
-        --Lipinski_Strict \
-        --Ghose \
-        --PAINS_Filter \
+        --LipinskiStrictFilter \
+        --GhoseFilter \
+        --PAINSFilter \
         --reduce_files_sizes True \
         --max_variants_per_compound 3 \
         --redock_elite_from_previous_gen False \

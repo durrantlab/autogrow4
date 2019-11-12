@@ -39,11 +39,11 @@ def add_mol_to_list(usable_list_line):
         usable_list_line = None
     return usable_list_line
 
-def MCS_mols(two_mols_list, list_for_mol2):
+def mcs_mols(two_mols_list, list_for_mol2):
     
-    MCS_results = rdFMCS.FindMCS(two_mols_list, matchValences = False, ringMatchesRingOnly = True, completeRingsOnly = True)
-    num_MCS = str(MCS_results.numAtoms)
-    list_for_mol2.append(num_MCS)
+    mcs_results = rdFMCS.FindMCS(two_mols_list, matchValences = False, ringMatchesRingOnly = True, completeRingsOnly = True)
+    num_mcs = str(mcs_results.numAtoms)
+    list_for_mol2.append(num_mcs)
 
     return list_for_mol2
 
@@ -80,7 +80,7 @@ if __name__ == "__main__":
         counter = counter-1
         job_input = [[[inhib, mol_list[counter]], mol_list] for mol_list in mol_usable_list]
         
-        mol_usable_list = mp.MultiThreading(job_input, -1,  MCS_mols)
+        mol_usable_list = mp.MultiThreading(job_input, -1,  mcs_mols)
         print(inhib_name)
         print(-7 - counter)
         print("")

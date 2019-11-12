@@ -25,8 +25,8 @@
     "max_variants_per_compound": 5,
     "start_a_new_run": true,
     "multithread_mode": "mpi",
-    "Lipinski_Strict": true,
-    "Ghose": true,
-    "Mozziconacci": true,
-    "NIH_Filter": true
+    "LipinskiStrictFilter": true,
+    "GhoseFilter": true,
+    "MozziconacciFilter": true,
+    "NIHFilter": true
 }

@@ -17,14 +17,14 @@ import autogrow.Docking.Delete_failed_mol as Delete
 import autogrow.Operators.ConvertFiles.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
 from autogrow.Docking.Docking_Class.ParentPDBQTConverter import ParentPDBQTConverter
 
-class obabel_Conversion(ParentPDBQTConverter):
+class MGLToolsConversion(ParentPDBQTConverter):
     """
-    This is a class to convert ligands from PDB to PDBQT format using commandline obabel
+    This is a class to convert ligands from PDB to PDBQT format using MGLTools
 
-    Openbabel citations:
-        - N M O'Boyle, M Banck, C A James, C Morley, T Vandermeersch, and G R Hutchison. "Open Babel: An open chemical toolbox." J. Cheminf. (2011), 3, 33. DOI:10.1186/1758-2946-3-33
-        - The Open Babel Package, version 2.3.1 http://openbabel.org (accessed Oct 2011)
-
+    MGLTools citations:
+        - Morris, G. M., Huey, R., Lindstrom, W., Sanner, M. F., Belew, R. K., Goodsell, D. S. and Olson, A. J. (2009) 
+        Autodock4 and AutoDockTools4: automated docking with selective receptor flexiblity. J. Computational Chemistry 2009, 16: 2785-91
+    
     Inputs:
     :param class ParentPDBQTConverter: Parent PDBQTConverter class to inherit from
     """    
@@ -40,32 +40,34 @@ class obabel_Conversion(ParentPDBQTConverter):
         :param bool test_boot: used to initialize class without objects for testing purpose
         """
         if test_boot==False:
-        
+            
             self.vars = vars
             self.debug_mode = vars["debug_mode"]
 
             # VINA SPECIFIC VARS
             receptor_file = vars['filename_of_receptor']
-            obabel_path = self.vars['obabel_path']
+            mgl_python = vars['mgl_python']
+            receptor_template = vars['prepare_receptor4.py']
             number_of_processors = vars['number_of_processors']
             docking_executable = vars['docking_executable']
 
             ########################### 
 
             # convert Receptor from PDB to PDBQT
-            self.convert_receptor_pdb_files_to_pdbqt(receptor_file, obabel_path, number_of_processors)
+            self.convert_receptor_pdb_files_to_pdbqt(receptor_file, mgl_python, receptor_template, number_of_processors)
 
             self.receptor_PDBQT_file = receptor_file + "qt"
 
     # 
     
-    def convert_receptor_pdb_files_to_pdbqt(self, receptor_file, obabel_path, number_of_processors):
+    def convert_receptor_pdb_files_to_pdbqt(self, receptor_file, mgl_python, receptor_template, number_of_processors):
         """
         Make sure a PDB file is properly formatted for conversion to pdbqt
         
         Inputs:
         :param str receptor_file:  the file path of the receptor
-        :param str obabel_path: file path of the obabel_path executable
+        :param str mgl_python: file path of the pythonsh file of mgl tools
+        :param str receptor_template: the receptor4.py file path from mgl tools.
         :param int number_of_processors: number of processors to multithread
         """    
         count = 0
@@ -89,29 +91,23 @@ class obabel_Conversion(ParentPDBQTConverter):
             # create a file to run the pdbqt
             for i in need_to_covert_receptor_to_pdbqt:
 
-                output = self.prepare_receptor_multiprocessing(obabel_path, i)
+                output = self.prepare_receptor_multiprocessing(mgl_python, receptor_template, i)
     #
 
-    def prepare_receptor_multiprocessing(self, obabel_path, mol_filename):
+    def prepare_receptor_multiprocessing(self, mgl_python, prepare_script, mol_filename):
         """
         This prepares the receptor for multiprocessing. 
         Inputs:
-        :param str obabel_path: file path of the obabel_path executable
+        :param str mgl_python: file path of the pythonsh file of mgl tools
+        :param str prepare_script:  the file path for the mgltool receptor prep file receptor4
         :param str mol_filename:  the file path of the receptor
         """
-
-        # This converts PDB to PDBQT with rigid converter.
-        # The -xrp option preserves the atom index and prevents root and BRANCHES in the output file.
-        # - unfortunately these may not be the best converted pdbqt files. We recommend using MGLTools for converting the receptor file.
-        # Developer note should replace this when better option becomes available
-        # 
-        print("Converting receptor PDB file to PDBQT using obabel")
-        command = "{} -ipdb {} -opdbqt -xrp > {}qt".format(obabel_path, mol_filename, mol_filename)
-
+        command = mgl_python + " " + prepare_script + " -r " + mol_filename + " -o " + mol_filename + "qt"
+        
         try:
             os.system(command)
         except:
-            raise Exception("Could not convert receptor with obabel")
+            raise Exception("Could not convert receptor with MGL_tools")
     #
 
     ####################################### 
@@ -129,9 +125,10 @@ class obabel_Conversion(ParentPDBQTConverter):
         :returns: str smile_name: name of the SMILES string from a pdb file
                                     None if its the param file 
         """
-        smile_name = self.get_smile_name_from_PDB(pdb_file)
+        smile_name = self.get_smile_name_from_pdb(pdb_file)
 
-        obabel_path = self.vars['obabel_path']
+        ligand4_template = self.vars['prepare_ligand4.py']
+        mgl_python = self.vars['mgl_python']
                 
         # gypsum makes 1 files labeled params which is not a valid pdb, but is actually a log
         # Do not convert the params files
@@ -143,7 +140,7 @@ class obabel_Conversion(ParentPDBQTConverter):
 
             # make sure its in proper format
             self.convert_pdb_to_pdbqt_acceptable_format(pdb_file)
-            self.prepare_ligand_processing(obabel_path,pdb_file)
+            self.prepare_ligand_processing(mgl_python, ligand4_template,pdb_file)
             if not os.path.exists(pdb_file + "qt"): 
                 # FILE FAILED TO CONVERT TO PDBQT DELETE PDB AND RETURN FALSE
                 if self.debug_mode ==False:
@@ -155,27 +152,27 @@ class obabel_Conversion(ParentPDBQTConverter):
                 else:
                     print("PDBQT not generated: " + os.path.basename(pdb_file) + "...")
                     return False, smile_name
-
         return True, smile_name
     # 
 
     # Convert Ligand from PDB to PDBQT conversion
-    def prepare_ligand_processing(self, obabel_path, mol_filename):
+    def prepare_ligand_processing(self, mgl_python, prepare_script, mol_filename):
         """
-        This function will convert a single ligand from PDB to PDBQT using obabel.
+        This function will convert a single ligand from PDB to PDBQT using MGLTools.
         It has 10seconds to sucessfull convert this. It will try to convert the 
             ligand up to 3 times
         If it fails to do so 3 times, whether because it timed out  
-            or because obabel failed or because of an obabel Glitch,
+            or because MGLTools failed or because of an MGLTools Glitch,
             it will stop and the ligand won't be docked. 
 
         It will print the ligand if it fails 3 times. It will also fail if the
-        molecule is unable to be imported into rdkit and sanitized. This is because obabel
+        molecule is unable to be imported into rdkit and sanitized. This is because MGLTools
         is sensitive to issues like atoms replaced with *, formating errors, and improper valences.
-        Because obabel will crash with these issues the RDKit check is especially useful to prevent hard crashes.
+        Because MGLTools will crash with these issues the RDKit check is especially useful to prevent hard crashes.
 
         Inputs:
-        :param str obabel_path: file path of the obabel_path executable
+        :param str mgl_python: file path of the pythonsh file of mgl tools
+        :param str prepare_script:  the file path for the mgltool ligand prep file receptor4
         :param str mol_filename:  the file path of the ligand
         """
 
@@ -194,9 +191,7 @@ class obabel_Conversion(ParentPDBQTConverter):
         if mol is not None:
             count = 0
             # timeout or gtimeout
-
-            command = timeout_option + " 10 {} -ipdb {} -opdbqt > {}qt".format(obabel_path, mol_filename, mol_filename)
-
+            command = timeout_option + " 10 " + mgl_python + " " + prepare_script + " -g -l " + mol_filename + " -o " + mol_filename + "qt"
 
             while not os.path.exists(mol_filename + "qt"):
                 if count < 3:         
@@ -218,7 +213,6 @@ class obabel_Conversion(ParentPDBQTConverter):
                     printout = "COMPLETELY FAILED TO CONVERT: {}".format(mol_filename)
                     print(printout)
                     break 
-
         if self.debug_mode ==False:
             if os.path.exists(temp_file)==True:
                 command = "rm {}".format(temp_file)
@@ -287,7 +281,7 @@ class obabel_Conversion(ParentPDBQTConverter):
     ####################################### 
     # Handle Failed PDBS                  #
     ####################################### 
-    def get_smile_name_from_PDB(self, pdb_file):
+    def get_smile_name_from_pdb(self, pdb_file):
         """
         This will return the unique identifier name for the compound
                 

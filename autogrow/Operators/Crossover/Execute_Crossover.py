@@ -1,4 +1,4 @@
-"""Pre-SmileMerge_MCS_Filter
+"""Pre-SmileMerge_mcs_Filter
 
 This script should take an input of a randomly selected file containing a list of smiles.
         
@@ -21,11 +21,11 @@ from rdkit.Chem import rdFMCS
 rdkit.RDLogger.DisableLog('rdApp.*')
 
 import autogrow.Operators.Filter.ExecuteFilters as Filter
-import autogrow.Operators.Crossover.SmilesMerge.SmilesMerge as SmilesMerge
+import autogrow.Operators.Crossover.smiles_merge.smiles_merge as smiles_merge
 import autogrow.Operators.ConvertFiles.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
 
 
-def test_for_MCS(vars, mol_1, mol_2):
+def test_for_mcs(vars, mol_1, mol_2):
     """
     Takes a ligand and a random selected molecule and looks
     for the Most common structure. rdFMCS.FindMCS(mols) flags an error if there
@@ -49,8 +49,8 @@ def test_for_MCS(vars, mol_1, mol_2):
 
     
     mols = [mol_1, mol_2]  
-    time_timeout = vars["max_time_MCS_prescreen"]
-    min_number_atoms_matched = vars["min_atom_match_MCS"]
+    time_timeout = vars["max_time_mcs_prescreen"]
+    min_number_atoms_matched = vars["min_atom_match_mcs"]
 
     try: 
         result = rdFMCS.FindMCS(mols, matchValences = False, ringMatchesRingOnly = True, completeRingsOnly = False, timeout = time_timeout)
@@ -73,7 +73,7 @@ def test_for_MCS(vars, mol_1, mol_2):
         return result
 # 
 
-def find_random_lig2(vars, ligands_list, Ligand1_pair):
+def find_random_lig2(vars, ligands_list, ligand1_pair):
     """
     Pick a random molecule from the list and check that it can be
     converted into a rdkit mol object and then test for a satistifactory 
@@ -83,10 +83,10 @@ def find_random_lig2(vars, ligands_list, Ligand1_pair):
     Inputs:
     :param dict vars: User variables which will govern how the programs runs
     :param list ligands_list: list of all the lignads to chose from
-    :param list Ligand1_pair: information for the Ligand 1. This info includes the name and SMILES string
+    :param list ligand1_pair: information for the ligand 1. This info includes the name and SMILES string
 
     Returns:
-    :returns: list mol2_pair: a set of information for a 2nd ligand (Lig2) This includes the name and SMILES string 
+    :returns: list mol2_pair: a set of information for a 2nd ligand (lig2) This includes the name and SMILES string 
                             this mol is from the ligands_list
     :returns: bool bool: returns False if no satistifactory matches were found it returns False
     """
@@ -94,53 +94,53 @@ def find_random_lig2(vars, ligands_list, Ligand1_pair):
     shuffled_num_list = list(range(0,len(ligands_list)-1))
     random.shuffle(shuffled_num_list)
 
-    # Convert Lig_1 into an RDkit mol
-    Lig_1_string = Ligand1_pair[0]
-    lig1_mol = convert_MolFromSmiles(Lig_1_string)    
+    # Convert lig_1 into an RDkit mol
+    lig_1_string = ligand1_pair[0]
+    lig1_mol = convert_mol_from_smiles(lig_1_string)    
 
     while count < len(ligands_list) - 1:
         rand_num = shuffled_num_list[count]
         mol2_pair = ligands_list[rand_num]
 
-        if mol2_pair[0] == Lig_1_string:
+        if mol2_pair[0] == lig_1_string:
             count = count + 1
             continue
         
-        # Convert Lig_1 into an RDkit mol
-        Lig_2_string = mol2_pair[0]
-        lig2_mol = convert_MolFromSmiles(Lig_2_string)
+        # Convert lig_1 into an RDkit mol
+        lig_2_string = mol2_pair[0]
+        lig2_mol = convert_mol_from_smiles(lig_2_string)
         
         if lig2_mol is None:
             count = count + 1
             continue
         else:
-            # it converts and it is not Ligand1 
+            # it converts and it is not ligand1 
             # now lets test for a common substructure
             
-            if test_for_MCS(vars, lig1_mol, lig2_mol) is None:
+            if test_for_mcs(vars, lig1_mol, lig2_mol) is None:
                 count = count + 1
                 continue
             else:
-                # We found a good pair of Ligands
+                # We found a good pair of ligands
                 return mol2_pair
 
     return False
 #
 
-def convert_MolFromSmiles(SmilesString):
+def convert_mol_from_smiles(smiles_string):
     """
     Test a SMILES string can be converted into an rdkit molecule (rdkit.Chem.rdchem.Mol)  
     and be sanitize. 
     This also deprotanates them
 
     Inputs:
-    :param str SmilesString: a single SMILES String
+    :param str smiles_string: a single SMILES String
     Returns:
     :returns: rdkit.Chem.rdchem.Mol mol: an rdkit molecule object if it properly converts from the SMILE
                         and None
     """
     try:
-        mol = Chem.MolFromSmiles(SmilesString, sanitize = False)  
+        mol = Chem.MolFromSmiles(smiles_string, sanitize = False)  
     except:
         return None
     
@@ -157,7 +157,7 @@ def convert_MolFromSmiles(SmilesString):
 ######################### 
 #### RUN MAIN PARTS #####
 #########################  
-def make_Crossovers(vars, generation_num, number_of_processors, num_crossovers_to_make, list_previous_gen_smiles, new_crossover_smiles_list):
+def make_crossovers(vars, generation_num, number_of_processors, num_crossovers_to_make, list_previous_gen_smiles, new_crossover_smiles_list):
     """
     Make crossover compounds in a list to be returned.
     
@@ -223,13 +223,13 @@ def make_Crossovers(vars, generation_num, number_of_processors, num_crossovers_t
             job_input = tuple(job_input)
             # Example information:
             # result is a list of lists
-            # result = [[Ligand_new_smiles, Lig1_smile_pair,Lig_2_pair],...]
-            # Ligand_new_smiles is the smiles string of a new ligand from crossover
-            # Lig1_smile_pair = ["NCCCCCC","zinc123"]
-            # Lig2_smile_pair = ["NCCCO","zinc456"]
-            # Lig1 and lig 2 were used to generate the Ligand_new_smiles
+            # result = [[ligand_new_smiles, lig1_smile_pair,lig_2_pair],...]
+            # ligand_new_smiles is the smiles string of a new ligand from crossover
+            # lig1_smile_pair = ["NCCCCCC","zinc123"]
+            # lig2_smile_pair = ["NCCCO","zinc456"]
+            # lig1 and lig 2 were used to generate the ligand_new_smiles
 
-            results = vars["parallelizer"].run(job_input, do_Crossovers_smiles_Merge)
+            results = vars["parallelizer"].run(job_input, do_crossovers_smiles_merge)
             results =  [x for x in results if x is not None]
 
             for index, i in enumerate(results):
@@ -295,7 +295,7 @@ def make_Crossovers(vars, generation_num, number_of_processors, num_crossovers_t
         return new_ligands_list
 #
 
-def run_SmilesMerge_prescreen(vars, ligands_list, Ligand1_pair):
+def run_smiles_merge_prescreen(vars, ligands_list, ligand1_pair):
     """
     This function runs a series of functions to find two molecules
     with a sufficient amount of shared common structure (most common structure = MCS)
@@ -306,78 +306,78 @@ def run_SmilesMerge_prescreen(vars, ligands_list, Ligand1_pair):
     Inputs:
     :param dict vars: User variables which will govern how the programs runs
     :param list ligands_list: list of all the lignads to chose from
-    :param list Ligand1_pair: information for the Ligand 1. This info includes the name and SMILES string
+    :param list ligand1_pair: information for the ligand 1. This info includes the name and SMILES string
     Returns:
-    :returns: list Lig_2_pair: a set of information for a 2nd ligand (Lig2) This includes the name and SMILES string 
+    :returns: list lig_2_pair: a set of information for a 2nd ligand (lig2) This includes the name and SMILES string 
                             this mol is from the ligands_list
                             returns None if a ligand with a sufficient MCS can not be found return None
     """
-    Ligand_1_string = Ligand1_pair[0]
+    ligand_1_string = ligand1_pair[0]
 
-    # check if Ligand_1 can be converted to an rdkit mol 
-    Lig_1 = convert_MolFromSmiles(Ligand_1_string)
-    if Lig_1 is False:
-        # Ligand1_string failed to be converted to rdkit mol format
+    # check if ligand_1 can be converted to an rdkit mol 
+    lig_1 = convert_mol_from_smiles(ligand_1_string)
+    if lig_1 is False:
+        # ligand1_string failed to be converted to rdkit mol format
         return None
     
     # GET TWO UNIQUE LIGANDS TO WITH A SHARED SUBSTRUCTURE
-    Lig_2_pair = find_random_lig2(vars, ligands_list, Ligand1_pair)
+    lig_2_pair = find_random_lig2(vars, ligands_list, ligand1_pair)
        
-    if Lig_2_pair is False:
-        # Ligand_1 has no matches 
+    if lig_2_pair is False:
+        # ligand_1 has no matches 
         return None
     
     else:
-        return Lig_2_pair
+        return lig_2_pair
 #
  
-def do_Crossovers_smiles_Merge(vars, Lig1_smile_pair, ligands_list):
+def do_crossovers_smiles_merge(vars, lig1_smile_pair, ligands_list):
     """
     This function will take the list of ligands to work on and the number in that list
-    for the Ligand 1. 
+    for the ligand 1. 
 
-    It will then prescreen the Ligand 1 using the run_SmilesMerge_prescreen which should return 
+    It will then prescreen the ligand 1 using the run_smiles_merge_prescreen which should return 
     either a None if no matches are found, or the Smile string of a second ligand (ligand 2)
-    which has some share common substructure with Ligand 1.
+    which has some share common substructure with ligand 1.
 
-    This pair of ligands will be passed off to the SmilesMerge.run_main_SmilesMerge function
+    This pair of ligands will be passed off to the smiles_merge.run_main_smiles_merge function
     which will execute a crossover and return a new molecule 
 
     Input:
     :param dict vars: User variables which will govern how the programs runs
-    :param list Lig1_smile_pair: a list with the SMILES string and info for lig1
+    :param list lig1_smile_pair: a list with the SMILES string and info for lig1
     :param list ligands_list: a list of all the seed ligands from the previous generation
 
     Returns:
-    :returns: str Ligand_new_smiles: a new mol's SMILES string
-    :returns: list Lig1_smile_pair: a list of parent ligand 1's information
-    :returns: list Lig_2_pair: a list of the parent ligand 2's information
+    :returns: str ligand_new_smiles: a new mol's SMILES string
+    :returns: list lig1_smile_pair: a list of parent ligand 1's information
+    :returns: list lig_2_pair: a list of the parent ligand 2's information
     :returns: bool None: returns three Nones if there are no sufficient matches
     """
-    # Run the run_SmilesMerge_prescreen of the ligand
+    # Run the run_smiles_merge_prescreen of the ligand
     # This gets a new a lig2 which passed the prescreen
-    Lig_2_pair = run_SmilesMerge_prescreen(vars, ligands_list, Lig1_smile_pair)
+    lig_2_pair = run_smiles_merge_prescreen(vars, ligands_list, lig1_smile_pair)
 
-    if Lig_2_pair is None:
+    if lig_2_pair is None:
         return None
     else:
-        Ligand_1_string = Lig1_smile_pair[0]
-        Ligand_2_string = Lig_2_pair[0]
+        ligand_1_string = lig1_smile_pair[0]
+        ligand_2_string = lig_2_pair[0]
 
         counter=0
         while counter<3:
-            # run SmilesMerge
-            Ligand_new_smiles = SmilesMerge.run_main_SmilesMerge(vars, Ligand_1_string, Ligand_2_string)
+            # run smiles_merge
+            ligand_new_smiles = smiles_merge.run_main_smiles_merge(vars, ligand_1_string, ligand_2_string)
         
-            if Ligand_new_smiles is None:
+            if ligand_new_smiles is None:
                 counter = counter+1
             else:
                 # Filter Here
-                pass_or_not = Filter.run_filter_on_just_smiles(Ligand_new_smiles, vars["Filter_Object_Dict"])
+                pass_or_not = Filter.run_filter_on_just_smiles(ligand_new_smiles, vars["filter_object_dict"])
                 if pass_or_not == False:
 
                     counter = counter+1
                 else:
-                    return [Ligand_new_smiles, Lig1_smile_pair, Lig_2_pair]
+                    return [ligand_new_smiles, lig1_smile_pair, lig_2_pair]
     return None
 #

@@ -62,9 +62,9 @@ do
         --dock_choice QuickVina2Docking \
         --scoring_choice VINA \
         --selector_choice Roulette_Selector \
-        --Lipinski_Strict \
-        --Ghose \
-        --PAINS_Filter \
+        --LipinskiStrictFilter \
+        --GhoseFilter \
+        --PAINSFilter \
         --reduce_files_sizes True \
         --max_variants_per_compound 5 \
         --redock_elite_from_previous_gen False \

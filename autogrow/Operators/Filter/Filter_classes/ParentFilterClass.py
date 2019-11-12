@@ -6,15 +6,15 @@ class ParentFilter(object):
         1) Lipinski
 
     Filters for for lead-likeness:
-        1) Ghose
-        2) Mozziconacci
+        1) GhoseFilter
+        2) MozziconacciFilter
 
     Filters for CNS/Blood Brain Barrier Permeable:
-        1) VandeWaterbeemd
+        1) VandeWaterbeemdFilter
 
     False-Positive/Metabolite substructure searches:
-        1) PAINS_Filter
-        2) NIH_Filter
+        1) PAINSFilter
+        2) NIHFilter
         3) BRENK_Filter
     """
     def get_name(self):

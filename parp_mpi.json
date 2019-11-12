@@ -23,7 +23,7 @@
     "scoring_function": "VINA",
     "selector_choice": "Rank_Selector",
     "max_variants_per_compound": 5,
-    "Lipinski_Strict": true,
+    "LipinskiStrictFilter": true,
     "reduce_files_sizes": true,
     "multithread_mode": "mpi"
 }

@@ -19,7 +19,7 @@ def make_run_class_dict(filters_to_use):
 
     Input:
     :param list filters_to_use: list of filters to be used.
-            defined in vars["Chosen_Ligand_Filters"]
+            defined in vars["chosen_ligand_filters"]
     
     Returns:
     :returns: dict child_dict: This dictionary contains all the names of the chosen filters as keys and the
@@ -60,12 +60,12 @@ def run_filter(vars, list_of_new_ligands):
                                                 -excludes all molecules which failed
     """
     # Get the already generated dictionary of filter objects
-    Filter_Object_Dict =vars["Filter_Object_Dict"]
+    filter_object_dict =vars["filter_object_dict"]
 
     # make a list of tuples for multi-processing Filter
     job_input = []            
     for smile_info in list_of_new_ligands:
-        temp_tuple = tuple([smile_info, Filter_Object_Dict])
+        temp_tuple = tuple([smile_info, filter_object_dict])
         job_input.append(temp_tuple)
     job_input = tuple(job_input)
         

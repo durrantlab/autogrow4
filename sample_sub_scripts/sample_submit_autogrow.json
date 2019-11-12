@@ -24,6 +24,6 @@
     "rescore_lig_efficiency": true,
     "max_variants_per_compound": 3,
     "start_a_new_run": true,
-    "Lipinski_Strict": true,
+    "LipinskiStrictFilter": true,
     "multithread_mode": "mpi"
 }

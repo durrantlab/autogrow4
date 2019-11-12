@@ -5,7 +5,7 @@ import math
 import copy
 
 
-def Run_Tournement_Selector(list_of_ligands, num_to_chose, tourn_size, idx_to_sel, favor_most_negative=True):
+def run_tournement_selector(list_of_ligands, num_to_chose, tourn_size, idx_to_sel, favor_most_negative=True):
     """
     This runs a tournement style selector given a list of ligands and specified metric. It will randomly 
     select ligands for tournements. The best scoring ligand for each of these groups will end up in the

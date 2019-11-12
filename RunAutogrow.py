@@ -82,19 +82,19 @@ PARSER.add_argument('--python_path', type=str, default="python",
     to import an API, such as argparse, you may need to provide this path.')
 
 
-# SmilesMerge Settings
-PARSER.add_argument('--max_time_MCS_prescreen', type = int, default = 1,
+# smiles_merge Settings
+PARSER.add_argument('--max_time_mcs_prescreen', type = int, default = 1,
     help = 'amount time the pre-screen MCS times out. Time out doesnt prevent \
     mcs matching just takes what it has up to that point')
-PARSER.add_argument('--max_time_MCS_thorough', type = int, default = 1,
+PARSER.add_argument('--max_time_mcs_thorough', type = int, default = 1,
     help = 'amount time the thorough MCS times out. Time out doesnt prevent \
     mcs matching just takes what it has up to that point')
-PARSER.add_argument('--min_atom_match_MCS', type = int, default = 4,
+PARSER.add_argument('--min_atom_match_mcs', type = int, default = 4,
     help = 'Determines the minimum number of atoms in common for a substructurematch. \
     The higher the more restrictive, but the more likely for two ligands not to match')
 PARSER.add_argument('--protanate_step', action = 'store_true', default=False,
     help = 'Indicates if Smilesmerge uses protanated mols (if true) or deprot \
-    (if False) SmilesMerge is 10x faster when deprotanated')
+    (if False) smiles_merge is 10x faster when deprotanated')
 
 
 # Mutation Settings
@@ -186,27 +186,27 @@ PARSER.add_argument('--redock_elite_from_previous_gen', choices = [True,False,"T
     copying the PDBQT files.')
 
 ####### FILTER VARIABLES
-PARSER.add_argument('--Lipinski_Strict', action = 'store_true', default=False,
+PARSER.add_argument('--LipinskiStrictFilter', action = 'store_true', default=False,
     help = 'Lipinski filters for orally available drugs following Lipinski rule of fives. \
     Filters by molecular weight, logP and number of hydrogen bond donors and acceptors. \
     Strict implimentation means a ligand must pass all requirements.')
-PARSER.add_argument('--Lipinski_Lenient', action = 'store_true', default=False,
+PARSER.add_argument('--LipinskiLenient', action = 'store_true', default=False,
     help = 'Lipinski filters for orally available drugs following Lipinski rule of fives. \
     Filters by molecular weight, logP and number of hydrogen bond donors and acceptors. \
     Lenient implimentation means a ligand may fail all but one requirement and still passs.')
-PARSER.add_argument('--Ghose', action = 'store_true', default=False,
-    help = 'Ghose filters for drug-likeliness; filters by molecular weight,\
+PARSER.add_argument('--GhoseFilter', action = 'store_true', default=False,
+    help = 'GhoseFilter filters for drug-likeliness; filters by molecular weight,\
     logP and number of atoms.')
-PARSER.add_argument('--Mozziconacci', action = 'store_true', default=False,
-    help = 'Mozziconacci filters for drug-likeliness; filters by the number of \
+PARSER.add_argument('--MozziconacciFilter', action = 'store_true', default=False,
+    help = 'MozziconacciFilter filters for drug-likeliness; filters by the number of \
     rotatable bonds, rings, oxygens, and halogens.')
-PARSER.add_argument('--VandeWaterbeemd', action = 'store_true', default=False,
-    help = 'VandeWaterbeemd filters for drug likely to be blood brain barrier permeable. \
+PARSER.add_argument('--VandeWaterbeemdFilter', action = 'store_true', default=False,
+    help = 'VandeWaterbeemdFilter filters for drug likely to be blood brain barrier permeable. \
     Filters by the number of molecular weight and Polar Sureface Area (PSA).')
-PARSER.add_argument('--PAINS_Filter', action = 'store_true', default=False,
+PARSER.add_argument('--PAINSFilter', action = 'store_true', default=False,
     help = 'PAINS filteres against Pan Assay Interference Compounds using \
     substructure a search.')
-PARSER.add_argument('--NIH_Filter', action = 'store_true', default=False,
+PARSER.add_argument('--NIHFilter', action = 'store_true', default=False,
     help = 'NIH filteres against molecules with undersirable functional groups \
     using substructure a search.')
 PARSER.add_argument('--BRENK_Filter', action = 'store_true', default=False,
@@ -221,19 +221,19 @@ PARSER.add_argument('--alternative_filter', action = 'append',
 
 # dependency variables
 # DOCUMENT THE file conversion for docking inputs
-PARSER.add_argument('--conversion_choice', choices = ["MGLTools_Conversion","obabel_Conversion","Custom"],
-    default="MGLTools_Conversion", help = 'Determines how .pdb files will be converted \
+PARSER.add_argument('--conversion_choice', choices = ["MGLToolsConversion","ObabelConversion","Custom"],
+    default="MGLToolsConversion", help = 'Determines how .pdb files will be converted \
     to the final format for docking. For Autodock Vina and QuickVina style docking software, \
-    files must be in .pdbqt format. MGLTools_Conversion: uses MGLTools and is the \
+    files must be in .pdbqt format. MGLToolsConversion: uses MGLTools and is the \
     recommended converter. MGLTools conversion is required for NNScore1/2 rescoring. \
-    obabel_Conversion: uses commandline obabel. Easier to install but Vina docking has \
+    ObabelConversion: uses commandline obabel. Easier to install but Vina docking has \
     been optimized with MGLTools conversion.')
 PARSER.add_argument('--custom_conversion_script', metavar = 'custom_conversion_script', 
     default="", help = 'The path to a python script for which is used to convert \
     ligands. This is required for custom conversion_choice choices. \
     Must be a list of strings [name_custom_conversion_class, Path/to/name_custom_conversion_class.py]')
 PARSER.add_argument('--mgltools_directory', metavar = 'mgltools_directory',
-    help = 'Required if using MGLTools conversion option (conversion_choice=MGLTools_Conversion) \
+    help = 'Required if using MGLTools conversion option (conversion_choice=MGLToolsConversion) \
     Path may look like: /home/user/MGLTools-1.5.6/')
 PARSER.add_argument('--mgl_python', metavar = 'mgl_python',required = False,
     help = '/home/user/MGLTools-1.5.4/bin/pythonsh')
@@ -242,7 +242,7 @@ PARSER.add_argument('--prepare_ligand4.py', metavar = 'prepare_ligand4.py',requi
 PARSER.add_argument('--prepare_receptor4.py', metavar = 'prepare_receptor4.py',required = False,
     help = '/home/userMGLTools-1.5.4/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_receptor4.py')
 PARSER.add_argument('--obabel_path', help = 'required if using obabel conversion \
-    option (conversion_choice=obabel_Conversion).Path may look like PATH/envs/py37/bin/obabel; \
+    option (conversion_choice=ObabelConversion).Path may look like PATH/envs/py37/bin/obabel; \
     may be found on Linux by running: which obabel')
 
 # docking
@@ -357,7 +357,7 @@ if ARGS_DICT["cache_prerun"]==False:
     #   importing files before the Parallelizer class is established 
     # in MPI mode can have errors
     import autogrow.AutogrowMainExecute as AutogrowMainExecute
-    AutogrowMainExecute.Main_Execute(vars)
+    AutogrowMainExecute.main_execute(vars)
 
     print("AUTOGROW FINISHED")
 

@@ -52,9 +52,9 @@ do
         --mgltools_directory $MGLTOOLS_HOME/ \
         --number_of_processors -1 \
         --scoring_choice VINA \
-        --Lipinski_Strict \
-        --Ghose \
-        --PAINS_Filter \
+        --LipinskiStrictFilter \
+        --GhoseFilter \
+        --PAINSFilter \
         --start_a_new_run \
         --filter_source_compounds False \
         --rxn_library Robust_Rxns \

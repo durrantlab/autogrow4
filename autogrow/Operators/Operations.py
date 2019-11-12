@@ -139,10 +139,10 @@ def populate_generation(vars, generation_num):
         num_crossovers_to_make = num_crossovers - len(new_crossover_smiles_list) 
 
         # Make all crossovers                 
-        new_crossovers = Execute_Crossover.make_Crossovers(vars, generation_num, number_of_processors, num_crossovers_to_make, seed_list_Crossovers, new_crossover_smiles_list)
+        new_crossovers = Execute_Crossover.make_crossovers(vars, generation_num, number_of_processors, num_crossovers_to_make, seed_list_Crossovers, new_crossover_smiles_list)
         if new_crossovers is None:
             #try once more
-            new_crossovers = Execute_Crossover.make_Crossovers(vars, generation_num, number_of_processors, num_crossovers_to_make, seed_list_Crossovers, new_crossover_smiles_list)
+            new_crossovers = Execute_Crossover.make_crossovers(vars, generation_num, number_of_processors, num_crossovers_to_make, seed_list_Crossovers, new_crossover_smiles_list)
         if new_crossovers is None:
             break
         else:
@@ -649,7 +649,7 @@ def make_pass_through_list(vars, smiles_from_previous_gen_list, num_elite_to_adv
         Returns a printout of why it failed if it fails
     """
     # this will be a list of lists
-    # Each sublist will be  [SMILES_string, ID]
+    # Each sublist will be  [smiles_string, ID]
     list_of_ligands_to_advance=[]
     
     # If not enough of your previous generation sanitize to make the list 

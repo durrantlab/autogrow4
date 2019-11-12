@@ -64,7 +64,7 @@ def save_vars_as_json(vars):
 
     temp_vars = {}
     for k in vars.keys():
-        if "parallelizer" in k or k=="Filter_Object_Dict": continue
+        if "parallelizer" in k or k=="filter_object_dict": continue
 
         temp_vars[k] = copy.deepcopy(vars[k])
 
@@ -461,7 +461,7 @@ def define_defaults():
 
 
     # PARSER.add_argument('--conversion_choice', choices = ["MGLTools","obabel"], default="MGLTools",
-    vars['conversion_choice'] = "MGLTools_Conversion"  
+    vars['conversion_choice'] = "MGLToolsConversion"  
     vars['obabel_path'] = "obabel"   
     vars["custom_conversion_script"] = ""
     # vars['prepare_ligand4.py'] = "/PATH/MGLTools-1.5.4/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_ligand4.py"
@@ -474,9 +474,9 @@ def define_defaults():
 
     # Crossover function
     vars["start_a_new_run"] = False
-    vars["max_time_MCS_prescreen"] = 1
-    vars["max_time_MCS_thorough"] = 1
-    vars["min_atom_match_MCS"] = 3
+    vars["max_time_mcs_prescreen"] = 1
+    vars["max_time_mcs_thorough"] = 1
+    vars["min_atom_match_mcs"] = 3
     vars["protanate_step"] = False
 
     # Mutation Settings
@@ -512,13 +512,13 @@ def define_defaults():
     vars["redock_elite_from_previous_gen"] = False
     
     # Filters
-    vars["Lipinski_Strict"] = False
-    vars["Lipinski_Lenient"] = False
-    vars["Ghose"] = False
-    vars["Mozziconacci"] = False
-    vars["VandeWaterbeemd"] = False
-    vars["PAINS_Filter"] = False
-    vars["NIH_Filter"] = False
+    vars["LipinskiStrictFilter"] = False
+    vars["LipinskiLenient"] = False
+    vars["GhoseFilter"] = False
+    vars["MozziconacciFilter"] = False
+    vars["VandeWaterbeemdFilter"] = False
+    vars["PAINSFilter"] = False
+    vars["NIHFilter"] = False
     vars["BRENK_Filter"] = False
     vars["No_Filters"] = False
     vars["alternative_filter"] = None
@@ -718,7 +718,7 @@ def load_in_commandline_parameters(argv):
 
     else:
         check_for_required_inputs(argv)
-        argv = handle_Custom_inputs_if_argparsed(argv)
+        argv = handle_custom_inputs_if_argparsed(argv)
         vars, argv = check_value_types(vars, argv)
         for key in list(argv.keys()):
             vars[key] = argv[key]
@@ -766,7 +766,7 @@ def load_in_commandline_parameters(argv):
                 MUST SPECIFY THE PATH TO THE Custom SCORING SCRIPT") 
 
     if vars["conversion_choice"] == "Custom" or vars["dock_choice"] == "Custom" or vars["scoring_choice"] == "Custom":
-        vars = handle_Custom_dock_and_Conversion_Scoring_options(vars)
+        vars = handle_custom_dock_and_conversion_scoring_options(vars)
 
     # Mutation Settings
     if vars['rxn_library'] == "Custom":
@@ -1033,7 +1033,7 @@ def set_run_directory(root_folder_path, start_a_new_run):
 ############################################
 ########   Custom Option Settings   ########
 ############################################
-def handle_Custom_inputs_if_argparsed(input_params):
+def handle_custom_inputs_if_argparsed(input_params):
     """
     There are several Custom options such as filters, docking software 
     which take a list of information. Because Filters can use multiple options
@@ -1460,7 +1460,7 @@ def handle_custom_scoring_script(vars):
         vars["scoring_choice"] =  Custom_class[0]
     return vars, need_restart, printout
 # 
-def handle_Custom_dock_and_Conversion_Scoring_options(vars):
+def handle_custom_dock_and_conversion_scoring_options(vars):
     """
     This function handles selecting the user defined Custom options 
     for Custom docking Conversion, and Scoring scripts.
@@ -1505,21 +1505,21 @@ def filter_choice_handling(vars):
     :param dict vars: Dictionary of User variables
     Returns:
     :returns: dict vars: Dictionary of User variables with the 
-        Chosen_Ligand_Filters added
+        chosen_ligand_filters added
     """
     if "No_Filters" in list(vars.keys()):
         if vars["No_Filters"] is True:
-            Chosen_Ligand_Filters = None
+            chosen_ligand_filters = None
         else:
             print(vars)
-            Chosen_Ligand_Filters, vars = picked_filters(vars)
+            chosen_ligand_filters, vars = picked_filters(vars)
     else:
-        Chosen_Ligand_Filters, vars = picked_filters(vars)
-    vars["Chosen_Ligand_Filters"] = Chosen_Ligand_Filters
+        chosen_ligand_filters, vars = picked_filters(vars)
+    vars["chosen_ligand_filters"] = chosen_ligand_filters
 
     import autogrow.Operators.Filter.ExecuteFilters as Filter
     # get child filter class object function dictionary
-    vars["Filter_Object_Dict"] = Filter.make_run_class_dict(Chosen_Ligand_Filters)
+    vars["filter_object_dict"] = Filter.make_run_class_dict(chosen_ligand_filters)
 
     return vars
 # 
@@ -1541,47 +1541,47 @@ def picked_filters(vars):
     filter_list = []
     vars_keys = list(vars.keys())
 
-    if "Lipinski_Strict" in vars_keys:
-        if vars['Lipinski_Strict'] is True:
-            filter_list.append('Lipinski_Strict')
+    if "LipinskiStrictFilter" in vars_keys:
+        if vars['LipinskiStrictFilter'] is True:
+            filter_list.append('LipinskiStrictFilter')
     else:
-        vars['Lipinski_Strict'] = False
+        vars['LipinskiStrictFilter'] = False
 
-    if "Lipinski_Lenient" in vars_keys:
-        if vars['Lipinski_Lenient'] is True:
-            filter_list.append('Lipinski_Lenient')
+    if "LipinskiLenient" in vars_keys:
+        if vars['LipinskiLenient'] is True:
+            filter_list.append('LipinskiLenient')
     else:
-        vars['Lipinski_Lenient'] = False
+        vars['LipinskiLenient'] = False
 
-    if "Ghose" in vars_keys:
-        if vars['Ghose'] is True:
-            filter_list.append('Ghose')
+    if "GhoseFilter" in vars_keys:
+        if vars['GhoseFilter'] is True:
+            filter_list.append('GhoseFilter')
     else:
-        vars['Ghose'] = False
+        vars['GhoseFilter'] = False
 
-    if "Mozziconacci" in vars_keys:
-        if vars['Mozziconacci'] is True:
-            filter_list.append('Mozziconacci')
+    if "MozziconacciFilter" in vars_keys:
+        if vars['MozziconacciFilter'] is True:
+            filter_list.append('MozziconacciFilter')
     else:
-        vars['Mozziconacci'] = False
+        vars['MozziconacciFilter'] = False
         
-    if "VandeWaterbeemd" in vars_keys:
-        if vars['VandeWaterbeemd'] is True:
-            filter_list.append('VandeWaterbeemd')
+    if "VandeWaterbeemdFilter" in vars_keys:
+        if vars['VandeWaterbeemdFilter'] is True:
+            filter_list.append('VandeWaterbeemdFilter')
     else:
-        vars['VandeWaterbeemd'] = False
+        vars['VandeWaterbeemdFilter'] = False
         
-    if "PAINS_Filter" in vars_keys:
-        if vars['PAINS_Filter'] is True:
-            filter_list.append('PAINS_Filter')
+    if "PAINSFilter" in vars_keys:
+        if vars['PAINSFilter'] is True:
+            filter_list.append('PAINSFilter')
     else:
-        vars['PAINS_Filter'] = False
+        vars['PAINSFilter'] = False
         
-    if "NIH_Filter" in vars_keys:
-        if vars['NIH_Filter'] is True:
-            filter_list.append('NIH_Filter')
+    if "NIHFilter" in vars_keys:
+        if vars['NIHFilter'] is True:
+            filter_list.append('NIHFilter')
     else:
-        vars['NIH_Filter'] = False
+        vars['NIHFilter'] = False
         
     if "BRENK_Filter" in vars_keys:
         if vars['BRENK_Filter'] is True:
@@ -1595,10 +1595,10 @@ def picked_filters(vars):
         vars['alternative_filter'] = None
         
     # if there is no user specified ligand filters but they haven't set
-    # filters to None ---> set filter to default of Lipinski_Lenient.
+    # filters to None ---> set filter to default of LipinskiLenient.
     if len(filter_list) == 0:
-        vars['Lipinski_Lenient'] = True
-        filter_list.append('Lipinski_Lenient')
+        vars['LipinskiLenient'] = True
+        filter_list.append('LipinskiLenient')
 
     return filter_list, vars
 # 

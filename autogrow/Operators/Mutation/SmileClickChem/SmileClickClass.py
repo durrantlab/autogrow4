@@ -23,7 +23,7 @@ class SmilesClickChem(object):
     """
     This class will take a molecule and Mutate it by reacting it.
     """
-    def __init__(self, rxn_library_variables, list_of_already_made_smiles, Filter_Object_Dict):
+    def __init__(self, rxn_library_variables, list_of_already_made_smiles, filter_object_dict):
         """
         init for SmilesClickChem.
         This will set up all the reaction and functional dictionaries required to Mutate a molecular
@@ -33,30 +33,32 @@ class SmilesClickChem(object):
                         ie. rxn_library_variables = [vars['rxn_library'], vars['rxn_library_file'], vars['function_group_library'],vars['complimentary_mol_directory']]
         :param list list_of_already_made_smiles: a list of lists. Each sublist contains info about a smiles made in this generation via mutation
                         ie.[['O=C([O-])', '(Gen_3_Mutant_37_747+ZINC51)Gen_4_Mutant_15_52']]
-        :param dict Filter_Object_Dict: a dictionary of all filter objects which are to be applied to the newly created ligands.        
+        :param dict filter_object_dict: a dictionary of all filter objects which are to be applied to the newly created ligands.        
         """
         # Unpackage the rxn_library_variables
 
         rxn_library = rxn_library_variables[0]
         rxn_library_file = rxn_library_variables[1]
         function_group_library = rxn_library_variables[2]
-        Complimentary_mol_dir = rxn_library_variables[3]
+        complimentary_mol_dir = rxn_library_variables[3]
         self.reaction_dict = self.retrieve_reaction_dict(rxn_library, rxn_library_file) # Retrieve the dictionary containing all the possible ClickChem Reactions
         self.list_of_reaction_names = list(self.reaction_dict.keys())
 
         self.functional_group_dict = self.retrieve_functional_group_dict(rxn_library, function_group_library)
-        self.complimentary_mol_dict = self.retrieve_complimentary_dictionary(rxn_library, Complimentary_mol_dir)    
+        self.complimentary_mol_dict = self.retrieve_complimentary_dictionary(rxn_library, complimentary_mol_dir)    
 
 
         # List of already predicted smiles
         self.list_of_already_made_smiles = [x[0] for x in list_of_already_made_smiles]
         # Dictionary containing all Filter class objects to be impossed on the ligand
-        self.Filter_Object_Dict = Filter_Object_Dict
+        self.filter_object_dict = filter_object_dict
     #
 
-    def update_list_of_already_made_smiles(self,list_of_already_made_smiles):
+    def update_list_of_already_made_smiles(self, list_of_already_made_smiles):
         """
-        This updates the list of Smiles which have been made in this generation via mutation.
+        This updates the list of Smiles which have been made in this
+        generation via mutation.
+
         :param list list_of_already_made_smiles: a list of lists. Each sublist contains info about a smiles made in this generation via mutation
                         ie.[['O=C([O-])', '(Gen_3_Mutant_37_747+ZINC51)Gen_4_Mutant_15_52']]
         """
@@ -287,7 +289,7 @@ class SmilesClickChem(object):
         return keys
     #
 
-    def retrieve_complimentary_dictionary(self, rxn_library, Complimentary_mol_dir):
+    def retrieve_complimentary_dictionary(self, rxn_library, complimentary_mol_dir):
         """
         Based on user controled variables, this definition will retrieve a dictionary of molecules
         seperated into classes by their functional groups.
@@ -296,32 +298,32 @@ class SmilesClickChem(object):
                 
         Inputs:
         :param str rxn_library: A string defining the choice of the reaction library. ClickChem uses the set of reactions from Autogrow 3.1.2
-                            Custom means you've defined a path to a Custom library in vars['Complimentary_mol_dir']
-        :param dict Complimentary_mol_dir: the path to the Complimentary_mol_dir directory. It may be an empty string in which
-                        case the Complimentary_mol_dir directory will default to those of the rxn_library
+                            Custom means you've defined a path to a Custom library in vars['complimentary_mol_dir']
+        :param dict complimentary_mol_dir: the path to the complimentary_mol_dir directory. It may be an empty string in which
+                        case the complimentary_mol_dir directory will default to those of the rxn_library
 
         Return:
         :returns: dict complimentary_mols_dict: a dictionary of complimentary molecules
         """
         script_dir = os.path.dirname(os.path.realpath(__file__))
 
-        if Complimentary_mol_dir == "":            
+        if complimentary_mol_dir == "":            
             if rxn_library == "ClickChem":
-                Complimentary_mol_dir = os.path.join(script_dir,"Reaction_libraries","ClickChem","complimentary_mol_dir")
+                complimentary_mol_dir = os.path.join(script_dir,"Reaction_libraries","ClickChem","complimentary_mol_dir")
             elif rxn_library == "Robust_Rxns":
-                Complimentary_mol_dir =  os.path.join(script_dir,"Reaction_libraries","Robust_Rxns","complimentary_mol_dir")
+                complimentary_mol_dir =  os.path.join(script_dir,"Reaction_libraries","Robust_Rxns","complimentary_mol_dir")
             elif rxn_library == "All_Rxns":
-                Complimentary_mol_dir =  os.path.join(script_dir,"Reaction_libraries","All_Rxns","complimentary_mol_dir")
+                complimentary_mol_dir =  os.path.join(script_dir,"Reaction_libraries","All_Rxns","complimentary_mol_dir")
             elif rxn_library == "Custom":
-                if os.path.isdir(Complimentary_mol_dir) == False:
-                    raise Exception("Custom Complimentary_mol_dir cannot be found. Please check the path: ", Complimentary_mol_dir)
+                if os.path.isdir(complimentary_mol_dir) == False:
+                    raise Exception("Custom complimentary_mol_dir cannot be found. Please check the path: ", complimentary_mol_dir)
             else:
                 raise Exception("rxn_library is not incorporated into SMILESCLICKCHEM.py")
             
         else:
-            if os.path.isdir(Complimentary_mol_dir) == False:
-                raise Exception("Complimentary_mol_dir is not a directory. It must be a directory with .smi files containing SMILES specified by functional groups.\
-                    These .smi files must be named the same as the files in the Complimentary_mol_dir.")
+            if os.path.isdir(complimentary_mol_dir) == False:
+                raise Exception("complimentary_mol_dir is not a directory. It must be a directory with .smi files containing SMILES specified by functional groups.\
+                    These .smi files must be named the same as the files in the complimentary_mol_dir.")
 
         # Make a list of all the functional groups. These will be the name of the .smi folders already seperated by group.
         functional_groups = (self.functional_group_dict.keys())
@@ -329,7 +331,7 @@ class SmilesClickChem(object):
         missing_smi_files = []
         complimentary_mols_dict = {}             
         for group in functional_groups:
-            filepath = "{}{}{}.smi".format(Complimentary_mol_dir,os.sep, group)
+            filepath = "{}{}{}.smi".format(complimentary_mol_dir,os.sep, group)
 
             if os.path.isfile(filepath) == True:
                 complimentary_mols_dict[group] = filepath
@@ -365,7 +367,7 @@ class SmilesClickChem(object):
             # mols chosen from the complimentary molecule dictionary
 
             # create a list to be used to determine which reactants need complimentary mol
-            # and which will use the Ligand
+            # and which will use the ligand
             reactant_order_list = []
             
             chosen_as_mol_num = random.randint(0,has_substructure_matches_count-1)
@@ -436,14 +438,14 @@ class SmilesClickChem(object):
         return list_subs_within_mol
     #
             
-    def run_Smile_Click(self, Ligand_smiles_string):
+    def run_smiles_click(self, ligand_smiles_string):
         """
-        This will take the shuffled list of reaction names (self.shuffled_reaction_list) and test the Ligand to see if it is 
+        This will take the shuffled list of reaction names (self.shuffled_reaction_list) and test the ligand to see if it is 
         capable of being used in the reaction. If the ligand is unable to be used in the reaction, then we move on to the
         next reaction in the list. If none work, we return a  None.
 
         Input:
-        :param str Ligand_smiles_string: SMILES string of a molecule to be reacted
+        :param str ligand_smiles_string: SMILES string of a molecule to be reacted
 
         Returns:
         :returns: list product_info: list containing the reaction product, the id_number of the reaction as found in the reaction_dict
@@ -452,7 +454,7 @@ class SmilesClickChem(object):
                             returns None if all reactions failed or input failed to convert to a sanitizable rdkit mol
         """
         try:
-            mol = Chem.MolFromSmiles(Ligand_smiles_string, sanitize = False) # This is the input molecule which serves as the parent molecule
+            mol = Chem.MolFromSmiles(ligand_smiles_string, sanitize = False) # This is the input molecule which serves as the parent molecule
         except:
             # mol object failed to initialize
             return None
@@ -476,7 +478,7 @@ class SmilesClickChem(object):
         # Determine which functional groups are within a ligand
         list_subs_within_mol = self.determine_functional_groups_in_mol(mol_deprotanated, mol_reprotanated)
         if len(list_subs_within_mol) == 0:
-            print("{} had no functional groups to react with.".format(Ligand_smiles_string))
+            print("{} had no functional groups to react with.".format(ligand_smiles_string))
             return None
 
         shuffled_reaction_list = self.rand_key_list(self.reaction_dict)  # Randomize the order of the list of reactions
@@ -712,6 +714,12 @@ class SmilesClickChem(object):
             2) It isn't in the self.list_of_already_made_smiles
             3) It passes Filterization
         Returns the smile if it passes; returns None if it fails.
+        
+        Inputs:
+        :param rdkit.Chem.rdchem.Mol reaction_product: an rdkit molecule to be checked.
+        Returns:
+        :returns: str reaction_product_smilestring: returns either a string or a None;
+            SMILES string if it is a good molecule; None if it can not sanitize and be cleaned
         """
         reaction_product = MOH.check_sanitization(reaction_product)
         if reaction_product is None:
@@ -747,7 +755,7 @@ class SmilesClickChem(object):
             return None
 
         # Run through filters
-        pass_or_not = Filter.run_filter_on_just_smiles(reaction_product_smilestring, self.Filter_Object_Dict)
+        pass_or_not = Filter.run_filter_on_just_smiles(reaction_product_smilestring, self.filter_object_dict)
         if pass_or_not == False:
             return None
         else:

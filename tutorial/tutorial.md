@@ -294,7 +294,7 @@ from rdkit.Chem.rdchem import BondStereo
                  --mgltools_directory $PATH/mgltools_x86_64Linux2_1.5.6/ \
                  --number_of_processors -1 \
                  --scoring_choice VINA \
-                 --Lipinski_Lenient \
+                 --LipinskiLenient \
                  --start_a_new_run \
                  --rxn_library ClickChem \
                  --selector_choice Rank_Selector \
@@ -473,8 +473,8 @@ from rdkit.Chem.rdchem import BondStereo
         - $PATH/autogrow4/autogrow/Docking/Docking_Class/ParentPDBQTConverter.py
     2) Have a unique name: class unique_name(ParentPDBQTConverter)
         -unique_name can not be one of the predefined docking scripts 
-        Currently files named: Convert_with_MGLTOOLS.py and Convert_with_obabel.py
-        Classes named obabel_Conversion and MGLTools_Conversion
+        Currently files named: convert_with_mgltools.py and convert_with_obabel.py
+        Classes named ObabelConversion and MGLToolsConversion
 
     3) Must have atleast have two functions following the below formating:
             # def convert_receptor_pdb_files_to_pdbqt(self, receptor_file, mgl_python, receptor_template, number_of_processors):
@@ -543,7 +543,7 @@ from rdkit.Chem.rdchem import BondStereo
     2) Have a unique name: class unique_name(ParentScoringClass)
         -unique_name can not be one of the predefined docking scripts 
         Currently files named: VINA.py, NN1.py, NN2.py, and Lig_Efficiency.py
-        Classes named VINA.py, NN1, NN2, and Lig_Efficiency
+        Classes named VINA.py, NN1, NN2, and LigEfficiency
     3) Must have atleast have two functions following the below formating:
             # def get_name(self):
             #     """

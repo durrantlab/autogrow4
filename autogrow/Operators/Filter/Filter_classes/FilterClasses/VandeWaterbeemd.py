@@ -1,10 +1,10 @@
-"""VandeWaterbeemd Filter
-This runs a VandeWaterbeemd filter for drugs which are likely
+"""VandeWaterbeemdFilter Filter
+This runs a VandeWaterbeemdFilter filter for drugs which are likely
 to be blood brain barrier permeable.
-VandeWaterbeemd filter filters molecules for Molecular weight (MW),
+VandeWaterbeemdFilter filter filters molecules for Molecular weight (MW),
 and Polar Sureface Area (PSA).
 
-To pass the VandeWaterbeemd filter a ligand must have:
+To pass the VandeWaterbeemdFilter filter a ligand must have:
     Molecular Weight: max 450 dalton
     Polar Sureface Area: max 90 A^2
 
@@ -26,14 +26,14 @@ rdkit.RDLogger.DisableLog('rdApp.*')
 from autogrow.Operators.Filter.Filter_classes.ParentFilterClass import ParentFilter
 
 
-class VandeWaterbeemd(ParentFilter):
+class VandeWaterbeemdFilter(ParentFilter):
     """
-    This runs a VandeWaterbeemd filter for drugs which are likely
+    This runs a VandeWaterbeemdFilter filter for drugs which are likely
     to be blood brain barrier permeable.
-    VandeWaterbeemd filter filters molecules for Molecular weight (MW),
+    VandeWaterbeemdFilter filter filters molecules for Molecular weight (MW),
     and Polar Sureface Area (PSA).
 
-    To pass the VandeWaterbeemd filter a ligand must have:
+    To pass the VandeWaterbeemdFilter filter a ligand must have:
         Molecular Weight: max 450 dalton
         Polar Sureface Area: max 90 A^2
 
@@ -45,15 +45,17 @@ class VandeWaterbeemd(ParentFilter):
 
     Inputs:
     :param class ParentFilter: a parent class to initialize off
+    Returns:
+    :returns: bool bool: True if the mol passes the filter; False if it fails the filter
     """
     def run_filter(self, mol):
         """
-        This runs a VandeWaterbeemd filter for drugs which are likely
+        This runs a VandeWaterbeemdFilter filter for drugs which are likely
         to be blood brain barrier permeable.
-        VandeWaterbeemd filter filters molecules for Molecular weight (MW),
+        VandeWaterbeemdFilter filter filters molecules for Molecular weight (MW),
         and Polar Sureface Area (PSA).
 
-        To pass the VandeWaterbeemd filter a ligand must have:
+        To pass the VandeWaterbeemdFilter filter a ligand must have:
             Molecular Weight: max 450 dalton
             Polar Sureface Area: max 90 A^2
 

@@ -109,19 +109,19 @@ class RankingSelectorTests(unittest.TestCase):
         # self.assertRaises(Ranking.score_and_append_diversity_scores(self.bad_mol_list))
 
     def test_Tournement_Selction(self):
-        self.assertEqual(type(TourSel.Run_Tournement_Selector(self.age_list,3,2,1)),list)
-        self.assertEqual(len(TourSel.Run_Tournement_Selector(self.age_list,3,2,1)),3)
+        self.assertEqual(type(TourSel.run_tournement_selector(self.age_list,3,2,1)),list)
+        self.assertEqual(len(TourSel.run_tournement_selector(self.age_list,3,2,1)),3)
 
 
         # These raise the proper errors but are removed from this unittest.
         # no idx in sublist to select by
-        # self.assertRaises(TourSel.Run_Tournement_Selector(self.age_list,3,2,3))
+        # self.assertRaises(TourSel.run_tournement_selector(self.age_list,3,2,3))
 
         # Not a list
-        # self.assertRaises(TourSel.Run_Tournement_Selector(None,3,2,3))
+        # self.assertRaises(TourSel.run_tournement_selector(None,3,2,3))
 
         # idx to select by could not be converted to float
-        # self.assertEqual(TourSel.Run_Tournement_Selector(self.age_list,3,2,0),None)
+        # self.assertEqual(TourSel.run_tournement_selector(self.age_list,3,2,0),None)
         
     def test_run_one_tournement(self):
         self.assertEqual(type(TourSel.run_one_tournement(self.age_list,2,1)),list)
@@ -130,11 +130,11 @@ class RankingSelectorTests(unittest.TestCase):
 
     ######## Roulette Selection ########
 
-    def test_Spin_Roulette_Selector(self):
+    def test_spin_roulette_selector(self):
         
-        self.assertEqual(len(RoulSel.Spin_Roulette_Selector(self.age_list, 5,'docking')), 5)
+        self.assertEqual(len(RoulSel.spin_roulette_selector(self.age_list, 5,'docking')), 5)
 
-        self.assertEqual(len(RoulSel.Spin_Roulette_Selector(self.age_list, 3,'diversity')),3)
+        self.assertEqual(len(RoulSel.spin_roulette_selector(self.age_list, 3,'diversity')),3)
 
     def test_adjust(self):
         
@@ -145,18 +145,18 @@ class RankingSelectorTests(unittest.TestCase):
 
     ######## Rank Selection ########
 
-    def test_Spin_Roulette_Selector(self):
+    def test_spin_roulette_selector(self):
         
-        self.assertEqual(len(RankSel.Run_Rank_selector(self.age_list, 5,-1)), 5)
+        self.assertEqual(len(RankSel.run_rank_selector(self.age_list, 5,-1)), 5)
 
        
 
         # These raise the proper errors but are removed from this unittest.
         # Asking for more to be chosen than optinos.
-        # self.assertRaises(RankSel.Run_Rank_selector(self.age_list, 9,-1))
+        # self.assertRaises(RankSel.run_rank_selector(self.age_list, 9,-1))
                
         # Wrong Data type
-        # self.assertRaises(RankSel.Run_Rank_selector(None, 2, -1))
+        # self.assertRaises(RankSel.run_rank_selector(None, 2, -1))
        
 
 

@@ -13,7 +13,7 @@ from autogrow.Docking.Docking_Class.ParentDockClass import ParentDocking
 
 from autogrow.Docking.Docking_Class.Docking_File_Conversion import *
 from autogrow.Docking.Docking_Class.ParentPDBQTConverter import ParentPDBQTConverter
-# from autogrow.Docking.Docking_Class.Docking_File_Conversion import Convert_with_MGLTOOLS, Convert_with_obabel
+# from autogrow.Docking.Docking_Class.Docking_File_Conversion import convert_with_obabel, convert_with_mgltools
 
 
 def pick_docking_class_dict(dock_choice):
@@ -74,7 +74,7 @@ def run_docking_common(vars, current_gen_int, current_generation_dir, smile_file
     :returns: str unweighted_ranked_smile_file: the name of the unweighted-ranked SMILES with their docking score
     """
     # Get directory string of PDB files for Ligands
-    current_generation_PDB_dir = current_generation_dir + "PDBs" + os.sep
+    current_generation_pdb_dir = current_generation_dir + "PDBs" + os.sep
 
     dock_choice = vars["dock_choice"]
     conversion_choice = vars["conversion_choice"]
@@ -91,15 +91,15 @@ def run_docking_common(vars, current_gen_int, current_generation_dir, smile_file
     file_conversion_class_object = file_conversion_class_object(temp_vars, receptor, test_boot=False)
 
     dock_class = pick_docking_class_dict(dock_choice)
-    dockingObject = dock_class(temp_vars, receptor, file_conversion_class_object,test_boot=False)
+    docking_object = dock_class(temp_vars, receptor, file_conversion_class_object,test_boot=False)
 
     if vars["docking_executable"] == None:
-        docking_executable = dockingObject.get_docking_executable_file(temp_vars)
+        docking_executable = docking_object.get_docking_executable_file(temp_vars)
         vars["docking_executable"] = docking_executable
 
     # Find PDB's
-    pdbs_in_folder = dockingObject.find_pdb_ligands(current_generation_PDB_dir)
-    job_input_convert_lig = tuple([tuple([dockingObject, pdb]) for pdb in pdbs_in_folder])
+    pdbs_in_folder = docking_object.find_pdb_ligands(current_generation_pdb_dir)
+    job_input_convert_lig = tuple([tuple([docking_object, pdb]) for pdb in pdbs_in_folder])
 
     print("####################")
     print("Convert Ligand to PDBQT format Begun")
@@ -116,9 +116,9 @@ def run_docking_common(vars, current_gen_int, current_generation_dir, smile_file
     
     # Docking the ligands which converted to PDBQT
     # Find PDBQT's
-    pdbqts_in_folder = dockingObject.find_converted_ligands(current_generation_PDB_dir)
+    pdbqts_in_folder = docking_object.find_converted_ligands(current_generation_pdb_dir)
 
-    job_input_dock_lig = tuple([tuple([dockingObject, pdbqt]) for pdbqt in pdbqts_in_folder])
+    job_input_dock_lig = tuple([tuple([docking_object, pdbqt]) for pdbqt in pdbqts_in_folder])
     print("####################")
     print("Docking Begun")
     smiles_names_failed_to_dock = vars["parallelizer"].run(job_input_dock_lig, run_dock_multithread)
@@ -149,7 +149,7 @@ def run_docking_common(vars, current_gen_int, current_generation_dir, smile_file
     print("#################### ")
     print("")
     print("Begin Ranking and Saving results")
-    unweighted_ranked_smile_file = dockingObject.rank_and_save_output_smi(vars, current_generation_dir, current_gen_int, smile_file_new_gen, deleted_smiles_names_list)
+    unweighted_ranked_smile_file = docking_object.rank_and_save_output_smi(vars, current_generation_dir, current_gen_int, smile_file_new_gen, deleted_smiles_names_list)
     print("")
     print("Completed Ranking and Saving results")
     print("")
@@ -157,30 +157,30 @@ def run_docking_common(vars, current_gen_int, current_generation_dir, smile_file
     return unweighted_ranked_smile_file
 #
 
-def lig_convert_multithread(dockingObject, pdb):
+def lig_convert_multithread(docking_object, pdb):
     """
     Run the ligand conversion of a single molecule.
     If it failed failed_smiles_name will be a string of the SMILE which failed to convert
     If it converts failed_smiles_name will be a None. 
 
     Input:
-    :param object dockingObject: the class for running the chosen docking method
+    :param object docking_object: the class for running the chosen docking method
     :param str pdb: the path to the pdb of a molecule
 
     Return:
     :returns: list failed_smiles_name: if the molecule failed to convert to final format. 
                             (ie. pdbqt conversion fail)
     """
-    failed_smiles_name = dockingObject.run_ligand_handling_for_docking(pdb)
+    failed_smiles_name = docking_object.run_ligand_handling_for_docking(pdb)
     return failed_smiles_name
 #
 
-def run_dock_multithread(dockingObject, pdb):
+def run_dock_multithread(docking_object, pdb):
     """
     Run the docking of a single molecule.
 
     Input:
-    :param object dockingObject: the class for running the chosen docking method
+    :param object docking_object: the class for running the chosen docking method
     :param str pdb: the path to the pdb of a molecule
 
     Return:
@@ -188,6 +188,6 @@ def run_dock_multithread(dockingObject, pdb):
                             (ie. docking failed)
     """
     print("Attempt to Dock complete: ", pdb)
-    failed_smiles_names = dockingObject.run_dock(pdb)
+    failed_smiles_names = docking_object.run_dock(pdb)
     return failed_smiles_names
 #

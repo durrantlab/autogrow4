@@ -1,7 +1,7 @@
 import __future__
 
 
-def Run_Rank_selector(usable_list_of_smiles, number_to_chose, column_idx_to_select, reverse_sort=False):
+def run_rank_selector(usable_list_of_smiles, number_to_chose, column_idx_to_select, reverse_sort=False):
     """
     Given a data set and an idx number to select based on it will select the top rank scores for that critera.
     The number is choses is defined by number_to_chose. 

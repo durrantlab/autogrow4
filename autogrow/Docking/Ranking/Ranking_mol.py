@@ -47,10 +47,10 @@ def create_seed_list(usable_list_of_smiles, generation_num, num_seed_diversity, 
 
         print('Roulette_Selector')
         # Get seed molecules based on docking scores
-        docking_fitness_smiles_list = Roulette_Sel.Spin_Roulette_Selector(usable_list_of_smiles, num_seed_dock_fitness, "docking")
+        docking_fitness_smiles_list = Roulette_Sel.spin_roulette_selector(usable_list_of_smiles, num_seed_dock_fitness, "docking")
 
         # Get seed molecules based on diversity scores
-        diversity_smile_list = Roulette_Sel.Spin_Roulette_Selector(usable_list_of_smiles, num_seed_diversity, "diversity")
+        diversity_smile_list = Roulette_Sel.spin_roulette_selector(usable_list_of_smiles, num_seed_diversity, "diversity")
    
     elif selector_choice == 'Rank_Selector':
         print('Rank_Selector')
@@ -59,10 +59,10 @@ def create_seed_list(usable_list_of_smiles, generation_num, num_seed_diversity, 
         # This may need to be adjusted for different scoring functions.
 
         # Get seed molecules based on docking scores
-        docking_fitness_smiles_list = Rank_Sel.Run_Rank_selector(usable_list_of_smiles, num_seed_dock_fitness, -2, False)
+        docking_fitness_smiles_list = Rank_Sel.run_rank_selector(usable_list_of_smiles, num_seed_dock_fitness, -2, False)
 
         # Get seed molecules based on diversity scores
-        diversity_smile_list = Rank_Sel.Run_Rank_selector(usable_list_of_smiles, num_seed_diversity, -1, False)
+        diversity_smile_list = Rank_Sel.run_rank_selector(usable_list_of_smiles, num_seed_diversity, -1, False)
         
     elif selector_choice == 'Tournement_Selector':
         print('Tournement_Selector')
@@ -71,10 +71,10 @@ def create_seed_list(usable_list_of_smiles, generation_num, num_seed_diversity, 
         # This may need to be adjusted for different scoring functions.
 
         # Get seed molecules based on docking scores
-        docking_fitness_smiles_list = Tournement_Sel.Run_Tournement_Selector(usable_list_of_smiles, num_seed_dock_fitness, tourn_size, -2, True)
+        docking_fitness_smiles_list = Tournement_Sel.run_tournement_selector(usable_list_of_smiles, num_seed_dock_fitness, tourn_size, -2, True)
 
         # Get seed molecules based on diversity scores
-        diversity_smile_list = Tournement_Sel.Run_Tournement_Selector(usable_list_of_smiles, num_seed_diversity, tourn_size, -1, True)
+        diversity_smile_list = Tournement_Sel.run_tournement_selector(usable_list_of_smiles, num_seed_diversity, tourn_size, -1, True)
 
     else:
         print(selector_choice)

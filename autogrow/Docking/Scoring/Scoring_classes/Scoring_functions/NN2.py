@@ -73,11 +73,11 @@ class NN2(VINA):
         Inputs:
         :param str vina_output_file: Path to a vina output file to be rescored
          Returns:
-        :returns: list results of the rescoring function: [file_path, it_rescored]
+        :returns: list results: of the rescoring function: [file_path, it_rescored]
             [PATH, True] means it passed
             [PATH, False] means it failed a results of all NN2 files
         """
-        result_of_rescore = run_NN_rescoring(self.vars, vina_output_file)
+        result_of_rescore = run_nn_rescoring(self.vars, vina_output_file)
         
         return result_of_rescore
     #
@@ -183,7 +183,7 @@ class NN2(VINA):
 
 ###Outside class for multithreading
 # Run NN2 rescoring
-def run_NN_rescoring(vars, vina_output_file):
+def run_nn_rescoring(vars, vina_output_file):
     """
     This will run NN2 on all of the vina files in the list.
     This is outside the class for multifunction purposes
@@ -196,7 +196,7 @@ def run_NN_rescoring(vars, vina_output_file):
     :param dict vars: User variables which will govern how the programs runs
     :param str vina_output_file: Path to a vina output file to be rescored
     Return:
-    :returns: list results of the rescoring function: [file_path, it_rescored]
+    :returns: list results: of the rescoring function: [file_path, it_rescored]
         [PATH, True] means it passed
         [PATH, False] means it failed a results of all NN2 files
     """
@@ -216,7 +216,7 @@ def run_NN_rescoring(vars, vina_output_file):
             " > " + str(nn2_output)
             
     # A list containing the file name as item 1 and whether it passed as item 2                
-    results = execute_NN_scoring(torun, nn2_output)
+    results = execute_nn_scoring(torun, nn2_output)
 
     # Will be None if it passed
     # A list containing the file name as item 1 and whether it passed as item 2
@@ -226,7 +226,7 @@ def run_NN_rescoring(vars, vina_output_file):
 
 #
 
-def execute_NN_scoring(command, file_path):
+def execute_nn_scoring(command, file_path):
     """
     Run an individual NN scoring function.
 
@@ -237,7 +237,7 @@ def execute_NN_scoring(command, file_path):
     :param str command: the rescoring bash style command to execute
     :param str file_path: Path to a vina output file to be rescored
     Return:
-    :returns: list results of the rescoring function: [file_path, it_rescored]
+    :returns: list results: of the rescoring function: [file_path, it_rescored]
         [PATH, True] means it passed
         [PATH, False] means it failed a results of all NN2 files
     """
@@ -253,6 +253,12 @@ def execute_NN_scoring(command, file_path):
 def confirm_file_has_scoring(file_path):
     """
     Check the file has a rescore value
+     
+    Input:
+    :param str file_path: Path to a vina output file to be rescored
+    Return:
+    :returns: bol has_scoring: True if has score;
+        False if no score found
     """
     if os.path.exists(file_path) == False:
         return False

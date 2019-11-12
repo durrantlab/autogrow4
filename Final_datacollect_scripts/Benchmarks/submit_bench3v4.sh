@@ -156,8 +156,8 @@ then
             --mgltools_directory $MGLTOOLS_HOME/ \
             --number_of_processors -1 \
             --scoring_choice VINA \
-            --Lipinski_Strict \
-            --Ghose \
+            --LipinskiStrictFilter \
+            --GhoseFilter \
             --start_a_new_run \
             --rxn_library ClickChem \
             --selector_choice Rank_Selector \
@@ -233,8 +233,8 @@ then
             --mgltools_directory $MGLTOOLS_HOME/ \
             --number_of_processors -1 \
             --scoring_choice VINA \
-            --Lipinski_Strict \
-            --Ghose \
+            --LipinskiStrictFilter \
+            --GhoseFilter \
             --start_a_new_run \
             --rxn_library ClickChem \
             --selector_choice Rank_Selector \
@@ -313,8 +313,8 @@ then
             --mgltools_directory $MGLTOOLS_HOME/ \
             --number_of_processors -1 \
             --scoring_choice VINA \
-            --Lipinski_Strict \
-            --Ghose \
+            --LipinskiStrictFilter \
+            --GhoseFilter \
             --start_a_new_run \
             --rxn_library ClickChem \
             --selector_choice Rank_Selector \
@@ -395,8 +395,8 @@ then
             --mgltools_directory $MGLTOOLS_HOME/ \
             --number_of_processors -1 \
             --scoring_choice VINA \
-            --Lipinski_Strict \
-            --Ghose \
+            --LipinskiStrictFilter \
+            --GhoseFilter \
             --start_a_new_run \
             --rxn_library ClickChem \
             --selector_choice Rank_Selector \
@@ -472,8 +472,8 @@ then
             --mgltools_directory $MGLTOOLS_HOME/ \
             --number_of_processors -1 \
             --scoring_choice VINA \
-            --Lipinski_Strict \
-            --Ghose \
+            --LipinskiStrictFilter \
+            --GhoseFilter \
             --start_a_new_run \
             --rxn_library ClickChem \
             --selector_choice Rank_Selector \
@@ -552,8 +552,8 @@ then
             --mgltools_directory $MGLTOOLS_HOME/ \
             --number_of_processors -1 \
             --scoring_choice VINA \
-            --Lipinski_Strict \
-            --Ghose \
+            --LipinskiStrictFilter \
+            --GhoseFilter \
             --start_a_new_run \
             --rxn_library ClickChem \
             --selector_choice Rank_Selector \
