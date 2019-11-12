@@ -219,7 +219,7 @@ def populate_generation(vars, generation_num):
             Errors could include not enough diversity, too few seeds to the generation, \
             the seed mols are unable to cross-over due to lack of similariy,\
             or all of the seed lack functional groups for performing reactions")
-        return None, None
+        return None, None, None
       
     else:   
         # Save the Full Generation
@@ -296,7 +296,7 @@ def populate_generation_0(vars, generation_num=0):
 
     if len(full_generation_smiles_list)  == 0:    
         print("population failed to import any molecules from the source_compounds_list.")
-        return None, None
+        return None, None, None
       
     else:   
         # Save the Full Generation
