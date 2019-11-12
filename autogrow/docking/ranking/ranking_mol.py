@@ -13,7 +13,7 @@ from rdkit import DataStructs
 #Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog('rdApp.*')
 
-import autogrow.operators.ConvertFiles.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
+import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
 import autogrow.docking.ranking.selecting.rank_selection as Rank_Sel
 import autogrow.docking.ranking.selecting.roulette_selection as Roulette_Sel
 import autogrow.docking.ranking.selecting.tournement_selection as Tournement_Sel

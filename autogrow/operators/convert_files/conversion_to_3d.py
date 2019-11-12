@@ -13,11 +13,11 @@ rdkit.RDLogger.DisableLog('rdApp.*')
 
 # Some pathing to allow for importing Gypsum Functions
 current_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-gypsum_dir = str(current_dir) + os.sep + "ConvertFiles" + os.sep + "gypsum_dl"
-gypsum_gypsum_dir = str(current_dir) + os.sep + "ConvertFiles" + os.sep + "gypsum_dl"+ os.sep + "gypsum_dl"
+gypsum_dir = str(current_dir) + os.sep + "convert_files" + os.sep + "gypsum_dl"
+gypsum_gypsum_dir = str(current_dir) + os.sep + "convert_files" + os.sep + "gypsum_dl"+ os.sep + "gypsum_dl"
 sys.path.extend([gypsum_dir,current_dir,gypsum_gypsum_dir])
 
-import autogrow.operators.ConvertFiles.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
+import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
 
 class StdoutRedirection:
     """Standard output redirection context manager
@@ -270,13 +270,13 @@ def run_gypsum_multiprocessing_mpi(gypsum_log_path, json_path, timeout_option, g
     :returns: str lig_id: the name of the ligand if it failed or None if it successfully converted to 3D sdf.
     """   
     current_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-    gypsum_dir = str(current_dir) + os.sep + "ConvertFiles" + os.sep + "gypsum_dl" + os.sep
+    gypsum_dir = str(current_dir) + os.sep + "convert_files" + os.sep + "gypsum_dl" + os.sep
     gypsum_gypsum_dir = str(gypsum_dir) + os.sep + "gypsum_dl" + os.sep
     sys.path.extend([current_dir, gypsum_dir,gypsum_gypsum_dir])
 
     from func_timeout import func_timeout, FunctionTimedOut
 
-    from autogrow.operators.ConvertFiles.gypsum_dl.gypsum_dl.Start import prepare_molecules
+    from autogrow.operators.convert_files.gypsum_dl.gypsum_dl.Start import prepare_molecules
     
 
     json_file_name = os.path.basename(json_path)

@@ -209,7 +209,7 @@ PARSER.add_argument('--PAINSFilter', action = 'store_true', default=False,
 PARSER.add_argument('--NIHFilter', action = 'store_true', default=False,
     help = 'NIH filteres against molecules with undersirable functional groups \
     using substructure a search.')
-PARSER.add_argument('--BRENK_Filter', action = 'store_true', default=False,
+PARSER.add_argument('--BRENKFilter', action = 'store_true', default=False,
     help = 'BRENK filter for lead-likeliness, by matching common false positive \
     molecules to the current mol.')
 PARSER.add_argument('--No_Filters', action = 'store_true', default=False,
@@ -368,6 +368,6 @@ if ARGS_DICT["cache_prerun"]==False:
 else: # cache prerun. This is necessary to prevent race conditions in mpi mode.
     import autogrow.UserVars
     import autogrow.AutogrowMainExecute as AutogrowMainExecute
-    import autogrow.operators.ConvertFiles.gypsum_dl.gypsum_dl.Parallelizer
+    import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.Parallelizer
     pass
 

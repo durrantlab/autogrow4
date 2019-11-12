@@ -110,7 +110,7 @@ def multiprocess_handling(vars):
     # # # launch mpi workers
     if vars["multithread_mode"] == 'mpi':
         # Avoid EOF error
-        from autogrow.operators.ConvertFiles.gypsum_dl.gypsum_dl.Parallelizer import Parallelizer
+        from autogrow.operators.convert_files.gypsum_dl.gypsum_dl.Parallelizer import Parallelizer
     
         vars["parallelizer"] = Parallelizer(vars["multithread_mode"], vars["number_of_processors"])
 
@@ -124,7 +124,7 @@ def multiprocess_handling(vars):
         #   has problems with importing the MPI enviorment and mpi4py
         #   So we will flag it to skip the MPI mode and just go to multithread/serial
         # This is a saftey precaution
-        from autogrow.operators.ConvertFiles.gypsum_dl.gypsum_dl.Parallelizer import Parallelizer
+        from autogrow.operators.convert_files.gypsum_dl.gypsum_dl.Parallelizer import Parallelizer
                 
         vars["parallelizer"] = Parallelizer(vars["multithread_mode"], vars["number_of_processors"], True)
 
@@ -519,7 +519,7 @@ def define_defaults():
     vars["VandeWaterbeemdFilter"] = False
     vars["PAINSFilter"] = False
     vars["NIHFilter"] = False
-    vars["BRENK_Filter"] = False
+    vars["BRENKFilter"] = False
     vars["No_Filters"] = False
     vars["alternative_filter"] = None
 
@@ -1155,7 +1155,7 @@ def handle_alternative_filters(vars, filter_list):
                         [[name_filter1, Path/to/name_filter1.py],\
                         [name_filter2, Path/to/name_filter2.py]]'.format(Custom_class[1]))
 
-                new_file = os.sep.join([os.path.abspath(os.path.dirname(__file__)),"operators","Filter","Filter_classes","FilterClasses",os.path.basename(Custom_class[0]) + ".py"]) 
+                new_file = os.sep.join([os.path.abspath(os.path.dirname(__file__)),"operators","Filter","filter_classes","filter_children_classes",os.path.basename(Custom_class[0]) + ".py"]) 
 
                 if os.path.exists(new_file)==True: 
                     # File has been copied to proper dir but is not being found by the code
@@ -1174,13 +1174,13 @@ def handle_alternative_filters(vars, filter_list):
             filter_list.append(Custom_class[0])
         if len(scripts_to_copy)!=0:
             for filter_info in scripts_to_copy:
-                print("copying Custom class file into the FilterClasses folder:")
+                print("copying Custom class file into the filter_children_classes folder:")
                 print("\t Copying : {}\n\t New file: {}\n".format(Custom_class[1], new_file))
                 print("AutoGrow will need to be restarted once all custom scripts \
                     have been copied to their required location.")
                 print("This is done once so if the script needs to be changed \
                     please either remove or replace the script within the \
-                    FilterClasses folder.")
+                    filter_children_classes folder.")
                 print("Please ensure you unit test this code properly before \
                     incorprating.\n")
                 copyfile(filter_info[0],filter_info[1])
@@ -1207,9 +1207,9 @@ def make_complete_children_dict(purpose_of_object):
         Filtering, Docking, Dockingfile conversion or Scoring
     """
     if purpose_of_object == "Filter":
-        import autogrow.operators.Filter.Filter_classes.FilterClasses
-        from autogrow.operators.Filter.Filter_classes.ParentFilterClass import ParentFilter as parent_object
-        from autogrow.operators.Filter.Filter_classes.get_child_filter_class import get_all_subclasses
+        import autogrow.operators.filter.filter_classes.filter_children_classes
+        from autogrow.operators.filter.filter_classes.ParentFilterClass import ParentFilter as parent_object
+        from autogrow.operators.filter.filter_classes.get_child_filter_class import get_all_subclasses
     elif purpose_of_object == "ParentPDBQTConverter":
         import autogrow.docking.docking_class.docking_file_conversion
         from autogrow.docking.docking_class.ParentPDBQTConverter import ParentPDBQTConverter as parent_object
@@ -1517,7 +1517,7 @@ def filter_choice_handling(vars):
         chosen_ligand_filters, vars = picked_filters(vars)
     vars["chosen_ligand_filters"] = chosen_ligand_filters
 
-    import autogrow.operators.Filter.ExecuteFilters as Filter
+    import autogrow.operators.filter.execute_filters as Filter
     # get child filter class object function dictionary
     vars["filter_object_dict"] = Filter.make_run_class_dict(chosen_ligand_filters)
 
@@ -1583,11 +1583,11 @@ def picked_filters(vars):
     else:
         vars['NIHFilter'] = False
         
-    if "BRENK_Filter" in vars_keys:
-        if vars['BRENK_Filter'] is True:
-            filter_list.append('BRENK_Filter')
+    if "BRENKFilter" in vars_keys:
+        if vars['BRENKFilter'] is True:
+            filter_list.append('BRENKFilter')
     else:
-        vars['BRENK_Filter'] = False
+        vars['BRENKFilter'] = False
        
     if "alternative_filter" in vars_keys:
         filter_list = handle_alternative_filters(vars, filter_list)

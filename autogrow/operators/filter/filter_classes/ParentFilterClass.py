@@ -15,7 +15,7 @@ class ParentFilter(object):
     False-Positive/Metabolite substructure searches:
         1) PAINSFilter
         2) NIHFilter
-        3) BRENK_Filter
+        3) BRENKFilter
     """
     def get_name(self):
         """

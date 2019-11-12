@@ -15,8 +15,8 @@ from rdkit.Chem import rdFMCS
 #Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog('rdApp.*')
 
-import autogrow.operators.ConvertFiles.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
-import autogrow.operators.Filter.ExecuteFilters as Filter
+import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
+import autogrow.operators.filter.execute_filters as Filter
 
 
 class SmilesClickChem(object):

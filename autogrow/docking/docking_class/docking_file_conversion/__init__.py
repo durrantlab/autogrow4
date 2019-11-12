@@ -1,6 +1,6 @@
  
 """
-This imports all of the filters within the FilterClasses file.
+This imports all of the filters within the filter_children_classes file.
 This is very important as the filters will not work if this doesn't exist.
 
 This is a dynamic and modular way of doing these imports.

@@ -253,17 +253,17 @@ from rdkit.Chem.rdchem import BondStereo
 
     -Gypsum_dl: 
         -Version:   1.1.1
-        -Location:  $PATH/autogrow4/autogrow/operators/ConvertFiles/gypsum_dl/
+        -Location:  $PATH/autogrow4/autogrow/operators/convert_files/gypsum_dl/
         -Citation:  Ropp PJ, Spiegel JO, Walker JL, Green H, Morales GA, Milliken KA, Ringe JJ, Durrant JD. Gypsum-DL: An Open-Source Program for Preparing Small-Molecule Libraries for Structure-Based Virtual Screening. J Cheminform. 11(1):34, 2019. [PMID: 31127411] [doi: 10.1186/s13321-019-0358-3]
         -License:   Apache version 2.0
     -Dimorphite_dl: 
         -Version:   1.2.2
-        -Location:  $PATH/autogrow4/autogrow/operators/ConvertFiles/gypsum_dl/gypsum_dl/Steps/SMILES/dimorphite_dl
+        -Location:  $PATH/autogrow4/autogrow/operators/convert_files/gypsum_dl/gypsum_dl/Steps/SMILES/dimorphite_dl
         -Citation:  Ropp PJ, Kaminsky JC, Yablonski S, Durrant JD (2019) Dimorphite-DL: An open-source program for enumerating the ionization states of drug-like small molecules. J Cheminform 11:14. doi:10.1186/s13321-019-0336-9.
         -License:   Apache version 2.0
     -MolVS: 
         -Version:   v0.1.1 2019 release
-        -Location:  $PATH/autogrow4/autogrow/operators/ConvertFiles/gypsum_dl/gypsum_dl/molvs
+        -Location:  $PATH/autogrow4/autogrow/operators/convert_files/gypsum_dl/gypsum_dl/molvs
         -Citation:  https://molvs.readthedocs.io; Take from https://github.com/mcs07/MolVS
         -License:   MIT License
 
@@ -350,11 +350,11 @@ from rdkit.Chem.rdchem import BondStereo
     These filters are applied to ligands after they are created by mutation/Crossover 
     but before Gypsum_dl conversion to 3D.
 
-    This custom code will be copied to the directory: $PATH/autogrow4/autogrow/operators/Filter/Filter_classes/FilterClasses/
+    This custom code will be copied to the directory: $PATH/autogrow4/autogrow/operators/filter/filter_classes/filter_children_classes/
 #####   Script formating:
     These filters use a class-based inheritance architecture which require:
     1) Filter must be instanced off of the ParentFilterClass located:
-        - $PATH/autogrow4/autogrow/operators/Filter/Filter_classes/ParentFilterClass.py
+        - $PATH/autogrow4/autogrow/operators/filter/filter_classes/ParentFilterClass.py
     2) Have a unique name: class unique_name(ParentFilter)
         -unique_name cannot be one of the predefined filters
     3) Must have at least one function called run_filter
@@ -864,7 +864,7 @@ from rdkit.Chem.rdchem import BondStereo
 
 #
 ##  Multiprocessing/MPI/Parallelization/Parallelizer:
-    Autogrow uses the Parallelizer.py script from Gypsum-DL (autogrow/operators/ConvertFiles/gypsum_dl/gypsum_dl/Parallelizer.py).
+    Autogrow uses the Parallelizer.py script from Gypsum-DL (autogrow/operators/convert_files/gypsum_dl/gypsum_dl/Parallelizer.py).
     This script creates a Parallelizer class object which can divide jobs in three manners:
         1) Serial: run all jobs 1 at a time
         2) Multiprocessing: dynamically allocated distribution of jobs across multiple cpus on the same device

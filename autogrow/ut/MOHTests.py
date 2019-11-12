@@ -6,7 +6,7 @@ import glob
 import rdkit
 from rdkit import Chem
 
-import autogrow.operators.ConvertFiles.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
+import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
 
 def fun(x):
     y = x + 1

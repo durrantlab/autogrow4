@@ -14,7 +14,7 @@ import rdkit
 import rdkit.Chem as Chem
 
 import autogrow.docking.delete_failed_mol as Delete
-import autogrow.operators.ConvertFiles.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
+import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
 from autogrow.docking.docking_class.ParentPDBQTConverter import ParentPDBQTConverter
 
 class MGLToolsConversion(ParentPDBQTConverter):

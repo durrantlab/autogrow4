@@ -10,12 +10,12 @@ import rdkit.Chem as Chem
 #Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog('rdApp.*')
 
-import autogrow.operators.Filter.ExecuteFilters as Filter
+import autogrow.operators.filter.execute_filters as Filter
 import autogrow.docking.ranking.ranking_mol as Ranking
 import autogrow.operators.mutation.execute_mutations as Mutation
 import autogrow.operators.Crossover.Execute_Crossover as Execute_Crossover
-import autogrow.operators.ConvertFiles.Conversion_to_3D as Conversion_to_3D
-import autogrow.operators.ConvertFiles.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
+import autogrow.operators.convert_files.conversion_to_3d as conversion_to_3d
+import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
 
 
 #############
@@ -232,7 +232,7 @@ def populate_generation(vars, generation_num):
     # CONVERT SMILES TO .sdf USING GYPSUM and convert .sdf to .pdb with rdkit
     # This will output sdf files into a folder. The .smi.0.sdf file is not a valid mol, but all the others will be valid
     # the 1st Smiles in the original .smi file is saved as .smi.1.sdf and 2nd file is saved as .smi.2.sdf
-    Conversion_to_3D.convert_to_3d(vars, smiles_to_convert_file, new_gen_folder_path)
+    conversion_to_3d.convert_to_3d(vars, smiles_to_convert_file, new_gen_folder_path)
     sys.stdout.flush()
 
     return full_generation_smiles_file, full_generation_smiles_list
@@ -327,7 +327,7 @@ def populate_generation_0(vars, generation_num=0):
         # CONVERT SMILES TO .sdf USING GYPSUM and convert .sdf to .pdb with rdkit
         # This will output sdf files into a folder. The .smi.0.sdf file is not a valid mol, but all the others will be valid
         # the 1st Smiles in the original .smi file is saved as .smi.1.sdf and 2nd file is saved as .smi.2.sdf
-        Conversion_to_3D.convert_to_3d(vars, smiles_to_convert_file, new_gen_folder_path)
+        conversion_to_3d.convert_to_3d(vars, smiles_to_convert_file, new_gen_folder_path)
 
         return already_docked, full_generation_smiles_file, full_generation_smiles_list
 # 

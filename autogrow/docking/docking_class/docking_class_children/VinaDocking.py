@@ -19,7 +19,7 @@ rdkit.RDLogger.DisableLog('rdApp.*')
 import autogrow.docking.delete_failed_mol as Delete
 import autogrow.docking.ranking.ranking_mol as Ranking
 from autogrow.docking.docking_class.ParentDockClass import ParentDocking
-import autogrow.operators.ConvertFiles.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
+import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
 import autogrow.docking.scoring.execute_scoring_mol as Scoring
 
 class VinaDocking(ParentDocking):
