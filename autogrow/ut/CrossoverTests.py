@@ -9,12 +9,12 @@ import rdkit.Chem as Chem
 import rdkit.Chem.rdFMCS as rdFMCS
 
 
-from autogrow.Operators.Crossover.smiles_merge.MergeFunctions import Alignment_and_Breaks as ANB
-import autogrow.Operators.Crossover.smiles_merge.MergeFunctions.Dict_and_R_Groups as DnR
-from autogrow.Operators.Crossover.smiles_merge.MergeFunctions import MappingClass as MC
-from autogrow.Operators.Crossover.smiles_merge.MergeFunctions import Merge_w_core as MWC
+from autogrow.operators.Crossover.smiles_merge.MergeFunctions import Alignment_and_Breaks as ANB
+import autogrow.operators.Crossover.smiles_merge.MergeFunctions.Dict_and_R_Groups as DnR
+from autogrow.operators.Crossover.smiles_merge.MergeFunctions import MappingClass as MC
+from autogrow.operators.Crossover.smiles_merge.MergeFunctions import Merge_w_core as MWC
 
-from autogrow.Operators.Crossover import Execute_Crossover as EC
+from autogrow.operators.Crossover import Execute_Crossover as EC
 
 
 class CrossoverTests(unittest.TestCase):

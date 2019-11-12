@@ -20,9 +20,9 @@ from rdkit.Chem import rdFMCS
 #Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog('rdApp.*')
 
-import autogrow.Operators.Filter.ExecuteFilters as Filter
-import autogrow.Operators.Crossover.smiles_merge.smiles_merge as smiles_merge
-import autogrow.Operators.ConvertFiles.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
+import autogrow.operators.Filter.ExecuteFilters as Filter
+import autogrow.operators.Crossover.smiles_merge.smiles_merge as smiles_merge
+import autogrow.operators.ConvertFiles.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
 
 
 def test_for_mcs(vars, mol_1, mol_2):

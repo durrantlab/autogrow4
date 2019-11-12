@@ -5,4 +5,4 @@ git remote add -f gypsum https://git.durrantlab.pitt.edu/jdurrant/gypsum.git
 
 git fetch gypsum master
 
-git subtree pull --prefix autogrow/Operators/ConvertFiles/gypsum gypsum master --squasg
+git subtree pull --prefix autogrow/operators/ConvertFiles/gypsum gypsum master --squasg

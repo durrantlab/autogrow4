@@ -28,7 +28,7 @@ import rdkit.Chem.Descriptors as Descriptors
 #Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog('rdApp.*')
 
-from autogrow.Operators.Filter.Filter_classes.ParentFilterClass import ParentFilter
+from autogrow.operators.Filter.Filter_classes.ParentFilterClass import ParentFilter
 
 
 class LipinskiStrictFilter(ParentFilter):

@@ -253,17 +253,17 @@ from rdkit.Chem.rdchem import BondStereo
 
     -Gypsum_dl: 
         -Version:   1.1.1
-        -Location:  $PATH/autogrow4/autogrow/Operators/ConvertFiles/gypsum_dl/
+        -Location:  $PATH/autogrow4/autogrow/operators/ConvertFiles/gypsum_dl/
         -Citation:  Ropp PJ, Spiegel JO, Walker JL, Green H, Morales GA, Milliken KA, Ringe JJ, Durrant JD. Gypsum-DL: An Open-Source Program for Preparing Small-Molecule Libraries for Structure-Based Virtual Screening. J Cheminform. 11(1):34, 2019. [PMID: 31127411] [doi: 10.1186/s13321-019-0358-3]
         -License:   Apache version 2.0
     -Dimorphite_dl: 
         -Version:   1.2.2
-        -Location:  $PATH/autogrow4/autogrow/Operators/ConvertFiles/gypsum_dl/gypsum_dl/Steps/SMILES/dimorphite_dl
+        -Location:  $PATH/autogrow4/autogrow/operators/ConvertFiles/gypsum_dl/gypsum_dl/Steps/SMILES/dimorphite_dl
         -Citation:  Ropp PJ, Kaminsky JC, Yablonski S, Durrant JD (2019) Dimorphite-DL: An open-source program for enumerating the ionization states of drug-like small molecules. J Cheminform 11:14. doi:10.1186/s13321-019-0336-9.
         -License:   Apache version 2.0
     -MolVS: 
         -Version:   v0.1.1 2019 release
-        -Location:  $PATH/autogrow4/autogrow/Operators/ConvertFiles/gypsum_dl/gypsum_dl/molvs
+        -Location:  $PATH/autogrow4/autogrow/operators/ConvertFiles/gypsum_dl/gypsum_dl/molvs
         -Citation:  https://molvs.readthedocs.io; Take from https://github.com/mcs07/MolVS
         -License:   MIT License
 
@@ -347,14 +347,14 @@ from rdkit.Chem.rdchem import BondStereo
 
 ### 1) Custom ligands filters: ***
     This feature allows the user to incorporate custom python scripts for filtering ligands.
-    These filters are applied to ligands after they are created by Mutation/Crossover 
+    These filters are applied to ligands after they are created by mutation/Crossover 
     but before Gypsum_dl conversion to 3D.
 
-    This custom code will be copied to the directory: $PATH/autogrow4/autogrow/Operators/Filter/Filter_classes/FilterClasses/
+    This custom code will be copied to the directory: $PATH/autogrow4/autogrow/operators/Filter/Filter_classes/FilterClasses/
 #####   Script formating:
     These filters use a class-based inheritance architecture which require:
     1) Filter must be instanced off of the ParentFilterClass located:
-        - $PATH/autogrow4/autogrow/Operators/Filter/Filter_classes/ParentFilterClass.py
+        - $PATH/autogrow4/autogrow/operators/Filter/Filter_classes/ParentFilterClass.py
     2) Have a unique name: class unique_name(ParentFilter)
         -unique_name cannot be one of the predefined filters
     3) Must have at least one function called run_filter
@@ -613,9 +613,9 @@ from rdkit.Chem.rdchem import BondStereo
 
     An example libraries can be found: 
 
-        autogrow4/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/all_rxns/All_Rxns_rxn_library.json
-        autogrow4/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/click_chem_rxns/click_chem_rxns_library.json
-        autogrow4/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/robust_rxns/Robust_Rxns_rxn_library.json            
+        autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/all_rxns/All_Rxns_rxn_library.json
+        autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/click_chem_rxns_library.json
+        autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/robust_rxns/Robust_Rxns_rxn_library.json            
     
     Reaction libraries identify ligands capable of reacting in a given reaction using the information
     found in the subdictionary's items "functional_groups" and "group_smarts". 
@@ -646,9 +646,9 @@ from rdkit.Chem.rdchem import BondStereo
         }
     Examples can be found: 
 
-        autogrow4/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/all_rxns/All_Rxns_functional_groups.json
-        autogrow4/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/click_chem_rxns/click_chem_functional_groups.json
-        autogrow4/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/robust_rxns/Robust_Rxns_functional_groups.json
+        autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/all_rxns/All_Rxns_functional_groups.json
+        autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/click_chem_functional_groups.json
+        autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/robust_rxns/Robust_Rxns_functional_groups.json
 
     The SMARTS strings provided in this file should also be present in each subdirctionary of the Reaction library .json file
     that references that functional group, 
@@ -864,7 +864,7 @@ from rdkit.Chem.rdchem import BondStereo
 
 #
 ##  Multiprocessing/MPI/Parallelization/Parallelizer:
-    Autogrow uses the Parallelizer.py script from Gypsum-DL (autogrow/Operators/ConvertFiles/gypsum_dl/gypsum_dl/Parallelizer.py).
+    Autogrow uses the Parallelizer.py script from Gypsum-DL (autogrow/operators/ConvertFiles/gypsum_dl/gypsum_dl/Parallelizer.py).
     This script creates a Parallelizer class object which can divide jobs in three manners:
         1) Serial: run all jobs 1 at a time
         2) Multiprocessing: dynamically allocated distribution of jobs across multiple cpus on the same device

@@ -6,7 +6,7 @@ import sys
 import shutil
 
 import autogrow.docking.execute_docking as DockingClass
-import autogrow.Operators.Operations as Operations
+import autogrow.operators.operations as operations
 import autogrow.docking.ranking.ranking_mol as Ranking
 import autogrow.docking.concatinate_files as concatinate_files
 
@@ -44,7 +44,7 @@ def main_execute(vars):
    
     # This is the main loop which will control and execute all commands
     # This is broken into 3 main sections:
-    # 1)  Operations which populating the new generation with ligands which
+    # 1)  operations which populating the new generation with ligands which
     # both pass the userdefined filter and convert from 1D smiles to 3D PDB
     # 2)  Docking which handles converting from PDBs to Docking specific formats and
     #  running the actual Docking simulations   
@@ -61,7 +61,7 @@ def main_execute(vars):
             if os.path.exists(current_generation_dir + os.sep + "generation_0_ranked.smi") == True:
                 continue
 
-            already_docked, smile_file_new_gen, new_gen_ligands_list = Operations.populate_generation_0(vars, generation_num=0)
+            already_docked, smile_file_new_gen, new_gen_ligands_list = operations.populate_generation_0(vars, generation_num=0)
             sys.stdout.flush()
 
             if already_docked == False:
@@ -70,7 +70,7 @@ def main_execute(vars):
                 unweighted_ranked_smile_file = DockingClass.run_docking_common(vars, current_generation_number, current_generation_dir, smile_file_new_gen)
 
         else:
-            smile_file_new_gen, new_gen_ligands_list = Operations.populate_generation(vars, current_generation_number)
+            smile_file_new_gen, new_gen_ligands_list = operations.populate_generation(vars, current_generation_number)
             sys.stdout.flush()
 
             if new_gen_ligands_list is None:

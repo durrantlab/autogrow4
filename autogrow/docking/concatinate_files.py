@@ -128,11 +128,11 @@ def run_concatination(parallelizer_object, directory):
 
     To decompress the folder please script in $PATH/autogrow/utility_scripts/file_concatination_and_compression.py 
 
-    parallelizer_object type is <class 'autogrow.Operators.ConvertFiles.gypsum_dl.gypsum_dl.Parallelizer.Parallelizer'>
+    parallelizer_object type is <class 'autogrow.operators.ConvertFiles.gypsum_dl.gypsum_dl.Parallelizer.Parallelizer'>
    
     Inputs:
     :param Parallelizer_obj parallelizer_object: a paralellizer object used to multiprocess.
-            initialized from autogrow/Operators/ConvertFiles/gypsum_dl/gypsum_dl/Parallelizer.py. 
+            initialized from autogrow/operators/ConvertFiles/gypsum_dl/gypsum_dl/Parallelizer.py. 
     :param str directory: the path to the folder which will be compiled and compressed.    
     """
     concat_file = directory + os.sep + "compresed_PDBS.txt"

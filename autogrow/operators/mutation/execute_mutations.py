@@ -9,7 +9,7 @@ import copy
 import sys
 
 
-import autogrow.Operators.Mutation.SmileClickChem.SmileClickClass as SmileClickClass
+import autogrow.operators.mutation.smiles_click_chem.SmileClickClass as SmileClickClass
 
 
 
@@ -29,7 +29,7 @@ def make_mutants(vars, generation_num, number_of_processors, num_mutants_to_make
     :param int num_mutants_to_make: number of mutants to return
     :param list ligands_list: list of ligand/name pairs which are the order in which to be sampled
     :param list new_mutation_smiles_list: is the list of mutants made for the current generation being populated 
-                                            but in a previous iteration of the loop in Operations
+                                            but in a previous iteration of the loop in operations
     :param list rxn_library_variables: a list of user variables which define the rxn_library, rxn_library_file,     
                                     and function_group_library. 
                                     ie. rxn_library_variables = [vars['rxn_library'], vars['rxn_library_file'], vars['function_group_library']]

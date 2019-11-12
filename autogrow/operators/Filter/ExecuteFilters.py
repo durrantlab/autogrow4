@@ -7,10 +7,10 @@ from rdkit import Chem
 #Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog('rdApp.*')
 
-from autogrow.Operators.Filter.Filter_classes.ParentFilterClass import ParentFilter
-from autogrow.Operators.Filter.Filter_classes.get_child_filter_class import get_all_subclasses
-import autogrow.Operators.ConvertFiles.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
-from autogrow.Operators.Filter.Filter_classes.FilterClasses import *
+from autogrow.operators.Filter.Filter_classes.ParentFilterClass import ParentFilter
+from autogrow.operators.Filter.Filter_classes.get_child_filter_class import get_all_subclasses
+import autogrow.operators.ConvertFiles.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
+from autogrow.operators.Filter.Filter_classes.FilterClasses import *
 
  
 def make_run_class_dict(filters_to_use):

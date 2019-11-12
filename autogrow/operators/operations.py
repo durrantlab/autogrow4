@@ -10,12 +10,12 @@ import rdkit.Chem as Chem
 #Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog('rdApp.*')
 
-import autogrow.Operators.Filter.ExecuteFilters as Filter
+import autogrow.operators.Filter.ExecuteFilters as Filter
 import autogrow.docking.ranking.ranking_mol as Ranking
-import autogrow.Operators.Mutation.Execute_Mutations as Mutation
-import autogrow.Operators.Crossover.Execute_Crossover as Execute_Crossover
-import autogrow.Operators.ConvertFiles.Conversion_to_3D as Conversion_to_3D
-import autogrow.Operators.ConvertFiles.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
+import autogrow.operators.mutation.execute_mutations as Mutation
+import autogrow.operators.Crossover.Execute_Crossover as Execute_Crossover
+import autogrow.operators.ConvertFiles.Conversion_to_3D as Conversion_to_3D
+import autogrow.operators.ConvertFiles.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
 
 
 #############

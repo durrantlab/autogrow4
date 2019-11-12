@@ -110,7 +110,7 @@ def multiprocess_handling(vars):
     # # # launch mpi workers
     if vars["multithread_mode"] == 'mpi':
         # Avoid EOF error
-        from autogrow.Operators.ConvertFiles.gypsum_dl.gypsum_dl.Parallelizer import Parallelizer
+        from autogrow.operators.ConvertFiles.gypsum_dl.gypsum_dl.Parallelizer import Parallelizer
     
         vars["parallelizer"] = Parallelizer(vars["multithread_mode"], vars["number_of_processors"])
 
@@ -124,7 +124,7 @@ def multiprocess_handling(vars):
         #   has problems with importing the MPI enviorment and mpi4py
         #   So we will flag it to skip the MPI mode and just go to multithread/serial
         # This is a saftey precaution
-        from autogrow.Operators.ConvertFiles.gypsum_dl.gypsum_dl.Parallelizer import Parallelizer
+        from autogrow.operators.ConvertFiles.gypsum_dl.gypsum_dl.Parallelizer import Parallelizer
                 
         vars["parallelizer"] = Parallelizer(vars["multithread_mode"], vars["number_of_processors"], True)
 
@@ -1155,7 +1155,7 @@ def handle_alternative_filters(vars, filter_list):
                         [[name_filter1, Path/to/name_filter1.py],\
                         [name_filter2, Path/to/name_filter2.py]]'.format(Custom_class[1]))
 
-                new_file = os.sep.join([os.path.abspath(os.path.dirname(__file__)),"Operators","Filter","Filter_classes","FilterClasses",os.path.basename(Custom_class[0]) + ".py"]) 
+                new_file = os.sep.join([os.path.abspath(os.path.dirname(__file__)),"operators","Filter","Filter_classes","FilterClasses",os.path.basename(Custom_class[0]) + ".py"]) 
 
                 if os.path.exists(new_file)==True: 
                     # File has been copied to proper dir but is not being found by the code
@@ -1207,9 +1207,9 @@ def make_complete_children_dict(purpose_of_object):
         Filtering, Docking, Dockingfile conversion or Scoring
     """
     if purpose_of_object == "Filter":
-        import autogrow.Operators.Filter.Filter_classes.FilterClasses
-        from autogrow.Operators.Filter.Filter_classes.ParentFilterClass import ParentFilter as parent_object
-        from autogrow.Operators.Filter.Filter_classes.get_child_filter_class import get_all_subclasses
+        import autogrow.operators.Filter.Filter_classes.FilterClasses
+        from autogrow.operators.Filter.Filter_classes.ParentFilterClass import ParentFilter as parent_object
+        from autogrow.operators.Filter.Filter_classes.get_child_filter_class import get_all_subclasses
     elif purpose_of_object == "ParentPDBQTConverter":
         import autogrow.docking.docking_class.docking_file_conversion
         from autogrow.docking.docking_class.ParentPDBQTConverter import ParentPDBQTConverter as parent_object
@@ -1517,7 +1517,7 @@ def filter_choice_handling(vars):
         chosen_ligand_filters, vars = picked_filters(vars)
     vars["chosen_ligand_filters"] = chosen_ligand_filters
 
-    import autogrow.Operators.Filter.ExecuteFilters as Filter
+    import autogrow.operators.Filter.ExecuteFilters as Filter
     # get child filter class object function dictionary
     vars["filter_object_dict"] = Filter.make_run_class_dict(chosen_ligand_filters)
 

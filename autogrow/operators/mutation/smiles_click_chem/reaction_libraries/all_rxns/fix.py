@@ -2,8 +2,8 @@ import os
 import glob
 import sys
 
-path ="/home/jacob/Documents/autogrow4/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/all_rxns/temp.json"
-new_path="/home/jacob/Documents/autogrow4/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/all_rxns/temp_new.json"
+path ="/home/jacob/Documents/autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/all_rxns/temp.json"
+new_path="/home/jacob/Documents/autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/all_rxns/temp_new.json"
 
 printout = ""
 

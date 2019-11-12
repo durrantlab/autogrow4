@@ -99,13 +99,13 @@ PARSER.add_argument('--protanate_step', action = 'store_true', default=False,
 
 # Mutation Settings
 PARSER.add_argument('--rxn_library', choices = ["click_chem_rxns","robust_rxns","all_rxns","Custom"],
-    default="click_chem_rxns", help = 'This set of reactions to be used in Mutation. \
+    default="click_chem_rxns", help = 'This set of reactions to be used in mutation. \
     If Custom, one must also provide rxn_file Path and function_group_library path')
 PARSER.add_argument('--rxn_library_file', type=str, default="", \
-    help = 'This PATH to a Custom SMIRKS reactions to use for Mutation. \
+    help = 'This PATH to a Custom SMIRKS reactions to use for mutation. \
     Only provide if using the Custom option for rxn_library.')
 PARSER.add_argument('--function_group_library', type=str, default="", \
-    help = 'This PATH for a dictionary of functional groups to be used for Mutation. \
+    help = 'This PATH for a dictionary of functional groups to be used for mutation. \
     Only provide if using the Custom option for rxn_library.')
 PARSER.add_argument('--complimentary_mol_directory', type=str, default="", \
     help = 'This PATH to the directory containing all the molecules being used \
@@ -368,6 +368,6 @@ if ARGS_DICT["cache_prerun"]==False:
 else: # cache prerun. This is necessary to prevent race conditions in mpi mode.
     import autogrow.UserVars
     import autogrow.AutogrowMainExecute as AutogrowMainExecute
-    import autogrow.Operators.ConvertFiles.gypsum_dl.gypsum_dl.Parallelizer
+    import autogrow.operators.ConvertFiles.gypsum_dl.gypsum_dl.Parallelizer
     pass
 

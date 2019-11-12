@@ -6,10 +6,10 @@ from rdkit.Chem import rdFMCS
 #Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog('rdApp.*')
 
-import autogrow.Operators.Crossover.smiles_merge.MergeFunctions.Merge_w_core as MWC
-import autogrow.Operators.Crossover.smiles_merge.MergeFunctions.Dict_and_R_Groups as DnR
-import autogrow.Operators.Crossover.smiles_merge.MergeFunctions.Alignment_and_Breaks as AnB
-import autogrow.Operators.ConvertFiles.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
+import autogrow.operators.Crossover.smiles_merge.MergeFunctions.Merge_w_core as MWC
+import autogrow.operators.Crossover.smiles_merge.MergeFunctions.Dict_and_R_Groups as DnR
+import autogrow.operators.Crossover.smiles_merge.MergeFunctions.Alignment_and_Breaks as AnB
+import autogrow.operators.ConvertFiles.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
 
 
 def run_main_smiles_merge(vars, lig_string_1, lig_string_2):

@@ -19,7 +19,7 @@ import __future__
 from rdkit.Chem import FilterCatalog
 from rdkit.Chem.FilterCatalog import FilterCatalogParams
 
-from autogrow.Operators.Filter.Filter_classes.ParentFilterClass import ParentFilter
+from autogrow.operators.Filter.Filter_classes.ParentFilterClass import ParentFilter
 
 
 class PAINSFilter(ParentFilter):
