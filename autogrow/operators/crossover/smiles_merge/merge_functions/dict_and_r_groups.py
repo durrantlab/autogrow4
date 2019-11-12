@@ -9,7 +9,7 @@ from rdkit import Chem
 #Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog('rdApp.*')
 
-import autogrow.operators.Crossover.smiles_merge.MergeFunctions.MappingClass as MappingClass
+import autogrow.operators.crossover.smiles_merge.merge_functions.MappingClass as MappingClass
 
 
 def handle_dicts_and_select_b_groups(mol_1, mol_2, mcs_mol):

@@ -13,7 +13,7 @@ rdkit.RDLogger.DisableLog('rdApp.*')
 import autogrow.operators.filter.execute_filters as Filter
 import autogrow.docking.ranking.ranking_mol as Ranking
 import autogrow.operators.mutation.execute_mutations as Mutation
-import autogrow.operators.Crossover.Execute_Crossover as Execute_Crossover
+import autogrow.operators.crossover.execute_crossover as execute_crossover
 import autogrow.operators.convert_files.conversion_to_3d as conversion_to_3d
 import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
 
@@ -66,10 +66,10 @@ def populate_generation(vars, generation_num):
     total_num_desired_new_ligands = num_crossovers + num_mutations + num_elite_to_advance_from_previous_gen
 
     # Get starting compounds for Mutations
-    seed_list_Mutations = make_seed_list(vars, source_compounds_list, generation_num, num_seed_diversity, num_seed_dock_fitness)
+    seed_list_mutations = make_seed_list(vars, source_compounds_list, generation_num, num_seed_diversity, num_seed_dock_fitness)
 
     # Save seed list for Mutations
-    save_ligand_list(vars['output_directory'], generation_num, seed_list_Mutations, "Mutation_Seed_List")
+    save_ligand_list(vars['output_directory'], generation_num, seed_list_mutations, "Mutation_Seed_List")
     sys.stdout.flush()
     
     print("MAKE MUTATIONS")
@@ -88,10 +88,10 @@ def populate_generation(vars, generation_num):
         num_mutants_to_make = num_mutations - len(new_mutation_smiles_list) 
 
         # Make all mutants                  
-        new_mutants = Mutation.make_mutants(vars, generation_num, number_of_processors, num_mutants_to_make, seed_list_Mutations, new_mutation_smiles_list, rxn_library_variables)                       
+        new_mutants = Mutation.make_mutants(vars, generation_num, number_of_processors, num_mutants_to_make, seed_list_mutations, new_mutation_smiles_list, rxn_library_variables)                       
         if new_mutants is None:
             #try once more
-            new_mutants = Mutation.make_mutants(vars, generation_num, number_of_processors, num_mutants_to_make, seed_list_Mutations, new_mutation_smiles_list, rxn_library_variables)                       
+            new_mutants = Mutation.make_mutants(vars, generation_num, number_of_processors, num_mutants_to_make, seed_list_mutations, new_mutation_smiles_list, rxn_library_variables)                       
 
         if new_mutants is None:
             break
@@ -121,10 +121,10 @@ def populate_generation(vars, generation_num):
     print("FINISHED MAKING MUTATIONS")    
 
     # Get starting compounds to seed Crossovers
-    seed_list_Crossovers = make_seed_list(vars, source_compounds_list, generation_num, num_seed_diversity, num_seed_dock_fitness)
+    seed_list_crossovers = make_seed_list(vars, source_compounds_list, generation_num, num_seed_diversity, num_seed_dock_fitness)
 
     # Save seed list for Crossovers
-    save_ligand_list(vars['output_directory'], generation_num, seed_list_Crossovers, "Crossover_Seed_List")
+    save_ligand_list(vars['output_directory'], generation_num, seed_list_crossovers, "Crossover_Seed_List")
     
     print("MAKE CROSSOVERS")
     sys.stdout.flush()
@@ -139,10 +139,10 @@ def populate_generation(vars, generation_num):
         num_crossovers_to_make = num_crossovers - len(new_crossover_smiles_list) 
 
         # Make all crossovers                 
-        new_crossovers = Execute_Crossover.make_crossovers(vars, generation_num, number_of_processors, num_crossovers_to_make, seed_list_Crossovers, new_crossover_smiles_list)
+        new_crossovers = execute_crossover.make_crossovers(vars, generation_num, number_of_processors, num_crossovers_to_make, seed_list_crossovers, new_crossover_smiles_list)
         if new_crossovers is None:
             #try once more
-            new_crossovers = Execute_Crossover.make_crossovers(vars, generation_num, number_of_processors, num_crossovers_to_make, seed_list_Crossovers, new_crossover_smiles_list)
+            new_crossovers = execute_crossover.make_crossovers(vars, generation_num, number_of_processors, num_crossovers_to_make, seed_list_crossovers, new_crossover_smiles_list)
         if new_crossovers is None:
             break
         else:

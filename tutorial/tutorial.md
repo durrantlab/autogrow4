@@ -347,7 +347,7 @@ from rdkit.Chem.rdchem import BondStereo
 
 ### 1) Custom ligands filters: ***
     This feature allows the user to incorporate custom python scripts for filtering ligands.
-    These filters are applied to ligands after they are created by mutation/Crossover 
+    These filters are applied to ligands after they are created by mutation/crossover 
     but before Gypsum_dl conversion to 3D.
 
     This custom code will be copied to the directory: $PATH/autogrow4/autogrow/operators/filter/filter_classes/filter_children_classes/

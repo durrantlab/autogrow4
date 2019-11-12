@@ -9,12 +9,12 @@ import rdkit.Chem as Chem
 import rdkit.Chem.rdFMCS as rdFMCS
 
 
-from autogrow.operators.Crossover.smiles_merge.MergeFunctions import Alignment_and_Breaks as ANB
-import autogrow.operators.Crossover.smiles_merge.MergeFunctions.Dict_and_R_Groups as DnR
-from autogrow.operators.Crossover.smiles_merge.MergeFunctions import MappingClass as MC
-from autogrow.operators.Crossover.smiles_merge.MergeFunctions import Merge_w_core as MWC
+from autogrow.operators.crossover.smiles_merge.merge_functions import alignment_and_breaks as ANB
+import autogrow.operators.crossover.smiles_merge.merge_functions.dict_and_r_groups as DnR
+from autogrow.operators.crossover.smiles_merge.merge_functions import MappingClass as MC
+from autogrow.operators.crossover.smiles_merge.merge_functions import merge_w_core as MWC
 
-from autogrow.operators.Crossover import Execute_Crossover as EC
+from autogrow.operators.crossover import execute_crossover as EC
 
 
 class CrossoverTests(unittest.TestCase):
@@ -98,7 +98,7 @@ class CrossoverTests(unittest.TestCase):
         #Variables for MWC
         self.bad_SMILES_list = None
 
-    # # Alignment_and_Breaks
+    # # alignment_and_breaks
     def test_handle_mcs_align_labeling_and_cyclicbreaks(self):
         
         results = ANB.handle_mcs_align_labeling_and_cyclicbreaks(self.mol1, self.mol2, self.mcs_mol)
@@ -389,7 +389,7 @@ class CrossoverTests(unittest.TestCase):
         self.assertEqual(B_chosen, ['1B1', '1B2', '2B2', '2B1'])
 
 
-    # # Merge_w_core.py
+    # # merge_w_core.py
     def test_remove_all_isolabels(self):
 
         mol = self.mcs_mol_2
@@ -679,7 +679,7 @@ class CrossoverTests(unittest.TestCase):
 
 
 
-    # # Execute_Crossover.py  EC
+    # # execute_crossover.py  EC
     
     def test_test_for_mcs(self):
 

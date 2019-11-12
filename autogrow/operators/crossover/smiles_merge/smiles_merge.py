@@ -6,9 +6,9 @@ from rdkit.Chem import rdFMCS
 #Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog('rdApp.*')
 
-import autogrow.operators.Crossover.smiles_merge.MergeFunctions.Merge_w_core as MWC
-import autogrow.operators.Crossover.smiles_merge.MergeFunctions.Dict_and_R_Groups as DnR
-import autogrow.operators.Crossover.smiles_merge.MergeFunctions.Alignment_and_Breaks as AnB
+import autogrow.operators.crossover.smiles_merge.merge_functions.merge_w_core as MWC
+import autogrow.operators.crossover.smiles_merge.merge_functions.dict_and_r_groups as DnR
+import autogrow.operators.crossover.smiles_merge.merge_functions.alignment_and_breaks as AnB
 import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
 
 
