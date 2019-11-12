@@ -57,7 +57,7 @@ do
         --PAINSFilter \
         --start_a_new_run \
         --filter_source_compounds False \
-        --rxn_library Robust_Rxns \
+        --rxn_library robust_rxns \
         --selector_choice Rank_Selector \
         --dock_choice QuickVina2Docking \
         --max_variants_per_compound 3 \

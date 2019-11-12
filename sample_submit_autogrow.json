@@ -27,7 +27,7 @@
     "start_a_new_run": true,
     "use_docked_source_compounds":false,
     "generate_plot": "True",
-    "rxn_library": "All_Rxns",
+    "rxn_library": "click_chem_rxns",
     "rescore_lig_efficiency": true,
     "dock_choice": "VinaDocking"
 }

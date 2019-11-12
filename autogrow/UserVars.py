@@ -480,7 +480,7 @@ def define_defaults():
     vars["protanate_step"] = False
 
     # Mutation Settings
-    vars["rxn_library"] ="ClickChem"
+    vars["rxn_library"] ="click_chem_rxns"
     vars["rxn_library_file"] =""
     vars["function_group_library"] = ""
     vars["complimentary_mol_directory"] = ""

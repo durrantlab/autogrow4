@@ -1,4 +1,4 @@
-The reactions used for the ClickChem reaction set are based on those used in
+The reactions used for the click_chem_rxns reaction set are based on those used in
 AutoClickChem, which were based on Click Chemistry reactions.
 
 All the reactions were converted from 3D format to 2D SMARTS reactions.

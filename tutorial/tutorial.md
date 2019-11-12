@@ -613,9 +613,9 @@ from rdkit.Chem.rdchem import BondStereo
 
     An example libraries can be found: 
 
-        autogrow4/autogrow/Operators/Mutation/SmileClickChem/SmileClickChem/Reaction_libraries/All_Rxns/All_Rxns_rxn_library.json
-        autogrow4/autogrow/Operators/Mutation/SmileClickChem/SmileClickChem/Reaction_libraries/ClickChem/ClickChem_rxn_library.json
-        autogrow4/autogrow/Operators/Mutation/SmileClickChem/SmileClickChem/Reaction_libraries/Robust_Rxns/Robust_Rxns_rxn_library.json            
+        autogrow4/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/all_rxns/All_Rxns_rxn_library.json
+        autogrow4/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/click_chem_rxns/click_chem_rxns_library.json
+        autogrow4/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/robust_rxns/Robust_Rxns_rxn_library.json            
     
     Reaction libraries identify ligands capable of reacting in a given reaction using the information
     found in the subdictionary's items "functional_groups" and "group_smarts". 
@@ -646,9 +646,9 @@ from rdkit.Chem.rdchem import BondStereo
         }
     Examples can be found: 
 
-        autogrow4/autogrow/Operators/Mutation/SmileClickChem/SmileClickChem/Reaction_libraries/All_Rxns/All_Rxns_functional_groups.json
-        autogrow4/autogrow/Operators/Mutation/SmileClickChem/SmileClickChem/Reaction_libraries/ClickChem/ClickChem_functional_groups.json
-        autogrow4/autogrow/Operators/Mutation/SmileClickChem/SmileClickChem/Reaction_libraries/Robust_Rxns/Robust_Rxns_functional_groups.json
+        autogrow4/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/all_rxns/All_Rxns_functional_groups.json
+        autogrow4/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/click_chem_rxns/click_chem_functional_groups.json
+        autogrow4/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/robust_rxns/Robust_Rxns_functional_groups.json
 
     The SMARTS strings provided in this file should also be present in each subdirctionary of the Reaction library .json file
     that references that functional group, 
@@ -705,7 +705,7 @@ from rdkit.Chem.rdchem import BondStereo
 ### 6) Custom Complimentary molecule libraries for Mutation:
     One can provide custom libraries of molecules to suppliment reactions by using the --complimentary_mol_directory option.
 
-    This can be used in conjunction with any of the predefined reactions sets (ie ClickChem, Robust_Rxns, All_Rxns), but this requires that
+    This can be used in conjunction with any of the predefined reactions sets (ie ClickChem, robust_rxns, all_rxns), but this requires that
     all functional groups used by those reaction libraries have a .smi file contained within the custom complimentary_mol_directory
     
         

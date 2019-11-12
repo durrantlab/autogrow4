@@ -98,8 +98,8 @@ PARSER.add_argument('--protanate_step', action = 'store_true', default=False,
 
 
 # Mutation Settings
-PARSER.add_argument('--rxn_library', choices = ["ClickChem","Robust_Rxns","All_Rxns","Custom"],
-    default="ClickChem", help = 'This set of reactions to be used in Mutation. \
+PARSER.add_argument('--rxn_library', choices = ["click_chem_rxns","robust_rxns","all_rxns","Custom"],
+    default="click_chem_rxns", help = 'This set of reactions to be used in Mutation. \
     If Custom, one must also provide rxn_file Path and function_group_library path')
 PARSER.add_argument('--rxn_library_file', type=str, default="", \
     help = 'This PATH to a Custom SMIRKS reactions to use for Mutation. \

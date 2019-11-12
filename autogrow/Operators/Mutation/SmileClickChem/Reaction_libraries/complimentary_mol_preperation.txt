@@ -17,7 +17,7 @@ We populated the functional group libraries using this list.
 Libraries exceeding 50,000 ligands were reduced to a maximum size of 50,000 ligands.
 
 ###################################################################################################################
-The complimentary molecule libraries used in Robust_Rxns and ClickChem were copied to form the All_Rxns complimentary molecule library
+The complimentary molecule libraries used in robust_rxns and click_chem_rxns were copied to form the all_rxns complimentary molecule library
 ###################################################################################################################
 
 The resulting libraries (when removing redundancies) uses:

@@ -976,7 +976,7 @@ AUTOCLICKCHEM_reactions = {
         "RXN_NUM": 38
     }
     }
-# All_Rxns Reactions
+# all_rxns Reactions
 All_Rxns_reactions =     {
         "1_Epoxide_and_Alcohol":     {
             "reaction_name": "1_Epoxide_and_Alcohol",
@@ -2218,20 +2218,20 @@ def run_post_multithread(output, functional_group, output_folder, modified_pickl
 if __name__ == "__main__":
 
     rxn_set = "Robust"
-    rxn_set = "All_Rxns"
+    rxn_set = "all_rxns"
     if rxn_set=="Robust": reactions=Robust_reactions
     elif rxn_set=="AUTOCLICKCHEM": reactions=AUTOCLICKCHEM_reactions
-    elif rxn_set=="All_Rxns": reactions=All_Rxns_reactions
+    elif rxn_set=="all_rxns": reactions=All_Rxns_reactions
     else:
         raise Exception("WHICH REACTION SET?")
 
 
-    folder = "/home/jacob/Desktop/test_All_Rxns/complimentary_mol_dir/"
+    folder = "/home/jacob/Desktop/test_all_rxns/complimentary_mol_dir/"
     
-    output_folder = "/home/jacob/Desktop/test_All_Rxns/Robust_reactions_FILTERED/"
-    source_pickle_folder = "/home/jacob/Desktop/test_All_Rxns/Robust_reactions_FILTERED/source_pickled_lib/"
-    modified_pickle_folder = "/home/jacob/Desktop/test_All_Rxns/Robust_reactions_FILTERED/modified_pickled_lib/"
-    good_mols_folder = "/home/jacob/Desktop/test_All_Rxns/Robust_reactions_FILTERED/Final/"
+    output_folder = "/home/jacob/Desktop/test_all_rxns/Robust_reactions_FILTERED/"
+    source_pickle_folder = "/home/jacob/Desktop/test_all_rxns/Robust_reactions_FILTERED/source_pickled_lib/"
+    modified_pickle_folder = "/home/jacob/Desktop/test_all_rxns/Robust_reactions_FILTERED/modified_pickled_lib/"
+    good_mols_folder = "/home/jacob/Desktop/test_all_rxns/Robust_reactions_FILTERED/Final/"
 
     if os.path.exists(folder)==False:
         raise Exception("folder HERE!!")

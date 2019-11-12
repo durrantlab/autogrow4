@@ -120,7 +120,7 @@ class SmilesClickChem(object):
         This is where all the chemical reactions for SmartClickChem are retrieved. If you want to add more just add 
         a Custom set of reactions please add a folder to PATH/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/
         They should be formatted as a dictionary of dictionary using the same format as :
-            os.path.join(pwd,"Reaction_libraries","ClickChem","ClickChem_rxn_library.json")
+            os.path.join(pwd,"Reaction_libraries","click_chem_rxns","ClickChem_rxn_library.json")
 
         The reactions are written as SMARTS-reaction strings. 
         
@@ -141,12 +141,12 @@ class SmilesClickChem(object):
         pwd = os.path.dirname(__file__)
         if rxn_library_file == "":
 
-            if rxn_library == "ClickChem":
-                rxn_library_file = os.path.join(pwd,"Reaction_libraries","ClickChem","ClickChem_rxn_library.json")
-            elif rxn_library == "Robust_Rxns":
-                rxn_library_file = os.path.join(pwd, "Reaction_libraries", "Robust_Rxns", "Robust_Rxns_rxn_library.json")
-            elif rxn_library == "All_Rxns":
-                rxn_library_file = os.path.join(pwd, "Reaction_libraries", "All_Rxns", "All_Rxns_rxn_library.json")
+            if rxn_library == "click_chem_rxns":
+                rxn_library_file = os.path.join(pwd,"Reaction_libraries","click_chem_rxns","ClickChem_rxn_library.json")
+            elif rxn_library == "robust_rxns":
+                rxn_library_file = os.path.join(pwd, "Reaction_libraries", "robust_rxns", "Robust_Rxns_rxn_library.json")
+            elif rxn_library == "all_rxns":
+                rxn_library_file = os.path.join(pwd, "Reaction_libraries", "all_rxns", "All_Rxns_rxn_library.json")
             elif rxn_library == "Custom":
                 if os.path.exists(rxn_library_file) == False:
                     raise Exception("Custom rxn_library_file cannot be found. Please check the path: ", rxn_library_file)
@@ -201,7 +201,7 @@ class SmilesClickChem(object):
         This is where all the functional groups which will be used in the SmartClickChem reactions are retrieved. 
         If you want to add more just add a Custom set of reactions please add a folder to PATH/autogrow/Operators/Mutation/SmileClickChem/Reaction_libraries/
         They should be formatted as a dictionary of dictionary using the same format as :
-            os.path.join(pwd,"Reaction_libraries","ClickChem","ClickChem_functional_groups.json")
+            os.path.join(pwd,"Reaction_libraries","click_chem_rxns","ClickChem_functional_groups.json")
 
         IF YOU CHOSE TO DO A Custom REACTION SET YOU MUST PROVIDE A DICTIONARY OF ALL FUNCTIONAL GROUPS IT WILL REACT.
         IF YOU FORGET TO ADD A FUNCTIONAL GROUP TO YOUR Custom DICTIONARY, THE REACTION MAY NEVER BE UTILIZED.
@@ -224,12 +224,12 @@ class SmilesClickChem(object):
 
         if function_group_library == "":
 
-            if rxn_library == "ClickChem":
-                function_group_library = os.path.join(pwd,"Reaction_libraries","ClickChem","ClickChem_functional_groups.json")
-            elif rxn_library == "Robust_Rxns":
-                function_group_library =  os.path.join(pwd,"Reaction_libraries","Robust_Rxns","Robust_Rxns_functional_groups.json")
-            elif rxn_library == "All_Rxns":
-                function_group_library =  os.path.join(pwd,"Reaction_libraries","All_Rxns","All_Rxns_functional_groups.json")
+            if rxn_library == "click_chem_rxns":
+                function_group_library = os.path.join(pwd,"Reaction_libraries","click_chem_rxns","ClickChem_functional_groups.json")
+            elif rxn_library == "robust_rxns":
+                function_group_library =  os.path.join(pwd,"Reaction_libraries","robust_rxns","Robust_Rxns_functional_groups.json")
+            elif rxn_library == "all_rxns":
+                function_group_library =  os.path.join(pwd,"Reaction_libraries","all_rxns","All_Rxns_functional_groups.json")
             elif rxn_library == "Custom":
                 if os.path.exists(function_group_library) == False:
                     raise Exception("Custom function_group_library cannot be found. Please check the path: ", function_group_library)
@@ -308,12 +308,12 @@ class SmilesClickChem(object):
         script_dir = os.path.dirname(os.path.realpath(__file__))
 
         if complimentary_mol_dir == "":            
-            if rxn_library == "ClickChem":
-                complimentary_mol_dir = os.path.join(script_dir,"Reaction_libraries","ClickChem","complimentary_mol_dir")
-            elif rxn_library == "Robust_Rxns":
-                complimentary_mol_dir =  os.path.join(script_dir,"Reaction_libraries","Robust_Rxns","complimentary_mol_dir")
-            elif rxn_library == "All_Rxns":
-                complimentary_mol_dir =  os.path.join(script_dir,"Reaction_libraries","All_Rxns","complimentary_mol_dir")
+            if rxn_library == "click_chem_rxns":
+                complimentary_mol_dir = os.path.join(script_dir,"Reaction_libraries","click_chem_rxns","complimentary_mol_dir")
+            elif rxn_library == "robust_rxns":
+                complimentary_mol_dir =  os.path.join(script_dir,"Reaction_libraries","robust_rxns","complimentary_mol_dir")
+            elif rxn_library == "all_rxns":
+                complimentary_mol_dir =  os.path.join(script_dir,"Reaction_libraries","all_rxns","complimentary_mol_dir")
             elif rxn_library == "Custom":
                 if os.path.isdir(complimentary_mol_dir) == False:
                     raise Exception("Custom complimentary_mol_dir cannot be found. Please check the path: ", complimentary_mol_dir)

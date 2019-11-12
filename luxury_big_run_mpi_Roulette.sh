@@ -70,7 +70,7 @@ do
         --redock_elite_from_previous_gen False \
         --filter_source_compounds False \
         --use_docked_source_compounds True \
-        --rxn_library All_Rxns \
+        --rxn_library all_rxns \
         --generate_plot True \
         --multithread_mode mpi \
         >>  $outfolder_four"test_output_$i.txt" 2>>  $outfolder_four"test_error_$i.txt"
