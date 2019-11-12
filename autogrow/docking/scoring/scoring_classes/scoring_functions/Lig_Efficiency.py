@@ -10,8 +10,8 @@ import rdkit.Chem as Chem
 #Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog('rdApp.*')
 
-from autogrow.Docking.Scoring.Scoring_classes.ParentScoringClass import ParentScoring
-from autogrow.Docking.Scoring.Scoring_classes.Scoring_functions.VINA import VINA 
+from autogrow.docking.scoring.scoring_classes.ParentScoringClass import ParentScoring
+from autogrow.docking.scoring.scoring_classes.scoring_functions.VINA import VINA 
 
 class LigEfficiency(VINA):
     """

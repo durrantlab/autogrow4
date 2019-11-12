@@ -207,17 +207,17 @@ from rdkit.Chem.rdchem import BondStereo
     AutoGrow 4.0.0 comes preinstalled with two docking programs:
         -Autodock Vina 1.1.2 (packaged with executables for Linux, MacOS, and Windows)
             -Version:   1.1.2
-            -Location:  $PATH/autogrow4/autogrow/Docking/Docking_Executables/Vina/
+            -Location:  $PATH/autogrow4/autogrow/docking/docking_executables/vina/
             -Citation:  Trott, O., & Olson, A. J. (2010). AutoDock Vina: improving the speed and accuracy of docking with a new scoring function, efficient optimization, and multithreading. Journal of computational chemistry, 31(2), 455–461. doi:10.1002/jcc.21334
             -License:   Apache version 2
 
         -QuickVina2.1 (compatible with Linux OS)
             -Version:   2.1
-            -Location:  $PATH/autogrow4/autogrow/Docking/Docking_Executables/QVina02/
+            -Location:  $PATH/autogrow4/autogrow/docking/docking_executables/q_vina_02/
             -Citation:  Amr Alhossary, Stephanus Daniel Handoko, Yuguang Mu, and Chee-Keong Kwoh. Bioinformatics (2015) 31 (13): 2214-2216. [DOI:10.1093/bioinformatics/btv082](https://doi.org/10.1093/bioinformatics/btv082)
             -License:   Apache version 2
 
-    These softwares can be found within the directory $PATH/autogrow4/autogrow/Docking/Docking_Executables/
+    These softwares can be found within the directory $PATH/autogrow4/autogrow/docking/docking_executables/
 
 
     AutoGrow allows users to provide custom docking software. 
@@ -237,12 +237,12 @@ from rdkit.Chem.rdchem import BondStereo
 
     -NNScore 1: 
         -Version:   1.1
-        -Location:  $PATH/autogrow4/autogrow/Docking/Scoring/NNScore_exe/nnscore1/
+        -Location:  $PATH/autogrow4/autogrow/docking/scoring/nn_score_exe/nnscore1/
         -Citation:  NNScore: A Neural-Network-Based Scoring Function for the Characterization of Protein-Ligand Complexes. Jacob D. Durrant, J. Andrew McCammon. Journal of Chemical Information and Modeling, 2010, 50 (10), pp 1865-1871.
         -License:   GNU General Public version 3
     -NNScore 2: 
         -Version:   2.02
-        -Location:  $PATH/autogrow4/autogrow/Docking/Scoring/NNScore_exe/nnscore2/
+        -Location:  $PATH/autogrow4/autogrow/docking/scoring/nn_score_exe/nnscore2/
         -Citation:  NNScore 2.0: A Neural-Network Receptor–Ligand Scoring Function. Jacob D. Durrant, Andrew McCammon. Journal of Chemical Information and Modeling, 2011, 51 (11), pp 2897-2903.
         -License:   GNU General Public version 3
 
@@ -386,11 +386,11 @@ from rdkit.Chem.rdchem import BondStereo
     Currently AutoGrow is configured to dock using Autodock Vina and QuickVina2, but AutoGrow is not limited to these docking softwares.
     A custom script can be added to run docking using virtually any software. 
 
-    This custom code will be copied to the directory: $PATH/autogrow4/autogrow/Docking/Docking_Class/DockingClassChildren/
+    This custom code will be copied to the directory: $PATH/autogrow4/autogrow/docking/docking_class/docking_class_children/
 #####   Script formating:    
     These docking scripts use a class-based inheritance architecture which require:
     1) Docking class object must be instanced off of the ParentDocking located:
-        - $PATH/autogrow4/autogrow/Docking/Docking_Class/ParentDockClass.py
+        - $PATH/autogrow4/autogrow/docking/docking_class/ParentDockClass.py
     2) Have a unique name: class unique_name(ParentDocking)
         -unique_name can not be one of the predefined docking scripts (currently just VinaDocking and QuickVina2Docking)
     3) Must have atleast have three functions following the below formating:
@@ -466,11 +466,11 @@ from rdkit.Chem.rdchem import BondStereo
     If using a docking software other than VINA/QuickVina is being used, one may need to convert the pdb format ligands into a different format or it may take .pdb files.
     If taking a format other than .pdbqt users will need to provide a custom script to convert ligands (or simply do nothing if it takes .pdbs).
 
-    This custom code will be copied to the directory: $PATH/autogrow4/autogrow/Docking/Docking_Class/DockingClassChildren/
+    This custom code will be copied to the directory: $PATH/autogrow4/autogrow/docking/docking_class/docking_class_children/
 #####   Script formating:    
     These conversion scripts use a class-based inheritance architecture which require:
     1) Conversion class object must be instanced off of the ParentPDBQTConverter located:
-        - $PATH/autogrow4/autogrow/Docking/Docking_Class/ParentPDBQTConverter.py
+        - $PATH/autogrow4/autogrow/docking/docking_class/ParentPDBQTConverter.py
     2) Have a unique name: class unique_name(ParentPDBQTConverter)
         -unique_name can not be one of the predefined docking scripts 
         Currently files named: convert_with_mgltools.py and convert_with_obabel.py
@@ -535,11 +535,11 @@ from rdkit.Chem.rdchem import BondStereo
     
     Users can incorporate custom scoring and rescoring options into AutoGrow. 
     
-    This custom code will be copied to the directory: $PATH/autogrow4/autogrow/Docking/Scoring/Scoring_classes/
+    This custom code will be copied to the directory: $PATH/autogrow4/autogrow/docking/scoring/scoring_classes/
 #####   Script formating:    
     These conversion scripts use a class-based inheritance architecture which require:
     1) Conversion class object must be instanced off of the ParentScoringClass located:
-        - $PATH/autogrow4/autogrow/Docking/Scoring/Scoring_classes/ParentScoringClass.py
+        - $PATH/autogrow4/autogrow/docking/scoring/scoring_classes/ParentScoringClass.py
     2) Have a unique name: class unique_name(ParentScoringClass)
         -unique_name can not be one of the predefined docking scripts 
         Currently files named: VINA.py, NN1.py, NN2.py, and Lig_Efficiency.py

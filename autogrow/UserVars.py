@@ -450,11 +450,11 @@ def define_defaults():
     # Some variables which can be manually replaced but defaults 
     # point to prepackaged locations.
     ## Neural Network executable for scoring binding
-    vars['nn1_script'] = os.path.join(script_dir,"Docking","Scoring","NNScore_exe", "nnscore1", "NNScore.py")
-    # Example: vars['nn1_script'] = "/PATH/autogrow4/autogrow/Docking/Scoring/NNScore_exe/nnscore1/NNScore.py"
+    vars['nn1_script'] = os.path.join(script_dir,"docking","scoring","nn_score_exe", "nnscore1", "NNScore.py")
+    # Example: vars['nn1_script'] = "/PATH/autogrow4/autogrow/docking/scoring/nn_score_exe/nnscore1/NNScore.py"
     
-    vars['nn2_script'] =  os.path.join(script_dir,"Docking","Scoring","NNScore_exe", "nnscore2", "NNScore2.py")
-    # Example: vars['nn2_script'] = "/PATH/autogrow4/autogrow/Docking/Scoring/nnscore2/NNScore2.py"
+    vars['nn2_script'] =  os.path.join(script_dir,"docking","scoring","nn_score_exe", "nnscore2", "NNScore2.py")
+    # Example: vars['nn2_script'] = "/PATH/autogrow4/autogrow/docking/scoring/nnscore2/NNScore2.py"
 
     #### OPTIONAL FILE-LOCATION VARIABLES #### 
     # (RECOMMEND SETTING TO "" SO AUTOGROW CAN AUTOLOCATE THESE FILES)# 
@@ -1211,17 +1211,17 @@ def make_complete_children_dict(purpose_of_object):
         from autogrow.Operators.Filter.Filter_classes.ParentFilterClass import ParentFilter as parent_object
         from autogrow.Operators.Filter.Filter_classes.get_child_filter_class import get_all_subclasses
     elif purpose_of_object == "ParentPDBQTConverter":
-        import autogrow.Docking.Docking_Class.Docking_File_Conversion
-        from autogrow.Docking.Docking_Class.ParentPDBQTConverter import ParentPDBQTConverter as parent_object
-        from autogrow.Docking.Docking_Class.get_child_class import get_all_subclasses
+        import autogrow.docking.docking_class.docking_file_conversion
+        from autogrow.docking.docking_class.ParentPDBQTConverter import ParentPDBQTConverter as parent_object
+        from autogrow.docking.docking_class.get_child_class import get_all_subclasses
     elif purpose_of_object == "ParentDocking":
-        import autogrow.Docking.Docking_Class.DockingClassChildren
-        from autogrow.Docking.Docking_Class.ParentDockClass import ParentDocking as parent_object
-        from autogrow.Docking.Docking_Class.get_child_class import get_all_subclasses 
+        import autogrow.docking.docking_class.docking_class_children
+        from autogrow.docking.docking_class.ParentDockClass import ParentDocking as parent_object
+        from autogrow.docking.docking_class.get_child_class import get_all_subclasses 
     elif purpose_of_object == "ParentScoring":
-        import autogrow.Docking.Scoring.Scoring_classes.Scoring_functions
-        from autogrow.Docking.Scoring.Scoring_classes.ParentScoringClass import ParentScoring as parent_object
-        from autogrow.Docking.Docking_Class.get_child_class import get_all_subclasses
+        import autogrow.docking.scoring.scoring_classes.scoring_functions
+        from autogrow.docking.scoring.scoring_classes.ParentScoringClass import ParentScoring as parent_object
+        from autogrow.docking.docking_class.get_child_class import get_all_subclasses
 
 
     children = get_all_subclasses(parent_object)
@@ -1273,7 +1273,7 @@ def handle_custom_conversion_script(vars):
                     Conversion_script child classes Must be a list of \
                     [name_Conversion_script1, Path/to/name_Conversion_script1.py]'.format(Custom_class[1]))
             
-            new_file = os.sep.join([os.path.abspath(os.path.dirname(__file__)),"Docking","Docking_Class","Docking_File_Conversion",os.path.basename(Custom_class[0]) + ".py"]) 
+            new_file = os.sep.join([os.path.abspath(os.path.dirname(__file__)),"docking","docking_class","docking_file_conversion",os.path.basename(Custom_class[0]) + ".py"]) 
 
             if os.path.exists(new_file)==True: 
                 # File has been copied to proper dir but is not being found by the code
@@ -1286,21 +1286,21 @@ def handle_custom_conversion_script(vars):
                 print(printout)
                 raise Exception(printout)
             else:
-                # Add copy the script to the Docking_File_Conversion folder
+                # Add copy the script to the docking_file_conversion folder
                 print("copying Custom class file into the Conversion_script folder:")
                 print("\t Copying : {}\n\t New file: {}\n".format(Custom_class[1], new_file))
                 print("AutoGrow will need to be restarted once the custom script \
                     has been copied to their required location.")
                 print("This is done once so if the script needs to be changed \
                     please either remove or replace the script within the \
-                    Docking_File_Conversion folder.")
+                    docking_file_conversion folder.")
                 print("Please ensure you unit test this code properly before \
                     incorprating.")
                 copyfile(Custom_class[1], new_file)
 
 
                 printout = printout + "\n#############################################################################"
-                printout = printout + "AutoGrow has incorporated the custom files into the Docking_File_Conversion Module."
+                printout = printout + "AutoGrow has incorporated the custom files into the docking_file_conversion Module."
                 printout = printout + "AutoGrow needs to be restarted and should now be able to run custom scripts."
                 printout = printout + "Please ensure you unit test this code properly before incorprating."
                 printout = printout + "#############################################################################\n"
@@ -1350,7 +1350,7 @@ def handle_custom_docking_script(vars):
                     Docking_script child classes Must be a list of \
                     [name_Docking_script1, Path/to/name_Docking_script1.py]'.format(Custom_class[1]))
 
-            new_file = os.sep.join([os.path.abspath(os.path.dirname(__file__)),"Docking","Docking_Class","DockingClassChildren",os.path.basename(Custom_class[0]) + ".py"]) 
+            new_file = os.sep.join([os.path.abspath(os.path.dirname(__file__)),"docking","docking_class","docking_class_children",os.path.basename(Custom_class[0]) + ".py"]) 
             
             if os.path.exists(new_file)==True: # File has been copied to proper dir but is not being found by the code
                 printout = "A copy of the custom script {} has been moved \
@@ -1364,19 +1364,19 @@ def handle_custom_docking_script(vars):
 
 
             else:
-                # Add copy the script to the DockingClassChildren folder
-                print("copying Custom class file into the DockingClassChildren folder:")
+                # Add copy the script to the docking_class_children folder
+                print("copying Custom class file into the docking_class_children folder:")
                 print("\t Copying : {}\n\t New file: {}\n".format(Custom_class[1], new_file))
                 print("AutoGrow will need to be restarted once the custom \
                     script has been copied to their required location.")
                 print("This is done once so if the script needs to be changed \
                     please either remove or replace the script within the \
-                    DockingClassChildren folder.")
+                    docking_class_children folder.")
                 print("Please ensure you unit test this code properly before incorprating.")
                 copyfile(Custom_class[1], new_file)
 
                 printout = printout + "\n#############################################################################"
-                printout = printout + "AutoGrow has incorporated the custom files into the DockingClassChildren Module."
+                printout = printout + "AutoGrow has incorporated the custom files into the docking_class_children Module."
                 printout = printout + "AutoGrow needs to be restarted and should now be able to run custom scripts."
                 printout = printout + "Please ensure you unit test this code properly before incorprating."
                 printout = printout + "#############################################################################\n"
@@ -1426,7 +1426,7 @@ def handle_custom_scoring_script(vars):
                     scoring_script child classes Must be a list of \
                     [name_scoring_script1, Path/to/name_scoring_script1.py]'.format(Custom_class[1]))
 
-            new_file = os.sep.join([os.path.abspath(os.path.dirname(__file__)),"Docking","Scoring","Scoring_classes","Scoring_functions",os.path.basename(Custom_class[0]) + ".py"]) 
+            new_file = os.sep.join([os.path.abspath(os.path.dirname(__file__)),"docking","scoring","scoring_classes","scoring_functions",os.path.basename(Custom_class[0]) + ".py"]) 
 
             if os.path.exists(new_file)==True: 
                 # File has been copied to proper dir but is not being found by the code

@@ -10,8 +10,8 @@ import string
 import subprocess
 import time
 
-import autogrow.Docking.Delete_failed_mol as Delete
-from autogrow.Docking.Docking_Class.DockingClassChildren.VinaDocking import VinaDocking
+import autogrow.docking.delete_failed_mol as Delete
+from autogrow.docking.docking_class.docking_class_children.VinaDocking import VinaDocking
 
 
 class QuickVina2Docking(VinaDocking):
@@ -68,9 +68,9 @@ class QuickVina2Docking(VinaDocking):
         if vars["docking_executable"] is None: 
             # get default docking_executable for QuickVina2
             script_dir = str(os.path.dirname(os.path.realpath(__file__)))
-            docking_executable_directory = script_dir.split(os.sep + "Docking_Class")[0] + os.sep + "Docking_Executables" + os.sep
+            docking_executable_directory = script_dir.split(os.sep + "docking_class")[0] + os.sep + "docking_executables" + os.sep
     
-            docking_executable = docking_executable_directory + "QVina02{}qvina2.1".format(os.sep) 
+            docking_executable = docking_executable_directory + "q_vina_02{}qvina2.1".format(os.sep) 
             
         else:
             # if user specifies a different QuickVina executable

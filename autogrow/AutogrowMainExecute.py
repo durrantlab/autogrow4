@@ -5,10 +5,10 @@ import glob
 import sys
 import shutil
 
-import autogrow.Docking.ExecuteDocking as DockingClass
+import autogrow.docking.execute_docking as DockingClass
 import autogrow.Operators.Operations as Operations
-import autogrow.Docking.Ranking.Ranking_mol as Ranking
-import autogrow.Docking.Concatinate_files as Concatinate_files
+import autogrow.docking.ranking.ranking_mol as Ranking
+import autogrow.docking.concatinate_files as concatinate_files
 
 def main_execute(vars):    
     """
@@ -105,7 +105,7 @@ def main_execute(vars):
             # And makes it easier to transfer the data
             pdbs_folder = "{}{}PDBs{}".format(current_generation_dir, os.sep, os.sep)
             if os.path.exists(pdbs_folder)==True:
-                Concatinate_files.run_concatination(vars["parallelizer"], pdbs_folder)
+                concatinate_files.run_concatination(vars["parallelizer"], pdbs_folder)
             else:
                 print("\nNo PDB folder to concatinate and compress. This is likely generation 0 seeded with a Ranked .smi file.\n")
         print("")

@@ -3,10 +3,10 @@ import __future__
 import glob
 import copy
 
-from autogrow.Docking.Docking_Class.get_child_class import get_all_subclasses
+from autogrow.docking.docking_class.get_child_class import get_all_subclasses
 
-import autogrow.Docking.Scoring.Scoring_classes.Scoring_functions
-from autogrow.Docking.Scoring.Scoring_classes.ParentScoringClass import ParentScoring
+import autogrow.docking.scoring.scoring_classes.scoring_functions
+from autogrow.docking.scoring.scoring_classes.ParentScoringClass import ParentScoring
 
 
 def pick_run_class_dict(scoring_choice):

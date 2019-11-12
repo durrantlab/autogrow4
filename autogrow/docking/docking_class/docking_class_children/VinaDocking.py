@@ -16,11 +16,11 @@ import rdkit.Chem as Chem
 #Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog('rdApp.*')
 
-import autogrow.Docking.Delete_failed_mol as Delete
-import autogrow.Docking.Ranking.Ranking_mol as Ranking
-from autogrow.Docking.Docking_Class.ParentDockClass import ParentDocking
+import autogrow.docking.delete_failed_mol as Delete
+import autogrow.docking.ranking.ranking_mol as Ranking
+from autogrow.docking.docking_class.ParentDockClass import ParentDocking
 import autogrow.Operators.ConvertFiles.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
-import autogrow.Docking.Scoring.Execute_scoring_mol as Scoring
+import autogrow.docking.scoring.execute_scoring_mol as Scoring
 
 class VinaDocking(ParentDocking):
     """
@@ -127,15 +127,15 @@ class VinaDocking(ParentDocking):
         if vars["docking_executable"] is None: 
             # get default docking_executable for vina
             script_dir = str(os.path.dirname(os.path.realpath(__file__)))
-            docking_executable_directory = script_dir.split(os.sep + "Docking_Class")[0] + os.sep + "Docking_Executables" + os.sep
+            docking_executable_directory = script_dir.split(os.sep + "docking_class")[0] + os.sep + "docking_executables" + os.sep
 
             if sys.platform == "linux" or sys.platform == "linux2":
                 # Use linux version of Autodock Vina
-                docking_executable = docking_executable_directory + "Vina" + os.sep + "autodock_vina_1_1_2_linux_x86" + os.sep + "bin" + os.sep + "vina"
+                docking_executable = docking_executable_directory + "vina" + os.sep + "autodock_vina_1_1_2_linux_x86" + os.sep + "bin" + os.sep + "vina"
         
             elif sys.platform == "darwin":
                 # Use OS X version of Autodock Vina
-                docking_executable = docking_executable_directory + "Vina" + os.sep + "autodock_vina_1_1_2_mac" + os.sep + "bin" + os.sep + "vina"
+                docking_executable = docking_executable_directory + "vina" + os.sep + "autodock_vina_1_1_2_mac" + os.sep + "bin" + os.sep + "vina"
 
             elif sys.platform == "win32":
                 # Windows...

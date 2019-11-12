@@ -4,15 +4,15 @@ import os
 import glob
 # import sys
 # script_dir = str(os.path.dirname(os.path.realpath(__file__))).replace('unittest',"")
-# scoring_folder = script_dir + 'autogrow/Docking/Scoring/'
+# scoring_folder = script_dir + 'autogrow/docking/scoring/'
 
 # ES = __import__(scoring_folder+'Execute_Scoring.py')
 
-import autogrow.Docking.Ranking.Ranking_mol as Ranking
+import autogrow.docking.ranking.ranking_mol as Ranking
 
-import autogrow.Docking.Ranking.Selecting.Tournement_Selection as TourSel
-import autogrow.Docking.Ranking.Selecting.Roulette_Selection as RoulSel
-import autogrow.Docking.Ranking.Selecting.Rank_Selection as RankSel
+import autogrow.docking.ranking.selecting.Tournement_Selection as TourSel
+import autogrow.docking.ranking.selecting.Roulette_Selection as RoulSel
+import autogrow.docking.ranking.selecting.Rank_Selection as RankSel
 
 
 class RankingSelectorTests(unittest.TestCase):
@@ -22,7 +22,7 @@ class RankingSelectorTests(unittest.TestCase):
         """
         Setting up the test molecule.
         """
-        self.rank_file = '/home/jacob/Desktop/UnittestExample/Vina_tests/Run_5/generation_0/generation_0_ranked.smi'
+        self.rank_file = '/home/jacob/Desktop/UnittestExample/vina_tests/Run_5/generation_0/generation_0_ranked.smi'
         
         self.non_exist_file = '/home/jacob/Desktop/fake.txt'
 
@@ -36,29 +36,29 @@ class RankingSelectorTests(unittest.TestCase):
 
         self.str = '4'
         self.vars = {'filename_of_receptor': "/home/jacob/Documents/autogrow4/cdc73/3v46.pdb", 'dock_choice': 'QuickVina2Docking', \
-        'nn1_script': '/home/jacob/Documents/autogrow4/autogrow/Docking/Scoring/NNScore_exe/nnscore1/NNScore.py',\
-        'docking_executable': '/home/jacob/Documents/autogrow4/autogrow/Docking/Docking_Executables/QVina02/qvina02', 'size_y': 30.0, 'size_z': 30.0, 'rxn_library': 'ClickChem', \
+        'nn1_script': '/home/jacob/Documents/autogrow4/autogrow/docking/scoring/nn_score_exe/nnscore1/NNScore.py',\
+        'docking_executable': '/home/jacob/Documents/autogrow4/autogrow/docking/docking_executables/q_vina_02/q_vina_02', 'size_y': 30.0, 'size_z': 30.0, 'rxn_library': 'ClickChem', \
         'rxn_library_file': '', 'output_directory': '/home/jacob/Desktop/Outputfolder/Run_1/', \
         'num_generations': 2, 'top_mols_to_seed_next_generation': 1, 'scoring_function': 'VINA', \
         'root_output_folder': '/home/jacob/Desktop/Outputfolder/', 'diversity_seed_depreciation_per_gen': 1, \
         'size_x': 30.0, \
         'mgl_python': '/home/jacob/MGLTools-1.5.6/bin/pythonsh',\
-        'nn2_script': '/home/jacob/Documents/autogrow4/autogrow/Docking/Scoring/NNScore_exe/nnscore2/NNScore2.py',\
+        'nn2_script': '/home/jacob/Documents/autogrow4/autogrow/docking/scoring/nn_score_exe/nnscore2/NNScore2.py',\
         'custom_scoring_script': '', 'redock_elite_from_previous_gen': False, \
         'selector_choice': 'Roulette_Selector', 'number_of_processors': -1}
 
         self.smile_dict = {'Gen_0_Mutant_5_203493': ['COC1OC(CO)C(O)C(O)C1n1nnc(CCO)c1-c1ccc(-c2cccs2)s1', '(ZINC04530731+ZINC01529972)Gen_0_Mutant_5_203493'], 'Gen_0_Cross_452996': ['CC(=O)OCC(O)CN=[N+]=[N-]', '(ZINC44117885+ZINC34601304)Gen_0_Cross_452996'], 'ZINC13526729': ['[N-]=[N+]=NCC1OC(O)CC1O', 'ZINC13526729']}
 
-        self.pdb_folder = '/home/jacob/Desktop/UnittestExample/Vina_tests/Run_5/generation_0/PDBs/'
+        self.pdb_folder = '/home/jacob/Desktop/UnittestExample/vina_tests/Run_5/generation_0/PDBs/'
 
-        self.pdbqtvina_file = '/home/jacob/Desktop/UnittestExample/Vina_tests/Run_5/generation_0/PDBs/Gen_0_Cross_452996__1.pdbqt.vina'
+        self.pdbqtvina_file = '/home/jacob/Desktop/UnittestExample/vina_tests/Run_5/generation_0/PDBs/Gen_0_Cross_452996__1.pdbqt.vina'
 
-        self.pdbqtvina_file_fail = '/home/jacob/Desktop/UnittestExample/Vina_tests/Run_5/generation_0/PDBs/Gen_0_Cross_452996__1Fail.pdbqt.vina'
+        self.pdbqtvina_file_fail = '/home/jacob/Desktop/UnittestExample/vina_tests/Run_5/generation_0/PDBs/Gen_0_Cross_452996__1Fail.pdbqt.vina'
         self.Gen_0_Cross_452996_smile = 'CC(=O)OCC(O)CN=[N+]=[N-]'
 
-        self.nn1_file = "/home/jacob/Desktop/UnittestExample/Vina_tests/Run_5/generation_0/PDBs/Gen_0_Cross_452996__1.pdbqt.vina.nn1"
+        self.nn1_file = "/home/jacob/Desktop/UnittestExample/vina_tests/Run_5/generation_0/PDBs/Gen_0_Cross_452996__1.pdbqt.vina.nn1"
 
-        self.nn2_file = "/home/jacob/Desktop/UnittestExample/Vina_tests/Run_5/generation_0/PDBs/Gen_0_Cross_452996__1.pdbqt.nn2"
+        self.nn2_file = "/home/jacob/Desktop/UnittestExample/vina_tests/Run_5/generation_0/PDBs/Gen_0_Cross_452996__1.pdbqt.nn2"
 
     def tearDown(self):
         """

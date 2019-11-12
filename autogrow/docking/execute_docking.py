@@ -4,16 +4,16 @@ import glob
 import os
 import copy
 
-import autogrow.Docking.Delete_failed_mol as Delete
-from autogrow.Docking.Docking_Class.get_child_class import get_all_subclasses
+import autogrow.docking.delete_failed_mol as Delete
+from autogrow.docking.docking_class.get_child_class import get_all_subclasses
 
-from autogrow.Docking.Docking_Class.DockingClassChildren import *
-from autogrow.Docking.Docking_Class.ParentDockClass import ParentDocking
-# from autogrow.Docking.Docking_Class.DockingClassChildren import VinaDocking, QuickVina2Docking
+from autogrow.docking.docking_class.docking_class_children import *
+from autogrow.docking.docking_class.ParentDockClass import ParentDocking
+# from autogrow.docking.docking_class.docking_class_children import VinaDocking, QuickVina2Docking
 
-from autogrow.Docking.Docking_Class.Docking_File_Conversion import *
-from autogrow.Docking.Docking_Class.ParentPDBQTConverter import ParentPDBQTConverter
-# from autogrow.Docking.Docking_Class.Docking_File_Conversion import convert_with_obabel, convert_with_mgltools
+from autogrow.docking.docking_class.docking_file_conversion import *
+from autogrow.docking.docking_class.ParentPDBQTConverter import ParentPDBQTConverter
+# from autogrow.docking.docking_class.docking_file_conversion import convert_with_obabel, convert_with_mgltools
 
 
 def pick_docking_class_dict(dock_choice):

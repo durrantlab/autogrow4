@@ -54,7 +54,7 @@ do
         -use_lipinski_filter FALSE -use_strict_lipinski_filter TRUE -use_ghose_filter FALSE \
         -scoring_function NN1 -score_by_ligand_efficiency FALSE -maintain_core FALSE \
         -minimum_core_atoms_required 4 \
-        -vina_executable /bgfs/jdurrant/jspiegel/autogrow4/autogrow/Docking/Docking_Executables/Vina/autodock_vina_1_1_2_linux_x86/bin/vina \
+        -vina_executable /bgfs/jdurrant/jspiegel/autogrow4/autogrow/docking/docking_executables/vina/autodock_vina_1_1_2_linux_x86/bin/vina \
         -openbabel_bin_directory /ihome/crc/install/python/anaconda2.7-4.2.0/bin/ \
         -mgltools_directory $MGLTOOLS_HOME/ \
         -num_processors -1 -output_dir $outfolder \

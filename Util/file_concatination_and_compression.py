@@ -5,7 +5,7 @@ If you use the reduce_files_sizes option AutoGrow will convert concatinate and c
 all files in the PDBs directory of each generation. This is useful when doing larger runs as
 data transfer is faster and data storage is reduced when files are merged and compressed.
     -The concatination script that is run in AutoGrow 4 can be found at:
-            autogrow4/autogrow/Docking/Concatinate_files.py
+            autogrow4/autogrow/docking/concatinate_files.py
 This script will either:
     1) Return the files back to their original uncompressed and deconcatinated formating 
                 or 

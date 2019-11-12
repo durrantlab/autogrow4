@@ -11,7 +11,7 @@ import rdkit.Chem as Chem
 rdkit.RDLogger.DisableLog('rdApp.*')
 
 import autogrow.Operators.Filter.ExecuteFilters as Filter
-import autogrow.Docking.Ranking.Ranking_mol as Ranking
+import autogrow.docking.ranking.ranking_mol as Ranking
 import autogrow.Operators.Mutation.Execute_Mutations as Mutation
 import autogrow.Operators.Crossover.Execute_Crossover as Execute_Crossover
 import autogrow.Operators.ConvertFiles.Conversion_to_3D as Conversion_to_3D
