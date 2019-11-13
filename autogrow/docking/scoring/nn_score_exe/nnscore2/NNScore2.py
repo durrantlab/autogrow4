@@ -295,7 +295,7 @@ class PDB:
         atom_already_loaded = [] # going to keep track of atomname_resid_chain pairs, to make sure redundants aren't loaded. This basically
                                  # gets rid of rotomers, I think.
 
-        for t in range(0,len(lines)):
+        for t in range(0, len(lines)):
             line=lines[t]
 
             if "between atoms" in line and " A " in line:

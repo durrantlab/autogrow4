@@ -5,7 +5,7 @@ import sys
 sub_script_original = os.path.abspath("luxury_big_run_mpi_Tournement.sh")
 
 output_dir = "/bgfs/jdurrant/jspiegel/Luxury_Run/Tournement_Lux/sub_scripts/"
-if os.path.exists(output_dir)==False:
+if os.path.exists(output_dir) is False:
     os.mkdir(output_dir)
 
 for i in [1,2,3]:

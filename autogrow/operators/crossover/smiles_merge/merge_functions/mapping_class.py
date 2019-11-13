@@ -94,7 +94,7 @@ class Mapping(object):
             parent ligands which are bound to that anchor. ie) ['1B1','2B1']
         """
         return self.Is_to_Bs[i]
-    # 
+    #
 
     def locate_i(self, b):
         """
@@ -108,11 +108,11 @@ class Mapping(object):
             B-groups is bound. ie) [10001]
         """
         return self.Bs_to_Is[b]
-    # 
+    #
 
     def delete_b(self, b):
         """
-        Removes the b from Bs_to_Is and all references to b in Is_to_Bs. 
+        Removes the b from Bs_to_Is and all references to b in Is_to_Bs.
             b is a Key in Bs_to_Is. B is one or more items in Is_to_Bs.
 
         Inputs:
@@ -122,9 +122,9 @@ class Mapping(object):
 
         Is_to_modify = self.locate_i(b)
         for i in Is_to_modify:
-            blank = self.Is_to_Bs[i].remove(b) 
+            blank = self.Is_to_Bs[i].remove(b)
         del self.Bs_to_Is[b]
-    # 
+    #
 
     def delete_i(self, i):
         """
@@ -136,13 +136,13 @@ class Mapping(object):
             anchor/node/i atom to be removed from the Bs_to_Is and b in Is_to_Bs
             dicts.
         """
-        
+
         Bs_to_modify = self.locate_b(i)
         for b in Bs_to_modify:
-            self.Bs_to_Is[b].remove(i) 
+            self.Bs_to_Is[b].remove(i)
         del self.Is_to_Bs[i]
-    # 
-    
+    #
+
     def chose_b_from_i(self, i):
         """
         Chose your B from a given i. This makes the decision which B-group
@@ -260,7 +260,7 @@ class Mapping(object):
 
         # Select an B to keep
         if i in list(self.Is_to_Bs.keys()):
-            
+
             options = self.locate_b(i)
             if len(options) > 1:
                 B_x = random.choice(options)
@@ -268,7 +268,7 @@ class Mapping(object):
                 B_x = options[0]
             else:
                 return 'None'
-                
+
             list_Is = self.locate_i(B_x)
             list_Bs = []
             for x in list_Is:
@@ -279,7 +279,7 @@ class Mapping(object):
                 set(flattened)
             )  # convert list to set to list to remove redundant B's
             # delete the B's and I's
-            for b in unique_Bs:            
+            for b in unique_Bs:
                 self.delete_b(b)
 
             for x in list_Is:

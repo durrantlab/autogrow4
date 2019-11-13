@@ -46,7 +46,7 @@ def handle_mcs_align_labeling_and_cyclicbreaks(mol_1, mol_2, mcs_mol):
 
     # Set Alignment, Isotope label, and Handle breaks
     picked_alignment = pick_mcs_alignment(mol_1, mol_2, mcs_mol)
-    if picked_alignment == None:
+    if picked_alignment is None:
         return None, None, None
 
     # Isotope label the MCS core
@@ -91,7 +91,7 @@ def handle_mcs_align_labeling_and_cyclicbreaks(mol_1, mol_2, mcs_mol):
     mol_2 = renumber_to_mcs(mol_2, new_index[1])
 
     # Add correct isolabels to the core atoms. requires 1 final fake alignment
-    # tuple of range(0,len(mcs_mol.GetNumAtoms()))
+    # tuple of range(0, len(mcs_mol.GetNumAtoms()))
     final_alignment = (new_index[2], new_index[2], new_index[2])
     # Isotope label the core
     index_tuple = add_mcs_isolabels(mol_1, mol_2, mcs_mol, final_alignment)
@@ -134,16 +134,16 @@ def check_cyclic_breaks(alignment_tuple, mol_1, mol_2, core):
 
     Returns:
     :returns: rdkit.Chem.rdchem.Mol core: the original core rdkit mol returned
-        if did_a_ring_break==False
+        if did_a_ring_break is False
     :returns: tuple alignment_tuple: the unaltered input param alignment_tuple
-        returned if did_a_ring_break==False
+        returned if did_a_ring_break is False
     :returns: bool did_a_ring_break: True if the ring broke and was fixed;
         False if there were no breaks and required no modifications to be made to
         the alignment_tuple or core
     :returns: rdkit.Chem.rdchem.Mol new_core: the modified core rdkit mol
-        returned if did_a_ring_break==True
+        returned if did_a_ring_break is True
     :returns: tuple new_align_tuple: the modified alignment_tuple returned if
-        did_a_ring_break==True
+        did_a_ring_break is True
     :returns: bool None: returns 3 Nones if it failed to fix the cyclic breaks
     """
 
@@ -339,7 +339,7 @@ def find_biggest_frag(frag_mols_obj):
         for i in range(0, len(frag_mols_obj)):
             frag = frag_mols_obj[i]
             atom_count = frag.GetNumAtoms()
-            if num_atoms_max == None:
+            if num_atoms_max is None:
                 idx_of_max = i
                 num_atoms_max = atom_count
             elif num_atoms_max < atom_count:

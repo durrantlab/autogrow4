@@ -24,7 +24,7 @@ def get_usable_fomat(infile):
             parts = line.split('\t')      # split line into parts seperated by 4-spaces
 
             choice_list = []
-            for i in range(0,len(parts)):
+            for i in range(0, len(parts)):
                 choice_list.append(parts[i])
             usable_list_of_smiles.append(choice_list)
 

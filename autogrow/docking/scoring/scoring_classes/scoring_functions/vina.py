@@ -33,7 +33,7 @@ class VINA(ParentScoring):
             testing purpose
         """
 
-        if test_boot == False:
+        if test_boot is False:
             self.vars = vars
 
             self.smiles_dict = smiles_dict
@@ -141,7 +141,7 @@ class VINA(ParentScoring):
         lig_info = [ligand_short_name, basefile_strip, affinity]
 
         lig_info = self.merge_smile_info_w_affinity_info(lig_info)
-        if lig_info == None:
+        if lig_info is None:
             return None
 
         lig_info = [str(x) for x in lig_info]
@@ -180,7 +180,7 @@ class VINA(ParentScoring):
                             "REMARK Final SMILES string: ", ""
                         ).replace("\n", "")
                         break
-            if new_smiles_string == None:
+            if new_smiles_string is None:
                 # If the REMARK SECTION IS NOT THERE raise except. Avoid this
                 # if possible as rdkit can missinterpret bonds because pdbs
                 # dont specify bond types

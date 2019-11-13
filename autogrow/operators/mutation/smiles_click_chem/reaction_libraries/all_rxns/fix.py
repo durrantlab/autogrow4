@@ -17,7 +17,7 @@ with open(path, "r") as f:
             line = line.split(": ")[0] + ": {}\n".format(new_rxn_num)
             new_rxn_num = new_rxn_num + 1
             original_rxn_num = original_rxn_num + 1
-        
+
         printout = printout + line
 
 with open(new_path, "w") as f:

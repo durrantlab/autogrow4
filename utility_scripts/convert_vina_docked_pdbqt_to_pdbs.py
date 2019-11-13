@@ -44,10 +44,10 @@ def run_conversion_for_a_vina_file(vina_file, output_folder, max_num_of_poses, m
     :param float min_docking_score: Most negative docking score to be converted; float or None
     """
     
-    if os.path.exists(vina_file) == False:
+    if os.path.exists(vina_file) is False:
         raise Exception("CANT FIND FILE:",vina_file)
 
-    if os.path.exists(output_folder) == False:
+    if os.path.exists(output_folder) is False:
         raise Exception("CANT FIND outfolder:",output_folder)
 
     short_name = os.path.basename(vina_file).replace(".pdbqt.vina","")
@@ -62,12 +62,12 @@ def run_conversion_for_a_vina_file(vina_file, output_folder, max_num_of_poses, m
             if pose_number > max_num_of_poses and max_num_of_poses!= -1:
                 # break if hit max number of poses
                 break
-            if terminate_run == True:
+            if terminate_run is True:
                 break
             
             if "REMARK VINA RESULT" in line:
                 write_pose = True
-                if max_docking_score==None and min_docking_score==None:
+                if max_docking_score is None and min_docking_score is None:
                     printout_list.append(line)
                 else:
 
@@ -96,7 +96,7 @@ def run_conversion_for_a_vina_file(vina_file, output_folder, max_num_of_poses, m
                     printout_list.append(line)
 
             elif "ENDMDL" in line:
-                if write_pose == True:
+                if write_pose is True:
                     printout_list.append(line)
                 
                     # convert list of pdbqt info to .pdb format by removing the partial charge info in ATOM line 
@@ -130,7 +130,7 @@ def convert_pdbqt_to_pdb(list_of_lines):
     :returns: str printout: A string for a .pdb to write to a file
     """
     printout = ""
-    line_index_range = [x for x in range(0,61)] + [x for x in range(70,80)] 
+    line_index_range = [x for x in range(0, 61)] + [x for x in range(70,80)] 
     
     for line in list_of_lines:
         if "ATOM" in line:
@@ -180,24 +180,24 @@ def get_arguments_from_argparse(ARGS_DICT):
         raise Exception("provided output_folder must be a directory.")
 
     #  argument_handling
-    if os.path.exists(ARGS_DICT["vina_docked_pdbqt_file"]) == False:
+    if os.path.exists(ARGS_DICT["vina_docked_pdbqt_file"]) is False:
         raise Exception("provided vina_docked_pdbqt_file can not be found.")
     if ".pdbqt.vina" not in ARGS_DICT["vina_docked_pdbqt_file"].lower():
-        if os.path.isdir(vina_docked_pdbqt_file)==False:
+        if os.path.isdir(vina_docked_pdbqt_file) is False:
             raise Exception("provided vina_docked_pdbqt_file must be either a docked vina file \
             containing .pdbqt.vina in file name or a directory of docked vina files.")
         else:
             ARGS_DICT["vina_docked_pdbqt_file"] = ARGS_DICT["vina_docked_pdbqt_file"] + os.sep
         
-    if os.path.exists(ARGS_DICT["output_folder"]) == False:
+    if os.path.exists(ARGS_DICT["output_folder"]) is False:
         try:
             os.mkdir(ARGS_DICT["output_folder"])
         except:
             pass
-        if os.path.exists(ARGS_DICT["output_folder"]) == False:
+        if os.path.exists(ARGS_DICT["output_folder"]) is False:
             raise Exception("output_folder could not be made or found.")
     else:
-        if os.path.isdir(ARGS_DICT["output_folder"]) == False:
+        if os.path.isdir(ARGS_DICT["output_folder"]) is False:
             raise Exception("output_folder needs to be a directory.")
         else:
             ARGS_DICT["output_folder"] = os.path.abspath(ARGS_DICT["output_folder"]) + os.sep
@@ -276,7 +276,7 @@ min_docking_score = ARGS_DICT["min_docking_score"]
 
 
 vina_docked_pdbqt_file = ARGS_DICT["vina_docked_pdbqt_file"]
-if os.path.isfile(vina_docked_pdbqt_file) == True:
+if os.path.isfile(vina_docked_pdbqt_file) is True:
     
     run_conversion_for_a_vina_file(vina_docked_pdbqt_file, output_folder, max_num_of_poses, max_docking_score, min_docking_score)
 

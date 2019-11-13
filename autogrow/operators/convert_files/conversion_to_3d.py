@@ -1,4 +1,6 @@
-# Run file type conversions from .smi to .sdf to .pdb
+"""
+Run file type conversions from .smi to .sdf to .pdb
+"""
 import __future__
 
 import glob
@@ -48,7 +50,7 @@ class StdoutRedirection:
         """
         This will return the class self object
         and flush the print statements.
-    
+
         Returns:
         :returns: self self: class self object
         """
@@ -128,17 +130,17 @@ def convert_smi_to_sdfs_with_gypsum(vars, gen_smiles_file, smile_file_directory)
     # Make a new folder to put gypsum .smi's and json. Name folder
     # gypsum_submission_files.
     folder_path = "{}gypsum_submission_files{}".format(smile_file_directory, os.sep)
-    if os.path.exists(folder_path) == False:
+    if os.path.exists(folder_path) is False:
         os.makedirs(folder_path)
 
     # Make Output for Gypsum folder (where .sdf's go)
     gypsum_output_folder_path = "{}3D_SDFs{}".format(smile_file_directory, os.sep)
-    if os.path.exists(gypsum_output_folder_path) == False:
+    if os.path.exists(gypsum_output_folder_path) is False:
         os.makedirs(gypsum_output_folder_path)
 
     # Make a folder to put the log files into within the 3D_SDFs folder
     gypsum_log_path = "{}log{}".format(gypsum_output_folder_path, os.sep)
-    if os.path.exists(gypsum_log_path) == False:
+    if os.path.exists(gypsum_log_path) is False:
         os.makedirs(gypsum_log_path)
 
     # Make All of the json files to submit to gypsum
@@ -160,7 +162,7 @@ def convert_smi_to_sdfs_with_gypsum(vars, gen_smiles_file, smile_file_directory)
     else:
         if (
             vars["python_path"] != "python"
-            and os.path.exists(vars["python_path"]) == False
+            and os.path.exists(vars["python_path"]) is False
         ):
             printout = "python path provided was not found."
             printout = printout + "\n\t{}".format(vars["python_path"])
@@ -414,9 +416,9 @@ def run_gypsum_multiprocessing_mpi(gypsum_log_path, json_path, timeout_option,
 
     # Check if it worked if it failed return lig_id if it works return None
     did_gypsum_complete = check_gypsum_log_did_complete(log_file)
-    if did_gypsum_complete == False:
+    if did_gypsum_complete is False:
         return lig_id
-    elif did_gypsum_complete == None:
+    elif did_gypsum_complete is None:
         return lig_id
     else:
         return None
@@ -488,9 +490,9 @@ def run_gypsum_multiprocessing(gypsum_log_path, json_path, timeout_option,
         return lig_id
     # Check if it worked if it failed return lig_id if it works return None
     did_gypsum_complete = check_gypsum_log_did_complete(log_file)
-    if did_gypsum_complete == False:
+    if did_gypsum_complete is False:
         return lig_id
-    elif did_gypsum_complete == None:
+    elif did_gypsum_complete is None:
         return lig_id
     else:
         return None
@@ -519,7 +521,7 @@ def check_gypsum_log_did_complete(log_file_path):
                     ie None, False, non-chemical string...
     """
 
-    if os.path.exists(log_file_path) == False:
+    if os.path.exists(log_file_path) is False:
         return False
 
     sys.stdout.flush()
@@ -602,7 +604,7 @@ def convert_single_sdf_to_pdb(pdb_subfolder_path, sdf_file_path):
         files
     """
 
-    if os.path.exists(sdf_file_path) == True:
+    if os.path.exists(sdf_file_path) is True:
 
         file_basename = basename(sdf_file_path)
         file_basename = file_basename.split("__input1")[0]
@@ -651,10 +653,10 @@ def convert_single_sdf_to_pdb(pdb_subfolder_path, sdf_file_path):
                         # protanation and stereochem
 
                         no_H_Smiles = mols_noH[i]
-                        if no_H_Smiles == None:
+                        if no_H_Smiles is None:
                             no_H_Smiles = Chem.MolToSmiles(mol)
 
-                        if no_H_Smiles == None:
+                        if no_H_Smiles is None:
                             print("SMILES was None for: ", pdb_name)
                             printout = "REMARK Final SMILES string: {}\n".format("None")
                         elif type(no_H_Smiles) == str:

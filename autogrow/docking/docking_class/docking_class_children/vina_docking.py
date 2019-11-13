@@ -48,7 +48,7 @@ class VinaDocking(ParentDocking):
             testing purpose
         """
 
-        if test_boot == False:
+        if test_boot is False:
 
             self.vars = vars
             self.debug_mode = vars["debug_mode"]
@@ -120,7 +120,7 @@ class VinaDocking(ParentDocking):
         if did_it_Dock is False:
             # Docking failed
 
-            if smile_name == None:
+            if smile_name is None:
                 print("Missing pdb and pdbqt files for : ", pdbqt_filename)
 
             return smile_name
@@ -306,13 +306,13 @@ class VinaDocking(ParentDocking):
         print("\tDocking: {}".format(lig_pdbqt_filename))
         results = self.execute_docking_vina(torun)
 
-        if results == None or results == None or results == 256:
+        if results is None or results is None or results == 256:
             made_changes = self.replace_atoms_not_handled_by_forcefield(
                 lig_pdbqt_filename
             )
-            if made_changes == True:
+            if made_changes is True:
                 results = self.execute_docking_vina(torun)
-                if results == 256 or results == None:
+                if results == 256 or results is None:
                     print(
                         "\nLigand failed to dock after corrections: {}\n".format(
                             lig_pdbqt_filename
@@ -366,7 +366,7 @@ class VinaDocking(ParentDocking):
                             )  # x Need to remove whitespaces on both ends
                 printout_of_file = printout_of_file + line
 
-        if retry == True:
+        if retry is True:
             print(printout_info)
             with open(lig_pdbqt_filename, "w") as f:
                 f.write(printout_of_file)
@@ -431,7 +431,7 @@ class VinaDocking(ParentDocking):
         if not os.path.exists(
             pdb_file + "qt.vina"
         ):  # so this pdbqt.vina file didn't exist
-            if self.debug_mode == False:
+            if self.debug_mode is False:
                 print(
                     "Docking unsuccessful: Deleting "
                     + os.path.basename(pdb_file)
@@ -491,16 +491,16 @@ class VinaDocking(ParentDocking):
 
         # Before ranking these we need to handle Pass-Through ligands from the
         # last generation If it's current_gen_int==1 or if
-        # vars['redock_elite_from_previous_gen']==True -Both of these states
+        # vars['redock_elite_from_previous_gen'] is True -Both of these states
         # dock all ligands from the last generation so all of the pass-through
         # lig are already in the PDB's folder thus they should be accounted
-        # for in smiles_list If vars['redock_elite_from_previous_gen']==False
+        # for in smiles_list If vars['redock_elite_from_previous_gen'] is False
         # and current_gen_int != 1 - We need to append the scores form the
         # last gen to smiles_list
 
         # Only add these when we haven't already redocked the ligand
         if (
-            self.vars["redock_elite_from_previous_gen"] == False
+            self.vars["redock_elite_from_previous_gen"] is False
             and current_gen_int != 0
         ):
             # Go to previous generation folder
@@ -518,14 +518,14 @@ class VinaDocking(ParentDocking):
             # generation to do this with and sometimes it will
             if (
                 current_gen_int == 1
-                and os.path.exists(ranked_smi_file_prev_gen) == False
+                and os.path.exists(ranked_smi_file_prev_gen) is False
             ):
                 pass
             else:
                 print("Getting ligand scores from the previous generation")
 
                 # Shouldn't happen but to be safe.
-                if os.path.exists(ranked_smi_file_prev_gen) == False:
+                if os.path.exists(ranked_smi_file_prev_gen) is False:
                     raise Exception(
                         "Previous generation ranked .smi file does not exist. Check if output folder has been moved"
                     )

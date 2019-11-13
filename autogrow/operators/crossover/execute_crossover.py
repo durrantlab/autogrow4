@@ -81,7 +81,7 @@ def test_for_mcs(vars, mol_1, mol_2):
     # finding mergable ligands number of atoms in common found
     if result.numAtoms < min_number_atoms_matched:
         return None
-    if result.canceled == True:
+    if result.canceled is True:
         return None
     else:
         return result
@@ -169,7 +169,7 @@ def convert_mol_from_smiles(smiles_string):
         return None
 
     mol = MOH.try_deprotanation(mol)
-    if mol == None:
+    if mol is None:
         return False
     return mol
 
@@ -424,7 +424,7 @@ def do_crossovers_smiles_merge(vars, lig1_smile_pair, ligands_list):
                 pass_or_not = Filter.run_filter_on_just_smiles(
                     ligand_new_smiles, vars["filter_object_dict"]
                 )
-                if pass_or_not == False:
+                if pass_or_not is False:
 
                     counter = counter + 1
                 else:

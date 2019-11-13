@@ -126,7 +126,7 @@ def multiprocess_handling(vars):
             vars["multithread_mode"], vars["number_of_processors"]
         )
 
-        if vars["parallelizer"] == None:
+        if vars["parallelizer"] is None:
             printout = "EOF ERRORS FAILED TO CREATE A PARALLIZER OBJECT"
             print(printout)
             raise Exception(printout)
@@ -309,7 +309,7 @@ def check_for_required_inputs(input_params):
     )
 
     # Check filename_of_receptor exists
-    if os.path.isfile(input_params["filename_of_receptor"]) == False:
+    if os.path.isfile(input_params["filename_of_receptor"]) is False:
         raise NotImplementedError(
             "Receptor file can not be found. File must be a .PDB file."
         )
@@ -317,7 +317,7 @@ def check_for_required_inputs(input_params):
         raise NotImplementedError("filename_of_receptor must be a .PDB file.")
 
     # Check root_output_folder exists
-    if os.path.exists(input_params["root_output_folder"]) == False:
+    if os.path.exists(input_params["root_output_folder"]) is False:
         # If the output directory doesn't exist, then make ithe output
         # directory doesn't exist, then make it
         try:
@@ -328,16 +328,16 @@ def check_for_required_inputs(input_params):
                 Please manual create desired directory or check input parameters"
             )
 
-        if os.path.exists(input_params["root_output_folder"]) == False:
+        if os.path.exists(input_params["root_output_folder"]) is False:
             raise NotImplementedError("root_output_folder does not exist")
-    if os.path.isdir(input_params["root_output_folder"]) == False:
+    if os.path.isdir(input_params["root_output_folder"]) is False:
         raise NotImplementedError(
             "root_output_folder is not a directory. \
             Check your input parameters."
         )
 
     # Check source_compound_file exists
-    if os.path.isfile(input_params["source_compound_file"]) == False:
+    if os.path.isfile(input_params["source_compound_file"]) is False:
         raise NotImplementedError(
             "source_compound_file can not be found. \
             File must be a tab delineated .smi file."
@@ -349,9 +349,9 @@ def check_for_required_inputs(input_params):
         )
 
     # Check mgltools_directory exists
-    if os.path.exists(input_params["mgltools_directory"]) == False:
+    if os.path.exists(input_params["mgltools_directory"]) is False:
         raise NotImplementedError("mgltools_directory does not exist")
-    if os.path.isdir(input_params["mgltools_directory"]) == False:
+    if os.path.isdir(input_params["mgltools_directory"]) is False:
         raise NotImplementedError(
             "mgltools_directory is not a directory. \
         Check your input parameters."
@@ -725,7 +725,7 @@ def check_value_types(vars, argv):
         if type(argv[key]) != type(vars[key]):
             # Several variable default is None which means checks are
             # processed elsewhere...
-            if vars[key] == None:
+            if vars[key] is None:
                 # check argv[key] is "none" or "None"
                 if type(argv[key]) == str:
                     if argv[key].lower() == "none":
@@ -777,7 +777,7 @@ def check_value_types(vars, argv):
                     printout = printout + "Please check Autogrow documentation using -h"
                     raise IOError(printout)
             elif type(vars[key]) == bool:
-                if argv[key] == None:
+                if argv[key] is None:
                     # Do not try to handle this. May make sense.
                     continue
                 if type(argv[key]) == str:
@@ -867,7 +867,7 @@ def load_in_commandline_parameters(argv):
                 "TO USE Custom DOCKING OPTION, MUST SPECIFY THE \
                 PATH TO THE docking_executable AND THE DOCKING_CLASS"
             )
-        if os.path.exists(vars["docking_executable"]) == False:
+        if os.path.exists(vars["docking_executable"]) is False:
             raise ValueError(
                 "Custom docking_executable could not be found at:\
                 {}".format(
@@ -920,7 +920,7 @@ def load_in_commandline_parameters(argv):
                  THE PATH TO THE REACTION LIBRARY USING INPUT PARAMETER rxn_library"
             )
         else:
-            if os.path.exists(vars["rxn_library_file"]) == False:
+            if os.path.exists(vars["rxn_library_file"]) is False:
                 raise ValueError(
                     "TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY \
                     THE PATH TO THE REACTION LIBRARY USING INPUT PARAMETER rxn_library"
@@ -932,7 +932,7 @@ def load_in_commandline_parameters(argv):
                 TO THE REACTION LIBRARY USING INPUT PARAMETER function_group_library"
             )
         else:
-            if os.path.isdir(vars["complimentary_mol_directory"]) == False:
+            if os.path.isdir(vars["complimentary_mol_directory"]) is False:
                 raise ValueError(
                     "TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY THE PATH \
                     TO THE REACTION LIBRARY USING INPUT PARAMETER complimentary_mol_directory"
@@ -1135,7 +1135,7 @@ def load_in_commandline_parameters(argv):
         vars["python_path"] == "python"
     if type(vars["python_path"]) != str or vars["python_path"] == "":
         vars["python_path"] == "python"
-    if vars["python_path"] != "python" and os.path.exists(vars["python_path"]) == False:
+    if vars["python_path"] != "python" and os.path.exists(vars["python_path"]) is False:
         printout = "python path provided was not found."
         printout = printout + "\n\t{}".format(vars["python_path"])
         printout = (
@@ -1197,13 +1197,13 @@ def find_previous_runs(folder_name_path):
 def set_run_directory(root_folder_path, start_a_new_run):
     """
     Determine and make the folder for the run directory.
-        If start_a_new_run == True    Start a frest new run.
+        If start_a_new_run is True    Start a frest new run.
             -If no previous runs exist in the root_folder_path then make a new
                 folder named root_folder_path + "Run_0"
             -If there are previous runs in the root_folder_path then make a
                 new folder incremental increasing the name by 1 from the last
                 run in the same output directory.
-        If start_a_new_run == False    Find the last run folder and return that path
+        If start_a_new_run is False    Find the last run folder and return that path
             -If no previous runs exist in the root_folder_path then make a new
             folder named root_folder_path + "Run_0"
 
@@ -1224,7 +1224,7 @@ def set_run_directory(root_folder_path, start_a_new_run):
 
     last_run_number = find_previous_runs(folder_name_path)
 
-    if last_run_number == None:
+    if last_run_number is None:
         # There are no previous simulation runs in this directory
         print("There are no previous runs in this directory.")
         print("Starting a new run named Run_0.")
@@ -1235,11 +1235,11 @@ def set_run_directory(root_folder_path, start_a_new_run):
         os.makedirs(folder_path)
 
     else:
-        if start_a_new_run == False:
+        if start_a_new_run is False:
             # Continue from the last simulation run
             run_number = last_run_number
             folder_path = "{}{}{}".format(folder_name_path, last_run_number, os.sep)
-        else:  # start_a_new_run == True
+        else:  # start_a_new_run is True
             # Start a new fresh simulation
             # Make a directory for the new run by increasing run number by +1
             # from last_run_number
@@ -1378,7 +1378,7 @@ def handle_alternative_filters(vars, filter_list):
         scripts_to_copy = []
         for Custom_class in vars["alternative_filter"]:
             if Custom_class[0] not in full_children_dict.keys():
-                if os.path.exists(Custom_class[1]) == False:
+                if os.path.exists(Custom_class[1]) is False:
                     # Check that the path to the original script exists.
                     raise Exception(
                         "File can not be found for alternative_filter \
@@ -1401,7 +1401,7 @@ def handle_alternative_filters(vars, filter_list):
                     ]
                 )
 
-                if os.path.exists(new_file) == True:
+                if os.path.exists(new_file) is True:
                     # File has been copied to proper dir but is not being found by the code
                     printout = "A copy of the custom script {} has been moved \
                         to {}\n".format(
@@ -1546,7 +1546,7 @@ def handle_custom_conversion_script(vars):
         full_children_dict = make_complete_children_dict("parent_pdbqt_converter")
         Custom_class = vars["custom_conversion_script"]
         if Custom_class[0] not in full_children_dict.keys():
-            if os.path.exists(Custom_class[1]) == False:
+            if os.path.exists(Custom_class[1]) is False:
                 print(Custom_class)
                 raise Exception(
                     "File can not be found for custom_conversion_script \
@@ -1567,7 +1567,7 @@ def handle_custom_conversion_script(vars):
                 ]
             )
 
-            if os.path.exists(new_file) == True:
+            if os.path.exists(new_file) is True:
                 # File has been copied to proper dir but is not being found by the code
                 printout = "A copy of the custom script {} has been moved \
                     to {}\n".format(
@@ -1675,7 +1675,7 @@ def handle_custom_docking_script(vars):
         full_children_dict = make_complete_children_dict("ParentDocking")
         Custom_class = vars["custom_docking_script"]
         if Custom_class[0] not in full_children_dict.keys():
-            if os.path.exists(Custom_class[1]) == False:
+            if os.path.exists(Custom_class[1]) is False:
                 print(Custom_class)
                 raise Exception(
                     "File can not be found for custom_docking_script \
@@ -1697,7 +1697,7 @@ def handle_custom_docking_script(vars):
             )
 
             if (
-                os.path.exists(new_file) == True
+                os.path.exists(new_file) is True
             ):  # File has been copied to proper dir but is not being found by the code
                 printout = "A copy of the custom script {} has been moved \
                     to {}\n".format(
@@ -1805,7 +1805,7 @@ def handle_custom_scoring_script(vars):
         full_children_dict = make_complete_children_dict("ParentScoring")
         Custom_class = vars["custom_scoring_script"]
         if Custom_class[0] not in full_children_dict.keys():
-            if os.path.exists(Custom_class[1]) == False:
+            if os.path.exists(Custom_class[1]) is False:
                 print(Custom_class)
                 raise Exception(
                     "File can not be found for custom_scoring_script \
@@ -1827,7 +1827,7 @@ def handle_custom_scoring_script(vars):
                 ]
             )
 
-            if os.path.exists(new_file) == True:
+            if os.path.exists(new_file) is True:
                 # File has been copied to proper dir but is not being found by the code
                 printout = "A copy of the custom script {} has been moved to {}\n".format(
                     Custom_class[1], new_file
@@ -1906,21 +1906,21 @@ def handle_custom_dock_and_conversion_scoring_options(vars):
     master_printout = ""
     if vars["conversion_choice"] == "Custom":
         vars, need_restart, printout = handle_custom_conversion_script(vars)
-        if need_restart == True:
+        if need_restart is True:
             master_need_restart = True
             master_printout = master_printout + printout
     if vars["dock_choice"] == "Custom":
         vars, need_restart, printout = handle_custom_docking_script(vars)
-        if need_restart == True:
+        if need_restart is True:
             master_need_restart = True
             master_printout = master_printout + printout
     if vars["scoring_choice"] == "Custom":
         vars, need_restart, printout = handle_custom_scoring_script(vars)
-        if need_restart == True:
+        if need_restart is True:
             master_need_restart = True
             master_printout = master_printout + printout
 
-    if master_need_restart == True:
+    if master_need_restart is True:
         print(master_printout)
         sys.exit(
             0

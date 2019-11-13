@@ -1,3 +1,4 @@
+""" Plots AutoGrow Run"""
 import __future__
 
 import os
@@ -256,14 +257,14 @@ def run_plotter(vars, dict_of_averages, outfile):
     for key in top_fifty_dict.keys():
         if top_fifty_dict[key] == "N/A":
             print_fifty = False
-    if print_fifty == True:
+    if print_fifty is True:
         list_generations_Fifty, list_of_scores_Fifty = make_graph(top_fifty_dict)
     # print("Graphing top_fifty_dict")
     print_twenty = True
     for key in top_twenty_dict.keys():
         if top_twenty_dict[key] == "N/A":
             print_twenty = False
-    if print_twenty == True:
+    if print_twenty is True:
         list_generations_Twenty, list_of_scores_Twenty = make_graph(top_twenty_dict)
 
     # print("Graphing top_ten_dict")
@@ -277,10 +278,10 @@ def run_plotter(vars, dict_of_averages, outfile):
     ax.plot(
         list_generations_Average, list_of_scores_Average, color="b", label="Average"
     )
-    if print_fifty == True:
+    if print_fifty is True:
         ax.plot(list_generations_Fifty, list_of_scores_Fifty, color="c", label="Top 50")
 
-    if print_twenty == True:
+    if print_twenty is True:
         ax.plot(
             list_generations_Twenty, list_of_scores_Twenty, color="m", label="Top 20"
         )
@@ -321,7 +322,7 @@ def run_plotter(vars, dict_of_averages, outfile):
         5.4, -8.5, output, bbox=dict(facecolor="white", alpha=0.5), fontsize="small"
     )
 
-    # legend1 = plt.legend([lines[i].get_label()  for i in range(0,lines_leg)],loc='center left', bbox_to_anchor=(1, 0.274),fontsize='small')
+    # legend1 = plt.legend([lines[i].get_label()  for i in range(0, lines_leg)],loc='center left', bbox_to_anchor=(1, 0.274),fontsize='small')
     # legend2 = plt.legend([output],loc='center left', bbox_to_anchor=(1, 0.774),fontsize='small')
     # # help(plt.legend)
     # ax.add_artist(legend1)

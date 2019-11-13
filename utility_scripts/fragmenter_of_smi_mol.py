@@ -39,14 +39,14 @@ def get_permutations_of_rotatable_bonds_to_cut(mol, c_c_bonds_off=False):
         atom2 = mol.GetAtomWithIdx(rot_bond[1])
         atom_isos = [atom1.GetIsotope(), atom2.GetIsotope()]
         bond = mol.GetBondBetweenAtoms(rot_bond[0], rot_bond[1])
-        if bond.GetIsAromatic() == True:
+        if bond.GetIsAromatic() is True:
             continue
         # Remove any bonds including Hydrogen
         elif atom1.GetAtomicNum()==1 or atom2.GetAtomicNum()==1:
             continue
         # Remove any C-C single bonds
         elif atom1.GetAtomicNum()==6 and atom2.GetAtomicNum()==6:
-            if c_c_bonds_off==True:continue
+            if c_c_bonds_off is True:continue
             else: 
                 Rotatable_Bonds_to_frag.append(atom_isos)
 
@@ -165,7 +165,7 @@ def remove_bonds(mol, list_of_atomiso_bondsets_to_remove):
             return None
         
         new_mol = MOH.check_sanitization(new_mol)
-        if new_mol == None:
+        if new_mol is None:
             return None
     new_mol = MOH.check_sanitization(new_mol)
     if new_mol== None:
@@ -196,7 +196,7 @@ def make_list_of_all_unique_frags(fragment_list):
         frags = Chem.GetMolFrags(fragments, asMols=True, sanitizeFrags=False)
         for frag in frags:
             frag = MOH.check_sanitization(frag)
-            if frag == None:
+            if frag is None:
                 continue
 
             # Remove those under 2 atoms minumum
@@ -229,7 +229,7 @@ def make_unique_lig_id(parent_lig_name, current_lig_list):
         raise Exception("Ligand ID's to seed this must have Unique string IDs")
     parent_lig_name = parent_lig_name.replace(" ","")
     picked_name = False
-    while picked_name == False:
+    while picked_name is False:
         random_int = random.choice(range(100000,999999))
         unique_lig_id = str(parent_lig_name) + "_Frag_" + str(random_int)
         if unique_lig_id in current_lig_list:
@@ -264,7 +264,7 @@ def make_frag_list_for_one_mol(mol_info, frags_per_seed_lig, run_brics, run_frag
 
     mol = Chem.MolFromSmiles(mol_Smile, sanitize=False)
     mol = MOH.check_sanitization(mol)
-    if mol == None:
+    if mol is None:
         printout = "\nMolecule {} failed to sanitize. Could not make any fragments from it".format(mol_id)
         raise Exception(printout)
     mol_Smile = Chem.MolToSmiles(mol,isomericSmiles=True,canonical=True)
@@ -278,16 +278,16 @@ def make_frag_list_for_one_mol(mol_info, frags_per_seed_lig, run_brics, run_frag
     for bond_set_to_del in permutations_of_bonds_to_remove:
         mol_copy = copy.deepcopy(mol)
         x = remove_bonds(mol_copy, bond_set_to_del)
-        if x == None:
+        if x is None:
             continue
         fragment_list.append(x)
     
     clean_frag_list=[]
-    if run_frag == True:
+    if run_frag is True:
         clean_frag_list = make_list_of_all_unique_frags(fragment_list)
         clean_frag_list = list(set(clean_frag_list))
     
-    if run_brics==True:
+    if run_brics is True:
         mol_copy = copy.deepcopy(mol)
         bric_mols = get_brics_permutations(mol_copy, min_frag_size = 3)
         
@@ -363,7 +363,7 @@ if __name__ == "__main__":
 
         try:
             c_c_bonds_off = sys.argv[7]
-            if c_c_bonds_off==True or c_c_bonds_off=="True" or c_c_bonds_off=="true" or c_c_bonds_off==1 or c_c_bonds_off=="1":
+            if c_c_bonds_off is True or c_c_bonds_off=="True" or c_c_bonds_off=="true" or c_c_bonds_off==1 or c_c_bonds_off=="1":
                 c_c_bonds_off=True
             else:
                 c_c_bonds_off=False
@@ -389,7 +389,7 @@ if __name__ == "__main__":
     print("frags_per_seed_lig: ", frags_per_seed_lig)
     print("smi_file_name: ", smi_file_name)
     print("########")
-    if os.path.isfile(smi_file_name) == False:
+    if os.path.isfile(smi_file_name) is False:
         raise Exception("\n.SMI file not found.\n") 
     print("Importing .smi file")
 
@@ -416,7 +416,7 @@ if __name__ == "__main__":
                     print("Miss Formatted within .SMI. Line number {}".format(str(line_counter)))
                     continue
                 mol = MOH.check_sanitization(mol)
-                if mol == None:
+                if mol is None:
                     continue
                 
                 mol_Smile = Chem.MolToSmiles(mol,isomericSmiles=True,canonical=True)

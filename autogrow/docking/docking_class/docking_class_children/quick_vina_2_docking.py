@@ -38,7 +38,7 @@ class QuickVina2Docking(VinaDocking):
             testing purpose
         """
 
-        if test_boot == False:
+        if test_boot is False:
 
             self.vars = vars
             self.debug_mode = vars["debug_mode"]

@@ -1,4 +1,4 @@
-# SMILECLICK Class
+"""SMILECLICK Class"""
 import __future__
 
 import sys
@@ -183,9 +183,9 @@ class SmilesClickChem(object):
                 )
             elif rxn_library == "robust_rxns":
                 rxn_library_file = os.path.join(
-                    pwd, 
-                    "reaction_libraries", 
-                    "robust_rxns", 
+                    pwd,
+                    "reaction_libraries",
+                    "robust_rxns",
                     "Robust_Rxns_rxn_library.json"
                 )
             elif rxn_library == "all_rxns":
@@ -193,7 +193,7 @@ class SmilesClickChem(object):
                     pwd, "reaction_libraries", "all_rxns", "All_Rxns_rxn_library.json"
                     )
             elif rxn_library == "Custom":
-                if os.path.exists(rxn_library_file) == False:
+                if os.path.exists(rxn_library_file) is False:
                     raise Exception(
                         "Custom rxn_library_file cannot be found. Please check the path: ",
                         rxn_library_file,
@@ -213,12 +213,12 @@ class SmilesClickChem(object):
                 )
 
         elif type(rxn_library_file) == str:
-            if os.path.exists(rxn_library_file) == False:
+            if os.path.exists(rxn_library_file) is False:
                 raise Exception(
                     "Custom specified rxn_library_file directory can not be found"
                 )
 
-            if os.path.isfile(rxn_library_file) == False:
+            if os.path.isfile(rxn_library_file) is False:
                 raise Exception("Custom specified rxn_library_file is not a file")
 
             try:
@@ -317,7 +317,7 @@ class SmilesClickChem(object):
                     "All_Rxns_functional_groups.json",
                 )
             elif rxn_library == "Custom":
-                if os.path.exists(function_group_library) == False:
+                if os.path.exists(function_group_library) is False:
                     raise Exception(
                         "Custom function_group_library cannot be found. Please check the path: ",
                         function_group_library,
@@ -339,12 +339,12 @@ class SmilesClickChem(object):
 
         elif type(function_group_library) == str:
 
-            if os.path.exists(function_group_library) == False:
+            if os.path.exists(function_group_library) is False:
                 raise Exception(
                     "Custom specified function_group_library directory can not be found"
                 )
 
-            if os.path.isfile(function_group_library) == False:
+            if os.path.isfile(function_group_library) is False:
                 raise Exception("Custom specified function_group_library is not a file")
 
             try:
@@ -441,7 +441,7 @@ class SmilesClickChem(object):
                     "complimentary_mol_dir",
                 )
             elif rxn_library == "Custom":
-                if os.path.isdir(complimentary_mol_dir) == False:
+                if os.path.isdir(complimentary_mol_dir) is False:
                     raise Exception(
                         "Custom complimentary_mol_dir cannot be found. Please check the path: ",
                         complimentary_mol_dir,
@@ -452,7 +452,7 @@ class SmilesClickChem(object):
                 )
 
         else:
-            if os.path.isdir(complimentary_mol_dir) == False:
+            if os.path.isdir(complimentary_mol_dir) is False:
                 raise Exception(
                     "complimentary_mol_dir is not a directory. It must be a directory with .smi files containing SMILES specified by functional groups.\
                     These .smi files must be named the same as the files in the complimentary_mol_dir."
@@ -467,7 +467,7 @@ class SmilesClickChem(object):
         for group in functional_groups:
             filepath = "{}{}{}.smi".format(complimentary_mol_dir, os.sep, group)
 
-            if os.path.isfile(filepath) == True:
+            if os.path.isfile(filepath) is True:
                 complimentary_mols_dict[group] = filepath
 
             else:
@@ -685,7 +685,7 @@ class SmilesClickChem(object):
                 else:
                     continue
 
-            if contains_group == None:
+            if contains_group is None:
                 # Reaction doesn't contain a functional group found in the
                 # reactant molecule. So lets move on to the next molecule
                 tries = tries + 1
@@ -697,7 +697,7 @@ class SmilesClickChem(object):
                 substructure = Chem.MolFromSmarts(
                     self.functional_group_dict[fun_groups_in_rxn[i]]
                 )
-                if mol_deprotanated.HasSubstructMatch(substructure) == True:
+                if mol_deprotanated.HasSubstructMatch(substructure) is True:
                     mol_to_use = copy.deepcopy(mol_deprotanated)
                 else:
                     mol_to_use = copy.deepcopy(mol_reprotanated)
@@ -748,7 +748,7 @@ class SmilesClickChem(object):
                                 break
                         if (
                             reaction_product_smilestring != None
-                            and is_rxn_complete == True
+                            and is_rxn_complete is True
                         ):
                             # REACTION WORKED!
                             break
@@ -811,10 +811,10 @@ class SmilesClickChem(object):
                             # Try with deprotanated molecule rdkit to
                             # recognize for the reaction
                             comp_mol = MOH.try_deprotanation(comp_mol)
-                            if comp_mol == None:
+                            if comp_mol is None:
                                 continue
 
-                            if comp_mol.HasSubstructMatch(substructure) == True:
+                            if comp_mol.HasSubstructMatch(substructure) is True:
                                 comp_mol = comp_mol
                                 # append to ordered list
                                 list_reactant_mols.append(comp_mol)
@@ -825,10 +825,10 @@ class SmilesClickChem(object):
                                 # Try with deprotanated molecule rdkit to
                                 # recognize for the reaction
                                 comp_mol = MOH.try_deprotanation(comp_mol)
-                                if comp_mol == None:
+                                if comp_mol is None:
                                     continue
 
-                                if comp_mol.HasSubstructMatch(substructure) == True:
+                                if comp_mol.HasSubstructMatch(substructure) is True:
                                     comp_mol = comp_mol
                                     # append to ordered list
                                     list_reactant_mols.append(comp_mol)
@@ -890,7 +890,7 @@ class SmilesClickChem(object):
                             # REACTION WORKED!
                             is_rxn_complete = True
                             break
-                    if reaction_product_smilestring != None and is_rxn_complete == True:
+                    if reaction_product_smilestring != None and is_rxn_complete is True:
                         # REACTION WORKED!
                         break
                     else:
@@ -913,7 +913,7 @@ class SmilesClickChem(object):
             # RETURNS THE NEW PRODUCTS SMILESTRING, THE REACTION ID NUMBER (SO
             # ONE CAN TRACK THE MOLS LINEAGE). THE COMP_MOL ZINC DATABASE ID
             # NUMBER (IF IT WAS A RXN WITH ONLY 1 REACTANT THIS IS None)
-            if comp_mol_id == None:
+            if comp_mol_id is None:
                 zinc_database_comp_mol_names = None
             elif len(comp_mol_id) == 1:
                 zinc_database_comp_mol_names = comp_mol_id[0]
@@ -936,12 +936,12 @@ class SmilesClickChem(object):
             2) It isn't in the self.list_of_already_made_smiles
             3) It passes Filterization
         Returns the smile if it passes; returns None if it fails.
-        
+
         Inputs:
-        :param rdkit.Chem.rdchem.Mol reaction_product: an rdkit 
+        :param rdkit.Chem.rdchem.Mol reaction_product: an rdkit
             molecule to be checked.
         Returns:
-        :returns: str reaction_product_smilestring: 
+        :returns: str reaction_product_smilestring:
             this will return either a SMILES string if it is a good molecule
             or None if it can not sanitize and be cleaned
         """
@@ -984,7 +984,7 @@ class SmilesClickChem(object):
         pass_or_not = Filter.run_filter_on_just_smiles(
             reaction_product_smilestring, self.filter_object_dict
         )
-        if pass_or_not == False:
+        if pass_or_not is False:
             return None
         else:
             return reaction_product_smilestring

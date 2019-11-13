@@ -11,7 +11,7 @@ import rdkit.Chem as Chem
 rdkit.RDLogger.DisableLog("rdApp.*")
 
 from autogrow.docking.scoring.scoring_classes.parent_scoring_class import ParentScoring
-from autogrow.docking.scoring.scoring_classes.scoring_functions.vina import VINA 
+from autogrow.docking.scoring.scoring_classes.scoring_functions.vina import VINA
 
 
 class NN2(VINA):
@@ -35,7 +35,7 @@ class NN2(VINA):
             testing purpose
         """
 
-        if test_boot == False:
+        if test_boot is False:
             self.vars = vars
 
             self.smiles_dict = smiles_dict
@@ -125,11 +125,11 @@ class NN2(VINA):
         if ".nn2" not in file_path:
             if ".vina" in file_path:
                 file_path = file_path + ".nn2"
-                if os.path.exists(file_path) == False:
+                if os.path.exists(file_path) is False:
                     return None
             else:
                 return None
-        if os.path.exists(file_path) == False:
+        if os.path.exists(file_path) is False:
             return None
         # grab the index of the ligand for the score
         basefile = os.path.basename(file_path)
@@ -185,7 +185,7 @@ class NN2(VINA):
         # Obtain additional file
         lig_info = self.merge_smile_info_w_affinity_info(lig_info)
 
-        if lig_info == None:
+        if lig_info is None:
             return None
         lig_info = [str(x) for x in lig_info]
 
@@ -219,7 +219,7 @@ def run_nn_rescoring(vars, vina_output_file):
     receptor = vars["filename_of_receptor"] + "qt"
     nn2_executable = vars["nn2_script"]
     docking_executable = vars["docking_executable"]
-    if vina_output_file == None:
+    if vina_output_file is None:
         return None
 
     nn2_output = str(vina_output_file) + ".nn2"
@@ -287,7 +287,7 @@ def confirm_file_has_scoring(file_path):
         False if no score found
     """
 
-    if os.path.exists(file_path) == False:
+    if os.path.exists(file_path) is False:
         return False
 
     with open(file_path, "r") as f:

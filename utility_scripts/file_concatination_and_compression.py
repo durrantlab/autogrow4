@@ -69,7 +69,7 @@ def seperate_files(compressed_file, outfolder):
         decompressed_file = decompress_file(compressed_file)
     else:
         decompressed_file= compressed_file
-    if os.path.exists(decompressed_file) == False:
+    if os.path.exists(decompressed_file) is False:
         raise Exception("Failed to decompress the file")
 
     printout = ""
@@ -78,7 +78,7 @@ def seperate_files(compressed_file, outfolder):
     with open(decompressed_file, "r") as f:
         for line in f.readlines():
             if "$$END_FILE$$" in line:
-                if out_file != None and os.path.exists(out_file)==False:
+                if out_file != None and os.path.exists(out_file) is False:
                     with open(out_file, "w") as f:
                         f.write(printout + "\n")
                 out_file = None
@@ -101,10 +101,10 @@ def seperate_files(compressed_file, outfolder):
 
     all_are_made = True
     for f in list_of_new_files:
-        if os.path.exists(f)==False:
+        if os.path.exists(f) is False:
             print("file failed to decompress: {}".format(f))
             all_are_made = False
-    if all_are_made == True:
+    if all_are_made is True:
         torun = "rm {}".format(decompressed_file)
         os.system(torun)
 #######
@@ -122,8 +122,8 @@ def del_files(file_or_folder):
     :param str file_or_folder: the file or folder to delete
     
     """
-    if os.path.exists(file_or_folder) == True:
-        if os.path.isdir(file_or_folder) == True:
+    if os.path.exists(file_or_folder) is True:
+        if os.path.isdir(file_or_folder) is True:
             try:
                 shutil.rmtree(file_or_folder)
             except:
@@ -135,7 +135,7 @@ def del_files(file_or_folder):
                 pass
 
         # If it failed to delete try via bash command
-        if os.path.exists(file_or_folder) == True:
+        if os.path.exists(file_or_folder) is True:
             command = "rm -rf {}".format(file_or_folder)
             try:
                 os.system(command)
@@ -195,13 +195,13 @@ if __name__ == "__main__":
         print(os.path.getsize(directory))
     elif sys.argv[1] == "deconcat":
         compressed_file = sys.argv[2]
-        if os.path.exists(compressed_file)==False:
+        if os.path.exists(compressed_file) is False:
             raise Exception("File to Decompress doesn't exist")
         try:
             outfolder = sys.argv[3]
         except:
             outfolder = os.path.abspath(compressed_file.split(os.path.basename(compressed_file))[0]) + os.sep
-        if os.path.exists(outfolder)==False:
+        if os.path.exists(outfolder) is False:
             os.mkdir(outfolder)
 
         directory = os.path.abspath(compressed_file.split(os.path.basename(compressed_file))[0]) + os.sep

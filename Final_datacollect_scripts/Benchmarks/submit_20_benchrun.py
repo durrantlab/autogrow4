@@ -4,10 +4,10 @@ import os
 file_path = "/bgfs/jdurrant/jspiegel/autogrow4/Final_datacollect_scripts/Benchmarks/submit_bench3v4.sh"
 out_folder = "/bgfs/jdurrant/jspiegel/temp_submits/"
 
-if os.path.exists(out_folder) == False:
+if os.path.exists(out_folder) is False:
     os.mkdir(out_folder)
 
-for x in range(0,20):
+for x in range(0, 20):
     os.system("sleep 2")
     print("")
     printout = ""

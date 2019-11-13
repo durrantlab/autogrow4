@@ -9,14 +9,14 @@ def get_folders():
     script_dir = str(os.path.dirname(os.path.realpath(__file__)))
                 
 
-    folders_all_list = [x for x in glob.glob(script_dir+"/*/") if os.path.isdir(x)==True]
+    folders_all_list = [x for x in glob.glob(script_dir+"/*/") if os.path.isdir(x) is True]
     bottom_dir = False
     new_folders = copy.deepcopy(folders_all_list)
 
-    while bottom_dir ==False:
+    while bottom_dir is False:
         temp = []
         for folder in new_folders:
-            sub_list = [x for x in glob.glob(folder+"/*/") if os.path.isdir(x)==True]
+            sub_list = [x for x in glob.glob(folder+"/*/") if os.path.isdir(x) is True]
             temp.extend(sub_list)
         
         folders_all_list.extend(temp)

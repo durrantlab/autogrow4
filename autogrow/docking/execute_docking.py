@@ -112,7 +112,7 @@ def run_docking_common(vars, current_gen_int, current_generation_dir,
         temp_vars, receptor, file_conversion_class_object, test_boot=False
     )
 
-    if vars["docking_executable"] == None:
+    if vars["docking_executable"] is None:
         docking_executable = docking_object.get_docking_executable_file(temp_vars)
         vars["docking_executable"] = docking_executable
 

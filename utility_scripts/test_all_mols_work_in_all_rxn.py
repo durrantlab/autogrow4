@@ -1949,7 +1949,7 @@ def dothing(file):
     if len(smile_list)<50 or len(zinc_list)<50:
         print("FAIL NO LIGANDS!!!!!!!")
         raise Exception("FAIL NO LIGANDS!!!!!!!")
-    job_input = [[smile_list[i], zinc_list[i]]  for i in range(0,len(smile_list))]
+    job_input = [[smile_list[i], zinc_list[i]]  for i in range(0, len(smile_list))]
         
     output = mp.multi_threading(job_input, num_processors,  dothing_to_mol)
 
@@ -1959,7 +1959,7 @@ def dothing(file):
 
     else:
         for i in output:
-            if i==None:
+            if i is None:
                 continue
             else:
                 print(i)
@@ -2005,7 +2005,7 @@ def get_mols(file_name):
             continue
     print("Multithread testing: ", file_name)
     print("      len multithread:", len(job_input))
-    # job_input = [[smile_list[i], zinc_list[i]] for i in range(0,len(smile_list))]
+    # job_input = [[smile_list[i], zinc_list[i]] for i in range(0, len(smile_list))]
     output = mp.multi_threading(job_input, num_processors,  dothing_to_mol)
 
     mol_dic = {}
@@ -2018,13 +2018,13 @@ def get_mols(file_name):
 def conduct_reaction_one(mol_set, rxn, sub, substructure_from_rxn):
     mol = mol_set[2]
 
-    if mol.HasSubstructMatch(sub) == False:
+    if mol.HasSubstructMatch(sub) is False:
         mol = Chem.RemoveHs(mol)   
-        if mol.HasSubstructMatch(sub) == False: 
+        if mol.HasSubstructMatch(sub) is False: 
             return ["Missing", mol_set]
-    if mol.HasSubstructMatch(substructure_from_rxn) == False:
+    if mol.HasSubstructMatch(substructure_from_rxn) is False:
         mol = Chem.RemoveHs(mol)   
-        if mol.HasSubstructMatch(substructure_from_rxn) == False: 
+        if mol.HasSubstructMatch(substructure_from_rxn) is False: 
             return ["Missing", mol_set]
 
     try:
@@ -2036,17 +2036,17 @@ def conduct_reaction_one(mol_set, rxn, sub, substructure_from_rxn):
 def conduct_reaction_two_mol2control(mol_set, mol_2, rxn, sub_1, substructure_from_rxn):
 
     mol_1 = mol_set[2]
-    if mol_1.HasSubstructMatch(sub_1) == False:
+    if mol_1.HasSubstructMatch(sub_1) is False:
         mol_1 = Chem.RemoveHs(mol_1)   
-        if mol_1.HasSubstructMatch(sub_1) == False: 
+        if mol_1.HasSubstructMatch(sub_1) is False: 
             mol_1 = Chem.AddHs(mol_1)   
-            if mol_1.HasSubstructMatch(sub_1) == False: 
+            if mol_1.HasSubstructMatch(sub_1) is False: 
                 return ["Missing", mol_set]
-    if mol_1.HasSubstructMatch(substructure_from_rxn) == False:
+    if mol_1.HasSubstructMatch(substructure_from_rxn) is False:
         mol_1 = Chem.RemoveHs(mol_1)   
-        if mol_1.HasSubstructMatch(substructure_from_rxn) == False: 
+        if mol_1.HasSubstructMatch(substructure_from_rxn) is False: 
             mol_1 = Chem.AddHs(mol_1)   
-            if mol_1.HasSubstructMatch(substructure_from_rxn) == False: 
+            if mol_1.HasSubstructMatch(substructure_from_rxn) is False: 
                 return ["Missing", mol_set]
     try:
         rxn.RunReactants((mol_1, mol_2))[0][0]
@@ -2062,13 +2062,13 @@ def conduct_reaction_two_mol2control(mol_set, mol_2, rxn, sub_1, substructure_fr
 def conduct_reaction_two_mol1control(mol_set, mol_1, rxn, sub_2, substructure_from_rxn):
     mol_2 = mol_set[2]
 
-    if mol_2.HasSubstructMatch(sub_2) == False:
+    if mol_2.HasSubstructMatch(sub_2) is False:
         mol_2 = Chem.RemoveHs(mol_2)   
-        if mol_2.HasSubstructMatch(sub_2) == False: 
+        if mol_2.HasSubstructMatch(sub_2) is False: 
             return ["Missing", mol_set]
-    if mol_2.HasSubstructMatch(substructure_from_rxn) == False:
+    if mol_2.HasSubstructMatch(substructure_from_rxn) is False:
         mol_2 = Chem.RemoveHs(mol_2)   
-        if mol_2.HasSubstructMatch(substructure_from_rxn) == False: 
+        if mol_2.HasSubstructMatch(substructure_from_rxn) is False: 
             return ["Missing", mol_set]
             
     try:
@@ -2087,7 +2087,7 @@ def write_to_badmol_library(missing_substructure,failed_reaction, output_folder,
 
     # missing_substructure
     missing_sub_folder = output_folder + "missing_sub/"
-    if os.path.isdir(missing_sub_folder) ==False:
+    if os.path.isdir(missing_sub_folder) is False:
         os.makedirs(missing_sub_folder)
     missing_sub_file = missing_sub_folder + functional_group_name + ".smi"
     printout = ""
@@ -2095,7 +2095,7 @@ def write_to_badmol_library(missing_substructure,failed_reaction, output_folder,
         temp_list = [missing_mol[1][0],missing_mol[1][1]]
         mol_info = "\t".join(temp_list)
         printout = printout + mol_info + "\n"
-    if os.path.exists(missing_sub_file)==True:
+    if os.path.exists(missing_sub_file) is True:
         with open(missing_sub_file, "a") as f:
             f.write(printout) 
     else:
@@ -2105,7 +2105,7 @@ def write_to_badmol_library(missing_substructure,failed_reaction, output_folder,
     # failed_reaction
     printout = ""
     failed_reaction_folder = output_folder + "failed_reaction/"
-    if os.path.isdir(failed_reaction_folder) ==False:
+    if os.path.isdir(failed_reaction_folder) is False:
         os.makedirs(failed_reaction_folder)
     failed_reaction_file = failed_reaction_folder + functional_group_name + ".smi"
 
@@ -2114,7 +2114,7 @@ def write_to_badmol_library(missing_substructure,failed_reaction, output_folder,
         mol_info = "\t".join(temp_list)
         printout = printout + mol_info + "\n"
         
-    if os.path.exists(failed_reaction_file)==True:
+    if os.path.exists(failed_reaction_file) is True:
         with open(failed_reaction_file, "a") as f:
             f.write(printout) 
     else:
@@ -2179,8 +2179,8 @@ def run_post_multithread(output, functional_group, output_folder, modified_pickl
     if NOT IN LIST RETURN zinc_id
     """
     missing_substructure = [x for x in output if x[0]=="Missing"]
-    failed_reaction = [x for x in output if x[0]==False]
-    passed_reaction = [x[1] for x in output if x[0]==True]
+    failed_reaction = [x for x in output if x[0] is False]
+    passed_reaction = [x[1] for x in output if x[0] is True]
     output = []
     print("            {} ligands are missing_substructure.".format(len(missing_substructure)))
     print("            {} ligands failed reaction.".format(len(failed_reaction)))
@@ -2233,17 +2233,17 @@ if __name__ == "__main__":
     modified_pickle_folder = "/home/jacob/Desktop/test_all_rxns/Robust_reactions_FILTERED/modified_pickled_lib/"
     good_mols_folder = "/home/jacob/Desktop/test_all_rxns/Robust_reactions_FILTERED/Final/"
 
-    if os.path.exists(folder)==False:
+    if os.path.exists(folder) is False:
         raise Exception("folder HERE!!")
 
-    if os.path.exists(output_folder)==False:
+    if os.path.exists(output_folder) is False:
         os.mkdir(output_folder)
 
-    if os.path.exists(source_pickle_folder)==False:
+    if os.path.exists(source_pickle_folder) is False:
         os.mkdir(source_pickle_folder)
-    if os.path.exists(modified_pickle_folder)==False:
+    if os.path.exists(modified_pickle_folder) is False:
         os.mkdir(modified_pickle_folder)
-    if os.path.exists(good_mols_folder)==False:
+    if os.path.exists(good_mols_folder) is False:
         os.mkdir(good_mols_folder)
 
     
@@ -2261,7 +2261,7 @@ if __name__ == "__main__":
         # # If so lets use this
 
         modified_pickle_file = modified_pickle_folder + name+"_pickle"
-        if os.path.exists(modified_pickle_file)==True:
+        if os.path.exists(modified_pickle_file) is True:
             pickled_file_dictionary[name] = modified_pickle_file
             modified_pickle_file = None
         # If no pre-modified pickle file exists lets check if there is a pickled version of the source file.
@@ -2271,7 +2271,7 @@ if __name__ == "__main__":
             # print(temp_pickle_name)
             pickled_file_dictionary[name] = temp_pickle_name
             
-            if os.path.exists(temp_pickle_name)==True:
+            if os.path.exists(temp_pickle_name) is True:
                 # print("pickled version Already Exists use this")
                 temp_pickle_name = None
                 continue
@@ -2325,7 +2325,7 @@ if __name__ == "__main__":
 
             substructure = Chem.MolFromSmarts(group_smarts[0])
             substructure_from_rxn = Chem.MolFromSmarts(reaction_string_split)
-            job_input = tuple([tuple([mols[i], rxn, substructure, substructure_from_rxn]) for i in range(0,len(mols))])
+            job_input = tuple([tuple([mols[i], rxn, substructure, substructure_from_rxn]) for i in range(0, len(mols))])
             mols = []
             substructure = None
             rxn = None
@@ -2353,13 +2353,13 @@ if __name__ == "__main__":
 
             control_mol = Chem.MolFromSmiles(example_rxn_reactants[1])
             sub_control = Chem.MolFromSmarts(group_smarts[1])
-            if control_mol.HasSubstructMatch(sub_control) == False:
+            if control_mol.HasSubstructMatch(sub_control) is False:
                 control_mol = Chem.AddHs(control_mol)
-                if control_mol == None:
+                if control_mol is None:
                     print("THIS SHOULDNT HAPPEN {}".format(reaction_string))
                     
                     raise Exception("THIS SHOULDNT HAPPEN")
-                if control_mol.HasSubstructMatch(sub_control) == False:
+                if control_mol.HasSubstructMatch(sub_control) is False:
                     print("THIS SHOULDNT HAPPEN 2 {}".format(reaction_string))
                     raise Exception("THIS SHOULDNT HAPPEN 2")
                 else:
@@ -2372,7 +2372,7 @@ if __name__ == "__main__":
             
             substructure = Chem.MolFromSmarts(group_smarts[0])
             substructure_from_rxn = Chem.MolFromSmarts(reaction_string_split[0])
-            job_input = tuple([tuple([mols[i], control_mol, rxn, substructure,substructure_from_rxn]) for i in range(0,len(mols))])
+            job_input = tuple([tuple([mols[i], control_mol, rxn, substructure,substructure_from_rxn]) for i in range(0, len(mols))])
             mols_dict = {}
             mols = []
             substructure = None
@@ -2398,12 +2398,12 @@ if __name__ == "__main__":
 
             control_mol = Chem.MolFromSmiles(example_rxn_reactants[0])
             sub_control = Chem.MolFromSmarts(group_smarts[0])
-            if control_mol.HasSubstructMatch(sub_control) == False:
+            if control_mol.HasSubstructMatch(sub_control) is False:
                 control_mol = Chem.AddHs(control_mol)
-                if control_mol == None:
+                if control_mol is None:
                     print("THIS SHOULDNT HAPPEN {}".format(reaction_string))
                     raise Exception("THIS SHOULDNT HAPPEN")
-                if control_mol.HasSubstructMatch(sub_control) == False:
+                if control_mol.HasSubstructMatch(sub_control) is False:
                     print("THIS SHOULDNT HAPPEN 2 {}".format(reaction_string))
                     raise Exception("THIS SHOULDNT HAPPEN 2")
                 else:
@@ -2419,7 +2419,7 @@ if __name__ == "__main__":
             substructure_from_rxn = Chem.MolFromSmarts(reaction_string_split[1])
 
             # mol_set, mol_1, rxn, sub_2, substructure_from_rxn
-            job_input = tuple([tuple([mols[i], control_mol, rxn, substructure, substructure_from_rxn]) for i in range(0,len(mols))])
+            job_input = tuple([tuple([mols[i], control_mol, rxn, substructure, substructure_from_rxn]) for i in range(0, len(mols))])
             mols = None
             substructure = None
             rxn = None
@@ -2443,7 +2443,7 @@ if __name__ == "__main__":
     print("Finished Testing Reactions!!!")
 
     # Save Final sets
-    if os.path.isdir(good_mols_folder) == False:
+    if os.path.isdir(good_mols_folder) is False:
         os.makedirs(good_mols_folder)
 
 

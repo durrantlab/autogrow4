@@ -223,7 +223,7 @@ def get_usable_fomat(infile):
     # IMPORT SMILES FROM THE PREVIOUS GENERATION
     usable_list_of_smiles = []
 
-    if os.path.exists(infile) == False:
+    if os.path.exists(infile) is False:
         print("\nFile of Source compounds does not exist: {}\n".format(infile))
         raise Exception("File of Source compounds does not exist")
 

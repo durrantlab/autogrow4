@@ -46,7 +46,7 @@ def get_average_score_per_gen(infolder, folder_list):
                     parts = line.split('\t')      # split line into parts seperated by 4-spaces
 
                     choice_list = []
-                    for i in range(0,len(parts)):
+                    for i in range(0, len(parts)):
                         choice_list.append(parts[i])
 
                     
@@ -60,7 +60,7 @@ def get_average_score_per_gen(infolder, folder_list):
 
     average_affinity_dict = {}
 
-    for i in range(0,len(average_score_list)):
+    for i in range(0, len(average_score_list)):
         gen_name = "generation_{}".format(i)
         average_affinity_dict[gen_name] = average_score_list[i]
 
@@ -90,7 +90,7 @@ def get_average_top_score_per_gen(infolder, folder_list, top_score_per_gen):
                         parts = line.split('\t')      # split line into parts seperated by 4-spaces
 
                         choice_list = []
-                        for i in range(0,len(parts)):
+                        for i in range(0, len(parts)):
                             choice_list.append(parts[i])
 
                         gen_affinity_sum = gen_affinity_sum + float(choice_list[-2])
@@ -104,7 +104,7 @@ def get_average_top_score_per_gen(infolder, folder_list, top_score_per_gen):
     print("out of for loop")
 
     average_affinity_dict = {}
-    for i in range(0,len(average_score_list)):
+    for i in range(0, len(average_score_list)):
         gen_name = "generation_{}".format(i)
         average_affinity_dict[gen_name] = average_score_list[i]
 

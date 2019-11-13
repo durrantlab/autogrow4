@@ -100,20 +100,20 @@ def get_arguments_from_argparse(ARGS_DICT):
         raise Exception("provided output_folder must be a directory.")
 
     #  argument_handling
-    if os.path.exists(ARGS_DICT["source_folder"]) == False or os.path.isdir(ARGS_DICT["source_folder"])==False:
+    if os.path.exists(ARGS_DICT["source_folder"]) is False or os.path.isdir(ARGS_DICT["source_folder"]) is False:
         raise Exception("provided source folder can not be found or is not a directory.")
     else:
         ARGS_DICT["source_folder"] = os.path.abspath(ARGS_DICT["source_folder"]) + os.sep
         
-    if os.path.exists(ARGS_DICT["output_folder"]) == False:
+    if os.path.exists(ARGS_DICT["output_folder"]) is False:
         try:
             os.mkdir(ARGS_DICT["output_folder"])
         except:
             pass
-        if os.path.exists(ARGS_DICT["output_folder"]) == False:
+        if os.path.exists(ARGS_DICT["output_folder"]) is False:
             raise Exception("output_folder could not be made or found.")
     else:
-        if os.path.isdir(ARGS_DICT["output_folder"]) == False:
+        if os.path.isdir(ARGS_DICT["output_folder"]) is False:
             raise Exception("output_folder needs to be a directory.")
         else:
             ARGS_DICT["output_folder"] = os.path.abspath(ARGS_DICT["output_folder"]) + os.sep

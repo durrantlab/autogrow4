@@ -1,3 +1,8 @@
+"""
+Top level for running AutoGrow.
+Runs all population generation (operations) and docking.
+Runs plotting at end.
+"""
 import __future__
 
 import os
@@ -7,7 +12,6 @@ import shutil
 
 import autogrow.docking.execute_docking as DockingClass
 import autogrow.operators.operations as operations
-import autogrow.docking.ranking.ranking_mol as Ranking
 import autogrow.docking.concatinate_files as concatinate_files
 
 def main_execute(vars):
@@ -20,14 +24,15 @@ def main_execute(vars):
     """
 
     # Unpack necessary variables
-    output_directory = vars["output_directory"] # This is the directory for the run within the root output folder
+    # output_directory is the root output folder for the run
+    output_directory = vars["output_directory"]
     num_gens_to_make = vars["num_generations"]
 
     # Determine what was the last completed generation in the Run directory
     last_generation = determine_current_gen(output_directory)
-    if last_generation == None:
+    if last_generation is None:
         # Check to see if there's a Run 0 based on the seed.
-        if vars["use_docked_source_compounds"] == True:
+        if vars["use_docked_source_compounds"] is True:
             # This will assess and rank the source compounds prior to
             # generation 1. Thus using the source compounds as a generation 0
             starting_generation_num = 0
@@ -59,18 +64,20 @@ def main_execute(vars):
         print(current_generation_dir)
         sys.stdout.flush()
 
-        if current_generation_number == 0 and vars["use_docked_source_compounds"] == True:
-            if os.path.exists(current_generation_dir + os.sep + "generation_0_ranked.smi") == True:
+        if current_generation_number == 0 and vars["use_docked_source_compounds"] is True:
+            if os.path.exists(current_generation_dir + os.sep + "generation_0_ranked.smi") is True:
                 continue
 
             already_docked, smile_file_new_gen, new_gen_ligands_list = operations.populate_generation_zero(vars, generation_num=0)
             sys.stdout.flush()
 
-            if already_docked == False:
+            if already_docked is False:
                 # Run file conversions of PDB to docking specific file type
                 # and Begin Docking unweighted_ranked_smile_file is the file
                 # name where the unweighted ranked but score .smi file resides
-                unweighted_ranked_smile_file = DockingClass.run_docking_common(vars, current_generation_number, current_generation_dir, smile_file_new_gen)
+                unweighted_ranked_smile_file = DockingClass.run_docking_common(
+                    vars, current_generation_number,
+                    current_generation_dir, smile_file_new_gen)
 
         else:
             smile_file_new_gen, new_gen_ligands_list = operations.populate_generation(vars, current_generation_number)
@@ -88,28 +95,28 @@ def main_execute(vars):
             unweighted_ranked_smile_file = DockingClass.run_docking_common(vars, current_generation_number, current_generation_dir, smile_file_new_gen)
 
         # Delete all temporary files; Skip if in Debugging Mode
-        if vars["debug_mode"] == False:
+        if vars["debug_mode"] is False:
             print("Deleting temporary files and directories")
             files_to_del = []
             folders_to_del = ["{}{}3D_SDFs{}".format(current_generation_dir, os.sep, os.sep), "{}{}3D_SDFs{}log{}".format(current_generation_dir, os.sep, os.sep, os.sep), "{}{}gypsum_submission_files{}".format(current_generation_dir, os.sep, os.sep)]
             for folder in folders_to_del:
-                if os.path.exists(folder) == False:
+                if os.path.exists(folder) is False:
                     continue
                 files_to_del.extend(glob.glob(folder+"*"))
 
-            job_input = tuple([tuple([x]) for x in files_to_del if os.path.isfile(x)==True])
+            job_input = tuple([tuple([x]) for x in files_to_del if os.path.isfile(x) is True])
             vars["parallelizer"].run(job_input, delete_temporary_files_and_folders)
             # Delete Folders in an ordered manor incase folders are nested
-            for i in range(0,len(folders_to_del)):
+            for i in range(0, len(folders_to_del)):
                 delete_temporary_files_and_folders(folders_to_del[i])
 
         sys.stdout.flush()
-        if vars["reduce_files_sizes"] == True:
+        if vars["reduce_files_sizes"] is True:
             # Reduce the files in the PDBs folder to a single compiled file.
             # This reduces the data size And makes it easier to transfer the
             # data
             pdbs_folder = "{}{}PDBs{}".format(current_generation_dir, os.sep, os.sep)
-            if os.path.exists(pdbs_folder)==True:
+            if os.path.exists(pdbs_folder) is True:
                 concatinate_files.run_concatination(vars["parallelizer"], pdbs_folder)
             else:
                 print("\nNo PDB folder to concatinate and compress. This is likely generation 0 seeded with a Ranked .smi file.\n")
@@ -118,14 +125,14 @@ def main_execute(vars):
 
         sys.stdout.flush()
 
-    if vars["generate_plot"] == True:
+    if vars["generate_plot"] is True:
         matplotlib_is_callable = False
         try:
             import matplotlib
             matplotlib_is_callable = True
         except:
             matplotlib_is_callable = False
-        if matplotlib_is_callable == False:
+        if matplotlib_is_callable is False:
             print("Can not make figure as matplotlib is not installed")
         else:
             print("plotting")
@@ -176,44 +183,42 @@ def determine_current_gen(output_directory):
                             Please check that the Run folder that there is something to continue off of.")
 
         last_gen_number = find_last_generation(folder_path_gen)
-        if last_gen_number == None:
+        if last_gen_number is None:
             # There are no previous runs in this directory
             return None
 
-        else:
-            # A previous run exists. The number of the last run.
-            folder_path = "{}{}".format(folder_path_gen, last_gen_number)
+        # A previous run exists. The number of the last run.
+        folder_path = "{}{}".format(folder_path_gen, last_gen_number)
 
-            is_completed = determine_if_gen_completed(folder_path, last_gen_number)
+        is_completed = determine_if_gen_completed(folder_path, last_gen_number)
 
-            if is_completed == True:
-                # The last generation (last_gen_number) completed and we will
-                # continue our run from that
-                return last_gen_number
+        if is_completed is True:
+            # The last generation (last_gen_number) completed and we will
+            # continue our run from that
+            return last_gen_number
 
+        # The last generation in the folder crashed before completing.
+        # So we will rename the directory by appending _FAILED to the
+        # folder name
+
+        printout = "Generation {} in {} failed in the previous simulation.".format(last_gen_number, folder_path)
+        print(printout)
+
+        counter = 0
+        dir_exists = True
+        while dir_exists is True:
+            failed_folder_rename = "{}_FAILED".format(folder_path)
+            failed_folder_rename_count = "{}_{}".format(failed_folder_rename, counter)
+
+            if os.path.isdir(failed_folder_rename_count) is True:
+                counter = counter + 1
             else:
-                # The last generation in the folder crashed before completing.
-                # So we will rename the directory by appending _FAILED to the
-                # folder name
+                dir_exists = False
 
-                printout = "Generation {} in {} failed in the previous simulation.".format(last_gen_number,folder_path)
-                print(printout)
-
-                counter = 0
-                dir_exists = True
-                while dir_exists == True:
-                    failed_folder_rename = "{}_FAILED".format(folder_path)
-                    failed_folder_rename_count = "{}_{}".format(failed_folder_rename,counter)
-
-                    if os.path.isdir(failed_folder_rename_count) == True:
-                        counter = counter + 1
-                    else:
-                        dir_exists = False
-
-                os.rename(folder_path, failed_folder_rename_count)
-                printout = "Renaming folder: {} \
-                            to: {}".format(folder_path,failed_folder_rename)
-                print(printout)
+        os.rename(folder_path, failed_folder_rename_count)
+        printout = "Renaming folder: {} \
+                    to: {}".format(folder_path, failed_folder_rename)
+        print(printout)
 #
 
 def find_last_generation(folder_path_string_no_gen):
@@ -251,15 +256,16 @@ def find_last_generation(folder_path_string_no_gen):
         # Check to see if there's a Run 0 based on the seed.
         i = 0
         folder_path = "{}{}{}".format(folder_path_string_no_gen, i, os.sep)
-        if os.path.exists(folder_path)==False:
+        if os.path.exists(folder_path) is False:
             return None
 
         # There are no previous runs in this directory
         last_gen_number = None
-        return None
+
     else:
         last_gen_number = i - 1
-        return last_gen_number
+
+    return last_gen_number
 #
 
 def determine_if_gen_completed(gen_dir_path, gen_number):
@@ -284,10 +290,7 @@ def determine_if_gen_completed(gen_dir_path, gen_number):
     ranked_file_name = "generation_{}_ranked.smi".format(gen_number)
     file_path = "{}{}{}".format(gen_dir_path, os.sep, ranked_file_name)
 
-    if os.path.isfile(file_path) == True:
-        return True
-    else:
-        return False
+    return os.path.isfile(file_path)
 #
 
 def delete_temporary_files_and_folders(file_or_folder):
@@ -298,8 +301,8 @@ def delete_temporary_files_and_folders(file_or_folder):
     :param str file_or_folder: the file or folder to delete
 
     """
-    if os.path.exists(file_or_folder) == True:
-        if os.path.isdir(file_or_folder) == True:
+    if os.path.exists(file_or_folder) is True:
+        if os.path.isdir(file_or_folder) is True:
             try:
                 shutil.rmtree(file_or_folder)
             except:
@@ -311,7 +314,7 @@ def delete_temporary_files_and_folders(file_or_folder):
                 pass
 
         # If it failed to delete try via bash command
-        if os.path.exists(file_or_folder) == True:
+        if os.path.exists(file_or_folder) is True:
             command = "rm -rf {}".format(file_or_folder)
             try:
                 os.system(command)

@@ -636,7 +636,7 @@ for k, v in args_dict.items():
     if v is None:
         del INPUTS[k]
 
-if args_dict["cache_prerun"] == False:
+if args_dict["cache_prerun"] is False:
     # load the commandline parameters
     from autogrow.user_vars import load_in_commandline_parameters
 

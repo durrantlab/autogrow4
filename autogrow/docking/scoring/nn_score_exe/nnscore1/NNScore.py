@@ -204,7 +204,7 @@ def therange(start, end, step):
     arange = []
     delta = end - start
     numsteps = delta / step + 1
-    for i in range(0,int(numsteps)):
+    for i in range(0, int(numsteps)):
         if start + i * step<= end:
             arange.append(start + i * step)
 
@@ -467,7 +467,7 @@ class PDB:
         file.close()'''
 
 
-        for t in range(0,len(lines)):
+        for t in range(0, len(lines)):
             line = lines[t]
             if len(line)>= 7:
 
@@ -987,7 +987,7 @@ elif autodock_output != "":
         print("Created directory " + sys.path[0] + os.sep + 'tmp' + os.sep)
 
     # now, pick a random id number
-    id = random.randrange(0,1000000)
+    id = random.randrange(0, 1000000)
 
     filenames = []
 

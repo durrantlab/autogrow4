@@ -1,3 +1,6 @@
+"""
+Run a single crossover event.
+"""
 import __future__
 
 import rdkit
@@ -73,7 +76,7 @@ def run_main_smiles_merge(vars, lig_string_1, lig_string_2):
         timeout=vars["max_time_mcs_thorough"],
     )
 
-    if mcs_results.canceled == True:
+    if mcs_results.canceled is True:
         return None
 
     # confirm that this meets the minimum number of matching atoms

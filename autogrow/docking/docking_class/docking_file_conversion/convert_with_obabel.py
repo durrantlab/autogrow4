@@ -49,7 +49,7 @@ class ObabelConversion(ParentPDBQTConverter):
             testing purpose
         """
 
-        if test_boot == False:
+        if test_boot is False:
 
             self.vars = vars
             self.debug_mode = vars["debug_mode"]
@@ -174,7 +174,7 @@ class ObabelConversion(ParentPDBQTConverter):
             self.prepare_ligand_processing(obabel_path, pdb_file)
             if not os.path.exists(pdb_file + "qt"):
                 # FILE FAILED TO CONVERT TO PDBQT DELETE PDB AND RETURN FALSE
-                if self.debug_mode == False:
+                if self.debug_mode is False:
                     print(
                         "PDBQT not generated: Deleting "
                         + os.path.basename(pdb_file)
@@ -243,7 +243,7 @@ class ObabelConversion(ParentPDBQTConverter):
                             os.system(command + " 2> " + temp_file)
                         except:
                             pass
-                        if os.path.exists(mol_filename + "qt") == False:
+                        if os.path.exists(mol_filename + "qt") is False:
                             printout = "Failed to convert {} times: {}".format(
                                 count, mol_filename
                             )
@@ -256,8 +256,8 @@ class ObabelConversion(ParentPDBQTConverter):
                     print(printout)
                     break
 
-        if self.debug_mode == False:
-            if os.path.exists(temp_file) == True:
+        if self.debug_mode is False:
+            if os.path.exists(temp_file) is True:
                 command = "rm {}".format(temp_file)
                 try:
                     os.system(command)
@@ -289,7 +289,7 @@ class ObabelConversion(ParentPDBQTConverter):
                     middle_lastpart = middle
 
                     for i in range(len(middle_lastpart)):
-                        if middle_lastpart[:1].isupper() == True:
+                        if middle_lastpart[:1].isupper() is True:
                             middle_firstpart = middle_firstpart + middle_lastpart[:1]
                             middle_lastpart = middle_lastpart[1:]
                         else:

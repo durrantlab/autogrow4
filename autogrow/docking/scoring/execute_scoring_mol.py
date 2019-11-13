@@ -91,7 +91,7 @@ def run_scoring_common(vars, smile_file, folder_to_search):
     rescore_lig_efficiency = vars["rescore_lig_efficiency"]
 
     # create rescore_lig_efficiency object if needed
-    if rescore_lig_efficiency == True:
+    if rescore_lig_efficiency is True:
         rescore_lig_efficiency_class = pick_run_class_dict("LigEfficiency")
         # Initialize the scoring class
         rescore_lig_efficiency_scoring_object = rescore_lig_efficiency_class(
@@ -130,7 +130,7 @@ def run_scoring_common(vars, smile_file, folder_to_search):
     for key in list(lig_dict.keys()):
 
         lig_info = lig_dict[key]
-        if lig_info == None:
+        if lig_info is None:
             continue
         lig_info = [str(x) for x in lig_info]
 
@@ -179,8 +179,8 @@ def run_rescoring(vars, scoring_object, files_to_score):
         return files_to_score
 
     results_rescore = [x for x in results_rescore if x != None]
-    completed_rescore = [x[0] for x in results_rescore if x[1] == True]
-    failed_to_rescore = [x[0] for x in results_rescore if x[1] == False]
+    completed_rescore = [x[0] for x in results_rescore if x[1] is True]
+    failed_to_rescore = [x[0] for x in results_rescore if x[1] is False]
 
     # print fails which made it through the try statement but failed to
     # produce an output file.
@@ -287,7 +287,7 @@ def score_files_multithread(scoring_object, file_path, rescore_lig_efficiency,
     """
 
     list_of_lig_data = scoring_object.run_scoring(file_path)
-    if rescore_lig_efficiency == True:
+    if rescore_lig_efficiency is True:
 
         list_of_lig_data = lig_efficiency_scoring_object.get_lig_efficiency_rescore_from_a_file(
             file_path, list_of_lig_data

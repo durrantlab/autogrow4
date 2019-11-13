@@ -4,7 +4,7 @@ import sys
 #Submit Tournement Tournement_k_varied_opt.sh
 sub_script_original = os.path.abspath("Tournement_k_varied_opt.sh")
 output_dir = "/bgfs/jdurrant/jspiegel/Luxury_Run/Tournement_k_vary/sub_scripts/"
-if os.path.exists(output_dir)==False:
+if os.path.exists(output_dir) is False:
     os.mkdir(output_dir)
     
 for i in [1,2,3]:

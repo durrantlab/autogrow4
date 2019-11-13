@@ -63,7 +63,7 @@ def seperate_files(compressed_file):
     compressed_file = os.path.abspath(compressed_file)
 
     decompressed_file = decompress_file(directory, compressed_file)
-    if os.path.exists(decompressed_file) == False:
+    if os.path.exists(decompressed_file) is False:
         raise Exception("Failed to decompress the file")
 
     printout = ""
@@ -72,7 +72,7 @@ def seperate_files(compressed_file):
     with open(decompressed_file, "r") as f:
         for line in f.readlines():
             if "$$END_FILE$$" in line:
-                if out_file != None and os.path.exists(out_file) == False:
+                if out_file != None and os.path.exists(out_file) is False:
                     with open(out_file, "w") as f:
                         f.write(printout + "\n")
                 out_file = None
@@ -100,10 +100,10 @@ def seperate_files(compressed_file):
 
     all_are_made = True
     for f in list_of_new_files:
-        if os.path.exists(f) == False:
+        if os.path.exists(f) is False:
             print("file failed to decompress: {}".format(f))
             all_are_made = False
-    if all_are_made == True:
+    if all_are_made is True:
         torun = "rm {}".format(decompressed_file)
         os.system(torun)
 
@@ -155,7 +155,7 @@ def run_concatination(parallelizer_object, directory):
     makes data transfer easier later on.
 
     To decompress the folder please script in
-    $PATH/autogrow/utility_scripts/file_concatination_and_compression.py 
+    $PATH/autogrow/utility_scripts/file_concatination_and_compression.py
 
     parallelizer_object type is <class
     'autogrow.operators.convert_files.gypsum_dl.gypsum_dl.Parallelizer.Parallelizer'>

@@ -90,7 +90,7 @@ def run_one_tournement(list_of_ligands, num_per_tourn, idx_to_sel,
 
         -num_per_tourn is the int(math.ceil(num_ligands * tourn_size)) so that
             it rounds to the nearest int with a minimum values of 1
-    
+
     Inputs:
     :param list list_of_ligands: The list of lists containing info about
         ligands with scores to select from.
@@ -117,12 +117,12 @@ def run_one_tournement(list_of_ligands, num_per_tourn, idx_to_sel,
             chosen_option = list_of_ligands[random.randint(0, num_ligands - 1)]
         else:
             choice = list_of_ligands[random.randint(0, num_ligands - 1)]
-            if favor_most_negative == True:
+            if favor_most_negative is True:
                 if float(chosen_option[idx_to_sel]) > float(choice[idx_to_sel]):
                     chosen_option = choice
                 else:
                     continue
-            elif favor_most_negative == False:
+            elif favor_most_negative is False:
                 if float(chosen_option[idx_to_sel]) < float(choice[idx_to_sel]):
                     chosen_option = choice
                 else:

@@ -43,7 +43,7 @@ def get_usable_fomat(infile):
             parts = line.split('\t')      # split line into parts seperated by 4-spaces
 
             choice_list = []
-            for i in range(0,len(parts)):
+            for i in range(0, len(parts)):
                 choice_list.append(parts[i])
             usable_list_of_smiles.append(choice_list)
 
@@ -76,7 +76,7 @@ def get_average_score_per_gen(infolder, folder_list):
                     parts = line.split('\t')      # split line into parts seperated by 4-spaces
 
                     choice_list = []
-                    for i in range(0,len(parts)):
+                    for i in range(0, len(parts)):
                         choice_list.append(parts[i])
 
                     
@@ -131,7 +131,7 @@ def get_average_top_score_per_gen(infolder, folder_list, top_score_per_gen):
                         parts = line.split('\t')      # split line into parts seperated by 4-spaces
 
                         choice_list = []
-                        for i in range(0,len(parts)):
+                        for i in range(0, len(parts)):
                             choice_list.append(parts[i])
 
                         gen_affinity_sum = gen_affinity_sum + float(choice_list[-2])
@@ -227,14 +227,14 @@ def run_plotter(vars, dict_of_averages, outfile):
     for key in top_fifty_dict.keys():
         if top_fifty_dict[key] == "N/A":
             print_fifty=False
-    if print_fifty==True:
+    if print_fifty is True:
         list_generations_Fifty, list_of_scores_Fifty = make_graph(top_fifty_dict)
     # print("Graphing top_fifty_dict")
     print_twenty=True
     for key in top_twenty_dict.keys():
         if top_twenty_dict[key] == "N/A":
             print_twenty=False
-    if print_twenty==True:
+    if print_twenty is True:
         list_generations_Twenty, list_of_scores_Twenty = make_graph(top_twenty_dict)
 
     # print("Graphing top_ten_dict")
@@ -246,10 +246,10 @@ def run_plotter(vars, dict_of_averages, outfile):
     ax = plt.subplot(111)
 
     ax.plot(list_generations_Average, list_of_scores_Average, color='b', label="Average")
-    if print_fifty==True:
+    if print_fifty is True:
         ax.plot(list_generations_Fifty, list_of_scores_Fifty, color='c', label="Top 50")
 
-    if print_twenty==True:
+    if print_twenty is True:
         ax.plot(list_generations_Twenty, list_of_scores_Twenty, color='m', label="Top 20")
     ax.plot(list_generations_Ten, list_of_scores_Ten, color='g', label="Top 10")
     ax.plot(list_generations_one, list_of_scores_one, color='r', label="Top 1")
@@ -282,7 +282,7 @@ def run_plotter(vars, dict_of_averages, outfile):
     
     plt.text(5.4,-8.5, output, bbox=dict(facecolor="white", alpha=0.5),fontsize='small')
 
-    # legend1 = plt.legend([lines[i].get_label()  for i in range(0,lines_leg)],loc='center left', bbox_to_anchor=(1, 0.274),fontsize='small')
+    # legend1 = plt.legend([lines[i].get_label()  for i in range(0, lines_leg)],loc='center left', bbox_to_anchor=(1, 0.274),fontsize='small')
     # legend2 = plt.legend([output],loc='center left', bbox_to_anchor=(1, 0.774),fontsize='small')
     # # help(plt.legend)
     # ax.add_artist(legend1)
@@ -355,7 +355,7 @@ def print_data_table(infolder, folder_list):
     return dict_of_averages
 
 def make_vars_dict(autogrow_vars_json):
-    if os.path.exists(autogrow_vars_json) == False:
+    if os.path.exists(autogrow_vars_json) is False:
         raise Exception("variable file could not be found. It should be the \
             vars.json file written by AutoGrow in the output folder of the run.")
     try:
@@ -394,7 +394,7 @@ def run_everything(infolder, autogrow_vars_json,outfile):
             right_level = True
             break
     
-    if right_level == False:
+    if right_level is False:
         topfolder_list = [x for x in all_folders_list if "__pycache__" not in x]
         all_folders_list = []
         for topfolder in topfolder_list:
@@ -405,7 +405,7 @@ def run_everything(infolder, autogrow_vars_json,outfile):
                 if "generation_" in os.path.basename(os.path.dirname(i)):
                     right_level = True
                     break
-            if right_level ==False:
+            if right_level is False:
                 print("THIS IS THE WRONG LEVEL TO WORK AT!!!!!!!!!!!!")
             run_a_single_folder(vars,tempfolder,outfile, all_folders_list)
 

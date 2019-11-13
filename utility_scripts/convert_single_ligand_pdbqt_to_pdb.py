@@ -28,7 +28,7 @@ def convert_pdbqt_to_pdb(pdbqt_file_in, pdb_file_out):
     :param str pdb_file_out: the string of the output .pdb
     """
     printout = ""
-    line_index_range = [x for x in range(0,61)] + [x for x in range(70,80)] 
+    line_index_range = [x for x in range(0, 61)] + [x for x in range(70,80)] 
 
     with open(pdbqt_file_in) as f:
         for line in f.readlines():
@@ -75,7 +75,7 @@ def get_arguments_from_argparse(ARGS_DICT):
         raise Exception("provided pdbqt_file must be a .pdbqt file.")
 
     #  argument_handling
-    if os.path.exists(ARGS_DICT["pdbqt_file"]) == False:
+    if os.path.exists(ARGS_DICT["pdbqt_file"]) is False:
         raise Exception("provided pdbqt_file must be a .pdbqt file.")
     else:
         if ARGS_DICT["pdbqt_file"].split(".")[-1] != "pdbqt" and ARGS_DICT["pdbqt_file"].split(".")[-1] != "PDBQT":
@@ -86,12 +86,12 @@ def get_arguments_from_argparse(ARGS_DICT):
         if ARGS_DICT["output_file"].split(".")[-1] != "pdb" and ARGS_DICT["output_file"].split(".")[-1] != "PDB":
             raise Exception("provided output_file must be a .pdb file.") 
 
-        if os.path.exists(os.path.dirname(ARGS_DICT["output_file"])) == False:
+        if os.path.exists(os.path.dirname(ARGS_DICT["output_file"])) is False:
             try:
                 os.mkdir(os.path.dirname(ARGS_DICT["output_file"]))
             except:
                 pass
-            if os.path.exists(os.path.dirname(ARGS_DICT["output_file"])) == False:
+            if os.path.exists(os.path.dirname(ARGS_DICT["output_file"])) is False:
                 raise Exception("directory to output the file could not be made or found.")
     else:
         ARGS_DICT["output_file"] = os.path.dirname(ARGS_DICT["pdbqt_file"]) + \

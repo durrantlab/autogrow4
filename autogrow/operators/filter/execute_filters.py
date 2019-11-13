@@ -1,3 +1,6 @@
+"""
+Top level for running filters.
+"""
 import __future__
 
 import copy
@@ -188,7 +191,7 @@ def run_all_selected_filters(mol, child_dict):
 
     filters_failed = 0
     mol = MOH.check_sanitization(mol)
-    if mol == None:
+    if mol is None:
         return False
     for child in list(child_dict.keys()):
         mol_copy = copy.deepcopy(mol)

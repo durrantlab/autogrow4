@@ -307,7 +307,7 @@ class CrossoverTests(unittest.TestCase):
         ordered_str_atomNum = ""
         atoms = mol.GetAtoms()
         num_atom = len(atoms)
-        for i in range(0,num_atom):
+        for i in range(0, num_atom):
             atom = mol.GetAtomWithIdx(i)
             at_num = atom.GetAtomicNum()
             ordered_str_atomNum = ordered_str_atomNum + str(at_num)

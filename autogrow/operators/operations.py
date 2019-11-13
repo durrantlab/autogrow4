@@ -1,3 +1,7 @@
+"""
+Populates an AutoGrow generation via mutation, crossover, and elitism.
+Also filters and converts SMILES to 3d SDFS.
+"""
 import __future__
 
 import os
@@ -161,7 +165,7 @@ def populate_generation(vars, generation_num):
     )
 
     if (
-        new_mutation_smiles_list == None
+        new_mutation_smiles_list is None
         or len(new_mutation_smiles_list) < num_mutations
     ):
         print("")
@@ -246,7 +250,7 @@ def populate_generation(vars, generation_num):
     )
 
     if (
-        new_crossover_smiles_list == None
+        new_crossover_smiles_list is None
         or len(new_crossover_smiles_list) < num_crossovers
     ):
         print("")
@@ -309,7 +313,7 @@ def populate_generation(vars, generation_num):
         new_generation_smiles_list.append(i)
         full_generation_smiles_list.append(i)
 
-    if vars["redock_elite_from_previous_gen"] == False and generation_num != 1:
+    if vars["redock_elite_from_previous_gen"] is False and generation_num != 1:
         for i in chosen_mol_to_pass_through_list:
             # Doesn't append to the new_generation_smiles_list
             full_generation_smiles_list.append(i)
@@ -469,7 +473,7 @@ def populate_generation_zero(vars, generation_num=0):
         )
         already_docked = False
 
-    if already_docked == True:
+    if already_docked is True:
         # Write all the ligands to a ranked file
         full_generation_smiles_list_printout = "\n".join(
             full_generation_smiles_list_printout
@@ -633,7 +637,7 @@ def get_complete_list_prev_gen_or_source_compounds(vars, generation_num):
                 "There were no available ligands in source compound. Check formating"
             )
 
-    elif generation_num == 1 and os.path.exists(source_file_gen_0) == False:
+    elif generation_num == 1 and os.path.exists(source_file_gen_0) is False:
         # This will be the full length list of starting molecules as the seed
         source_file = str(vars["source_compound_file"])
         usable_list_of_smiles = Ranking.get_usable_fomat(source_file)
@@ -652,7 +656,7 @@ def get_complete_list_prev_gen_or_source_compounds(vars, generation_num):
         ] + "generation_{}{}generation_{}_ranked.smi".format(
             generation_num - 1, os.sep, generation_num - 1
         )
-        if os.path.exists(source_file) == False:
+        if os.path.exists(source_file) is False:
             printout = (
                 "\n"
                 + "There were no available ligands in previous generation ranked ligand file.\n"
@@ -755,14 +759,14 @@ def make_seed_list(vars, source_compounds_list, generation_num, num_seed_diversi
         # Get starting compounds for Mutations
         full_length = True
     elif generation_num == 1:
-        if vars["use_docked_source_compounds"] == False:
+        if vars["use_docked_source_compounds"] is False:
             # Get starting compounds for Mutations
             full_length = True
         else:
             source_file_gen_0 = vars[
                 "output_directory"
             ] + "generation_{}{}generation_{}_ranked.smi".format(0, os.sep, 0)
-            if os.path.exists(source_file_gen_0) == False:
+            if os.path.exists(source_file_gen_0) is False:
                 full_length = True
 
             else:
@@ -791,7 +795,7 @@ def make_seed_list(vars, source_compounds_list, generation_num, num_seed_diversi
     else:
         full_length = False
 
-    if full_length == True or generation_num == 0:
+    if full_length is True or generation_num == 0:
         # This will be the full length list of starting molecules as the seed
         random.shuffle(usable_list_of_smiles)
 
@@ -911,7 +915,7 @@ def make_pass_through_list(vars, smiles_from_previous_gen_list,
         x for x in smiles_from_previous_gen_list if type(x) == list
     ]
 
-    if generation_num == 0 and vars["filter_source_compounds"] == True:
+    if generation_num == 0 and vars["filter_source_compounds"] is True:
         # Run Filters on ligand list
         ligands_which_passed_filters = Filter.run_filter(
             vars, smiles_from_previous_gen_list
@@ -950,7 +954,7 @@ def make_pass_through_list(vars, smiles_from_previous_gen_list,
     except:
         has_dock_score = False
 
-    if generation_num == 0 and has_dock_score == False:
+    if generation_num == 0 and has_dock_score is False:
         # Take the 1st num_elite_to_advance_from_previous_gen number of
         # molecules from ligands_which_passed_filters
         random.shuffle(ligands_which_passed_filters)
@@ -958,7 +962,7 @@ def make_pass_through_list(vars, smiles_from_previous_gen_list,
         for x in range(0, len(ligands_which_passed_filters)):
             selected_mol = ligands_which_passed_filters[x]
             list_of_ligands_to_advance.append(selected_mol)
-    elif generation_num == 0 and has_dock_score == True:
+    elif generation_num == 0 and has_dock_score is True:
         # Use the make_seed_list function to select the list to advance.
         # This list will be chosen strictly by
         list_of_ligands_to_advance = make_seed_list(
@@ -969,7 +973,7 @@ def make_pass_through_list(vars, smiles_from_previous_gen_list,
             num_elite_to_advance_from_previous_gen,
         )
 
-    elif generation_num != 0 and has_dock_score == False:
+    elif generation_num != 0 and has_dock_score is False:
         # Take the 1st num_elite_to_advance_from_previous_gen number of
         # molecules from ligands_which_passed_filters
         random.shuffle(ligands_which_passed_filters)
@@ -978,7 +982,7 @@ def make_pass_through_list(vars, smiles_from_previous_gen_list,
             selected_mol = ligands_which_passed_filters[x]
             list_of_ligands_to_advance.append(selected_mol)
 
-    elif generation_num != 0 and has_dock_score == True:
+    elif generation_num != 0 and has_dock_score is True:
         # Use the make_seed_list function to select the list to advance. This
         # list will be chosen strictly by
         list_of_ligands_to_advance = make_seed_list(
