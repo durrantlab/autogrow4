@@ -83,8 +83,8 @@ def test_for_mcs(vars, mol_1, mol_2):
         return None
     if result.canceled is True:
         return None
-    else:
-        return result
+    
+    return result
 
 
 def find_random_lig2(vars, ligands_list, ligand1_pair):
@@ -126,22 +126,21 @@ def find_random_lig2(vars, ligands_list, ligand1_pair):
             continue
 
         # Convert lig_1 into an RDkit mol
-        Lig_2_string = mol2_pair[0]
-        lig2_mol = convert_mol_from_smiles(Lig_2_string)
+        lig_2_string = mol2_pair[0]
+        lig2_mol = convert_mol_from_smiles(lig_2_string)
 
         if lig2_mol is None:
             count = count + 1
             continue
-        else:
-            # it converts and it is not Ligand1. now lets test for a common
-            # substructure
 
-            if test_for_mcs(vars, lig1_mol, lig2_mol) is None:
-                count = count + 1
-                continue
-            else:
-                # We found a good pair of Ligands
-                return mol2_pair
+        # it converts and it is not Ligand1. now lets test for a common
+        # substructure
+        if test_for_mcs(vars, lig1_mol, lig2_mol) is None:
+            count = count + 1
+            continue
+
+        # We found a good pair of Ligands
+        return mol2_pair
 
     return False
 
@@ -240,8 +239,8 @@ def make_crossovers(vars, generation_num, number_of_processors,
                 react_list.pop() for x in range(num_to_make) if len(react_list) > 0
             ]
 
-            smile_inputs = [x[0] for x in smile_pairs]
-            smile_names = [x[1] for x in smile_pairs]
+            # smile_inputs = [x[0] for x in smile_pairs]
+            # smile_names = [x[1] for x in smile_pairs]
 
             # make a list of tuples for multi-processing Crossover
             job_input = []
@@ -325,10 +324,9 @@ def make_crossovers(vars, generation_num, number_of_processors,
 
     if len(new_ligands_list) < num_crossovers_to_make:
         return None
-    else:
-        # once the number of mutants we need is generated return the list
 
-        return new_ligands_list
+    # once the number of mutants we need is generated return the list
+    return new_ligands_list
 
 
 def run_smiles_merge_prescreen(vars, ligands_list, ligand1_pair):
@@ -367,8 +365,7 @@ def run_smiles_merge_prescreen(vars, ligands_list, ligand1_pair):
         # ligand_1 has no matches
         return None
 
-    else:
-        return lig_2_pair
+    return lig_2_pair
 
 
 def do_crossovers_smiles_merge(vars, lig1_smile_pair, ligands_list):
@@ -406,27 +403,27 @@ def do_crossovers_smiles_merge(vars, lig1_smile_pair, ligands_list):
 
     if lig_2_pair is None:
         return None
-    else:
-        ligand_1_string = lig1_smile_pair[0]
-        ligand_2_string = lig_2_pair[0]
 
-        counter = 0
-        while counter < 3:
-            # run SmilesMerge
-            ligand_new_smiles = smiles_merge.run_main_smiles_merge(
-                vars, ligand_1_string, ligand_2_string
+    ligand_1_string = lig1_smile_pair[0]
+    ligand_2_string = lig_2_pair[0]
+
+    counter = 0
+    while counter < 3:
+        # run SmilesMerge
+        ligand_new_smiles = smiles_merge.run_main_smiles_merge(
+            vars, ligand_1_string, ligand_2_string
+        )
+
+        if ligand_new_smiles is None:
+            counter = counter + 1
+        else:
+            # Filter Here
+            pass_or_not = Filter.run_filter_on_just_smiles(
+                ligand_new_smiles, vars["filter_object_dict"]
             )
+            if pass_or_not is False:
 
-            if ligand_new_smiles is None:
                 counter = counter + 1
             else:
-                # Filter Here
-                pass_or_not = Filter.run_filter_on_just_smiles(
-                    ligand_new_smiles, vars["filter_object_dict"]
-                )
-                if pass_or_not is False:
-
-                    counter = counter + 1
-                else:
-                    return [ligand_new_smiles, lig1_smile_pair, lig_2_pair]
+                return [ligand_new_smiles, lig1_smile_pair, lig_2_pair]
     return None

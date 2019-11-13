@@ -6,7 +6,6 @@ import __future__
 
 import random
 import copy
-import sys
 
 
 import autogrow.operators.mutation.smiles_click_chem.smiles_click_chem as SmileClickClass
@@ -16,8 +15,9 @@ import autogrow.operators.mutation.smiles_click_chem.smiles_click_chem as SmileC
 # Functions for creating molecular models
 ##########################################
 def make_mutants(vars, generation_num, number_of_processors,
-    num_mutants_to_make, ligands_list, new_mutation_smiles_list,
-    rxn_library_variables):
+                 num_mutants_to_make, ligands_list,
+                 new_mutation_smiles_list,
+                 rxn_library_variables):
     """
     Make mutant compounds in a list to be returned
 
@@ -164,9 +164,9 @@ def make_mutants(vars, generation_num, number_of_processors,
 
     if len(new_ligands_list) < num_mutants_to_make:
         return None
-    else:
-        # once the number of mutants we need is generated return the list
-        return new_ligands_list
+
+    # once the number of mutants we need is generated return the list
+    return new_ligands_list
 
 
 def run_smiles_click_for_multithread(smile, a_smiles_click_chem_object):

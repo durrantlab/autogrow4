@@ -1,5 +1,6 @@
-# Dictionary and Dictionary handling functions
-
+"""
+Dictionary and Dictionary handling functions
+"""
 import __future__
 
 import copy
@@ -36,35 +37,35 @@ def handle_dicts_and_select_b_groups(mol_1, mol_2, mcs_mol):
     if they_pass is False:
         return None
 
-    r_smiles_dict_1, b_to_r_master_dict_1, B_to_Anchor_master_dict_1 = mol_handling_of_fragmenting_labeling_and_indexing(
+    r_smiles_dict_1, b_to_r_master_dict_1, b_to_anchor_master_dict_1 = mol_handling_of_fragmenting_labeling_and_indexing(
         mol_1, mcs_mol, 1
     )
     # check that this worked (ie if it failed they will return None)
     if r_smiles_dict_1 is None:
         return None
 
-    r_smiles_dict_2, b_to_r_master_dict_2, B_to_Anchor_master_dict_2 = mol_handling_of_fragmenting_labeling_and_indexing(
+    r_smiles_dict_2, b_to_r_master_dict_2, b_to_anchor_master_dict_2 = mol_handling_of_fragmenting_labeling_and_indexing(
         mol_2, mcs_mol, 2
     )
     # check that this worked (ie if it failed they will return None)
     if r_smiles_dict_2 is None:
         return None
 
-    # Merg B_to_anchor_master_dict into 1 master dictionary of B_to_anchors.
+    # Merg b_to_anchor_master_dict into 1 master dictionary of B_to_anchors.
     # the keys will be all be unique so we can add these dictionaries together
     # without worry of overrighting an entry. We will invert the dict after to
     # get anchors as the keys and the B's as the items. example
-    # B_to_Anchor_master {'1B1':[10008,10007],'1B2':[10000],'1B3':[10006],
+    # b_to_anchor_master {'1B1':[10008,10007],'1B2':[10000],'1B3':[10006],
     # '2B3':[10006,10007],'2B2':[10000],'2B1':[10008]}
-    B_to_Anchor_master = B_to_Anchor_master_dict_1
-    for i in list(B_to_Anchor_master_dict_2.keys()):
-        B_to_Anchor_master[i] = B_to_Anchor_master_dict_2[i]
+    b_to_anchor_master = b_to_anchor_master_dict_1
+    for i in list(b_to_anchor_master_dict_2.keys()):
+        b_to_anchor_master[i] = b_to_anchor_master_dict_2[i]
 
-    # Invert B_dictionary to produce a master I dicitonary. example
-    # Anchor_to_B_master = {10008:['1B1','2B1'],10000:['1B2','2B2']}
-    Anchor_to_B_master = invert_dictionary(B_to_Anchor_master)
+    # Invert b_dictionary to produce a master I dicitonary. example
+    # anchor_to_b_master = {10008:['1B1','2B1'],10000:['1B2','2B2']}
+    anchor_to_b_master = invert_dictionary(b_to_anchor_master)
 
-    bs_chosen = mapping_class.run_mapping(B_to_Anchor_master, Anchor_to_B_master)
+    bs_chosen = mapping_class.run_mapping(b_to_anchor_master, anchor_to_b_master)
 
     # Get the R groups which correspond to the chosen B's
     # ['1R1', '1R5', '2R2']
@@ -103,11 +104,11 @@ def mol_handling_of_fragmenting_labeling_and_indexing(mol, mcs_mol, lig_number):
         branch off the common core keys are the R-groups; items are the SMILES
         strings of that R-groups returns None if it fails. Example: {'1R1':
         '[10003*][1007N]=[1013O]', '1R2': '[10000*][1011CH2]=[1008O]'}
-    :returns: dict B_to_R_master_dict: A dictionary which tracks the R groups
+    :returns: dict b_to_r_master_dict: A dictionary which tracks the R groups
         which belong to a B-group keys are the B-groups; items are the R-groups
         which belong to the B-group. returns None if it fails. Example: {'1B1':
         ['1R2'], '1B2': ['1R1']}
-    :returns: dict B_to_anchor_master_dict: A dictionary which tracks the iso
+    :returns: dict b_to_anchor_master_dict: A dictionary which tracks the iso
         label of the anchor atoms for B-group. keys are the B-groups; items are
         the iso label of the anchor atoms for B-group returns None if it fails.
         Example:{'1B1': [10000], '1B2': [10003]}
@@ -118,28 +119,28 @@ def mol_handling_of_fragmenting_labeling_and_indexing(mol, mcs_mol, lig_number):
     mcs_touches = get_atoms_touch_mcs(mol)
 
     # invert dictionary
-    lig_R_atoms_touch_MCS = invert_dictionary(mcs_touches)
+    lig_r_atoms_touch_mcs = invert_dictionary(mcs_touches)
 
     # remove the Core atoms from each ligand this gives us the R-groups
-    Replace_core = r_group_list(mol, mcs_mol)
-    if Replace_core is None:
-        # Replace_core failed to handle fragments"
+    replace_core = r_group_list(mol, mcs_mol)
+    if replace_core is None:
+        # replace_core failed to handle fragments"
         return None, None, None
 
-    Replace_core = replace_core_mol_dummy_atoms(mol, mcs_mol, Replace_core)
-    if Replace_core is None:
-        # Replace_core failed to handle fragments"
+    replace_core = replace_core_mol_dummy_atoms(mol, mcs_mol, replace_core)
+    if replace_core is None:
+        # replace_core failed to handle fragments"
         return None, None, None
 
     # A single anchor (isotope label) may now be present multiple times in the
-    # Replace_core_mols as they are fragmented replace_frag_w_anchor_isolabels
+    # replace_core_mols as they are fragmented replace_frag_w_anchor_isolabels
     # can return a None if failed so lets check for None before we move on
-    if Replace_core is None:
-        # Replace_core failed to handle fragments"
+    if replace_core is None:
+        # replace_core failed to handle fragments"
         return None, None, None
 
-    # MAKE NEW MOL FRAGS FROM LABELED REPLACE_CORE
-    mol_frags = Chem.GetMolFrags(Replace_core, asMols=True, sanitizeFrags=False)
+    # MAKE NEW MOL FRAGS FROM LABELED replace_core
+    mol_frags = Chem.GetMolFrags(replace_core, asMols=True, sanitizeFrags=False)
     list_r_groups = []
     i = 0
     while i < len(mol_frags):
@@ -153,13 +154,13 @@ def mol_handling_of_fragmenting_labeling_and_indexing(mol, mcs_mol, lig_number):
 
     # r_dict is a secondary dictionary for searching I's in R's. this
     # dictionary is limited to only the R-group and anchor(I).
-    r_dict = get_r_dict(r_chain_dictionary, lig_R_atoms_touch_MCS)
+    r_dict = get_r_dict(r_chain_dictionary, lig_r_atoms_touch_mcs)
 
     # make inversion of r_dict. keys are the Anchor atom iso_labels while the
     # items are the R-group numbers which are attached to that anchor atom.
     # Example: {10008: ['2R3'], 10000: ['2R2'], 10006: ['2R1'], 10007:
     # ['2R1']}
-    I_dict = invert_dictionary(r_dict)
+    i_dict = invert_dictionary(r_dict)
 
     """
     B-dictionaries:
@@ -185,12 +186,12 @@ def mol_handling_of_fragmenting_labeling_and_indexing(mol, mcs_mol, lig_number):
         handled more in the Mapping class, but this is why the nominclature
         change from R-groups to B-groups and why the next several steps are
         important.
-    make_B_dictionaries (B is the name we gave to R-groups sets)
+    make_b_dictionaries (B is the name we gave to R-groups sets)
     """
 
-    B_to_R_master_dict, B_to_anchor_master_dict = make_B_dic(I_dict, r_dict, lig_number)
+    b_to_r_master_dict, b_to_anchor_master_dict = make_b_dic(i_dict, r_dict, lig_number)
 
-    return r_smiles_dictionary, B_to_R_master_dict, B_to_anchor_master_dict
+    return r_smiles_dictionary, b_to_r_master_dict, b_to_anchor_master_dict
 
 
 def check_replace_mol(mol_1, mol_2, mcs_mol):
@@ -268,9 +269,9 @@ def replace_core_mol_dummy_atoms(mol, mcs, replace_core_mol):
     the core atoms. example:
         mol = Chem.MolFromSmiles("[10000N-]=[10001N+]=[10002N][10003CH2][2004CH]1[2005NH2+][2006CH2][2007CH]([2008OH])[2009CH]([2010OH])[2011CH]1[2012OH]")
         mcs = Chem.MolFromSmiles("[10003CH3][10002N]=[10001N+]=[10000NH]")
-        Replace_core = Chem.MolFromSmiles("[3*][2004CH]1[2005NH2+][2006CH2][2007CH]([2008OH])[2009CH]([2010OH])[2011CH]1[2012OH]")
+        replace_core = Chem.MolFromSmiles("[3*][2004CH]1[2005NH2+][2006CH2][2007CH]([2008OH])[2009CH]([2010OH])[2011CH]1[2012OH]")
 
-        resulting Replace_core = '[10003*][2004CH]1[2005NH2+][2006CH2][2007CH]([2008OH])[2009CH]([2010OH])[2011CH]1[2012OH]'
+        resulting replace_core = '[10003*][2004CH]1[2005NH2+][2006CH2][2007CH]([2008OH])[2009CH]([2010OH])[2011CH]1[2012OH]'
 
     Inputs:
     :param rdkit.Chem.rdchem.Mol mol: an rdkit molecule
@@ -339,9 +340,7 @@ def r_groups_dict(mol_frags, lig_number_for_multiplier):
     k = int(lig_number_for_multiplier)
     while i < num_frags:
         frag = mol_frags[i]
-        R_list_idx = []
         r_list_temp = []
-        r_list_smiles = []
         r_list_smiles = Chem.MolToSmiles(frag, isomericSmiles=True)
         for atoms in frag.GetAtoms():
             iso = atoms.GetIsotope()
@@ -351,9 +350,9 @@ def r_groups_dict(mol_frags, lig_number_for_multiplier):
             if iso > 3000:
                 name = "I{}".format(iso - 10000)
                 r_list_temp.append(iso)
-            lignum_R_Rnum = "{}R{}".format(k, i + 1)
-            r_chain_dictionary[lignum_R_Rnum] = r_list_temp
-            r_smiles_dictionary[lignum_R_Rnum] = r_list_smiles
+            lig_num_r_r_num = "{}R{}".format(k, i + 1)
+            r_chain_dictionary[lig_num_r_r_num] = r_list_temp
+            r_smiles_dictionary[lig_num_r_r_num] = r_list_smiles
         i = i + 1
 
     return r_chain_dictionary, r_smiles_dictionary
@@ -374,23 +373,23 @@ def get_r_dict(r_chain_dict, lig_r_atom_touch_mcs):
         [10000]}
 
     Returns:
-    :returns: dict Rs_dict:  dictionary of R-groups and anchor atoms they are
+    :returns: dict r_s_dict:  dictionary of R-groups and anchor atoms they are
         connected to. keys are R-groups. items are isolabel of anchor atoms. ie)
         {'1R1': [10000]}
     """
 
-    Rs_dict = {}
+    r_s_dict = {}
     for key in list(r_chain_dict.keys()):
-        temp_R_list = r_chain_dict[key]
+        temp_r_list = r_chain_dict[key]
         node_list = []
         for atom in r_chain_dict[key]:
             for key_id in list(lig_r_atom_touch_mcs.keys()):
                 if atom == key_id:
                     for x in lig_r_atom_touch_mcs[key_id]:
                         node_list.append(x)
-                    Rs_dict[key] = node_list
+                    r_s_dict[key] = node_list
 
-    return Rs_dict
+    return r_s_dict
 
 
 ##########
@@ -419,12 +418,12 @@ def get_idx_using_unique_iso(mol, iso_val):
     return None
 
 
-def make_B_dic(i_dictionary, r_dict_num, lig_number):
+def make_b_dic(i_dictionary, r_dict_num, lig_number):
     """
     This generates the dictionaries for the B-groups. one is to track the
-    R-groups which a B-group represents (this is the B_to_R_master_dict). one
+    R-groups which a B-group represents (this is the b_to_r_master_dict). one
     is to track the anchor atoms a B-group branches from (this is the
-    B_to_anchor_master_dict).
+    b_to_anchor_master_dict).
 
     Inputs:
     :param dict i_dictionary:dictionary for R groups bound to nodes (aka I's).
@@ -435,17 +434,17 @@ def make_B_dic(i_dictionary, r_dict_num, lig_number):
         respectively)
 
     Returns:
-    :returns: dict B_to_R_master_dict: key is unique B-name and the R-groups
+    :returns: dict b_to_r_master_dict: key is unique B-name and the R-groups
         it represents. example {'1B1':['1R1'],'1B2':['1R2','1R3','1R4'],'1B3':
         ['1R5']}
-    :returns: dict B_to_anchor_master_dict: key is unique B-name and items are
+    :returns: dict b_to_anchor_master_dict: key is unique B-name and items are
         anchors that B connects to. example
         {'1B1':[10008,10007],'1B2':[10000],'1B3':[10006]}
     """
 
     k = lig_number
-    B_to_R_master_dict = {}
-    B_to_anchor_master_dict = {}
+    b_to_r_master_dict = {}
+    b_to_anchor_master_dict = {}
     counter = 1
     anchor_list = list(i_dictionary.keys())
     # anchor_list = [10008, 10000, 10006, 10007]
@@ -453,23 +452,23 @@ def make_B_dic(i_dictionary, r_dict_num, lig_number):
     while len(anchor_list) > 0:
         anchor = anchor_list[0]
         B_key = "{}B{}".format(k, counter)
-        temp_R_list = []
+        temp_r_list = []
         temp_anchor_list = []
 
         for Rs in i_dictionary[anchor]:
             # example Rs in i_dictionary[anchor]: '1R1')
-            temp_R_list.append(Rs)
-            r_dict_Is = r_dict_num[Rs]
-            for I in r_dict_Is:
+            temp_r_list.append(Rs)
+            r_dict_i = r_dict_num[Rs]
+            for I in r_dict_i:
                 # example Rs in i_dictionary[anchor]: '1R1')
                 temp_anchor_list.append(I)
         # remove any redundancies in the list by list(set(list_of_things))
         temp_anchor_list = list(set(temp_anchor_list))
-        temp_R_list = list(set(temp_R_list))
+        temp_r_list = list(set(temp_r_list))
 
         # make new B-group entry in the dictionaries
-        B_to_R_master_dict[B_key] = temp_R_list  # This B-represents these R-groups
-        B_to_anchor_master_dict[
+        b_to_r_master_dict[B_key] = temp_r_list  # This B-represents these R-groups
+        b_to_anchor_master_dict[
             B_key
         ] = temp_anchor_list  # This B connects to these anchor atoms
 
@@ -482,10 +481,10 @@ def make_B_dic(i_dictionary, r_dict_num, lig_number):
                 anchor_list.remove(i)
 
     # example
-    # B_to_R_master_dict:{'1B1':['1R1'],'1B2':['1R2','1R3','1R4'],'1B3':
+    # b_to_r_master_dict:{'1B1':['1R1'],'1B2':['1R2','1R3','1R4'],'1B3':
     # ['1R5']}. example
-    # B_to_anchor_master_dict:{'1B1':[10008,10007],'1B2':[10000],'1B3':[10006]}.
-    return B_to_R_master_dict, B_to_anchor_master_dict
+    # b_to_anchor_master_dict:{'1B1':[10008,10007],'1B2':[10000],'1B3':[10006]}.
+    return b_to_r_master_dict, b_to_anchor_master_dict
 
 
 def invert_dictionary(old_dic):
@@ -644,4 +643,3 @@ def get_rs_chosen_smiles(rs_chosen, r_smiles_dict_1, r_smiles_dict_2):
         rs_chosen_smiles.append(Rs_for_the_R)
 
     return rs_chosen_smiles
-

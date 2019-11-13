@@ -53,7 +53,7 @@ class QuickVina2Docking(VinaDocking):
 
             ###########################
 
-            self.receptor_PDBQT_file = receptor_file + "qt"
+            self.receptor_pdbqt_file = receptor_file + "qt"
 
             self.vars["docking_executable"] = self.get_docking_executable_file(
                 self.vars

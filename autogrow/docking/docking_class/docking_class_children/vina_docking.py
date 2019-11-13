@@ -63,7 +63,7 @@ class VinaDocking(ParentDocking):
 
             ###########################
 
-            self.receptor_PDBQT_file = receptor_file + "qt"
+            self.receptor_pdbqt_file = receptor_file + "qt"
 
             self.vars["docking_executable"] = self.get_docking_executable_file(
                 self.vars
@@ -263,7 +263,7 @@ class VinaDocking(ParentDocking):
             + " --size_z "
             + str(vars["size_z"])
             + " --receptor "
-            + self.receptor_PDBQT_file
+            + self.receptor_pdbqt_file
             + " --ligand "
             + lig_pdbqt_filename
             + " --out "

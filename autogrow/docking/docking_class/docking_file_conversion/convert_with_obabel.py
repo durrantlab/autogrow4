@@ -4,13 +4,8 @@ The child classes from ParentExample
 import __future__
 
 import os
-import sys
-import glob
-import string
 import subprocess
-import time
 
-import rdkit
 import rdkit.Chem as Chem
 
 import autogrow.docking.delete_failed_mol as Delete
@@ -67,10 +62,10 @@ class ObabelConversion(ParentPDBQTConverter):
                 receptor_file, obabel_path, number_of_processors
             )
 
-            self.receptor_PDBQT_file = receptor_file + "qt"
+            self.receptor_pdbqt_file = receptor_file + "qt"
 
     def convert_receptor_pdb_files_to_pdbqt(self, receptor_file, obabel_path,
-        number_of_processors):
+                                            number_of_processors):
         """
         Make sure a PDB file is properly formatted for conversion to pdbqt
 
@@ -140,7 +135,7 @@ class ObabelConversion(ParentPDBQTConverter):
             raise Exception("Could not convert receptor with obabel")
 
     #######################################
-    # Convert the Ligand from PDB to PDBQT                                                                 # DockingModel
+    # Convert the Ligand from PDB to PDBQT DockingModel
     ##########################################
     def convert_ligand_pdb_file_to_pdbqt(self, pdb_file):
         """
@@ -184,9 +179,9 @@ class ObabelConversion(ParentPDBQTConverter):
                     # REMOVED FOR LIGANDS WHICH FAILED TO CONVERT TO PDBQT
                     Delete.delete_all_associated_files(pdb_file)
                     return False, smile_name
-                else:
-                    print("PDBQT not generated: " + os.path.basename(pdb_file) + "...")
-                    return False, smile_name
+                # In debug mode but pdbqt file does not exist
+                print("PDBQT not generated: " + os.path.basename(pdb_file) + "...")
+                return False, smile_name
 
         return True, smile_name
 
@@ -301,14 +296,9 @@ class ObabelConversion(ParentPDBQTConverter):
                         middle_lastpart = middle_firstpart[2:] + middle_lastpart
                         middle_firstpart = middle_firstpart[:2]
 
-                    if not (
-                        middle_firstpart == "BR"
-                        or middle_firstpart == "ZN"
-                        or middle_firstpart == "FE"
-                        or middle_firstpart == "MN"
-                        or middle_firstpart == "CL"
-                        or middle_firstpart == "MG"
-                    ):
+
+                    if middle_firstpart not in ["BR", "ZN", "FE",
+                                                "MN", "CL", "MG"]:
                         # so just keep the first letter for the element part
                         # of the atom name
                         middle_lastpart = middle_firstpart[1:] + middle_lastpart

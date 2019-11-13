@@ -1,19 +1,21 @@
+"""
+This script handles the docking and file conversion for docking.
+"""
 import __future__
 
-import glob
 import os
-import copy
 
-import autogrow.docking.delete_failed_mol as Delete
 from autogrow.docking.docking_class.get_child_class import get_all_subclasses
 
 from autogrow.docking.docking_class.docking_class_children import *
 from autogrow.docking.docking_class.parent_dock_class import ParentDocking
-# from autogrow.docking.docking_class.docking_class_children import VinaDocking, QuickVina2Docking
+# from autogrow.docking.docking_class.docking_class_children \
+#                           import VinaDocking, QuickVina2Docking
 
 from autogrow.docking.docking_class.docking_file_conversion import *
 from autogrow.docking.docking_class.parent_pdbqt_converter import ParentPDBQTConverter
-# from autogrow.docking.docking_class.docking_file_conversion import convert_with_obabel, convert_with_mgltools
+# from autogrow.docking.docking_class.docking_file_conversion \
+#                           import convert_with_obabel, convert_with_mgltools
 
 
 def pick_docking_class_dict(dock_choice):
@@ -33,8 +35,8 @@ def pick_docking_class_dict(dock_choice):
 
     child_dict = {}
     for child in children:
-        childName = child.__name__
-        child_dict[childName] = child
+        child_name = child.__name__
+        child_dict[child_name] = child
 
     return child_dict[dock_choice]
 
@@ -57,14 +59,14 @@ def pick_run_conversion_class_dict(conversion_choice):
 
     child_dict = {}
     for child in children:
-        childName = child.__name__
-        child_dict[childName] = child
+        child_name = child.__name__
+        child_dict[child_name] = child
 
     return child_dict[conversion_choice]
 
 
 def run_docking_common(vars, current_gen_int, current_generation_dir,
-    smile_file_new_gen):
+                       smile_file_new_gen):
     """
     This section runs the functions common to all Docking programs.
 

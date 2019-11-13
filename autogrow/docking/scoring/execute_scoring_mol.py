@@ -1,7 +1,8 @@
-import __future__
+"""
+This function handles the scoring/rescoring of docked molecules.
+"""
 
-import glob
-import copy
+import __future__
 
 from autogrow.docking.docking_class.get_child_class import get_all_subclasses
 
@@ -26,8 +27,8 @@ def pick_run_class_dict(scoring_choice):
 
     child_dict = {}
     for child in children:
-        childName = child.__name__
-        child_dict[childName] = child
+        child_name = child.__name__
+        child_dict[child_name] = child
     return child_dict[scoring_choice]
 
 
@@ -266,7 +267,7 @@ def make_lig_score_dictionary(list_of_list_of_lig_data):
 
 
 def score_files_multithread(scoring_object, file_path, rescore_lig_efficiency,
-    lig_efficiency_scoring_object):
+                             lig_efficiency_scoring_object):
     """
     Run the scoring of a single molecule.
 
@@ -336,5 +337,3 @@ def make_dict_of_smiles(smile_file):
             smiles_dict[lig_name_short] = split_line
 
     return smiles_dict
-
-

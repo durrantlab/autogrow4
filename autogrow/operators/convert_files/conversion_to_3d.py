@@ -144,7 +144,7 @@ def convert_smi_to_sdfs_with_gypsum(vars, gen_smiles_file, smile_file_directory)
         os.makedirs(gypsum_log_path)
 
     # Make All of the json files to submit to gypsum
-    list_of_jsons = make_smifile_and_gyspum_submitfile(
+    list_of_jsons = make_smi_and_gyspum_submit(
         gen_smiles_file,
         folder_path,
         gypsum_output_folder_path,
@@ -161,8 +161,8 @@ def convert_smi_to_sdfs_with_gypsum(vars, gen_smiles_file, smile_file_directory)
         python_path = "python"
     else:
         if (
-            vars["python_path"] != "python"
-            and os.path.exists(vars["python_path"]) is False
+                vars["python_path"] != "python"
+                and os.path.exists(vars["python_path"]) is False
         ):
             printout = "python path provided was not found."
             printout = printout + "\n\t{}".format(vars["python_path"])
@@ -212,9 +212,10 @@ def convert_smi_to_sdfs_with_gypsum(vars, gen_smiles_file, smile_file_directory)
     return gypsum_output_folder_path
 
 
-def make_smifile_and_gyspum_submitfile(gen_smiles_file, folder_path,
-    gypsum_output_folder_path, max_variance, gypsum_thoroughness, min_ph,
-    max_ph, pka_precision):
+def make_smi_and_gyspum_submit(gen_smiles_file, folder_path,
+                               gypsum_output_folder_path, max_variance,
+                               gypsum_thoroughness, min_ph, max_ph,
+                               pka_precision):
     """
     Make an individual .json file to submit to Gypsum for every ligand in the
     .smi file. It then executes gypsum for every .json file. This also makes a
@@ -272,16 +273,16 @@ def make_smifile_and_gyspum_submitfile(gen_smiles_file, folder_path,
             elif len(ligand_name.split(")")) == 1:
                 lig_name_short = ligand_name
             else:
-                printout = "Ligand name failed to abridge. Smiles may be named in improper format \
-                            please seperate with _ or camelcase. Our formatting is: \
-                            (Gen_30_Cross_639427+Gen_31_Cross_717928)Gen_34_Cross_709666 \
-                            which reads as Gen_34_Cross_709666 (aka ligand 709666) \
+                printout = "Ligand name failed to abridge. Smiles may be \
+                            named in improper format please seperate with _ \
+                            or camelcase. Our formatting is: \
+                            (Gen_2_Cross_631+Gen_3_Cross_744)Gen_4_Cross_702 \
+                            which reads as Gen_34_Cross_702 (aka ligand 702) \
                             was produced by crossover using ligands: \
-                            Gen_30_Cross_639427 and Gen_31_Cross_717928. \
-                            This will abridge to Gen_34_Cross_709666 for saving files.\n\
-                            The failed ligand name was {}".format(
-                    ligand_name
-                )
+                            Gen_2_Cross_631 and Gen_3_Cross_744. \
+                            This will abridge to Gen_4_Cross_702 for saving \
+                            files.\nThe failed ligand name was \
+                            {}".format(ligand_name)
 
                 print(printout)
                 raise Exception(printout)
@@ -331,7 +332,7 @@ def make_smifile_and_gyspum_submitfile(gen_smiles_file, folder_path,
 
 
 def run_gypsum_multiprocessing_mpi(gypsum_log_path, json_path, timeout_option,
-    gypsum_timeout_limit, python_path):
+                                   gypsum_timeout_limit, python_path):
     """
     This converts the a single ligand from a SMILE to a 3D SDF using Gypsum.
     This is used within a multithread.
@@ -420,12 +421,12 @@ def run_gypsum_multiprocessing_mpi(gypsum_log_path, json_path, timeout_option,
         return lig_id
     elif did_gypsum_complete is None:
         return lig_id
-    else:
-        return None
+    
+    return None
 
 
 def run_gypsum_multiprocessing(gypsum_log_path, json_path, timeout_option,
-    gypsum_timeout_limit, python_path):
+                               gypsum_timeout_limit, python_path):
     """
     This converts the a single ligand from a SMILE to a 3D SDF using Gypsum.
     This is used within a multithread.
@@ -559,9 +560,8 @@ def convert_sdf_to_pdbs(vars, gen_folder_path, sdfs_folder_path):
 
     files = []
 
-    if os.path.isdir(
-        sdfs_folder_path
-    ):  # so it's a directory, go through the directory and find all the sdf files
+    if os.path.isdir(sdfs_folder_path):
+        # so it's a directory, go through the directory and find all the sdf files
         if sdfs_folder_path[-1:] != os.sep:
             sdfs_folder_path = (
                 sdfs_folder_path + os.sep

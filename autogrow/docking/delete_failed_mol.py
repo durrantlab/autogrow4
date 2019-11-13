@@ -1,11 +1,13 @@
-# Deletion.py
+"""
+delete_failed_mol.py deletes all files associated with a ligand
+This is done to clean up failed attempts to dock.
+"""
 #######################
 # Delete extra ligands #
 ########################
 
 import glob
 import os
-import random
 
 
 def delete_all_associated_files(pdb_filename):

@@ -41,11 +41,11 @@ def make_run_class_dict(filters_to_use):
 
     child_dict = {}
     for child in children:
-        childObject = child()
-        childName = childObject.get_name()
+        child_object = child()
+        child_name = child_object.get_name()
 
-        if childName in filters_to_use:
-            child_dict[childName] = childObject
+        if child_name in filters_to_use:
+            child_dict[child_name] = child_object
 
     return child_dict
 
@@ -72,8 +72,8 @@ def run_filter(vars, list_of_new_ligands):
 
     # make a list of tuples for multi-processing Filter
     job_input = []
-    for smile_info in list_of_new_ligands:
-        temp_tuple = tuple([smile_info, filter_object_dict])
+    for smiles_info in list_of_new_ligands:
+        temp_tuple = tuple([smiles_info, filter_object_dict])
         job_input.append(temp_tuple)
     job_input = tuple(job_input)
 
@@ -85,25 +85,25 @@ def run_filter(vars, list_of_new_ligands):
     return ligands_which_passed_filter
 
 
-def run_filter_mol(smile_info, child_dict):
+def run_filter_mol(smiles_info, child_dict):
     """
     This takes a smiles_string and the selected filter list (child_dict) and
     runs it through the selected filters.
 
     Inputs:
-    :param list smile_info: A list with info about a ligand, the SMILES string
-        is idx=0 and the name/ID is idx=1. example: smile_info
+    :param list smiles_info: A list with info about a ligand, the SMILES string
+        is idx=0 and the name/ID is idx=1. example: smiles_info
         ["CCCCCCC","zinc123"]
     :param dict child_dict: This dictionary contains all the names of the
         chosen filters as keys and the the filter objects as the items Or None if
         User specifies no filters
 
     Returns:
-    :returns: list smile_info: list of the smile_info if it passed the filter.
+    :returns: list smiles_info: list of the smiles_info if it passed the filter.
         returns None If the mol fails a filter.
     """
 
-    smiles_string = smile_info[0]
+    smiles_string = smiles_info[0]
 
     mol = Chem.MolFromSmiles(smiles_string, sanitize=False)
     # try sanitizing, which is necessary later
@@ -126,10 +126,11 @@ def run_filter_mol(smile_info, child_dict):
         # see if passed
         if filter_result is False:
             return None
-        else:
-            return smile_info
-    else:
-        return smile_info
+        # it passed return the smiles_info
+        return smiles_info
+
+    # This will return None
+    return smiles_info
 
 
 def run_filter_on_just_smiles(smile_string, child_dict):
@@ -138,7 +139,7 @@ def run_filter_on_just_smiles(smile_string, child_dict):
     runs it through the selected filters.
 
     Inputs:
-    :param str smile_string: A smiles_string. example: smile_info
+    :param str smile_string: A smiles_string. example: smiles_info
         ["CCCCCCC","zinc123"]
     :param dict child_dict: This dictionary contains all the names of the
         chosen filters as keys and the the filter objects as the items Or None if
@@ -166,10 +167,10 @@ def run_filter_on_just_smiles(smile_string, child_dict):
         # see if passed
         if filter_result is False:
             return False
-        else:
-            return smile_string
-    else:
+        # it passed return the smiles_info
         return smile_string
+    # return the smile string
+    return smile_string
 
 
 def run_all_selected_filters(mol, child_dict):
@@ -201,5 +202,6 @@ def run_all_selected_filters(mol, child_dict):
 
     if filters_failed == 0:
         return True
-    else:
-        return False
+
+    # failed one or more filters
+    return False

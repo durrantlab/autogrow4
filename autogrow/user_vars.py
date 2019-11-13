@@ -1501,9 +1501,9 @@ def make_complete_children_dict(purpose_of_object):
     children = get_all_subclasses(parent_object)
     child_dict = {}
     for child in children:
-        childObject = child()
-        childName = childObject.get_name()
-        child_dict[childName] = childObject
+        child_object = child()
+        child_name = child_object.get_name()
+        child_dict[child_name] = child_object
 
     return child_dict
 
