@@ -168,7 +168,7 @@ def remove_bonds(mol, list_of_atomiso_bondsets_to_remove):
         if new_mol is None:
             return None
     new_mol = MOH.check_sanitization(new_mol)
-    if new_mol== None:
+    if new_mol is None:
         return None
     else:
         return new_mol
