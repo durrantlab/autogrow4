@@ -85,7 +85,7 @@ class QuickVina2Docking(VinaDocking):
             )
 
             docking_executable = (
-                docking_executable_directory + "q_vina_02{}qvina2.1".format(os.sep)
+                docking_executable_directory + "q_vina_2{}qvina2.1".format(os.sep)
             )
 
         else:

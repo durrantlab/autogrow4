@@ -33,7 +33,7 @@ class ScoringTests(unittest.TestCase):
         self.str = '4'
         self.vars = {'filename_of_receptor': "/home/jacob/Documents/autogrow4/cdc73/3v46.pdb", 'dock_choice': 'QuickVina2Docking', \
         'nn1_script': '/home/jacob/Documents/autogrow4/autogrow/docking/scoring/nn_score_exe/nnscore1/NNScore.py',\
-        'docking_executable': '/home/jacob/Documents/autogrow4/autogrow/docking/docking_executables/q_vina_02/q_vina_02', 'size_y': 30.0, 'size_z': 30.0, 'rxn_library': "click_chem_rxns", \
+        'docking_executable': '/home/jacob/Documents/autogrow4/autogrow/docking/docking_executables/q_vina_2/q_vina_02', 'size_y': 30.0, 'size_z': 30.0, 'rxn_library': "click_chem_rxns", \
         'rxn_library_file': '', 'output_directory': '/home/jacob/Desktop/Outputfolder/Run_1/', \
         'num_generations': 2, 'top_mols_to_seed_next_generation': 1, 'scoring_function': 'VINA', \
         'root_output_folder': '/home/jacob/Desktop/Outputfolder/', 'diversity_seed_depreciation_per_gen': 1, \
