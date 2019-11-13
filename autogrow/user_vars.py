@@ -205,7 +205,7 @@ def check_for_required_inputs(input_params):
     if "docking_exhaustiveness" in list(input_params.keys()):
         if input_params["docking_exhaustiveness"] == "None":
             input_params["docking_exhaustiveness"] = None
-        if input_params["docking_exhaustiveness"] != None:
+        if input_params["docking_exhaustiveness"] is not None:
 
             try:
                 input_params["docking_exhaustiveness"] = int(
@@ -225,7 +225,7 @@ def check_for_required_inputs(input_params):
     if "docking_num_modes" in list(input_params.keys()):
         if input_params["docking_num_modes"] == "None":
             input_params["docking_num_modes"] = None
-        if input_params["docking_num_modes"] != None:
+        if input_params["docking_num_modes"] is not None:
             try:
                 input_params["docking_num_modes"] = int(
                     input_params["docking_num_modes"]
@@ -876,7 +876,7 @@ def load_in_commandline_parameters(argv):
             )
         if (
             type(vars["custom_docking_script"]) != list
-            or os.path.exists(vars["custom_docking_script"][1]) != True
+            or os.path.exists(vars["custom_docking_script"][1]) is not True
         ):
             raise ValueError(
                 "TO USE Custom DOCKING OPTION, MUST SPECIFY THE \
@@ -886,7 +886,7 @@ def load_in_commandline_parameters(argv):
     if vars["conversion_choice"] == "Custom":
         if (
             type(vars["custom_conversion_script"]) != list
-            or os.path.exists(vars["custom_conversion_script"][1]) != True
+            or os.path.exists(vars["custom_conversion_script"][1]) is not True
         ):
 
             raise ValueError(
@@ -897,7 +897,7 @@ def load_in_commandline_parameters(argv):
     if vars["scoring_choice"] == "Custom":
         if (
             type(vars["custom_scoring_script"]) != list
-            or os.path.exists(vars["custom_scoring_script"][1]) != True
+            or os.path.exists(vars["custom_scoring_script"][1]) is not True
         ):
 
             raise ValueError(
@@ -1279,7 +1279,7 @@ def handle_custom_inputs_if_argparsed(input_params):
     if "alternative_filter" not in input_params.keys():
         input_params["alternative_filter"] = None
     if (
-        input_params["alternative_filter"] != None
+        input_params["alternative_filter"] is not None
         and input_params["alternative_filter"] != []
     ):
         orginal = input_params["alternative_filter"][0]
@@ -1359,7 +1359,7 @@ def handle_alternative_filters(vars, filter_list):
         as the name of that class and place that file in the same folder as the
         other filter classes.
     """
-    if vars["alternative_filter"] != None:
+    if vars["alternative_filter"] is not None:
         if type(vars["alternative_filter"]) != list:
             raise Exception(
                 "If you want to add Custom filters to the filter \
@@ -1525,7 +1525,7 @@ def handle_custom_conversion_script(vars):
     """
     need_restart = False
     printout = ""
-    if vars["custom_conversion_script"] != None:
+    if vars["custom_conversion_script"] is not None:
         if type(vars["custom_conversion_script"]) != list:
             print(vars["custom_conversion_script"])
             raise Exception(
@@ -1654,7 +1654,7 @@ def handle_custom_docking_script(vars):
     """
     need_restart = False
     printout = ""
-    if vars["custom_docking_script"] != None:
+    if vars["custom_docking_script"] is not None:
         if type(vars["custom_docking_script"]) != list:
             print(vars["custom_docking_script"])
             raise Exception(
@@ -1784,7 +1784,7 @@ def handle_custom_scoring_script(vars):
     """
     need_restart = False
     printout = ""
-    if vars["custom_scoring_script"] != None:
+    if vars["custom_scoring_script"] is not None:
         if type(vars["custom_scoring_script"]) != list:
             print(vars["custom_scoring_script"])
             raise Exception(

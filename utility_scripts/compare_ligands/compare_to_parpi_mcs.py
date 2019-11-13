@@ -70,7 +70,7 @@ if __name__ == "__main__":
     # Convert Strings to RDKIT mol objects and append to end of each ligands list
     job_input = [[line] for line in usable_list]
     mol_usable_list = mp.multi_threading(job_input, -1,  add_mol_to_list)
-    mol_usable_list = [x for x in mol_usable_list if x!= None]
+    mol_usable_list = [x for x in mol_usable_list if x is not None]
     # This will be used to check rdkit types later
     rdkit_obj_type = type(mol_usable_list[0][-1])
 

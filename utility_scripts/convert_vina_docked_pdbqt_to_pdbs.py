@@ -80,14 +80,14 @@ def run_conversion_for_a_vina_file(vina_file, output_folder, max_num_of_poses, m
                     except:
                         raise Exception("Score not in remark line for {}".format(vina_file))
                     
-                    if max_docking_score != None:
+                    if max_docking_score is not None:
                         if score > max_docking_score:
                             terminate_run = True
                             write_pose = False
                             break
 
 
-                    if min_docking_score != None:
+                    if min_docking_score is not None:
                         if score < min_docking_score:
                             # This score is bellow the minimum but the poses after may not be docked as well.
                             # Normally this should be a stop but may be useful for studying poor poses...
@@ -203,19 +203,19 @@ def get_arguments_from_argparse(ARGS_DICT):
             ARGS_DICT["output_folder"] = os.path.abspath(ARGS_DICT["output_folder"]) + os.sep
 
     # handle max_num_of_poses
-    if ARGS_DICT["max_num_of_poses"] != None:
+    if ARGS_DICT["max_num_of_poses"] is not None:
         if type(ARGS_DICT["max_num_of_poses"]) != float or type(ARGS_DICT["max_num_of_poses"]) != int:
             raise Exception("max_num_of_poses must be a int or None")
         elif type(ARGS_DICT["max_num_of_poses"]) == float:
             ARGS_DICT["max_num_of_poses"] = int(ARGS_DICT["max_num_of_poses"])
     # handle max_docking_score
-    if ARGS_DICT["max_docking_score"] != None:
+    if ARGS_DICT["max_docking_score"] is not None:
         if type(ARGS_DICT["max_docking_score"]) != float or type(ARGS_DICT["max_docking_score"]) != int:
             raise Exception("max_docking_score must be a float or None")
         elif type(ARGS_DICT["max_docking_score"]) == int:
             ARGS_DICT["max_docking_score"] = float(ARGS_DICT["max_num_of_poses"])
     # handle min_docking_score
-    if ARGS_DICT["min_docking_score"] != None:
+    if ARGS_DICT["min_docking_score"] is not None:
         if type(ARGS_DICT["min_docking_score"]) != float or type(ARGS_DICT["min_docking_score"]) != int:
             raise Exception("min_docking_score must be a float or None")
         elif type(ARGS_DICT["min_docking_score"]) == int:

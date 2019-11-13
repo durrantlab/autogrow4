@@ -273,7 +273,7 @@ class VinaDocking(ParentDocking):
 
         # Add optional user variables additional variable
         if (
-            vars["docking_exhaustiveness"] != None
+            vars["docking_exhaustiveness"] is not None
             and vars["docking_exhaustiveness"] != "None"
         ):
             if (
@@ -285,7 +285,7 @@ class VinaDocking(ParentDocking):
                     + " --exhaustiveness "
                     + str(int(vars["docking_exhaustiveness"]))
                 )
-        if vars["docking_num_modes"] != None and vars["docking_num_modes"] != "None":
+        if vars["docking_num_modes"] is not None and vars["docking_num_modes"] != "None":
             if (
                 type(vars["docking_num_modes"]) == int
                 or type(vars["docking_num_modes"]) == float

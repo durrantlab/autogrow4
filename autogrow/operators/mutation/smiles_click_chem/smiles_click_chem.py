@@ -747,7 +747,7 @@ class SmilesClickChem(object):
                                 is_rxn_complete = True
                                 break
                         if (
-                            reaction_product_smilestring != None
+                            reaction_product_smilestring is not None
                             and is_rxn_complete is True
                         ):
                             # REACTION WORKED!
@@ -890,7 +890,7 @@ class SmilesClickChem(object):
                             # REACTION WORKED!
                             is_rxn_complete = True
                             break
-                    if reaction_product_smilestring != None and is_rxn_complete is True:
+                    if reaction_product_smilestring is not None and is_rxn_complete is True:
                         # REACTION WORKED!
                         break
                     else:

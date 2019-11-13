@@ -82,7 +82,7 @@ def get_arguments_from_argparse(ARGS_DICT):
 
             raise Exception("provided pdbqt_file must be a .pdbqt file.")
         
-    if ARGS_DICT["output_file"] != None:
+    if ARGS_DICT["output_file"] is not None:
         if ARGS_DICT["output_file"].split(".")[-1] != "pdb" and ARGS_DICT["output_file"].split(".")[-1] != "PDB":
             raise Exception("provided output_file must be a .pdb file.") 
 

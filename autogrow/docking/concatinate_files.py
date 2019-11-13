@@ -7,7 +7,6 @@ import __future__
 
 import glob
 import os
-import copy
 import gzip
 import shutil
 
@@ -72,7 +71,7 @@ def seperate_files(compressed_file):
     with open(decompressed_file, "r") as f:
         for line in f.readlines():
             if "$$END_FILE$$" in line:
-                if out_file != None and os.path.exists(out_file) is False:
+                if out_file is not None and os.path.exists(out_file) is False:
                     with open(out_file, "w") as f:
                         f.write(printout + "\n")
                 out_file = None
@@ -169,7 +168,8 @@ def run_concatination(parallelizer_object, directory):
 
     concat_file = directory + os.sep + "compresed_PDBS.txt"
     print(
-        "Start Concatination: To seperate files use the file_concatination_and_compression.py in the Utility script folder."
+        "Start Concatination: To seperate files use the \
+        file_concatination_and_compression.py in the Utility script folder."
     )
     file_list = glob.glob(directory + os.sep + "*")
     file_list = [os.path.abspath(x) for x in file_list]

@@ -84,7 +84,7 @@ def run_scoring_common(vars, smile_file, folder_to_search):
     # Run Rescoring If applicable (All classes should have this even if its
     # just returning None)
     files_to_score = run_rescoring(vars, scoring_object, files_to_score)
-    files_to_score = [x for x in files_to_score if x != None]
+    files_to_score = [x for x in files_to_score if x is not None]
 
     # Determine if the values from the Scoring function should be adjusted by
     # the number of non-H atoms in the ligand ie) rescoring_lig_efficiency
@@ -159,7 +159,7 @@ def run_rescoring(vars, scoring_object, files_to_score):
         scoring function.
     """
 
-    files_to_score = [x for x in files_to_score if x != None]
+    files_to_score = [x for x in files_to_score if x is not None]
 
     # Run Rescoring If applicable (All classes should have this even if its
     # just returning None)
@@ -178,7 +178,7 @@ def run_rescoring(vars, scoring_object, files_to_score):
     if results_rescore[0] == "Not Applicable":
         return files_to_score
 
-    results_rescore = [x for x in results_rescore if x != None]
+    results_rescore = [x for x in results_rescore if x is not None]
     completed_rescore = [x[0] for x in results_rescore if x[1] is True]
     failed_to_rescore = [x[0] for x in results_rescore if x[1] is False]
 

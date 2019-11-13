@@ -148,7 +148,7 @@ def populate_generation(vars, generation_num):
             break
         else:
             # Remove Nones:
-            new_mutants = [x for x in new_mutants if x != None]
+            new_mutants = [x for x in new_mutants if x is not None]
 
             for i in new_mutants:
                 new_mutation_smiles_list.append(i)
@@ -234,7 +234,7 @@ def populate_generation(vars, generation_num):
             break
         else:
             # Remove Nones:
-            new_crossovers = [x for x in new_crossovers if x != None]
+            new_crossovers = [x for x in new_crossovers if x is not None]
 
         # append those which passed the filter
         for i in new_crossovers:
@@ -705,7 +705,7 @@ def get_complete_list_prev_gen_or_source_compounds(vars, generation_num):
         usable_list_of_smiles = Filter.run_filter(vars, usable_list_of_smiles)
 
     # Remove Nones:
-    usable_list_of_smiles = [x for x in usable_list_of_smiles if x != None]
+    usable_list_of_smiles = [x for x in usable_list_of_smiles if x is not None]
 
     if len(usable_list_of_smiles) == 0:
         printout = "\nThere were no ligands in source compound which passed the User-selected Filters.\n"
@@ -922,11 +922,11 @@ def make_pass_through_list(vars, smiles_from_previous_gen_list,
         )
         # Remove Nones:
         ligands_which_passed_filters = [
-            x for x in ligands_which_passed_filters if x != None
+            x for x in ligands_which_passed_filters if x is not None
         ]
     else:
         ligands_which_passed_filters = [
-            x for x in smiles_from_previous_gen_list if x != None
+            x for x in smiles_from_previous_gen_list if x is not None
         ]
     # If not enough of your previous generation sanitize to make the list
     # Return None and trigger an Error

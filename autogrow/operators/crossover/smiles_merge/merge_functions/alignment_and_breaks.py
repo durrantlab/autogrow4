@@ -1,3 +1,4 @@
+"""This handles alignment and ring breaks for Crossover"""
 import __future__
 
 import random
@@ -165,7 +166,7 @@ def check_cyclic_breaks(alignment_tuple, mol_1, mol_2, core):
         # ring breaks can occur when an atom in either lig is a ring atom
         # but the common substructure has that as a non-ring atom
         if atom_c.IsInRing() is False and (
-            atom1.IsInRing() is True or atom2.IsInRing() is True
+                atom1.IsInRing() is True or atom2.IsInRing() is True
         ):
             mcs_ringbreak_idx.append(l1)
             mol_1_ringbreak_idx.append(l2)
@@ -230,7 +231,7 @@ def check_cyclic_breaks(alignment_tuple, mol_1, mol_2, core):
         # removed from mcs.
         count = 0
         for l1, l2, c1 in zip(
-            alignment_tuple[0], alignment_tuple[1], alignment_tuple[2]
+                alignment_tuple[0], alignment_tuple[1], alignment_tuple[2]
         ):
             if c1 not in all_atoms_to_delete:
                 new_align_list_l1.append(l1)
@@ -240,9 +241,10 @@ def check_cyclic_breaks(alignment_tuple, mol_1, mol_2, core):
         new_align_tuple = (new_align_list_l1, new_align_list_l2, new_align_list_c1)
         did_a_ring_break = True
         return new_core, new_align_tuple, did_a_ring_break
-    else:
-        did_a_ring_break = False
-        return core, alignment_tuple, did_a_ring_break
+
+    # len(mcs_ringbreak_idx) less than or equal to 0
+    did_a_ring_break = False
+    return core, alignment_tuple, did_a_ring_break
 
 
 def ringbreak_frag_handling(new_core, mcs_ringbreak_idx):
@@ -288,9 +290,9 @@ def ringbreak_frag_handling(new_core, mcs_ringbreak_idx):
         for i in list_of_frag_idxs:
             if i == largest_frag_index_num:
                 continue
-            else:
-                frag = check_fragmentation[int(i)]
-                list_frag_mols.append(frag)
+
+            frag = check_fragmentation[int(i)]
+            list_frag_mols.append(frag)
 
         # get the idx for all atoms in all frags EXCEPT THE LARGEST FRAG.
         # these will be the idx's of the original common core, before deleting
@@ -310,8 +312,7 @@ def ringbreak_frag_handling(new_core, mcs_ringbreak_idx):
         return iso_core_frag_list
 
     # if no fragmentation occured
-    else:
-        return iso_core_frag_list
+    return iso_core_frag_list
 
 
 #
@@ -458,9 +459,8 @@ def pick_mcs_alignment(mol_1, mol_2, common_core):
     else:
         if len(all_drug_pairings) == 0 or type(all_drug_pairings[0]) != tuple:
             return None
-        else:
-            if len(all_drug_pairings[0]) == 0:
-                return None
+        if len(all_drug_pairings[0]) == 0:
+            return None
 
     # chose an alignment
     alignment_choice = random.choice(all_drug_pairings)
@@ -498,7 +498,7 @@ def add_mcs_isolabels(mol_1, mol_2, common_core, picked_alignment):
     i = 0
     index_list = []
     for lig1, lig2, c1 in zip(
-        picked_alignment[0], picked_alignment[1], picked_alignment[2]
+            picked_alignment[0], picked_alignment[1], picked_alignment[2]
     ):
         atom1 = mol_1.GetAtomWithIdx(lig1)
         atom2 = mol_2.GetAtomWithIdx(lig2)

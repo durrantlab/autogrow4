@@ -78,7 +78,7 @@ def seperate_files(compressed_file, outfolder):
     with open(decompressed_file, "r") as f:
         for line in f.readlines():
             if "$$END_FILE$$" in line:
-                if out_file != None and os.path.exists(out_file) is False:
+                if out_file is not None and os.path.exists(out_file) is False:
                     with open(out_file, "w") as f:
                         f.write(printout + "\n")
                 out_file = None

@@ -13,7 +13,7 @@
     "number_of_mutants": 3,
     "number_of_crossovers": 3,
     "number_elitism_advance_from_previous_gen": 3,
-    "top_mols_to_seed_next_generation": 1,
+    "top_mols_to_seed_next_generation": 5,
     "diversity_mols_to_seed_first_generation": 3,
     "diversity_seed_depreciation_per_gen": 0,
     "num_generations": 2,
@@ -30,6 +30,5 @@
     "rxn_library": "click_chem_rxns",
     "rescore_lig_efficiency": true,
     "dock_choice": "VinaDocking",
-    "multithread_mode": "mpi",
     "conversion_choice": "ObabelConversion"
 }
