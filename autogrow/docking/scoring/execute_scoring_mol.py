@@ -6,6 +6,7 @@ import __future__
 
 from autogrow.docking.docking_class.get_child_class import get_all_subclasses
 
+# importing scoring_functions is necessary to find rescoring modules
 import autogrow.docking.scoring.scoring_classes.scoring_functions
 from autogrow.docking.scoring.scoring_classes.parent_scoring_class import ParentScoring
 
@@ -267,7 +268,7 @@ def make_lig_score_dictionary(list_of_list_of_lig_data):
 
 
 def score_files_multithread(scoring_object, file_path, rescore_lig_efficiency,
-                             lig_efficiency_scoring_object):
+                            lig_efficiency_scoring_object):
     """
     Run the scoring of a single molecule.
 
