@@ -296,7 +296,7 @@ Running AutoGrow:
                     --mgltools_directory $PATH/mgltools_x86_64Linux2_1.5.6/ \
                     --number_of_processors -1 \
                     --scoring_choice VINA \
-                    --LipinskiLenient \
+                    --LipinskiLenientFilter \
                     --start_a_new_run \
                     --rxn_library ClickChem \
                     --selector_choice Rank_Selector \

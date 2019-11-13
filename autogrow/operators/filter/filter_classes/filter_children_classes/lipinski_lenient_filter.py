@@ -28,7 +28,7 @@ rdkit.RDLogger.DisableLog('rdApp.*')
 from autogrow.operators.filter.filter_classes.parent_filter_class import ParentFilter
 
 
-class LipinskiLenient(ParentFilter):
+class LipinskiLenientFilter(ParentFilter):
     """
     This runs a Lenient Lipinski filter. Lipinski filter refines for orally
     available drugs. It filters molecules by Molecular weight (MW), the number

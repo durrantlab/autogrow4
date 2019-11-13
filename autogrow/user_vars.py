@@ -1,4 +1,4 @@
-"""UserVars
+"""user_vars
 This should contain the functions for defining input variables.
 Both the default variables and the user input variables.
 This should also validate them.
@@ -605,7 +605,7 @@ def define_defaults():
 
     # Filters
     vars["LipinskiStrictFilter"] = False
-    vars["LipinskiLenient"] = False
+    vars["LipinskiLenientFilter"] = False
     vars["GhoseFilter"] = False
     vars["MozziconacciFilter"] = False
     vars["VandeWaterbeemdFilter"] = False
@@ -1986,11 +1986,11 @@ def picked_filters(vars):
     else:
         vars["LipinskiStrictFilter"] = False
 
-    if "LipinskiLenient" in vars_keys:
-        if vars["LipinskiLenient"] is True:
-            filter_list.append("LipinskiLenient")
+    if "LipinskiLenientFilter" in vars_keys:
+        if vars["LipinskiLenientFilter"] is True:
+            filter_list.append("LipinskiLenientFilter")
     else:
-        vars["LipinskiLenient"] = False
+        vars["LipinskiLenientFilter"] = False
 
     if "GhoseFilter" in vars_keys:
         if vars["GhoseFilter"] is True:
@@ -2034,9 +2034,9 @@ def picked_filters(vars):
         vars["alternative_filter"] = None
 
     # if there is no user specified ligand filters but they haven't set
-    # filters to None ---> set filter to default of LipinskiLenient.
+    # filters to None ---> set filter to default of LipinskiLenientFilter.
     if len(filter_list) == 0:
-        vars["LipinskiLenient"] = True
-        filter_list.append("LipinskiLenient")
+        vars["LipinskiLenientFilter"] = True
+        filter_list.append("LipinskiLenientFilter")
 
     return filter_list, vars
