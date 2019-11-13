@@ -215,7 +215,7 @@ Dependencies:
 
                     -QuickVina2.1 (compatible with Linux OS)
                         -Version:   2.1
-                        -Location:  $PATH/autogrow4/autogrow/docking/docking_executables/q_vina_02/
+                        -Location:  $PATH/autogrow4/autogrow/docking/docking_executables/q_vina_2/
                         -Citation:  Amr Alhossary, Stephanus Daniel Handoko, Yuguang Mu, and Chee-Keong Kwoh. Bioinformatics (2015) 31 (13): 2214-2216. [DOI:10.1093/bioinformatics/btv082](https://doi.org/10.1093/bioinformatics/btv082)
                         -License:   Apache version 2
 
