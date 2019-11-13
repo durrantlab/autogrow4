@@ -1,13 +1,12 @@
+"""
+This script contains the class NN1 that rescores Vina type docking
+using the program NNScore1.
+"""
 import __future__
 
 import glob
 import os
 
-import rdkit
-import rdkit.Chem as Chem
-
-# Disable the unnecessary RDKit warnings
-rdkit.RDLogger.DisableLog("rdApp.*")
 
 from autogrow.docking.scoring.scoring_classes.parent_scoring_class import ParentScoring
 from autogrow.docking.scoring.scoring_classes.scoring_functions.vina import VINA
@@ -107,8 +106,8 @@ class NN1(VINA):
             lig_info = self.get_score_from_a_file(file_path)
             return lig_info
 
-        else:
-            return None
+        # file_path does not exist
+        return None
 
     def get_score_from_a_file(self, file_path):
         """

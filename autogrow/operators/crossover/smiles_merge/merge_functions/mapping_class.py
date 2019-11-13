@@ -1,3 +1,8 @@
+"""
+This script holds the Mapping class.
+This is used when mapping most common substructure (MCS)
+    to combine two molecules.
+"""
 import __future__
 
 import random
@@ -55,29 +60,30 @@ class Mapping(object):
     These type of decisions are handled by this class.
     """
 
-    def __init__(self, Bs_to_Is, Is_to_Bs):
+    def __init__(self, b_to_is, i_to_bs):
         """
         When a Mapping object is initialized, it imports 2 input dictionaries,
         which can be referenced throughout the class.
 
         Inputs:
-        :param dict Bs_to_Is: Dictionary converting B-groups to anchor/node/I
+        :param dict b_to_is: Dictionary converting B-groups to anchor/node/I
             atoms. This contains groups from both parent molecules. This is the
-            inveBse of Is_to_Bs. keys are B-groups; items are the anchor atoms
+            inverse of i_to_bs. keys are B-groups; items are the anchor atoms
             isotope label. ie) {'1B1': [10003], '2B3': [10005], '2B2': [10003],
             '2B1': [10002]}
-        :param dict Is_to_Bs: Dictionary converting Anchor/node/I atoms to
+        :param dict i_to_bs: Dictionary converting Anchor/node/I atoms to
             corresponding B-groups. This contains groups from both parent
-            molecules. This is the inveBse of Bs_to_Is. keys are the anchor atoms
+            molecules. This is the inverse of b_to_is. keys are the anchor
+            atoms
             isotope labels; items are B-groups ie) {10002: ['2B1'], 10003: ['1B1',
             '2B2'], 10005: ['2B3']}
         """
 
-        self.Bs_to_Is = copy.deepcopy(
-            Bs_to_Is
+        self.b_to_is = copy.deepcopy(
+            b_to_is
         )  # B-I mapping dictionary from outside class
-        self.Is_to_Bs = copy.deepcopy(
-            Is_to_Bs
+        self.i_to_bs = copy.deepcopy(
+            i_to_bs
         )  # I-B mapping dictionary from outside class
 
     def locate_b(self, i):
@@ -87,13 +93,13 @@ class Mapping(object):
 
         Inputs:
         :param int i: the isolabel of an anchor atom which will be used to
-            search for B-groups within self.Is_to_Bs.
+            search for B-groups within self.i_to_bs.
 
         Returns
-        :returns: list self.Is_to_Bs[i]: A list of all the B-groups, from both
+        :returns: list self.i_to_bs[i]: A list of all the B-groups, from both
             parent ligands which are bound to that anchor. ie) ['1B1','2B1']
         """
-        return self.Is_to_Bs[i]
+        return self.i_to_bs[i]
     #
 
     def locate_i(self, b):
@@ -101,46 +107,46 @@ class Mapping(object):
         Given a specified B-group return the anchor/I/node it connects to.
 
         Inputs:
-        :param str b: the name of a B-groups within self.Bs_to_Is.
+        :param str b: the name of a B-groups within self.b_to_is.
 
         Returns
-        :returns: list self.Bs_to_Is[b]: A list of the anchor the given
+        :returns: list self.b_to_is[b]: A list of the anchor the given
             B-groups is bound. ie) [10001]
         """
-        return self.Bs_to_Is[b]
+        return self.b_to_is[b]
     #
 
     def delete_b(self, b):
         """
-        Removes the b from Bs_to_Is and all references to b in Is_to_Bs.
-            b is a Key in Bs_to_Is. B is one or more items in Is_to_Bs.
+        Removes the b from b_to_is and all references to b in i_to_bs.
+            b is a Key in b_to_is. B is one or more items in i_to_bs.
 
         Inputs:
-        :param str b: A B-group to be removed from the Bs_to_Is and B in
-            Is_to_Bs dicts.
+        :param str b: A B-group to be removed from the b_to_is and B in
+            i_to_bs dicts.
         """
 
-        Is_to_modify = self.locate_i(b)
-        for i in Is_to_modify:
-            blank = self.Is_to_Bs[i].remove(b)
-        del self.Bs_to_Is[b]
+        i_list_to_modify = self.locate_i(b)
+        for i in i_list_to_modify:
+            blank = self.i_to_bs[i].remove(b)
+        del self.b_to_is[b]
     #
 
     def delete_i(self, i):
         """
-        Removes the i from Is_to_Bs and all references to i in Bs_to_Is. i is
-            a Key in Is_to_Bs. i is one or more items in Bs_to_Is.
+        Removes the i from i_to_bs and all references to i in b_to_is. i is
+            a Key in i_to_bs. i is one or more items in b_to_is.
 
         Inputs:
         :param int i: An interger representing the isolabel for an
-            anchor/node/i atom to be removed from the Bs_to_Is and b in Is_to_Bs
+            anchor/node/i atom to be removed from the b_to_is and b in i_to_bs
             dicts.
         """
 
-        Bs_to_modify = self.locate_b(i)
-        for b in Bs_to_modify:
-            self.Bs_to_Is[b].remove(i)
-        del self.Is_to_Bs[i]
+        bs_to_modify = self.locate_b(i)
+        for b in bs_to_modify:
+            self.b_to_is[b].remove(i)
+        del self.i_to_bs[i]
     #
 
     def chose_b_from_i(self, i):
@@ -173,7 +179,7 @@ class Mapping(object):
             to this anchor in the child molecule.
 
         Returns:
-        :returns: str B_x: A string of the name of a chosen B-group; None if
+        :returns: str b_x: A string of the name of a chosen B-group; None if
             not in the dictionary or if there is no available choices
         """
 
@@ -259,55 +265,59 @@ class Mapping(object):
         #  against shrinking the child molecule
 
         # Select an B to keep
-        if i in list(self.Is_to_Bs.keys()):
+        if i in list(self.i_to_bs.keys()):
 
             options = self.locate_b(i)
             if len(options) > 1:
-                B_x = random.choice(options)
+                b_x = random.choice(options)
             elif len(options) == 1:
-                B_x = options[0]
+                b_x = options[0]
             else:
-                return 'None'
+                return  "None"
 
-            list_Is = self.locate_i(B_x)
-            list_Bs = []
-            for x in list_Is:
-                list_Bs.append(self.locate_b(x))
+            list_is = self.locate_i(b_x)
+            list_bs = []
+            for x in list_is:
+                list_bs.append(self.locate_b(x))
 
-            flattened = [val for sublist in list_Bs for val in sublist]
-            unique_Bs = list(
+            flattened = [val for sublist in list_bs for val in sublist]
+            unique_bs = list(
                 set(flattened)
             )  # convert list to set to list to remove redundant B's
             # delete the B's and I's
-            for b in unique_Bs:
+            for b in unique_bs:
                 self.delete_b(b)
 
-            for x in list_Is:
+            for x in list_is:
                 self.delete_i(x)
-            return B_x
-        else:
-            return 'None'
+            return b_x
+
+        # the i is not in list(self.i_to_bs.keys())
+        # return the string "None"
+        return "None"
 #
     def testing_function_return_self_dicts(self):
         """
-        Return the properties: self.Bs_to_Is and self.Is_to_Bs
+        Return the properties: self.b_to_is and self.i_to_bs
 
         Returns:
-        :returns: dict Bs_to_Is: Dictionary converting B-groups to
+        :returns: dict b_to_is: Dictionary converting B-groups to
             anchor/node/I atoms. This contains groups from both parent molecules.
-            This is the inveBse of Is_to_Bs. keys are B-groups; items are the
+            This is the inverse of i_to_bs. keys are B-groups; items are the
             anchor atoms isotope label. ie) {'1B1': [10003], '2B3': [10005],
             '2B2': [10003], '2B1': [10002]}
-        :returns: dict Is_to_Bs: Dictionary converting Anchor/node/I atoms to
+        :returns: dict i_to_bs: Dictionary converting Anchor/node/I atoms to
             corresponding B-groups. This contains groups from both parent
-            molecules. This is the inveBse of Bs_to_Is. keys are the anchor atoms
+            molecules. This is the inverse of b_to_is. keys are the anchor atoms
             isotope labels; items are B-groups. ie) {10002: ['2B1'], 10003:
             ['1B1', '2B2'], 10005: ['2B3']}
         """
-        return self.Bs_to_Is, self.Is_to_Bs
+        return self.b_to_is, self.i_to_bs
 
-# i_dict = {10000: ['1B1', '2B1'], 10004: ['2B2'], 10005: ['2B3'], 10006: ['2B4'], 10007: ['1B3'], 10008: ['1B2']}
-# b_dict = {'1B1': [10000], '1B2': [10008], '1B3': [10007], '2B4': [10006], '2B3': [10005], '2B2': [10004], '2B1': [10000]}
+# i_dict = {10000: ['1B1', '2B1'], 10004: ['2B2'], 10005: ['2B3'], 10006: \
+#       ['2B4'], 10007: ['1B3'], 10008: ['1B2']}
+# b_dict = {'1B1': [10000], '1B2': [10008], '1B3': [10007], '2B4': [10006], \
+# '2B3': [10005], '2B2': [10004], '2B1': [10000]}
 def run_mapping(b_dict, i_dict):
     """
     This runs the mapping class which can determine which B-groups/R-groups we
@@ -316,12 +326,12 @@ def run_mapping(b_dict, i_dict):
     Inputs:
     :param dict b_dict: Dictionary converting B-groups to anchor/node/I
         atoms. This contains groups from both parent molecules. This is the
-        inveBse of Is_to_Bs. keys are B-groups; items are the anchor atoms isotope
+        inverse of i_to_bs. keys are B-groups; items are the anchor atoms isotope
         label. ie) {'1B1': [10003], '2B3': [10005], '2B2': [10003], '2B1':
         [10002]}
     :param dict i_dict: Dictionary converting Anchor/node/I atoms to
         corresponding B-groups. This contains groups from both parent molecules.
-        This is the inveBse of Bs_to_Is. keys are the anchor atoms isotope labels;
+        This is the inverse of b_to_is. keys are the anchor atoms isotope labels;
         items are B-groups. ie) {10002: ['2B1'], 10003: ['1B1', '2B2'], 10005:
         ['2B3']}
 
@@ -329,11 +339,11 @@ def run_mapping(b_dict, i_dict):
     :returns: list bs_chosen: A list of all the chosen B-groups to be used to
         generate a child molecule later.
     """
-    aMapping = Mapping(b_dict, i_dict)
+    a_mapping_object = Mapping(b_dict, i_dict)
     bs_chosen = []
     for i in i_dict:
-        B_choice = aMapping.chose_b_from_i(i)
-        bs_chosen.append(B_choice)
+        b_choice = a_mapping_object.chose_b_from_i(i)
+        bs_chosen.append(b_choice)
 
     bs_chosen = list(set(bs_chosen))
 

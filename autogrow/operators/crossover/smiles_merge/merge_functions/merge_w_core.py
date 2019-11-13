@@ -1,3 +1,7 @@
+"""
+This script is handles the merging of two molecules and cleans up
+the molecule.
+"""
 import __future__
 
 import copy
@@ -29,7 +33,7 @@ def merge_smiles_with_core(rs_chosen_smiles, mcs_mol):
 
         mol_frag, keys are isotope label, value is Idx.
 
-        example mol_frag_iso_to_Idx_dict = {10007: 0, 10008: 8, 1013: 1, 1014: 3, 1015: 5, 1016: 7,
+        example mol_frag_iso_to_idx_dict = {10007: 0, 10008: 8, 1013: 1, 1014: 3, 1015: 5, 1016: 7,
                                            1017: 9, 1018: 6, 1019: 4, 1020: 2})
 
     Inputs:
@@ -81,27 +85,28 @@ def merge_smiles_with_core(rs_chosen_smiles, mcs_mol):
                 mol_frag = mol_frag_copy
 
             # make dict of anchor to connected atoms and bond types.
-            # example anchor_to_connection_dict = {10008: [1016, rdkit.Chem.rdchem.BondType.AROMATIC],
-            #                         10007: [1013, rdkit.Chem.rdchem.BondType.AROMATIC]})
+            # example anchor_to_connection_dict = {
+            #           10008: [1016, rdkit.Chem.rdchem.BondType.AROMATIC],
+            #           10007: [1013, rdkit.Chem.rdchem.BondType.AROMATIC]})
             anchor_to_connection_dict = make_anchor_to_bonds_and_type_for_frag(mol_frag)
 
             # Make Dict of all atoms in mol_frag, keys are isotope label,
             # value is Idx.
-            # example mol_frag_iso_to_Idx_dict = {10007: 0, 10008: 8, 1013: 1, 1014: 3, 1015: 5,
-            #                        1016: 7, 1017: 9, 1018: 6, 1019: 4, 1020: 2})
-            mol_frag_iso_to_Idx_dict = make_dict_all_atoms_iso_to_idx_dict(mol_frag)
+            # example mol_frag_iso_to_idx_dict = {10007: 0, 10008: 8, 1013: 1,
+            #   1014: 3, 1015: 5, 1016: 7, 1017: 9, 1018: 6, 1019: 4, 1020: 2})
+            mol_frag_iso_to_idx_dict = make_dict_all_atoms_iso_to_idx_dict(mol_frag)
 
             # Make list of atoms idx to remove the anchor atoms from the frag.
             # this is necessary to prevent the redundancy of multiple of the
             # same anchors once the mol_frag and the core are merged.
-            anchors_Idxs_to_remove = []
+            anchors_idxs_to_remove = []
             for anchors in list(anchor_to_connection_dict.keys()):
                 # anchors are iso numbers of 10,000 or higher
-                idx_val = mol_frag_iso_to_Idx_dict[anchors]
-                anchors_Idxs_to_remove.append(idx_val)
+                idx_val = mol_frag_iso_to_idx_dict[anchors]
+                anchors_idxs_to_remove.append(idx_val)
 
             # remove the anchor atoms from mol_frag
-            mol_frag = MOH.remove_atoms(mol_frag, anchors_Idxs_to_remove)
+            mol_frag = MOH.remove_atoms(mol_frag, anchors_idxs_to_remove)
 
             # Merge the frag with the core. ie) mol1="CCC" and mol2="CCCCCC"
             # mol3 = Chem.CombineMols(mol1,mol2); mol3 == "CCC.CCCCCC"
@@ -156,13 +161,13 @@ def make_anchor_to_bonds_and_type_for_frag(mol_frag):
     """
 
     anchor_to_connection_dict = {}
-    isos_anchors_Idxs_to_remove = []
+    isos_anchors_idxs_to_remove = []
 
     for atom in mol_frag.GetAtoms():
         if atom.GetIsotope() > 9999:  # if atom is an anchor
             iso_anchor = atom.GetIsotope()  # isotopes of the anchor atom
             anchor_idx = atom.GetIdx()  # get that atoms idx
-            isos_anchors_Idxs_to_remove.append(
+            isos_anchors_idxs_to_remove.append(
                 anchor_idx
             )  # append to list to remove later
 
@@ -225,7 +230,7 @@ def make_dict_all_atoms_iso_to_idx_dict(mol):
 
 
 def unpack_lists_of_atoms_and_bond_type(anchor_to_connection_dict, anchor_atom_iso,
-    core_merg_iso_to_idx_dict):
+                                        core_merg_iso_to_idx_dict):
     """
     Iterate through all atoms which will be bound to the anchor and unpackage
     all the bond types in a list.
@@ -316,8 +321,8 @@ def remove_all_isolabels(rw_core_merg):
 
     # If mol is wrong data type (excluding None) raise TypeError
     if (
-        type(rw_core_merg) != rdkit.Chem.rdchem.Mol
-        and type(rw_core_merg) != rdkit.Chem.rdchem.RWMol
+            type(rw_core_merg) != rdkit.Chem.rdchem.Mol
+            and type(rw_core_merg) != rdkit.Chem.rdchem.RWMol
     ):
         printout = "rw_core_merg is the wrong data type. \n"
         printout = (

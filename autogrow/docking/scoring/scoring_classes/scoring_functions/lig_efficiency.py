@@ -1,7 +1,8 @@
+"""
+This script contains the class LigEfficiency.
+This is used to rescore a fitness metric by the number of non-hydrogen atoms.
+"""
 import __future__
-
-import glob
-import os
 
 import rdkit
 import rdkit.Chem as Chem
@@ -65,7 +66,9 @@ class LigEfficiency(VINA):
             the docking score from the best pose.
         """
         # For saftey remove Nones and empty lists
-        if type(lig_info) is not type([]) or len(lig_info) == 0:
+        if type(lig_info) is not list:
+            return None
+        if len(lig_info) == 0:
             return None
 
         lig_info = append_lig_effeciency(lig_info)
@@ -79,23 +82,23 @@ class LigEfficiency(VINA):
 # These Functions are placed outside the class for multithreading reasons.
 # Multithreading doesn't like being executed within the class.
 
-def get_number_heavy_atoms(SMILES_str):
+def get_number_heavy_atoms(smiles_str):
     """
     Get the number of non Hydrogens in a SMILE
 
 
     Inputs:
-    :param str SMILES_str: a str representing a molecule
+    :param str smiles_str: a str representing a molecule
 
     Returns:
     :returns: int num_heavy_atoms: a int of the count of heavy atoms
     """
-    if SMILES_str is None:
+    if smiles_str is None:
         return None
     # easiest nearly everything should get through
 
     try:
-        mol = Chem.MolFromSmiles(SMILES_str, sanitize=False)
+        mol = Chem.MolFromSmiles(smiles_str, sanitize=False)
     except:
         mol = None
 
@@ -149,23 +152,3 @@ def append_lig_effeciency(list_of_lig_info):
     list_of_lig_info.append(str(lig_efficieny))
 
     return list_of_lig_info
-
-
-if __name__ == "__main__":
-    vars = {}
-    # vars["scoring_choice"] = 'VINA'
-    # folder_to_search = os.sep + os.path.join("home", "jspiegel", "DataB", "jspiegel", "projects", "output_autogrow_testing", "Run_11", "generation_0", "PDBs") + os.sep
-    # run_scoring_common(vars, folder_to_search)
-    smile_dict = {
-        "Gen_0_Mutant_5_203493": [
-            "COC1OC(CO)C(O)C(O)C1n1nnc(CCO)c1-c1ccc(-c2cccs2)s1",
-            "(ZINC04530731+ZINC01529972)Gen_0_Mutant_5_203493",
-        ],
-        "Gen_0_Cross_452996": [
-            "CC(=O)OCC(O)CN=[N+]=[N-]",
-            "(ZINC44117885+ZINC34601304)Gen_0_Cross_452996",
-        ],
-        "ZINC13526729": ["[N-]=[N+]=NCC1OC(O)CC1O", "ZINC13526729"],
-    }
-
-    print(append_lig_effeciency(smile_dict["Gen_0_Mutant_5_203493"]))

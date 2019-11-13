@@ -76,12 +76,12 @@ class GhoseFilter(ParentFilter):
         if 20 > num_atoms > 70:
             return False
 
-        num_H_bond_donors = Lipinski.NumHDonors(mol)
-        if num_H_bond_donors > 5:
+        num_hydrogen_bond_donors = Lipinski.NumHDonors(mol)
+        if num_hydrogen_bond_donors > 5:
             return False
 
-        num_H_bond_acceptors = Lipinski.NumHAcceptors(mol)
-        if num_H_bond_acceptors > 10:
+        num_hydrogen_bond_acceptors = Lipinski.NumHAcceptors(mol)
+        if num_hydrogen_bond_acceptors > 10:
             return False
 
         # molar Refractivity
@@ -90,8 +90,9 @@ class GhoseFilter(ParentFilter):
             return False
 
         # molar LogP
-        mol_logP = Crippen.MolLogP(mol)
-        if -0.4 > mol_logP > 5:
+        mol_log_p = Crippen.MolLogP(mol)
+        if -0.4 > mol_log_p > 5:
             return False
-        else:
-            return True
+
+        # passed all filters
+        return True

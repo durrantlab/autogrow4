@@ -21,8 +21,6 @@ import __future__
 import rdkit
 import rdkit.Chem as Chem
 import rdkit.Chem.Lipinski as Lipinski
-import rdkit.Chem.Crippen as Crippen
-import rdkit.Chem.Descriptors as Descriptors
 
 # Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog("rdApp.*")
@@ -84,5 +82,6 @@ class MozziconacciFilter(ParentFilter):
         num_rotatable_bonds = Lipinski.NumRotatableBonds(mol)
         if num_rotatable_bonds > 15:
             return False
-        else:
-            return True
+
+        # Passes everything
+        return True

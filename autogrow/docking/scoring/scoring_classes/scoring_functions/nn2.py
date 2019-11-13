@@ -1,14 +1,13 @@
+"""
+This script contains the class NN2 that rescores Vina type docking
+using the program NNScore2.
+"""
 import __future__
 
 import glob
 import os
 import sys
 
-import rdkit
-import rdkit.Chem as Chem
-
-# Disable the unnecessary RDKit warnings
-rdkit.RDLogger.DisableLog("rdApp.*")
 
 from autogrow.docking.scoring.scoring_classes.parent_scoring_class import ParentScoring
 from autogrow.docking.scoring.scoring_classes.scoring_functions.vina import VINA
@@ -107,8 +106,8 @@ class NN2(VINA):
             lig_info = self.get_score_from_a_file(file_path)
             return lig_info
 
-        else:
-            return None
+        # file_path does not exist
+        return None
 
     def get_score_from_a_file(self, file_path):
         """
@@ -150,14 +149,15 @@ class NN2(VINA):
                     try:
                         score = line.split(", ")[1]
                         score = float(score)
-                        score = score * -1.0
-
                     except:
                         continue
+
+                    # if we have a score
+                    score = score * -1.0
                     break
                 elif (
-                    "When the poses were ranked by the best of the 20 network scores"
-                    in line
+                        "When the poses were ranked by the best of the 20 network scores"
+                        in line
                 ):
                     line = f.readline()
 
@@ -179,8 +179,8 @@ class NN2(VINA):
         if score is None:
             # This file lacks a pose to use
             return None
-        else:
-            lig_info = [ligand_short_name, ligand_pose, score]
+
+        lig_info = [ligand_short_name, ligand_pose, score]
 
         # Obtain additional file
         lig_info = self.merge_smile_info_w_affinity_info(lig_info)
@@ -190,9 +190,6 @@ class NN2(VINA):
         lig_info = [str(x) for x in lig_info]
 
         return lig_info
-
-        return lig_info
-
 
 ###Outside class for multithreading
 # Run NN2 rescoring

@@ -83,7 +83,7 @@ def test_for_mcs(vars, mol_1, mol_2):
         return None
     if result.canceled is True:
         return None
-    
+
     return result
 
 

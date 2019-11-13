@@ -79,16 +79,17 @@ class LipinskiStrictFilter(ParentFilter):
         if exact_mwt > 500:
             return False
 
-        num_H_bond_donors = Lipinski.NumHDonors(mol)
-        if num_H_bond_donors > 5:
+        num_hydrogen_bond_donors = Lipinski.NumHDonors(mol)
+        if num_hydrogen_bond_donors > 5:
             return False
 
-        num_H_bond_acceptors = Lipinski.NumHAcceptors(mol)
-        if num_H_bond_acceptors > 10:
+        num_hydrogen_bond_acceptors = Lipinski.NumHAcceptors(mol)
+        if num_hydrogen_bond_acceptors > 10:
             return False
 
-        mol_logP = Crippen.MolLogP(mol)
-        if mol_logP > 5:
+        mol_log_p = Crippen.MolLogP(mol)
+        if mol_log_p > 5:
             return False
-        else:
-            return True
+
+        # Passed all filters
+        return True

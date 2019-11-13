@@ -3,11 +3,8 @@ import __future__
 
 import os
 import glob
-import sys
 
-import numpy as np
-import matplotlib as matplotlib
-
+import matplotlib
 import matplotlib.pyplot as plt
 
 
@@ -221,14 +218,13 @@ def make_graph(dictionary):
         list_generations.append(gen)
         list_of_gen_names.append(key)
 
-    enough = True
+    # Check that there are no N/A in list_of_scores
+    # If any gen has an N/A we will not plot the entire line
     for i in list_of_scores:
         if i is "N/A":
-            enough = False
             return None, None
-    else:
-        return list_generations, list_of_scores
 
+    return list_generations, list_of_scores
 
 def run_plotter(vars, dict_of_averages, outfile):
     """
@@ -251,24 +247,24 @@ def run_plotter(vars, dict_of_averages, outfile):
     top_one_dict = dict_of_averages["top_one_dict"]
 
     # print("Graphing Overall Average")
-    list_generations_Average, list_of_scores_Average = make_graph(average_affinity_dict)
+    list_generations_average, list_of_scores_average = make_graph(average_affinity_dict)
     # print("Graphing top_fifty_dict")
     print_fifty = True
     for key in top_fifty_dict.keys():
         if top_fifty_dict[key] == "N/A":
             print_fifty = False
     if print_fifty is True:
-        list_generations_Fifty, list_of_scores_Fifty = make_graph(top_fifty_dict)
+        list_generations_fifty, list_of_scores_fifty = make_graph(top_fifty_dict)
     # print("Graphing top_fifty_dict")
     print_twenty = True
     for key in top_twenty_dict.keys():
         if top_twenty_dict[key] == "N/A":
             print_twenty = False
     if print_twenty is True:
-        list_generations_Twenty, list_of_scores_Twenty = make_graph(top_twenty_dict)
+        list_generations_twenty, list_of_scores_twenty = make_graph(top_twenty_dict)
 
     # print("Graphing top_ten_dict")
-    list_generations_Ten, list_of_scores_Ten = make_graph(top_ten_dict)
+    list_generations_ten, list_of_scores_ten = make_graph(top_ten_dict)
     # print("Graphing top_one_dict")
     list_generations_one, list_of_scores_one = make_graph(top_one_dict)
     # print("")
@@ -276,16 +272,16 @@ def run_plotter(vars, dict_of_averages, outfile):
     ax = plt.subplot(111)
 
     ax.plot(
-        list_generations_Average, list_of_scores_Average, color="b", label="Average"
+        list_generations_average, list_of_scores_average, color="b", label="Average"
     )
     if print_fifty is True:
-        ax.plot(list_generations_Fifty, list_of_scores_Fifty, color="c", label="Top 50")
+        ax.plot(list_generations_fifty, list_of_scores_fifty, color="c", label="Top 50")
 
     if print_twenty is True:
         ax.plot(
-            list_generations_Twenty, list_of_scores_Twenty, color="m", label="Top 20"
+            list_generations_twenty, list_of_scores_twenty, color="m", label="Top 20"
         )
-    ax.plot(list_generations_Ten, list_of_scores_Ten, color="g", label="Top 10")
+    ax.plot(list_generations_ten, list_of_scores_ten, color="g", label="Top 10")
     ax.plot(list_generations_one, list_of_scores_one, color="r", label="Top 1")
 
     ax.set_ylim()
@@ -322,8 +318,10 @@ def run_plotter(vars, dict_of_averages, outfile):
         5.4, -8.5, output, bbox=dict(facecolor="white", alpha=0.5), fontsize="small"
     )
 
-    # legend1 = plt.legend([lines[i].get_label()  for i in range(0, lines_leg)],loc='center left', bbox_to_anchor=(1, 0.274),fontsize='small')
-    # legend2 = plt.legend([output],loc='center left', bbox_to_anchor=(1, 0.774),fontsize='small')
+    # legend1 = plt.legend([lines[i].get_label() for i in range(0, lines_leg)],
+    #           loc='center left', bbox_to_anchor=(1, 0.274),fontsize='small')
+    # legend2 = plt.legend([output],loc='center left',
+    #           bbox_to_anchor=(1, 0.774),fontsize='small')
     # # help(plt.legend)
     # ax.add_artist(legend1)
     # ax.add_artist(legend2)

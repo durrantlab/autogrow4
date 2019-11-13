@@ -221,37 +221,37 @@ def run_plotter(vars, dict_of_averages, outfile):
     top_one_dict = dict_of_averages["top_one_dict"]
 
     # print("Graphing Overall Average")
-    list_generations_Average, list_of_scores_Average = make_graph(average_affinity_dict)
+    list_generations_average, list_of_scores_average = make_graph(average_affinity_dict)
     # print("Graphing top_fifty_dict")
     print_fifty=True
     for key in top_fifty_dict.keys():
         if top_fifty_dict[key] == "N/A":
             print_fifty=False
     if print_fifty is True:
-        list_generations_Fifty, list_of_scores_Fifty = make_graph(top_fifty_dict)
+        list_generations_fifty, list_of_scores_fifty = make_graph(top_fifty_dict)
     # print("Graphing top_fifty_dict")
     print_twenty=True
     for key in top_twenty_dict.keys():
         if top_twenty_dict[key] == "N/A":
             print_twenty=False
     if print_twenty is True:
-        list_generations_Twenty, list_of_scores_Twenty = make_graph(top_twenty_dict)
+        list_generations_twenty, list_of_scores_twenty = make_graph(top_twenty_dict)
 
     # print("Graphing top_ten_dict")
-    list_generations_Ten, list_of_scores_Ten = make_graph(top_ten_dict)
+    list_generations_ten, list_of_scores_ten = make_graph(top_ten_dict)
     # print("Graphing top_one_dict")
     list_generations_one, list_of_scores_one = make_graph(top_one_dict)
     # print("")
 
     ax = plt.subplot(111)
 
-    ax.plot(list_generations_Average, list_of_scores_Average, color='b', label="Average")
+    ax.plot(list_generations_average, list_of_scores_average, color='b', label="Average")
     if print_fifty is True:
-        ax.plot(list_generations_Fifty, list_of_scores_Fifty, color='c', label="Top 50")
+        ax.plot(list_generations_fifty, list_of_scores_fifty, color='c', label="Top 50")
 
     if print_twenty is True:
-        ax.plot(list_generations_Twenty, list_of_scores_Twenty, color='m', label="Top 20")
-    ax.plot(list_generations_Ten, list_of_scores_Ten, color='g', label="Top 10")
+        ax.plot(list_generations_twenty, list_of_scores_twenty, color='m', label="Top 20")
+    ax.plot(list_generations_ten, list_of_scores_ten, color='g', label="Top 10")
     ax.plot(list_generations_one, list_of_scores_one, color='r', label="Top 1")
 
     #Niraparib has a docking score of -10.7 

@@ -1,5 +1,7 @@
-# An object for auto-detecting and creating jobs with the proper templates.
-# You'll need to import the base class first
+"""
+An object for auto-detecting and creating jobs with the proper templates.
+You'll need to import the base class first
+"""
 
 
 def get_all_subclasses(base_class):

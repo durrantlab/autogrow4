@@ -14,7 +14,6 @@ and computational approaches to estimate solubility and permeability in drug
 discovery and development settings Advanced Drug Delivery Reviews, 46 (2001),
 pp. 3-26
 """
-
 import __future__
 
 import rdkit
@@ -83,18 +82,19 @@ class LipinskiLenientFilter(ParentFilter):
         if exact_mwt > 500:
             violation_counter = violation_counter + 1
 
-        num_H_bond_donors = Lipinski.NumHDonors(mol)
-        if num_H_bond_donors > 5:
+        num_hydrogen_bond_donors = Lipinski.NumHDonors(mol)
+        if num_hydrogen_bond_donors > 5:
             violation_counter = violation_counter + 1
 
-        num_H_bond_acceptors = Lipinski.NumHAcceptors(mol)
-        if num_H_bond_acceptors > 10:
+        num_hydrogen_bond_acceptors = Lipinski.NumHAcceptors(mol)
+        if num_hydrogen_bond_acceptors > 10:
             violation_counter = violation_counter + 1
-        mol_logP = Crippen.MolLogP(mol)
-        if mol_logP > 5:
+        mol_log_p = Crippen.MolLogP(mol)
+        if mol_log_p > 5:
             violation_counter = violation_counter + 1
 
         if violation_counter < 2:
             return True
-        else:
-            return False
+
+        # Failed more than two filters
+        return False

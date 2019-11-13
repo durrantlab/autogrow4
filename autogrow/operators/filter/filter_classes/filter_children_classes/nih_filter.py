@@ -12,6 +12,7 @@ doi:10.1021/jm901070c.
 """
 import __future__
 
+import rdkit
 from rdkit.Chem import FilterCatalog
 from rdkit.Chem.FilterCatalog import FilterCatalogParams
 
@@ -83,7 +84,7 @@ class NIHFilter(ParentFilter):
         # it failed the filter)
         if self.filters.HasMatch(mol) is True:
             return False
-        else:
-            # if No matches are found to filter list this will return a True
-            # as it Passed the filter.
-            return True
+
+        # if No matches are found to filter list this will return a True
+        # as it Passed the filter.
+        return True

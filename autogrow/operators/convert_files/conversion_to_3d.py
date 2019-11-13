@@ -421,7 +421,7 @@ def run_gypsum_multiprocessing_mpi(gypsum_log_path, json_path, timeout_option,
         return lig_id
     elif did_gypsum_complete is None:
         return lig_id
-    
+
     return None
 
 
