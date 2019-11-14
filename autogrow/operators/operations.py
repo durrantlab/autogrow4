@@ -711,33 +711,32 @@ def get_complete_list_prev_gen_or_source_compounds(vars, generation_num):
         print(printout)
         raise Exception(printout)
 
-    prefilter_list = copy.deepcopy(usable_list_of_smiles)
-    if vars["filter_source_compounds"] is False and generation_num == 1:
-        pass
-    else:
+    if vars["filter_source_compounds"] is True:
+
+        prefilter_list = copy.deepcopy(usable_list_of_smiles)
         print("")
         print("Running Filter on the Compounds from last generation/Source")
         usable_list_of_smiles = Filter.run_filter(vars, usable_list_of_smiles)
+        
+        # Remove Nones:
+        usable_list_of_smiles = [x for x in usable_list_of_smiles if x is not None]
 
-    # Remove Nones:
-    usable_list_of_smiles = [x for x in usable_list_of_smiles if x is not None]
+        if len(usable_list_of_smiles) == 0:
+            printout = "\nThere were no ligands in source compound which \
+                        passed the User-selected Filters.\n"
+            print(printout)
+            raise Exception(printout)
 
-    if len(usable_list_of_smiles) == 0:
-        printout = "\nThere were no ligands in source compound which \
-                    passed the User-selected Filters.\n"
-        print(printout)
-        raise Exception(printout)
+        for lig in usable_list_of_smiles:
+            failed_filter_list = []
+            if lig not in prefilter_list:
+                failed_filter_list.append(lig[1])
 
-    for lig in usable_list_of_smiles:
-        failed_filter_list = []
-        if lig not in prefilter_list:
-            failed_filter_list.append(lig[1])
-
-    if len(failed_filter_list) != 0:
-        printout = "\n THE FOLLOWING LIGANDS WERE REMOVED FROM THE\
-                    SOURCE LIST: Failed the User-selected Filters\n"
-        printout = printout + "\t{}".format(failed_filter_list)
-        print(printout)
+        if len(failed_filter_list) != 0:
+            printout = "\n THE FOLLOWING LIGANDS WERE REMOVED FROM THE\
+                        SOURCE LIST: Failed the User-selected Filters\n"
+            printout = printout + "\t{}".format(failed_filter_list)
+            print(printout)
 
     random.shuffle(usable_list_of_smiles)
 
