@@ -29,7 +29,7 @@
     "generate_plot": true,
     "rxn_library": "all_rxns",
     "rescore_lig_efficiency": true,
-    "scoring_choice": "NN1",
-    "dock_choice": "VinaDocking",
+    "scoring_choice": "VINA",
+    "dock_choice": "QuickVina2Docking",
     "conversion_choice": "ObabelConversion"
 }

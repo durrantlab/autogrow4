@@ -1,13 +1,11 @@
+"""
+This script contains the class VINA.
+This is used to score Vina type docking such as QuickVina2 and Vina
+"""
 import __future__
 
 import glob
 import os
-
-import rdkit
-import rdkit.Chem as Chem
-
-# Disable the unnecessary RDKit warnings
-rdkit.RDLogger.DisableLog("rdApp.*")
 
 from autogrow.docking.scoring.scoring_classes.parent_scoring_class import ParentScoring
 
@@ -115,7 +113,6 @@ class VINA(ParentScoring):
         basefile_strip = basefile.replace(".pdbqt.vina", "")
         basefile_split = basefile.split("__")
         ligand_short_name = basefile_split[0]
-        ligand_pose = basefile_split[1].split(".")[0]
 
         affinity = None
 
@@ -184,8 +181,6 @@ class VINA(ParentScoring):
                 # If the REMARK SECTION IS NOT THERE raise except. Avoid this
                 # if possible as rdkit can missinterpret bonds because pdbs
                 # dont specify bond types
-                # mol = Chem.MolFromPDBFile(pdb_path)
-                # new_smiles_string = Chem.MolToSmiles(mol, isomericSmiles=True,canonical=True)
                 raise Exception(
                     "Could not get SMILES string from PDB file: " + pdb_path
                 )
@@ -203,5 +198,7 @@ class VINA(ParentScoring):
             ligand_full_info = [str(x) for x in ligand_full_info]
 
             return ligand_full_info
-        else:
-            return None
+        # Return None because lig name isn't in dictionary.
+        # This is precautionary to prevent key errors later.
+        # This should not occur
+        return None

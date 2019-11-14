@@ -71,5 +71,6 @@ class VandeWaterbeemdFilter(ParentFilter):
         psa = MolSurf.TPSA(mol)
         if psa > 90:
             return False
-        else:
-            return True
+
+        # passes everything
+        return True

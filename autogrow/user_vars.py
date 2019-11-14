@@ -1753,7 +1753,8 @@ def handle_custom_docking_script(vars):
 
                 printout = (
                     printout
-                    + "\n#############################################################################"
+                    + "\n############################################"
+                    + "#################################"
                 )
                 printout = (
                     printout
@@ -1769,7 +1770,8 @@ def handle_custom_docking_script(vars):
                 )
                 printout = (
                     printout
-                    + "#############################################################################\n"
+                    + "##############################################"
+                    + "###############################\n"
                 )
 
                 need_restart = True
@@ -1878,7 +1880,8 @@ def handle_custom_scoring_script(vars):
                 )
                 copyfile(Custom_class[1], new_file)
 
-                printout = "\n#############################################################################"
+                printout = "\n#######################################"
+                printout = printout + "######################################"
                 printout = (
                     printout
                     + "AutoGrow has incorporated the custom files into the scoring Module."
@@ -1893,7 +1896,8 @@ def handle_custom_scoring_script(vars):
                 )
                 printout = (
                     printout
-                    + "#############################################################################\n"
+                    + "##############################################"
+                    + "###############################\n"
                 )
 
                 need_restart = True

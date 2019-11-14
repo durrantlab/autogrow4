@@ -6,21 +6,10 @@ import __future__
 import os
 import sys
 import glob
-import string
-import subprocess
-import time
-
-import rdkit
-import rdkit.Chem as Chem
-
-# Disable the unnecessary RDKit warnings
-rdkit.RDLogger.DisableLog("rdApp.*")
-
 
 import autogrow.docking.delete_failed_mol as Delete
 import autogrow.docking.ranking.ranking_mol as Ranking
 from autogrow.docking.docking_class.parent_dock_class import ParentDocking
-import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
 import autogrow.docking.scoring.execute_scoring_mol as Scoring
 
 
@@ -33,7 +22,7 @@ class VinaDocking(ParentDocking):
     """
 
     def __init__(self, vars=None, receptor_file=None,
-        file_conversion_class_object=None, test_boot=True):
+                 file_conversion_class_object=None, test_boot=True):
         """
         get the specifications for Vina/QuickVina2 from vars load them into
         the self variables we will need and convert the receptor to the proper
@@ -92,8 +81,9 @@ class VinaDocking(ParentDocking):
         if did_it_convert is False:
             # conversion failed
             return smile_name
-        else:
-            return None
+        # Conversion pass. Return None
+        # only return failed smile_names which will be handled later
+        return None
 
     def run_dock(self, pdbqt_filename):
         """
@@ -115,9 +105,9 @@ class VinaDocking(ParentDocking):
         # check that it docked
         pdb_filename = pdbqt_filename.replace("qt", "")
 
-        did_it_Dock, smile_name = self.check_docked(pdb_filename)
+        did_it_dock, smile_name = self.check_docked(pdb_filename)
 
-        if did_it_Dock is False:
+        if did_it_dock is False:
             # Docking failed
 
             if smile_name is None:
@@ -273,12 +263,12 @@ class VinaDocking(ParentDocking):
 
         # Add optional user variables additional variable
         if (
-            vars["docking_exhaustiveness"] is not None
-            and vars["docking_exhaustiveness"] != "None"
+                vars["docking_exhaustiveness"] is not None
+                and vars["docking_exhaustiveness"] != "None"
         ):
             if (
-                type(vars["docking_exhaustiveness"]) == int
-                or type(vars["docking_exhaustiveness"]) == float
+                    type(vars["docking_exhaustiveness"]) == int
+                    or type(vars["docking_exhaustiveness"]) == float
             ):
                 torun = (
                     torun
@@ -287,8 +277,8 @@ class VinaDocking(ParentDocking):
                 )
         if vars["docking_num_modes"] is not None and vars["docking_num_modes"] != "None":
             if (
-                type(vars["docking_num_modes"]) == int
-                or type(vars["docking_num_modes"]) == float
+                    type(vars["docking_num_modes"]) == int
+                    or type(vars["docking_num_modes"]) == float
             ):
                 torun = torun + " --num_modes " + str(int(vars["docking_num_modes"]))
 
@@ -374,11 +364,14 @@ class VinaDocking(ParentDocking):
             printout_info = "\nCheck the docking message for 'Parse error on'"
             printout_info = (
                 printout_info
-                + "\n\t This ligand failed to dock. Please check that all atoms are covered by the docking forcefield"
+                + "\n\t This ligand failed to dock. Please check that all "
+                + "atoms are covered by the docking forcefield"
             )
             printout_info = (
                 printout_info
-                + "\n\t Any atoms not covered by the forcefield should be added to atoms_to_replace in the function replace_atoms_not_handled_by_forcefield"
+                + "\n\t Any atoms not covered by the forcefield should be "
+                + "added to atoms_to_replace in the function "
+                + "replace_atoms_not_handled_by_forcefield"
             )
             printout_info = printout_info + "\n\t Verify for this ligand: {}\n".format(
                 lig_pdbqt_filename
@@ -429,7 +422,7 @@ class VinaDocking(ParentDocking):
                 pdb_file
             )
         if not os.path.exists(
-            pdb_file + "qt.vina"
+                pdb_file + "qt.vina"
         ):  # so this pdbqt.vina file didn't exist
             if self.debug_mode is False:
                 print(
@@ -446,12 +439,13 @@ class VinaDocking(ParentDocking):
                 Delete.delete_all_associated_files(pdbqt_file)
 
                 return False, smile_name
-            else:
-                print("Docking unsuccessful: " + os.path.basename(pdb_file) + "...")
 
-                return False, smile_name
-        else:
-            return True, smile_name
+            # Failed to dock but in debug mode
+            print("Docking unsuccessful: " + os.path.basename(pdb_file) + "...")
+            return False, smile_name
+
+        # Sucessfully docked
+        return True, smile_name
 
     ##########################################
     # Convert the dock outputs to a usable formatted .smi file
@@ -460,7 +454,8 @@ class VinaDocking(ParentDocking):
     ##########################################
 
     def rank_and_save_output_smi(self, vars, current_generation_dir,
-        current_gen_int, smile_file, deleted_smiles_names_list):
+                                 current_gen_int, smile_file,
+                                 deleted_smiles_names_list):
         """
         Given a folder with PDBQT's, rank all the SMILES based on docking
         score (High to low). Then format it into a .smi file. Then save the
@@ -500,8 +495,8 @@ class VinaDocking(ParentDocking):
 
         # Only add these when we haven't already redocked the ligand
         if (
-            self.vars["redock_elite_from_previous_gen"] is False
-            and current_gen_int != 0
+                self.vars["redock_elite_from_previous_gen"] is False
+                and current_gen_int != 0
         ):
             # Go to previous generation folder
             prev_gen_num = str(current_gen_int - 1)
@@ -517,8 +512,8 @@ class VinaDocking(ParentDocking):
             # Also check sometimes Generation 1 won't have a previous
             # generation to do this with and sometimes it will
             if (
-                current_gen_int == 1
-                and os.path.exists(ranked_smi_file_prev_gen) is False
+                    current_gen_int == 1
+                    and os.path.exists(ranked_smi_file_prev_gen) is False
             ):
                 pass
             else:
@@ -527,7 +522,8 @@ class VinaDocking(ParentDocking):
                 # Shouldn't happen but to be safe.
                 if os.path.exists(ranked_smi_file_prev_gen) is False:
                     raise Exception(
-                        "Previous generation ranked .smi file does not exist. Check if output folder has been moved"
+                        "Previous generation ranked .smi file does not exist. "
+                        + "Check if output folder has been moved"
                     )
 
                 # Get the data for all ligands from previous generation ranked
