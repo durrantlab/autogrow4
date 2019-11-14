@@ -1,13 +1,12 @@
 # !/usr/bin/env python
 
-# This is the executable file for Autogrow 4.0.0. This script should come
-# first. It should obtain and verify all the parameters work. This than should
-# pass these parameters variables to the main execution function titled
-# AutogrowMainExecute.py found in MainFunctions
+"""This is the executable file for Autogrow 4.0.0. This script should come
+first. It should obtain and verify all the parameters work. This than should
+pass these parameters variables to the main execution function titled
+AutogrowMainExecute.py found in MainFunctions"""
 
 import __future__
 
-import sys
 import argparse
 import copy
 
@@ -34,7 +33,8 @@ PARSER.add_argument(
     "-d",
     action="store_true",
     default=False,
-    help="Run Autogrow in Debug mode. This keeps all temporary files and adds extra print statements.",
+    help="Run Autogrow in Debug mode. This keeps all \
+    temporary files and adds extra print statements.",
 )
 
 # receptor information
@@ -175,7 +175,7 @@ PARSER.add_argument(
 # Mutation Settings
 PARSER.add_argument(
     "--rxn_library",
-    choices = ["click_chem_rxns","robust_rxns","all_rxns","Custom"],
+    choices=["click_chem_rxns", "robust_rxns", "all_rxns", "Custom"],
     default="click_chem_rxns",
     help="This set of reactions to be used in Mutation. \
     If Custom, one must also provide rxn_file Path and function_group_library path",
@@ -260,13 +260,15 @@ PARSER.add_argument(
     type=int,
     default=10,
     help="Number of mols that seed next generation, for all generations after the first.\
-    Should be less than number_of_crossovers_first_generation + number_of_mutations_first_generation",
+    Should be less than number_of_crossovers_first_generation \
+    + number_of_mutations_first_generation",
 )
 PARSER.add_argument(
     "--diversity_mols_to_seed_first_generation",
     type=int,
     default=10,
-    help="Should be less than number_of_crossovers_first_generation + number_of_mutations_first_generation",
+    help="Should be less than number_of_crossovers_first_generation \
+    + number_of_mutations_first_generation",
 )
 PARSER.add_argument(
     "--diversity_seed_depreciation_per_gen",
@@ -428,12 +430,14 @@ PARSER.add_argument(
     default="",
     help="The path to a python script for which is used to convert \
     ligands. This is required for custom conversion_choice choices. \
-    Must be a list of strings [name_custom_conversion_class, Path/to/name_custom_conversion_class.py]",
+    Must be a list of strings \
+    [name_custom_conversion_class, Path/to/name_custom_conversion_class.py]",
 )
 PARSER.add_argument(
     "--mgltools_directory",
     metavar="mgltools_directory",
-    help="Required if using MGLTools conversion option (conversion_choice=MGLToolsConversion) \
+    help="Required if using MGLTools conversion option \
+    (conversion_choice=MGLToolsConversion) \
     Path may look like: /home/user/MGLTools-1.5.6/",
 )
 PARSER.add_argument(
@@ -457,7 +461,8 @@ PARSER.add_argument(
 PARSER.add_argument(
     "--obabel_path",
     help="required if using obabel conversion \
-    option (conversion_choice=ObabelConversion).Path may look like PATH/envs/py37/bin/obabel; \
+    option (conversion_choice=ObabelConversion).\
+    Path may look like PATH/envs/py37/bin/obabel; \
     may be found on Linux by running: which obabel",
 )
 
@@ -606,7 +611,8 @@ PARSER.add_argument(
     "--reduce_files_sizes",
     choices=[True, False, "True", "False", "true", "false"],
     default=True,
-    help="Run this combines all files in the PDBs folder into a single text file. Useful when data needs to be transfered.",
+    help="Run this combines all files in the PDBs folder into a \
+    single text file. Useful when data needs to be transfered.",
 )
 
 # Make a histogram of the simulation at the end of the run.
@@ -663,5 +669,3 @@ else:  # cache prerun. This is necessary to prevent race conditions in mpi mode.
     import autogrow.user_vars
     import autogrow.autogrow_main_execute as AutogrowMainExecute
     import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.Parallelizer
-
-    pass

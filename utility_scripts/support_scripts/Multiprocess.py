@@ -50,9 +50,9 @@ def multi_threading(inputs, num_processors, task_name):
 
     return results
 
-# 
+#
 # Worker function
-# 
+#
 def worker(input, output):
     for seq, job in iter(input.get, 'STOP'):
         func, args = job
@@ -112,9 +112,9 @@ def start_processes(inputs, num_processors):
 
     return  [item[1] for item in map(list, results)]
 
-### 
+###
 # Helper functions
-### 
+###
 
 def flatten_list(tier_list):
     """

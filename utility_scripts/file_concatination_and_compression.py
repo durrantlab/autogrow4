@@ -7,17 +7,17 @@ data transfer is faster and data storage is reduced when files are merged and co
     -The concatination script that is run in AutoGrow 4 can be found at:
             autogrow4/autogrow/docking/concatinate_files.py
 This script will either:
-    1) Return the files back to their original uncompressed and deconcatinated formating 
-                or 
+    1) Return the files back to their original uncompressed and deconcatinated formating
+                or
     2) Concatinate and then compress the files into a single file.
 
 
 The formating of the concatination is:
     "\n##############################File_name: {}\n".format(os.path.basename(file_name_1))
-    ... Content of the 1st file...    
+    ... Content of the 1st file...
     "\n##############################$$END_FILE$$ {}".format(os.path.basename(file_name_1))
     "\n##############################File_name: {}\n".format(os.path.basename(file_name_2))
-    ... Content of the 2nd file...    
+    ... Content of the 2nd file...
     "\n##############################$$END_FILE$$ {}".format(os.path.basename(file_name_2))
 
 This concatinated file is tar.gz compressed.
@@ -74,7 +74,7 @@ def seperate_files(compressed_file, outfolder):
 
     printout = ""
     list_of_new_files = []
-    out_file = None    
+    out_file = None
     with open(decompressed_file, "r") as f:
         for line in f.readlines():
             if "$$END_FILE$$" in line:
@@ -97,7 +97,7 @@ def seperate_files(compressed_file, outfolder):
             else:
                 printout = printout + line
                 continue
-    
+
 
     all_are_made = True
     for f in list_of_new_files:
@@ -120,7 +120,7 @@ def del_files(file_or_folder):
 
     Inputs:
     :param str file_or_folder: the file or folder to delete
-    
+
     """
     if os.path.exists(file_or_folder) is True:
         if os.path.isdir(file_or_folder) is True:
@@ -168,7 +168,7 @@ def run_concatination(directory):
 #######
 if __name__ == "__main__":
     try:
-        todo = sys.argv[1] 
+        todo = sys.argv[1]
         directory = sys.argv[2]
     except:
         print("Use this script to concatinate the files in a folder into a single outputfolder\

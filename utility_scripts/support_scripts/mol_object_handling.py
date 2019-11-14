@@ -16,7 +16,7 @@
 
 # This script is taken directly from Gypsum-DL's MolObjectHandling.py
 # Modification to function names were simply superficial to make PEP8 compliant
-# ie 
+# ie
 # def handle_hydrogens became def handle_hydrogens
 # def nitrogen_charge_adjustment  became nitrogen_charge_adjustment
 # file name change from MolObjectHandling.py to mol_object_handling.py
@@ -231,7 +231,7 @@ def nitrogen_charge_adjustment(mol):
             # GetBondTypeAsDouble prints out 1 for single, 2.0 for double,
             # 3.0 for triple, 1.5 for AROMATIC but if AROMATIC WE WILL SKIP THIS ATOM
             num_bond_sums = sum(bonds)
-            
+
             # Check if the octet is filled
             if num_bond_sums == 4.0:
                 atom.SetFormalCharge(+1)

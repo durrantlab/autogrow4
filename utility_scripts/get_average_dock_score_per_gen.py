@@ -49,7 +49,7 @@ def get_average_score_per_gen(infolder, folder_list):
                     for i in range(0, len(parts)):
                         choice_list.append(parts[i])
 
-                    
+
                     gen_affinity_sum = gen_affinity_sum + float(choice_list[-2])
                     num_lines_counter = num_lines_counter + float(1.0)
 
@@ -76,13 +76,13 @@ def get_average_top_score_per_gen(infolder, folder_list, top_score_per_gen):
 
         for rank_file in ranked_file:
             # Check number of lines
-            num_lines = sum(1 for line in open(rank_file, "r")) 
-       
+            num_lines = sum(1 for line in open(rank_file, "r"))
+
             if num_lines >= top_score_per_gen:
                 # read as a tab delineated .smi file
                 with open(rank_file, "r") as f:
                     gen_affinity_sum = float(0.0)
-            
+
                     for i,line in enumerate(f.readlines()):
                         if i >= top_score_per_gen:
                             break
@@ -94,10 +94,10 @@ def get_average_top_score_per_gen(infolder, folder_list, top_score_per_gen):
                             choice_list.append(parts[i])
 
                         gen_affinity_sum = gen_affinity_sum + float(choice_list[-2])
-                        
+    
                     gen_affinity_average = gen_affinity_sum/top_score_per_gen
                     average_score_list.append(gen_affinity_average)
-                
+
             else:
                 average_score_list.append("N/A")
 
@@ -129,7 +129,7 @@ def make_graph(dictionary):
 
     for key in dictionary.keys():
         print(key)
-        list_of_gen_names.append(key)    
+        list_of_gen_names.append(key)
 
         score = dictionary[key]
         list_of_scores.append(score)
@@ -138,7 +138,7 @@ def make_graph(dictionary):
         print(gen)
         gen = int(gen)
         list_generations.append(gen)
-        list_of_gen_names.append(key)    
+        list_of_gen_names.append(key)
 
     enough=True
     for i in list_of_scores:
@@ -157,7 +157,7 @@ def make_graph(dictionary):
 
     plt.plot(list_generations, list_of_scores, line=2.0)
     plt.show()
-    
+
 if __name__ == "__main__":
     print("Overall Scoring Average for all Compounds")
     average_affinity_dict = get_average_score_per_gen(infolder, folder_list)
@@ -169,11 +169,11 @@ if __name__ == "__main__":
     print("Average for Top Scoring Compounds")
     print("Number of top scoring compounds: ", top_score_per_gen_twenty)
     top_twenty_dict = get_average_top_score_per_gen(infolder, folder_list, top_score_per_gen_twenty)
-    print("") 
+    print("")
     print("Average for Top Scoring Compounds")
     print("Number of top scoring compounds: ", top_score_per_gen_ten)
     top_ten_dict = get_average_top_score_per_gen(infolder, folder_list, top_score_per_gen_ten)
-    print("") 
+    print("")
     print("Best Score per generation")
     print("Number of top scoring compounds: ", 1)
     top_one_dict = get_average_top_score_per_gen(infolder, folder_list, 1)

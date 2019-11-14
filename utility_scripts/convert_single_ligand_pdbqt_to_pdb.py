@@ -4,7 +4,7 @@ This script will convert a pdbqt file into a .pdb file.
 This is done by removing a column of the PDB file.
 
 # Run example:
-# 
+#
 # output example:
 # python convert_ligands_pdb_to_smi.py \
 #   -source_folder $PATH/OF/PDBS/ \
@@ -28,7 +28,7 @@ def convert_pdbqt_to_pdb(pdbqt_file_in, pdb_file_out):
     :param str pdb_file_out: the string of the output .pdb
     """
     printout = ""
-    line_index_range = [x for x in range(0, 61)] + [x for x in range(70,80)] 
+    line_index_range = [x for x in range(0, 61)] + [x for x in range(70,80)]
 
     with open(pdbqt_file_in) as f:
         for line in f.readlines():
@@ -37,32 +37,32 @@ def convert_pdbqt_to_pdb(pdbqt_file_in, pdb_file_out):
                 for i in line_index_range:
                     # print(i)
                     if i >= len(line):continue
-                        
+    
                     else:
                         short_line = short_line + line[i]
 
-                printout = printout + short_line 
+                printout = printout + short_line
             elif "REMARK                            x       y       z     vdW  Elec       q    Type" in line \
             or "REMARK                         _______ _______ _______ _____ _____    ______ ____" in line:
                 short_line = ""
                 for i in line_index_range:
                     # print(i)
                     if i >= len(line):continue
-                        
+    
                     else:
-                        short_line = short_line + line[i] 
+                        short_line = short_line + line[i]
 
                 printout = printout + short_line + "\n"
             else:
                 printout = printout + line
     with open(pdb_file_out, "w") as f:
         f.write(printout)
-# 
+#
 
 def get_arguments_from_argparse(ARGS_DICT):
     """
     This function handles the arg parser arguments for the script.
-    
+
     Inputs:
     :param dict ARGS_DICT: dictionary of parameters
     Returns:
@@ -81,10 +81,10 @@ def get_arguments_from_argparse(ARGS_DICT):
         if ARGS_DICT["pdbqt_file"].split(".")[-1] != "pdbqt" and ARGS_DICT["pdbqt_file"].split(".")[-1] != "PDBQT":
 
             raise Exception("provided pdbqt_file must be a .pdbqt file.")
-        
+
     if ARGS_DICT["output_file"] is not None:
         if ARGS_DICT["output_file"].split(".")[-1] != "pdb" and ARGS_DICT["output_file"].split(".")[-1] != "PDB":
-            raise Exception("provided output_file must be a .pdb file.") 
+            raise Exception("provided output_file must be a .pdb file.")
 
         if os.path.exists(os.path.dirname(ARGS_DICT["output_file"])) is False:
             try:
@@ -98,7 +98,7 @@ def get_arguments_from_argparse(ARGS_DICT):
             ARGS_DICT["pdbqt_file"].replace(".pdbqt", ".pdb").replace(".PDBQT", ".pdb")
 
     return ARGS_DICT
-# 
+#
 
 
 # Argment parsing

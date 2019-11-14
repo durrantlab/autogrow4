@@ -26,7 +26,7 @@ def get_usable_fomat(infile):
                         - For default setting this is the Docking score
                         - If you add a unique scoring function Docking score should be -3 and that score function should be -2
 
-            Any other information MUST be between part 2 and part -2 (this allows for the 
+            Any other information MUST be between part 2 and part -2 (this allows for the
                 expansion of features without disrupting the rest of the code)
 
     Inputs:
@@ -34,8 +34,8 @@ def get_usable_fomat(infile):
     Returns:
     :returns: list usable_list_of_smiles: list of SMILES and their associated information formated into a list
                                     which is usable by the rest of Autogrow
-    """   
-    # IMPORT SMILES FROM THE PREVIOUS GENERATION  
+    """
+    # IMPORT SMILES FROM THE PREVIOUS GENERATION
     usable_list_of_smiles = []
     with open(infile) as smiles_file:
         for line in smiles_file:
@@ -59,7 +59,7 @@ def get_average_score_per_gen(infolder, folder_list):
     Returns:
     :returns: list usable_list_of_smiles: list of SMILES and their associated information formated into a list
                                     which is usable by the rest of Autogrow
-    """ 
+    """
 
     average_affinity_dict = {}
     for gen_folder in folder_list:
@@ -79,13 +79,13 @@ def get_average_score_per_gen(infolder, folder_list):
                     for i in range(0, len(parts)):
                         choice_list.append(parts[i])
 
-                    
+
                     gen_affinity_sum = gen_affinity_sum + float(choice_list[-2])
                     num_lines_counter = num_lines_counter + float(1.0)
 
 
             gen_affinity_average = float(gen_affinity_sum/num_lines_counter)
-            
+
             gen_num = os.path.basename(rank_file).split("_")[1]
             gen_name = "generation_{}".format(gen_num)
             average_affinity_dict[gen_name] = gen_affinity_average
@@ -95,7 +95,7 @@ def get_average_score_per_gen(infolder, folder_list):
 
 def get_average_top_score_per_gen(infolder, folder_list, top_score_per_gen):
     """
-    This script will get the average docking score of the top N number of ligands 
+    This script will get the average docking score of the top N number of ligands
      ranked .smi file from each generation.
 
     Inputs:
@@ -105,7 +105,7 @@ def get_average_top_score_per_gen(infolder, folder_list, top_score_per_gen):
                 ie) if top_score_per_gen=50 it will return the average of the top 50 scores.
     Returns:
     :returns: dict average_affinity_dict: dictionary of average affinity scores for top_score_per_gen number of ligands
-    """ 
+    """
     average_affinity_dict = {}
 
     for gen_folder in folder_list:
@@ -114,16 +114,16 @@ def get_average_top_score_per_gen(infolder, folder_list, top_score_per_gen):
 
         for rank_file in ranked_file:
             # Check number of lines
-            num_lines=0 
+            num_lines=0
             with open(rank_file, "r") as rf:
                 for line in rf:
                     num_lines=num_lines+1
-       
+
             if num_lines >= top_score_per_gen:
                 # read as a tab delineated .smi file
                 with open(rank_file, "r") as f:
                     gen_affinity_sum = float(0.0)
-            
+
                     for i,line in enumerate(f.readlines()):
                         if i >= top_score_per_gen:
                             break
@@ -135,7 +135,7 @@ def get_average_top_score_per_gen(infolder, folder_list, top_score_per_gen):
                             choice_list.append(parts[i])
 
                         gen_affinity_sum = gen_affinity_sum + float(choice_list[-2])
-                        
+    
                     gen_affinity_average = float(gen_affinity_sum/top_score_per_gen)
 
                     gen_num = os.path.basename(rank_file).split("_")[1]
@@ -156,7 +156,7 @@ def print_gens(average_affinity_dict):
 
     Inputs:
     :param dict average_affinity_dict: dictionary of average affinity scores for top_score_per_gen number of ligands
-    """ 
+    """
     print("generation_number              average affinity score")
     affinity_keys = list(average_affinity_dict.keys())
     affinity_keys.sort(key=lambda x: int(x.split('_')[1]))
@@ -165,17 +165,17 @@ def print_gens(average_affinity_dict):
 
 def make_graph(dictionary):
     """
-    Because some generations may not have 50 ligands this basically checks to see if 
+    Because some generations may not have 50 ligands this basically checks to see if
     theres enough ligands and prepares lists to be plotted
-    
+
     Inputs:
     :param dict dictionary: dictionary of average affinity scores for top_score_per_gen number of ligands
     Returns:
     :returns: list list_generations: list of ints for each generation to be plotted.
         if a generation lacks ligands to generate the average it will return "N/A"
-    :returns: list list_of_scores: list of averages for each generation; 
+    :returns: list list_of_scores: list of averages for each generation;
         if a generation lacks ligands to generate the average it will return "N/A"
-    """ 
+    """
     list_generations = []
     list_of_gen_names = []
     list_of_scores = []
@@ -183,7 +183,7 @@ def make_graph(dictionary):
 
     for key in dictionary.keys():
         #print(key)
-        list_of_gen_names.append(key)    
+        list_of_gen_names.append(key)
 
         score = dictionary[key]
         list_of_scores.append(score)
@@ -192,7 +192,7 @@ def make_graph(dictionary):
 
         gen = int(gen)
         list_generations.append(gen)
-        list_of_gen_names.append(key)    
+        list_of_gen_names.append(key)
 
     enough=True
     for i in list_of_scores:
@@ -204,7 +204,7 @@ def make_graph(dictionary):
 
 def run_plotter(vars, dict_of_averages, outfile):
     """
-    This plots the averages into a matplotlib figure. 
+    This plots the averages into a matplotlib figure.
     It will require you to answer questions about titles and labels
 
     Inputs:
@@ -213,7 +213,7 @@ def run_plotter(vars, dict_of_averages, outfile):
                     and the overall average for each generation.
     :param str outfile: Path for the output file for the plot
     """
-    
+
     average_affinity_dict = dict_of_averages["average_affinity_dict"]
     top_fifty_dict = dict_of_averages["top_fifty_dict"]
     top_twenty_dict = dict_of_averages["top_twenty_dict"]
@@ -254,7 +254,7 @@ def run_plotter(vars, dict_of_averages, outfile):
     ax.plot(list_generations_ten, list_of_scores_ten, color='g', label="Top 10")
     ax.plot(list_generations_one, list_of_scores_one, color='r', label="Top 1")
 
-    #Niraparib has a docking score of -10.7 
+    #Niraparib has a docking score of -10.7
     #Olaparib has a docking score of -12.2
     ax.axhline(y=-9.3, color='maroon', linestyle=':', label="ADP-ribose")
     ax.axhline(y=-10.3, color='purple', linestyle=':', label="NAD/NADH")
@@ -277,9 +277,9 @@ def run_plotter(vars, dict_of_averages, outfile):
     # Put a legend to the right of the current axis
     ax.legend(loc='center left', bbox_to_anchor=(1, 0.274),fontsize='small')
     number_of_lig_per_gen = str(num_lig)
-    
+
     output = str(number_of_lig_per_gen) + " lig/gen" + "\n" + str(number_of_conf_per_lig) +" conformer/lig"
-    
+
     plt.text(5.4,-8.5, output, bbox=dict(facecolor="white", alpha=0.5),fontsize='small')
 
     # legend1 = plt.legend([lines[i].get_label()  for i in range(0, lines_leg)],loc='center left', bbox_to_anchor=(1, 0.274),fontsize='small')
@@ -294,12 +294,12 @@ def run_plotter(vars, dict_of_averages, outfile):
 
     if "VINA" in str(scoring_type):
         y_label = 'Docking Affinity (kcal/mol)'
-    else: 
+    else:
         y_label = 'Fitness Score'
 
 
     plt.ylabel(y_label,fontweight='semibold')
-    
+
     plt.xlabel("Generation Number",fontweight='semibold')
 
     plt.savefig(outfile,bbox_inches='tight',dpi=1000)
@@ -333,11 +333,11 @@ def print_data_table(infolder, folder_list):
     print("Average for Top Scoring Compounds")
     print("Number of top scoring compounds: ", 20)
     top_twenty_dict = get_average_top_score_per_gen(infolder, folder_list, 20)
-    print("") 
+    print("")
     print("Average for Top Scoring Compounds")
     print("Number of top scoring compounds: ", 10)
     top_ten_dict = get_average_top_score_per_gen(infolder, folder_list, 10)
-    print("") 
+    print("")
     print("Best Score per generation")
     print("Number of top scoring compounds: ", 1)
     top_one_dict = get_average_top_score_per_gen(infolder, folder_list, 1)
@@ -365,7 +365,7 @@ def make_vars_dict(autogrow_vars_json):
         raise Exception("variable file would not import. It should be the \
             vars.json file written by AutoGrow in the output folder of the run.")
     return vars
-# 
+#
 
 # Run Everything
 def run_a_single_folder(vars,infolder,outfile, all_folders_list):
@@ -393,7 +393,7 @@ def run_everything(infolder, autogrow_vars_json,outfile):
         if "generation_" in os.path.basename(os.path.dirname(i)):
             right_level = True
             break
-    
+
     if right_level is False:
         topfolder_list = [x for x in all_folders_list if "__pycache__" not in x]
         all_folders_list = []
@@ -412,20 +412,20 @@ def run_everything(infolder, autogrow_vars_json,outfile):
     else:
         run_a_single_folder(vars,infolder,outfile, all_folders_list)
 
- 
+
 
 if __name__ == "__main__":
-    
+
     #
     # SPECIFY WHICH RUN NUMBER
     # infolder = "/$PATH/Autogrow_output_dir/Run_0/"
-    
+
     try:
         infolder = sys.argv[1]
     except:
         raise Exception("This script takes a folder which contains AutoGrow 4 \
              data and a folder to ouput a text file and histogram plot")
-    try: 
+    try:
         autogrow_vars_json = sys.argv[2]
     except:
         autogrow_vars_json = infolder + "/vars.json"

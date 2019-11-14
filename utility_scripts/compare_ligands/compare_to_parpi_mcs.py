@@ -16,7 +16,7 @@ import support_scripts.Multiprocess as mp
 
 
 def get_usable_fomat(infile):
-    # IMPORT SMILES FROM THE PREVIOUS GENERATION  
+    # IMPORT SMILES FROM THE PREVIOUS GENERATION
     usable_list_of_smiles = []
     with open(infile) as smiles_file:
         for line in smiles_file:
@@ -40,7 +40,7 @@ def add_mol_to_list(usable_list_line):
     return usable_list_line
 
 def mcs_mols(two_mols_list, list_for_mol2):
-    
+
     mcs_results = rdFMCS.FindMCS(two_mols_list, matchValences=False, ringMatchesRingOnly=True, completeRingsOnly=True)
     num_mcs = str(mcs_results.numAtoms)
     list_for_mol2.append(num_mcs)
@@ -56,17 +56,17 @@ def get_PARPis():
     talazoparib = Chem.MolFromSmiles("CN1C(=NC=N1)C2C(N=C3C=C(C=C4C3=C2NNC4=O)F)C5=CC=C(C=C5)F")
     parpis= [olaparib, rucaparib, niraparib, veliparib, iniparib, talazoparib]
     parpis_names = ["olaparib", "rucaparib", "niraparib", "veliparib", "iniparib", "talazoparib"]
-    
+
     #Change the index number in this list to visualize the mol
     return parpis,parpis_names
-    
+
 
 if __name__ == "__main__":
 
     input_smi = "/home/jacob/Desktop/Outputfolder/Trial_dock/LGMNB_PAINS.smi"
     usable_list = get_usable_fomat(input_smi)
     new_file = "/home/jacob/Desktop/Outputfolder/Trial_dock/ranked_PARPi_comparison.smi"
-    
+
     # Convert Strings to RDKIT mol objects and append to end of each ligands list
     job_input = [[line] for line in usable_list]
     mol_usable_list = mp.multi_threading(job_input, -1,  add_mol_to_list)
@@ -79,7 +79,7 @@ if __name__ == "__main__":
     for inhib,inhib_name in zip(parpis,parpis_names):
         counter = counter-1
         job_input = [[[inhib, mol_list[counter]], mol_list] for mol_list in mol_usable_list]
-        
+
         mol_usable_list = mp.multi_threading(job_input, -1,  mcs_mols)
         print(inhib_name)
         print(-7 - counter)
@@ -95,7 +95,7 @@ if __name__ == "__main__":
 
     save_list.sort(key = lambda x: float(x[-1]),reverse = True)
 
-    
+
     with open(new_file, "w") as NF:
         for line in save_list:
 
