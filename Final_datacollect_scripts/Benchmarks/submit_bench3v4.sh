@@ -159,7 +159,7 @@ then
             --LipinskiStrictFilter \
             --GhoseFilter \
             --start_a_new_run \
-            --rxn_library ClickChem \
+            --rxn_library click_chem_rxns \
             --selector_choice Rank_Selector \
             --dock_choice VinaDocking \
             --max_variants_per_compound 1 \
@@ -236,7 +236,7 @@ then
             --LipinskiStrictFilter \
             --GhoseFilter \
             --start_a_new_run \
-            --rxn_library ClickChem \
+            --rxn_library click_chem_rxns \
             --selector_choice Rank_Selector \
             --dock_choice VinaDocking \
             --max_variants_per_compound 3 \
@@ -316,7 +316,7 @@ then
             --LipinskiStrictFilter \
             --GhoseFilter \
             --start_a_new_run \
-            --rxn_library ClickChem \
+            --rxn_library click_chem_rxns \
             --selector_choice Rank_Selector \
             --dock_choice VinaDocking \
             --max_variants_per_compound 5 \
@@ -398,7 +398,7 @@ then
             --LipinskiStrictFilter \
             --GhoseFilter \
             --start_a_new_run \
-            --rxn_library ClickChem \
+            --rxn_library click_chem_rxns \
             --selector_choice Rank_Selector \
             --dock_choice QuickVina2Docking \
             --max_variants_per_compound 1 \
@@ -475,7 +475,7 @@ then
             --LipinskiStrictFilter \
             --GhoseFilter \
             --start_a_new_run \
-            --rxn_library ClickChem \
+            --rxn_library click_chem_rxns \
             --selector_choice Rank_Selector \
             --dock_choice QuickVina2Docking \
             --max_variants_per_compound 3 \
@@ -555,7 +555,7 @@ then
             --LipinskiStrictFilter \
             --GhoseFilter \
             --start_a_new_run \
-            --rxn_library ClickChem \
+            --rxn_library click_chem_rxns \
             --selector_choice Rank_Selector \
             --dock_choice QuickVina2Docking \
             --max_variants_per_compound 5 \
