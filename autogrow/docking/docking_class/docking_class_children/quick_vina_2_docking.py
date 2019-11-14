@@ -4,13 +4,7 @@ The child classes from ParentExample
 import __future__
 
 import os
-import sys
-import glob
-import string
-import subprocess
-import time
 
-import autogrow.docking.delete_failed_mol as Delete
 from autogrow.docking.docking_class.docking_class_children.vina_docking import VinaDocking
 
 
@@ -23,7 +17,7 @@ class QuickVina2Docking(VinaDocking):
     """
 
     def __init__(self, vars=None, receptor_file=None,
-        file_conversion_class_object=None, test_boot=True):
+                 file_conversion_class_object=None, test_boot=True):
         """
         get the specifications for Vina/QuickVina2 from vars load them into
         the self variables we will need and convert the receptor to the proper

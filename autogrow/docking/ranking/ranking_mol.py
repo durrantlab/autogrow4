@@ -1,13 +1,13 @@
+"""
+This script runs the ranking and selection of ligands.
+"""
 import __future__
 
-import glob
-import sys
 import os
 import random
 
-import numpy.random as rn
-import rdkit.Chem as Chem
 import rdkit
+import rdkit.Chem as Chem
 from rdkit.Chem.rdMolDescriptors import GetMorganFingerprint
 from rdkit import DataStructs
 
@@ -20,8 +20,8 @@ import autogrow.docking.ranking.selecting.roulette_selection as Roulette_Sel
 import autogrow.docking.ranking.selecting.tournement_selection as Tournement_Sel
 
 
-def create_seed_list(usable_list_of_smiles, generation_num, num_seed_diversity,
-    num_seed_dock_fitness, selector_choice, tourn_size):
+def create_seed_list(usable_list_of_smiles, num_seed_diversity,
+                     num_seed_dock_fitness, selector_choice, tourn_size):
     """
     this function will take ausable_list_of_smiles which can be derived from
     either the previous generation or a source_compounds_file. Then it will
@@ -41,7 +41,6 @@ def create_seed_list(usable_list_of_smiles, generation_num, num_seed_diversity,
     :param list usable_list_of_smiles: a list with SMILES strings, names, and
         information about the smiles from either the previous generation or the
         source compound list
-    :param int generation_num: the generation of the current population
     :param int num_seed_diversity: the number of seed molecules which come
         from diversity selection
     :param int num_seed_dock_fitness: the number of seed molecules which come
@@ -112,7 +111,7 @@ def create_seed_list(usable_list_of_smiles, generation_num, num_seed_diversity,
     chosen_mol_list = [x for x in docking_fitness_smiles_list]
     chosen_mol_list.extend(diversity_smile_list)
 
-    if selector_choice == "Rank_Selector" or selector_choice == "Roulette_Selector":
+    if selector_choice in ["Rank_Selector", "Roulette_Selector"]:
         # Get all the information about the chosen molecules. chosen_mol_list
         # is 1D list of all chosen ligands chosen_mol_full_data_list is a 1D
         # list with each item of the list having multiple pieces of
@@ -320,7 +319,7 @@ def score_and_append_diversity_scores(molecules_list):
     for pair in molecules_list:
         if pair is not None:
             smile = pair[0]
-            name = pair[1]
+            # name = pair[1]
             try:
                 mol = Chem.MolFromSmiles(smile, sanitize=False)
             except:

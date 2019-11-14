@@ -1,3 +1,7 @@
+"""
+This script holds the parent class for docking.
+This is used as the basis for all docking classes.
+"""
 import __future__
 
 class ParentDocking(object):
@@ -9,7 +13,7 @@ class ParentDocking(object):
     """
 
     def __init__(self, vars=None, receptor_file=None,
-        file_conversion_class_object=None, test_boot=True):
+                 file_conversion_class_object=None, test_boot=True):
         """
         Require to initialize any pdbqt conversion class.
 
@@ -45,7 +49,8 @@ class ParentDocking(object):
         raise NotImplementedError("run_dock() not implemented")
 
     def rank_and_save_output_smi(self, vars, current_generation_dir,
-        current_gen_int, smile_file, deleted_smiles_names_list):
+                                 current_gen_int, smile_file,
+                                 deleted_smiles_names_list):
         """
         rank_and_save_output_smi is needs to be implimented in each class.
         raise exception if missing

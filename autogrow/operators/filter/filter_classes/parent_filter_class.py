@@ -1,3 +1,8 @@
+"""
+This script holds the parent class for filtering.
+This is used as the basis for all filter classes.
+"""
+import __future__
 class ParentFilter(object):
     """
     This is a scipt containing all of the filters for drug likeliness

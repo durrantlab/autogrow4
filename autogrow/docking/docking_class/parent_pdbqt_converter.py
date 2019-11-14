@@ -1,3 +1,7 @@
+"""
+This script holds the parent class for file conversion for docking.
+This is used as the basis for all file conversion classes.
+"""
 import __future__
 
 class ParentPDBQTConverter(object):
@@ -32,7 +36,8 @@ class ParentPDBQTConverter(object):
         return self.__class__.__name__
 
     def convert_receptor_pdb_files_to_pdbqt(self, receptor_file, mgl_python,
-        receptor_template, number_of_processors):
+                                            receptor_template,
+                                            number_of_processors):
         """
         Make sure a PDB file is properly formatted for conversion to pdbqt
 

@@ -92,7 +92,8 @@ class PAINSFilter(ParentFilter):
         :param rdkit.Chem.rdchem.Mol object mol: An rdkit mol object to be
             tested if it passes the filters Returns:
         Returns:
-        :returns: bool bool: True if the mol passes the filter; False if it fails the filter
+        :returns: bool bool: True if the mol passes the filter;
+            False if it fails the filter
         """
 
         # This is our set of all the PAINS filters

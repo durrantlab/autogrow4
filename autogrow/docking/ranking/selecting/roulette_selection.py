@@ -1,15 +1,13 @@
+"""
+This script is use to select molecules using a roulette selector
+"""
 import __future__
-
-import glob
-import sys
-import os
-import random
 
 import numpy.random as rn
 
 
 def spin_roulette_selector(usable_list_of_smiles, number_to_chose,
-    docking_or_diversity):
+                           docking_or_diversity):
     """
     make a list of ligands chosen by a random weighted roulette selection,
     without replacement, weighted by its docking score

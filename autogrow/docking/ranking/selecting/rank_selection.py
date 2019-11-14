@@ -1,8 +1,11 @@
+"""
+This script is use to select molecules using a ranked selector
+"""
 import __future__
 
 
 def run_rank_selector(usable_list_of_smiles, number_to_chose,
-    column_idx_to_select, reverse_sort=False):
+                      column_idx_to_select, reverse_sort=False):
     """
     Given a data set and an idx number to select based on it will select the
     top rank scores for that critera. The number is choses is defined by
@@ -54,9 +57,10 @@ def run_rank_selector(usable_list_of_smiles, number_to_chose,
         info = sorted_list[i]
         if "\t".join(info) in temp_list_info:
             continue
-        else:
-            temp_list_info.append("\t".join(info))
-            new_sorted_list.append(info)
+
+        temp_list_info.append("\t".join(info))
+        new_sorted_list.append(info)
+
     del sorted_list
     del temp_list_info
     if len(new_sorted_list) < number_to_chose:

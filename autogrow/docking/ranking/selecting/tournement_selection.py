@@ -1,3 +1,6 @@
+"""
+This script is use to select molecules using a tournement selector
+"""
 import __future__
 
 import random
@@ -6,7 +9,7 @@ import copy
 
 
 def run_tournement_selector(list_of_ligands, num_to_chose, tourn_size,
-    idx_to_sel, favor_most_negative=True):
+                            idx_to_sel, favor_most_negative=True):
     """
     This runs a tournement style selector given a list of ligands and
     specified metric. It will randomly select ligands for tournements. The
@@ -73,7 +76,7 @@ def run_tournement_selector(list_of_ligands, num_to_chose, tourn_size,
 
 
 def run_one_tournement(list_of_ligands, num_per_tourn, idx_to_sel,
-    favor_most_negative=True):
+                       favor_most_negative=True):
     """
     This runs a single tournement style selection given a list of ligands and
     specified metric. It will randomly select ligands for the tournement. The
