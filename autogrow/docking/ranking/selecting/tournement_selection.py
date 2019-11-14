@@ -83,7 +83,7 @@ def run_one_tournement(list_of_ligands, num_per_tourn, idx_to_sel,
     best scoring ligand from the tournement will be returned.
 
     This is done WITHOUT REPLACEMENT. This does provide an opportunity for any
-    ligand to make it \into the chosen_ligands list even if it doesn't have a
+    ligand to make it into the chosen_ligands list even if it doesn't have a
     high score, but that chance of random incorporation decreases as
     tourn_size increases.
         -ie tourn_size=1.0 will randomly pick N number of ligands equal to the

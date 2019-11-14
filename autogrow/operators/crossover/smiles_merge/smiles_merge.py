@@ -15,8 +15,45 @@ import autogrow.operators.crossover.smiles_merge.merge_functions.dict_and_r_grou
 import autogrow.operators.crossover.smiles_merge.merge_functions.alignment_and_breaks as AnB
 import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
 
+def process_ligand_new_mol(ligand_new_mol):
+    """
+    This function processes the ligand_new_mol.
+    It either returns the SMILES string of ligand_new_mol (ligand_new_smiles)
+    or None if it failed at any step.
 
+    Inputs:
+    :param str lig_string_1: smile string for lig 1
 
+    Returns:
+    :returns: str ligand_new_smiles: either returns the SMILES
+        string of ligand_new_mol or None if it failed at any step.
+    """
+
+    ligand_new_mol = MOH.check_sanitization(ligand_new_mol)
+    if ligand_new_mol is None:
+        return None
+
+    # REMOVE ALL THE ISOTOPES IN THE NEW MOLECULE
+    ligand_new_mol_final = MWC.remove_all_isolabels(ligand_new_mol)
+
+    # Remove any fragments incase 1 made it through
+    ligand_new_mol_final = MOH.handle_frag_check(ligand_new_mol_final)
+    if ligand_new_mol_final is None:
+        return None
+
+    # Make sure there are no unassigned atoms which made it through. These are
+    # very unlikely but possible
+    ligand_new_mol_final = MOH.check_for_unassigned_atom(ligand_new_mol_final)
+    if ligand_new_mol_final is None:
+        return None
+
+    ligand_new_mol = MOH.check_sanitization(ligand_new_mol_final)
+    if ligand_new_mol is None:
+        return None
+
+    ligand_new_smiles = Chem.MolToSmiles(ligand_new_mol, isomericSmiles=True)
+
+    return ligand_new_smiles
 
 def run_main_smiles_merge(vars, lig_string_1, lig_string_2):
     """
@@ -38,25 +75,19 @@ def run_main_smiles_merge(vars, lig_string_1, lig_string_2):
     # lig_string_1 = "[N-] = [N+] = NCC(O)COc1cccc2ccccc12"
     # lig_string_2 = "C# CCOc1ccc2ccccc2c1CO"
     # lig_string_1 = "C1 = CC = CC = C1"
-
-    Lig_smile_1 = Chem.MolFromSmiles(lig_string_1, sanitize=False)
-    Lig_smile_2 = Chem.MolFromSmiles(lig_string_2, sanitize=False)
-
     # Sanitize
-    Lig_smile_1 = Chem.MolFromSmiles(lig_string_1, sanitize=False)
-    Lig_smile_2 = Chem.MolFromSmiles(lig_string_2, sanitize=False)
+    lig_smile_1 = Chem.MolFromSmiles(lig_string_1, sanitize=False)
+    lig_smile_2 = Chem.MolFromSmiles(lig_string_2, sanitize=False)
 
     # Sanitize, deprotanate, and reprotanate both molecules
-    mol_1 = MOH.check_sanitization(Lig_smile_1)
-    if mol_1 is None:
-        return False
-    mol_2 = MOH.check_sanitization(Lig_smile_2)
-    if mol_2 is None:
+    mol_1 = MOH.check_sanitization(lig_smile_1)
+    mol_2 = MOH.check_sanitization(lig_smile_2)
+    if mol_1 is None or mol_2 is None:
         return False
 
     protanate_step = vars["protanate_step"]
-    mol_1 = MOH.handleHs(Lig_smile_1, protanate_step)
-    mol_2 = MOH.handleHs(Lig_smile_2, protanate_step)
+    mol_1 = MOH.handleHs(lig_smile_1, protanate_step)
+    mol_2 = MOH.handleHs(lig_smile_2, protanate_step)
 
     # check that handleHs() worked for both molecules if fail move on to next
     # pair of molecules
@@ -112,28 +143,8 @@ def run_main_smiles_merge(vars, lig_string_1, lig_string_2):
     if ligand_new_mol is None:
         return None
 
-    ligand_new_mol = MOH.check_sanitization(ligand_new_mol)
-    if ligand_new_mol is None:
-        return None
-
-    # REMOVE ALL THE ISOTOPES IN THE NEW MOLECULE
-    ligand_new_mol_final = MWC.remove_all_isolabels(ligand_new_mol)
-
-    # Remove any fragments incase 1 made it through
-    ligand_new_mol_final = MOH.handle_frag_check(ligand_new_mol_final)
-    if ligand_new_mol_final is None:
-        return None
-
-    # Make sure there are no unassigned atoms which made it through. These are
-    # very unlikely but possible
-    ligand_new_mol_final = MOH.check_for_unassigned_atom(ligand_new_mol_final)
-    if ligand_new_mol_final is None:
-        return None
-
-    ligand_new_mol = MOH.check_sanitization(ligand_new_mol_final)
-    if ligand_new_mol is None:
-        return None
-
-    ligand_new_smiles = Chem.MolToSmiles(ligand_new_mol, isomericSmiles=True)
+    # ligand_new_smiles is either a SMILES string if processing works
+    # or None if processing fails
+    ligand_new_smiles = process_ligand_new_mol(ligand_new_mol)
 
     return ligand_new_smiles

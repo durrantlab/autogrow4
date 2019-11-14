@@ -6,11 +6,9 @@ This should also validate them.
 
 import __future__
 
-import glob
 import os
 import copy
 import datetime
-import time
 import json
 import sys
 import platform
@@ -95,7 +93,8 @@ def multiprocess_handling(vars):
         vars["multithread_mode"] = "serial"
         if vars["number_of_processors"] != 1:
             print(
-                "Because --multithread_mode was set to serial, this will be run on a single processor."
+                "Because --multithread_mode was set to serial, "
+                + "this will be run on a single processor."
             )
         vars["number_of_processors"] = 1
 
@@ -105,14 +104,19 @@ def multiprocess_handling(vars):
         try:
             import mpi4py
         except:
-            printout = "mpi4py not installed but --multithread_mode is set to mpi. \n Either install mpi4py or switch multithread_mode to multithreading or serial"
+            printout = "mpi4py not installed but --multithread_mode is set to"
+            printout = printout + " mpi. \n Either install mpi4py or switch "
+            printout = printout + "multithread_mode to multithreading or serial"
             raise ImportError(printout)
 
         try:
             import func_timeout
             from func_timeout import func_timeout, FunctionTimedOut
         except:
-            printout = "func_timeout not installed but --multithread_mode is set to mpi. \n Either install func_timeout or switch multithread_mode to multithreading or serial"
+            printout = "func_timeout not installed but --multithread_mode is "
+            printout = printout + "set to mpi. \n Either install func_timeout "
+            printout = printout + "or switch multithread_mode to"
+            printout = printout + " multithreading or serial"
             raise ImportError(printout)
 
     # # # launch mpi workers
@@ -214,8 +218,8 @@ def check_for_required_inputs(input_params):
             except:
                 pass
             if (
-                type(input_params["docking_exhaustiveness"]) != int
-                and type(input_params["docking_exhaustiveness"]) != float
+                    type(input_params["docking_exhaustiveness"]) != int
+                    and type(input_params["docking_exhaustiveness"]) != float
             ):
                 raise Exception(
                     "docking_exhaustiveness needs to be an interger. \
@@ -234,8 +238,8 @@ def check_for_required_inputs(input_params):
                 pass
 
             if (
-                type(input_params["docking_num_modes"]) != int
-                and type(input_params["docking_num_modes"]) != float
+                    type(input_params["docking_num_modes"]) != int
+                    and type(input_params["docking_num_modes"]) != float
             ):
                 raise Exception(
                     "docking_num_modes needs to be an interger. \
@@ -245,7 +249,7 @@ def check_for_required_inputs(input_params):
 
     # Check numbers which may be defined by first generation
     if "top_mols_to_seed_next_generation_first_generation" not in list(
-        input_params.keys()
+            input_params.keys()
     ):
         if "top_mols_to_seed_next_generation" not in list(input_params.keys()):
             # Use defined default of 10
@@ -277,7 +281,7 @@ def check_for_required_inputs(input_params):
             ]
 
     if "number_elitism_advance_from_previous_gen_first_generation" not in list(
-        input_params.keys()
+            input_params.keys()
     ):
         if "number_elitism_advance_from_previous_gen" not in list(input_params.keys()):
             # Use defined default of 10
@@ -543,23 +547,28 @@ def define_defaults():
     vars["nn1_script"] = os.path.join(
         script_dir, "docking", "scoring", "nn_score_exe", "nnscore1", "NNScore.py"
     )
-    # Example: vars['nn1_script'] = "/PATH/autogrow4/autogrow/docking/scoring/nn_score_exe/nnscore1/NNScore.py"
+    # Example: vars['nn1_script'] =
+    #    "/PATH/autogrow4/autogrow/docking/scoring/nn_score_exe/nnscore1/NNScore.py"
 
     vars["nn2_script"] = os.path.join(
         script_dir, "docking", "scoring", "nn_score_exe", "nnscore2", "NNScore2.py"
     )
-    # Example: vars['nn2_script'] = "/PATH/autogrow4/autogrow/docking/scoring/nnscore2/NNScore2.py"
+    # Example: vars['nn2_script'] =
+    #    "/PATH/autogrow4/autogrow/docking/scoring/nnscore2/NNScore2.py"
 
     #### OPTIONAL FILE-LOCATION VARIABLES ####
     # (RECOMMEND SETTING TO "" SO AUTOGROW CAN AUTOLOCATE THESE FILES)#
 
-    # PARSER.add_argument('--conversion_choice', choices = ["MGLTools","obabel"], default="MGLTools",
+    # PARSER.add_argument('--conversion_choice', choices
+    #    = ["MGLTools","obabel"], default="MGLTools",
     vars["conversion_choice"] = "MGLToolsConversion"
     vars["obabel_path"] = "obabel"
     vars["custom_conversion_script"] = ""
-    # vars['prepare_ligand4.py'] = "/PATH/MGLTools-1.5.4/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_ligand4.py"
+    # vars['prepare_ligand4.py'] =
+    #   "/PATH/MGLTools-1.5.4/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_ligand4.py"
     vars["prepare_ligand4.py"] = ""
-    # vars['prepare_receptor4.py'] = "/PATH/MGLTools-1.5.4/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_receptor4.py"
+    # vars['prepare_receptor4.py'] =
+    #   "/PATH/MGLTools-1.5.4/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_receptor4.py"
     vars["prepare_receptor4.py"] = ""
     # vars['mgl_python'] = "/PATH/MGLTools-1.5.4/bin/pythonsh"
     vars["mgl_python"] = ""
@@ -875,8 +884,8 @@ def load_in_commandline_parameters(argv):
                 )
             )
         if (
-            type(vars["custom_docking_script"]) != list
-            or os.path.exists(vars["custom_docking_script"][1]) is not True
+                type(vars["custom_docking_script"]) != list
+                or os.path.exists(vars["custom_docking_script"][1]) is not True
         ):
             raise ValueError(
                 "TO USE Custom DOCKING OPTION, MUST SPECIFY THE \
@@ -885,8 +894,8 @@ def load_in_commandline_parameters(argv):
 
     if vars["conversion_choice"] == "Custom":
         if (
-            type(vars["custom_conversion_script"]) != list
-            or os.path.exists(vars["custom_conversion_script"][1]) is not True
+                type(vars["custom_conversion_script"]) != list
+                or os.path.exists(vars["custom_conversion_script"][1]) is not True
         ):
 
             raise ValueError(
@@ -896,8 +905,8 @@ def load_in_commandline_parameters(argv):
 
     if vars["scoring_choice"] == "Custom":
         if (
-            type(vars["custom_scoring_script"]) != list
-            or os.path.exists(vars["custom_scoring_script"][1]) is not True
+                type(vars["custom_scoring_script"]) != list
+                or os.path.exists(vars["custom_scoring_script"][1]) is not True
         ):
 
             raise ValueError(
@@ -906,9 +915,9 @@ def load_in_commandline_parameters(argv):
             )
 
     if (
-        vars["conversion_choice"] == "Custom"
-        or vars["dock_choice"] == "Custom"
-        or vars["scoring_choice"] == "Custom"
+            vars["conversion_choice"] == "Custom"
+            or vars["dock_choice"] == "Custom"
+            or vars["scoring_choice"] == "Custom"
     ):
         vars = handle_custom_dock_and_conversion_scoring_options(vars)
 
@@ -1034,7 +1043,7 @@ def load_in_commandline_parameters(argv):
 
     # Make sure scripts and executables exist
     if not os.path.exists(vars["prepare_ligand4.py"]) and not os.path.exists(
-        vars["prepare_ligand4.py"].replace('"', "")
+            vars["prepare_ligand4.py"].replace('"', "")
     ):
         printout = (
             printout
@@ -1045,7 +1054,7 @@ def load_in_commandline_parameters(argv):
         print(printout)
         raise NotImplementedError(printout)
     if not os.path.exists(vars["prepare_receptor4.py"]) and not os.path.exists(
-        vars["prepare_receptor4.py"].replace('"', "")
+            vars["prepare_receptor4.py"].replace('"', "")
     ):
         printout = (
             printout
@@ -1056,7 +1065,7 @@ def load_in_commandline_parameters(argv):
         print(printout)
         raise NotImplementedError(printout)
     if not os.path.exists(vars["mgl_python"]) and not os.path.exists(
-        vars["mgl_python"].replace('"', "")
+            vars["mgl_python"].replace('"', "")
     ):
         printout = (
             printout
@@ -1067,7 +1076,7 @@ def load_in_commandline_parameters(argv):
         print(printout)
         raise NotImplementedError(printout)
     if not os.path.exists(vars["nn1_script"]) and not os.path.exists(
-        vars["nn1_script"].replace('"', "")
+            vars["nn1_script"].replace('"', "")
     ):
         printout = (
             printout
@@ -1080,7 +1089,7 @@ def load_in_commandline_parameters(argv):
         print(printout)
         raise NotImplementedError(printout)
     if not os.path.exists(vars["nn2_script"]) and not os.path.exists(
-        vars["nn2_script"].replace('"', "")
+            vars["nn2_script"].replace('"', "")
     ):
         printout = (
             printout
@@ -1279,8 +1288,8 @@ def handle_custom_inputs_if_argparsed(input_params):
     if "alternative_filter" not in input_params.keys():
         input_params["alternative_filter"] = None
     if (
-        input_params["alternative_filter"] is not None
-        and input_params["alternative_filter"] != []
+            input_params["alternative_filter"] is not None
+            and input_params["alternative_filter"] != []
     ):
         orginal = input_params["alternative_filter"][0]
         orginal = orginal.replace("[[", "[").replace("]]", "]")
@@ -1385,9 +1394,7 @@ def handle_alternative_filters(vars, filter_list):
                         {}\n If you want to add Custom filters to the filter child \
                         classes Must be a list of lists \
                         [[name_filter1, Path/to/name_filter1.py],\
-                        [name_filter2, Path/to/name_filter2.py]]".format(
-                            Custom_class[1]
-                        )
+                        [name_filter2, Path/to/name_filter2.py]]".format(Custom_class[1])
                     )
 
                 new_file = os.sep.join(
@@ -1404,9 +1411,7 @@ def handle_alternative_filters(vars, filter_list):
                 if os.path.exists(new_file) is True:
                     # File has been copied to proper dir but is not being found by the code
                     printout = "A copy of the custom script {} has been moved \
-                        to {}\n".format(
-                        Custom_class[1], new_file
-                    )
+                        to {}\n".format(Custom_class[1], new_file)
                     printout = (
                         printout
                         + "Unfortunately this could not be  \
@@ -1450,15 +1455,19 @@ def handle_alternative_filters(vars, filter_list):
                 copyfile(filter_info[0], filter_info[1])
 
             print(
-                "\n#############################################################################"
+                "\n########################################"
+                + "#####################################"
             )
-            print("AutoGrow has incorporated the custom files into the filter Module.")
+            print("AutoGrow has incorporated the custom files into"
+                  + " the filter Module.")
             print(
-                " AutoGrow needs to be restarted and should now be able to run custom scripts."
+                " AutoGrow needs to be restarted and should now "
+                + "be able to run custom scripts."
             )
             print("Please ensure you unit test this code properly before incorprating.")
             print(
-                "#############################################################################\n"
+                "#####################################"
+                + "########################################\n"
             )
             sys.exit(
                 0
@@ -1570,9 +1579,7 @@ def handle_custom_conversion_script(vars):
             if os.path.exists(new_file) is True:
                 # File has been copied to proper dir but is not being found by the code
                 printout = "A copy of the custom script {} has been moved \
-                    to {}\n".format(
-                    Custom_class[1], new_file
-                )
+                    to {}\n".format(Custom_class[1], new_file)
                 printout = (
                     printout
                     + "Unfortunately this could not be \
@@ -1612,23 +1619,28 @@ def handle_custom_conversion_script(vars):
 
                 printout = (
                     printout
-                    + "\n#############################################################################"
+                    + "\n#########################################"
+                    + "####################################"
                 )
                 printout = (
                     printout
-                    + "AutoGrow has incorporated the custom files into the docking_file_conversion Module."
+                    + "AutoGrow has incorporated the custom files into "
+                    + "the docking_file_conversion Module."
                 )
                 printout = (
                     printout
-                    + "AutoGrow needs to be restarted and should now be able to run custom scripts."
+                    + "AutoGrow needs to be restarted and should now be "
+                    + "able to run custom scripts."
                 )
                 printout = (
                     printout
-                    + "Please ensure you unit test this code properly before incorprating."
+                    + "Please ensure you unit test this code properly "
+                    + "before incorprating."
                 )
                 printout = (
                     printout
-                    + "#############################################################################\n"
+                    + "#########################################"
+                    + "####################################\n"
                 )
 
                 need_restart = True
@@ -1696,13 +1708,12 @@ def handle_custom_docking_script(vars):
                 ]
             )
 
-            if (
-                os.path.exists(new_file) is True
-            ):  # File has been copied to proper dir but is not being found by the code
+            if os.path.exists(new_file) is True:
+                # File has been copied to proper dir but is not being found by the code
                 printout = "A copy of the custom script {} has been moved \
                     to {}\n".format(
-                    Custom_class[1], new_file
-                )
+                        Custom_class[1], new_file
+                    )
                 printout = (
                     printout
                     + "Unfortunately this could not be imported \
