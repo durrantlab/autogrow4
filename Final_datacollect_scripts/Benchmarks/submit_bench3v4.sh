@@ -158,6 +158,7 @@ then
             --scoring_choice VINA \
             --LipinskiStrictFilter \
             --GhoseFilter \
+            --filter_source_compounds False \
             --start_a_new_run \
             --rxn_library click_chem_rxns \
             --selector_choice Rank_Selector \
@@ -235,6 +236,7 @@ then
             --scoring_choice VINA \
             --LipinskiStrictFilter \
             --GhoseFilter \
+            --filter_source_compounds False \
             --start_a_new_run \
             --rxn_library click_chem_rxns \
             --selector_choice Rank_Selector \
@@ -315,6 +317,7 @@ then
             --scoring_choice VINA \
             --LipinskiStrictFilter \
             --GhoseFilter \
+            --filter_source_compounds False \
             --start_a_new_run \
             --rxn_library click_chem_rxns \
             --selector_choice Rank_Selector \
@@ -397,6 +400,7 @@ then
             --scoring_choice VINA \
             --LipinskiStrictFilter \
             --GhoseFilter \
+            --filter_source_compounds False \
             --start_a_new_run \
             --rxn_library click_chem_rxns \
             --selector_choice Rank_Selector \
@@ -474,6 +478,7 @@ then
             --scoring_choice VINA \
             --LipinskiStrictFilter \
             --GhoseFilter \
+            --filter_source_compounds False \
             --start_a_new_run \
             --rxn_library click_chem_rxns \
             --selector_choice Rank_Selector \
@@ -554,6 +559,7 @@ then
             --scoring_choice VINA \
             --LipinskiStrictFilter \
             --GhoseFilter \
+            --filter_source_compounds False \
             --start_a_new_run \
             --rxn_library click_chem_rxns \
             --selector_choice Rank_Selector \
