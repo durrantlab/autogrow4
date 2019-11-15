@@ -53,7 +53,7 @@ do
     start_time="$(date +%s%N | cut -b1-13)"
     date +%s%N | cut -b1-13
 
-    time timeout 86400 python /bgfs/jdurrant/jspiegel/old_autogrow/autogrow/autogrow/autogrow_3_1_3.py \
+    time timeout 86400 /ihome/crc/install/python/anaconda2.7-2018.12_westpa/bin/python /bgfs/jdurrant/jspiegel/old_autogrow/autogrow/autogrow/autogrow_3_1_3.py \
         --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow4/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
         -center_x -70.76 -center_y  21.82 -center_z 28.33 \
         -size_x 25.0 -size_y 16.0 -size_z 25.0 \
@@ -137,7 +137,7 @@ then
         start_time="$(date +%s%N | cut -b1-13)"
         date +%s%N | cut -b1-13
 
-        time python /bgfs/jdurrant/jspiegel/autogrow4/RunAutogrow.py \
+        time /ihome/crc/install/python/anaconda2.7-2018.12_westpa/bin/python /bgfs/jdurrant/jspiegel/autogrow4/RunAutogrow.py \
             --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow4/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
             --center_x -70.76 --center_y  21.82 --center_z 28.33 \
             --size_x 25.0 --size_y 16.0 --size_z 25.0 \
@@ -169,6 +169,7 @@ then
             --debug_mode \
             --reduce_files_sizes False \
             --use_docked_source_compounds False \
+            --python_path /ihome/crc/install/python/anaconda2.7-2018.12_westpa/bin/python \
             --gypsum_timeout_limit 60 \
             >  $outfolder_four"test_output.txt" 2>  $outfolder_four"test_error.txt"
 
@@ -215,7 +216,7 @@ then
         start_time="$(date +%s%N | cut -b1-13)"
         date +%s%N | cut -b1-13
 
-        time python /bgfs/jdurrant/jspiegel/autogrow4/RunAutogrow.py \
+        time /ihome/crc/install/python/anaconda2.7-2018.12_westpa/bin/python /bgfs/jdurrant/jspiegel/autogrow4/RunAutogrow.py \
             --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow4/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
             --center_x -70.76 --center_y  21.82 --center_z 28.33 \
             --size_x 25.0 --size_y 16.0 --size_z 25.0 \
@@ -247,6 +248,7 @@ then
             --debug_mode \
             --reduce_files_sizes False \
             --use_docked_source_compounds False \
+            --python_path /ihome/crc/install/python/anaconda2.7-2018.12_westpa/bin/python \
             --gypsum_timeout_limit 60 \
             >  $outfolder_four"test_output.txt" 2>  $outfolder_four"test_error.txt"
 
@@ -296,7 +298,7 @@ then
         start_time="$(date +%s%N | cut -b1-13)"
         date +%s%N | cut -b1-13
 
-        time python /bgfs/jdurrant/jspiegel/autogrow4/RunAutogrow.py \
+        time /ihome/crc/install/python/anaconda2.7-2018.12_westpa/bin/python /bgfs/jdurrant/jspiegel/autogrow4/RunAutogrow.py \
             --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow4/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
             --center_x -70.76 --center_y  21.82 --center_z 28.33 \
             --size_x 25.0 --size_y 16.0 --size_z 25.0 \
@@ -328,6 +330,7 @@ then
             --debug_mode \
             --reduce_files_sizes False \
             --use_docked_source_compounds False \
+            --python_path /ihome/crc/install/python/anaconda2.7-2018.12_westpa/bin/python \
             --gypsum_timeout_limit 60 \
             >  $outfolder_four"test_output.txt" 2>  $outfolder_four"test_error.txt"
 
@@ -379,7 +382,7 @@ then
         start_time="$(date +%s%N | cut -b1-13)"
         date +%s%N | cut -b1-13
 
-        time python /bgfs/jdurrant/jspiegel/autogrow4/RunAutogrow.py \
+        time /ihome/crc/install/python/anaconda2.7-2018.12_westpa/bin/python /bgfs/jdurrant/jspiegel/autogrow4/RunAutogrow.py \
             --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow4/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
             --center_x -70.76 --center_y  21.82 --center_z 28.33 \
             --size_x 25.0 --size_y 16.0 --size_z 25.0 \
@@ -411,6 +414,7 @@ then
             --debug_mode \
             --reduce_files_sizes False \
             --use_docked_source_compounds False \
+            --python_path /ihome/crc/install/python/anaconda2.7-2018.12_westpa/bin/python \
             --gypsum_timeout_limit 60 \
             >  $outfolder_four"test_output.txt" 2>  $outfolder_four"test_error.txt"
 
@@ -457,7 +461,7 @@ then
         start_time="$(date +%s%N | cut -b1-13)"
         date +%s%N | cut -b1-13
 
-        time python /bgfs/jdurrant/jspiegel/autogrow4/RunAutogrow.py \
+        time /ihome/crc/install/python/anaconda2.7-2018.12_westpa/bin/python /bgfs/jdurrant/jspiegel/autogrow4/RunAutogrow.py \
             --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow4/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
             --center_x -70.76 --center_y  21.82 --center_z 28.33 \
             --size_x 25.0 --size_y 16.0 --size_z 25.0 \
@@ -489,6 +493,7 @@ then
             --debug_mode \
             --reduce_files_sizes False \
             --use_docked_source_compounds False \
+            --python_path /ihome/crc/install/python/anaconda2.7-2018.12_westpa/bin/python \
             --gypsum_timeout_limit 60 \
             >  $outfolder_four"test_output.txt" 2>  $outfolder_four"test_error.txt"
 
@@ -538,7 +543,7 @@ then
         start_time="$(date +%s%N | cut -b1-13)"
         date +%s%N | cut -b1-13
 
-        time python /bgfs/jdurrant/jspiegel/autogrow4/RunAutogrow.py \
+        time /ihome/crc/install/python/anaconda2.7-2018.12_westpa/bin/python /bgfs/jdurrant/jspiegel/autogrow4/RunAutogrow.py \
             --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow4/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
             --center_x -70.76 --center_y  21.82 --center_z 28.33 \
             --size_x 25.0 --size_y 16.0 --size_z 25.0 \
@@ -570,6 +575,7 @@ then
             --debug_mode \
             --reduce_files_sizes False \
             --use_docked_source_compounds False \
+            --python_path /ihome/crc/install/python/anaconda2.7-2018.12_westpa/bin/python \
             --gypsum_timeout_limit 60 \
             >  $outfolder_four"test_output.txt" 2>  $outfolder_four"test_error.txt"
 
