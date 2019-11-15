@@ -28,7 +28,7 @@ def program_info():
         program_output
         + "If you use AutoGrow 4.0.0 in your research, please cite the following reference:\n"
     )
-    program_output = program_output + "Spiegel, J, Ropp, P. J., Durrant, J. D. \n"
+    program_output = program_output + "Spiegel, J, Durrant, J. D. \n"
     program_output = program_output + " ================== \n\n"
 
     return program_output
