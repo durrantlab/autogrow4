@@ -169,7 +169,6 @@ then
             --debug_mode \
             --reduce_files_sizes False \
             --use_docked_source_compounds False \
-            --python_path /ihome/crc/install/python/anaconda2.7-2018.12_westpa/bin/python \
             --gypsum_timeout_limit 60 \
             >  $outfolder_four"test_output.txt" 2>  $outfolder_four"test_error.txt"
 
@@ -248,7 +247,6 @@ then
             --debug_mode \
             --reduce_files_sizes False \
             --use_docked_source_compounds False \
-            --python_path /ihome/crc/install/python/anaconda2.7-2018.12_westpa/bin/python \
             --gypsum_timeout_limit 60 \
             >  $outfolder_four"test_output.txt" 2>  $outfolder_four"test_error.txt"
 
@@ -330,7 +328,6 @@ then
             --debug_mode \
             --reduce_files_sizes False \
             --use_docked_source_compounds False \
-            --python_path /ihome/crc/install/python/anaconda2.7-2018.12_westpa/bin/python \
             --gypsum_timeout_limit 60 \
             >  $outfolder_four"test_output.txt" 2>  $outfolder_four"test_error.txt"
 
@@ -414,7 +411,6 @@ then
             --debug_mode \
             --reduce_files_sizes False \
             --use_docked_source_compounds False \
-            --python_path /ihome/crc/install/python/anaconda2.7-2018.12_westpa/bin/python \
             --gypsum_timeout_limit 60 \
             >  $outfolder_four"test_output.txt" 2>  $outfolder_four"test_error.txt"
 
@@ -493,7 +489,6 @@ then
             --debug_mode \
             --reduce_files_sizes False \
             --use_docked_source_compounds False \
-            --python_path /ihome/crc/install/python/anaconda2.7-2018.12_westpa/bin/python \
             --gypsum_timeout_limit 60 \
             >  $outfolder_four"test_output.txt" 2>  $outfolder_four"test_error.txt"
 
@@ -575,7 +570,6 @@ then
             --debug_mode \
             --reduce_files_sizes False \
             --use_docked_source_compounds False \
-            --python_path /ihome/crc/install/python/anaconda2.7-2018.12_westpa/bin/python \
             --gypsum_timeout_limit 60 \
             >  $outfolder_four"test_output.txt" 2>  $outfolder_four"test_error.txt"
 

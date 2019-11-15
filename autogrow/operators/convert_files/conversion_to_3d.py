@@ -10,15 +10,16 @@ from os.path import basename
 
 import rdkit
 import rdkit.Chem as Chem
+from func_timeout import func_timeout
 
 # Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog("rdApp.*")
 
 # Some pathing to allow for importing Gypsum Functions
-current_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-gypsum_dir = str(current_dir) + os.sep + "convert_files" + os.sep + "gypsum_dl"
-gypsum_gypsum_dir = (
-    str(current_dir)
+CURRENT_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+GYPSUM_DIR = str(CURRENT_DIR) + os.sep + "convert_files" + os.sep + "gypsum_dl"
+GYPSUM_GYPSUM_DIR = (
+    str(CURRENT_DIR)
     + os.sep
     + "convert_files"
     + os.sep
@@ -26,9 +27,10 @@ gypsum_gypsum_dir = (
     + os.sep
     + "gypsum_dl"
 )
-sys.path.extend([gypsum_dir, current_dir, gypsum_gypsum_dir])
+sys.path.extend([GYPSUM_DIR, CURRENT_DIR, GYPSUM_GYPSUM_DIR])
 
 import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
+from autogrow.operators.convert_files.gypsum_dl.gypsum_dl.Start import prepare_molecules
 
 
 
@@ -119,13 +121,12 @@ def convert_smi_to_sdfs_with_gypsum(vars, gen_smiles_file, smile_file_directory)
         the 3D sdf's created by gypsum.
     """
 
-    max_variance = vars["max_variants_per_compound"]
-    number_of_processors = vars["number_of_processors"]
     max_variants_per_compound = vars["max_variants_per_compound"]
     gypsum_thoroughness = vars["gypsum_thoroughness"]
     min_ph = vars["min_ph"]
     max_ph = vars["max_ph"]
     pka_precision = vars["pka_precision"]
+    gypsum_timeout_limit = vars["gypsum_timeout_limit"]
 
     # Make a new folder to put gypsum .smi's and json. Name folder
     # gypsum_submission_files.
@@ -144,37 +145,16 @@ def convert_smi_to_sdfs_with_gypsum(vars, gen_smiles_file, smile_file_directory)
         os.makedirs(gypsum_log_path)
 
     # Make All of the json files to submit to gypsum
-    list_of_jsons = make_smi_and_gyspum_submit(
+    list_of_gypsum_params = make_smi_and_gyspum_params(
         gen_smiles_file,
         folder_path,
         gypsum_output_folder_path,
-        max_variance,
+        max_variants_per_compound,
         gypsum_thoroughness,
         min_ph,
         max_ph,
         pka_precision,
     )
-
-    timeout_option = vars["timeout_vs_gtimeout"]
-    gypsum_timeout_limit = vars["gypsum_timeout_limit"]
-    if "python_path" not in vars.keys():
-        python_path = "python"
-    else:
-        if (
-                vars["python_path"] != "python"
-                and os.path.exists(vars["python_path"]) is False
-        ):
-            printout = "python path provided was not found."
-            printout = printout + "\n\t{}".format(vars["python_path"])
-            printout = (
-                printout
-                + "\nPlease either leave blank or provide proper \
-                path to python enviorment."
-            )
-            print(printout)
-            raise Exception(printout)
-        else:
-            python_path = vars["python_path"]
 
     # create a the job_inputs to run gypsum in multithread
     job_input = tuple(
@@ -182,25 +162,21 @@ def convert_smi_to_sdfs_with_gypsum(vars, gen_smiles_file, smile_file_directory)
             tuple(
                 [
                     gypsum_log_path,
-                    json_path,
-                    timeout_option,
+                    gypsum_params,
                     gypsum_timeout_limit,
-                    python_path,
                 ]
             )
-            for json_path in list_of_jsons
+            for gypsum_params in list_of_gypsum_params
         ]
     )
 
-    if vars["parallelizer"].return_mode() == "mpi":
-        failed_to_convert = vars["parallelizer"].run(
-            job_input, run_gypsum_multiprocessing_mpi
-        )
-        sys.stdout.flush()
-    else:
-        failed_to_convert = vars["parallelizer"].run(
-            job_input, run_gypsum_multiprocessing
-        )
+
+    sys.stdout.flush()
+    failed_to_convert = vars["parallelizer"].run(
+        job_input, run_gypsum_multiprocessing
+    )
+    sys.stdout.flush()
+
 
     lig_failed_to_convert = [x for x in failed_to_convert if x is not None]
     lig_failed_to_convert = list(set(lig_failed_to_convert))
@@ -212,17 +188,16 @@ def convert_smi_to_sdfs_with_gypsum(vars, gen_smiles_file, smile_file_directory)
     return gypsum_output_folder_path
 
 
-def make_smi_and_gyspum_submit(gen_smiles_file, folder_path,
+def make_smi_and_gyspum_params(gen_smiles_file, folder_path,
                                gypsum_output_folder_path, max_variance,
                                gypsum_thoroughness, min_ph, max_ph,
                                pka_precision):
     """
-    Make an individual .json file to submit to Gypsum for every ligand in the
-    .smi file. It then executes gypsum for every .json file. This also makes a
-    .smi file for each ligand which will be required for Gypsum.
+    Make an individual .smi file and parameter dictionary to submit to Gypsum
+    for every ligand in the generation_*_to_convert.smi file.
 
-    The .smi file for each ligand will be noted within the .json file to
-    instruct Gypsum where to find the SMILE.
+    The .smi file for each ligand will be noted within the dictionary as
+    "source".
 
     Inputs:
     :param str gen_smiles_file: the file name of the .smi file to be converted
@@ -244,14 +219,14 @@ def make_smi_and_gyspum_submit(gen_smiles_file, folder_path,
         ranges by Dimorphite-DL
 
     Returns:
-    :returns: list list_of_jsons: a list of the paths to all .jsons to be
-        submitted to Gypsum.
+    :returns: list list_of_gypsum_params: a list of dictionaries. Each
+        dictionary contains the Gypsum-DL parameters to convert a single
+        ligand from SMILES to 3D .sdf
     """
-    list_of_jsons = []
+    list_of_gypsum_params = []
 
     with open(gen_smiles_file) as smiles_file:
         for line in smiles_file:
-            line_full = line
             if line == "\n":
                 continue
             line = line.replace("\n", "")
@@ -289,70 +264,61 @@ def make_smi_and_gyspum_submit(gen_smiles_file, folder_path,
 
             smi_line = "{}\t{}".format(smile, lig_name_short)
 
-            json_path = "{}{}.json".format(folder_path, lig_name_short)
             smi_path = "{}{}.smi".format(folder_path, lig_name_short)
-            gypsum_out_sdf_path = "{}{}.sdf".format(
-                gypsum_output_folder_path, lig_name_short
-            )
 
             # make .smi file
             with open(smi_path, "w") as smi_file:
                 smi_file.write(smi_line)
 
             # Make .json file
+            gypsum_params = {
+                "source": smi_path,
+                "output_folder": gypsum_output_folder_path,
+                "num_processors": 1,
+                "job_manager": "serial",
+                "use_durrant_lab_filters": True,
+                "max_variants_per_compound": max_variance,
+                "thoroughness": gypsum_thoroughness,
+                "separate_output_files": True,
+                "add_pdb_output": False,
+                "add_html_output": False,
+                "min_ph": min_ph,
+                "max_ph": max_ph,
+                "pka_precision": pka_precision,
+                "skip_optimize_geometry": False,
+                "skip_alternate_ring_conformations": False,
+                "skip_adding_hydrogen": False,
+                "skip_making_tautomers": False,
+                "skip_enumerate_chiral_mol": False,
+                "skip_enumerate_double_bonds": False,
+                "let_tautomers_change_chirality": False,
+                "2d_output_only": False,
+                "cache_prerun": False,
+                "test": False,
+            }
 
-            json_params = """{{"source": "{}",
-            "output_folder": "{}",
-            "num_processors": 1,
-            "use_durrant_lab_filters": true,
-            "job_manager": "serial",
-            "separate_output_files":true,
-            "max_variants_per_compound": {},
-            "thoroughness": {},
-            "min_ph": {},
-            "max_ph": {},
-            "pka_precision": {}
-            }}""".format(
-                smi_path,
-                gypsum_output_folder_path,
-                max_variance,
-                gypsum_thoroughness,
-                min_ph,
-                max_ph,
-                pka_precision,
-            )
+            list_of_gypsum_params.append(gypsum_params)
 
-            # make .json file
-            with open(json_path, "w") as json_file:
-                json_file.write(json_params)
-
-            list_of_jsons.append(json_path)
-
-    return list_of_jsons
+    return list_of_gypsum_params
 
 
-def run_gypsum_multiprocessing_mpi(gypsum_log_path, json_path, timeout_option,
-                                   gypsum_timeout_limit, python_path):
+def run_gypsum_multiprocessing(gypsum_log_path, gypsum_params,
+                               gypsum_timeout_limit):
     """
     This converts the a single ligand from a SMILE to a 3D SDF using Gypsum.
     This is used within a multithread.
 
     This uses a Try statement and a bash script to be able to create a timeout
-    if it requires more than 5 minutes to convert a single ligands
+    to prevent stalling or very long conversions.
 
     Inputs:
     :param str gypsum_log_path: a path to the folder to place the log files
         produced when running gypsum.
-    :param str json_path: the path to the json file which will be run to
+    :param dict gypsum_params: dictionary of params to be feed to Gypsum-DL to
         convert to 3D sdf for a single ligand
-    :param str timeout_option: this is taken from vars["timeout_vs_gtimeout"].
-        This tells the Bash system whether to use "timeout" or "gtimeout".
-        gtimeout is used on most MacOS, while timeout is used on most Linux OS.
     :param int gypsum_timeout_limit: this is taken from
         vars["gypsum_timeout_limit"]. It determines the maximum amount of time to
         run Gypsum per ligand
-    :param str python_path: Taken from vars["python_path"]. Not used here but
-        for symetry with run_gypsum_multiprocessing
 
     Returns:
     :returns: str lig_id: the name of the ligand if it failed or None if it
@@ -365,50 +331,13 @@ def run_gypsum_multiprocessing_mpi(gypsum_log_path, json_path, timeout_option,
     gypsum_gypsum_dir = str(gypsum_dir) + os.sep + "gypsum_dl" + os.sep
     sys.path.extend([current_dir, gypsum_dir, gypsum_gypsum_dir])
 
-    from func_timeout import func_timeout, FunctionTimedOut
 
-    from autogrow.operators.convert_files.gypsum_dl.gypsum_dl.Start import (
-        prepare_molecules,
-    )
-
-    json_file_name = os.path.basename(json_path)
-    lig_id = json_file_name.replace(".json", "")
+    lig_id = gypsum_params["source"].split(os.sep)[-1].replace(".smi", "")
     log_file = "{}{}_log.txt".format(gypsum_log_path, lig_id)
-
-    # The following information in INPUTS will be overriden once in gypsum_dl.
-    # The only information that is import is the json_path, which will be used
-    # to define all the parameters.
-    INPUTS = {
-        "json": json_path,
-        "source": None,
-        "output_folder": None,
-        "job_manager": "serial",
-        "num_processors": 1,
-        "max_variants_per_compound": None,
-        "thoroughness": None,
-        "separate_output_files": False,
-        "add_pdb_output": False,
-        "add_html_output": False,
-        "min_ph": None,
-        "max_ph": None,
-        "pka_precision": None,
-        "skip_optimize_geometry": False,
-        "skip_alternate_ring_conformations": False,
-        "skip_adding_hydrogen": False,
-        "skip_making_tautomers": False,
-        "skip_enumerate_chiral_mol": False,
-        "skip_enumerate_double_bonds": False,
-        "let_tautomers_change_chirality": False,
-        "use_durrant_lab_filters": False,
-        "2d_output_only": False,
-        "cache_prerun": False,
-        "test": False,
-    }
 
     try:
         with StdoutRedirection(log_file):
-            # prepare_molecules(INPUTS)
-            func_timeout(gypsum_timeout_limit, prepare_molecules, args=(INPUTS,))
+            func_timeout(gypsum_timeout_limit, prepare_molecules, args=(gypsum_params,))
 
         sys.stdout.flush()
     except:
@@ -417,86 +346,11 @@ def run_gypsum_multiprocessing_mpi(gypsum_log_path, json_path, timeout_option,
 
     # Check if it worked if it failed return lig_id if it works return None
     did_gypsum_complete = check_gypsum_log_did_complete(log_file)
-    if did_gypsum_complete is False:
-        return lig_id
-    elif did_gypsum_complete is None:
+    if did_gypsum_complete in [None, False]:
+        # Failed to convert
         return lig_id
 
     return None
-
-
-def run_gypsum_multiprocessing(gypsum_log_path, json_path, timeout_option,
-                               gypsum_timeout_limit, python_path):
-    """
-    This converts the a single ligand from a SMILE to a 3D SDF using Gypsum.
-    This is used within a multithread.
-
-    This uses a Try statement and a bash script to be able to create a timeout
-    if it requires more than 5 minutes to convert a single ligands
-
-    Inputs:
-    :param str gypsum_log_path: a path to the folder to place the log files
-        produced when running gypsum.
-    :param str json_path: the path to the json file which will be run to
-        convert to 3D sdf for a single ligand
-    :param str timeout_option: this is taken from vars["timeout_vs_gtimeout"].
-        This tells the Bash system whether to use "timeout" or "gtimeout".
-        gtimeout is used on most MacOS, while timeout is used on most Linux OS.
-    :param int gypsum_timeout_limit: this is taken from
-        vars["gypsum_timeout_limit"]. It determines the maximum amount of time to
-        run Gypsum per ligand
-    :param str python_path: Taken from vars["python_path"]. It is the path to
-        the python enviorment to use. If not provided it will defer to using just
-        python
-
-    Returns:
-    :returns: str lig_id: the name of the ligand if it failed or None if it
-        successfully converted to 3D sdf.
-    """
-
-    json_file_name = os.path.basename(json_path)
-    lig_id = json_file_name.replace(".json", "")
-    log_file = "{}{}_log.txt".format(gypsum_log_path, lig_id)
-
-    current_dir_executables = os.path.abspath(os.path.dirname(__file__))
-    run_single_gypsum_executable = "{}{}run_single_gypsum_{}.sh".format(
-        current_dir_executables, os.sep, timeout_option
-    )
-    gypsum_dl_py_executable = "{}{}gypsum_dl{}run_gypsum_dl.py".format(
-        current_dir_executables, os.sep, os.sep
-    )
-
-    # run as a .sh bash script to be able to use timeout feature and pipe log.
-    # There is a timeout limit for gypsum defined by users defined within
-    # run_single_gypsum_executable_timeout but we add an extra 30 second
-    # timeout limit wrapped around for security since we are using the
-    # os.system function anyway timeout or gtimeout.
-    command = (
-        timeout_option
-        + " "
-        + str(gypsum_timeout_limit + 30)
-        + " bash {} {} {} {} {} >> {} 2>> {}".format(
-            run_single_gypsum_executable,
-            gypsum_dl_py_executable,
-            json_path,
-            gypsum_timeout_limit,
-            python_path,
-            log_file,
-            log_file,
-        )
-    )
-    try:
-        os.system(command)
-    except:
-        return lig_id
-    # Check if it worked if it failed return lig_id if it works return None
-    did_gypsum_complete = check_gypsum_log_did_complete(log_file)
-    if did_gypsum_complete is False:
-        return lig_id
-    elif did_gypsum_complete is None:
-        return lig_id
-    else:
-        return None
 
 
 def check_gypsum_log_did_complete(log_file_path):
@@ -539,10 +393,10 @@ def check_gypsum_log_did_complete(log_file_path):
 
     if str(lastline) == "TIMEOUT":
         return False
-    elif str(lastline) == "FAILED ERRORS WITH THE LIGAND":
+    if str(lastline) == "FAILED ERRORS WITH THE LIGAND":
         return None
-    else:
-        return True
+    # passes
+    return True
 
 
 def convert_sdf_to_pdbs(vars, gen_folder_path, sdfs_folder_path):
@@ -618,11 +472,11 @@ def convert_single_sdf_to_pdb(pdb_subfolder_path, sdf_file_path):
         except:
             mols = None
         try:
-            mols_noH = Chem.SDMolSupplier(
+            mols_no_hydrogen = Chem.SDMolSupplier(
                 sdf_file_path, sanitize=True, removeHs=True, strictParsing=False
             )
         except:
-            mols_noH = [None for x in range(0, len(mols))]
+            mols_no_hydrogen = [None for x in range(0, len(mols))]
 
         if mols is None:
             pass
@@ -652,20 +506,20 @@ def convert_single_sdf_to_pdb(pdb_subfolder_path, sdf_file_path):
                         # Add header to PDB file with SMILES containing
                         # protanation and stereochem
 
-                        no_H_Smiles = mols_noH[i]
-                        if no_H_Smiles is None:
-                            no_H_Smiles = Chem.MolToSmiles(mol)
+                        no_hydrogen_smiles = mols_no_hydrogen[i]
+                        if no_hydrogen_smiles is None:
+                            no_hydrogen_smiles = Chem.MolToSmiles(mol)
 
-                        if no_H_Smiles is None:
+                        if no_hydrogen_smiles is None:
                             print("SMILES was None for: ", pdb_name)
                             printout = "REMARK Final SMILES string: {}\n".format("None")
-                        elif type(no_H_Smiles) == str:
+                        elif type(no_hydrogen_smiles) == str:
                             printout = "REMARK Final SMILES string: {}\n".format(
-                                no_H_Smiles
+                                no_hydrogen_smiles
                             )
-                        elif type(no_H_Smiles) == type(Chem.MolFromSmiles("C")):
+                        elif type(no_hydrogen_smiles) == type(Chem.MolFromSmiles("C")):
                             printout = "REMARK Final SMILES string: {}\n".format(
-                                Chem.MolToSmiles(no_H_Smiles)
+                                Chem.MolToSmiles(no_hydrogen_smiles)
                             )
 
                         with open(pdb_name) as f:

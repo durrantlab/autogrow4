@@ -128,17 +128,7 @@ PARSER.add_argument(
     If True find the last generation in the root_output_folder and continue to fill.\
     Default is False.",
 )
-PARSER.add_argument(
-    "--python_path",
-    type=str,
-    default="python",
-    help="On some systems there may be multiple enviorments. AutoGrow executes \
-    several os.system calls that may open additional python shells. In some rare \
-    cases these new the python shells may call the wrong python installation. \
-    If this occurs, please provide the path to the desired python here. \
-    If the log files in the generation_0/3D_SDFs/log/ directory is unable \
-    to import an API, such as argparse, you may need to provide this path.",
-)
+
 
 
 # SmilesMerge Settings

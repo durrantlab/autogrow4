@@ -649,7 +649,6 @@ def define_defaults():
     vars["debug_mode"] = False
     vars["reduce_files_sizes"] = False
     vars["generate_plot"] = True
-    vars["python_path"] = "python"
 
     # Check Bash Timeout function (There's a difference between MacOS and linux)
     # Linux uses timeout while MacOS uses gtimeout
@@ -1139,21 +1138,6 @@ def load_in_commandline_parameters(argv):
     vars["output_directory"] = set_run_directory(
         vars["root_output_folder"], vars["start_a_new_run"]
     )
-
-    if "python_path" not in vars.keys():
-        vars["python_path"] == "python"
-    if type(vars["python_path"]) != str or vars["python_path"] == "":
-        vars["python_path"] == "python"
-    if vars["python_path"] != "python" and os.path.exists(vars["python_path"]) is False:
-        printout = "python path provided was not found."
-        printout = printout + "\n\t{}".format(vars["python_path"])
-        printout = (
-            printout
-            + "\nPlease either leave blank or provide proper \
-            path to python enviorment."
-        )
-        print(printout)
-        raise Exception(printout)
 
     # Save variables in vars dict to a .json file for later usage and reference
     # It saves the file to the output_directory + "vars.json"
