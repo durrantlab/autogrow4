@@ -22,13 +22,13 @@ def get_usable_fomat(infile):
             part -1 (the last piece of info) is the SMILES diversity score
                 relative to its population
             part -2 (the second to last piece of info) is the fitness metric
-                for evaluating. For default setting this is the Docking score.
-                If you add a unique scoring function Docking score should be -3
-                and that score function should be -2
+                for evaluating
+                - For default setting this is the Docking score
+                - If you add a unique scoring function Docking score should be
+                    -3 and that score function should be -2
 
             Any other information MUST be between part 2 and part -2 (this
-            allows for the expansion of features without disrupting the
-            rest of the code)
+            allows for the expansion of features without disrupting the rest of the code)
 
     Inputs:
     :param str infile: the string of the PATHname of a formatted .smi file to
@@ -41,10 +41,19 @@ def get_usable_fomat(infile):
 
     # IMPORT SMILES FROM THE PREVIOUS GENERATION
     usable_list_of_smiles = []
+
+    if os.path.exists(infile) is False:
+        print("\nFile of Source compounds does not exist: {}\n".format(infile))
+        raise Exception("File of Source compounds does not exist")
+
     with open(infile) as smiles_file:
         for line in smiles_file:
             line = line.replace("\n", "")
             parts = line.split("\t")  # split line into parts seperated by 4-spaces
+            if len(parts) == 1:
+                parts = line.split(
+                    "    "
+                )  # split line into parts seperated by 4-spaces
 
             choice_list = []
             for i in range(0, len(parts)):

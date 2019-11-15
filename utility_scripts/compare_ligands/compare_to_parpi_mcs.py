@@ -14,14 +14,52 @@ from rdkit.Chem.Draw.MolDrawing import MolDrawing, DrawingOptions #
 
 import support_scripts.Multiprocess as mp
 
-
 def get_usable_fomat(infile):
+    """
+    This code takes a string for an file which is formated as an .smi file. It
+    opens the file and reads in the components into a usable list.
+
+    The .smi must follow the following format for each line:
+        MANDATORY INFO
+            part 1 is the SMILES string
+            part 2 is the SMILES name/ID
+
+        Optional info
+            part -1 (the last piece of info) is the SMILES diversity score
+                relative to its population
+            part -2 (the second to last piece of info) is the fitness metric
+                for evaluating
+                - For default setting this is the Docking score
+                - If you add a unique scoring function Docking score should be
+                    -3 and that score function should be -2
+
+            Any other information MUST be between part 2 and part -2 (this
+            allows for the expansion of features without disrupting the rest of the code)
+
+    Inputs:
+    :param str infile: the string of the PATHname of a formatted .smi file to
+        be read into the program
+
+    Returns:
+    :returns: list usable_list_of_smiles: list of SMILES and their associated
+        information formated into a list which is usable by the rest of Autogrow
+    """
+
     # IMPORT SMILES FROM THE PREVIOUS GENERATION
     usable_list_of_smiles = []
+
+    if os.path.exists(infile) is False:
+        print("\nFile of Source compounds does not exist: {}\n".format(infile))
+        raise Exception("File of Source compounds does not exist")
+
     with open(infile) as smiles_file:
         for line in smiles_file:
-            line = line.replace("\n","")
-            parts = line.split('\t')      # split line into parts seperated by 4-spaces
+            line = line.replace("\n", "")
+            parts = line.split("\t")  # split line into parts seperated by 4-spaces
+            if len(parts) == 1:
+                parts = line.split(
+                    "    "
+                )  # split line into parts seperated by 4-spaces
 
             choice_list = []
             for i in range(0, len(parts)):
@@ -29,7 +67,8 @@ def get_usable_fomat(infile):
             usable_list_of_smiles.append(choice_list)
 
     return usable_list_of_smiles
-#
+
+
 def add_mol_to_list(usable_list_line):
 
     try:
