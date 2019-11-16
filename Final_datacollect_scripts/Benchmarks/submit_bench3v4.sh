@@ -147,8 +147,8 @@ then
             --number_of_crossovers_first_generation 50 \
             --number_of_mutants 50 \
             --number_of_crossovers 50 \
-            --top_mols_to_seed_next_generation 70 \
-            --number_elitism_advance_from_previous_gen 70 \
+            --top_mols_to_seed_next_generation 50 \
+            --number_elitism_advance_from_previous_gen 50 \
             --number_elitism_advance_from_previous_gen_first_generation 0 \
             --diversity_mols_to_seed_first_generation 0 \
             --diversity_seed_depreciation_per_gen 0 \
@@ -224,8 +224,8 @@ then
             --number_of_crossovers_first_generation 50 \
             --number_of_mutants 50 \
             --number_of_crossovers 50 \
-            --top_mols_to_seed_next_generation 70 \
-            --number_elitism_advance_from_previous_gen 70 \
+            --top_mols_to_seed_next_generation 50 \
+            --number_elitism_advance_from_previous_gen 50 \
             --number_elitism_advance_from_previous_gen_first_generation 0 \
             --diversity_mols_to_seed_first_generation 0 \
             --diversity_seed_depreciation_per_gen 0 \
@@ -304,8 +304,8 @@ then
             --number_of_crossovers_first_generation 50 \
             --number_of_mutants 50 \
             --number_of_crossovers 50 \
-            --top_mols_to_seed_next_generation 70 \
-            --number_elitism_advance_from_previous_gen 70 \
+            --top_mols_to_seed_next_generation 50 \
+            --number_elitism_advance_from_previous_gen 50 \
             --number_elitism_advance_from_previous_gen_first_generation 0 \
             --diversity_mols_to_seed_first_generation 0 \
             --diversity_seed_depreciation_per_gen 0 \
@@ -386,8 +386,8 @@ then
             --number_of_crossovers_first_generation 50 \
             --number_of_mutants 50 \
             --number_of_crossovers 50 \
-            --top_mols_to_seed_next_generation 70 \
-            --number_elitism_advance_from_previous_gen 70 \
+            --top_mols_to_seed_next_generation 50 \
+            --number_elitism_advance_from_previous_gen 50 \
             --number_elitism_advance_from_previous_gen_first_generation 0 \
             --diversity_mols_to_seed_first_generation 0 \
             --diversity_seed_depreciation_per_gen 0 \
@@ -463,8 +463,8 @@ then
             --number_of_crossovers_first_generation 50 \
             --number_of_mutants 50 \
             --number_of_crossovers 50 \
-            --top_mols_to_seed_next_generation 70 \
-            --number_elitism_advance_from_previous_gen 70 \
+            --top_mols_to_seed_next_generation 50 \
+            --number_elitism_advance_from_previous_gen 50 \
             --number_elitism_advance_from_previous_gen_first_generation 0 \
             --diversity_mols_to_seed_first_generation 0 \
             --diversity_seed_depreciation_per_gen 0 \
@@ -543,8 +543,8 @@ then
             --number_of_crossovers_first_generation 50 \
             --number_of_mutants 50 \
             --number_of_crossovers 50 \
-            --top_mols_to_seed_next_generation 70 \
-            --number_elitism_advance_from_previous_gen 70 \
+            --top_mols_to_seed_next_generation 50 \
+            --number_elitism_advance_from_previous_gen 50 \
             --number_elitism_advance_from_previous_gen_first_generation 0 \
             --diversity_mols_to_seed_first_generation 0 \
             --diversity_seed_depreciation_per_gen 0 \

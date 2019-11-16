@@ -629,7 +629,7 @@ def define_defaults():
     vars["docking_executable"] = None
     vars["docking_exhaustiveness"] = None
     vars["docking_num_modes"] = None
-    vars["docking_timeout_limit"] = 200
+    vars["docking_timeout_limit"] = 120
     vars["custom_docking_script"] = ""
 
     # scoring
@@ -643,7 +643,7 @@ def define_defaults():
     vars["min_ph"] = 6.4
     vars["max_ph"] = 8.4
     vars["pka_precision"] = 1.0
-    vars["gypsum_timeout_limit"] = 30
+    vars["gypsum_timeout_limit"] = 10
 
     # Other vars
     vars["debug_mode"] = False

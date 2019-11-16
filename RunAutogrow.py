@@ -489,15 +489,15 @@ PARSER.add_argument(
 PARSER.add_argument(
     "--docking_timeout_limit",
     type=float,
-    default=200,
+    default=120,
     help="The maximum amount of time allowed to dock a single ligand into a \
     pocket in seconds. Many factors influence the time required to dock, such as: \
     processor speed, the docking software, # rotatable bonds, exhaustiveness docking,\
     and number of docking modes... \
-    The default docking_timeout_limit is 200 seconds, which is excess for most \
+    The default docking_timeout_limit is 120 seconds, which is excess for most \
     docking events using QuickVina2Docking under default settings. If run with \
     more exhaustive settings or with highly flexible ligands, consider increasing \
-    docking_timeout_limit to accommodate. Default docking_timeout_limit is 200 seconds",
+    docking_timeout_limit to accommodate. Default docking_timeout_limit is 120 seconds",
 )
 PARSER.add_argument(
     "--custom_docking_script",
@@ -583,13 +583,13 @@ PARSER.add_argument(
 PARSER.add_argument(
     "--gypsum_timeout_limit",
     type=float,
-    default=15,
+    default=10,
     help="Maximum time gypsum is allowed to run for a given ligand in seconds. \
     On average Gypsum-DL takes on several seconds to run for a given ligand, but \
     factors such as mol size, # rotatable bonds, processor speed, and gypsum \
     settings (ie gypsum_thoroughness or max_variants_per_compound) will change \
     how long it takes to run. If increasing gypsum settings it is best to increase \
-    the gypsum_timeout_limit. Default gypsum_timeout_limit is 15 seconds",
+    the gypsum_timeout_limit. Default gypsum_timeout_limit is 10 seconds",
 )
 
 # Reduce files down. This compiles and compresses the files in the PDBs folder
