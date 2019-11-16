@@ -63,9 +63,9 @@ do
         -directory_of_fragments /bgfs/jdurrant/jspiegel/old_autogrow/autogrow/autogrow/fragments/MW_150/ \
         -number_of_mutants_first_generation 50 \
         -number_of_crossovers_first_generation 50 \
-        -number_of_mutants 85 \
-        -number_of_crossovers 85 \
-        -top_ones_to_advance_to_next_generation 70 \
+        -number_of_mutants 75 \
+        -number_of_crossovers 75 \
+        -top_ones_to_advance_to_next_generation 50 \
         -num_generations 6 -max_seconds_per_generation 21600 \
         -use_lipinski_filter TRUE -use_strict_lipinski_filter TRUE -use_ghose_filter TRUE \
         -scoring_function VINA -score_by_ligand_efficiency FALSE -maintain_core FALSE \
@@ -169,7 +169,6 @@ then
             --debug_mode \
             --reduce_files_sizes False \
             --use_docked_source_compounds False \
-            --gypsum_timeout_limit 60 \
             >  $outfolder_four"test_output.txt" 2>  $outfolder_four"test_error.txt"
 
         end_time="$(date +%s%N | cut -b1-13)"
@@ -247,7 +246,6 @@ then
             --debug_mode \
             --reduce_files_sizes False \
             --use_docked_source_compounds False \
-            --gypsum_timeout_limit 60 \
             >  $outfolder_four"test_output.txt" 2>  $outfolder_four"test_error.txt"
 
         end_time="$(date +%s%N | cut -b1-13)"
@@ -328,7 +326,6 @@ then
             --debug_mode \
             --reduce_files_sizes False \
             --use_docked_source_compounds False \
-            --gypsum_timeout_limit 60 \
             >  $outfolder_four"test_output.txt" 2>  $outfolder_four"test_error.txt"
 
         end_time="$(date +%s%N | cut -b1-13)"
@@ -411,7 +408,6 @@ then
             --debug_mode \
             --reduce_files_sizes False \
             --use_docked_source_compounds False \
-            --gypsum_timeout_limit 60 \
             >  $outfolder_four"test_output.txt" 2>  $outfolder_four"test_error.txt"
 
         end_time="$(date +%s%N | cut -b1-13)"
@@ -489,7 +485,6 @@ then
             --debug_mode \
             --reduce_files_sizes False \
             --use_docked_source_compounds False \
-            --gypsum_timeout_limit 60 \
             >  $outfolder_four"test_output.txt" 2>  $outfolder_four"test_error.txt"
 
         end_time="$(date +%s%N | cut -b1-13)"
@@ -570,7 +565,6 @@ then
             --debug_mode \
             --reduce_files_sizes False \
             --use_docked_source_compounds False \
-            --gypsum_timeout_limit 60 \
             >  $outfolder_four"test_output.txt" 2>  $outfolder_four"test_error.txt"
 
         end_time="$(date +%s%N | cut -b1-13)"

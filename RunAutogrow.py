@@ -583,13 +583,13 @@ PARSER.add_argument(
 PARSER.add_argument(
     "--gypsum_timeout_limit",
     type=float,
-    default=30,
+    default=15,
     help="Maximum time gypsum is allowed to run for a given ligand in seconds. \
     On average Gypsum-DL takes on several seconds to run for a given ligand, but \
     factors such as mol size, # rotatable bonds, processor speed, and gypsum \
     settings (ie gypsum_thoroughness or max_variants_per_compound) will change \
     how long it takes to run. If increasing gypsum settings it is best to increase \
-    the gypsum_timeout_limit. Default gypsum_timeout_limit is 30 seconds",
+    the gypsum_timeout_limit. Default gypsum_timeout_limit is 15 seconds",
 )
 
 # Reduce files down. This compiles and compresses the files in the PDBs folder
