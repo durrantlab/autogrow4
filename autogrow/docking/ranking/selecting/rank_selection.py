@@ -4,6 +4,9 @@ This script is use to select molecules using a ranked selector
 import __future__
 
 
+import os
+import random
+
 def run_rank_selector(usable_list_of_smiles, number_to_chose,
                       column_idx_to_select, reverse_sort=False):
     """
@@ -80,9 +83,21 @@ def run_rank_selector(usable_list_of_smiles, number_to_chose,
         reverse=reverse_sort,
     )
 
+    if len(list(set([x[0] for x in new_sorted_list]))) >= number_to_chose:
+        sorted_list = []
+        smiles_list = []
+        for mol_info in new_sorted_list:
+            if mol_info[0] in smiles_list:
+                continue
+            else:
+                sorted_list.append(mol_info)
+                smiles_list.append(mol_info[0])
+    else:
+        sorted_list = new_sorted_list
+
     top_choice_smile_order = []
     for i in range(0, number_to_chose):
-        smile = new_sorted_list[i]
+        smile = sorted_list[i]
         top_choice_smile_order.append(smile[0])
 
     return top_choice_smile_order
