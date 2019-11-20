@@ -214,7 +214,7 @@ PARSER.add_argument(
     choices=["mpi", "multithreading", "serial"],
     help="Determine what style \
     multithreading: mpi, multithreading, or serial. serial will override \
-    num_processors and force it to be on a single processor.",
+    number_of_processors and force it to be on a single processor.",
 )
 
 # Genetic Algorithm Options

@@ -183,7 +183,7 @@ def get_arguments_from_argparse(ARGS_DICT):
     if os.path.exists(ARGS_DICT["vina_docked_pdbqt_file"]) is False:
         raise Exception("provided vina_docked_pdbqt_file can not be found.")
     if ".pdbqt.vina" not in ARGS_DICT["vina_docked_pdbqt_file"].lower():
-        if os.path.isdir(vina_docked_pdbqt_file) is False:
+        if os.path.isdir(ARGS_DICT["vina_docked_pdbqt_file"]) is False:
             raise Exception("provided vina_docked_pdbqt_file must be either a docked vina file \
             containing .pdbqt.vina in file name or a directory of docked vina files.")
         else:
@@ -204,7 +204,7 @@ def get_arguments_from_argparse(ARGS_DICT):
 
     # handle max_num_of_poses
     if ARGS_DICT["max_num_of_poses"] is not None:
-        if type(ARGS_DICT["max_num_of_poses"]) != float or type(ARGS_DICT["max_num_of_poses"]) != int:
+        if type(ARGS_DICT["max_num_of_poses"]) != float and type(ARGS_DICT["max_num_of_poses"]) != int:
             raise Exception("max_num_of_poses must be a int or None")
         elif type(ARGS_DICT["max_num_of_poses"]) == float:
             ARGS_DICT["max_num_of_poses"] = int(ARGS_DICT["max_num_of_poses"])
@@ -260,6 +260,14 @@ PARSER.add_argument('--min_docking_score', type = float, required = False, defau
     for a pose to be converted it must: \
     -13.0. <= docking score <= -15.0')
 
+PARSER.add_argument(
+    "--number_of_processors",
+    "-p",
+    type=int,
+    metavar="N",
+    default=-1,
+    help="Number of processors to use for parallel calculations.\
+         Set to -1 for all availble CPUs.")
 
 
 ARGS_DICT = vars(PARSER.parse_args())
@@ -283,7 +291,7 @@ if os.path.isfile(vina_docked_pdbqt_file) is True:
 else:
 
     # vina_docked_pdbqt_file is a folder run for all .pdbqt.vina files
-    pdbqt_files = glob.glob(vina_docked_pdbqt_file + ".pdbqt.vina")
+    pdbqt_files = glob.glob(vina_docked_pdbqt_file + "*.pdbqt.vina")
     pdbqt_files.extend(glob.glob(vina_docked_pdbqt_file + "*.PDBQT.vina"))
     pdbqt_files.extend(glob.glob(vina_docked_pdbqt_file + "*.pdbqt.VINA"))
     pdbqt_files.extend(glob.glob(vina_docked_pdbqt_file + "*.PDBQT.VINA"))
