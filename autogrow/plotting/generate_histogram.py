@@ -62,7 +62,6 @@ def get_usable_fomat(infile):
 
     return usable_list_of_smiles
 
-
 def get_average_score_per_gen(infolder, folder_list):
     """
     This script will get the average docking score from the ranked .smi file
@@ -81,7 +80,7 @@ def get_average_score_per_gen(infolder, folder_list):
 
     average_affinity_dict = {}
     for gen_folder in folder_list:
-        gen_folder_name = infolder + gen_folder + "/"
+        gen_folder_name = infolder + gen_folder + os.sep
         ranked_file = glob.glob(gen_folder_name + "*_ranked.smi")
 
         for rank_file in ranked_file:
@@ -111,7 +110,6 @@ def get_average_score_per_gen(infolder, folder_list):
     print_gens(average_affinity_dict)
     return average_affinity_dict
 
-
 def get_average_top_score_per_gen(infolder, folder_list, top_score_per_gen):
     """
     This script will get the average docking score of the top N number of
@@ -134,7 +132,7 @@ def get_average_top_score_per_gen(infolder, folder_list, top_score_per_gen):
     average_affinity_dict = {}
 
     for gen_folder in folder_list:
-        gen_folder_name = infolder + gen_folder + "/"
+        gen_folder_name = infolder + gen_folder + os.sep
         ranked_file = glob.glob(gen_folder_name + "*_ranked.smi")
 
         for rank_file in ranked_file:
@@ -158,8 +156,8 @@ def get_average_top_score_per_gen(infolder, folder_list, top_score_per_gen):
                         )  # split line into parts seperated by 4-spaces
 
                         choice_list = []
-                        for i in range(0, len(parts)):
-                            choice_list.append(parts[i])
+                        for j in range(0, len(parts)):
+                            choice_list.append(parts[j])
 
                         gen_affinity_sum = gen_affinity_sum + float(choice_list[-2])
 
@@ -177,7 +175,6 @@ def get_average_top_score_per_gen(infolder, folder_list, top_score_per_gen):
     print_gens(average_affinity_dict)
     return average_affinity_dict
 
-
 def print_gens(average_affinity_dict):
     """
     This prints out the average scores for each generation
@@ -192,7 +189,6 @@ def print_gens(average_affinity_dict):
     affinity_keys.sort(key=lambda x: int(x.split("_")[1]))
     for gen in affinity_keys:
         print(gen, "                  ", average_affinity_dict[gen])
-
 
 def make_graph(dictionary):
     """
@@ -230,7 +226,7 @@ def make_graph(dictionary):
     # Check that there are no N/A in list_of_scores
     # If any gen has an N/A we will not plot the entire line
     for i in list_of_scores:
-        if i is "N/A":
+        if i == "N/A":
             return None, None
 
     return list_generations, list_of_scores
@@ -348,7 +344,6 @@ def run_plotter(vars, dict_of_averages, outfile):
 
     plt.savefig(outfile, bbox_inches="tight", dpi=1000)
 
-
 def print_data_table(infolder, folder_list):
     """
     This function takes a folder of an Autogrow Run and a list of all folders
@@ -397,7 +392,6 @@ def print_data_table(infolder, folder_list):
     dict_of_averages["top_ten_dict"] = top_ten_dict
     dict_of_averages["top_one_dict"] = top_one_dict
     return dict_of_averages
-
 
 # Run Everything
 def generate_figures(vars):
