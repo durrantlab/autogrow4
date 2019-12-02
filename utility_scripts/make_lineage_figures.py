@@ -309,7 +309,7 @@ def get_parents_full_names(child_name, master_shortname_mol_dict):
         if parent_1_short not in master_shortname_mol_dict.keys():
             raise Exception("a parent is not in master_shortname_mol_dict " \
                 + "this means that the dictionary is missing information on" \
-                + "a ligand. missing parrent is: {}".format(parent_1_short))
+                + " a ligand. missing parrent is: {}".format(parent_1_short))
 
         parent_1_name = master_shortname_mol_dict[parent_1_short]
         return [parent_1_name, None]
@@ -321,12 +321,12 @@ def get_parents_full_names(child_name, master_shortname_mol_dict):
     if parent_1_short not in master_shortname_mol_dict.keys():
         raise Exception("a parent is not in master_shortname_mol_dict " \
             + "this means that the dictionary is missing information on" \
-            + "a ligand. missing parrent is: {}".format(parent_1_short))
+            + " a ligand. missing parrent is: {}".format(parent_1_short))
 
     if parent_2_short not in master_shortname_mol_dict.keys():
         raise Exception("a parent is not in master_shortname_mol_dict " \
             + "this means that the dictionary is missing information on" \
-            + "a ligand. missing parrent is: {}".format(parent_2_short))
+            + " a ligand. missing parrent is: {}".format(parent_2_short))
 
     parent_1_name = master_shortname_mol_dict[parent_1_short]
     parent_2_name = master_shortname_mol_dict[parent_2_short]
@@ -558,7 +558,7 @@ def make_ranked_files_mol_dict(vars):
     mol_dict = {}
     for mol_entry in new_list:
         if mol_entry[1] in mol_dict.keys():
-
+            
             # source compounds may be unranked or may
             # be ranked from advancement but not in the source compound .smi
             # so we check to try to keep the ranked version if it exists.
@@ -566,7 +566,7 @@ def make_ranked_files_mol_dict(vars):
                 # the current line is not ranked
                 continue
             #
-            if type(mol_dict[mol_entry[1]]) not in [float, int]:
+            if type(mol_dict[mol_entry[1]][-3]) not in [float, int]:
                 # the current line is ranked but the previously entered version
                 # was not. Lets overwrite it
                 mol_dict[mol_entry[1]] = mol_entry
@@ -856,11 +856,28 @@ def run_everything(vars):
     # make a simplified master_mol_dict
     mol_dict = {}
     for gen_list in lineage_dict.keys():
-        for mol_name in lineage_dict[gen_list]:
-            if mol_name is not None:
-                mol_dict[mol_name] = master_mol_dict[mol_name]
+        for lig_name in lineage_dict[gen_list]:
+            if lig_name is not None:
+                mol_dict[lig_name] = master_mol_dict[lig_name]
     del master_mol_dict
     del master_shortname_mol_dict
+
+    # Write all information of lieage to .smi file
+    lineage_smi = vars["output_dir"] + \
+            str(mol_name) + "_lineage.smi"
+    lineage_list = []
+    for gen_num in lineage_dict.keys():
+        lineage_list.extend(lineage_dict[gen_num])
+    printout = ""
+    for lig_name in lineage_list:
+        if lig_name is None: continue
+        temp = copy.deepcopy(mol_dict[lig_name])
+        del temp[-1] # remove last item which is rdkit mol
+        temp = "\t".join([str(x) for x in temp]) + "\n"
+        printout = printout + temp
+
+    with open(lineage_smi, 'w') as f:
+        f.write(printout)
 
     # generate images
     make_image_files(vars, lineage_dict, mol_dict)

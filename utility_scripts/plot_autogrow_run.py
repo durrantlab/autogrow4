@@ -271,11 +271,11 @@ def run_plotter(vars, dict_of_averages, outfile):
     ax.plot(list_generations_one, list_of_scores_one, color='r', label="Top 1")
 
     #Niraparib has a docking score of -10.7
-    #Olaparib has a docking score of -12.2
+    #Olaparib has a docking score of -12.8
     ax.axhline(y=-9.3, color='maroon', linestyle=':', label="ADP-ribose")
     ax.axhline(y=-10.3, color='purple', linestyle=':', label="NAD/NADH")
     ax.axhline(y=-10.7, color='k', linestyle=':', label="Niraparib score")
-    ax.axhline(y=-12.2, color='y', linestyle=':', label="Olaparib score")
+    ax.axhline(y=-12.8, color='y', linestyle=':', label="Olaparib score")
 
     ax.set_ylim()
 
