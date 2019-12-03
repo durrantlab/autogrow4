@@ -352,7 +352,8 @@ def run_plotter(vars, dict_of_averages, outfile):
 
     plt.xlabel("Generation Number", fontweight="semibold")
 
-    plt.savefig(outfile, bbox_inches="tight", dpi=1000)
+    plt.savefig(outfile, bbox_inches="tight", \
+        foramt=vars["outfile_format"], dpi=1000)
 
 def print_data_table(infolder, folder_list):
     """
@@ -482,6 +483,12 @@ def process_inputs(inputs):
             vars.json file written by AutoGrow in the output folder of the run.")
 
 
+    if "outfile_format" in inputs.keys():
+        if inputs["outfile_format"] is None:
+            inputs["outfile_format"] = "svg"
+        if inputs["outfile_format"].lower() not in ["svg", "png", "jpg", "pdf"]:
+            raise Exception("outfile_format not a valid format")
+        
     if "outfile" in inputs.keys():
         if inputs["outfile"] is not None:
             if os.path.dirname(inputs["outfile"]) is False:
@@ -492,9 +499,12 @@ def process_inputs(inputs):
             if os.path.dirname(inputs["outfile"]) is False:
                 raise Exception("outfile directory does not exist")
         else:
-            inputs["outfile"] = inputs["infolder"] + os.sep + "data_histogram.png"
+            inputs["outfile"] = inputs["infolder"] + os.sep + \
+                "data_histogram." + inputs["outfile_format"]
+
     else:
-        inputs["outfile"] = inputs["infolder"] + os.sep + "data_histogram.png"
+        inputs["outfile"] = inputs["infolder"] + os.sep + \
+            "data_histogram." + inputs["outfile_format"]
 
     # update --plot_reference_lines
     if "plot_reference_lines" not in inputs.keys():
@@ -558,6 +568,13 @@ PARSER.add_argument(
     required=False,
     default=None,
     help="Path to folder to output files. will be created if does not exist",
+)
+PARSER.add_argument(
+    "--outfile_format",
+    metavar="param.outfile_format",
+    type=str, default="svg",
+    choices=["svg", "png", "jpg", "pdf"],
+    help="The type of file for figure to be exported as default is .svg file.",
 )
 PARSER.add_argument(
     "--infolder",
