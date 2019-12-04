@@ -136,7 +136,7 @@ def main_execute(vars):
             print("Can not make figure as matplotlib is not installed")
         else:
             print("plotting")
-            import autogrow.plotting.generate_histogram as plot
+            import autogrow.plotting.generate_line_plot as plot
             plot.generate_figures(vars)
 
     sys.stdout.flush()

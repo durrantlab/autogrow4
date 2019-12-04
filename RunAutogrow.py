@@ -605,12 +605,12 @@ PARSER.add_argument(
     single text file. Useful when data needs to be transfered.",
 )
 
-# Make a histogram of the simulation at the end of the run.
+# Make a line plot of the simulation at the end of the run.
 PARSER.add_argument(
     "--generate_plot",
     choices=[True, False, "True", "False", "true", "false"],
     default=True,
-    help="Make a histogram of the simulation at the end of the run.",
+    help="Make a line plot of the simulation at the end of the run.",
 )
 
 # mpi mode pre-Run so there are python cache files without EOF Errors

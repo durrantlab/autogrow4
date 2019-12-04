@@ -396,7 +396,7 @@ def print_data_table(infolder, folder_list):
 # Run Everything
 def generate_figures(vars):
     """
-    This runs everything to make a histogram of the results of an Autogrow
+    This runs everything to make a line plot of the results of an Autogrow
     simulation.
 
     Inputs:
@@ -408,7 +408,7 @@ def generate_figures(vars):
         print("")
     infolder = vars["output_directory"]
 
-    outfile = infolder + "data_histogram.png"
+    outfile = infolder + "data_line_plot.png"
 
     all_folders_list = [
         f for f in sorted(os.listdir(infolder)) if os.path.isdir(infolder + f)

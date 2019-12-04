@@ -407,7 +407,7 @@ def print_data_table(infolder, folder_list):
 
 def generate_figures(vars):
     """
-    This runs everything to make a histogram of the results of an Autogrow
+    This runs everything to make a line plot of the results of an Autogrow
     simulation.
 
     Inputs:
@@ -500,11 +500,11 @@ def process_inputs(inputs):
                 raise Exception("outfile directory does not exist")
         else:
             inputs["outfile"] = inputs["infolder"] + os.sep + \
-                "data_histogram." + inputs["outfile_format"]
+                "data_line_plot." + inputs["outfile_format"]
 
     else:
         inputs["outfile"] = inputs["infolder"] + os.sep + \
-            "data_histogram." + inputs["outfile_format"]
+            "data_line_plot." + inputs["outfile_format"]
 
     # update --plot_reference_lines
     if "plot_reference_lines" not in inputs.keys():
