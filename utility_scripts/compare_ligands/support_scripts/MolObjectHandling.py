@@ -67,7 +67,7 @@ def handle_hydrogens(mol, protanate_step):
 
     Inputs:
     :param rdkit.Chem.rdchem.Mol sanitized_deprotanated_mol: an rdkit molecule already sanitized and deprotanated.
-    :param bol protanate_step: True if mol needs to be protanated; False if deprotanated
+    :param bool protanate_step: True if mol needs to be protanated; False if deprotanated
                                 -Note if Protanated, smiles_merge takes up to 10times longer
 
     Returns:

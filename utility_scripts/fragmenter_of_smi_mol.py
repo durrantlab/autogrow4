@@ -1,13 +1,19 @@
+"""
+This script will fragment a .smi
+Example Run:
+python fragmenter_of_smi_mol.py \
+    --smi_file autogrow4/source_compounds/PARPi.smi
+"""
 import itertools
 import copy
 import random
 import os
-import sys
+import argparse
 
 import rdkit
 import rdkit.Chem as Chem
 import rdkit.Chem.AllChem as AllChem
-from rdkit.Chem import rdFMCS
+from rdkit.Chem.BRICS import BRICSDecompose
 from rdkit import RDLogger
 # Turn off warnings
 RDLogger.DisableLog('rdApp.*')
@@ -16,25 +22,54 @@ import support_scripts.Multiprocess as mp
 import support_scripts.mol_object_handling as MOH
 
 def get_atom_w_iso_num(mol, iso_num):
+    """
+    Find all permutations of bonds to cut on a molecule.
+
+    Inputs:
+    :param rdkit.Chem.rdchem.Mol mol: any rdkit mol
+    :param int iso_num: the isotope number to get index
+
+    Returns:
+    :returns: int atom_idx: the atom.GetIdx() of the atom with the
+        isotope label. If not in atom return None
+    """
     for atom in mol.GetAtoms():
         if atom.GetIsotope() == iso_num:
             return atom.GetIdx()
-        else:
-            continue
+        continue
     return None
 #
 def label_iso_num_w_idx(mol):
+    """
+    Find all permutations of bonds to cut on a molecule.
+
+    Inputs:
+    :param rdkit.Chem.rdchem.Mol mol: any rdkit mol
+
+    Returns:
+    :returns: rdkit.Chem.rdchem.Mol mol: a rdkit mol
+    """
     for atom in mol.GetAtoms():
         atom.SetIsotope(atom.GetIdx())
     return mol
 #
-def get_permutations_of_rotatable_bonds_to_cut(mol, c_c_bonds_off=False):
-    RotatableBond = Chem.MolFromSmarts('[!$(*#*)&!D1]-&!@[!$(*#*)&!D1]')
-    Rotatable_Bonds_set = mol.GetSubstructMatches(RotatableBond)
+def get_rot_bond_permutations_to_cut(mol, c_c_bonds_off=False):
+    """
+    Find all permutations of bonds to cut on a molecule.
+
+    Inputs:
+    :param rdkit.Chem.rdchem.Mol mol: any rdkit mol
+
+    :param bool c_c_bonds_off: whether to fragment C-C bonds
+    Returns:
+    :returns: list permutations_of_bonds_to_remove: list of bonds to cut for a mol
+    """
+    rotatable_bond = Chem.MolFromSmarts('[!$(*#*)&!D1]-&!@[!$(*#*)&!D1]')
+    rotatable_bonds_set = mol.GetSubstructMatches(rotatable_bond)
 
 
-    Rotatable_Bonds_to_frag = []
-    for rot_bond in Rotatable_Bonds_set:
+    rotatable_bonds_to_frag = []
+    for rot_bond in rotatable_bonds_set:
         atom1 = mol.GetAtomWithIdx(rot_bond[0])
         atom2 = mol.GetAtomWithIdx(rot_bond[1])
         atom_isos = [atom1.GetIsotope(), atom2.GetIsotope()]
@@ -42,20 +77,21 @@ def get_permutations_of_rotatable_bonds_to_cut(mol, c_c_bonds_off=False):
         if bond.GetIsAromatic() is True:
             continue
         # Remove any bonds including Hydrogen
-        elif atom1.GetAtomicNum()==1 or atom2.GetAtomicNum()==1:
+        if atom1.GetAtomicNum() == 1 or atom2.GetAtomicNum() == 1:
             continue
         # Remove any C-C single bonds
-        elif atom1.GetAtomicNum()==6 and atom2.GetAtomicNum()==6:
-            if c_c_bonds_off is True:continue
-            else:
-                Rotatable_Bonds_to_frag.append(atom_isos)
+        if atom1.GetAtomicNum() == 6 and atom2.GetAtomicNum() == 6:
+            if c_c_bonds_off is True:
+                continue
+            
+            rotatable_bonds_to_frag.append(atom_isos)
 
-        else:
-            Rotatable_Bonds_to_frag.append(atom_isos)
+        rotatable_bonds_to_frag.append(atom_isos)
     permutations_of_bonds_to_remove = []
 
-    for i in range(1, len(Rotatable_Bonds_to_frag) + 1):  #  xrange will return the values 1,2,3,4 in this loop
-        temp_perm_list = list(itertools.combinations(Rotatable_Bonds_to_frag, i))
+    for i in range(1, len(rotatable_bonds_to_frag) + 1):
+        #  xrange will return the values 1, 2, 3, 4 in this loop
+        temp_perm_list = list(itertools.combinations(rotatable_bonds_to_frag, i))
         permutations_of_bonds_to_remove.extend(temp_perm_list)
     return permutations_of_bonds_to_remove
 #
@@ -79,14 +115,14 @@ def remove_atoms(mol, list_of_idx_to_remove):
         return None
 
     try:
-        atomsToRemove = list_of_idx_to_remove
-        atomsToRemove.sort(reverse = True)
+        atoms_to_remove = list_of_idx_to_remove
+        atoms_to_remove.sort(reverse=True)
     except:
         return None
 
     try:
         em1 = Chem.EditableMol(mol)
-        for atom in atomsToRemove:
+        for atom in atoms_to_remove:
             em1.RemoveAtom(atom)
 
         new_mol = em1.GetMol()
@@ -95,19 +131,28 @@ def remove_atoms(mol, list_of_idx_to_remove):
     except:
         return None
 #
-def get_brics_permutations(mol,min_frag_size = 3):
-    from rdkit.Chem.BRICS import BRICSDecompose
-    res = list(BRICSDecompose(mol,returnMols=True,minFragmentSize=min_frag_size))
-    smis = [Chem.MolToSmiles(x,True) for x in res]
+def get_brics_permutations(mol, min_frag_size=3):
+    """
+    Fragment a mol using BRICS methods.
+
+    Inputs:
+    :param rdkit.Chem.rdchem.Mol mol: any rdkit mol
+    :param int min_frag_size: minimum size of fragments to keep
+    Returns:
+    :returns: list clean_frag_list: list of fragmented SMILES
+    """
+    res = list(BRICSDecompose(mol, returnMols=True, minFragmentSize=min_frag_size))
+    smis = [Chem.MolToSmiles(x, True) for x in res]
 
     # Get larger pieces
-    res = list(BRICSDecompose(mol,returnMols=True,keepNonLeafNodes=True,minFragmentSize=min_frag_size))
-    smis.extend([Chem.MolToSmiles(x,True) for x in res])
+    res = list(BRICSDecompose(mol, returnMols=True, keepNonLeafNodes=True,
+                              minFragmentSize=min_frag_size))
+    smis.extend([Chem.MolToSmiles(x, True) for x in res])
     clean_frag_list = []
     for x in res:
         list_to_remove = []
         for i in x.GetAtoms():
-            if i.GetAtomicNum()==0:
+            if i.GetAtomicNum() == 0:
                 list_to_remove.append(i.GetIdx())
 
         x = remove_atoms(x, list_to_remove)
@@ -119,7 +164,7 @@ def get_brics_permutations(mol,min_frag_size = 3):
     list(set(list(clean_frag_list)))
 
     return clean_frag_list
-
+#
 def remove_bonds(mol, list_of_atomiso_bondsets_to_remove):
     """
     This function removes bond from an rdkit mol based on
@@ -129,7 +174,7 @@ def remove_bonds(mol, list_of_atomiso_bondsets_to_remove):
 
     Inputs:
     :param rdkit.Chem.rdchem.Mol mol: any rdkit mol
-    :param list list_of_idx_to_remove: a list of idx values to remove
+    :param list list_of_atomiso_bondsets_to_remove: a list of idx values to remove
                                         from mol
     Returns:
     :returns: rdkit.Chem.rdchem.Mol new_mol: the rdkit mol as input but with
@@ -152,15 +197,15 @@ def remove_bonds(mol, list_of_atomiso_bondsets_to_remove):
     for atomiso_bondsets in list_of_atomiso_bondsets_to_remove:
         if len(atomiso_bondsets) == 0:
             continue
-        elif len(atomiso_bondsets) != 2:
+        if len(atomiso_bondsets) != 2:
             printout = "list_of_atomiso_bondsets_to_remove needs to be 2 isolabels for the atoms"
             raise TypeError(printout)
 
-        atom_1_idx = int(get_atom_w_iso_num(new_mol,atomiso_bondsets[0]))
-        atom_2_idx = int(get_atom_w_iso_num(new_mol,atomiso_bondsets[1]))
+        atom_1_idx = int(get_atom_w_iso_num(new_mol, atomiso_bondsets[0]))
+        atom_2_idx = int(get_atom_w_iso_num(new_mol, atomiso_bondsets[1]))
 
         try:
-            new_mol = Chem.FragmentOnBonds(new_mol, [atom_1_idx, atom_2_idx],addDummies=False)
+            new_mol = Chem.FragmentOnBonds(new_mol, [atom_1_idx, atom_2_idx], addDummies=False)
         except:
             return None
 
@@ -170,8 +215,7 @@ def remove_bonds(mol, list_of_atomiso_bondsets_to_remove):
     new_mol = MOH.check_sanitization(new_mol)
     if new_mol is None:
         return None
-    else:
-        return new_mol
+    return new_mol
 #
 def make_list_of_all_unique_frags(fragment_list):
     """
@@ -206,7 +250,7 @@ def make_list_of_all_unique_frags(fragment_list):
 
             for atom in frag.GetAtoms():
                 atom.SetIsotope(0)
-            clean_frag_list.append(Chem.MolToSmiles(frag,isomericSmiles=True,canonical=True))
+            clean_frag_list.append(Chem.MolToSmiles(frag, isomericSmiles=True, canonical=True))
         list(set(list(clean_frag_list)))
 
     return clean_frag_list
@@ -227,19 +271,19 @@ def make_unique_lig_id(parent_lig_name, current_lig_list):
     """
     if type(parent_lig_name) != str:
         raise Exception("Ligand ID's to seed this must have Unique string IDs")
-    parent_lig_name = parent_lig_name.replace(" ","")
+    parent_lig_name = parent_lig_name.replace(" ", "")
     picked_name = False
     while picked_name is False:
-        random_int = random.choice(range(100000,999999))
+        random_int = random.choice(range(100000, 999999))
         unique_lig_id = str(parent_lig_name) + "_Frag_" + str(random_int)
         if unique_lig_id in current_lig_list:
             continue
-        else:
-            picked_name = True
-            break
+        picked_name = True
+        break
     return unique_lig_id
 #
-def make_frag_list_for_one_mol(mol_info, frags_per_seed_lig, run_brics, run_frag, c_c_bonds_off=False):
+def make_frag_list_for_one_mol(mol_info, frags_per_seed_lig, run_brics,
+                               run_frag, c_c_bonds_off=False):
     """
     This will take a ligand string and ID encased in the list mol_info.
     This will then be fragmented along all non Carbon-carbon rotatable bonds which
@@ -253,57 +297,60 @@ def make_frag_list_for_one_mol(mol_info, frags_per_seed_lig, run_brics, run_frag
     :param list mol_info: list containing [mol_string, mol_id]
                 mol_info[0] = the SMILE string of the parent mol
                 mol_info[1] = the Unique ID of the parent mol
-    :param int frags_per_seed_lig: the number of fragments to generate from a given parent mol
+    :param bool run_brics: whether to fragment using BRICS method
+    :param bool run_frag: whether to fragment all bonds
+    :param bool c_c_bonds_off: whether to fragment C-C bonds
 
     Returns:
     :returns: list final_frag_list: A list of lists containing the chosen unique fragments.
             final_frag_list[0] = [SMILE, mol_id]
     """
-    mol_Smile = mol_info[0]
+    mol_smile = mol_info[0]
     lig_id = mol_info[1]
 
-    mol = Chem.MolFromSmiles(mol_Smile, sanitize=False)
+    mol = Chem.MolFromSmiles(mol_smile, sanitize=False)
     mol = MOH.check_sanitization(mol)
     if mol is None:
-        printout = "\nMolecule {} failed to sanitize. Could not make any fragments from it".format(mol_id)
+        printout = "\nMolecule {} failed to sanitize. \
+                    Could not make any fragments from it".format(lig_id)
         raise Exception(printout)
-    mol_Smile = Chem.MolToSmiles(mol,isomericSmiles=True,canonical=True)
+    mol_smile = Chem.MolToSmiles(mol, isomericSmiles=True, canonical=True)
 
 
     mol = label_iso_num_w_idx(mol)
     mol_copy = copy.deepcopy(mol)
-    permutations_of_bonds_to_remove = get_permutations_of_rotatable_bonds_to_cut(mol_copy,c_c_bonds_off)
+    bonds_to_remove_permutations = get_rot_bond_permutations_to_cut(mol_copy, c_c_bonds_off)
 
     fragment_list = []
-    for bond_set_to_del in permutations_of_bonds_to_remove:
+    for bond_set_to_del in bonds_to_remove_permutations:
         mol_copy = copy.deepcopy(mol)
         x = remove_bonds(mol_copy, bond_set_to_del)
         if x is None:
             continue
         fragment_list.append(x)
 
-    clean_frag_list=[]
+    clean_frag_list = []
     if run_frag is True:
         clean_frag_list = make_list_of_all_unique_frags(fragment_list)
         clean_frag_list = list(set(clean_frag_list))
 
     if run_brics is True:
         mol_copy = copy.deepcopy(mol)
-        bric_mols = get_brics_permutations(mol_copy, min_frag_size = 3)
+        bric_mols = get_brics_permutations(mol_copy, min_frag_size=3)
 
         clean_frag_list.extend(bric_mols)
         clean_frag_list = list(set(clean_frag_list))
 
     if len(clean_frag_list) == 0:
-        printout =  "\nNo fragments were made for {}.\n".format(lig_id)
+        printout = "\nNo fragments were made for {}.\n".format(lig_id)
         print(printout)
-        return [[mol_Smile, lig_id]]
+        return [[mol_smile, lig_id]]
 
     # Pick the number of ligands to make
-    final_frag_list = [[mol_Smile, lig_id]]
+    final_frag_list = [[mol_smile, lig_id]]
 
     if frags_per_seed_lig == -1:
-        printout = "\nFor {}: {} fragmented were made.".format(lig_id,len(clean_frag_list))
+        printout = "\nFor {}: {} fragmented were made.".format(lig_id, len(clean_frag_list))
         print(printout)
         for frag in clean_frag_list:
             unique_lig_id = make_unique_lig_id(lig_id, final_frag_list)
@@ -311,94 +358,24 @@ def make_frag_list_for_one_mol(mol_info, frags_per_seed_lig, run_brics, run_frag
             final_frag_list.append(temp_frag_info)
     return final_frag_list
 
-    if frags_per_seed_lig > len(clean_frag_list):
-        printout = "\nFor {}: Not enough fragments made to make {} fragmented ligands.".format(lig_id,frags_per_seed_lig)
-        printout =printout +"\n \t Only made {}. Will take all of these instead + 1 for the original ligand.".format(len(clean_frag_list))
-        print(printout)
+#
+def get_ligands_from_smi(smi_file):
+    """
+    Get the ligands from the smi_file
 
-        for frag in clean_frag_list:
-            unique_lig_id = make_unique_lig_id(lig_id, final_frag_list)
-            temp_frag_info = [frag, unique_lig_id]
-            final_frag_list.append(temp_frag_info)
+    Inputs:
+    :param str smi_file: Path to smiles file
 
-    elif frags_per_seed_lig < len(clean_frag_list):
-        printout = "\nFor {}: Made more fragments than requested. Made {} fragments.\n".format(lig_id,len(clean_frag_list))
-        printout = printout + "\tWill Chose {} random unique fragments plus the original seed molecule. \n"
-        print(printout)
-        random_list_frags = random.sample(clean_frag_list, frags_per_seed_lig)
-        for frag in random_list_frags:
-            unique_lig_id = make_unique_lig_id(lig_id, final_frag_list)
-            temp_frag_info = [frag, unique_lig_id]
-            final_frag_list.append(temp_frag_info)
-
-    else:
-        printout = "\nFor {}: Made exact {} unique fragments..".format(frags_per_seed_lig)
-        printout =printout +"\n \t Will take all of these instead + 1 for the original ligand."
-        print(printout)
-
-        for frag in clean_frag_list:
-            unique_lig_id = make_unique_lig_id(lig_id, final_frag_list)
-            temp_frag_info = [frag, unique_lig_id]
-            final_frag_list.append(temp_frag_info)
-
-    return final_frag_list
-
-
-
-
-if __name__ == "__main__":
-    try:
-        smi_file_name = str(sys.argv[1])
-        output_smi_file_name = str(sys.argv[2])
-        frags_per_seed_lig = int(sys.argv[3])
-        number_of_processors = int(sys.argv[4])
-        if sys.argv[5] =="True" or sys.argv[5]=="true" or sys.argv[5]=="1":
-            run_brics = True
-        else:
-            run_brics = False
-        if sys.argv[6] =="True" or sys.argv[6]=="true" or sys.argv[6]=="1":
-            run_frag = True
-        else:
-            run_frag = False
-
-        try:
-            c_c_bonds_off = sys.argv[7]
-            if c_c_bonds_off is True or c_c_bonds_off=="True" or c_c_bonds_off=="true" or c_c_bonds_off==1 or c_c_bonds_off=="1":
-                c_c_bonds_off=True
-            else:
-                c_c_bonds_off=False
-
-        except:
-            c_c_bonds_off = False
-
-    except:
-        printout = "to run the fragmentor: \n"
-
-        printout = printout + "1st argv is the path to the.smi file of ligands to fragment\n"
-        printout = printout + "2nd argv is the path to output .smi file of generated fragments\n"
-        printout = printout + "3rd argv is number of fragments to generate per parent ligand. set to -1 if you want all output fragments.\n"
-        printout = printout + "4th argv is number of processors\n"
-        printout = printout + "5th argv is to add brics decomposition True or False \n"
-        printout = printout + "6th argv is to add standard fragment along all rotatable bonds True or False \n"
-        printout = printout + "7th argv is an optional arguement; if True it will ignore fragments on C-C bonds; if False it will fragment along C-C bonds; default is False\nn"
-        print(printout+"\n\n\n")
-        sys.exit(0)
-
-    print("")
-    print("STARTING FRAGMENTER")
-    print("frags_per_seed_lig: ", frags_per_seed_lig)
-    print("smi_file_name: ", smi_file_name)
-    print("########")
-    if os.path.isfile(smi_file_name) is False:
-        raise Exception("\n.SMI file not found.\n")
-    print("Importing .smi file")
-
+    Returns:
+    :returns: list list_of_ligands: A list of lists containing the chosen unique fragments.
+            final_frag_list[0] = [SMILE, mol_id]
+    """
     list_of_ligands = []
-    with open(smi_file_name, "r") as smiles_file:
+    with open(smi_file, "r") as smiles_file:
         line_counter = 0
         for line in smiles_file:
             line_counter = line_counter + 1
-            line = line.replace("\n","")
+            line = line.replace("\n", "")
             parts = line.split('\t')      # split line into parts seperated by 4-spaces
             if len(parts) == 1:
                 parts = line.split('    ')      # split line into parts seperated by 4-spaces
@@ -419,23 +396,54 @@ if __name__ == "__main__":
                 if mol is None:
                     continue
 
-                mol_Smile = Chem.MolToSmiles(mol,isomericSmiles=True,canonical=True)
-                mol_info = [mol_Smile, mol_id]
+                mol_smile = Chem.MolToSmiles(mol, isomericSmiles=True, canonical=True)
+                mol_info = [mol_smile, mol_id]
                 list_of_ligands.append(mol_info)
 
             else:
                 continue
-    print("Was able to import and sanitize {} ligands from the .smi.".format(len(list_of_ligands)))
+    print("Was able to import and sanitize {} \
+          ligands from the .smi.".format(len(list_of_ligands)))
     if line_counter != len(list_of_ligands):
-        print("\t Failed to sanitize/import {} ligands from the .smi".format(line_counter - len(list_of_ligands)))
-    original_ligands = copy.deepcopy(list_of_ligands)
+        print("\t Failed to sanitize/import \
+              {} ligands from the .smi".format(line_counter - len(list_of_ligands)))
     print("########")
+
+    return list_of_ligands
+#
+def run_fragmentation_main(vars):
+    """
+    This runs the fragmenter.
+
+    Inputs:
+    :param dict vars: variable with all of the user variables
+    """
+    print(vars)
+    smi_file = vars["smi_file"]
+    output_smi_file = vars["output_smi_file"]
+    run_brics = vars["run_brics"]
+    frags_per_seed_lig = vars["frags_per_seed_lig"]
+    run_frag = vars["run_frag"]
+    c_c_bonds_off = vars["c_c_bonds_off"]
+    number_of_processors = vars["number_of_processors"]
+
+    print("")
+    print("STARTING FRAGMENTER")
+    print("frags_per_seed_lig: ", frags_per_seed_lig)
+    print("smi_file: ", smi_file)
+    print("########")
+    print("Importing .smi file")
+    list_of_ligands = get_ligands_from_smi(smi_file)
 
 
     # create a set of jobs to multithread the fragmentation
-    job_input = [tuple([mol_info, frags_per_seed_lig, run_brics, run_frag, c_c_bonds_off]) for mol_info in list_of_ligands]
+    job_input = [[mol_info, frags_per_seed_lig,
+                  run_brics, run_frag, c_c_bonds_off]
+                 for mol_info in list_of_ligands]
+    job_input = [tuple(x) for x in job_input]
     list_of_ligands = None
-    output = mp.multi_threading(job_input, number_of_processors,  make_frag_list_for_one_mol)
+    output = mp.multi_threading(job_input, number_of_processors,
+                                make_frag_list_for_one_mol)
 
 
     print("Finish multithread\n")
@@ -450,24 +458,24 @@ if __name__ == "__main__":
         initial_output_reduce.extend(x)
     output = None
 
-    initial_output_reduce = [x for x in initial_output_reduce if x[0] is not ""]
-    initial_output_reduce = [x for x in initial_output_reduce if x[1] is not ""]
+    initial_output_reduce = [x for x in initial_output_reduce if x[0] != ""]
+    initial_output_reduce = [x for x in initial_output_reduce if x[1] != ""]
 
     # Reduce smile redundancies:
     smiles_list = []
     output_reduce = []
     for x in initial_output_reduce:
-        if x[0] in smiles_list:continue
-        else:
-            output_reduce.append(x)
-            smiles_list.append(x[0])
+        if x[0] in smiles_list:
+            continue
+        output_reduce.append(x)
+        smiles_list.append(x[0])
 
     final_mol_list = []
     master_smile_list = []
     master_id_list = []
     for x in output_reduce:
         temp_smile = x[0]
-        temp_id =  x[1]
+        temp_id = x[1]
         if temp_smile in master_smile_list:
             continue
         if temp_id in master_id_list:
@@ -486,30 +494,108 @@ if __name__ == "__main__":
 
     print("####")
     print("\nSaving list to file")
-    with open(output_smi_file_name, "w") as f:
+    with open(output_smi_file, "w") as f:
         f.write(printout)
 
 
     print("Number of parent ligands:         {}".format(len(job_input)))
     print("Number of new fragmented ligands: {}".format(len(final_mol_list)-len(job_input)))
     print("Total number ligs in output file: {}".format(len(final_mol_list)))
-    print("Finished")
+#
+def process_inputs(inputs):
+    """
+    This will handle processing all parameters.
+
+    inputs:
+    :params dict inputs: dictionary of argparse parameters
+    Returns:
+    :returns: dict inputs: dictionary of argparse parameters
+    """
+    # check input smi
+    smi_file = os.path.abspath(inputs["smi_file"])
+    if os.path.exists(smi_file) is False:
+        raise Exception("\n.SMI file not found.\n")
+    if os.path.isfile(smi_file) is False:
+        raise Exception("\n.SMI file not found.\n")
+    inputs["smi_file"] = smi_file
+
+    # check output_smi_file
+    if "output_smi_file" in inputs.keys():
+        output_smi_file = inputs["output_smi_file"]
+    else:
+        output_smi_file = None
+
+    if output_smi_file is None:
+        output_smi_file = smi_file + "_Fragmented.smi"
+    output_smi_file = os.path.abspath(output_smi_file)
+
+    if os.path.exists(os.path.dirname(output_smi_file)) is False:
+        raise Exception("\n.directory for output_smi_file not found.\n")
+    if os.path.isfile(smi_file) is False:
+        raise Exception("\n.SMI file not found.\n")
+    inputs["output_smi_file"] = output_smi_file
+
+    if "frags_per_seed_lig" in inputs.keys():
+        inputs["frags_per_seed_lig"] = int(inputs["frags_per_seed_lig"])
+    else:
+        inputs["frags_per_seed_lig"] = -1
+
+    if "run_brics" in inputs.keys():
+        inputs["run_brics"] = bool(inputs["run_brics"])
+    else:
+        inputs["run_brics"] = True
+
+    if "run_frag" in inputs.keys():
+        inputs["run_frag"] = bool(inputs["run_brics"])
+    else:
+        inputs["run_frag"] = True
+
+    if "c_c_bonds_off" in inputs.keys():
+        inputs["c_c_bonds_off"] = bool(inputs["run_brics"])
+    else:
+        inputs["c_c_bonds_off"] = True
+
+    if "number_of_processors" in inputs.keys():
+        inputs["number_of_processors"] = int(inputs["run_brics"])
+    else:
+        inputs["number_of_processors"] = True
+
+    return inputs
+
+# Argment parsing
+PARSER = argparse.ArgumentParser()
+PARSER.add_argument(
+    '--smi_file', required=False, default=None,
+    help='Path to tab-delineated .smi file to fragment')
+PARSER.add_argument(
+    '--output_smi_file', '-o', type=str, default=None,
+    help='Path to output tab-delineated .smi file of fragments. \
+    If not provided it will play a file in the same directory as smi_file \
+    titled smi_file + _Fragmented.smi')
+PARSER.add_argument(
+    '--frags_per_seed_lig', type=int, required=False, default=-1,
+    help='Number of fragments to create per input SMILES. \
+    default is -1 which mean all possible fragments.')
+PARSER.add_argument(
+    '--run_brics', type=bool, required=False, default=True,
+    help='Whether to fragment ligands using BRICS fragmentation. This fragments \
+    along synthesizable bonds. Default is True.')
+PARSER.add_argument(
+    '--run_frag', type=bool, required=False, default=True,
+    help='Whether to fragment ligands over all rotatable bonds. Default is True.')
+PARSER.add_argument(
+    '--c_c_bonds_off', type=bool, required=False, default=True,
+    help='Whether to exclude fragmenting carbon-carbon single bonds. Default is True. \
+    If True it will ignore fragments on C-C bonds; if False it will fragment.')
+PARSER.add_argument(
+    "--number_of_processors", "-p", type=int, metavar="N", default=-1,
+    help="Number of processors to use for parallel calculations. \
+    Set to -1 for all availble CPUs.")
 
 
+ARGS_DICT = vars(PARSER.parse_args())
+ARGS_DICT = process_inputs(ARGS_DICT)
 
-# Example submission
-# python fragmenter_of_smi_mol.py ../source_compounds/PARPi.smi ../source_compounds/new_bric.smi -1 -1 True True
-
-# Frag and BRIC W C-C
-# python fragmenter_of_smi_mol.py ../source_compounds/PARPi.smi ../source_compounds/new_bric.smi -1 -1 True True
-
-# Frag and BRIC only
-# python fragmenter_of_smi_mol.py ../source_compounds/PARPi.smi ../source_compounds/only_bric.smi -1 -1 True False False
-
-# Frag only no C-C
-# python fragmenter_of_smi_mol.py ../source_compounds/PARPi.smi ../source_compounds/new_bric.smi -1 -1 False True False
-
-# Frag only with C-C
-# python fragmenter_of_smi_mol.py ../source_compounds/PARPi.smi ../source_compounds/new_bric.smi -1 -1 False True True
-
-
+run_fragmentation_main(ARGS_DICT)
+print("Fragments located at: {}".format(ARGS_DICT["output_smi_file"]))
+print("Finished")
