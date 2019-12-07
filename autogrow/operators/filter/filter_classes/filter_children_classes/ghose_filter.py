@@ -3,7 +3,7 @@ This runs a Ghose filter for drug-likeliness. Ghose filter filters molecules
 by Molecular weight (MW), the number of atoms, and the logP value.
 
 To pass the filter a molecule must be:
-    MW between 160 and 500 dalton
+    MW between 160 and 480 dalton
     Number of Atoms: between 20 and 70
     logP  between -0,4 and +5,6
 
@@ -34,7 +34,7 @@ class GhoseFilter(ParentFilter):
     value.
 
     To pass the filter a molecule must be:
-        MW between 160 and 500 dalton
+        MW between 160 and 480 dalton
         Number of Atoms: between 20 and 70
         logP  between -0,4 and +5,6
 
@@ -55,7 +55,7 @@ class GhoseFilter(ParentFilter):
         value.
 
         To pass the filter a molecule must be:
-            MW between 160 and 500 dalton
+            MW between 160 and 480 dalton
             Number of Atoms: between 20 and 70
             logP  between -0,4 and +5,6
 
@@ -69,7 +69,7 @@ class GhoseFilter(ParentFilter):
         """
 
         exact_mwt = Descriptors.ExactMolWt(mol)
-        if 160 > exact_mwt > 500:
+        if 160 > exact_mwt > 480:
             return False
 
         num_atoms = mol.GetNumAtoms()
