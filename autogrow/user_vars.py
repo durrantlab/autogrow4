@@ -74,7 +74,7 @@ def save_vars_as_json(vars):
         temp_vars[k] = copy.deepcopy(vars[k])
 
     with open(vars_file, "w") as fp:
-        json.dump(temp_vars, fp)
+        json.dump(temp_vars, fp, indent=4) 
 
 
 def multiprocess_handling(vars):
