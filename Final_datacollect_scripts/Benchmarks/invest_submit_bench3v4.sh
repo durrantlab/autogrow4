@@ -157,7 +157,7 @@ then
             --number_of_processors -1 \
             --scoring_choice VINA \
             --LipinskiStrictFilter \
-            --GhoseFilter \
+            --GhoseModifiedFilter \
             --filter_source_compounds False \
             --start_a_new_run \
             --rxn_library click_chem_rxns \
@@ -235,7 +235,7 @@ then
             --number_of_processors -1 \
             --scoring_choice VINA \
             --LipinskiStrictFilter \
-            --GhoseFilter \
+            --GhoseModifiedFilter \
             --filter_source_compounds False \
             --start_a_new_run \
             --rxn_library click_chem_rxns \
@@ -316,7 +316,7 @@ then
             --number_of_processors -1 \
             --scoring_choice VINA \
             --LipinskiStrictFilter \
-            --GhoseFilter \
+            --GhoseModifiedFilter \
             --filter_source_compounds False \
             --start_a_new_run \
             --rxn_library click_chem_rxns \
@@ -399,7 +399,7 @@ then
             --number_of_processors -1 \
             --scoring_choice VINA \
             --LipinskiStrictFilter \
-            --GhoseFilter \
+            --GhoseModifiedFilter \
             --filter_source_compounds False \
             --start_a_new_run \
             --rxn_library click_chem_rxns \
@@ -477,7 +477,7 @@ then
             --number_of_processors -1 \
             --scoring_choice VINA \
             --LipinskiStrictFilter \
-            --GhoseFilter \
+            --GhoseModifiedFilter \
             --filter_source_compounds False \
             --start_a_new_run \
             --rxn_library click_chem_rxns \
@@ -558,7 +558,7 @@ then
             --number_of_processors -1 \
             --scoring_choice VINA \
             --LipinskiStrictFilter \
-            --GhoseFilter \
+            --GhoseModifiedFilter \
             --filter_source_compounds False \
             --start_a_new_run \
             --rxn_library click_chem_rxns \

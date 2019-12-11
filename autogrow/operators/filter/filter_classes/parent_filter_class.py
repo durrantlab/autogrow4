@@ -12,7 +12,8 @@ class ParentFilter(object):
 
     Filters for for lead-likeness:
         1) GhoseFilter
-        2) MozziconacciFilter
+        2) GhoseModifiedFilter
+        3) MozziconacciFilter
 
     Filters for CNS/Blood Brain Barrier Permeable:
         1) VandeWaterbeemdFilter

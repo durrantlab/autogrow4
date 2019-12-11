@@ -66,7 +66,7 @@ do
         --selector_choice Tournement_Selector \
         --tourn_size 0.0$i \
         --LipinskiStrictFilter \
-        --GhoseFilter \
+        --GhoseModifiedFilter \
         --PAINSFilter \
         --reduce_files_sizes True \
         --max_variants_per_compound 3 \

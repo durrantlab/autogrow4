@@ -353,6 +353,16 @@ PARSER.add_argument(
     logP and number of atoms.",
 )
 PARSER.add_argument(
+    "--GhoseModifiedFilter",
+    action="store_true",
+    default=False,
+    help="Ghose filters for drug-likeliness; filters by molecular weight,\
+    logP and number of atoms. This is the same as the GhoseFilter, but \
+    the upper-bound of the molecular weight restrict is loosened from \
+    480Da to 500Da. This is intended to be run with Lipinski Filter and \
+    to match AutoGrow 3's Ghose Filter.",
+)
+PARSER.add_argument(
     "--MozziconacciFilter",
     action="store_true",
     default=False,

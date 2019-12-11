@@ -18,7 +18,9 @@ ZINC molecules:
 
     This starting list was ligands from 1.0>=logp>3.5 and MW<=250da. This consisted of 80 tranches and 682,820 starting ligands
 
-    This list was filtered to ensure every ligand in the ligand has atleast one moiety that would react in the All_Rxn reaction list.
+    This list was further filtered to ensure that the SMILES could be converted to rdkit mol object and filtered with:
+        'LipinskiStrictFilter', 'GhoseFilter', and 'MozziconacciFilter'.
+    This list was filtered to ensure every ligand in the list has atleast one moiety that would react in the All_Rxn reaction list.
 
     We then seperated these by MW ranges and capped the size to 5,000 randomized ligands:
         1) MW >=100da           :  autogrow4/source_compounds/Fragment_MW_up_to_100.smi
@@ -26,4 +28,5 @@ ZINC molecules:
         3) 150da > MW >=200da   :  autogrow4/source_compounds/Fragment_MW_150_to_200.smi
         4) 200da > MW >=250da   :  autogrow4/source_compounds/Fragment_MW_200_to_250.smi
 
-
+    The total number of different ZINC15 molecules in this file is 23,457 compounds.
+    

@@ -53,7 +53,7 @@ do
         --number_of_processors -1 \
         --scoring_choice VINA \
         --LipinskiStrictFilter \
-        --GhoseFilter \
+        --GhoseModifiedFilter \
         --PAINSFilter \
         --start_a_new_run \
         --filter_source_compounds False \

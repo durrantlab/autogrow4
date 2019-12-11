@@ -616,6 +616,7 @@ def define_defaults():
     vars["LipinskiStrictFilter"] = False
     vars["LipinskiLenientFilter"] = False
     vars["GhoseFilter"] = False
+    vars["GhoseModifiedFilter"] = False
     vars["MozziconacciFilter"] = False
     vars["VandeWaterbeemdFilter"] = False
     vars["PAINSFilter"] = False
@@ -1996,6 +1997,12 @@ def picked_filters(vars):
             filter_list.append("GhoseFilter")
     else:
         vars["GhoseFilter"] = False
+
+    if "GhoseModifiedFilter" in vars_keys:
+        if vars["GhoseModifiedFilter"] is True:
+            filter_list.append("GhoseModifiedFilter")
+    else:
+        vars["GhoseModifiedFilter"] = False
 
     if "MozziconacciFilter" in vars_keys:
         if vars["MozziconacciFilter"] is True:
