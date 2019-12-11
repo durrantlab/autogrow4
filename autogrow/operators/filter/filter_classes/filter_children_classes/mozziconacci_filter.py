@@ -83,5 +83,9 @@ class MozziconacciFilter(ParentFilter):
         if num_rotatable_bonds > 15:
             return False
 
+        ring_count = Chem.rdmolops.GetSSSR(mol)
+        if ring_count > 6:
+            return False
+
         # Passes everything
         return True
