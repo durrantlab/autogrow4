@@ -63,9 +63,7 @@ do
         --scoring_choice VINA \
         --selector_choice Rank_Selector \
         --LipinskiStrictFilter \
-        --GhoseFilter \
         --PAINSFilter \
-        --MozziconacciFilter \
         --reduce_files_sizes True \
         --docking_exhaustiveness 25 \
         --max_variants_per_compound 5 \

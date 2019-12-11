@@ -7,7 +7,7 @@ out_folder = "/bgfs/jdurrant/jspiegel/temp_submits/"
 if os.path.exists(out_folder) is False:
     os.mkdir(out_folder)
 
-for x in range(0, 20):
+for x in range(0, 25):
     os.system("sleep 2")
     print("")
     printout = ""
