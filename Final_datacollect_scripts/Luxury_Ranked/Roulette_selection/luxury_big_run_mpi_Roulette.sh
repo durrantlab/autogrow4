@@ -63,6 +63,7 @@ do
         --scoring_choice VINA \
         --selector_choice Roulette_Selector \
         --LipinskiStrictFilter \
+        --GhoseModifiedFilter \
         --PAINSFilter \
         --reduce_files_sizes True \
         --max_variants_per_compound 5 \
