@@ -63,6 +63,7 @@ do
         --scoring_choice VINA \
         --selector_choice Rank_Selector \
         --LipinskiStrictFilter \
+        --GhoseModifiedFilter \
         --PAINSFilter \
         --reduce_files_sizes True \
         --docking_exhaustiveness 25 \
