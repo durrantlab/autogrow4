@@ -1,12 +1,12 @@
 #!/bin/bash
 """
-This
+This script will take a file path to a tab-delineated
+.smi file. It will then filter it for redundancies in the 
+1st and 2nd columns of the file. 
+The output file is the input file + '_no_dup.smi'
 """
-# filename=/home/jacob/Downloads/zinc15_available/pass_sanitize.smi
-# awk '!seen[$1]++' $filename >> output.txt
-# awk '!seen[$2]++' output.txt >> output2.txt
 
-filename=/home/jacob/Documents/autogrow4/source_compounds/Fragment_MW_100_to_150_docked.smi
+filename=$1
 tmp_str=_tmp_dummy.smi
 no_dup_str=_no_dup.smi
 tmp_filename=$filename$tmp_str

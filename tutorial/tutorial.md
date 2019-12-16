@@ -895,7 +895,22 @@ from rdkit.Chem.rdchem import BondStereo
     These files can be found within the autogrow4/utility_scripts/ folder.
 
 ### Preparation scripts pre-run:
-#### /autogrow4/utility_scripts/convert_directory_ligands_pdb_to_smi.py:
+####    /autogrow4/utility_scripts/remove_duplicates_from_smi.sh:
+    This script will take a file path to a tab-delineated .smi file. It will then filter it for redundancies in the 1st and 2nd columns of the file. 
+    
+    The output file is the input file + '_no_dup.smi'
+
+    This is done using BASH rather than Python because it is less memory intensive when dealing with large .smi files in the millions of compounds range. This is important when filtering through large databases such as ZINC15.
+
+    This script takes 1 input variable:
+    filename str: Required
+        This is the path to the tab-delineated .smi file to remove any redundancies.
+    
+    Example submit:
+    bash autogrow4/utility_scripts/remove_duplicates_from_smi.sh \
+        $PATH/TO/SMILES.smi
+
+####    /autogrow4/utility_scripts/convert_directory_ligands_pdb_to_smi.py:
     This script will convert a directory of pdb files (small molecules only, not proteins) to SMILES and create a single .smi file with all SMILES.
 
     This script takes 3 input arguments:
@@ -915,7 +930,7 @@ from rdkit.Chem.rdchem import BondStereo
         --output_folder $PATH/TO/OUTPUT/ \
         --number_of_processors -1
 
-#### /autogrow4/utility_scripts/fragmenter_of_smi_mol.py:
+####    /autogrow4/utility_scripts/fragmenter_of_smi_mol.py:
     This script will fragment compounds from a .smi file. It is useful for lead-optimization. This script was used for the PARPi lead-optimizations in the AutoGrow 4.0.0 paper.
     
     This can fragment compounds in 2 manners:
@@ -958,7 +973,7 @@ from rdkit.Chem.rdchem import BondStereo
 
 ### File handling post-run:
 
-#### /autogrow4/utility_scripts/convert_single_ligand_pdbqt_to_pdb.py:
+####    /autogrow4/utility_scripts/convert_single_ligand_pdbqt_to_pdb.py:
     This script will convert a pdbqt file into a .pdb file.
 
     This is done by removing a column of the PDB file.
@@ -974,7 +989,7 @@ from rdkit.Chem.rdchem import BondStereo
         --pdbqt_file $PATH/OF/PDBQT_file.pdbqt \
         --output_folder $PATH/TO/OUTPUT/FOLDER/
 
-#### /autogrow4/utility_scripts/convert_vina_docked_pdbqt_to_pdbs.py:
+####    /autogrow4/utility_scripts/convert_vina_docked_pdbqt_to_pdbs.py:
     This script will convert a docked .pdbqt.vina file into seperate .pdb file.
 
     This is done by splitting up a single .pdbqt.vina into seperate .pdbqt files for each docked pose.
@@ -1021,7 +1036,7 @@ from rdkit.Chem.rdchem import BondStereo
         --max_num_of_poses 1 --number_of_processors -1
 
 
-#### /autogrow4/utility_scripts/convert_single_ligand_pdbqt_to_pdb.py:
+####    /autogrow4/utility_scripts/convert_single_ligand_pdbqt_to_pdb.py:
     This script is used to decompress or recompress AutoGrow data.
 
     If you use the reduce_files_sizes option AutoGrow will convert concatinate and compress all files in the PDBs directory of each generation. This is useful when doing larger runs as data transfer is faster and data storage is reduced when files are merged and compressed.
@@ -1060,8 +1075,7 @@ from rdkit.Chem.rdchem import BondStereo
         --input_folder_or_file PATH_TO_RUN/Run_0/generation_1/PDBs/
 
 ### Graph generation for post-run analysis:
-
-#### /autogrow4/utility_scripts/plot_autogrow_run.py:
+####    /autogrow4/utility_scripts/plot_autogrow_run.py:
     This script will create a line plot of the average score for each generation of AutoGrow run. This is the same type of figure as the --generate_plot option that AutoGrow 4.0.0 already provides, but this also allows plotting of reference lines.
 
     This script takes 4 input arguments:
@@ -1084,8 +1098,7 @@ from rdkit.Chem.rdchem import BondStereo
         -i $PATH/Run_1/Run_0/ \
         --plot_reference_lines [['Olaparib Score',-12.8,'y'],['Niraparib',-10.7,'k'],['NAD/NADH',-10.3,'purple'],['ADP-ribose',-9.3,'maroon']]
 
-
-#### /autogrow4/utility_scripts/make_lineage_figures.py:
+####    /autogrow4/utility_scripts/make_lineage_figures.py:
     This script creates figures for all ligands which parented a given ligand.
 
     All compounds for the entire AutoGrow run will be compiled into a dictionary which is used to search when tracing lineages. We pickle these dictionaries so that if this script is run multiple times these dictionaries do not need to be recreated. For this reason the 1st time running this script on a data set will take longer than future runs. A pre-run option will compile these data sets without generating figures.

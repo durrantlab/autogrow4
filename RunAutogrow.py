@@ -174,7 +174,7 @@ PARSER.add_argument(
     "--rxn_library_file",
     type=str,
     default="",
-    help="This PATH to a Custom SMIRKS reactions to use for Mutation. \
+    help="This PATH to a Custom json file of SMARTS reactions to use for Mutation. \
     Only provide if using the Custom option for rxn_library.",
 )
 PARSER.add_argument(
