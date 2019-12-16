@@ -1,4 +1,7 @@
-
+#!/bin/bash
+"""
+This
+"""
 # filename=/home/jacob/Downloads/zinc15_available/pass_sanitize.smi
 # awk '!seen[$1]++' $filename >> output.txt
 # awk '!seen[$2]++' output.txt >> output2.txt

@@ -1,5 +1,6 @@
 """
-Plots AutoGrow Run
+Plots a line plot of the average score for each generation of AutoGrow run.
+
 Example submit:
     python autogrow4/utility_scripts/plot_autogrow_run.py\
         -i $PATH/Run_1/Run_0/ \
@@ -567,7 +568,8 @@ PARSER.add_argument(
     metavar="param.outfile",
     required=False,
     default=None,
-    help="Path to folder to output files. will be created if does not exist",
+    help="Path to folder to output files. It will be created if does not exist. \
+    If not provide it will be placed in the infolder/data_line_plot.svg",
 )
 PARSER.add_argument(
     "--outfile_format",

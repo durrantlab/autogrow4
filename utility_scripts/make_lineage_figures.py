@@ -1,5 +1,11 @@
 """
-This script makes figures of all ligands which parented a given ligand.
+This script creates figures for all ligands which parented a given ligand.
+
+All compounds for the entire AutoGrow run will be compiled into a dictionary \
+which is used to search when tracing lineages. We pickle these dictionaries so \
+that if this script is run multiple times these dictionaries do not need to be \
+recreated. For this reason the 1st time running this script on a data set will \
+take longer than future runs.    
 """
 import os
 import sys
@@ -10,8 +16,6 @@ import copy
 import pickle
 
 import matplotlib.pyplot as plt
-
-
 
 import rdkit
 import rdkit.Chem as Chem

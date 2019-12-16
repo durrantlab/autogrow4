@@ -231,7 +231,7 @@ def get_arguments_from_argparse(ARGS_DICT):
 
 # Argment parsing
 PARSER = argparse.ArgumentParser()
-PARSER.add_argument('--vina_docked_pdbqt_file', '-f', required = False, default=None,
+PARSER.add_argument('--vina_docked_pdbqt_file', '-f', required=True, default=None,
     help='Path to .pdbqt.vina file to split into 1 .pdb file per pose that matches all criteria. \
         if this is a directory it will convert all of the files with the extension .pdbqt.vina')
 
@@ -239,7 +239,7 @@ PARSER.add_argument('--output_folder', '-o', type=str, default=None,
     help='Path to folder where the .pdb files will be placed. \
     Files will be the basename of the docked file with _pose_{pose_number}.pdb \
     replacing the extension .pdbqt.vina.')
-PARSER.add_argument('--max_num_of_poses', type = int, required = False, default=-1,
+PARSER.add_argument('--max_num_of_poses', type=int, required=False, default=-1,
     help='Each docked file will have 1 or more poses of the ligand. This setting \
     controls how many are converted. default is -1 which means all poses possible. \
     max_num_of_poses=1 means only the best docked pose will be converted. \
@@ -248,7 +248,7 @@ PARSER.add_argument('--max_num_of_poses', type = int, required = False, default=
     for a pose to be converted it must be between the 1st and 5th pose in the file and \
     must have docked with a score less than or equal to -13.0.')
 
-PARSER.add_argument('--max_docking_score', type = float, required = False, default=None,
+PARSER.add_argument('--max_docking_score', type=float, required=False, default=None,
     help='The most positive docking score to be converted. (More negative scores \
     are predicted to bind better). If additional criteria such as \
     max_num_of_poses is applied a pose must meet both criterias \
@@ -256,7 +256,7 @@ PARSER.add_argument('--max_docking_score', type = float, required = False, defau
     for a pose to be converted it must be between the 1st and 5th pose in the file and \
     must have docked with a score less than or equal to -13.0.')
 
-PARSER.add_argument('--min_docking_score', type = float, required = False, default=None,
+PARSER.add_argument('--min_docking_score', type=float, required=False, default=None,
     help='The most negative docking score to be converted. (More negative scores \
     are predicted to bind better). If additional criteria such as \
     max_num_of_poses is applied a pose must meet both criterias \

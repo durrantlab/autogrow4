@@ -565,7 +565,7 @@ def process_inputs(inputs):
 # Argment parsing
 PARSER = argparse.ArgumentParser()
 PARSER.add_argument(
-    '--smi_file', required=False, default=None,
+    '--smi_file', required=True, default=None,
     help='Path to tab-delineated .smi file to fragment')
 PARSER.add_argument(
     '--output_smi_file', '-o', type=str, default=None,

@@ -103,7 +103,7 @@ def get_arguments_from_argparse(ARGS_DICT):
 
 # Argment parsing
 PARSER = argparse.ArgumentParser()
-PARSER.add_argument('--pdbqt_file', '-f', required = False, default=None,
+PARSER.add_argument('--pdbqt_file', '-f', required=True, default=None,
     help='Path to .pdbqt file to convert to a .pdb file. This must be a single \
     ligand and must end with .pdbqt')
 PARSER.add_argument('--output_file', '-o', type=str, default=None,

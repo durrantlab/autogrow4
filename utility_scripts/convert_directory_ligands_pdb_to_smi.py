@@ -7,9 +7,9 @@
 #
 # output example:
 # python convert_ligands_pdb_to_smi.py \
-#   -source_folder $PATH/OF/PDBS/ \
-#   -output_folder $PATH/TO/OUTPUT/ \
-#   -number_of_processors -1
+#   --source_folder $PATH/OF/PDBS/ \
+#   --output_folder $PATH/TO/OUTPUT/ \
+#   --number_of_processors -1
 #
 # This will convert all .pdb files within $PATH/OF/PDBS/ into a single
 # .smi file at $PATH/TO/OUTPUT/PDBS.smi
@@ -123,12 +123,12 @@ def get_arguments_from_argparse(ARGS_DICT):
 
 # Argment parsing
 PARSER = argparse.ArgumentParser()
-PARSER.add_argument('--source_folder', '-s', required = False, default=None,
+PARSER.add_argument('--source_folder', '-s', required=True, default=None,
     help='Path to folder containing .pdb files to convert. \
     File must contain a single small molecules. Without protein. \
     Files must end with either .pdb or .PDB')
-PARSER.add_argument('--output_folder', '-o', required = False, default=None,
-    help='Path to folder where we will output .smi file of converted .pdbs.')
+PARSER.add_argument('--output_folder', '-o', required=True, default=None,
+    help='Path to folder where we will output a .smi file of converted .pdb files.')
 
 # processors and multithread mode
 PARSER.add_argument('--number_of_processors', '-p', type = int, metavar='N', default = 1,

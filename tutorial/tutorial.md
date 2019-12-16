@@ -857,11 +857,6 @@ from rdkit.Chem.rdchem import BondStereo
 ####    -If running on a cluster:
     We recommend setting the number_of_processors=-1 and defining the number of processors in an SBATCH type submission script.
 
-### Webserver:@@@@@@@@@JAKE NOT IMPLIMENTED
-    If you struggle to have enough computational power to sucessfully run Autogrow, try using our free webserver at:
-        @@@@@@@@@JAKE INSERT BIOTITE WEBSERVER
-
-
 #
 ##  Multiprocessing/MPI/Parallelization/Parallelizer:
     Autogrow uses the Parallelizer.py script from Gypsum-DL (autogrow/operators/convert_files/gypsum_dl/gypsum_dl/Parallelizer.py).
@@ -893,3 +888,221 @@ from rdkit.Chem.rdchem import BondStereo
             python RunAutogrow.py -j custom_parameters.json
             *** Do not use srun or mpirun for the production run. cpu/job distribution is handled internally. 
             Using srun or mpirun can cause errors with the mpi4py universe. ***
+
+#
+##  Utility Scripts:
+    AutoGrow 4.0.0 provides several accessory scripts for preparing files, processing data, and analyzing data. 
+    These files can be found within the autogrow4/utility_scripts/ folder.
+
+### Preparation scripts pre-run:
+#### /autogrow4/utility_scripts/convert_directory_ligands_pdb_to_smi.py:
+    This script will convert a directory of pdb files (small molecules only, not proteins) to SMILES and create a single .smi file with all SMILES.
+
+    This script takes 3 input arguments:
+        --source_folder str (-s) Required
+            Path to folder containing .pdb files to convert.
+            File must contain a single small molecules. Without proteins.
+            Files must end with either .pdb or .PDB'
+        --output_folder str (-o) Required
+            Path to folder where we will output a .smi file of converted .pdb files.
+        --number_of_processors int (-p) 
+            Number of processors to use for parallel calculations.
+            This script is not MPI enable but is able to multithread using SMP architecture. Set to -1 for all availble CPUs.
+
+    Example run:
+    python /autogrow4/utility_scripts/convert_directory_ligands_pdb_to_smi.py \
+        --source_folder $PATH/OF/PDBS/ \
+        --output_folder $PATH/TO/OUTPUT/ \
+        --number_of_processors -1
+
+#### /autogrow4/utility_scripts/fragmenter_of_smi_mol.py:
+    This script will fragment compounds from a .smi file. It is useful for lead-optimization. This script was used for the PARPi lead-optimizations in the AutoGrow 4.0.0 paper.
+    
+    This can fragment compounds in 2 manners:
+        1) BRICS decomposition: This fragments along synthesizable bonds
+        2) fragment rotatable bonds: This breaks compounds along rotatable bonds.
+            -There is an option to skip carbon-carbon single bonds.
+
+    For each molecule all permutation of fragments are calculated 
+        (ie) fragment rotatable bonds C-O-C1CCCC1 could produce the following fragments:
+                C-O-C1CCCC1 No bond breaks
+                C and O-C1CCCC1 breaking the 1st bond
+                C-O and C1CCCC1 breaking the 2nd bond
+                C and O and C1CCCC1 breaking the 1st bond and 2nd bond
+    A limit on maximum number of fragments per compound and a minimum number of atoms per fragment can be set.       
+
+    This script takes 7 input arguments:
+
+        --smi_file str Required
+            Path to tab-delineated .smi file to fragment
+        --output_smi_file str (-o):
+            Path to output tab-delineated .smi file of fragments. 
+            If not provided it will play a file in the same directory as smi_file titled smi_file + _Fragmented.smi
+        --frags_per_seed_lig int:
+            Number of fragments to create per input SMILES. 
+            default is -1 which mean all possible fragments.
+        --run_brics bool:
+            Whether to fragment ligands using BRICS fragmentation. This fragments along synthesizable bonds. Default is True.
+        --run_frag bool:
+            Whether to fragment ligands over all rotatable bonds. Default is True.
+        --c_c_bonds_off bool:
+            Whether to exclude fragmenting carbon-carbon single bonds. Default is True.
+            If True it will ignore fragments on C-C bonds; if False it will fragment.
+        --number_of_processors int (-p):
+            Number of processors to use for parallel calculations.
+            This script is not MPI enable but is able to multithread using SMP architecture. Set to -1 for all availble CPUs.
+
+    Example run:
+    python /autogrow4/utility_scripts/fragmenter_of_smi_mol.py \
+        -smi_file $PATH/OF/SMILES.smi
+
+### File handling post-run:
+
+#### /autogrow4/utility_scripts/convert_single_ligand_pdbqt_to_pdb.py:
+    This script will convert a pdbqt file into a .pdb file.
+
+    This is done by removing a column of the PDB file.
+
+    This script takes 2 input arguments:
+        --pdbqt_file str (-f) Required
+            Path to .pdbqt file to convert to a .pdb file. This must be a single ligand and must end with .pdbqt
+        --output_folder str (-o) Required
+            Path to file where we will output .pdb file. If not provide the output .pdb will be the same as the input pdbqt_file but ending with .pdb instead of .pdbqt.
+
+    Example run:
+    python autogrow4/utility_scripts/convert_single_ligand_pdbqt_to_pdb.py \
+        --pdbqt_file $PATH/OF/PDBQT_file.pdbqt \
+        --output_folder $PATH/TO/OUTPUT/FOLDER/
+
+#### /autogrow4/utility_scripts/convert_vina_docked_pdbqt_to_pdbs.py:
+    This script will convert a docked .pdbqt.vina file into seperate .pdb file.
+
+    This is done by splitting up a single .pdbqt.vina into seperate .pdbqt files for each docked pose.
+    Then it removes a column of the .pdbqt and saves as a .pdb file.
+
+    If variable --max_num_of_poses is not set it will convert all poses.
+        If --max_num_of_poses == 1 it will only convert the top docked pose to .pdb
+        If --max_num_of_poses == 2 it will only convert the top 2 docked poses to .pdb
+        If --max_num_of_poses == 10 but there only 8 poses it will convert the 8 poses and stop
+
+
+    If --max_docking_score is not set it will convert all poses to .pdb;
+        If --max_docking_score == -10.0 it will only convert poses with docking scores less than
+            or equal to -10.0 (Remember docking scores are better when more negative)
+
+    --max_docking_score and --max_num_of_poses work as AND type operators.
+        Example:
+            --max_docking_score == -11.4 and --max_num_of_poses==5
+            It will take the top 5 poses as long as they also have docking scores <=-11.4
+
+
+    This script takes 6 input arguments:
+        --vina_docked_pdbqt_file str (-f): Required
+            Path to .pdbqt.vina file to split into 1 .pdb file per pose that matches all criteria. If this is a directory it will convert all of the files with the extension .pdbqt.vina
+        --output_folder str (-o):
+            Path to folder where the .pdb files will be placed. Files will be the basename of the docked file with _pose_{pose_number}.pdb replacing the extension .pdbqt.vina.
+        --max_num_of_poses int:
+            Each docked file will have 1 or more poses of the ligand. This setting controls how many are converted. default is -1 which means all poses possible. max_num_of_poses=1 means only the best docked pose will be converted.
+            If additional criteria like max_docking_score is applied a pose must meet both criterias to be converted. ie) if max_num_of_poses= 5 and max_docking_score=-13.0 for a pose to be converted it must be between the 1st and 5th pose in the file and must have docked with a score less than or equal to -13.0.
+        --max_docking_score float:
+            The most positive docking score to be converted. (More negative scores     are predicted to bind better). If additional criteria such as max_num_of_poses is applied a pose must meet both criterias to be converted. ie) if max_num_of_poses= 5 and max_docking_score=-13.0 for a pose to be converted it must be between the 1st and 5th pose in the file and must have docked with a score less than or equal to -13.0.
+        --min_docking_score float:
+            The most negative docking score to be converted. (More negative scores are predicted to bind better). If additional criteria such as max_num_of_poses is applied a pose must meet both criterias to be converted. 
+            ie) if min_docking_score= -15.0 and max_docking_score=-13.0 for a pose to be converted it must:
+                -13.0. <= docking score <= -15.0
+        --number_of_processors int (-p) 
+            Number of processors to use for parallel calculations.
+            This script is not MPI enable but is able to multithread using SMP architecture. Set to -1 for all availble CPUs.
+
+    Example submit:
+    python $PATH/autogrow4/utility_scripts/convert_vina_docked_pdbqt_to_pdbs.py \
+        --vina_docked_pdbqt_file $PATH/Run_1/Run_0/generation_30/PDBs/Gen_30_Cross_313228__1.pdbqt.vina \
+        --output_folder $PATH/outfolder/ \
+        --max_num_of_poses 1 --number_of_processors -1
+
+
+#### /autogrow4/utility_scripts/convert_single_ligand_pdbqt_to_pdb.py:
+    This script is used to decompress or recompress AutoGrow data.
+
+    If you use the reduce_files_sizes option AutoGrow will convert concatinate and compress all files in the PDBs directory of each generation. This is useful when doing larger runs as data transfer is faster and data storage is reduced when files are merged and compressed.
+        -The concatination script that is run in AutoGrow 4 can be found at:
+                autogrow4/autogrow/docking/concatinate_files.py
+    This script will either:
+        1) Return the files back to their original uncompressed and deconcatinated formating
+            or
+        2) Concatinate and then compress the files into a single file.
+
+
+    The formating of the concatination is:
+        "\n##############################File_name: {}\n".format(os.path.basename(file_name_1))
+        ... Content of the 1st file...
+        "\n##############################$$END_FILE$$ {}".format(os.path.basename(file_name_1))
+        "\n##############################File_name: {}\n".format(os.path.basename(file_name_2))
+        ... Content of the 2nd file...
+        "\n##############################$$END_FILE$$ {}".format(os.path.basename(file_name_2))
+
+    This concatinated file is tar.gz compressed.
+
+    This script takes 2 input arguments:
+        --compress_or_decompress str (-s) Required
+            choices=["compress", "decompress"]
+            Chose whether to compress or decompress a directory
+        --input_folder_or_file str (-i) Required
+            Path to directory/file to compress or decompress.
+
+    Example decompression:
+        python autogrow4/utility_scripts/file_concatination_and_compression.py \
+        --compress_or_decompress decompress \
+        --input_folder_or_file PATH_TO_RUN/Run_0/generation_1/PDBs/compresed_PDBS.txt.gz
+    Example compression:
+        python autogrow4/utility_scripts/file_concatination_and_compression.py \
+        --compress_or_decompress compress \
+        --input_folder_or_file PATH_TO_RUN/Run_0/generation_1/PDBs/
+
+### Graph generation for post-run analysis:
+
+#### /autogrow4/utility_scripts/plot_autogrow_run.py:
+    This script will create a line plot of the average score for each generation of AutoGrow run. This is the same type of figure as the --generate_plot option that AutoGrow 4.0.0 already provides, but this also allows plotting of reference lines.
+
+    This script takes 4 input arguments:
+    --infolder str (-i): Required
+        Path to input folder containing the AutoGrow run. This should be the top folder which contains the vars.json file.
+    --outfile str (-o):
+        Path to folder to output files. It will be created if does not exist. If not provide it will be placed in the infolder/data_line_plot.svg
+    --outfile_format str:
+        choices=[ svg  png  jpg  pdf ]
+        The type of file for figure to be exported as default is .svg file.
+    --plot_reference_lines list:
+        This will be a list of lists, with each sublist being a different dotted-line reference to plot. 
+        For each sublist the order of information should be:
+            [name, value, matplotlib_color]
+        For example a [['Olaparib score',-12.8,'y'],['Niraparib score',-10.7,'k']] will add horizontal dotted lines at -12.8 (yellow) and -10.7 (black) with Olaparib and Niraparib added to the legend. 
+        Spaces must be within quotes and not be between variables. matplotlib colors can be found with mcolors.get_named_colors_mapping().keys() 
+
+    Example submit:
+    python autogrow4/utility_scripts/plot_autogrow_run.py\
+        -i $PATH/Run_1/Run_0/ \
+        --plot_reference_lines [['Olaparib Score',-12.8,'y'],['Niraparib',-10.7,'k'],['NAD/NADH',-10.3,'purple'],['ADP-ribose',-9.3,'maroon']]
+
+
+#### /autogrow4/utility_scripts/make_lineage_figures.py:
+    This script creates figures for all ligands which parented a given ligand.
+
+    All compounds for the entire AutoGrow run will be compiled into a dictionary which is used to search when tracing lineages. We pickle these dictionaries so that if this script is run multiple times these dictionaries do not need to be recreated. For this reason the 1st time running this script on a data set will take longer than future runs. A pre-run option will compile these data sets without generating figures.
+
+    --output_dir str (-o): Required
+        Path to folder to output files. will be created if does not exist 
+    --input_dir str (-i): Required
+        Path to input folder containing the AutoGrow run. This should be the top folder which contains the vars.json file.
+    --mol_name str: Required unless prerun
+        This is the name of the molecule whose lineage will be traced back. If not provided or None, the script will simply compile the necessary dictions/picklefiles and then terminate. These pickle files are stored in the input folder containing the vars.json file from the AutoGrow run.
+            Example mol_name:
+                Gen_5_Cross_203131 or Gen_4_Mutant_7_802531 
+                Can also be provided as full-name ie: 
+                    (Gen_2_Mutant_7_97143)Gen_4_Mutant_7_802531
+    --complimentary_mol_directory str:
+        If using a custom complimentary molecule library for mutations this path is required. If not the script will try to autodetect the location of the predefined complimentary_mol_directory. Many molecules generated by mutation will required the complimentary molecule that helped spawn them.
+    --source_compound_file str: Required
+        This is the source .smi file used to seed generation zero of the AutoGrow run. This is an essential file.
+    --pre_run bool: 
+        If True this will compile the necessary dictions/picklefiles and then terminate. These pickle files are stored in the input folder containing the vars.json file from the AutoGrow run.
