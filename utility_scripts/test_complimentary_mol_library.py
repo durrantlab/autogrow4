@@ -1,4 +1,15 @@
-"""SMILECLICK Class"""
+"""
+This script will test a complimentary molecule library to ensure all compounds
+react in all reactions they may be used in.
+
+Example submit:
+
+    python autogrow4/utility_scripts/test_complimentary_mol_library.py \
+        --rxn_library_file autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/ClickChem_rxn_library.json \
+        --function_group_library autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/ClickChem_functional_groups.json \
+        --complimentary_mol_directory autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/complimentary_mol_dir \
+        --output_folder autogrow4/utility_scripts/output/
+"""
 import __future__
 
 import random
@@ -6,10 +17,9 @@ import os
 import json
 import copy
 import argparse
-import sys
 
 import rdkit
-from rdkit import Chem
+import rdkit.Chem as Chem
 from rdkit.Chem import AllChem
 
 # Disable the unnecessary RDKit warnings
@@ -22,10 +32,10 @@ import support_scripts.mol_object_handling as MOH
 class SmilesClickChem(object):
     """
     This class will take a molecule and Mutate it by reacting it.
-    
-    This is modified from the AutoGrow source code file: 
+
+    This is modified from the AutoGrow source code file:
         /autogrow4/autogrow/operators/mutation/smiles_click_chem/smiles_click_chem.py
-    Filters were removed for simplicity
+    Unused sections were removed for simplicity.
     """
 
     def __init__(self, rxn_library_variables, list_of_already_made_smiles):
@@ -68,20 +78,6 @@ class SmilesClickChem(object):
 
         # List of already predicted smiles
         self.list_of_already_made_smiles = [x[0] for x in list_of_already_made_smiles]
-
-    def update_list_of_already_made_smiles(self, list_of_already_made_smiles):
-        """
-        This updates the list of Smiles which have been made in this
-        generation via mutation.
-
-        Inputs:
-        :param list list_of_already_made_smiles: a list of lists. Each sublist
-            contains info about a smiles made in this generation via mutation.
-            ie. [['O=C([O-])',
-            '(Gen_3_Mutant_37_747+ZINC51)Gen_4_Mutant_15_52']]
-        """
-        list_of_already_made_smiles = [x[0] for x in list_of_already_made_smiles]
-        self.list_of_already_made_smiles.extend(list_of_already_made_smiles)
 
     def rxn_lib_format_json_dict_of_dict(self, old_dict):
         """
@@ -389,21 +385,6 @@ class SmilesClickChem(object):
 
         return functional_group_dict
 
-    def rand_key_list(self, dictionary):
-        """
-        Get a random ordered list of all the keys from  a dictionary.
-
-        Inputs:
-        :param dict dictionary: any dictionary
-
-        Returns:
-        :returns: list keys: a randomly ordered list containing all the keys
-            from the dictionary
-        """
-        keys = list(dictionary.keys())  # List of keys
-        random.shuffle(keys)
-        return keys
-
     def retrieve_complimentary_dictionary(self, rxn_library, complimentary_mol_dir):
         """
         Based on user controled variables, this definition will retrieve a
@@ -496,496 +477,6 @@ class SmilesClickChem(object):
             )
 
         return complimentary_mols_dict
-
-    def make_reactant_order_list(self, substructure_search_result,
-                                 has_substructure_matches_count):
-        """
-        make an ordered list of reactants which composed of 0 and 1. This list
-        will be used (in later steps) to determine which reactant is the
-        ligand and which requires a complimentary molecule.
-
-        Inputs:
-        :param list substructure_search_result: list composed of 0 and 1. 1
-            for if it has the substructure 0 for not
-        :param int has_substructure_matches_count: how many substructure
-            matches there are
-        Returns:
-        :returns: list reactant_order_list: an ordered list of reactants which
-            composed of 0 and 1.
-        """
-        # for mols w atleast 1 substructure
-        if has_substructure_matches_count == 1:
-            reactant_order_list = substructure_search_result
-        elif has_substructure_matches_count > 1:
-            # if more than 1 reactant is found in the ligand than we need to
-            # randomly pick 1 to be the molecule in the reaction and the
-            # other(s) to be mols chosen from the complimentary molecule
-            # dictionary
-
-            # create a list to be used to determine which reactants need
-            # complimentary mol and which will use the Ligand
-            reactant_order_list = []
-
-            chosen_as_mol_num = random.randint(0, has_substructure_matches_count - 1)
-            counter_of_matches = 0
-            for i in range(0, len(substructure_search_result)):
-                if (
-                        substructure_search_result[i] == 1
-                        and counter_of_matches == chosen_as_mol_num
-                ):
-                    reactant_order_list.append(1)
-                    counter_of_matches = counter_of_matches + 1
-                elif (
-                        substructure_search_result[i] == 1
-                        and counter_of_matches != chosen_as_mol_num
-                ):
-                    reactant_order_list.append(0)
-                    counter_of_matches = counter_of_matches + 1
-                else:
-                    reactant_order_list.append(0)
-        return reactant_order_list
-
-    def get_random_complimentary_mol(self, functional_group):
-        """
-        This function will get a dictionary of complimentary mols
-
-        Inputs:
-        :param str functional_group: the functional group of the needed
-            complimentary molecule for the reaction
-
-        Returns:
-        :returns: list random_comp_mol: list with the SMILES string and name
-            of molecule for the randomly chosen comp mol
-        """
-        infile = self.complimentary_mol_dict[functional_group]
-
-        with open(infile, "r") as f:
-            random_comp_mol_line = random.choice(f.readlines())
-            random_comp_mol_line = (
-                random_comp_mol_line.replace("\n", "")
-                .replace("\t", " ")
-                .replace("    ", " ")
-            )
-            for i in range(10):
-                random_comp_mol_line.replace("  ", " ")
-            parts = random_comp_mol_line.split(
-                " "
-            )  # split line into parts seperated by 4-spaces
-            # parts = [x for x in random_comp_mol_line.split(" ") if x!= ""]
-            # # split line into parts seperated by 4-spaces
-
-            smile_list = parts[0]
-            zinc_name_list = parts[1]
-            random_comp_mol = [smile_list, zinc_name_list]
-
-        return random_comp_mol
-
-    def determine_functional_groups_in_mol(self, mol_deprotanated, mol_reprotanated):
-        """
-        This function will take a molecule and find which functional groups it
-        has. This will save time for picking reactions, particularly as
-        reaction lists become larger.
-
-        Inputs:
-        :param rdkit.Chem.rdchem.Mol mol_deprotanated: an rdkit molecule which
-            has been sanitized and deprotanated
-        :param rdkit.Chem.rdchem.Mol mol_reprotanated: an rdkit molecule which
-            has been sanitized and fully protanated
-
-        Returns:
-        :returns: list list_subs_within_mol: a list of the name of every
-            functional group found within the molecule. these will be used later
-            to filter for reactions.
-        """
-        list_subs_within_mol = []
-        functional_group_dict = self.functional_group_dict
-
-        for key in list(functional_group_dict.keys()):
-            substructure = Chem.MolFromSmarts(functional_group_dict[key])
-            if mol_reprotanated.HasSubstructMatch(substructure):
-                list_subs_within_mol.append(key)
-            else:
-                if mol_deprotanated.HasSubstructMatch(substructure):
-                    list_subs_within_mol.append(key)
-                else:
-                    continue
-        return list_subs_within_mol
-
-    def run_smiles_click(self, ligand_smiles_string):
-        """
-        This will take the shuffled list of reaction names
-        (self.shuffled_reaction_list) and test the Ligand to see if it is
-        capable of being used in the reaction. If the ligand is unable to be
-        used in the reaction, then we move on to the next reaction in the
-        list. If none work, we return a  None.
-
-        Inputs:
-        :param str ligand_smiles_string: SMILES string of a molecule to be
-            reacted
-
-        Returns:
-        :returns: list product_info: list containing the reaction product, the
-            id_number of the reaction as found in the reaction_dict and the id for
-            the complimentary mol (None if it was a single reactant reaction)
-            [reaction_product_smilestring, reaction_id_number,
-            zinc_database_comp_mol_name]. returns None if all reactions failed or
-            input failed to convert to a sanitizable rdkit mol.
-        """
-        try:
-            mol = Chem.MolFromSmiles(
-                ligand_smiles_string, sanitize=False
-            )  # This is the input molecule which serves as the parent molecule
-        except:
-            # mol object failed to initialize
-            return None
-
-        # try sanitizing, which is necessary later
-        mol = MOH.check_sanitization(mol)
-        if mol is None:
-            return None
-
-        # Is important for some functional groups while being deprotanated are
-        # useful for other reaction
-        mol_reprotanated = copy.deepcopy(mol)
-        mol_reprotanated = MOH.try_reprotanation(mol_reprotanated)
-        if mol_reprotanated is None:
-            return None
-
-        mol_deprotanated = copy.deepcopy(mol)
-        mol_deprotanated = MOH.try_deprotanation(mol_deprotanated)
-        if mol_deprotanated is None:
-            return None
-
-        # Determine which functional groups are within a ligand
-        list_subs_within_mol = self.determine_functional_groups_in_mol(
-            mol_deprotanated, mol_reprotanated
-        )
-        if len(list_subs_within_mol) == 0:
-            print(
-                "{} had no functional groups to react with.".format(
-                    ligand_smiles_string
-                )
-            )
-            return None
-
-        shuffled_reaction_list = self.rand_key_list(
-            self.reaction_dict
-        )  # Randomize the order of the list of reactions
-
-        tries = 0
-        is_rxn_complete = False
-        # go through all possible rxns in dicitonary of rxns using the random
-        # order of rxns loop ends when a rxn is successful or when it runs out
-        # of reactions
-        while tries < len(shuffled_reaction_list) and is_rxn_complete is False:
-            reaction_name = shuffled_reaction_list[tries]
-            a_reaction_dict = self.reaction_dict[reaction_name]
-
-            fun_groups_in_rxn = a_reaction_dict["functional_groups"]
-            contains_group = None
-            for i in range(0, len(fun_groups_in_rxn)):
-                if fun_groups_in_rxn[i] in list_subs_within_mol:
-                    contains_group = i
-                    # The number i which contains_group is now equal to will
-                    # be used to remember the placement of the molecule later
-                    # in the reaction.
-                    break
-
-                continue
-
-            if contains_group is None:
-                # Reaction doesn't contain a functional group found in the
-                # reactant molecule. So lets move on to the next molecule
-                tries = tries + 1
-                continue
-
-            # Determine whether to react using the protanated or
-            # deprotanated form of the ligand
-            substructure = Chem.MolFromSmarts(
-                self.functional_group_dict[fun_groups_in_rxn[i]]
-            )
-
-            if mol_deprotanated.HasSubstructMatch(substructure) is True:
-                mol_to_use = copy.deepcopy(mol_deprotanated)
-            else:
-                mol_to_use = copy.deepcopy(mol_reprotanated)
-            substructure = None
-
-            rxn = AllChem.ReactionFromSmarts(str(a_reaction_dict["reaction_string"]))
-            rxn.Initialize()
-
-            # if the reaction requires only a single reactant we will attempt
-            # to run the reaction
-            if a_reaction_dict["num_reactants"] == 1:
-                # "Try reaction"
-                zinc_database_comp_mol_name = None
-                comp_mol_id = None
-                try:
-                    # if reaction works keep it
-                    reaction_products_list = [
-                        x[0] for x in rxn.RunReactants((mol_to_use,))
-                    ]
-
-                    # randomly shuffle the lists of products so that we don't
-                    # bias a single product type. ie ClickChem Reactions
-                    # 5_Alkyne_and_Azide produces two products: a 1,5 isomer
-                    # and a 1,4 isomer; This will shuffle the list and try
-                    # each option
-                    random.shuffle(reaction_products_list)
-
-                    if (
-                            reaction_products_list in [(), []]
-                            or len(reaction_products_list) == 0
-                    ):
-                        # if reaction fails then lets move on to the next
-                        # reaction
-                        tries = tries + 1
-                    else:
-                        is_rxn_complete = False
-                        for reaction_product in reaction_products_list:
-                            # Filter and check the product is valid
-                            reaction_product_smilestring = self.check_if_product_is_good(
-                                reaction_product
-                            )
-                            if reaction_product_smilestring is None:
-                                is_rxn_complete = False
-                            else:
-                                # REACTION WORKED!
-                                is_rxn_complete = True
-                                break
-                        if (
-                                reaction_product_smilestring is not None
-                                and is_rxn_complete is True
-                        ):
-                            # REACTION WORKED!
-                            break
-                        # else:
-                        tries = tries + 1
-
-                except:
-                    # if reaction fails then lets move on to the next reaction
-                    mol_to_use = None
-                    tries = tries + 1
-                    break
-            else:
-                # for each functional group in the reaction, test
-                # if the ligand has that as a substructure
-
-                list_reactant_mols = []
-                comp_mol_id = []
-                for i in range(0, len(fun_groups_in_rxn)):
-                    if i == contains_group:
-                        # This is where the molecule goes
-                        list_reactant_mols.append(mol_to_use)
-
-                    else:
-                        # for reactants which need to be taken from the
-                        # complimentary dictionary. Find the reactants
-                        # functional group
-                        functional_group_name = str(
-                            a_reaction_dict["functional_groups"][i]
-                        )
-
-                        # Determine whether to react using the protanated or
-                        # deprotanated form of the ligand
-                        substructure = Chem.MolFromSmarts(
-                            self.functional_group_dict[fun_groups_in_rxn[i]]
-                        )
-
-                        # lets give up to 100 tries to find a comp molecule
-                        # which is viable
-                        for find_mol_tries in range(0, 100):
-
-                            # find that group in the complimentary dictionary.
-                            # comp_molecule = ["cccc", "ZINC123"]
-                            comp_molecule = self.get_random_complimentary_mol(
-                                functional_group_name
-                            )
-
-                            # zinc_database name
-                            zinc_database_comp_mol_name = comp_molecule[1]
-
-                            # Smiles String of complimentary molecule
-                            comp_smiles_string = comp_molecule[0]
-
-                            # check this is a santizable molecule
-                            comp_mol = Chem.MolFromSmiles(
-                                comp_smiles_string, sanitize=False
-                            )
-                            # try sanitizing, which is necessary later
-                            comp_mol = MOH.check_sanitization(comp_mol)
-
-                            # Try with deprotanated molecule rdkit to
-                            # recognize for the reaction
-                            comp_mol = MOH.try_deprotanation(comp_mol)
-                            if comp_mol is None:
-                                continue
-
-                            if comp_mol.HasSubstructMatch(substructure) is True:
-                                comp_mol = comp_mol
-                                # append to ordered list
-                                list_reactant_mols.append(comp_mol)
-                                comp_mol_id.append(zinc_database_comp_mol_name)
-                                break
-
-                            # Try with deprotanated molecule rdkit to
-                            # recognize for the reaction
-                            comp_mol = MOH.try_deprotanation(comp_mol)
-                            if comp_mol is None:
-                                continue
-
-                            if comp_mol.HasSubstructMatch(substructure) is True:
-                                comp_mol = comp_mol
-                                # append to ordered list
-                                list_reactant_mols.append(comp_mol)
-                                comp_mol_id.append(zinc_database_comp_mol_name)
-                                break
-
-                            comp_mol = None
-                            continue
-
-                # we will make a tuple of the molecules as rdkit mol objects
-                # 1st we generate a list of reactant mol objects then we
-                # convert to tuple
-
-                # convert list to tuple
-                tuple_reactant_mols = tuple(list_reactant_mols)
-
-                # Run the reaction: We use a try/except statement incase an
-                # error occurs and rdkit is unable to complete the reaction.
-                # without this a failure to complete the reaction would result
-                # in the terminating.
-
-                # Try to run reaction
-                try:
-                    # if reaction works keep it
-                    reaction_products_list = [
-                        x[0] for x in rxn.RunReactants(tuple_reactant_mols)
-                    ]
-
-                    # randomly shuffle the lists of products so that we don't
-                    # bias a single product type. ie ClickChem Reactions
-                    # 5_Alkyne_and_Azide produces two products: a 1,5 isomer
-                    # and a 1,4 isomer; This will shuffle the list and try
-                    # each option
-                    random.shuffle(reaction_products_list)
-
-                except:
-                    reaction_product = None
-                    tries = tries + 1
-                    continue
-
-                if (
-                        reaction_products_list in [(), []]
-                        or len(reaction_products_list) == 0
-                ):
-                    reaction_id_number = a_reaction_dict["RXN_NUM"]
-                    tries = tries + 1
-                    continue
-                else:
-                    is_rxn_complete = False
-                    for reaction_product in reaction_products_list:
-                        # Filter and check the product is valid
-                        reaction_product_smilestring = self.check_if_product_is_good(
-                            reaction_product
-                        )
-                        if reaction_product_smilestring is None:
-                            is_rxn_complete = False
-                        else:
-                            # REACTION WORKED!
-                            is_rxn_complete = True
-                            break
-                    if reaction_product_smilestring is not None and is_rxn_complete is True:
-                        # REACTION WORKED!
-                        break
-                    # try again
-                    tries = tries + 1
-
-        # end of the big while loop (while tries < len(shuffled_reaction_list)
-        # and is_rxn_complete is False)
-
-        # check that a reaction was sucessful
-        if is_rxn_complete is True:
-            reaction_product = MOH.check_sanitization(reaction_product)
-            if reaction_product is None:
-                return None
-
-            reaction_product_smilestring = Chem.MolToSmiles(
-                reaction_product, isomericSmiles=True
-            )
-            reaction_id_number = a_reaction_dict["RXN_NUM"]
-
-            # RETURNS THE NEW PRODUCTS SMILESTRING, THE REACTION ID NUMBER (SO
-            # ONE CAN TRACK THE MOLS LINEAGE). THE COMP_MOL ZINC DATABASE ID
-            # NUMBER (IF IT WAS A RXN WITH ONLY 1 REACTANT THIS IS None)
-            if comp_mol_id is None:
-                zinc_database_comp_mol_names = None
-            elif len(comp_mol_id) == 1:
-                zinc_database_comp_mol_names = comp_mol_id[0]
-            else:
-                zinc_database_comp_mol_names = "+".join(comp_mol_id)
-            product_info = [
-                reaction_product_smilestring,
-                reaction_id_number,
-                zinc_database_comp_mol_names,
-            ]
-            return product_info
-        # reaction failed
-        return None
-
-    def check_if_product_is_good(self, reaction_product):
-        """
-        This function will test whether the product passes all of the
-            requirements:
-            1) Mol sanitizes
-            2) It isn't in the self.list_of_already_made_smiles
-        Returns the smile if it passes; returns None if it fails.
-
-        Inputs:
-        :param rdkit.Chem.rdchem.Mol reaction_product: an rdkit
-            molecule to be checked.
-        Returns:
-        :returns: str reaction_product_smilestring:
-            this will return either a SMILES string if it is a good molecule
-            or None if it can not sanitize and be cleaned
-        """
-        reaction_product = MOH.check_sanitization(reaction_product)
-        if reaction_product is None:
-            return None
-
-        # Remove any fragments incase 1 made it through
-        reaction_product = MOH.handle_frag_check(reaction_product)
-        if reaction_product is None:
-            return None
-
-        # Make sure there are no unassigned atoms which made it through. These
-        # are very unlikely but possible
-        reaction_product = MOH.check_for_unassigned_atom(reaction_product)
-        if reaction_product is None:
-            return None
-
-        reaction_product = MOH.try_reprotanation(reaction_product)
-        if reaction_product is None:
-            return None
-
-        # Remove H's
-        reaction_product = MOH.try_deprotanation(reaction_product)
-        if reaction_product is None:
-            return None
-
-        reaction_product = MOH.check_sanitization(reaction_product)
-        if reaction_product is None:
-            return None
-
-        # Check if product SMILE has been made before
-        reaction_product_smilestring = Chem.MolToSmiles(
-            reaction_product, isomericSmiles=True
-        )
-        if reaction_product_smilestring in self.list_of_already_made_smiles:
-            return None
-
-        # passes
-        return reaction_product_smilestring
 #
 def get_usable_fomat(infile):
     """
@@ -1041,41 +532,34 @@ def get_usable_fomat(infile):
 
     return usable_list_of_smiles
 #
-def react_with_multiple_reactants(mol_set, mol_name, rxn_obj):
+def react_with_multiple_reactants(mol_tuple, mol_name, rxn_obj):
     """
     This will run a single molecule through a 1-reactant reaction.
 
     If it fails it will return the name of mol (mol_info[1])
     If it passes it will return None
     Inputs:
-    :param list mol_info: list of mol info
-        mol_info[0] is the SMILES, 
-        mol_info[1] is the name, 
-        mol_info[-1] is the rdkit mol obj,
+    :param tuple mol_tuple: a tuple of all mols to react
+    :param str mol_name: name of the molecule being tested
     :param rdkit.Chem.rdChemReactions.ChemicalReaction rxn_obj: the reaction object to use
 
     Returns:
     :returns: str mol_name: returns the mol_name if it fails to react;
         returns None if it passes reaction
     """
-    # mol_name = mol_info[1]
-    # mol_1 = mol_info[-1]
     try:
         # if reaction works keep it
         reaction_products_list = [
-                        x[0] for x in rxn_obj.RunReactants(mol_set)
+                        x[0] for x in rxn_obj.RunReactants(mol_tuple)
                     ]
     except:
-        # return mol_name
-        print("FAIL")
-    sys.exit(0)
+        return mol_name
 
     if len(reaction_products_list) == 0:
         return mol_name
     # created a new compound so it passes
     return None
-
-# 
+#
 def run_a_single_reactant_reaction(mol_info, rxn_obj):
     """
     This will run a single molecule through a 1-reactant reaction.
@@ -1084,8 +568,8 @@ def run_a_single_reactant_reaction(mol_info, rxn_obj):
     If it passes it will return None
     Inputs:
     :param list mol_info: list of mol info
-        mol_info[0] is the SMILES, 
-        mol_info[1] is the name, 
+        mol_info[0] is the SMILES,
+        mol_info[1] is the name,
         mol_info[-1] is the rdkit mol obj,
     :param rdkit.Chem.rdChemReactions.ChemicalReaction rxn_obj: the reaction object to use
 
@@ -1095,7 +579,7 @@ def run_a_single_reactant_reaction(mol_info, rxn_obj):
     """
     mol_name = mol_info[1]
     mol_1 = mol_info[-1]
-    
+
     try:
         # if reaction works keep it
         reaction_products_list = rxn_obj.RunReactants((mol_1,))
@@ -1105,11 +589,171 @@ def run_a_single_reactant_reaction(mol_info, rxn_obj):
         return mol_name
     # created a new compound so it passes
     return None
+#
+def get_rxn_and_examples(current_rxn_dict):
+    """
+    get the example reaction molecules from current_rxn_dict, create the rxn_obj,
+    and test examples in the rxn.
 
+    Inputs:
+    :param dict current_rxn_dict: a dictionary of information about a reaction
+
+    Returns:
+    :returns: tuple example_rxn_reactants: a tuple of rdkit
+            mol objects that are example compounds
+    :returns: rdkit.Chem.rdChemReactions.ChemicalReaction rxn_obj: the
+        reaction object to use
+    """
+    rxn_name = current_rxn_dict["reaction_name"]
+    # Test example reactants
+    example_smiles_rxn_reactants = current_rxn_dict["example_rxn_reactants"]
+    example_smiles_rxn_reactants = example_smiles_rxn_reactants.replace("['","").replace("']","")
+    example_smiles_rxn_reactants = example_smiles_rxn_reactants.replace(" ","").replace('"',"")
+    example_smiles_rxn_reactants = example_smiles_rxn_reactants.split("','")
+    
+    example_rxn_reactants = []
+    for smile_str in example_smiles_rxn_reactants:
+        smile_str = smile_str.replace("'","").replace('"',"")
+        smile_str = smile_str.replace(" ","")
+
+        example_mol = Chem.MolFromSmiles(smile_str)
+
+        example_mol = MOH.check_sanitization(example_mol)
+        if example_mol is None:
+            print(smile_str)
+            printout = "example mol from rxn: {}".format(rxn_name)
+            printout = printout + " failed to sanitize in RDKit"
+            print(printout)
+            raise Exception(printout)
+        example_rxn_reactants.append(example_mol)
+
+    # convert example_rxn_reactants to tuple
+    example_rxn_reactants = tuple(example_rxn_reactants)
+    reaction_string = current_rxn_dict["reaction_string"]
+    try:
+        rxn_obj = AllChem.ReactionFromSmarts(reaction_string)
+        rxn_obj.Initialize()
+    except:
+        printout = "rxn {} failed to be created.".format(rxn_name)
+        printout = printout + "Rxn SMART is flawed"
+        print(printout)
+        raise Exception(printout)
+
+
+    # Demo on example reactants
+    example_results = react_with_multiple_reactants(example_rxn_reactants, "test_reactions", rxn_obj)
+    if example_results is not None:
+        printout = "rxn {} failed to run on example compounds.".format(rxn_name)
+        printout = printout + "\nPlease check example compounds"
+        print(printout)
+        raise Exception(printout)
+
+    return example_rxn_reactants, rxn_obj
+# 
+def run_all_for_fun_group(vars, fun_group, rxns_by_fun_group, a_smiles_click_object):
+    """
+    This runs the all testing for a single functional group.
+
+    This will also write the compounds which pass to a .smi file.
+
+    Inputs:
+    :param dict vars: Dictionary of User variables
+    :param str fun_group: functional group name
+    :param dict rxns_by_fun_group: Dictionary of rxns names organized by 
+        functional groups
+    :param obj a_smiles_click_object: a a_smiles_click_object class object.
+        This provides useful pathing information.
+
+    Returns:
+    :returns: list failed_to_react: a list of mol names which failed to react
+    :returns: list failed_to_sanitize: a list of mol names which failed to sanitize 
+    """
+    # unpack variables
+    complimentary_mol_dict = a_smiles_click_object.complimentary_mol_dict
+    reaction_dict = a_smiles_click_object.reaction_dict
+    number_of_processors = vars["number_of_processors"]
+    output_folder = vars["output_folder"]
+
+    smi_comp_file = complimentary_mol_dict[fun_group]
+    fun_group_list = get_usable_fomat(smi_comp_file)
+    fun_group_mol_list = []
+    failed_to_sanitize = []
+    for info in fun_group_list:
+        mol = Chem.MolFromSmiles(info[0])
+        mol = MOH.check_sanitization(mol)
+        if mol is None:
+            failed_to_sanitize.append(info)
+            continue
+        temp = copy.deepcopy(info)
+        temp.append(mol)
+        fun_group_mol_list.append(temp)
+
+    # print info about failures
+    if len(failed_to_sanitize) != 0:
+        printout = "{} compounds ".format(len(failed_to_sanitize))
+        printout = printout + "failed to sanitize from: {}".format(fun_group)
+        print(printout)
+
+    failed_to_react = []
+    for rxn_name in rxns_by_fun_group[fun_group]:
+
+        current_rxn_dict = reaction_dict[rxn_name]
+        example_reactants, rxn_obj = get_rxn_and_examples(current_rxn_dict)
+
+        list_of_reactants = []
+        functional_groups_rxn = current_rxn_dict["functional_groups"]
+        i_count_to_use = None
+        for i_count in range(len(functional_groups_rxn)):
+            f_group = functional_groups_rxn[i_count]
+
+            if fun_group == f_group:
+                i_count_to_use = i_count
+            else:
+                continue
+        if i_count_to_use is None:
+            raise Exception("This is a code error.")
+
+        list_of_reactants = []
+        for mol_info in fun_group_mol_list:
+            mol_tuple_temp = []
+            for i_count in range(len(functional_groups_rxn)):
+                if i_count == i_count_to_use:
+                    mol_tuple_temp.append(mol_info[-1])
+                else:
+                    mol_tuple_temp.append(example_reactants[i_count])
+
+            list_of_reactants.append(tuple([tuple(mol_tuple_temp), mol_info[1], rxn_obj]))
+
+        output = mp.multi_threading(list_of_reactants, number_of_processors,
+                        react_with_multiple_reactants)
+        output = [x for x in output if x is not None]
+        failed_to_react.append([rxn_name, output])
+
+        # print info about failures
+        if len(output) != 0:
+            printout = "{} compounds failed to react from ".format(len(output))
+            printout = printout + "react from {} ".format(fun_group)
+            printout = printout + "in rxn: {}".format(rxn_name)
+            print(printout)
+
+    master_failed_to_react = []
+    master_passes_reactions = []
+    for fail_mol_list in failed_to_react:
+        master_failed_to_react.extend(fail_mol_list[1])
+    for mol_info in fun_group_list:
+        if mol_info[1] in master_failed_to_react:
+            continue
+        master_passes_reactions.append("    ".join(mol_info))
+    # write to ouput .smi file
+    with open(output_folder + fun_group + ".smi", "w") as f:
+        f.write("\n".join(master_passes_reactions))
+
+    return failed_to_react, failed_to_sanitize
+# 
 def run_main(vars):
     """
-    This runs the main testing. 
-    
+    This runs the main testing.
+
     Inputs:
     :param dict vars: Dictionary of User variables
     """
@@ -1117,13 +761,13 @@ def run_main(vars):
     # Force rxn_library to be custom because why else run this
     rxn_library = "Custom"
 
+    output_folder = vars["output_folder"]
     rxn_library_file = vars["rxn_library_file"]
     function_group_library = vars["function_group_library"]
     complimentary_mol_dir = vars["complimentary_mol_directory"]
-    number_of_processors = vars["number_of_processors"]
 
     rxn_library_variables = [
-        rxn_library, 
+        rxn_library,
         rxn_library_file,
         function_group_library,
         complimentary_mol_dir
@@ -1134,7 +778,6 @@ def run_main(vars):
         rxn_library_variables, new_mutation_smiles_list
     )
 
-    complimentary_mol_dict = a_smiles_click_chem_object.complimentary_mol_dict
     list_of_reaction_names = a_smiles_click_chem_object.list_of_reaction_names
     functional_group_dict = a_smiles_click_chem_object.functional_group_dict
     reaction_dict = a_smiles_click_chem_object.reaction_dict
@@ -1151,90 +794,30 @@ def run_main(vars):
 
     failed_to_sanitize_by_fun_group = {}
     failed_to_react_by_fun_group = {}
+
     for fun_group in rxns_by_fun_group.keys():
-        smi_comp_file = complimentary_mol_dict[fun_group]
-        fun_group_list = get_usable_fomat(smi_comp_file)
-        fun_group_mol_list = []
-        failed_to_sanitize = []
-        for info in fun_group_list:
-            mol = Chem.MolFromSmiles(info[0])
-            mol = MOH.check_sanitization(mol)
-            if mol is None:
-                failed_to_sanitize.append(info)
-                continue
-            info.append(mol)
-            fun_group_mol_list.append(info)
+        failed_to_react, failed_to_sanitize = run_all_for_fun_group(vars, fun_group, rxns_by_fun_group, a_smiles_click_chem_object)
+        failed_to_react_by_fun_group[fun_group] = failed_to_react
         failed_to_sanitize_by_fun_group[fun_group] = failed_to_sanitize
 
-        failed_to_react = []
-        for rxn_name in rxns_by_fun_group[fun_group]:
-            
-            current_rxn_dict = reaction_dict[rxn_name]
-            # Test example reactants
-            example_smiles_rxn_reactants = current_rxn_dict["example_rxn_reactants"]
-            example_smiles_rxn_reactants = example_smiles_rxn_reactants.replace("[","").replace("]","")
-            example_smiles_rxn_reactants = example_smiles_rxn_reactants.replace(" ","").replace('"',"")
-            example_smiles_rxn_reactants = example_smiles_rxn_reactants.split(",")
-            
-            example_rxn_reactants = []
-            for smile_str in example_smiles_rxn_reactants:
-                example_smile = Chem.MolFromSmiles(smile_str)
-                
-                example_mol = MOH.check_sanitization(mol)
-                if example_mol is None:
-                    printout = "example mol from rxn: {}".format(rxn_name)
-                    printout = printout + " failed to sanitize in RDKit"
-                    print(printout)
-                    raise Exception(printout)
-                example_rxn_reactants.append(example_mol)
-                
-            # convert example_rxn_reactants to tuple
-            tuple_example_rxn_reactants = tuple(example_rxn_reactants)
-            reaction_string = current_rxn_dict["reaction_string"]
-            try:
-                rxn_obj = AllChem.ReactionFromSmarts(reaction_string)
-                rxn_obj.Initialize()
-            except:
-                printout = "rxn {} failed to be created.".format(rxn_name)
-                printout = printout + "Rxn SMART is flawed"
-                print(printout)
-                raise Exception(printout)
+    # Handle saving log
+    with open(output_folder + "failed_to_sanitize_mol_by_fun_group.json", "w") as fp:
+        json.dump(failed_to_sanitize_by_fun_group, fp, indent=4) 
 
-            # Demo on example reactants
-            print(rxn_name)
-            print(reaction_string)
-            print(tuple_example_rxn_reactants)
-            reaction_products_list =  rxn_obj.RunReactants(tuple_example_rxn_reactants)
-            print(reaction_products_list)
-            sys.exit(0)
-            example_results = react_with_multiple_reactants(example_rxn_reactants, "test_reactions", rxn_obj)
-            print(example_results)
-            if example_results is not None:
-                printout = "rxn {} failed to run on example compounds.".format(rxn_name)
-                printout = printout + "\nPlease check example compounds"
-                print(printout)
-                raise Exception(printout)
-
-            num_reactants = current_rxn_dict["num_reactants"]
-            list_of_reactants = []
-            if num_reactants == 1:
-
-                for mol_info in fun_group_mol_list:
-                    list_of_reactants.append([mol_info, rxn_obj])
-
-                list_of_reactants = [tuple(x) for x in list_of_reactants]
-                list_of_reactants = tuple(list_of_reactants)
-
-                output = mp.multi_threading(list_of_reactants, number_of_processors,
-                                run_a_single_reactant_reaction)
-                output = [x for x in output if x is not None]
-                failed_to_react.append([rxn_name, output])
-            else:
-                functional_groups_rxn = current_rxn_dict["functional_groups"] 
-                
-                for f_group in functional_groups_rxn:
-                    num_reactants = current_rxn_dict["num_reactants"]
-
+    with open(output_folder + "failed_to_react_by_fun_group.json", "w") as fp:
+        json.dump(failed_to_react_by_fun_group, fp, indent=4)
+    
+    master_failed_list = []
+    for fun_group in failed_to_react_by_fun_group.keys():
+        temp = [x[1] for x in failed_to_react_by_fun_group[fun_group]]
+        for x in temp:
+            master_failed_list.extend(x)
+    master_failed_list = list(set(master_failed_list))
+    if len(master_failed_list) == 0:
+        print("All compounds passed!")
+    else:
+        print("{} compounds failed. Please check logs".format(len(master_failed_list)))
+# 
 def get_arguments_from_argparse(args_dict):
     """
     This function handles the arg parser arguments for the script.
@@ -1276,6 +859,35 @@ def get_arguments_from_argparse(args_dict):
         raise ValueError(
                 "number_of_processors must be an int. To use all processors set to -1."
             )
+    if "output_folder" not in args_dict.keys():
+        printout = "output_folder is a required variable. it is the PATH to where " + \
+            "filtered .smi file and log files will be placed. Will save a file " + \
+            "in this directory for mols which failed sanitization, mols which " + \
+            "failed to react in specific reactions, and .smi files that contain " + \
+            "all mols that reacted properly."
+        raise ValueError(printout)
+
+    if type(args_dict["output_folder"]) != str or args_dict["output_folder"] == "":
+        printout = "output_folder is a required variable. it is the PATH to where " + \
+            "filtered .smi file and log files will be placed. Will save a file " + \
+            "in this directory for mols which failed sanitization, mols which " + \
+            "failed to react in specific reactions, and .smi files that contain " + \
+            "all mols that reacted properly."
+        raise ValueError(printout)
+
+    args_dict["output_folder"] = os.path.abspath(args_dict["output_folder"]) + os.sep
+    if os.path.exists(args_dict["output_folder"]) is True:
+        if os.path.isdir(args_dict["output_folder"]) is False:
+            print(args_dict["output_folder"])
+            printout = "output_folder must be a directory. Please check input arguments"
+            raise ValueError(printout)
+    else:
+        try:
+            os.mkdir(args_dict["output_folder"])
+        except:
+            pass
+        if os.path.exists(args_dict["output_folder"]) is False:
+            raise Exception("output_folder could not be made or found.")
 
     return args_dict
 #
@@ -1311,6 +923,16 @@ PARSER.add_argument(
     All Functional groups specified function_group_library must have its \
     own .smi file. We recommend you filter these dictionaries prior to Autogrow \
     for the Drug-likeliness and size filters you will Run Autogrow with.",
+)
+PARSER.add_argument(
+    "--output_folder",
+    type=str,
+    default="",
+    required=True,
+    help="This PATH to where filtered .smi file and log files will be placed. \
+        Will save a file in this directory for mols which failed sanitization, \
+        mols which failed to react in specific reactions, and .smi files \
+        that contain all mols that reacted properly.",
 )
 # processors and multithread mode
 PARSER.add_argument(
