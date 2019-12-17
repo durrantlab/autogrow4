@@ -971,6 +971,33 @@ from rdkit.Chem.rdchem import BondStereo
     python /autogrow4/utility_scripts/fragmenter_of_smi_mol.py \
         -smi_file $PATH/OF/SMILES.smi
 
+### Preparation custom Reaction libraries pre-run:
+####    /autogrow4/utility_scripts/test_complimentary_mol_library.py:
+    This script will test a complimentary molecule library to ensure all compounds
+    react in all reactions they may be used in.
+
+    We recommend running this test if creating custom complimentary libraries or reaction libraries.
+
+    This script takes 5 input arguments:
+        --rxn_library_file str: Required
+            This PATH to a Custom json file of SMARTS reactions to use for Mutation.
+        --function_group_library str: Required
+            type=strThis PATH for a dictionary of functional groups to be used for Mutation.
+        --complimentary_mol_directory str: Required
+            This PATH to the directory containing all the molecules being used to react with. The directory should contain .smi files contain SMILES of molecules containing the functional group represented by that file. Each file should be named with the same title as the functional groups described in rxn_library_file & function_group_library +.smi 
+            All functional groups specified function_group_library must have its own .smi file. We recommend you filter these dictionaries prior to Autogrow for the Drug-likeliness and size filters you will Run Autogrow with.
+        --output_folder str: Required
+            This PATH to where filtered .smi file and log files will be placed. Will save a file in this directory for mols which failed sanitization, mols which failed to react in specific reactions, and .smi files that contain all mols that reacted properly.
+        --number_of_processors int (-p) 
+            Number of processors to use for parallel calculations.
+            This script is not MPI enable but is able to multithread using SMP architecture. Set to -1 for all availble CPUs.
+
+    Example submit:
+        python autogrow4/utility_scripts/test_complimentary_mol_library.py \
+            --rxn_library_file autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/ClickChem_rxn_library.json \
+            --function_group_library autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/ClickChem_functional_groups.json \
+            --complimentary_mol_directory autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/complimentary_mol_dir \
+            --output_folder autogrow4/utility_scripts/output/
 ### File handling post-run:
 
 ####    /autogrow4/utility_scripts/convert_single_ligand_pdbqt_to_pdb.py:
