@@ -595,11 +595,14 @@ from rdkit.Chem.rdchem import BondStereo
     The outer dictionary uses the reaction's name as the key and the subdictionary contiaining all information
     about the reaction as the item. 
 
+    We provide a script to check Complimentary and Reaction libraries molecule libraries at:
+        autogrow4/utility_scripts/test_complimentary_mol_library.py
+        A tutorial is provided in the Utility Scripts section of this document
+
     If using this you will need three pieces of information each explained below:
         
 #####    Three requirments for custom Reaction libraries:
 ######   1) Reaction library .json file: Contains reactions and all reaction information
- 
 
     Each subdictionary must contain the following information:
         "reaction_name": "Name of the reaction",
@@ -708,9 +711,12 @@ from rdkit.Chem.rdchem import BondStereo
     This can be used in conjunction with any of the predefined reactions sets (ie ClickChem, robust_rxns, all_rxns), but this requires that
     all functional groups used by those reaction libraries have a .smi file contained within the custom complimentary_mol_directory
     
-        
     We strongly recommend thoroughly checking that each molecule in each library matches the intended functional group.
     If a ligand does not match the inteded functional group the reaction will fail and it will slow the process of mutant creation.
+
+    We provide a script to check Complimentary molecule libraries at:
+        autogrow4/utility_scripts/test_complimentary_mol_library.py
+        A tutorial is provided in the Utility Scripts section of this document
 
     THERE MUST BE ONE ENTRY PER FUNCTIONAL GROUP. NAMES ARE CAP SENSITIVE.
 
