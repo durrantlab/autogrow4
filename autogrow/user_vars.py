@@ -74,7 +74,7 @@ def save_vars_as_json(vars):
         temp_vars[k] = copy.deepcopy(vars[k])
 
     with open(vars_file, "w") as fp:
-        json.dump(temp_vars, fp, indent=4) 
+        json.dump(temp_vars, fp, indent=4)
 
 
 def multiprocess_handling(vars):
@@ -148,6 +148,108 @@ def multiprocess_handling(vars):
 
     return vars
 
+def run_macos_notarization(vars):
+    """
+    This function runs notarization on vina and qvina2 docking.
+    This is important for MacOS newer than 10.15 and newer than
+
+    For MacOS newer than 10.15, this will require an internet connection.
+
+    Inputs:
+    :param dict vars: dict of user variables which will govern how the programs runs
+    """
+    current_dir = os.path.dirname(os.path.realpath(__file__)) + os.sep
+    vina_exe = current_dir + os.sep.join(["docking", "docking_executables", "vina", \
+                                          "autodock_vina_1_1_2_mac", "bin", "vina"])
+    qvina2_exe = current_dir + os.sep.join(["docking", "docking_executables", \
+                                            "q_vina_2", "q_vina_2_1_mac", "qvina2.1"])
+
+    # Check executables exist. raise exception if not
+    if os.path.exists(vina_exe) is False or os.path.exists(qvina2_exe) is False:
+        printout = "Docking executables could not be found."
+        raise Exception(printout)
+
+    # Ensure permissions are unrestricted
+    try:
+        command = "chmod -R a+rwx {}".format(vina_exe)
+        os.system(command)
+        command = "chmod -R a+rwx {}".format(qvina2_exe)
+        os.system(command)
+    except:
+        printout = "Permissions could not be adjusted on docking files."
+        print(printout)
+        raise Exception(printout)
+
+    # Check Platform information
+    mac_version = platform.mac_ver()[0]
+    if int(mac_version.split(0)) < 10:
+        printout = "We do not provide support for MacOS less than 10.7.\n" + \
+            "Please run using docker version of AutoGrow."
+        print(printout)
+        raise Exception(printout)
+
+    if int(mac_version.split(0)) == 10:
+        if mac_version.split(1) < 7:
+            printout = "We do not support for MacOS less than 10.7.\n" + \
+                "Please run using docker version of AutoGrow."
+            print(printout)
+            raise Exception(printout)
+
+        if mac_version.split(1) > 15:
+            # 10.15 is Catalina which requires notarizing docking software
+
+            printout = "We have not tested MacOS higher than 10.15.\n" + \
+                "Please run using docker version of AutoGrow."
+            print(printout)
+            raise Exception(printout)
+
+        try:
+            command = "xattr -w com.apple.quarantine {}".format(vina_exe)
+            os.system(command)
+            command = "xattr -w com.apple.quarantine {}".format(qvina2_exe)
+            os.system(command)
+        except:
+            printout = "Please install xattr. Can be installed using the command:"
+            printout = printout  + "\n\tpip install xattr"
+            print(printout)
+            raise Exception(printout)
+
+    # Run test to make sure docking executables are compatible with OS.
+    # Test will output the version of Vina and QVina2.1 executables to txt file
+    # in the root_output_folder (docking_exe_MACOS_test.txt)
+    # If both executables are compatible with this MacOS there should be the following
+    # 2 lines in the txt file:
+    #   AutoDock Vina 1.1.2 (May 11, 2011)
+    #   QuickVina 2.1 (24 Dec, 2017)
+    #
+    # Otherwise we will raise an exception docking will fail.
+
+    test_vina_outfile = vars["root_output_folder"] + os.sep + "docking_exe_MACOS_test.txt"
+    try:
+        command = "{} --version > {arg_2} 2>> {arg_2}".format(vina_exe, arg_2=test_vina_outfile)
+        os.system(command)
+        command = "{} --version >> {arg_2} 2>> {arg_2}".format(qvina2_exe, arg_2=test_vina_outfile)
+        os.system(command)
+    except:
+        printout = "Docking executables could not be found."
+        # is not compatible on this OS. \nPlease use docker "
+        raise Exception(printout)
+
+    with open(test_vina_outfile, "r") as test_file:
+        lines = test_file.readlines()
+    if "AutoDock Vina 1.1.2" not in lines[0]:
+        printout = "Vina docking is not compatible on this OS. \nPlease use docker or "
+        printout = printout + "try provide a Vina executable compatible with the OS.\n"
+        print(printout)
+        if vars["dock_choice"] == "VinaDocking":
+            raise Exception(printout)
+
+    if "QuickVina 2.1" not in lines[1]:
+        printout = "QuickVina 2.1 docking is not compatible on this OS. \nPlease use docker"
+        printout = printout + " or try provide a Vina executable compatible with the OS.\n"
+        print(printout)
+        if vars["dock_choice"] == "QuickVina2Docking":
+            raise Exception(printout)
 
 ############################################
 ###### Variables Handlining Settings #######
@@ -180,8 +282,7 @@ def check_for_required_inputs(input_params):
     for variable in list_of_required_inputs:
         if variable in keys_from_input:
             continue
-        else:
-            missing_variables.append(variable)
+        missing_variables.append(variable)
 
     if len(missing_variables) != 0:
         printout = "\nRequired variables are missing from the input. A description \
@@ -198,8 +299,8 @@ def check_for_required_inputs(input_params):
     for x in ["center_x", "center_y", "center_z", "size_x", "size_y", "size_z"]:
         if type(input_params[x]) == float:
             continue
-        elif type(input_params[x]) == int:
-            input_params[x] == float(input_params[x])
+        if type(input_params[x]) == int:
+            input_params[x] = float(input_params[x])
         else:
             printout = "\n{} must be a float value.\n".format(x)
             print(printout)
@@ -393,29 +494,27 @@ def determine_bash_timeout_vs_gtimeout():
         timeout_option = "timeout"
         return timeout_option
 
-    else:
-        try:  # timeout or gtimeout
-            timeout_result = os.system("g" + command)
-        except:
-            raise Exception(
-                "Something is very wrong. This OS may not be supported \
-                by Autogrow or you may need to execute through Bash."
-            )
-        if timeout_result == 0:
-            timeout_option = "gtimeout"
-            return timeout_option
-        else:
-            printout = "Need to install GNU tools for Bash to work. \n"
-            printout = (
-                printout
-                + "This is essential to use Bash Timeout function in Autogrow. \n"
-            )
-            printout = printout + "\t This will require 1st installing homebrew. \n"
-            printout = printout + "\t\t Instructions found at: https://brew.sh/ \n"
-            printout = printout + "\t Once brew is installed, please run:"
-            printout = printout + " sudo brew install coreutils \n\n"
-            print(printout)
-            raise Exception(printout)
+    try:  # timeout or gtimeout
+        timeout_result = os.system("g" + command)
+    except:
+        raise Exception(
+            "Something is very wrong. This OS may not be supported \
+            by Autogrow or you may need to execute through Bash."
+        )
+    if timeout_result == 0:
+        timeout_option = "gtimeout"
+        return timeout_option
+    printout = "Need to install GNU tools for Bash to work. \n"
+    printout = (
+        printout
+        + "This is essential to use Bash Timeout function in Autogrow. \n"
+    )
+    printout = printout + "\t This will require 1st installing homebrew. \n"
+    printout = printout + "\t\t Instructions found at: https://brew.sh/ \n"
+    printout = printout + "\t Once brew is installed, please run:"
+    printout = printout + " sudo brew install coreutils \n\n"
+    print(printout)
+    raise Exception(printout)
 
 
 def check_dependencies():
@@ -427,7 +526,7 @@ def check_dependencies():
     # Check Bash Timeout function (There's a difference between MacOS and linux)
     # Linux uses timeout while MacOS uses gtimeout
     timeout_option = determine_bash_timeout_vs_gtimeout()
-    if timeout_option != "timeout" and timeout_option != "gtimeout":
+    if timeout_option not in ["timeout", "gtimeout"]:
         raise Exception(
             "Something is very wrong. This OS may not be supported by \
         Autogrow or you may need to execute through Bash."
@@ -654,7 +753,7 @@ def define_defaults():
     # Check Bash Timeout function (There's a difference between MacOS and linux)
     # Linux uses timeout while MacOS uses gtimeout
     timeout_option = determine_bash_timeout_vs_gtimeout()
-    if timeout_option == "timeout" or timeout_option == "gtimeout":
+    if timeout_option in  ["timeout", "gtimeout"]:
         vars["timeout_vs_gtimeout"] = timeout_option
     else:
         raise Exception(
@@ -891,6 +990,11 @@ def load_in_commandline_parameters(argv):
                 "TO USE Custom DOCKING OPTION, MUST SPECIFY THE \
                 PATH TO THE Custom DOCKING SCRIPT"
             )
+    if vars["dock_choice"] in ["VinaDocking", "QuickVina2Docking"]:
+        if sys.platform == "darwin":
+            # Some MacOS require docking software to be notarized.
+            # This will require an internet signal
+            run_macos_notarization(vars)
 
     if vars["conversion_choice"] == "Custom":
         if (
@@ -900,7 +1004,7 @@ def load_in_commandline_parameters(argv):
 
             raise ValueError(
                 "TO USE Custom conversion_choice OPTION, \
-                MUST SPECIFY THE PATH TO THE Custom Conversion SCRIPT"
+                MUST SPECIFY THE PATH TO THE custom Conversion SCRIPT"
             )
 
     if vars["scoring_choice"] == "Custom":
@@ -910,7 +1014,7 @@ def load_in_commandline_parameters(argv):
         ):
 
             raise ValueError(
-                "TO USE Custom scoring_choice OPTION, \
+                "TO USE custom scoring_choice OPTION, \
                 MUST SPECIFY THE PATH TO THE Custom SCORING SCRIPT"
             )
 
@@ -928,24 +1032,22 @@ def load_in_commandline_parameters(argv):
                 "TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY \
                  THE PATH TO THE REACTION LIBRARY USING INPUT PARAMETER rxn_library"
             )
-        else:
-            if os.path.exists(vars["rxn_library_file"]) is False:
-                raise ValueError(
-                    "TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY \
-                    THE PATH TO THE REACTION LIBRARY USING INPUT PARAMETER rxn_library"
-                )
+        if os.path.exists(vars["rxn_library_file"]) is False:
+            raise ValueError(
+                "TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY \
+                THE PATH TO THE REACTION LIBRARY USING INPUT PARAMETER rxn_library"
+            )
 
         if vars["complimentary_mol_directory"] == "":
             raise ValueError(
                 "TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY THE PATH \
                 TO THE REACTION LIBRARY USING INPUT PARAMETER function_group_library"
             )
-        else:
-            if os.path.isdir(vars["complimentary_mol_directory"]) is False:
-                raise ValueError(
-                    "TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY THE PATH \
-                    TO THE REACTION LIBRARY USING INPUT PARAMETER complimentary_mol_directory"
-                )
+        if os.path.isdir(vars["complimentary_mol_directory"]) is False:
+            raise ValueError(
+                "TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY THE PATH \
+                TO THE REACTION LIBRARY USING INPUT PARAMETER complimentary_mol_directory"
+            )
     else:  # Using default settings
         if vars["rxn_library_file"] != "":
             raise ValueError(
@@ -1182,10 +1284,10 @@ def find_previous_runs(folder_name_path):
         # There are no previous runs in this directory
         last_run_number = None
         return None
-    else:
-        # A previous run exists. The number of the last run.
-        last_run_number = i - 1
-        return last_run_number
+
+    # A previous run exists. The number of the last run.
+    last_run_number = i - 1
+    return last_run_number
 
 
 def set_run_directory(root_folder_path, start_a_new_run):
@@ -1279,11 +1381,11 @@ def handle_custom_inputs_if_argparsed(input_params):
         orginal = input_params["alternative_filter"][0]
         orginal = orginal.replace("[[", "[").replace("]]", "]")
         new_alternative_filter = []
-        for Custom_filter in orginal.split("]"):
-            Custom_filter = Custom_filter.replace("[", "").replace("]", "")
-            Custom_filter = [x for x in Custom_filter.split(",") if x != ""]
-            if len(Custom_filter) == 2:
-                new_alternative_filter.append(Custom_filter)
+        for custom_filter in orginal.split("]"):
+            custom_filter = custom_filter.replace("[", "").replace("]", "")
+            custom_filter = [x for x in custom_filter.split(",") if x != ""]
+            if len(custom_filter) == 2:
+                new_alternative_filter.append(custom_filter)
         input_params["alternative_filter"] = new_alternative_filter
 
     # custom_conversion_script
@@ -1292,13 +1394,13 @@ def handle_custom_inputs_if_argparsed(input_params):
     if input_params["custom_conversion_script"] not in [None, [], "", "[]"]:
         orginal = input_params["custom_conversion_script"][0]
         orginal = orginal.replace("[[", "[").replace("]]", "]")
-        new_Alternative_conversion = []
-        for Custom_converter in orginal.split("]"):
-            Custom_converter = Custom_converter.replace("[", "").replace("]", "")
-            Custom_converter = [x for x in Custom_converter.split(",") if x != ""]
-            if len(Custom_converter) == 2:
-                new_Alternative_conversion.append(Custom_converter)
-        input_params["custom_conversion_script"] = new_Alternative_conversion
+        new_alternative_conversion = []
+        for custom_converter in orginal.split("]"):
+            custom_converter = custom_converter.replace("[", "").replace("]", "")
+            custom_converter = [x for x in custom_converter.split(",") if x != ""]
+            if len(custom_converter) == 2:
+                new_alternative_conversion.append(custom_converter)
+        input_params["custom_conversion_script"] = new_alternative_conversion
 
     # custom_docking_script
     if "custom_docking_script" not in input_params.keys():
@@ -1306,13 +1408,13 @@ def handle_custom_inputs_if_argparsed(input_params):
     if input_params["custom_docking_script"] not in [None, [], "", "[]"]:
         orginal = input_params["custom_docking_script"][0]
         orginal = orginal.replace("[[", "[").replace("]]", "]")
-        new_Alternative_docking = []
-        for Custom_docking in orginal.split("]"):
-            Custom_docking = Custom_docking.replace("[", "").replace("]", "")
-            Custom_docking = [x for x in Custom_docking.split(",") if x != ""]
-            if len(Custom_docking) == 2:
-                new_Alternative_docking.append(Custom_docking)
-        input_params["custom_docking_script"] = new_Alternative_docking
+        new_alternative_docking = []
+        for custom_docking in orginal.split("]"):
+            custom_docking = custom_docking.replace("[", "").replace("]", "")
+            custom_docking = [x for x in custom_docking.split(",") if x != ""]
+            if len(custom_docking) == 2:
+                new_alternative_docking.append(custom_docking)
+        input_params["custom_docking_script"] = new_alternative_docking
 
     # Custom_Scoring script
     if "custom_scoring_script" not in input_params.keys():
@@ -1320,13 +1422,13 @@ def handle_custom_inputs_if_argparsed(input_params):
     if input_params["custom_scoring_script"] not in [None, [], "", "[]"]:
         orginal = input_params["custom_scoring_script"][0]
         orginal = orginal.replace("[[", "[").replace("]]", "]")
-        new_Alternative_scoring = []
-        for Custom_scoring in orginal.split("]"):
-            Custom_scoring = Custom_scoring.replace("[", "").replace("]", "")
-            Custom_scoring = [x for x in Custom_scoring.split(",") if x != ""]
-            if len(Custom_scoring) == 2:
-                new_Alternative_scoring.append(Custom_scoring)
-        input_params["custom_scoring_script"] = new_Alternative_scoring
+        new_alternative_scoring = []
+        for custom_scoring in orginal.split("]"):
+            custom_scoring = custom_scoring.replace("[", "").replace("]", "")
+            custom_scoring = [x for x in custom_scoring.split(",") if x != ""]
+            if len(custom_scoring) == 2:
+                new_alternative_scoring.append(custom_scoring)
+        input_params["custom_scoring_script"] = new_alternative_scoring
 
     return input_params
 
@@ -1370,16 +1472,16 @@ def handle_alternative_filters(vars, filter_list):
 
         full_children_dict = make_complete_children_dict("Filter")
         scripts_to_copy = []
-        for Custom_class in vars["alternative_filter"]:
-            if Custom_class[0] not in full_children_dict.keys():
-                if os.path.exists(Custom_class[1]) is False:
+        for custom_class in vars["alternative_filter"]:
+            if custom_class[0] not in full_children_dict.keys():
+                if os.path.exists(custom_class[1]) is False:
                     # Check that the path to the original script exists.
                     raise Exception(
                         "File can not be found for alternative_filter \
                         {}\n If you want to add Custom filters to the filter child \
                         classes Must be a list of lists \
                         [[name_filter1, Path/to/name_filter1.py],\
-                        [name_filter2, Path/to/name_filter2.py]]".format(Custom_class[1])
+                        [name_filter2, Path/to/name_filter2.py]]".format(custom_class[1])
                     )
 
                 new_file = os.sep.join(
@@ -1389,14 +1491,14 @@ def handle_alternative_filters(vars, filter_list):
                         "filter",
                         "filter_classes",
                         "filter_classes",
-                        os.path.basename(Custom_class[0]) + ".py",
+                        os.path.basename(custom_class[0]) + ".py",
                     ]
                 )
 
                 if os.path.exists(new_file) is True:
                     # File has been copied to proper dir but is not being found by the code
                     printout = "A copy of the custom script {} has been moved \
-                        to {}\n".format(Custom_class[1], new_file)
+                        to {}\n".format(custom_class[1], new_file)
                     printout = (
                         printout
                         + "Unfortunately this could not be  \
@@ -1406,22 +1508,22 @@ def handle_alternative_filters(vars, filter_list):
                         printout
                         + "Please check the file naming \
                         corresponding to: {}\n\n".format(
-                            Custom_class
+                            custom_class
                         )
                     )
                     print(printout)
                     raise Exception(printout)
-                else:
-                    # Add to list of scripts to copy into the filter folder
-                    scripts_to_copy.append([Custom_class[1], new_file])
 
-            filter_list.append(Custom_class[0])
+                # Add to list of scripts to copy into the filter folder
+                scripts_to_copy.append([custom_class[1], new_file])
+
+            filter_list.append(custom_class[0])
         if len(scripts_to_copy) != 0:
             for filter_info in scripts_to_copy:
                 print("copying Custom class file into the FilterClasses folder:")
                 print(
                     "\t Copying : {}\n\t New file: {}\n".format(
-                        Custom_class[1], new_file
+                        custom_class[1], new_file
                     )
                 )
                 print(
@@ -1454,11 +1556,9 @@ def handle_alternative_filters(vars, filter_list):
                 "#####################################"
                 + "########################################\n"
             )
-            sys.exit(
-                0
-            )  # Technically Exit intentionally but maybe should be a raise Exception
+            # Technically Exit intentionally but maybe should be a raise Exception
+            sys.exit(0)
     return filter_list
-
 
 #
 def make_complete_children_dict(purpose_of_object):
@@ -1538,16 +1638,16 @@ def handle_custom_conversion_script(vars):
             )
 
         full_children_dict = make_complete_children_dict("parent_pdbqt_converter")
-        Custom_class = vars["custom_conversion_script"]
-        if Custom_class[0] not in full_children_dict.keys():
-            if os.path.exists(Custom_class[1]) is False:
-                print(Custom_class)
+        custom_class = vars["custom_conversion_script"]
+        if custom_class[0] not in full_children_dict.keys():
+            if os.path.exists(custom_class[1]) is False:
+                print(custom_class)
                 raise Exception(
                     "File can not be found for custom_conversion_script \
                     {}\n If you want to add Custom Conversion_scripts to the \
                     Conversion_script child classes Must be a list of \
                     [name_Conversion_script1, Path/to/name_Conversion_script1.py]".format(
-                        Custom_class[1]
+                        custom_class[1]
                     )
                 )
 
@@ -1557,14 +1657,14 @@ def handle_custom_conversion_script(vars):
                     "docking",
                     "docking_class",
                     "docking_file_conversion",
-                    os.path.basename(Custom_class[0]) + ".py",
+                    os.path.basename(custom_class[0]) + ".py",
                 ]
             )
 
             if os.path.exists(new_file) is True:
                 # File has been copied to proper dir but is not being found by the code
                 printout = "A copy of the custom script {} has been moved \
-                    to {}\n".format(Custom_class[1], new_file)
+                    to {}\n".format(custom_class[1], new_file)
                 printout = (
                     printout
                     + "Unfortunately this could not be \
@@ -1574,63 +1674,63 @@ def handle_custom_conversion_script(vars):
                     printout
                     + "Please check the file naming corresponding \
                     to: {}\n\n".format(
-                        Custom_class
+                        custom_class
                     )
                 )
                 print(printout)
                 raise Exception(printout)
-            else:
-                # Add copy the script to the docking_file_conversion folder
-                print("copying Custom class file into the Conversion_script folder:")
-                print(
-                    "\t Copying : {}\n\t New file: {}\n".format(
-                        Custom_class[1], new_file
-                    )
-                )
-                print(
-                    "AutoGrow will need to be restarted once the custom script \
-                    has been copied to their required location."
-                )
-                print(
-                    "This is done once so if the script needs to be changed \
-                    please either remove or replace the script within the \
-                    docking_file_conversion folder."
-                )
-                print(
-                    "Please ensure you unit test this code properly before \
-                    incorprating."
-                )
-                copyfile(Custom_class[1], new_file)
 
-                printout = (
-                    printout
-                    + "\n#########################################"
-                    + "####################################"
+            # Add copy the script to the docking_file_conversion folder
+            print("copying Custom class file into the Conversion_script folder:")
+            print(
+                "\t Copying : {}\n\t New file: {}\n".format(
+                    custom_class[1], new_file
                 )
-                printout = (
-                    printout
-                    + "AutoGrow has incorporated the custom files into "
-                    + "the docking_file_conversion Module."
-                )
-                printout = (
-                    printout
-                    + "AutoGrow needs to be restarted and should now be "
-                    + "able to run custom scripts."
-                )
-                printout = (
-                    printout
-                    + "Please ensure you unit test this code properly "
-                    + "before incorprating."
-                )
-                printout = (
-                    printout
-                    + "#########################################"
-                    + "####################################\n"
-                )
+            )
+            print(
+                "AutoGrow will need to be restarted once the custom script \
+                has been copied to their required location."
+            )
+            print(
+                "This is done once so if the script needs to be changed \
+                please either remove or replace the script within the \
+                docking_file_conversion folder."
+            )
+            print(
+                "Please ensure you unit test this code properly before \
+                incorprating."
+            )
+            copyfile(custom_class[1], new_file)
 
-                need_restart = True
+            printout = (
+                printout
+                + "\n#########################################"
+                + "####################################"
+            )
+            printout = (
+                printout
+                + "AutoGrow has incorporated the custom files into "
+                + "the docking_file_conversion Module."
+            )
+            printout = (
+                printout
+                + "AutoGrow needs to be restarted and should now be "
+                + "able to run custom scripts."
+            )
+            printout = (
+                printout
+                + "Please ensure you unit test this code properly "
+                + "before incorprating."
+            )
+            printout = (
+                printout
+                + "#########################################"
+                + "####################################\n"
+            )
 
-        vars["conversion_choice"] = Custom_class[0]
+            need_restart = True
+
+        vars["conversion_choice"] = custom_class[0]
     return vars, need_restart, printout
 
 
@@ -1670,16 +1770,16 @@ def handle_custom_docking_script(vars):
             )
 
         full_children_dict = make_complete_children_dict("ParentDocking")
-        Custom_class = vars["custom_docking_script"]
-        if Custom_class[0] not in full_children_dict.keys():
-            if os.path.exists(Custom_class[1]) is False:
-                print(Custom_class)
+        custom_class = vars["custom_docking_script"]
+        if custom_class[0] not in full_children_dict.keys():
+            if os.path.exists(custom_class[1]) is False:
+                print(custom_class)
                 raise Exception(
                     "File can not be found for custom_docking_script \
                     {}\n If you want to add Custom Docking_scripts to the \
                     Docking_script child classes Must be a list of \
                     [name_Docking_script1, Path/to/name_Docking_script1.py]".format(
-                        Custom_class[1]
+                        custom_class[1]
                     )
                 )
 
@@ -1689,7 +1789,7 @@ def handle_custom_docking_script(vars):
                     "docking",
                     "docking_class",
                     "docking_class_children",
-                    os.path.basename(Custom_class[0]) + ".py",
+                    os.path.basename(custom_class[0]) + ".py",
                 ]
             )
 
@@ -1697,7 +1797,7 @@ def handle_custom_docking_script(vars):
                 # File has been copied to proper dir but is not being found by the code
                 printout = "A copy of the custom script {} has been moved \
                     to {}\n".format(
-                        Custom_class[1], new_file
+                        custom_class[1], new_file
                     )
                 printout = (
                     printout
@@ -1708,60 +1808,59 @@ def handle_custom_docking_script(vars):
                     printout
                     + "Please check the file naming corresponding \
                     to: {}\n\n".format(
-                        Custom_class
+                        custom_class
                     )
                 )
                 print(printout)
                 raise Exception(printout)
 
-            else:
-                # Add copy the script to the children folder
-                print("copying Custom class file into the children folder:")
-                print(
-                    "\t Copying : {}\n\t New file: {}\n".format(
-                        Custom_class[1], new_file
-                    )
+            # Add copy the script to the children folder
+            print("copying Custom class file into the children folder:")
+            print(
+                "\t Copying : {}\n\t New file: {}\n".format(
+                    custom_class[1], new_file
                 )
-                print(
-                    "AutoGrow will need to be restarted once the custom \
-                    script has been copied to their required location."
-                )
-                print(
-                    "This is done once so if the script needs to be changed \
-                    please either remove or replace the script within the \
-                    children folder."
-                )
-                print(
-                    "Please ensure you unit test this code properly before incorprating."
-                )
-                copyfile(Custom_class[1], new_file)
+            )
+            print(
+                "AutoGrow will need to be restarted once the custom \
+                script has been copied to their required location."
+            )
+            print(
+                "This is done once so if the script needs to be changed \
+                please either remove or replace the script within the \
+                children folder."
+            )
+            print(
+                "Please ensure you unit test this code properly before incorprating."
+            )
+            copyfile(custom_class[1], new_file)
 
-                printout = (
-                    printout
-                    + "\n############################################"
-                    + "#################################"
-                )
-                printout = (
-                    printout
-                    + "AutoGrow has incorporated the custom files into the children Module."
-                )
-                printout = (
-                    printout
-                    + "AutoGrow needs to be restarted and should now be able to run custom scripts."
-                )
-                printout = (
-                    printout
-                    + "Please ensure you unit test this code properly before incorprating."
-                )
-                printout = (
-                    printout
-                    + "##############################################"
-                    + "###############################\n"
-                )
+            printout = (
+                printout
+                + "\n############################################"
+                + "#################################"
+            )
+            printout = (
+                printout
+                + "AutoGrow has incorporated the custom files into the children Module."
+            )
+            printout = (
+                printout
+                + "AutoGrow needs to be restarted and should now be able to run custom scripts."
+            )
+            printout = (
+                printout
+                + "Please ensure you unit test this code properly before incorprating."
+            )
+            printout = (
+                printout
+                + "##############################################"
+                + "###############################\n"
+            )
 
-                need_restart = True
+            need_restart = True
 
-        vars["dock_choice"] = Custom_class[0]
+        vars["dock_choice"] = custom_class[0]
     return vars, need_restart, printout
 
 
@@ -1801,16 +1900,16 @@ def handle_custom_scoring_script(vars):
             )
 
         full_children_dict = make_complete_children_dict("ParentScoring")
-        Custom_class = vars["custom_scoring_script"]
-        if Custom_class[0] not in full_children_dict.keys():
-            if os.path.exists(Custom_class[1]) is False:
-                print(Custom_class)
+        custom_class = vars["custom_scoring_script"]
+        if custom_class[0] not in full_children_dict.keys():
+            if os.path.exists(custom_class[1]) is False:
+                print(custom_class)
                 raise Exception(
                     "File can not be found for custom_scoring_script \
                     {}\n If you want to add Custom scoring_scripts to the \
                     scoring_script child classes Must be a list of \
                     [name_scoring_script1, Path/to/name_scoring_script1.py]".format(
-                        Custom_class[1]
+                        custom_class[1]
                     )
                 )
 
@@ -1821,14 +1920,14 @@ def handle_custom_scoring_script(vars):
                     "scoring",
                     "scoring_classes",
                     "scoring_functions",
-                    os.path.basename(Custom_class[0]) + ".py",
+                    os.path.basename(custom_class[0]) + ".py",
                 ]
             )
 
             if os.path.exists(new_file) is True:
                 # File has been copied to proper dir but is not being found by the code
                 printout = "A copy of the custom script {} has been moved to {}\n".format(
-                    Custom_class[1], new_file
+                    custom_class[1], new_file
                 )
                 printout = (
                     printout
@@ -1837,57 +1936,56 @@ def handle_custom_scoring_script(vars):
                 printout = (
                     printout
                     + "Please check the file naming corresponding to: {}\n\n".format(
-                        Custom_class
+                        custom_class
                     )
                 )
                 print(printout)
                 raise Exception(printout)
 
-            else:
-                # Add copy the script to the scoring_choices folder
-                print("copying Custom class file into the scoring_choices folder:")
-                print(
-                    "\t Copying : {}\n\t New file: {}\n".format(
-                        Custom_class[1], new_file
-                    )
+            # Add copy the script to the scoring_choices folder
+            print("copying Custom class file into the scoring_choices folder:")
+            print(
+                "\t Copying : {}\n\t New file: {}\n".format(
+                    custom_class[1], new_file
                 )
-                print(
-                    "AutoGrow will need to be restarted once the custom script \
-                    has been copied to their required location."
-                )
-                print(
-                    "This is done once so if the script needs to be changed \
-                    please either remove or replace the script within \
-                    the scoring_choices folder."
-                )
-                print(
-                    "Please ensure you unit test this code properly before incorprating."
-                )
-                copyfile(Custom_class[1], new_file)
+            )
+            print(
+                "AutoGrow will need to be restarted once the custom script \
+                has been copied to their required location."
+            )
+            print(
+                "This is done once so if the script needs to be changed \
+                please either remove or replace the script within \
+                the scoring_choices folder."
+            )
+            print(
+                "Please ensure you unit test this code properly before incorprating."
+            )
+            copyfile(custom_class[1], new_file)
 
-                printout = "\n#######################################"
-                printout = printout + "######################################"
-                printout = (
-                    printout
-                    + "AutoGrow has incorporated the custom files into the scoring Module."
-                )
-                printout = (
-                    printout
-                    + "AutoGrow needs to be restarted and should now be able to run custom scripts."
-                )
-                printout = (
-                    printout
-                    + "Please ensure you unit test this code properly before incorprating."
-                )
-                printout = (
-                    printout
-                    + "##############################################"
-                    + "###############################\n"
-                )
+            printout = "\n#######################################"
+            printout = printout + "######################################"
+            printout = (
+                printout
+                + "AutoGrow has incorporated the custom files into the scoring Module."
+            )
+            printout = (
+                printout
+                + "AutoGrow needs to be restarted and should now be able to run custom scripts."
+            )
+            printout = (
+                printout
+                + "Please ensure you unit test this code properly before incorprating."
+            )
+            printout = (
+                printout
+                + "##############################################"
+                + "###############################\n"
+            )
 
-                need_restart = True
+            need_restart = True
 
-        vars["scoring_choice"] = Custom_class[0]
+        vars["scoring_choice"] = custom_class[0]
     return vars, need_restart, printout
 
 

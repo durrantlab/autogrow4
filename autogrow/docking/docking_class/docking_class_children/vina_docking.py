@@ -45,10 +45,10 @@ class VinaDocking(ParentDocking):
 
             # VINA SPECIFIC VARS
             receptor_file = vars["filename_of_receptor"]
-            mgl_python = vars["mgl_python"]
-            receptor_template = vars["prepare_receptor4.py"]
-            number_of_processors = vars["number_of_processors"]
-            docking_executable = vars["docking_executable"]
+            # mgl_python = vars["mgl_python"]
+            # receptor_template = vars["prepare_receptor4.py"]
+            # number_of_processors = vars["number_of_processors"]
+            # docking_executable = vars["docking_executable"]
 
             ###########################
 
@@ -74,9 +74,10 @@ class VinaDocking(ParentDocking):
 
         # convert ligands to pdbqt format
         # log("\nConverting ligand PDB files to PDBQT format...")
-        did_it_convert, smile_name = self.file_conversion_class_object.convert_ligand_pdb_file_to_pdbqt(
-            pdb_file
-        )
+        did_it_convert, smile_name = \
+            self.file_conversion_class_object.convert_ligand_pdb_file_to_pdbqt(
+                pdb_file
+            )
 
         if did_it_convert is False:
             # conversion failed
@@ -183,7 +184,7 @@ class VinaDocking(ParentDocking):
             printout = printout + "{}".format(docking_executable)
             print(printout)
             raise Exception(printout)
-        
+
         return docking_executable
 
     # Finding PDBs for ligands in a folder
@@ -423,13 +424,11 @@ class VinaDocking(ParentDocking):
         if not os.path.exists(pdb_file):
             # PDB file doesn't exist
             return False, None
-        else:
-            smile_name = self.file_conversion_class_object.get_smile_name_from_pdb(
-                pdb_file
-            )
-        if not os.path.exists(
-                pdb_file + "qt.vina"
-        ):  # so this pdbqt.vina file didn't exist
+        smile_name = self.file_conversion_class_object.get_smile_name_from_pdb(
+            pdb_file
+        )
+        if not os.path.exists(pdb_file + "qt.vina"):
+        # so this pdbqt.vina file didn't exist
             if self.debug_mode is False:
                 print(
                     "Docking unsuccessful: Deleting "

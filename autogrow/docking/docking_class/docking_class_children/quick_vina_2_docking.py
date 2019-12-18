@@ -41,10 +41,10 @@ class QuickVina2Docking(VinaDocking):
 
             # VINA SPECIFIC VARS
             receptor_file = vars["filename_of_receptor"]
-            mgl_python = vars["mgl_python"]
-            receptor_template = vars["prepare_receptor4.py"]
-            number_of_processors = vars["number_of_processors"]
-            docking_executable = vars["docking_executable"]
+            # mgl_python = vars["mgl_python"]
+            # receptor_template = vars["prepare_receptor4.py"]
+            # number_of_processors = vars["number_of_processors"]
+            # docking_executable = vars["docking_executable"]
 
             ###########################
 
