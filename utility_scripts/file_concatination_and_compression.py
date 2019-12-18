@@ -108,7 +108,7 @@ def seperate_files(compressed_file):
                 out_file = None
                 printout = ""
                 continue
-            elif "File_name:" in line:
+            if "File_name:" in line:
 
                 printout = ""
 
@@ -124,9 +124,9 @@ def seperate_files(compressed_file):
                 out_file = os.path.abspath(out_file)
                 list_of_new_files.append(out_file)
                 continue
-            else:
-                printout = printout + line
-                continue
+
+            printout = printout + line
+            continue
 
     all_are_made = True
     for f in list_of_new_files:

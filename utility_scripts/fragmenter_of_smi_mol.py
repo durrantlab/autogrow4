@@ -12,7 +12,6 @@ import argparse
 
 import rdkit
 import rdkit.Chem as Chem
-import rdkit.Chem.AllChem as AllChem
 from rdkit.Chem.BRICS import BRICSDecompose
 from rdkit import RDLogger
 # Turn off warnings

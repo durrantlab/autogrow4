@@ -16,7 +16,6 @@ This is done by removing a column of the PDB file.
 
 import __future__
 import os
-import sys
 import argparse
 
 
@@ -28,7 +27,7 @@ def convert_pdbqt_to_pdb(pdbqt_file_in, pdb_file_out):
     :param str pdb_file_out: the string of the output .pdb
     """
     printout = ""
-    line_index_range = [x for x in range(0, 61)] + [x for x in range(70,80)]
+    line_index_range = [x for x in range(0, 61)] + [x for x in range(70, 80)]
 
     with open(pdbqt_file_in) as f:
         for line in f.readlines():
@@ -36,21 +35,23 @@ def convert_pdbqt_to_pdb(pdbqt_file_in, pdb_file_out):
                 short_line = ""
                 for i in line_index_range:
                     # print(i)
-                    if i >= len(line):continue
-    
-                    else:
-                        short_line = short_line + line[i]
+                    if i >= len(line):
+                        continue
+
+                    short_line = short_line + line[i]
 
                 printout = printout + short_line
-            elif "REMARK                            x       y       z     vdW  Elec       q    Type" in line \
-            or "REMARK                         _______ _______ _______ _____ _____    ______ ____" in line:
+            elif "REMARK                            x       y       z     vdW  Elec" + \
+                "       q    Type" in line \
+                or "REMARK                         _______ _______ _______ _____ _____"+ \
+                "    ______ ____" in line:
                 short_line = ""
                 for i in line_index_range:
                     # print(i)
-                    if i >= len(line):continue
-    
-                    else:
-                        short_line = short_line + line[i]
+                    if i >= len(line):
+                        continue
+
+                    short_line = short_line + line[i]
 
                 printout = printout + short_line + "\n"
             else:
@@ -59,54 +60,58 @@ def convert_pdbqt_to_pdb(pdbqt_file_in, pdb_file_out):
         f.write(printout)
 #
 
-def get_arguments_from_argparse(ARGS_DICT):
+def get_arguments_from_argparse(args_dict):
     """
     This function handles the arg parser arguments for the script.
 
     Inputs:
-    :param dict ARGS_DICT: dictionary of parameters
+    :param dict args_dict: dictionary of parameters
     Returns:
-    :returns: dict ARGS_DICT: dictionary of parameters
+    :returns: dict args_dict: dictionary of parameters
     """
 
 
     # Argument handling
-    if type(ARGS_DICT["pdbqt_file"]) != str:
+    if type(args_dict["pdbqt_file"]) != str:
         raise Exception("provided pdbqt_file must be a .pdbqt file.")
 
     #  argument_handling
-    if os.path.exists(ARGS_DICT["pdbqt_file"]) is False:
+    if os.path.exists(args_dict["pdbqt_file"]) is False:
         raise Exception("provided pdbqt_file must be a .pdbqt file.")
     else:
-        if ARGS_DICT["pdbqt_file"].split(".")[-1] != "pdbqt" and ARGS_DICT["pdbqt_file"].split(".")[-1] != "PDBQT":
+        if args_dict["pdbqt_file"].split(".")[-1] != "pdbqt" and \
+            args_dict["pdbqt_file"].split(".")[-1] != "PDBQT":
 
             raise Exception("provided pdbqt_file must be a .pdbqt file.")
 
-    if ARGS_DICT["output_file"] is not None:
-        if ARGS_DICT["output_file"].split(".")[-1] != "pdb" and ARGS_DICT["output_file"].split(".")[-1] != "PDB":
+    if args_dict["output_file"] is not None:
+        if args_dict["output_file"].split(".")[-1] != "pdb" and \
+            args_dict["output_file"].split(".")[-1] != "PDB":
             raise Exception("provided output_file must be a .pdb file.")
 
-        if os.path.exists(os.path.dirname(ARGS_DICT["output_file"])) is False:
+        if os.path.exists(os.path.dirname(args_dict["output_file"])) is False:
             try:
-                os.mkdir(os.path.dirname(ARGS_DICT["output_file"]))
+                os.mkdir(os.path.dirname(args_dict["output_file"]))
             except:
                 pass
-            if os.path.exists(os.path.dirname(ARGS_DICT["output_file"])) is False:
+            if os.path.exists(os.path.dirname(args_dict["output_file"])) is False:
                 raise Exception("directory to output the file could not be made or found.")
     else:
-        ARGS_DICT["output_file"] = os.path.dirname(ARGS_DICT["pdbqt_file"]) + \
-            ARGS_DICT["pdbqt_file"].replace(".pdbqt", ".pdb").replace(".PDBQT", ".pdb")
+        args_dict["output_file"] = os.path.dirname(args_dict["pdbqt_file"]) + \
+            args_dict["pdbqt_file"].replace(".pdbqt", ".pdb").replace(".PDBQT", ".pdb")
 
-    return ARGS_DICT
+    return args_dict
 #
 
 
 # Argment parsing
 PARSER = argparse.ArgumentParser()
-PARSER.add_argument('--pdbqt_file', '-f', required=True, default=None,
+PARSER.add_argument(
+    '--pdbqt_file', '-f', required=True, default=None,
     help='Path to .pdbqt file to convert to a .pdb file. This must be a single \
     ligand and must end with .pdbqt')
-PARSER.add_argument('--output_file', '-o', type=str, default=None,
+PARSER.add_argument(
+    '--output_file', '-o', type=str, default=None,
     help='Path to file where we will output .pdb file. \
     If not provide the output .pdb will be the same as the input \
     pdbqt_file but ending with .pdb instead of .pdbqt.')

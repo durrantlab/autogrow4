@@ -237,8 +237,8 @@ def make_graph(dictionary):
     for i in list_of_scores:
         if i == "N/A":
             return None, None
-    else:
-        return list_generations, list_of_scores
+
+    return list_generations, list_of_scores
 
 def run_plotter(vars, dict_of_averages, outfile):
     """
