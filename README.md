@@ -7,3 +7,5 @@ Autogrow 4.0 was designed with modularity in mind. We've expanded new user optio
 
 A detailed tutorial for using AutoGrow can be found in the directory autogrow4/tutorial/tutorial.md
 
+
+The default fragment libraries included with AutoGrow were derived from a subset of the ZINC database (https://zinc.docking.org/). We thank ZINC for allowing us to distribute these fragment libraries to AutoGrow users.
