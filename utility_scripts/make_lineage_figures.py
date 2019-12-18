@@ -5,7 +5,7 @@ All compounds for the entire AutoGrow run will be compiled into a dictionary \
 which is used to search when tracing lineages. We pickle these dictionaries so \
 that if this script is run multiple times these dictionaries do not need to be \
 recreated. For this reason the 1st time running this script on a data set will \
-take longer than future runs.    
+take longer than future runs.
 """
 import os
 import sys
@@ -562,7 +562,7 @@ def make_ranked_files_mol_dict(vars):
     mol_dict = {}
     for mol_entry in new_list:
         if mol_entry[1] in mol_dict.keys():
-            
+
             # source compounds may be unranked or may
             # be ranked from advancement but not in the source compound .smi
             # so we check to try to keep the ranked version if it exists.

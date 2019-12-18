@@ -83,7 +83,7 @@ def get_rot_bond_permutations_to_cut(mol, c_c_bonds_off=False):
         if atom1.GetAtomicNum() == 6 and atom2.GetAtomicNum() == 6:
             if c_c_bonds_off is True:
                 continue
-            
+
             rotatable_bonds_to_frag.append(atom_isos)
 
         rotatable_bonds_to_frag.append(atom_isos)

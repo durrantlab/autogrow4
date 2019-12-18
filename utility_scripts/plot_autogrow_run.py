@@ -4,7 +4,9 @@ Plots a line plot of the average score for each generation of AutoGrow run.
 Example submit:
     python autogrow4/utility_scripts/plot_autogrow_run.py\
         -i $PATH/Run_1/Run_0/ \
-        --plot_reference_lines [['Olaparib Score',-12.8,'y'],['Niraparib',-10.7,'k'],['NAD/NADH',-10.3,'purple'],['ADP-ribose',-9.3,'maroon']]
+        --plot_reference_lines [['Olaparib Score',-12.8,'y'],\
+            ['Niraparib',-10.7,'k'],['NAD/NADH',-10.3,'purple'],\
+                ['ADP-ribose',-9.3,'maroon']]
 """
 import __future__
 
@@ -489,7 +491,7 @@ def process_inputs(inputs):
             inputs["outfile_format"] = "svg"
         if inputs["outfile_format"].lower() not in ["svg", "png", "jpg", "pdf"]:
             raise Exception("outfile_format not a valid format")
-        
+
     if "outfile" in inputs.keys():
         if inputs["outfile"] is not None:
             if os.path.dirname(inputs["outfile"]) is False:

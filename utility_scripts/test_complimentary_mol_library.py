@@ -4,15 +4,17 @@ react in all reactions they may be used in.
 
 Example submit:
 
-    python autogrow4/utility_scripts/test_complimentary_mol_library.py \
-        --rxn_library_file autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/ClickChem_rxn_library.json \
-        --function_group_library autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/ClickChem_functional_groups.json \
-        --complimentary_mol_directory autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/complimentary_mol_dir \
-        --output_folder autogrow4/utility_scripts/output/
+python autogrow4/utility_scripts/test_complimentary_mol_library.py \
+--rxn_library_file \
+autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/ClickChem_rxn_library.json \
+--function_group_library \
+autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/ClickChem_functional_groups.json \
+--complimentary_mol_directory \
+autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/complimentary_mol_dir \
+--output_folder autogrow4/utility_scripts/output/
 """
 import __future__
 
-import random
 import os
 import json
 import copy
@@ -29,7 +31,7 @@ rdkit.RDLogger.DisableLog("rdApp.*")
 import support_scripts.Multiprocess as mp
 import support_scripts.mol_object_handling as MOH
 
-class SmilesClickChem(object):
+class SmilesClickChem():
     """
     This class will take a molecule and Mutate it by reacting it.
 
@@ -551,7 +553,7 @@ def react_with_multiple_reactants(mol_tuple, mol_name, rxn_obj):
         # if reaction works keep it
         reaction_products_list = [
                         x[0] for x in rxn_obj.RunReactants(mol_tuple)
-                    ]
+        ]
     except:
         return mol_name
 
@@ -607,14 +609,14 @@ def get_rxn_and_examples(current_rxn_dict):
     rxn_name = current_rxn_dict["reaction_name"]
     # Test example reactants
     example_smiles_rxn_reactants = current_rxn_dict["example_rxn_reactants"]
-    example_smiles_rxn_reactants = example_smiles_rxn_reactants.replace("['","").replace("']","")
-    example_smiles_rxn_reactants = example_smiles_rxn_reactants.replace(" ","").replace('"',"")
+    example_smiles_rxn_reactants = example_smiles_rxn_reactants.replace("['", "").replace("']", "")
+    example_smiles_rxn_reactants = example_smiles_rxn_reactants.replace(" ", "").replace('"', "")
     example_smiles_rxn_reactants = example_smiles_rxn_reactants.split("','")
-    
+
     example_rxn_reactants = []
     for smile_str in example_smiles_rxn_reactants:
-        smile_str = smile_str.replace("'","").replace('"',"")
-        smile_str = smile_str.replace(" ","")
+        smile_str = smile_str.replace("'", "").replace('"', "")
+        smile_str = smile_str.replace(" ", "")
 
         example_mol = Chem.MolFromSmiles(smile_str)
 
@@ -641,7 +643,8 @@ def get_rxn_and_examples(current_rxn_dict):
 
 
     # Demo on example reactants
-    example_results = react_with_multiple_reactants(example_rxn_reactants, "test_reactions", rxn_obj)
+    example_results = react_with_multiple_reactants(example_rxn_reactants,
+                                                    "test_reactions", rxn_obj)
     if example_results is not None:
         printout = "rxn {} failed to run on example compounds.".format(rxn_name)
         printout = printout + "\nPlease check example compounds"
@@ -649,7 +652,7 @@ def get_rxn_and_examples(current_rxn_dict):
         raise Exception(printout)
 
     return example_rxn_reactants, rxn_obj
-# 
+#
 def run_all_for_fun_group(vars, fun_group, rxns_by_fun_group, a_smiles_click_object):
     """
     This runs the all testing for a single functional group.
@@ -659,14 +662,14 @@ def run_all_for_fun_group(vars, fun_group, rxns_by_fun_group, a_smiles_click_obj
     Inputs:
     :param dict vars: Dictionary of User variables
     :param str fun_group: functional group name
-    :param dict rxns_by_fun_group: Dictionary of rxns names organized by 
+    :param dict rxns_by_fun_group: Dictionary of rxns names organized by
         functional groups
     :param obj a_smiles_click_object: a a_smiles_click_object class object.
         This provides useful pathing information.
 
     Returns:
     :returns: list failed_to_react: a list of mol names which failed to react
-    :returns: list failed_to_sanitize: a list of mol names which failed to sanitize 
+    :returns: list failed_to_sanitize: a list of mol names which failed to sanitize
     """
     # unpack variables
     complimentary_mol_dict = a_smiles_click_object.complimentary_mol_dict
@@ -725,7 +728,7 @@ def run_all_for_fun_group(vars, fun_group, rxns_by_fun_group, a_smiles_click_obj
             list_of_reactants.append(tuple([tuple(mol_tuple_temp), mol_info[1], rxn_obj]))
 
         output = mp.multi_threading(list_of_reactants, number_of_processors,
-                        react_with_multiple_reactants)
+                                    react_with_multiple_reactants)
         output = [x for x in output if x is not None]
         failed_to_react.append([rxn_name, output])
 
@@ -749,7 +752,7 @@ def run_all_for_fun_group(vars, fun_group, rxns_by_fun_group, a_smiles_click_obj
         f.write("\n".join(master_passes_reactions))
 
     return failed_to_react, failed_to_sanitize
-# 
+#
 def run_main(vars):
     """
     This runs the main testing.
@@ -796,17 +799,19 @@ def run_main(vars):
     failed_to_react_by_fun_group = {}
 
     for fun_group in rxns_by_fun_group.keys():
-        failed_to_react, failed_to_sanitize = run_all_for_fun_group(vars, fun_group, rxns_by_fun_group, a_smiles_click_chem_object)
+        failed_to_react, failed_to_sanitize = run_all_for_fun_group(vars, fun_group,
+                                                                    rxns_by_fun_group,
+                                                                    a_smiles_click_chem_object)
         failed_to_react_by_fun_group[fun_group] = failed_to_react
         failed_to_sanitize_by_fun_group[fun_group] = failed_to_sanitize
 
     # Handle saving log
     with open(output_folder + "failed_to_sanitize_mol_by_fun_group.json", "w") as fp:
-        json.dump(failed_to_sanitize_by_fun_group, fp, indent=4) 
+        json.dump(failed_to_sanitize_by_fun_group, fp, indent=4)
 
     with open(output_folder + "failed_to_react_by_fun_group.json", "w") as fp:
         json.dump(failed_to_react_by_fun_group, fp, indent=4)
-    
+
     master_failed_list = []
     for fun_group in failed_to_react_by_fun_group.keys():
         temp = [x[1] for x in failed_to_react_by_fun_group[fun_group]]
@@ -817,7 +822,7 @@ def run_main(vars):
         print("All compounds passed!")
     else:
         print("{} compounds failed. Please check logs".format(len(master_failed_list)))
-# 
+#
 def get_arguments_from_argparse(args_dict):
     """
     This function handles the arg parser arguments for the script.
@@ -829,10 +834,10 @@ def get_arguments_from_argparse(args_dict):
     """
     # Argument handling
     if args_dict["rxn_library_file"] == "" or args_dict["function_group_library"] == "":
-            raise ValueError(
-                "TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY \
-                 THE PATH TO THE REACTION LIBRARY USING INPUT PARAMETER rxn_library"
-            )
+        raise ValueError(
+            "TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY \
+                THE PATH TO THE REACTION LIBRARY USING INPUT PARAMETER rxn_library"
+        )
     if os.path.exists(args_dict["rxn_library_file"]) is False:
         raise ValueError(
             "TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY \
@@ -844,12 +849,11 @@ def get_arguments_from_argparse(args_dict):
             "TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY THE PATH \
             TO THE REACTION LIBRARY USING INPUT PARAMETER function_group_library"
         )
-    else:
-        if os.path.isdir(args_dict["complimentary_mol_directory"]) is False:
-            raise ValueError(
-                "TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY THE PATH \
-                TO THE REACTION LIBRARY USING INPUT PARAMETER complimentary_mol_directory"
-            )
+    if os.path.isdir(args_dict["complimentary_mol_directory"]) is False:
+        raise ValueError(
+            "TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY THE PATH \
+            TO THE REACTION LIBRARY USING INPUT PARAMETER complimentary_mol_directory"
+        )
 
     if "number_of_processors" not in args_dict.keys():
         args_dict["number_of_processors"] = -1
@@ -857,8 +861,9 @@ def get_arguments_from_argparse(args_dict):
         args_dict["number_of_processors"] = int(args_dict["number_of_processors"])
     except:
         raise ValueError(
-                "number_of_processors must be an int. To use all processors set to -1."
-            )
+            "number_of_processors must be an int. \
+            To use all processors set to -1.")
+
     if "output_folder" not in args_dict.keys():
         printout = "output_folder is a required variable. it is the PATH to where " + \
             "filtered .smi file and log files will be placed. Will save a file " + \
