@@ -36,3 +36,6 @@ To cite QuickVina-W please cite:
 
 __"Protein-Ligand Blind Docking Using QuickVina-W With Inter-Process Spatio-Temporal Integration"__
 Nafisa M. Hassan, Amr A. Alhossary, Yuguang Mu & Chee-Keong Kwoh. Nature Scientific Reports 7(1) (2017). [DOI:10.1038/s41598-017-15571-7](http://dx.doi.org/10.1038/s41598-017-15571-7)
+
+##################################
+qvina2.1 for Mac was compiled using Mojave 10.15
