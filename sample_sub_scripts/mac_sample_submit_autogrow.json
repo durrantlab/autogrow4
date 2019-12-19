@@ -1,21 +1,19 @@
 {
-    "filename_of_receptor": "/Users/jdurrant/Documents/Work/durrant_git/autogrow/tutorial/3v46.pdb",
+    "filename_of_receptor": "/Users/jdurrant/Documents/Work/durrant_git/autogrow4/tutorial/3v46.pdb",
     "center_x": 13.21,
     "center_y": 11.84,
     "center_z": 16.57,
     "size_x": 30.0,
     "size_y": 30.0,
     "size_z": 30.0,
-    "source_compound_file": "/Users/jdurrant/Documents/Work/durrant_git/autogrow/source_compounds/small_mol_library.smi",
-    "root_output_folder": "/Users/jdurrant/Documents/Work/durrant_git/autogrow/mac_sample_submit_autogrow.output_dir/",
+    "source_compound_file": "/Users/jdurrant/Documents/Work/durrant_git/autogrow4/source_compounds/Fragment_MW_100_to_150_docked.smi",
+    "root_output_folder": "/Users/jdurrant/Documents/Work/durrant_git/autogrow4/mac_sample_submit_autogrow.output_dir/",
     "number_of_mutants_first_generation": 2,
     "number_of_crossovers_first_generation": 2,
     "number_of_mutants": 2,
     "number_of_crossovers": 2,
     "number_elitism_advance_from_previous_gen": 1,
     "top_mols_to_seed_next_generation": 1,
-    "diversity_mols_to_seed_first_generation": 1,
-    "diversity_seed_depreciation_per_gen": 1,
     "num_generations": 2,
     "mgltools_directory": "/Library/MGLTools/1.5.6/",
     "number_of_processors": -1,
@@ -23,5 +21,6 @@
     "scoring_function": "VINA",
     "max_variants_per_compound": 1,
     "start_a_new_run": true,
-    "LipinskiStrictFilter": true
+    "LipinskiStrictFilter": true,
+    "overide": false
 }

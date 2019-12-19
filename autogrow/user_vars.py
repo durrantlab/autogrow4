@@ -148,6 +148,55 @@ def multiprocess_handling(vars):
 
     return vars
 
+def test_docking_executables(vars, vina_exe, qvina2_exe):
+    """
+    This will test if docking executables are compatible with OS.
+    This is only required for MacOS.
+
+    Test will output the version of Vina and QVina2.1 executables to txt file
+    in the root_output_folder (docking_exe_MACOS_test.txt)
+    If both executables are compatible with this MacOS there should be the following
+    2 lines in the txt file:
+        AutoDock Vina 1.1.2 (May 11, 2011)
+        QuickVina 2.1 (24 Dec, 2017)
+
+    Returns True if both work and returns False.
+
+    Inputs:
+    :param dict vars: dict of user variables which will govern how the programs runs
+    :param str vina_exe: path to vina executable
+    :param str qvina2_exe: path to quick vina 2 executable
+    Returns:
+    :returns: bool bool: returns True if both docking executables work; False if either fails
+    """
+    test_vina_outfile = vars["root_output_folder"] + os.sep + "docking_exe_MACOS_test.txt"
+    try:
+        command = "{} --version > {arg_2} 2>> {arg_2}".format(vina_exe, arg_2=test_vina_outfile)
+        os.system(command)
+        command = "{} --version >> {arg_2} 2>> {arg_2}".format(qvina2_exe, arg_2=test_vina_outfile)
+        os.system(command)
+    except:
+        printout = "Docking executables could not be found."
+        # is not compatible on this OS. \nPlease use docker "
+        return False
+
+    with open(test_vina_outfile, "r") as test_file:
+        lines = test_file.readlines()
+    if "AutoDock Vina 1.1.2" not in lines[0]:
+        printout = "Vina docking is not compatible on this OS. \nPlease use docker or "
+        printout = printout + "try provide a Vina executable compatible with the OS.\n"
+        print(printout)
+        if vars["dock_choice"] == "VinaDocking":
+            return False
+
+    if "QuickVina 2.1" not in lines[1]:
+        printout = "QuickVina 2.1 docking is not compatible on this OS. \nPlease use docker"
+        printout = printout + " or try provide a Vina executable compatible with the OS.\n"
+        print(printout)
+        if vars["dock_choice"] == "QuickVina2Docking":
+            return False
+    return True
+
 def run_macos_notarization(vars):
     """
     This function runs notarization on vina and qvina2 docking.
@@ -169,87 +218,57 @@ def run_macos_notarization(vars):
         printout = "Docking executables could not be found."
         raise Exception(printout)
 
-    # Ensure permissions are unrestricted
-    try:
-        command = "chmod -R a+rwx {}".format(vina_exe)
-        os.system(command)
-        command = "chmod -R a+rwx {}".format(qvina2_exe)
-        os.system(command)
-    except:
-        printout = "Permissions could not be adjusted on docking files."
-        print(printout)
-        raise Exception(printout)
+    both_docking_exe_work = test_docking_executables(vars, vina_exe, qvina2_exe)
 
-    # Check Platform information
-    mac_version = platform.mac_ver()[0]
-    if int(mac_version.split(0)) < 10:
-        printout = "We do not provide support for MacOS less than 10.7.\n" + \
-            "Please run using docker version of AutoGrow."
-        print(printout)
-        raise Exception(printout)
+    # Delete section @@@ #@@@JAKE
+    if vars["overide"] == True: #@@@JAKE
+        both_docking_exe_work = False #@@@JAKE
 
-    if int(mac_version.split(0)) == 10:
-        if mac_version.split(1) < 7:
-            printout = "We do not support for MacOS less than 10.7.\n" + \
-                "Please run using docker version of AutoGrow."
-            print(printout)
-            raise Exception(printout)
-
-        if mac_version.split(1) > 15:
-            # 10.15 is Catalina which requires notarizing docking software
-
-            printout = "We have not tested MacOS higher than 10.15.\n" + \
-                "Please run using docker version of AutoGrow."
-            print(printout)
-            raise Exception(printout)
-
+    if both_docking_exe_work is False:
+        # Ensure permissions are unrestricted
         try:
-            command = "xattr -w com.apple.quarantine {}".format(vina_exe)
+            command = "chmod -R a+rwx {}".format(vina_exe)
             os.system(command)
-            command = "xattr -w com.apple.quarantine {}".format(qvina2_exe)
+            command = "chmod -R a+rwx {}".format(qvina2_exe)
             os.system(command)
         except:
-            printout = "Please install xattr. Can be installed using the command:"
-            printout = printout  + "\n\tpip install xattr"
+            printout = "Permissions could not be adjusted on docking files."
             print(printout)
             raise Exception(printout)
 
-    # Run test to make sure docking executables are compatible with OS.
-    # Test will output the version of Vina and QVina2.1 executables to txt file
-    # in the root_output_folder (docking_exe_MACOS_test.txt)
-    # If both executables are compatible with this MacOS there should be the following
-    # 2 lines in the txt file:
-    #   AutoDock Vina 1.1.2 (May 11, 2011)
-    #   QuickVina 2.1 (24 Dec, 2017)
-    #
-    # Otherwise we will raise an exception docking will fail.
-
-    test_vina_outfile = vars["root_output_folder"] + os.sep + "docking_exe_MACOS_test.txt"
-    try:
-        command = "{} --version > {arg_2} 2>> {arg_2}".format(vina_exe, arg_2=test_vina_outfile)
-        os.system(command)
-        command = "{} --version >> {arg_2} 2>> {arg_2}".format(qvina2_exe, arg_2=test_vina_outfile)
-        os.system(command)
-    except:
-        printout = "Docking executables could not be found."
-        # is not compatible on this OS. \nPlease use docker "
-        raise Exception(printout)
-
-    with open(test_vina_outfile, "r") as test_file:
-        lines = test_file.readlines()
-    if "AutoDock Vina 1.1.2" not in lines[0]:
-        printout = "Vina docking is not compatible on this OS. \nPlease use docker or "
-        printout = printout + "try provide a Vina executable compatible with the OS.\n"
-        print(printout)
-        if vars["dock_choice"] == "VinaDocking":
+        # Check Platform information
+        mac_version = platform.mac_ver()[0]
+        if int(mac_version.split(0)) < 10:
+            printout = "We do not provide support for MacOS less than 10.7.\n" + \
+                "Please run using docker version of AutoGrow."
+            print(printout)
             raise Exception(printout)
 
-    if "QuickVina 2.1" not in lines[1]:
-        printout = "QuickVina 2.1 docking is not compatible on this OS. \nPlease use docker"
-        printout = printout + " or try provide a Vina executable compatible with the OS.\n"
-        print(printout)
-        if vars["dock_choice"] == "QuickVina2Docking":
-            raise Exception(printout)
+        if int(mac_version.split(0)) == 10:
+            if mac_version.split(1) < 7:
+                printout = "We do not support for MacOS less than 10.7.\n" + \
+                    "Please run using docker version of AutoGrow."
+                print(printout)
+                raise Exception(printout)
+
+            if mac_version.split(1) > 15:
+                # 10.15 is Catalina which requires notarizing docking software
+
+                printout = "We have not tested MacOS higher than 10.15.\n" + \
+                    "Please run using docker version of AutoGrow."
+                print(printout)
+                raise Exception(printout)
+
+            try:
+                command = "xattr -w com.apple.quarantine {}".format(vina_exe)
+                os.system(command)
+                command = "xattr -w com.apple.quarantine {}".format(qvina2_exe)
+                os.system(command)
+            except:
+                printout = "Please install xattr. Can be installed using the command:"
+                printout = printout  + "\n\tpip install xattr"
+                print(printout)
+                raise Exception(printout)
 
 ############################################
 ###### Variables Handlining Settings #######
