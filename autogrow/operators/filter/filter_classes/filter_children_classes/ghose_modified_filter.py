@@ -96,7 +96,7 @@ class GhoseModifiedFilter(ParentFilter):
 
         # molar LogP
         mol_log_p = Crippen.MolLogP(mol)
-        if -0.4 > mol_log_p > 5:
+        if -0.4 > mol_log_p > 5.6:
             return False
 
         # passed all filters
