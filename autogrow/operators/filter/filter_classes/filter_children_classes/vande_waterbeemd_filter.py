@@ -4,8 +4,8 @@ brain barrier permeable. VandeWaterbeemd filter filters molecules for
 Molecular weight (MW), and Polar Sureface Area (PSA).
 
 To pass the VandeWaterbeemd filter a ligand must have:
-    Molecular Weight: max 450 dalton
-    Polar Sureface Area: max 90 A^2
+    Molecular Weight: less than 450 dalton
+    Polar Sureface Area: less than 90 A^2
 
 If you use the Van de Waterbeemd Filter please cite: Van de Waterbeemd, Han:
 et al Estimation of Dlood-Brain Barrier Crossing of Drugs Using Molecular Size
@@ -33,8 +33,8 @@ class VandeWaterbeemdFilter(ParentFilter):
     Molecular weight (MW), and Polar Sureface Area (PSA).
 
     To pass the VandeWaterbeemd filter a ligand must have:
-        Molecular Weight: max 450 dalton
-        Polar Sureface Area: max 90 A^2
+        Molecular Weight: less than 450 dalton
+        Polar Sureface Area: less than 90 A^2
 
     If you use the Van de Waterbeemd Filter please cite: Van de Waterbeemd,
     Han: et al Estimation of Dlood-Brain Barrier Crossing of Drugs Using
@@ -54,8 +54,8 @@ class VandeWaterbeemdFilter(ParentFilter):
         molecules for Molecular weight (MW), and Polar Sureface Area (PSA).
 
         To pass the VandeWaterbeemd filter a ligand must have:
-            Molecular Weight: max 450 dalton
-            Polar Sureface Area: max 90 A^2
+            Molecular Weight: less than 450 dalton
+            Polar Sureface Area: less than 90 A^2
 
         Inputs:
         :param rdkit.Chem.rdchem.Mol object mol: An rdkit mol object to be
