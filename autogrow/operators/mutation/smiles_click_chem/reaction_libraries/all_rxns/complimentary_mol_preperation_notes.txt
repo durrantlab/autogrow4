@@ -18,7 +18,7 @@ We retrieved ligands from the Zinc15 database.
 
 
 This list was further filtered to ensure that the SMILES could be converted to rdkit mol object and filtered with:
-    'LipinskiStrictFilter', 'GhoseFilter', and 'MozziconacciFilter'.
+    'LipinskiStrictFilter' and 'GhoseFilter'.
 
 We populated the functional group libraries using this list. 
 
