@@ -103,8 +103,6 @@ class PAINSFilter(ParentFilter):
             # (as it failed the filter)
             if filters.HasMatch(mol) is True:
                 return False
-            else:
-                continue
 
         # if No matches are found to filter list this will return a True as it
         # Passed the filter.

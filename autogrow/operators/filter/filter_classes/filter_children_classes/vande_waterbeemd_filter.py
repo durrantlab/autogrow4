@@ -66,10 +66,10 @@ class VandeWaterbeemdFilter(ParentFilter):
         """
 
         exact_mwt = Descriptors.ExactMolWt(mol)
-        if exact_mwt > 450:
+        if exact_mwt >= 450:
             return False
         psa = MolSurf.TPSA(mol)
-        if psa > 90:
+        if psa >= 90:
             return False
 
         # passes everything
