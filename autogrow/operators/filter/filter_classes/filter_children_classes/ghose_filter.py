@@ -76,14 +76,6 @@ class GhoseFilter(ParentFilter):
         if 20 > num_atoms > 70:
             return False
 
-        num_hydrogen_bond_donors = Lipinski.NumHDonors(mol)
-        if num_hydrogen_bond_donors > 5:
-            return False
-
-        num_hydrogen_bond_acceptors = Lipinski.NumHAcceptors(mol)
-        if num_hydrogen_bond_acceptors > 10:
-            return False
-
         # molar Refractivity
         MolMR = Crippen.MolMR(mol)
         if 40 > MolMR > 130:

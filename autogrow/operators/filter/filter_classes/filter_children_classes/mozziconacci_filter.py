@@ -74,25 +74,25 @@ class MozziconacciFilter(ParentFilter):
 
         halogen = Chem.MolFromSmarts("[*;#9,#17,#35,#53,#85]")
         number_of_halogens = len(mol.GetSubstructMatches(halogen, maxMatches=8))
-        if number_of_halogens >= 7:
+        if number_of_halogens > 7:
             return False
 
         oxygen = Chem.MolFromSmarts("[#8]")
         number_of_oxygens = len(mol.GetSubstructMatches(oxygen, maxMatches=2))
-        if number_of_oxygens <= 1:
+        if number_of_oxygens < 1:
             return False
 
         nitrogen = Chem.MolFromSmarts("[#7]")
         number_of_nitrogen = len(mol.GetSubstructMatches(nitrogen, maxMatches=2))
-        if number_of_nitrogen <= 1:
+        if number_of_nitrogen < 1:
             return False
 
         num_rotatable_bonds = Lipinski.NumRotatableBonds(mol)
-        if num_rotatable_bonds >= 15:
+        if num_rotatable_bonds > 15:
             return False
 
         ring_count = Chem.rdmolops.GetSSSR(mol)
-        if ring_count >= 6:
+        if ring_count > 6:
             return False
 
         # Passes everything
