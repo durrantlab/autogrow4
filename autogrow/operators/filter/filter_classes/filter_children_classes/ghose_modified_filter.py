@@ -74,21 +74,21 @@ class GhoseModifiedFilter(ParentFilter):
         """
 
         exact_mwt = Descriptors.ExactMolWt(mol)
-        if 160 > exact_mwt > 500:
+        if ((exact_mwt < 160) or (exact_mwt > 500)):
             return False
 
         num_atoms = mol.GetNumAtoms()
-        if 20 > num_atoms > 70:
+        if ((num_atoms < 20) or (num_atoms > 70)):
             return False
 
         # molar Refractivity
         MolMR = Crippen.MolMR(mol)
-        if 40 > MolMR > 130:
+        if ((MolMR < 40) or (MolMR > 130)):
             return False
 
         # molar LogP
         mol_log_p = Crippen.MolLogP(mol)
-        if -0.4 > mol_log_p > 5.6:
+        if ((mol_log_p < -0.4) or (mol_log_p > 5.6)):
             return False
 
         # passed all filters
