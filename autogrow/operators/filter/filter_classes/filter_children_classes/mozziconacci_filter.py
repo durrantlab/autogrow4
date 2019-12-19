@@ -83,7 +83,7 @@ class MozziconacciFilter(ParentFilter):
             return False
 
         nitrogen = Chem.MolFromSmarts("[#7]")
-        number_of_nitrogen = len(mol.GetSubstructMatches(oxygen, maxMatches=2))
+        number_of_nitrogen = len(mol.GetSubstructMatches(nitrogen, maxMatches=2))
         if number_of_nitrogen < 1:
             return False
 
