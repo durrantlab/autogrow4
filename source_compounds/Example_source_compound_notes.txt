@@ -19,7 +19,7 @@ ZINC molecules:
     This starting list was ligands from 1.0>=logp>3.5 and MW<=250da. This consisted of 80 tranches and 682,820 starting ligands
 
     This list was further filtered to ensure that the SMILES could be converted to rdkit mol object and filtered with:
-        'LipinskiStrictFilter', 'GhoseFilter', and 'MozziconacciFilter'.
+        'LipinskiStrictFilter' and 'GhoseFilter'.
     This list was filtered to ensure every ligand in the list has atleast one moiety that would react in the All_Rxn reaction list.
 
     We then seperated these by MW ranges and capped the size to 5,000 randomized ligands:

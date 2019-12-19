@@ -11,7 +11,7 @@ We retrieved ligands from the Zinc15 database.
     This resulted in 53,427,687 substances and 331 Tranches
 
 
-This list was further filtered to ensure that the SMILES could be converted to rdkit mol object and filtered with LipinskiStrictFilter', 'GhoseFilter', and 'MozziconacciFilter'.
+This list was further filtered to ensure that the SMILES could be converted to rdkit mol object and filtered with LipinskiStrictFilter' and 'GhoseFilter'.
 We populated the functional group libraries using this list. 
 
 Libraries exceeding 50,000 ligands were reduced to a maximum size of 50,000 ligands.
