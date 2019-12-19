@@ -7,6 +7,7 @@ To pass the filter a molecule must be:
     # of Rotatable bonds: Max 15
     # of Rings: Max 6
     # of Oxygens: Min 1
+    # of Nitrogens: Min 1
     # of Halogens: Max 7
 
 If you use the Mozziconacci Filter please cite: Mozziconacci, J. C. et al.
@@ -37,6 +38,7 @@ class MozziconacciFilter(ParentFilter):
         # of Rotatable bonds: Max 15
         # of Rings: Max 6
         # of Oxygens: Min 1
+        # of Nitrogens: Min 1
         # of Halogens: Max 7
 
     If you use the Mozziconacci Filter please cite: Mozziconacci, J. C. et al.
@@ -58,6 +60,7 @@ class MozziconacciFilter(ParentFilter):
             # of Rotatable bonds: Max 15
             # of Rings: Max 6
             # of Oxygens: Min 1
+            # of Nitrogens: Min 1
             # of Halogens: Max 7
 
         Inputs:
@@ -77,6 +80,11 @@ class MozziconacciFilter(ParentFilter):
         oxygen = Chem.MolFromSmarts("[#8]")
         number_of_oxygens = len(mol.GetSubstructMatches(oxygen, maxMatches=2))
         if number_of_oxygens < 1:
+            return False
+
+        nitrogen = Chem.MolFromSmarts("[#7]")
+        number_of_nitrogen = len(mol.GetSubstructMatches(nitrogen, maxMatches=2))
+        if number_of_nitrogen < 1:
             return False
 
         num_rotatable_bonds = Lipinski.NumRotatableBonds(mol)
