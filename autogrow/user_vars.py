@@ -238,20 +238,20 @@ def run_macos_notarization(vars):
 
         # Check Platform information
         mac_version = platform.mac_ver()[0]
-        if int(mac_version.split(0)) < 10:
+        if int(mac_version.split(".")[0]) < 10:
             printout = "We do not provide support for MacOS less than 10.7.\n" + \
                 "Please run using docker version of AutoGrow."
             print(printout)
             raise Exception(printout)
 
-        if int(mac_version.split(0)) == 10:
-            if mac_version.split(1) < 7:
+        if int(mac_version.split(".")[0]) == 10:
+            if mac_version.split(".")[1] < 7:
                 printout = "We do not support for MacOS less than 10.7.\n" + \
                     "Please run using docker version of AutoGrow."
                 print(printout)
                 raise Exception(printout)
 
-            if mac_version.split(1) > 15:
+            if mac_version.split(".")[1] > 15:
                 # 10.15 is Catalina which requires notarizing docking software
 
                 printout = "We have not tested MacOS higher than 10.15.\n" + \
