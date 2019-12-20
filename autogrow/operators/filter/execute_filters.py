@@ -7,6 +7,7 @@ import copy
 
 import rdkit
 from rdkit import Chem
+from rdkit.Chem.MolStandardize import rdMolStandardize
 
 # Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog("rdApp.*")
@@ -116,6 +117,15 @@ def run_filter_mol(smiles_info, child_dict):
         return None
 
     mol = MOH.check_sanitization(mol)
+    if mol is None:
+        return None
+
+    # remove charge from mol objects. This affects some properties
+    # such as: logP, Mol refractivity, and polar surface area
+    # which can impact filters such as Ghose and VandeWaterbeemd
+    # This is done because logP is traditionally applied to neutral molecules
+    uncharger_obj = rdMolStandardize.Uncharger()
+    mol = uncharger_obj.uncharge(mol)
     if mol is None:
         return None
 

@@ -2,6 +2,10 @@
 This runs a Ghose filter for drug-likeliness. Ghose filter filters molecules
 by Molecular weight (MW), the number of atoms, and the logP value.
 
+We protonate the mol in this filter because hydrogens affect
+atom count. Our Ghose implimentation counts hydrogens in against
+the total number of atoms.
+
 To pass the filter a molecule must be:
     MW between 160 and 480 dalton
     Number of Atoms: between 20 and 70
@@ -14,6 +18,8 @@ databases Journal of Combinatorial Chemistry, 1 (1999), pp. 55-68
 """
 
 import __future__
+
+import copy
 
 import rdkit
 import rdkit.Chem as Chem
@@ -32,6 +38,10 @@ class GhoseFilter(ParentFilter):
     This runs a Ghose filter for drug-likeliness. Ghose filter filters
     molecules by Molecular weight (MW), the number of atoms, and the logP
     value.
+
+    We protonate the mol in this filter because hydrogens affect
+    atom count. Our Ghose implimentation counts hydrogens in against
+    the total number of atoms.
 
     To pass the filter a molecule must be:
         MW between 160 and 480 dalton
@@ -54,6 +64,10 @@ class GhoseFilter(ParentFilter):
         molecules by Molecular weight (MW), the number of atoms, and the logP
         value.
 
+        We protonate the mol in this filter because hydrogens affect
+        atom count. Our Ghose implimentation counts hydrogens in against
+        the total number of atoms.
+
         To pass the filter a molecule must be:
             MW between 160 and 480 dalton
             Number of Atoms: between 20 and 70
@@ -67,22 +81,26 @@ class GhoseFilter(ParentFilter):
         :returns: bool bool: True if the mol passes the filter; False if it
             fails the filter
         """
-
-        exact_mwt = Descriptors.ExactMolWt(mol)
+        # Make a copy of the mol so we can AddHs without affecting other filters
+        # number of atoms is altered by the presence/absence of hydrogens.
+        # Our Ghose filter counts hydrogenss towards atom count
+        copy_mol = copy.deepcopy(mol)
+        copy_mol = Chem.AddHs(copy_mol)
+        exact_mwt = Descriptors.ExactMolWt(copy_mol)
         if ((exact_mwt < 160) or (exact_mwt > 480)):
             return False
 
-        num_atoms = mol.GetNumAtoms()
+        num_atoms = copy_mol.GetNumAtoms()
         if ((num_atoms < 20) or (num_atoms > 70)):
             return False
 
         # molar Refractivity
-        MolMR = Crippen.MolMR(mol)
+        MolMR = Crippen.MolMR(copy_mol)
         if ((MolMR < 40) or (MolMR > 130)):
             return False
 
         # molar LogP
-        mol_log_p = Crippen.MolLogP(mol)
+        mol_log_p = Crippen.MolLogP(copy_mol)
         if ((mol_log_p < -0.4) or (mol_log_p > 5.6)):
             return False
 
