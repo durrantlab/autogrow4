@@ -237,21 +237,21 @@ def run_macos_notarization(vars):
             raise Exception(printout)
 
         # Check Platform information
-        mac_version = platform.mac_ver()[0]
-        if int(mac_version.split(".")[0]) < 10:
+        mac_version = platform.mac_ver()[0].split(".")
+        if int(mac_version[0]) < 10:
             printout = "We do not provide support for MacOS less than 10.7.\n" + \
                 "Please run using docker version of AutoGrow."
             print(printout)
             raise Exception(printout)
 
-        if int(mac_version.split(".")[0]) == 10:
-            if mac_version.split(".")[1] < 7:
+        if int(mac_version[0]) == 10:
+            if mac_version[1] < 7:
                 printout = "We do not support for MacOS less than 10.7.\n" + \
                     "Please run using docker version of AutoGrow."
                 print(printout)
                 raise Exception(printout)
 
-            if mac_version.split(".")[1] > 15:
+            if mac_version[1] > 15:
                 # 10.15 is Catalina which requires notarizing docking software
 
                 printout = "We have not tested MacOS higher than 10.15.\n" + \
@@ -448,12 +448,16 @@ def check_for_required_inputs(input_params):
             os.makedirs(input_params["root_output_folder"])
         except:
             raise NotImplementedError(
-                "root_output_folder could not be created. \
+                "root_output_folder could not be found and could not be created. \
                 Please manual create desired directory or check input parameters"
             )
 
         if os.path.exists(input_params["root_output_folder"]) is False:
-            raise NotImplementedError("root_output_folder does not exist")
+            raise NotImplementedError(
+                "root_output_folder could not be found and could not be created. \
+                Please manual create desired directory or check input parameters"
+            )
+
     if os.path.isdir(input_params["root_output_folder"]) is False:
         raise NotImplementedError(
             "root_output_folder is not a directory. \
@@ -503,17 +507,6 @@ def determine_bash_timeout_vs_gtimeout():
     # 32512 means that the timeout function DOES NOT Work (most likely this is MacOS)
 
     try:  # timeout or gtimeout
-        timeout_result = os.system(command)
-    except:
-        raise Exception(
-            "Something is very wrong. This OS may not be supported by \
-            Autogrow or you may need to execute through Bash."
-        )
-    if timeout_result == 0:
-        timeout_option = "timeout"
-        return timeout_option
-
-    try:  # timeout or gtimeout
         timeout_result = os.system("g" + command)
     except:
         raise Exception(
@@ -523,6 +516,20 @@ def determine_bash_timeout_vs_gtimeout():
     if timeout_result == 0:
         timeout_option = "gtimeout"
         return timeout_option
+    print("gtimeout failed to run, we will check timeout")
+
+    try:  # timeout or gtimeout
+        timeout_result = os.system(command)
+    except:
+        raise Exception(
+            "Something is very wrong. This OS may not be supported by \
+            Autogrow or you may need to execute through Bash."
+        )
+
+    if timeout_result == 0:
+        timeout_option = "timeout"
+        return timeout_option
+
     printout = "Need to install GNU tools for Bash to work. \n"
     printout = (
         printout
@@ -768,7 +775,7 @@ def define_defaults():
     vars["debug_mode"] = False
     vars["reduce_files_sizes"] = False
     vars["generate_plot"] = True
-
+    vars["overide"] = True #@@@JAKE DELETE
     # Check Bash Timeout function (There's a difference between MacOS and linux)
     # Linux uses timeout while MacOS uses gtimeout
     timeout_option = determine_bash_timeout_vs_gtimeout()
@@ -1010,7 +1017,7 @@ def load_in_commandline_parameters(argv):
                 PATH TO THE Custom DOCKING SCRIPT"
             )
     if vars["dock_choice"] in ["VinaDocking", "QuickVina2Docking"]:
-        if sys.platform == "darwin":
+        if sys.platform == "darwin" or vars["overide"] == True:
             # Some MacOS require docking software to be notarized.
             # This will require an internet signal
             run_macos_notarization(vars)
