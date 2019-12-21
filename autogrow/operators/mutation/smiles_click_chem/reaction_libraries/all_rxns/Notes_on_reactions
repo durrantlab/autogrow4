@@ -3,5 +3,5 @@ The reaction numbering starts with ClickChem numbering followed by the Robust re
 
 Please see other libraries for more in-depth preparation notes
 
-All functional groups that start with a lowercase or a number are from the Robust_reactions
-All functional groups that start with an uppercase are from ClickChem reactions
+All functional groups that start with a lowercase or a number and "_robust" at the end are from the Robust_reactions
+All functional groups that start with an uppercase and "_clickchem" at the endare from ClickChem reactions
