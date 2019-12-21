@@ -24,7 +24,6 @@
     "max_variants_per_compound": 1,
     "start_a_new_run": true,
     "Lipinski_Strict": true,
-    "rxn_library": "click_chem_rxns",
-    "overide": true
+    "rxn_library": "click_chem_rxns"
 }
 

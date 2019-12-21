@@ -630,13 +630,6 @@ PARSER.add_argument(
     action="store_true",
     help="Run this before running gypsum in mpi-mode.",
 )
-# Delete section @@@ #@@@JAKE
-PARSER.add_argument(
-    "--overide", default=False,
-    action="store_true",
-    help="# Delete section @@@ #@@@JAKE. USED FOR MAC OVERIDE",
-)
-
 
 args_dict = vars(PARSER.parse_args())
 

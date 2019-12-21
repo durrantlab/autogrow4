@@ -220,10 +220,6 @@ def run_macos_notarization(vars):
 
     both_docking_exe_work = test_docking_executables(vars, vina_exe, qvina2_exe)
 
-    # Delete section @@@ #@@@JAKE
-    if vars["overide"] == True: #@@@JAKE
-        both_docking_exe_work = False #@@@JAKE
-
     if both_docking_exe_work is False:
         # Ensure permissions are unrestricted
         try:
@@ -775,7 +771,6 @@ def define_defaults():
     vars["debug_mode"] = False
     vars["reduce_files_sizes"] = False
     vars["generate_plot"] = True
-    vars["overide"] = True #@@@JAKE DELETE
     # Check Bash Timeout function (There's a difference between MacOS and linux)
     # Linux uses timeout while MacOS uses gtimeout
     timeout_option = determine_bash_timeout_vs_gtimeout()
@@ -1017,7 +1012,7 @@ def load_in_commandline_parameters(argv):
                 PATH TO THE Custom DOCKING SCRIPT"
             )
     if vars["dock_choice"] in ["VinaDocking", "QuickVina2Docking"]:
-        if sys.platform == "darwin" or vars["overide"] == True:
+        if sys.platform == "darwin":
             # Some MacOS require docking software to be notarized.
             # This will require an internet signal
             run_macos_notarization(vars)
