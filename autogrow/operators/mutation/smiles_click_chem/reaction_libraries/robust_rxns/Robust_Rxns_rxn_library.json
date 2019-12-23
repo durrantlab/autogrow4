@@ -273,8 +273,8 @@
         "reaction_name": "28_oxadiazole", 
         "example_rxn_product": "Cc1noc(C)n1", 
         "example_rxn_reactants": ["CC#N", "CC(=O)O"],
-        "functional_groups": ["nitrile_robust", "carboxylic_acid_robust"],
-        "group_smarts": ["[C&H0&$(C-[#6])]#[N&H0]", "[#6]-[C&R0](=[O&D1])-[O&H1]"],
+        "functional_groups": ["nitrile_type_2_robust", "carboxylic_acid_robust"],
+        "group_smarts": ["[#6][C]#[#7;D1]", "[#6]-[C&R0](=[O&D1])-[O&H1]"],
         "num_reactants": 2, 
         "reaction_string": "[#6:6][C:5]#[#7;D1:4].[#6:1][C:2](=[OD1:3])[OH1]>>[#6:6][c:5]1[n:4][o:3][c:2]([#6:1])n1", 
         "RXN_NUM": 28
@@ -433,8 +433,8 @@
         "reaction_name": "44_Grignard_carbonyl", 
         "example_rxn_product": "CCC(C)=O", 
         "example_rxn_reactants": ["CC#N", "CCBr"],
-        "functional_groups": ["nitrile_robust", "halide_type_1_robust"],
-        "group_smarts": ["[C&H0&$(C-[#6])]#[N&H0]", "[Cl,Br,I][#6&$([#6]~[#6])&!$([#6](-,:[Cl,Br,I])[Cl,Br,I])&!$([#6]=O)]"],
+        "functional_groups": ["nitrile_type_2_robust", "halide_type_1_robust"],
+        "group_smarts": ["[#6][C]#[#7;D1]", "[Cl,Br,I][#6&$([#6]~[#6])&!$([#6](-,:[Cl,Br,I])[Cl,Br,I])&!$([#6]=O)]"],
         "num_reactants": 2, 
         "reaction_string": "[#6:1][C:2]#[#7;D1].[Cl,Br,I][#6;$([#6]~[#6]);!$([#6]([Cl,Br,I])[Cl,Br,I]);!$([#6]=O):3]>>[#6:1][C:2](=O)[#6:3]", 
         "RXN_NUM": 44
