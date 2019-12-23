@@ -179,7 +179,7 @@ class VinaDocking(ParentDocking):
             # if user specifies a different vina executable
             docking_executable = vars["docking_executable"]
 
-        if os.path.exists(docking_executable) is True:
+        if os.path.exists(docking_executable) is False:
             printout = "Docking executable could not be found at: "
             printout = printout + "{}".format(docking_executable)
             print(printout)
