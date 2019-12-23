@@ -631,7 +631,6 @@ PARSER.add_argument(
     help="Run this before running gypsum in mpi-mode.",
 )
 
-
 args_dict = vars(PARSER.parse_args())
 
 # copying args_dict so we can delete out of while iterating through the

@@ -37,12 +37,12 @@ class ParentDocking(object):
         """
         return self.__class__.__name__
 
-    def run_dock(self, input_string):
+    def run_dock(self, pdbqt_filename):
         """
         run_dock is needs to be implimented in each class.
 
         Inputs:
-        :param str input_string: a string for docking process raise exception
+        :param str pdbqt_filename: a string for docking process raise exception
             if missing
         """
 

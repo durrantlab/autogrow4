@@ -7,21 +7,23 @@
     "size_y": 30.0,
     "size_z": 30.0,
     "source_compound_file": "/Users/jdurrant/Documents/Work/durrant_git/autogrow/source_compounds/small_mol_library.smi",
-    "root_output_folder": "/Users/jdurrant/Documents/Work/durrant_git/autogrow/mac_sample_submit_autogrow.output_dir/",
+    "root_output_folder": "/Users/jdurrant/Documents/Work/durrant_git/autogrow4/mac_sample_submit_autogrow.output_dir/",
     "number_of_mutants_first_generation": 2,
     "number_of_crossovers_first_generation": 2,
     "number_of_mutants": 2,
     "number_of_crossovers": 2,
-    "number_elitism_advance_from_previous_gen": 1,
+    "number_to_advance_from_previous_gen": 1,
     "top_mols_to_seed_next_generation": 1,
     "diversity_mols_to_seed_first_generation": 1,
     "diversity_seed_depreciation_per_gen": 1,
     "num_generations": 2,
     "mgltools_directory": "/Library/MGLTools/1.5.6/",
     "number_of_processors": -1,
-    "dock_choice": "QuickVina2Docking",
+    "Dock_choice": "QuickVina2Docking",
     "scoring_function": "VINA",
     "max_variants_per_compound": 1,
     "start_a_new_run": true,
-    "LipinskiStrictFilter": true
+    "Lipinski_Strict": true,
+    "rxn_library": "click_chem_rxns"
 }
+

@@ -4,6 +4,7 @@ The child classes from ParentExample
 import __future__
 
 import os
+import sys
 
 from autogrow.docking.docking_class.docking_class_children.vina_docking import VinaDocking
 
@@ -40,10 +41,10 @@ class QuickVina2Docking(VinaDocking):
 
             # VINA SPECIFIC VARS
             receptor_file = vars["filename_of_receptor"]
-            mgl_python = vars["mgl_python"]
-            receptor_template = vars["prepare_receptor4.py"]
-            number_of_processors = vars["number_of_processors"]
-            docking_executable = vars["docking_executable"]
+            # mgl_python = vars["mgl_python"]
+            # receptor_template = vars["prepare_receptor4.py"]
+            # number_of_processors = vars["number_of_processors"]
+            # docking_executable = vars["docking_executable"]
 
             ###########################
 
@@ -78,12 +79,42 @@ class QuickVina2Docking(VinaDocking):
                 + os.sep
             )
 
-            docking_executable = (
-                docking_executable_directory + "q_vina_2{}qvina2.1".format(os.sep)
-            )
+            if sys.platform == "linux" or sys.platform == "linux2":
+                # Use linux version of Autodock Vina
+                docking_executable = (
+                    docking_executable_directory
+                    + "q_vina_2"
+                    + os.sep
+                    + "q_vina_2_1_linux"
+                    + os.sep
+                    + "qvina2.1"
+                )
+
+            elif sys.platform == "darwin":
+                # Use OS X version of Autodock Vina
+                docking_executable = (
+                    docking_executable_directory
+                    + "q_vina_2"
+                    + os.sep
+                    + "q_vina_2_1_mac"
+                    + os.sep
+                    + "qvina2.1"
+                )
+
+            elif sys.platform == "win32":
+                # Windows...
+                raise Exception("Windows is currently not supported")
+            else:
+                raise Exception("This OS is currently not supported")
 
         else:
             # if user specifies a different QuickVina executable
             docking_executable = vars["docking_executable"]
+
+        if os.path.exists(docking_executable) is False:
+            printout = "Docking executable could not be found at: "
+            printout = printout + "{}".format(docking_executable)
+            print(printout)
+            raise Exception(printout)
 
         return docking_executable

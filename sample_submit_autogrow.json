@@ -9,7 +9,7 @@
     "source_compound_file": "/home/jacob/Documents/autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/all_rxns/complimentary_mol_dir/2_acetylphenol.smi",
     "root_output_folder": "/home/jacob/Desktop/Outputfolder/",
     "number_of_mutants_first_generation": 10,
-    "number_of_crossovers_first_generation": 0,
+    "number_of_crossovers_first_generation": 10,
     "number_of_mutants": 3,
     "number_of_crossovers": 3,
     "number_elitism_advance_from_previous_gen": 3,
@@ -27,11 +27,11 @@
     "docking_exhaustiveness": 1,
     "start_a_new_run": true,
     "generate_plot": true,
-    "rxn_library": "all_rxns",
     "rescore_lig_efficiency": true,
     "scoring_choice": "VINA",
     "dock_choice": "QuickVina2Docking",
     "gypsum_timeout_limit": 1,
     "debug_mode": true,
-    "conversion_choice": "ObabelConversion"
+    "conversion_choice": "ObabelConversion",
+    "rxn_library": "click_chem_rxns"
 }
