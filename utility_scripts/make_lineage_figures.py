@@ -499,6 +499,9 @@ def make_comp_mol_dict(vars):
     # Only valid for autoclickchem rxns
 
     comp_smi_list = glob.glob(vars["complimentary_mol_directory"] + os.sep + "*.smi")
+    if len(comp_smi_list) == 0:
+        raise Exception("No .smi files found for complimentary_mol_directory.\n" + \
+            "please check: {}".format(vars["complimentary_mol_directory"]))
     comp_dict = {}
     for smi in comp_smi_list:
         comp_mol_list = get_usable_fomat(smi)
@@ -761,14 +764,14 @@ def process_inputs(inputs):
             complimentary_mol_directory = str(os.sep).join([
                 dir_above_script_dir, "autogrow", "operators", "mutation",
                 "smiles_click_chem", "reaction_libraries",
-                vars_dict["rxn_library"].lower()])
+                vars_dict["rxn_library"].lower(), "complimentary_mol_dir"])
 
             complimentary_mol_directory = os.path.abspath(complimentary_mol_directory)
             if os.path.exists(complimentary_mol_directory) is False:
                 raise Exception("Please provide path to complimentary_mol_directory. \
                     Could not find the location of the directory")
 
-            inputs["complimentary_mol_directory"] = complimentary_mol_directory
+            inputs["complimentary_mol_directory"] = complimentary_mol_directory + os.sep
         else:
             raise Exception("Please provide path to complimentary_mol_directory. \
                 Could not find the location of the directory")
@@ -832,9 +835,11 @@ def process_inputs(inputs):
     inputs["single_image_folder"] = inputs["output_dir"] + "single_image_folder" + os.sep
     if os.path.exists(inputs["single_image_folder"]) is False:
         os.mkdir(inputs["single_image_folder"])
-
-    inputs["ancestry_image_folder"] = inputs["output_dir"]  \
-        + "ancestry_"+ inputs["mol_name"]  + os.sep
+    if "mol_name" not in inputs.keys():
+        inputs["mol_name"] = None
+    if inputs["pre_run"] is False:
+        inputs["ancestry_image_folder"] = inputs["output_dir"]  \
+            + "ancestry_"+ inputs["mol_name"]  + os.sep
     # Will wait to create this folder until its needed
 
     return inputs
