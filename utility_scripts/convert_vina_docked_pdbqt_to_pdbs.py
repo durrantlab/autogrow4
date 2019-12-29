@@ -201,7 +201,9 @@ def start_run_main(vars):
         pdbqt_files.extend(glob.glob(vina_docked_pdbqt_file + "*.pdbqt.VINA"))
         pdbqt_files.extend(glob.glob(vina_docked_pdbqt_file + "*.PDBQT.VINA"))
         pdbqt_files = list(set(pdbqt_files))
-
+        if len(pdbqt_files) == 0:
+            printout = "No .pdbqt.vina were found at: {}".format(vina_docked_pdbqt_file)
+            raise Exception(printout)
         job_input = tuple([tuple([vina_docked_pdbqt_file, output_folder, max_num_of_poses,
                                   max_docking_score, min_docking_score]) \
                                  for vina_docked_pdbqt_file in pdbqt_files])
