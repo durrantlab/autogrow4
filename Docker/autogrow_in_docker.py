@@ -85,9 +85,7 @@ def make_docker():
             "Please also make sure docker is installed on the system."
         print(printout)
         raise Exception(printout)
-
 #
-############################################
 def check_for_required_inputs(json_vars):
     """
     Confirm all the required inputs were provided.
@@ -309,8 +307,7 @@ def get_output_folder(json_vars):
 
     # os.system("sudo docker cp {}:Outputfolder.zip {}".format(container_id, folder_path))
     return folder_path
-
-
+#
 def move_files_to_temp_dir(json_vars):
     """
     This will move all files needed to a temp_user_files directory and will created a modified
@@ -382,7 +379,6 @@ def move_files_to_temp_dir(json_vars):
     # update permissions so files can be manipulated without sudo/admin
     os.system("chmod -R a+rwx {}".format(temp_dir_path))
     os.system("chmod -R a+rwx {}".format(output_and_log_dir))
-
 #
 def handle_json_info(vars):
     """
