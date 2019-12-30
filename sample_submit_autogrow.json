@@ -31,7 +31,6 @@
     "scoring_choice": "VINA",
     "dock_choice": "QuickVina2Docking",
     "gypsum_timeout_limit": 1,
-    "debug_mode": true,
-    "conversion_choice": "ObabelConversion",
-    "rxn_library": "click_chem_rxns"
+    "debug_mode": false,
+    "rxn_library": "all_rxns"
 }

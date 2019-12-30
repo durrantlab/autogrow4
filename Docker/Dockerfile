@@ -41,13 +41,18 @@ RUN cd /mgltool*/ && \
 RUN mkdir /autogrow4/
 ADD ./autogrow4 /autogrow4
 
+# Copy over User files for AutoGrow Run
+RUN mkdir /UserFiles
+ADD ./temp_user_files /UserFiles
+
 # Copy over the autogrow run script
 ADD ./run_autogrow_in_container.bash /autogrow/run_autogrow_in_container.bash
 RUN chmod +x /autogrow/run_autogrow_in_container.bash
 
 # Make directories for mounted host file systems
 RUN mkdir /Outputfolder
-RUN mkdir /UserFiles
+
+
 RUN ls autogrow4
 ENTRYPOINT ["bash", "/autogrow/run_autogrow_in_container.bash"]
 
