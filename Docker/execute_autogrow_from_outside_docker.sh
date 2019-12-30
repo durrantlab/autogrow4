@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# This code is used to run AutoGrow4 that is inside of the docker
+# from outside the docker. It also copies the results from within the
+# docker container to the root_output_folder
 temp_user_files=$1
 outfolder=$2
 echo "###################################"

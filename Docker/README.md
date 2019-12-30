@@ -23,7 +23,7 @@ To run AutoGrow4 in a docker, please run the `autogrow_in_docker.py` script:
         # normal pathing of your system.
         # Please note that the docker downloads its own copy of obabel and MGLTools
         # so you do not need to provide those paths.
-        2) `sudo python autogrow_in_docker.py -j ./sample_autogrow_json.json`
+        2) `sudo python autogrow_in_docker.py -j ./sample_autogrow_docker_json.json`
 
         # Results will be output to the directory specified by the root_output_folder variable
 
@@ -31,7 +31,7 @@ To run AutoGrow4 in a docker, please run the `autogrow_in_docker.py` script:
         1) open a docker enabled and bash enabled terminal with administrative priveledges
         #  cd to this directory in a bash terminal
         3) cd autogrow4/Docker/
-        4)  `python autogrow_in_docker.py -j ./sample_autogrow_json.json`
+        4)  `python autogrow_in_docker.py -j ./sample_autogrow_docker_json.json`
 
         # Results will be output to the directory specified by the root_output_folder variable
 
@@ -46,7 +46,7 @@ For Use in the Host System
   exceptions:
     1) User variables must be supplied in JSON format.
         - Please see documentation within the tutorial manual and an example can be found:
-          -  ./sample_autogrow_json.json
+          -  ./sample_autogrow_docker_json.json
 
     Required variables within the JSON file:
     - `-root_output_folder`: folder path on host system that results will be copied to.
@@ -59,7 +59,7 @@ For Use in the Host System
     - `-mgltools_directory` should not be specified.
 
 * `example.bash`: An example of how to use `autogrow_in_docker.py`.
-* `sample_autogrow_json.json`: A sample JSON file to supply `autogrow_in_docker.py`.
+* `sample_autogrow_docker_json.json`: A sample JSON file to supply `autogrow_in_docker.py`.
 * `build.bash`: Builds the `autogrow` docker image. This should be run by
     the python wrapper script `autogrow_in_docker.py` from the autogrow4/Docker/
     directory.
