@@ -1,11 +1,62 @@
 #!/usr/bin/env python
+"""
+This script will handle running AutoGrow4 in a docker container.
+It handles generating the docker image and container, handling the user variables,
+executing AutoGrow4, and copying the files from the container to the desired directory.
 
+This script requires a JSON file that contains all the parameters that would be
+required to run AutoGrow4 on a host system (ie paths on your computer).
+Necessary files, such as the receptor pdb, will be copied into the docker.
+
+To run AutoGrow from within docker. Launches docker
+  image. Accepts the exact same parameters as AutoGrow4, with the following
+  exceptions:
+    1) User variables must be supplied in JSON format.
+        - Please see documentation within the tutorial manual and an example can be found:
+          -  ./sample_autogrow_json.json
+
+    Required variables within the JSON file:
+    - `-root_output_folder`: folder path on host system that results will be copied to.
+    - `-source_compound_file`: Path on host system to the tab-delineate .smi
+        file that will seed generation 1.
+    - `-filename_of_receptor`: Path on host system of the receptor to be tested.
+    - `-center_x`, `-center_y`, `-center_z`: x,y,z coordinates of center of pocket to be tested.
+    - `-size_x`, `-size_y`, `-size_z`: dimensions of the pocket in x,y,z coordinates.
+    Variable that will be ignored:
+    - `-openbabel_bin_directory` should not be specified.
+    - `-mgltools_directory` should not be specified.
+
+The resulting AutoGrow4 output will be zipped and transfered to the desired
+root_output_folder.
+
+An example JSON is provided in: ./sample_autogrow_json.json
+
+
+To run AutoGrow4 in a docker, please run the `autogrow_in_docker.py` script:
+    Example on Linux/MacOS:
+        #  cd to this directory in a bash terminal
+        1) cd autogrow4/Docker/
+        # Run autogrow_in_docker.py with sudo and supply a json file using the
+        # normal pathing of your system.
+        # Please note that the docker downloads its own copy of obabel and MGLTools
+        # so you do not need to provide those paths.
+        2) `sudo python autogrow_in_docker.py -j ./sample_autogrow_json.json`
+
+        # Results will be output to the directory specified by the root_output_folder variable
+
+    Example on Windows OS:
+        1) open a docker enabled and bash enabled terminal with administrative priveledges
+        #  cd to this directory in a bash terminal
+        3) cd autogrow4/Docker/
+        4)  `python autogrow_in_docker.py -j ./sample_autogrow_json.json`
+
+        # Results will be output to the directory specified by the root_output_folder variable
+
+"""
 import os
-import sys
 import shutil
 import json
 import argparse
-import glob
 
 def make_docker():
     """
@@ -81,10 +132,9 @@ def check_for_required_inputs(json_vars):
     for x in ["center_x", "center_y", "center_z", "size_x", "size_y", "size_z"]:
         if type(json_vars[x]) in [float, int]:
             continue
-        else:
-            printout = "\n{} must be a float value.\n".format(x)
-            print(printout)
-            raise Exception(printout)
+        printout = "\n{} must be a float value.\n".format(x)
+        print(printout)
+        raise Exception(printout)
 
 
     #######################################
@@ -179,7 +229,7 @@ def find_previous_runs(folder_name_path):
     # A previous run exists. The number of the last run.
     last_run_number = i - 1
     return last_run_number
-# 
+#
 def set_run_directory(root_folder_path, start_a_new_run):
     """
     Determine and make the folder for the run directory.
@@ -238,7 +288,7 @@ def set_run_directory(root_folder_path, start_a_new_run):
     print("The Run folder path is: ", folder_path)
     print("")
     return folder_path
-# 
+#
 def get_output_folder(json_vars):
     """
     Find the folder for where to place output runs on host system.
@@ -255,11 +305,11 @@ def get_output_folder(json_vars):
         start_a_new_run = False
 
     root_output_folder = os.path.abspath(json_vars["root_output_folder"]) + os.sep
-    folder_path = set_run_directory(root_output_folder, start_a_new_run) 
+    folder_path = set_run_directory(root_output_folder, start_a_new_run)
 
     # os.system("sudo docker cp {}:Outputfolder.zip {}".format(container_id, folder_path))
     return folder_path
-    
+
 
 def move_files_to_temp_dir(json_vars):
     """
@@ -269,10 +319,6 @@ def move_files_to_temp_dir(json_vars):
 
     Inputs:
     :param dict json_vars: The parameters. A dictionary of {parameter name: value}.
-
-    Returns:
-    :returns: dict docker_json_vars: A modified version of the json dictionary
-        that is to be used within the docker container.
     """
     docker_json_vars = {}
     # make or remove and make the temp_user_files dir
@@ -337,7 +383,6 @@ def move_files_to_temp_dir(json_vars):
     os.system("chmod -R a+rwx {}".format(temp_dir_path))
     os.system("chmod -R a+rwx {}".format(output_and_log_dir))
 
-    return docker_json_vars
 #
 def handle_json_info(vars):
     """
@@ -353,8 +398,6 @@ def handle_json_info(vars):
     Returns:
     :param dict argv: Dictionary of User specified variables
     :param dict json_vars: Dictionary of User specified variables
-    :returns: dict docker_json_vars: A modified version of the json dictionary
-        that is to be used within the docker container.
     """
     print("Handling files")
 
@@ -365,10 +408,10 @@ def handle_json_info(vars):
         raise Exception(printout)
     json_vars = json.load(open(json_file))
     check_for_required_inputs(json_vars)
-    docker_json_vars = move_files_to_temp_dir(json_vars)
+    move_files_to_temp_dir(json_vars)
 
-    return json_vars, docker_json_vars
-# 
+    return json_vars
+#
 def run_autogrow_docker_main(vars):
     """
     This function runs the processing to:
@@ -395,7 +438,7 @@ def run_autogrow_docker_main(vars):
     # 2) copy files to a temp directory
     #     -receptor, .smi files ...
     # 3) make a JSON file with modified information for within docker
-    json_vars, docker_json_vars = handle_json_info(vars)
+    json_vars = handle_json_info(vars)
 
     # HANDLE RESTARTING A RUN!!!!!!!???? @@@@JAKE
 
@@ -414,7 +457,7 @@ def run_autogrow_docker_main(vars):
     command = "bash {} {} {}".format(execute_outside_docker, tmp_path, outfolder_path)
     os.system(command)
     print("AutoGrow Results placed in: {}".format(outfolder_path))
-# 
+#
 
 PARSER = argparse.ArgumentParser()
 
@@ -432,8 +475,3 @@ PARSER.add_argument(
 
 ARGS_DICT = vars(PARSER.parse_args())
 run_autogrow_docker_main(ARGS_DICT)
-
-# sudo docker run autogrow -it \
-#     -v /home/jacob/Documents/autogrow4/Docker/.temp_user_files:/autogrow_work_dir/ \
-#     -filename_of_receptor ../tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
-#     -output_dir /autogrow_work_dir/autogrow_output/

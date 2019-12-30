@@ -8,7 +8,7 @@ echo "###################################"
 # sudo docker run --rm  -v $temp_user_files \
 #     --name autogrow
 docker run autogrow4 \
-    --name autogrow4 -/UserFiles/docker_json_vars.json    
+    --name autogrow4 -/UserFiles/docker_json_vars.json
 
 
 # CONTAINER_ID=$(sudo docker ps -alq)
