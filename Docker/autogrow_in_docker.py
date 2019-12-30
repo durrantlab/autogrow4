@@ -311,7 +311,7 @@ def move_files_to_temp_dir(json_vars):
         temp_path = temp_dir_path + basename
         if os.path.isdir(var_item):
             shutil.copytree(var_item, temp_path)
-            docker_json_vars[var_name] = "/UserFiles/" + basename + os.sep
+            docker_json_vars[var_name] = "/UserFiles/" + basename + "/"
             continue
 
         if os.path.isfile(var_item):
