@@ -25,10 +25,12 @@ def make_docker():
     build_bash_script = script_dir + "build.bash"
     try:
         os.system("cd {}".format(script_dir))
-        os.system("sudo bash {} > {}".format(build_bash_script, log_file))
+        os.system("bash {} > {}".format(build_bash_script, log_file))
     except:
         printout = "\nCan not create a docker file. Please make sure to run the " + \
-            "script with sudo priveledges 'sudo bash build.bash'\n" + \
+            "script with sudo/administrative priveledges.\nIf Linux/MacOS:" + \
+            "\t'sudo bash build.bash'\nnIf Windows:\tRun from bash and " + \
+            "docker enabled terminal with administrative priveledges.\n" + \
             "Please also make sure docker is installed on the system."
         print(printout)
         raise Exception(printout)
@@ -113,7 +115,7 @@ def check_for_required_inputs(json_vars):
         # directory doesn't exist, then make it
         try:
             os.makedirs(json_vars["root_output_folder"])
-            os.system("chmod +x {}".format(json_vars["root_output_folder"]))
+            os.system("chmod -R a+rwx {}".format(json_vars["root_output_folder"]))
         except:
             raise NotImplementedError(
                 "root_output_folder could not be found and could not be created. \
@@ -230,7 +232,7 @@ def set_run_directory(root_folder_path, start_a_new_run):
             run_number = last_run_number + 1
             folder_path = "{}{}{}".format(folder_name_path, run_number, os.sep)
             os.mkdir(folder_path)
-            os.system("chmod +x {}".format(folder_path))
+            os.system("chmod -R a+rwx {}".format(folder_path))
 
     print("The Run number is: ", run_number)
     print("The Run folder path is: ", folder_path)
@@ -278,23 +280,22 @@ def move_files_to_temp_dir(json_vars):
     if os.path.exists(temp_dir_path):
         shutil.rmtree(temp_dir_path)
     os.mkdir(temp_dir_path)
-    os.system("chmod +x {}".format(temp_dir_path))
+    os.system("chmod -R a+rwx {}".format(temp_dir_path))
 
     # make or remove and make an output_and_log_dir
     output_and_log_dir = os.path.abspath("output_and_log_dir") + os.sep
     if os.path.exists(output_and_log_dir):
         shutil.rmtree(output_and_log_dir)
     os.mkdir(output_and_log_dir)
-    os.system("chmod +x {}".format(output_and_log_dir))
+    os.system("chmod -R a+rwx {}".format(output_and_log_dir))
 
     print("copying files into temp directory: temp_user_files")
     # get files from json_vars
     for var_name in json_vars.keys():
         var_item = json_vars[var_name]
-        if type(var_item) not in [str, unicode]:
+        if str(type(var_item)) not in ["<type 'unicode'>", "<type 'unicode'>"]:
             continue
-        if type(var_item) == unicode:
-            var_item = str(var_item)
+        var_item = str(var_item)
         # This could be a different variable that is not a path
         # ie) dock_choice: QuickVina2 would be a string that is not a path
         if os.path.exists(var_item) is False:
@@ -331,6 +332,10 @@ def move_files_to_temp_dir(json_vars):
 
     with open(temp_dir_path + "docker_json_vars.json", "w") as file_item:
         json.dump(docker_json_vars, file_item, indent=4)
+
+    # update permissions so files can be manipulated without sudo/admin
+    os.system("chmod -R a+rwx {}".format(temp_dir_path))
+    os.system("chmod -R a+rwx {}".format(output_and_log_dir))
 
     return docker_json_vars
 #
@@ -406,7 +411,7 @@ def run_autogrow_docker_main(vars):
     tmp_path = os.path.abspath("temp_user_files")
     script_dir = str(os.path.dirname(os.path.realpath(__file__))) + os.sep
     execute_outside_docker = script_dir + "execute_autogrow_from_outside_docker.sh"
-    command = "sudo bash {} {} {}".format(execute_outside_docker, tmp_path, outfolder_path)
+    command = "bash {} {} {}".format(execute_outside_docker, tmp_path, outfolder_path)
     os.system(command)
     print("AutoGrow Results placed in: {}".format(outfolder_path))
 # 

@@ -28,8 +28,9 @@ if echo $* | grep -q "json"; then
 
     # Zip up results and move to working directory.
     # cd //Output/
+    chmod -R a+rwx Outputfolder/
     zip -r Outputfolder.zip Outputfolder/
-
+    chmod -R a+rwx Outputfolder.zip
 fi
 # For interactive
 bash

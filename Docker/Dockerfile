@@ -15,7 +15,7 @@ RUN apt-get -yqq install zip
 # Install python
 RUN apt-get -yqq install bzip2
 RUN wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
-RUN chmod +x Miniconda3-latest-Linux-x86_64.sh
+RUN chmod -R a+rwx Miniconda3-latest-Linux-x86_64.sh
 RUN ./Miniconda3-latest-Linux-x86_64.sh -b
 RUN rm ./Miniconda3-latest-Linux-x86_64.sh
 RUN echo "alias python=/root/miniconda3/bin/python" >> /root/.bashrc
@@ -47,7 +47,7 @@ ADD ./temp_user_files /UserFiles
 
 # Copy over the autogrow run script
 ADD ./run_autogrow_in_container.bash /autogrow/run_autogrow_in_container.bash
-RUN chmod +x /autogrow/run_autogrow_in_container.bash
+RUN chmod -R a+rwx /autogrow/run_autogrow_in_container.bash
 
 # Make directories for mounted host file systems
 RUN mkdir /Outputfolder
