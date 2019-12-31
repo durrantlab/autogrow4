@@ -3,6 +3,21 @@
 This document will break down the how to run Autogrow. It will also cover what 
 dependencies are required to run Autogrow. 
 
+Please note file paths are relative to a given system. There are several paths in the tutorial
+which need to be replaced with the proper path on ones system. These paths will be indicated by
+a string of ALL_CAPS:
+    For example (From section "Installing AutoGrow"):
+        cd /PATH_TO/DESIRED_DIR/
+
+        Must replace "/PATH_TO/DESIRED_DIR/" with the path to the directory you would
+        like to place autogrow4 in. On a Ubuntu OS this may look like:
+            cd /home/jacob/Documents/
+
+    For brevity the directory of autogrow4 is represented simplified to /autogrow4/
+    throughout this tutorial. You may need to supply the /PATH_TO/DESIRED_DIR/ 
+    described above before the /autogrow4/
+        
+
 ##  Computer Requirements:
     Autogrow has been tested on Ubuntu 16.04 and higher, as well as MacOS 10.13: High Sierra. 
     It has been verified to work on HPC using SMP multithreading running RedHat Enterprise Server release 7.3 Maipo.
@@ -11,8 +26,8 @@ dependencies are required to run Autogrow.
 #
 ##  Installing AutoGrow :
     AutoGrow 4.0.0 can be install by git clone command: 
-        1) cd PATH/desired_dir/
-        2) git clone https://git.durrantlab.pitt.edu/jdurrant/autogrow
+        1) cd /PATH_TO/DESIRED_DIR/
+        2) git clone https://git.durrantlab.pitt.edu/jdurrant/autogrow4
 
 # 
 ##  Dependencies:
@@ -57,13 +72,13 @@ dependencies are required to run Autogrow.
     Once the command-line version of MGLTools package has been downloaded follow example installation provided below, which uses a Linux system
     with the 1.5.6 version of MGLTools.
         1) Extract files by unzipping/untar the package:
-            tar -xvf $PATH/mgltools_x86_64Linux2_1.5.6.tar.gz
+            tar -xvf /PATH_TO/mgltools_x86_64Linux2_1.5.6.tar.gz
         2) Go to the extract folder:
-            cd  $PATH/mgltools_x86_64Linux2_1.5.6
+            cd  /PATH_TO/mgltools_x86_64Linux2_1.5.6
         3) Run the installation script and make sure MGLToolsPckgs is unpacked:
             bash install.sh
-            #if $PATH/mgltools_x86_64Linux2_1.5.6/MGLToolsPckgs/ is not a folder manually unzip/untar MGLToolsPckgs.tar.gz
-            tar -xvf $PATH/mgltools_x86_64Linux2_1.5.6/MGLToolsPckgs.tar.gz
+            #if /PATH_TO/mgltools_x86_64Linux2_1.5.6/MGLToolsPckgs/ is not a folder manually unzip/untar MGLToolsPckgs.tar.gz
+            tar -xvf /PATH_TO/mgltools_x86_64Linux2_1.5.6/MGLToolsPckgs.tar.gz
 
         4) Click 'OK' to the licensing agreement. Please note MGLTools is free for academic use but may require a license for commerical usage.
             -This should open automatically
@@ -73,24 +88,24 @@ dependencies are required to run Autogrow.
     To use MGLTools to convert files, AutoGrow requires the path to the MGLTools directory.
         The path can be found by 
             1) going to the extract folder:
-                >>> cd  $PATH/mgltools_x86_64Linux2_1.5.6
+                >>> cd  /PATH_TO/mgltools_x86_64Linux2_1.5.6
             2) use pwd function in bash
                 >>> pwd
-                    $PATH/mgltools_x86_64Linux2_1.5.6/
+                    /PATH_TO/mgltools_x86_64Linux2_1.5.6/
                 The output string will be the absolute path to the MGLTools directory.
 
     The installed MGLTools directory is provided to Autogrow using the variable: --mgltools_directory
-        python RunAutogrow.py .. --mgltools_directory $PATH/mgltools_x86_64Linux2_1.5.6 ...
+        python RunAutogrow.py .. --mgltools_directory /PATH_TO/mgltools_x86_64Linux2_1.5.6 ...
     On Linux and MacOS machines, Autogrow will autolocate three important file paths based on mgltools_directory:
         -prepare_ligand4.py     mgltools_directory + /MGLToolsPckgs/AutoDockTools/Utilities24/prepare_ligand4.py
         -prepare_receptor4.py   mgltools_directory + /MGLToolsPckgs/AutoDockTools/Utilities24/prepare_receptor4.py
         -mgl_python             mgltools_directory + /bin/pythonsh
     If running a Windows OS (not fully supported by this version of Autogrow) please provide those pathings to AutoGrow manually:
         python RunAutogrow.py .. \
-        --mgltools_directory $PATH\mgltools_win32_1.5.6\ \
-        --prepare_ligand4.py $PATH\mgltools_win32_1.5.6\ \
-        --prepare_receptor4.py $PATH\mgltools_win32_1.5.6\ \
-        --mgl_python $PATH\mgltools_win32_1.5.6\ + $PATH\TO\pythonsh ...
+        --mgltools_directory /PATH_TO/mgltools_win32_1.5.6\ \
+        --prepare_ligand4.py /PATH_TO/mgltools_win32_1.5.6\ \
+        --prepare_receptor4.py /PATH_TO/mgltools_win32_1.5.6\ \
+        --mgl_python /PATH_TO/mgltools_win32_1.5.6\ + /PATH_TO/pythonsh ...
 
     If one wants to provide a custom pathing to these location, providing these variables at the commandline will override any autolocation.
 
@@ -116,9 +131,9 @@ dependencies are required to run Autogrow.
     To use obabel to convert files, AutoGrow requires the path to the obabel executable. 
     Once installed the path to the obabel executable can be found by running:
         >>> which obabel
-            $PATH/obabel
+            /PATH_TO/obabel
     This path should be provided to AutoGrow using the --obabel_path variable:
-        python RunAutogrow.py .. --obabel_path $PATH/obabel ...
+        python RunAutogrow.py .. --obabel_path /PATH_TO/obabel ...
 
     
 ### Python APIs: (Required)
@@ -207,22 +222,22 @@ from rdkit.Chem.rdchem import BondStereo
     AutoGrow 4.0.0 comes preinstalled with two docking programs:
         -Autodock Vina 1.1.2 (packaged with executables for Linux, MacOS, and Windows)
             -Version:   1.1.2
-            -Location:  $PATH/autogrow4/autogrow/docking/docking_executables/vina/
+            -Location:  /autogrow4/autogrow/docking/docking_executables/vina/
             -Citation:  Trott, O., & Olson, A. J. (2010). AutoDock Vina: improving the speed and accuracy of docking with a new scoring function, efficient optimization, and multithreading. Journal of computational chemistry, 31(2), 455–461. doi:10.1002/jcc.21334
             -License:   Apache version 2
 
         -QuickVina2.1 (compatible with Linux OS)
             -Version:   2.1
-            -Location:  $PATH/autogrow4/autogrow/docking/docking_executables/q_vina_2/
+            -Location:  /autogrow4/autogrow/docking/docking_executables/q_vina_2/
             -Citation:  Amr Alhossary, Stephanus Daniel Handoko, Yuguang Mu, and Chee-Keong Kwoh. Bioinformatics (2015) 31 (13): 2214-2216. [DOI:10.1093/bioinformatics/btv082](https://doi.org/10.1093/bioinformatics/btv082)
             -License:   Apache version 2
 
-    These softwares can be found within the directory $PATH/autogrow4/autogrow/docking/docking_executables/
+    These softwares can be found within the directory /autogrow4/autogrow/docking/docking_executables/
 
 
     AutoGrow allows users to provide custom docking software. 
     This could be as simple as using a different version of Autodock Vina:
-        Example: python RunAutogrow.py ... --docking_executable $PATH/TO/Autodock_Vina_version_X_executable
+        Example: python RunAutogrow.py ... --docking_executable /PATH_TO/Autodock_Vina_version_X_executable
     Or
     A slightly more involved incorporation of a completely new docking software type:
         Details for custom docking suites are provided below in the section "Providing Custom options"
@@ -237,12 +252,12 @@ from rdkit.Chem.rdchem import BondStereo
 
     -NNScore 1: 
         -Version:   1.1
-        -Location:  $PATH/autogrow4/autogrow/docking/scoring/nn_score_exe/nnscore1/
+        -Location:  /autogrow4/autogrow/docking/scoring/nn_score_exe/nnscore1/
         -Citation:  NNScore: A Neural-Network-Based Scoring Function for the Characterization of Protein-Ligand Complexes. Jacob D. Durrant, J. Andrew McCammon. Journal of Chemical Information and Modeling, 2010, 50 (10), pp 1865-1871.
         -License:   GNU General Public version 3
     -NNScore 2: 
         -Version:   2.02
-        -Location:  $PATH/autogrow4/autogrow/docking/scoring/nn_score_exe/nnscore2/
+        -Location:  /autogrow4/autogrow/docking/scoring/nn_score_exe/nnscore2/
         -Citation:  NNScore 2.0: A Neural-Network Receptor–Ligand Scoring Function. Jacob D. Durrant, Andrew McCammon. Journal of Chemical Information and Modeling, 2011, 51 (11), pp 2897-2903.
         -License:   GNU General Public version 3
 
@@ -253,17 +268,17 @@ from rdkit.Chem.rdchem import BondStereo
 
     -Gypsum_dl: 
         -Version:   1.1.1
-        -Location:  $PATH/autogrow4/autogrow/operators/convert_files/gypsum_dl/
+        -Location:  /autogrow4/autogrow/operators/convert_files/gypsum_dl/
         -Citation:  Ropp PJ, Spiegel JO, Walker JL, Green H, Morales GA, Milliken KA, Ringe JJ, Durrant JD. Gypsum-DL: An Open-Source Program for Preparing Small-Molecule Libraries for Structure-Based Virtual Screening. J Cheminform. 11(1):34, 2019. [PMID: 31127411] [doi: 10.1186/s13321-019-0358-3]
         -License:   Apache version 2.0
     -Dimorphite_dl: 
         -Version:   1.2.2
-        -Location:  $PATH/autogrow4/autogrow/operators/convert_files/gypsum_dl/gypsum_dl/Steps/SMILES/dimorphite_dl
+        -Location:  /autogrow4/autogrow/operators/convert_files/gypsum_dl/gypsum_dl/Steps/SMILES/dimorphite_dl
         -Citation:  Ropp PJ, Kaminsky JC, Yablonski S, Durrant JD (2019) Dimorphite-DL: An open-source program for enumerating the ionization states of drug-like small molecules. J Cheminform 11:14. doi:10.1186/s13321-019-0336-9.
         -License:   Apache version 2.0
     -MolVS: 
         -Version:   v0.1.1 2019 release
-        -Location:  $PATH/autogrow4/autogrow/operators/convert_files/gypsum_dl/gypsum_dl/molvs
+        -Location:  /autogrow4/autogrow/operators/convert_files/gypsum_dl/gypsum_dl/molvs
         -Citation:  https://molvs.readthedocs.io; Take from https://github.com/mcs07/MolVS
         -License:   MIT License
 
@@ -273,14 +288,14 @@ from rdkit.Chem.rdchem import BondStereo
     Autogrow is a commandline operated python program. It has two options for job submission:
      1) commandline submission: executing directly from the commandline.
          Example:
-             cd $PATH/autogrow/
+             cd /PATH_TO/autogrow4/
 
              python RunAutogrow.py \
-                 --filename_of_receptor $PATH/autogrow4/autogrow/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
+                 --filename_of_receptor /autogrow4/autogrow/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
                  --center_x -70.76 --center_y  21.82 --center_z 28.33 \
                  --size_x 25.0 --size_y 16.0 --size_z 25.0 \
-                 --source_compound_file $PATH/autogrow4/autogrow/source_compounds/naphthalene_smiles.smi \
-                 --root_output_folder $PATH/output_directory/ \
+                 --source_compound_file /autogrow4/autogrow/source_compounds/naphthalene_smiles.smi \
+                 --root_output_folder /PATH_TO/output_directory/ \
                  --number_of_mutants_first_generation 50 \
                  --number_of_crossovers_first_generation 50 \
                  --number_of_mutants 50 \
@@ -291,7 +306,7 @@ from rdkit.Chem.rdchem import BondStereo
                  --diversity_mols_to_seed_first_generation 10 \
                  --diversity_seed_depreciation_per_gen 10 \
                  --num_generations 5 \
-                 --mgltools_directory $PATH/mgltools_x86_64Linux2_1.5.6/ \
+                 --mgltools_directory /PATH_TO/mgltools_x86_64Linux2_1.5.6/ \
                  --number_of_processors -1 \
                  --scoring_choice VINA \
                  --LipinskiLenientFilter \
@@ -304,21 +319,60 @@ from rdkit.Chem.rdchem import BondStereo
                  --generate_plot True \
                  --reduce_files_sizes True \
                  --use_docked_source_compounds True \
-                 >  $PATH/OUTPUT/text_file.txt 2>  $PATH/OUTPUT/text_errormessage_file.txt
+                 >  /PATH_TO/OUTPUT/text_file.txt 2>  /PATH_TO/OUTPUT/text_errormessage_file.txt
      2) json file submission: store variables for AutoGrow in a .json file
          Example:
-             cd $PATH/autogrow/   
-             python RunAutogrow.py -j $PATH/json_file_with_variable.json
+             cd /PATH_TO/autogrow4/   
+             python RunAutogrow.py -j /PATH_TO/json_file_with_variable.json
 
      Examples of the json files can be found in the tutorial folder.
 #
 ## Understanding Autogrow parameters:
     A explanation of every parameter can be retrieved by running:
-        python $PATH/autogrow4/RunAutogrow.py --help
+        python /autogrow4/RunAutogrow.py --help
     
 #
-## Docker submission: For Windows users
-    @@@@@@@@@JAKE Fill in with how to use once it has been included
+## Docker submission:
+    The/autogrow4/Docker/ directory contains the scripts to run AutoGrow4 within a docker
+    container. These scripts are useful when using OS that is not compatible with AutoGrow 
+    dependencies or are not supported by our current multithreading approach, such as Windows.
+
+    Prior to running these scripts please install docker software. Please also
+    always run these scripts with sudo (Linux/MacOS) or administrative
+    priveledges (Window).
+
+    The first time running AutoGrow4 with docker (or if docker images have been purged),
+    will take a few minutes longer to install dependencies within the docker enviorment.
+
+    Depending on the AutoGrow4 settings, processor speed/count... AutoGrow4 may complete
+    within minutes or may take as long as multiple days. For this reason please make sure
+    to run in settings that can handle that will be able to run complete without being
+    disrupted or disruptive. Using nohup may be a useful wrapper for longer runs or
+    when running jobs remotes (ie running a job over ssh).
+
+### Running AutoGrow4 in docker:
+    To run AutoGrow4 in a docker, please first install docker software.
+    
+    Then run the `autogrow_in_docker.py` script:
+        Example on Linux/MacOS:
+            #  cd to this directory in a bash terminal
+            1) cd /autogrow4/Docker/
+            # Run autogrow_in_docker.py with sudo and supply a json file using the
+            # normal pathing of your system.
+            # Please note that the docker downloads its own copy of obabel and MGLTools
+            # so you do not need to provide those paths.
+            2) `sudo python autogrow_in_docker.py -j ./sample_autogrow_docker_json.json`
+
+            # Results will be output to the directory specified by the root_output_folder variable
+
+        Example on Windows OS:
+            1) open a docker enabled and bash enabled terminal with administrative priveledges
+            #  cd to this directory in a bash terminal
+            3) cd /autogrow4/Docker/
+            4)  `python autogrow_in_docker.py -j ./sample_autogrow_docker_json.json`
+
+            # Results will be output to the directory specified by the root_output_folder variable
+
 #
 ## Providing Custom options:
     AutoGrow was designed to be modular. This allows for the easy swaping of code.
@@ -350,11 +404,11 @@ from rdkit.Chem.rdchem import BondStereo
     These filters are applied to ligands after they are created by mutation/crossover 
     but before Gypsum_dl conversion to 3D.
 
-    This custom code will be copied to the directory: $PATH/autogrow4/autogrow/operators/filter/filter_classes/filter_children_classes/
+    This custom code will be copied to the directory: /autogrow4/autogrow/operators/filter/filter_classes/filter_children_classes/
 #####   Script formating:
     These filters use a class-based inheritance architecture which require:
     1) Filter must be instanced off of the ParentFilterClass located:
-        - $PATH/autogrow4/autogrow/operators/filter/filter_classes/parent_filter_class.py
+        - /autogrow4/autogrow/operators/filter/filter_classes/parent_filter_class.py
     2) Have a unique name: class unique_name(ParentFilter)
         -unique_name cannot be one of the predefined filters
     3) Must have at least one function called run_filter
@@ -362,35 +416,35 @@ from rdkit.Chem.rdchem import BondStereo
 
 #####   Running custom Filters:
     Example shown is to submit multiple custom filters:
-        alternative_filter [["custom_filter_1","$PATH/custom_filter_1.py"],["custom_filter_2","$PATH//custom_filter_2.py"]]
+        alternative_filter [["custom_filter_1","/PATH_TO/custom_filter_1.py"],["custom_filter_2","/PATH_TO//custom_filter_2.py"]]
     To sumbit for a single custom filter it should be:
-        alternative_filter [["custom_filter_1","$PATH/custom_filter_1.py"]]
+        alternative_filter [["custom_filter_1","/PATH_TO/custom_filter_1.py"]]
         
     Submission through .json format: 
 
         {
             ... ,
-            "alternative_filter": [["custom_filter_1","$PATH/custom_filter_1.py"],["custom_filter_2","$PATH/custom_filter_2.py"]]
+            "alternative_filter": [["custom_filter_1","/PATH_TO/custom_filter_1.py"],["custom_filter_2","/PATH_TO/custom_filter_2.py"]]
         }
 
-        python RunAutogrow.py -j $PATH/To/json_file_with_variable.json
+        python RunAutogrow.py -j /PATH_TO/json_file_with_variable.json
 
 
     Commandline submission format: 
         python RunAutogrow.py \
             ... \
-            --alternative_filter [["custom_filter_1","$PATH/custom_filter_1.py"],["custom_filter_2","$PATH/custom_filter_2.py"]]
+            --alternative_filter [["custom_filter_1","/PATH_TO/custom_filter_1.py"],["custom_filter_2","/PATH_TO/custom_filter_2.py"]]
     # 
 ### 2) Custom docking code: ***
     This feature allows the user to incorporate custom python scripts for docking ligands.
     Currently AutoGrow is configured to dock using Autodock Vina and QuickVina2, but AutoGrow is not limited to these docking softwares.
     A custom script can be added to run docking using virtually any software. 
 
-    This custom code will be copied to the directory: $PATH/autogrow4/autogrow/docking/docking_class/docking_class_children/
+    This custom code will be copied to the directory: /autogrow4/autogrow/docking/docking_class/docking_class_children/
 #####   Script formating:    
     These docking scripts use a class-based inheritance architecture which require:
     1) Docking class object must be instanced off of the ParentDocking located:
-        - $PATH/autogrow4/autogrow/docking/docking_class/parent_dock_class.py
+        - /autogrow4/autogrow/docking/docking_class/parent_dock_class.py
     2) Have a unique name: class unique_name(ParentDocking)
         -unique_name can not be one of the predefined docking scripts (currently just VinaDocking and QuickVina2Docking)
     3) Must have atleast have three functions following the below formating:
@@ -447,30 +501,30 @@ from rdkit.Chem.rdchem import BondStereo
 
         {
             ...
-            "docking_executable": "$PATH/To/executable/for/custom_docking",
+            "docking_executable": "/PATH_TO/EXECUTABLE_FOR_CUSTOM_DOCKING/custom_docking",
             "dock_choice": "Custom",
-            "custom_docking_script": ["custom_docking", "$PATH/To/class_object/for/custom_docking.py"]
+            "custom_docking_script": ["custom_docking", "/PATH_TO/CLASS_OBJECT_FOR_CUSTOM_DOCKING/custom_docking.py"]
         }
 
-        python RunAutogrow.py -j $PATH/To/json_file_with_variable.json
+        python RunAutogrow.py -j /PATH_TO/To/json_file_with_variable.json
 
 
     Commandline submission format: 
         python RunAutogrow.py \
             ... \
-            --docking_executable "$PATH/To/executable/for/custom_docking" \
+            --docking_executable "/PATH_TO/EXECUTABLE_FOR_CUSTOM_DOCKING/custom_docking" \
             --dock_choice Custom \
-            --alternative_filter ["custom_docking", "$PATH/To/class_object/for/custom_docking.py"]
+            --alternative_filter ["custom_docking", "/PATH_TO/CLASS_OBJECT_FOR_CUSTOM_DOCKING/custom_docking.py"]
 
 ### 3) Custom ligand conversion code from PDB to dockable format (ie PDBQT) ***
     If using a docking software other than VINA/QuickVina is being used, one may need to convert the pdb format ligands into a different format or it may take .pdb files.
     If taking a format other than .pdbqt users will need to provide a custom script to convert ligands (or simply do nothing if it takes .pdbs).
 
-    This custom code will be copied to the directory: $PATH/autogrow4/autogrow/docking/docking_class/docking_class_children/
+    This custom code will be copied to the directory: /autogrow4/autogrow/docking/docking_class/docking_class_children/
 #####   Script formating:    
     These conversion scripts use a class-based inheritance architecture which require:
     1) Conversion class object must be instanced off of the ParentPDBQTConverter located:
-        - $PATH/autogrow4/autogrow/docking/docking_class/parent_pdbqt_converter.py
+        - /autogrow4/autogrow/docking/docking_class/parent_pdbqt_converter.py
     2) Have a unique name: class unique_name(ParentPDBQTConverter)
         -unique_name can not be one of the predefined docking scripts 
         Currently files named: convert_with_mgltools.py and convert_with_obabel.py
@@ -515,16 +569,16 @@ from rdkit.Chem.rdchem import BondStereo
         {
             ...
             "conversion_choice": "Custom",
-            "custom_conversion_script": ["custom_conversion", "$PATH/To/class_object/for/custom_conversion.py"]
+            "custom_conversion_script": ["custom_conversion", "/PATH_TO/CLASS_OBJECT_FOR/custom_conversion.py"]
         }
 
-        python RunAutogrow.py -j $PATH/To/json_file_with_variable.json
+        python RunAutogrow.py -j /PATH_TO/JSON_FILE/json_file_with_variable.json
 
     Commandline submission format: 
         python RunAutogrow.py \
             ... \
             --conversion_choice Custom \
-            --custom_conversion_script ["custom_conversion", "$PATH/To/class_object/for/custom_conversion.py"]
+            --custom_conversion_script ["custom_conversion", "/PATH_TO/CLASS_OBJECT_FOR/for/custom_conversion.py"]
 
 
 ### 4) Custom Scoring/Rescoring code ***
@@ -535,11 +589,11 @@ from rdkit.Chem.rdchem import BondStereo
     
     Users can incorporate custom scoring and rescoring options into AutoGrow. 
     
-    This custom code will be copied to the directory: $PATH/autogrow4/autogrow/docking/scoring/scoring_classes/
+    This custom code will be copied to the directory: /autogrow4/autogrow/docking/scoring/scoring_classes/
 #####   Script formating:    
     These conversion scripts use a class-based inheritance architecture which require:
     1) Conversion class object must be instanced off of the parent_scoring_class located:
-        - $PATH/autogrow4/autogrow/docking/scoring/scoring_classes/parent_scoring_class.py
+        - /autogrow4/autogrow/docking/scoring/scoring_classes/parent_scoring_class.py
     2) Have a unique name: class unique_name(parent_scoring_class)
         -unique_name can not be one of the predefined docking scripts 
         Currently files named: vina.py, nn1.py, nn2.py, and lig_efficiency.py
@@ -570,16 +624,16 @@ from rdkit.Chem.rdchem import BondStereo
         {
             ...
             "scoring_choice": "Custom",
-            "custom_scoring_script": ["custom_scoring_name", "$PATH/To/class_object/for/custom_scoring.py"]
+            "custom_scoring_script": ["custom_scoring_name", "/PATH_TO/CLASS_OBJECT_FOR/custom_scoring.py"]
         }
 
-        python RunAutogrow.py -j $PATH/To/json_file_with_variable.json
+        python RunAutogrow.py -j /PATH_TO/JSON_FILE/json_file_with_variable.json
 
     Commandline submission format: 
         python RunAutogrow.py \
             ... \
             --conversion_choice Custom \
-            --custom_conversion_script ["custom_scoring_name", "$PATH/To/class_object/for/custom_scoring.py"]
+            --custom_conversion_script ["custom_scoring_name", "/PATH_TO/CLASS_OBJECT_FOR/custom_scoring.py"]
 
     # 
 ### 5) Custom Reaction libraries
@@ -596,7 +650,7 @@ from rdkit.Chem.rdchem import BondStereo
     about the reaction as the item. 
 
     We provide a script to check Complimentary and Reaction libraries molecule libraries at:
-        autogrow4/utility_scripts/test_complimentary_mol_library.py
+        /autogrow4/utility_scripts/test_complimentary_mol_library.py
         A tutorial is provided in the Utility Scripts section of this document
 
     If using this you will need three pieces of information each explained below:
@@ -616,9 +670,9 @@ from rdkit.Chem.rdchem import BondStereo
 
     An example libraries can be found: 
 
-        autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/all_rxns/All_Rxns_rxn_library.json
-        autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/click_chem_rxns_library.json
-        autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/robust_rxns/Robust_Rxns_rxn_library.json            
+        /autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/all_rxns/All_Rxns_rxn_library.json
+        /autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/click_chem_rxns_library.json
+        /autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/robust_rxns/Robust_Rxns_rxn_library.json            
     
     Reaction libraries identify ligands capable of reacting in a given reaction using the information
     found in the subdictionary's items "functional_groups" and "group_smarts". 
@@ -649,9 +703,9 @@ from rdkit.Chem.rdchem import BondStereo
         }
     Examples can be found: 
 
-        autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/all_rxns/All_Rxns_functional_groups.json
-        autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/click_chem_functional_groups.json
-        autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/robust_rxns/Robust_Rxns_functional_groups.json
+        /autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/all_rxns/All_Rxns_functional_groups.json
+        /autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/click_chem_functional_groups.json
+        /autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/robust_rxns/Robust_Rxns_functional_groups.json
 
     The SMARTS strings provided in this file should also be present in each subdirctionary of the Reaction library .json file
     that references that functional group, 
@@ -665,7 +719,7 @@ from rdkit.Chem.rdchem import BondStereo
     For this reason we require a directory populated with .smi files containing small molecules that match each functional group.
 
     The name of each .smi file should be the name of the functional group (the keys of the Functional group library .json file) +.smi
-        Example the .smi file for the functional group "Acid_Anhydride_Noncyclic" should be $PATH/complimentary_mol_directory/Acid_Anhydride_Noncyclic.smi
+        Example the .smi file for the functional group "Acid_Anhydride_Noncyclic" should be /PATH_TO/complimentary_mol_directory/Acid_Anhydride_Noncyclic.smi
 
     THERE MUST BE ONE ENTRY PER FUNCTIONAL GROUP. NAMES ARE CAP SENSITIVE.
 
@@ -690,20 +744,20 @@ from rdkit.Chem.rdchem import BondStereo
         {
             ...
             "rxn_library": "Custom",
-            "rxn_library_file": "$PATH/To/rxn_library_file.json",
-            "function_group_library": "$PATH/To/function_group_library.json",
-            "complimentary_mol_directory": "$PATH/To/complimentary_mol_directory/",
+            "rxn_library_file": "/PATH_TO/rxn_library_file.json",
+            "function_group_library": "/PATH_TO/function_group_library.json",
+            "complimentary_mol_directory": "/PATH_TO/complimentary_mol_directory/",
         }
 
-        python RunAutogrow.py -j $PATH/To/json_file_with_variable.json
+        python RunAutogrow.py -j /PATH_TO/json_file_with_variable.json
 
     Commandline submission format: 
         python RunAutogrow.py \
             ... \
             --rxn_library Custom \
-            --rxn_library_file $PATH/To/rxn_library_file.json \
-            --function_group_library $PATH/To/function_group_library.json \
-            --complimentary_mol_directory $PATH/To/complimentary_mol_directory/ 
+            --rxn_library_file /PATH_TO/rxn_library_file.json \
+            --function_group_library /PATH_TO/function_group_library.json \
+            --complimentary_mol_directory /PATH_TO/complimentary_mol_directory/ 
     # 
 ### 6) Custom Complimentary molecule libraries for Mutation:
     One can provide custom libraries of molecules to suppliment reactions by using the --complimentary_mol_directory option.
@@ -715,7 +769,7 @@ from rdkit.Chem.rdchem import BondStereo
     If a ligand does not match the inteded functional group the reaction will fail and it will slow the process of mutant creation.
 
     We provide a script to check Complimentary molecule libraries at:
-        autogrow4/utility_scripts/test_complimentary_mol_library.py
+        /autogrow4/utility_scripts/test_complimentary_mol_library.py
         A tutorial is provided in the Utility Scripts section of this document
 
     THERE MUST BE ONE ENTRY PER FUNCTIONAL GROUP. NAMES ARE CAP SENSITIVE.
@@ -733,15 +787,15 @@ from rdkit.Chem.rdchem import BondStereo
 
         {
             ...
-            "complimentary_mol_directory": "$PATH/To/complimentary_mol_directory/",
+            "complimentary_mol_directory": "/PATH_TO/complimentary_mol_directory/",
         }
 
-        python RunAutogrow.py -j $PATH/To/json_file_with_variable.json
+        python RunAutogrow.py -j /PATH_TO/json_file_with_variable.json
 
     Commandline submission format: 
         python RunAutogrow.py \
             ... \
-            --complimentary_mol_directory $PATH/To/complimentary_mol_directory/ 
+            --complimentary_mol_directory /PATH_TO/complimentary_mol_directory/ 
 # 
 
 ## Prepping Receptor:
@@ -762,7 +816,7 @@ from rdkit.Chem.rdchem import BondStereo
             # Installation instructions for obabel are provided in the Dependencies section.
 
             # Convert PQR to PDB via obabel
-            obabel -ipqr PATH/PQR_FILE.pqr -opdb -O PATH/PDB_OUTPUT_FILE.pdb
+            obabel -ipqr /PATH_TO/PQR_FILE.pqr -opdb -O /PATH_TO/PDB_OUTPUT_FILE.pdb
 
 ### 4) Determine and define the binding pocket:
     Docking software such as Vina and QuickVina require 6 float parameters to define a binding pocket:
@@ -795,8 +849,8 @@ from rdkit.Chem.rdchem import BondStereo
                 >> import scoria
                 >> 
                 # define your protein pdb file
-                # The protein pdb file used for the publication can be found at: $PATH/autogrow4/autogrow/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb
-                >> pdb_file = "$PATH/OF/PDB_FILE.pdb"
+                # The protein pdb file used for the publication can be found at: /autogrow4/autogrow/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb
+                >> pdb_file = "/PATH_TO/OF/PDB_FILE.pdb"
 
                 # create a scoria mol object from the protein pdb file
                 >> mol = scoria.Molecule(pdb_file)
@@ -819,7 +873,7 @@ from rdkit.Chem.rdchem import BondStereo
                 >> import scoria
                 >> 
                 # define the protein molecule from the PDB file
-                >> mol = scoria.Molecule("PATH/OF/PDB_FILE.pdb")
+                >> mol = scoria.Molecule("/PATH_TO/OF/PDB_FILE.pdb")
 
                 # select which residues are going to be used to define pocket with resseq (the residue number)
                 >> sel = mol.select_atoms({"resseq":[763, 872, 888, 907, 988]})
@@ -865,7 +919,7 @@ from rdkit.Chem.rdchem import BondStereo
 
 #
 ##  Multiprocessing/MPI/Parallelization/Parallelizer:
-    Autogrow uses the Parallelizer.py script from Gypsum-DL (autogrow/operators/convert_files/gypsum_dl/gypsum_dl/Parallelizer.py).
+    AutoGrow4 uses the Parallelizer.py script from Gypsum-DL (/autogrow4/autogrow/operators/convert_files/gypsum_dl/gypsum_dl/Parallelizer.py).
     This script creates a Parallelizer class object which can divide jobs in three manners:
         1) Serial: run all jobs 1 at a time
         2) Multiprocessing: dynamically allocated distribution of jobs across multiple cpus on the same device
@@ -898,7 +952,7 @@ from rdkit.Chem.rdchem import BondStereo
 #
 ##  Utility Scripts:
     AutoGrow 4.0.0 provides several accessory scripts for preparing files, processing data, and analyzing data. 
-    These files can be found within the autogrow4/utility_scripts/ folder.
+    These files can be found within the /autogrow4/utility_scripts/ folder.
 
 ### Preparation scripts pre-run:
 ####    /autogrow4/utility_scripts/remove_duplicates_from_smi.sh:
@@ -913,8 +967,8 @@ from rdkit.Chem.rdchem import BondStereo
         This is the path to the tab-delineated .smi file to remove any redundancies.
     
     Example submit:
-    bash autogrow4/utility_scripts/remove_duplicates_from_smi.sh \
-        $PATH/TO/SMILES.smi
+    bash /autogrow4/utility_scripts/remove_duplicates_from_smi.sh \
+        /PATH_TO/TO/SMILES.smi
 
 ####    /autogrow4/utility_scripts/convert_directory_ligands_pdb_to_smi.py:
     This script will convert a directory of pdb files (small molecules only, not proteins) to SMILES and create a single .smi file with all SMILES.
@@ -932,8 +986,8 @@ from rdkit.Chem.rdchem import BondStereo
 
     Example run:
     python /autogrow4/utility_scripts/convert_directory_ligands_pdb_to_smi.py \
-        --source_folder $PATH/OF/PDBS/ \
-        --output_folder $PATH/TO/OUTPUT/ \
+        --source_folder /PATH_TO/OF/PDBS/ \
+        --output_folder /PATH_TO/TO/OUTPUT/ \
         --number_of_processors -1
 
 ####    /autogrow4/utility_scripts/fragmenter_of_smi_mol.py:
@@ -975,7 +1029,7 @@ from rdkit.Chem.rdchem import BondStereo
 
     Example run:
     python /autogrow4/utility_scripts/fragmenter_of_smi_mol.py \
-        -smi_file $PATH/OF/SMILES.smi
+        -smi_file /PATH_TO/OF/SMILES.smi
 
 ### Preparation custom Reaction libraries pre-run:
 ####    /autogrow4/utility_scripts/test_complimentary_mol_library.py:
@@ -999,11 +1053,11 @@ from rdkit.Chem.rdchem import BondStereo
             This script is not MPI enable but is able to multithread using SMP architecture. Set to -1 for all availble CPUs.
 
     Example submit:
-        python autogrow4/utility_scripts/test_complimentary_mol_library.py \
-            --rxn_library_file autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/ClickChem_rxn_library.json \
-            --function_group_library autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/ClickChem_functional_groups.json \
-            --complimentary_mol_directory autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/complimentary_mol_dir \
-            --output_folder autogrow4/utility_scripts/output/
+        python /autogrow4/utility_scripts/test_complimentary_mol_library.py \
+            --rxn_library_file /autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/ClickChem_rxn_library.json \
+            --function_group_library /autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/ClickChem_functional_groups.json \
+            --complimentary_mol_directory /autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/complimentary_mol_dir \
+            --output_folder /autogrow4/utility_scripts/output/
 ### File handling post-run:
 
 ####    /autogrow4/utility_scripts/convert_single_ligand_pdbqt_to_pdb.py:
@@ -1018,9 +1072,9 @@ from rdkit.Chem.rdchem import BondStereo
             Path to file where we will output .pdb file. If not provide the output .pdb will be the same as the input pdbqt_file but ending with .pdb instead of .pdbqt.
 
     Example run:
-    python autogrow4/utility_scripts/convert_single_ligand_pdbqt_to_pdb.py \
-        --pdbqt_file $PATH/OF/PDBQT_file.pdbqt \
-        --output_folder $PATH/TO/OUTPUT/FOLDER/
+    python /autogrow4/utility_scripts/convert_single_ligand_pdbqt_to_pdb.py \
+        --pdbqt_file /PATH_TO/OF/PDBQT_file.pdbqt \
+        --output_folder /PATH_TO/TO/OUTPUT/FOLDER/
 
 ####    /autogrow4/utility_scripts/convert_vina_docked_pdbqt_to_pdbs.py:
     This script will convert a docked .pdbqt.vina file into seperate .pdb file.
@@ -1063,9 +1117,9 @@ from rdkit.Chem.rdchem import BondStereo
             This script is not MPI enable but is able to multithread using SMP architecture. Set to -1 for all availble CPUs.
 
     Example submit:
-    python $PATH/autogrow4/utility_scripts/convert_vina_docked_pdbqt_to_pdbs.py \
-        --vina_docked_pdbqt_file $PATH/Run_1/Run_0/generation_30/PDBs/Gen_30_Cross_313228__1.pdbqt.vina \
-        --output_folder $PATH/outfolder/ \
+    python /autogrow4/utility_scripts/convert_vina_docked_pdbqt_to_pdbs.py \
+        --vina_docked_pdbqt_file /PATH_TO/Run_1/Run_0/generation_30/PDBs/Gen_30_Cross_313228__1.pdbqt.vina \
+        --output_folder /PATH_TO/outfolder/ \
         --max_num_of_poses 1 --number_of_processors -1
 
 
@@ -1074,7 +1128,7 @@ from rdkit.Chem.rdchem import BondStereo
 
     If you use the reduce_files_sizes option AutoGrow will convert concatinate and compress all files in the PDBs directory of each generation. This is useful when doing larger runs as data transfer is faster and data storage is reduced when files are merged and compressed.
         -The concatination script that is run in AutoGrow 4 can be found at:
-                autogrow4/autogrow/docking/concatinate_files.py
+                /autogrow4/autogrow/docking/concatinate_files.py
     This script will either:
         1) Return the files back to their original uncompressed and deconcatinated formating
             or
@@ -1099,11 +1153,11 @@ from rdkit.Chem.rdchem import BondStereo
             Path to directory/file to compress or decompress.
 
     Example decompression:
-        python autogrow4/utility_scripts/file_concatination_and_compression.py \
+        python /autogrow4/utility_scripts/file_concatination_and_compression.py \
         --compress_or_decompress decompress \
         --input_folder_or_file PATH_TO_RUN/Run_0/generation_1/PDBs/compresed_PDBS.txt.gz
     Example compression:
-        python autogrow4/utility_scripts/file_concatination_and_compression.py \
+        python /autogrow4/utility_scripts/file_concatination_and_compression.py \
         --compress_or_decompress compress \
         --input_folder_or_file PATH_TO_RUN/Run_0/generation_1/PDBs/
 
@@ -1127,8 +1181,8 @@ from rdkit.Chem.rdchem import BondStereo
         Spaces must be within quotes and not be between variables. matplotlib colors can be found with mcolors.get_named_colors_mapping().keys() 
 
     Example submit:
-    python autogrow4/utility_scripts/plot_autogrow_run.py\
-        -i $PATH/Run_1/Run_0/ \
+    python /autogrow4/utility_scripts/plot_autogrow_run.py\
+        -i /PATH_TO/Run_1/Run_0/ \
         --plot_reference_lines [['Olaparib Score',-12.8,'y'],['Niraparib',-10.7,'k'],['NAD/NADH',-10.3,'purple'],['ADP-ribose',-9.3,'maroon']]
 
 ####    /autogrow4/utility_scripts/make_lineage_figures.py:
@@ -1152,3 +1206,10 @@ from rdkit.Chem.rdchem import BondStereo
         This is the source .smi file used to seed generation zero of the AutoGrow run. This is an essential file.
     --pre_run bool: 
         If True this will compile the necessary dictions/picklefiles and then terminate. These pickle files are stored in the input folder containing the vars.json file from the AutoGrow run.
+
+    Example submit:
+    python /autogrow4/utility_scripts/make_lineage_figures.py \
+        -o /PATH_TO/output_folder/ \
+        -i /PATH_TO/INPUT_RUN/Run_3/ \
+        --source_compound_file /autogrow4/source_compounds/PARPI_BRICS_frags.smi \
+        --mol_name Gen_17_Cross_727024
