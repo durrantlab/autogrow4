@@ -5,7 +5,6 @@
 # create a JSON file with the desired user variables.
 # An example JSON is provided at: autogrow4/Docker/sample_autogrow_docker_json.json
 
-
 SCRIPT_PATH="$(readlink -f "$0")"
 DIR_PATH=`dirname "$SCRIPT_PATH"`
 

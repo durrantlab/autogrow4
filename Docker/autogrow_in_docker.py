@@ -282,6 +282,14 @@ def set_run_directory(root_folder_path, start_a_new_run):
             os.mkdir(folder_path)
             os.system("chmod -R a+rwx {}".format(folder_path))
 
+    if run_number == last_run_number:
+        temp_dir_path = os.path.abspath("temp_user_files") + os.sep
+        temp_path = temp_dir_path + "old_runs" + os.sep + "Run_0"
+        if os.path.exists(temp_path) is True:
+            shutil.rmtree(temp_path)
+
+        shutil.copytree(folder_path, temp_path)
+
     print("The Run number is: ", run_number)
     print("The Run folder path is: ", folder_path)
     print("")
@@ -305,7 +313,6 @@ def get_output_folder(json_vars):
     root_output_folder = os.path.abspath(json_vars["root_output_folder"]) + os.sep
     folder_path = set_run_directory(root_output_folder, start_a_new_run)
 
-    # os.system("sudo docker cp {}:Outputfolder.zip {}".format(container_id, folder_path))
     return folder_path
 #
 def move_files_to_temp_dir(json_vars):
@@ -389,11 +396,12 @@ def handle_json_info(vars):
             -receptor, .smi files ...
         3) make a JSON file with modified information for within docker
     Inputs:
-    :param dict argv: Dictionary of User specified variables
+    :param dict vars: Dictionary of User specified variables
 
     Returns:
-    :param dict argv: Dictionary of User specified variables
     :param dict json_vars: Dictionary of User specified variables
+    :returns: str folder_path: the string of the newly created directory for
+        puting output folders
     """
     print("Handling files")
 
@@ -406,7 +414,10 @@ def handle_json_info(vars):
     check_for_required_inputs(json_vars)
     move_files_to_temp_dir(json_vars)
 
-    return json_vars
+    # get output folder
+    outfolder_path = get_output_folder(json_vars)
+
+    return json_vars, outfolder_path
 #
 def run_autogrow_docker_main(vars):
     """
@@ -422,7 +433,7 @@ def run_autogrow_docker_main(vars):
         6) export the files back to the final end dir
 
     Inputs:
-    :param dict argv: Dictionary of User specified variables
+    :param dict vars: Dictionary of User specified variables
     """
     printout = "\n\nThis script builds a docker for AutoGrow4 and runs AutoGrow4 " + \
         "within the docker. The setup may take a few minutes the first time being run " + \
@@ -434,15 +445,10 @@ def run_autogrow_docker_main(vars):
     # 2) copy files to a temp directory
     #     -receptor, .smi files ...
     # 3) make a JSON file with modified information for within docker
-    json_vars = handle_json_info(vars)
-
-    # HANDLE RESTARTING A RUN!!!!!!!???? @@@@JAKE
+    json_vars, outfolder_path = handle_json_info(vars)
 
     # Run part 4) run build.bash
     make_docker()
-
-    # get output folder
-    outfolder_path = get_output_folder(json_vars)
 
     # Run part 5) run AutoGrow in the container
     # docker cp foo.txt mycontainer:/foo.txt
