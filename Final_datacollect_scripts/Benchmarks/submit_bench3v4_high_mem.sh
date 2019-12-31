@@ -2,10 +2,10 @@
 #SBATCH --job-name=bench_3v4_smallSMP_Run_0
 #SBATCH --output=/bgfs/jdurrant/jspiegel/Benchmarks/bench_3v4_Run_0.conf.out
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=24
+#SBATCH --ntasks-per-node=12
 #SBATCH --time=23:59:00
-#SBATCH --cluster=invest
-#SBATCH --partition=jdurrant
+#SBATCH --cluster=smp
+#SBATCH --partition=high-mem
 
 ## Define the environment
 #py2.7 settings 
@@ -19,8 +19,6 @@ module load python/anaconda2.7-2018.12_westpa
 # module load mgltools
 # module load gcc/8.2.0
 # module load python/anaconda3.7-2018.12_westpa
-
-date
 
 highest_folder="/bgfs/jdurrant/jspiegel/Benchmarks/Run_0/"
 mkdir $highest_folder
