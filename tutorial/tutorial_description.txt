@@ -22,7 +22,10 @@ a string of ALL_CAPS:
     Autogrow has been tested on Ubuntu 16.04 and higher, as well as MacOS 10.13: High Sierra. 
     It has been verified to work on HPC using SMP multithreading running RedHat Enterprise Server release 7.3 Maipo.
 
-    Autogrow has not been configured for Windows OS, but a docker image capable of running on Windows can be found:
+    Autogrow has not been configured for Windows OS, but a script capable of running AutoGrow4 within a docker container on Windows can be found:
+        /autogrow4/autogrow/Docker/
+    This script should be capable of running on any docker enable machine and should be capable of multithreading. Details on running AutoGrow4 within a docker can be found below in the section:
+        "Docker submission"
 #
 ##  Installing AutoGrow :
     AutoGrow 4.0.0 can be install by git clone command: 
