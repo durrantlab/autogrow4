@@ -76,7 +76,8 @@ def make_docker():
     build_bash_script = script_dir + "build.bash"
     try:
         os.system("cd {}".format(script_dir))
-        os.system("bash {} > {}".format(build_bash_script, log_file))
+        os.system("bash {} {} > {}".format(build_bash_script, script_dir, log_file))
+        asdvba
     except:
         printout = "\nCan not create a docker file. Please make sure to run the " + \
             "script with sudo/administrative priveledges.\nIf Linux/MacOS:" + \
@@ -439,6 +440,15 @@ def run_autogrow_docker_main(vars):
         "within the docker. The setup may take a few minutes the first time being run " + \
         "and AutoGrow may take a long time depending on the settings.\n\n"
     print(printout)
+
+    # Check that we are in the correct directory if not raise exception
+    script_dir = str(os.path.dirname(os.path.realpath(__file__))) + os.sep
+    if os.path.abspath(os.getcwd()) != os.path.abspath(script_dir):
+        printout = "\nMust execute this script from this directory: {}\n".format(script_dir)
+        printout = printout + "Before running please 'cd {}'\n".format(script_dir)
+        print(printout)
+        raise Exception(printout)
+
     # Run parts 1-3
     # 1) check that JSON file has basic info
     #     -receptor, size/center...

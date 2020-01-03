@@ -1,8 +1,5 @@
 #!/bin/bash
 
-SCRIPT_PATH="$(readlink -f "$0")"
-DIR_PATH=`dirname "$SCRIPT_PATH"`
-cd $DIR_PATH
 # Copy over autogrow source code
 if [ -f autogrow ]; then
     rm -r autogrow4
