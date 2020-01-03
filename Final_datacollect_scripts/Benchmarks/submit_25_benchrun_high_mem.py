@@ -8,7 +8,7 @@ if os.path.exists(out_folder) is False:
     os.mkdir(out_folder)
 
 for x in range(0, 25):
-    os.system("sleep 2")
+    # os.system("sleep 2")
     print("")
     printout = ""
     with open(file_path, "r") as f:
