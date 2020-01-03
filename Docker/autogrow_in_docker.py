@@ -77,7 +77,6 @@ def make_docker():
     try:
         os.system("cd {}".format(script_dir))
         os.system("bash {} {} > {}".format(build_bash_script, script_dir, log_file))
-        asdvba
     except:
         printout = "\nCan not create a docker file. Please make sure to run the " + \
             "script with sudo/administrative priveledges.\nIf Linux/MacOS:" + \
