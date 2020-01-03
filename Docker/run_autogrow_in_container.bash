@@ -3,6 +3,11 @@
 # This script runs AutoGrow4 from within the docker container
 # It serves as the ENTRYPOINT of the docker.
 
+SCRIPT_PATH="$(readlink -f "$0")"
+DIR_PATH=`dirname "$SCRIPT_PATH"`
+# Change into top of the autogrow directory
+# cd $DIR_PATH
+# cd ../
 if echo $* | grep -q "test"; then
   exit;
 fi
