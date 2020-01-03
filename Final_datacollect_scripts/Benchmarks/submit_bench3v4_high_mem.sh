@@ -3,9 +3,15 @@
 #SBATCH --output=/bgfs/jdurrant/jspiegel/Benchmarks/bench_3v4_Run_0.conf.out
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=12
-#SBATCH --time=23:59:00
+#SBATCH --time=22:59:00
 #SBATCH --cluster=smp
 #SBATCH --partition=high-mem
+#SBATCH --mem=503G
+
+# To ensure we are always running on the 512GB of RAM partition
+# We use the--mem=503G and we also use the free -g command to 
+# create a record of the available RAM.
+free -g
 
 ## Define the environment
 #py2.7 settings 
@@ -66,7 +72,7 @@ do
         -number_of_mutants 85 \
         -number_of_crossovers 85 \
         -top_ones_to_advance_to_next_generation 70 \
-        -num_generations 6 -max_seconds_per_generation 21600 \
+        -num_generations 6 -max_seconds_per_generation 18000 \
         -use_lipinski_filter TRUE -use_strict_lipinski_filter TRUE -use_ghose_filter TRUE \
         -scoring_function VINA -score_by_ligand_efficiency FALSE -maintain_core FALSE \
         -minimum_core_atoms_required 4 \
