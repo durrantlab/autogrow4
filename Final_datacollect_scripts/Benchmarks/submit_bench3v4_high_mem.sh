@@ -6,10 +6,10 @@
 #SBATCH --time=22:59:00
 #SBATCH --cluster=smp
 #SBATCH --partition=high-mem
-#SBATCH --mem=503G
+#SBATCH --mem=251
 
-# To ensure we are always running on the 512GB of RAM partition
-# We use the--mem=503G and we also use the free -g command to 
+# To ensure we are always running on the 256GB of RAM partition
+# We use the--mem=251G and we also use the free -g command to 
 # create a record of the available RAM.
 free -g
 
