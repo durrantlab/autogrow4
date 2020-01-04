@@ -26,8 +26,7 @@ To run AutoGrow from within docker. Launches docker
     - `-openbabel_bin_directory` should not be specified.
     - `-mgltools_directory` should not be specified.
 
-The resulting AutoGrow4 output will be zipped and transfered to the desired
-root_output_folder.
+The resulting AutoGrow4 output to the desired root_output_folder.
 
 An example JSON is provided in: ./sample_autogrow_docker_json.json
 
@@ -57,6 +56,46 @@ import os
 import shutil
 import json
 import argparse
+import sys
+
+def change_permissions(file_path):
+    """
+    This will open the permissions for a given file.
+
+    Inputs:
+    :param str file_path: Path to a file to open permissions to.
+    """
+    os.chmod(file_path, 0o777)
+#
+def change_permissions_recurssively(file_or_folder_path):
+    """
+    This will open the permissions for a given file/folder.
+
+    Inputs:
+    :param str file_or_folder_path: Path to a file/folder to open permissions to.
+    """
+    if os.path.isdir(file_or_folder_path):
+        if sys.platform == "linux" or sys.platform == "linux2":
+            os.system("chmod -R a+rwx {}".format(file_or_folder_path))
+        else:
+            directory_path_list = []
+            file_list = []
+            for top_dir, dir_list, file_list in os.walk(file_or_folder_path, topdown=False):
+                for directory in [os.path.join(top_dir, d) for d in dir_list]:
+                    directory_path_list.append(directory)
+                for file_path in [os.path.join(top_dir, fil) for fil in file_list]:
+                    file_list.append(file_path)
+
+            # Convert mods on all files within a directory
+            file_list = list(set(file_list))
+            directory_path_list = list(set(directory_path_list))
+            for file_path in file_list:
+                change_permissions(file_path)
+            for dir_path in directory_path_list:
+                change_permissions(dir_path)
+    else:
+        change_permissions(file_or_folder_path)
+
 
 def make_docker():
     """
@@ -73,18 +112,21 @@ def make_docker():
         "this script it may take a few minutes. Output details are piped to: " + \
         "{}\n".format(log_file)
 
-    build_bash_script = script_dir + "build.bash"
+    print(printout)
     try:
-        os.system("cd {}".format(script_dir))
-        os.system("bash {} {} > {}".format(build_bash_script, script_dir, log_file))
+        os.system("docker build -t autogrow4 . > {}".format(log_file))
     except:
         printout = "\nCan not create a docker file. Please make sure to run the " + \
-            "script with sudo/administrative priveledges.\nIf Linux/MacOS:" + \
-            "\t'sudo bash build.bash'\nnIf Windows:\tRun from bash and " + \
+            "script with sudo/administrative priveledges.\nIf Linux/MacOS:\n" + \
+            "\t'sudo python autogrow_in_docker.py -j PATH/JSON.json'\n" + \
+            "If Windows:\n\tRun from bash and " + \
             "docker enabled terminal with administrative priveledges.\n" + \
             "Please also make sure docker is installed on the system."
         print(printout)
         raise Exception(printout)
+
+    # Remove the temporary autogrow4 directory
+    shutil.rmtree("autogrow4")
 #
 def check_for_required_inputs(json_vars):
     """
@@ -163,7 +205,7 @@ def check_for_required_inputs(json_vars):
         # directory doesn't exist, then make it
         try:
             os.makedirs(json_vars["root_output_folder"])
-            os.system("chmod -R a+rwx {}".format(json_vars["root_output_folder"]))
+            change_permissions_recurssively(json_vars["root_output_folder"])
         except:
             raise NotImplementedError(
                 "root_output_folder could not be found and could not be created. \
@@ -280,15 +322,7 @@ def set_run_directory(root_folder_path, start_a_new_run):
             run_number = last_run_number + 1
             folder_path = "{}{}{}".format(folder_name_path, run_number, os.sep)
             os.mkdir(folder_path)
-            os.system("chmod -R a+rwx {}".format(folder_path))
-
-    if run_number == last_run_number:
-        temp_dir_path = os.path.abspath("temp_user_files") + os.sep
-        temp_path = temp_dir_path + "old_runs" + os.sep + "Run_0"
-        if os.path.exists(temp_path) is True:
-            shutil.rmtree(temp_path)
-
-        shutil.copytree(folder_path, temp_path)
+            change_permissions_recurssively(folder_path)
 
     print("The Run number is: ", run_number)
     print("The Run folder path is: ", folder_path)
@@ -330,14 +364,14 @@ def move_files_to_temp_dir(json_vars):
     if os.path.exists(temp_dir_path):
         shutil.rmtree(temp_dir_path)
     os.mkdir(temp_dir_path)
-    os.system("chmod -R a+rwx {}".format(temp_dir_path))
+    change_permissions_recurssively(temp_dir_path)
 
     # make or remove and make an output_and_log_dir
     output_and_log_dir = os.path.abspath("output_and_log_dir") + os.sep
     if os.path.exists(output_and_log_dir):
         shutil.rmtree(output_and_log_dir)
     os.mkdir(output_and_log_dir)
-    os.system("chmod -R a+rwx {}".format(output_and_log_dir))
+    change_permissions_recurssively(output_and_log_dir)
 
     print("copying files into temp directory: temp_user_files")
     # get files from json_vars
@@ -384,8 +418,26 @@ def move_files_to_temp_dir(json_vars):
         json.dump(docker_json_vars, file_item, indent=4)
 
     # update permissions so files can be manipulated without sudo/admin
-    os.system("chmod -R a+rwx {}".format(temp_dir_path))
-    os.system("chmod -R a+rwx {}".format(output_and_log_dir))
+    change_permissions_recurssively(temp_dir_path)
+    change_permissions_recurssively(output_and_log_dir)
+
+    # Copy over AutoGrow4 files into a temp directory
+    temp_autogrow4_path = os.path.abspath("autogrow4") + os.sep
+
+    script_dir = str(os.path.dirname(os.path.realpath(__file__)))
+    autogrow4_top_dir = str(os.path.dirname(script_dir))
+    if os.path.exists(temp_autogrow4_path):
+        shutil.rmtree(temp_autogrow4_path)
+    os.mkdir(temp_autogrow4_path)
+    autogrow4_top_dir = autogrow4_top_dir + os.sep
+    change_permissions_recurssively(temp_autogrow4_path)
+
+    # Copy all files in autogrow4 directory into a temp except the Docker folder
+    for fol_to_copy in ["autogrow", "source_compounds", "utility_scripts", "tutorial"]:
+        shutil.copytree(autogrow4_top_dir + fol_to_copy, temp_autogrow4_path + fol_to_copy)
+    shutil.copyfile(autogrow4_top_dir + "RunAutogrow.py", temp_autogrow4_path + "RunAutogrow.py")
+    # Open permissions
+    change_permissions_recurssively(temp_autogrow4_path)
 #
 def handle_json_info(vars):
     """
@@ -427,8 +479,7 @@ def run_autogrow_docker_main(vars):
         2) copy files to a temp directory
             -receptor, .smi files ...
         3) make a JSON file with modified information for within docker
-        4) run build.bash
-            which transfers the necessary files to docker container
+        4) Build docker image and link files to output folder
         5) execute RunAutogrow.py from within the docker containiner
         6) export the files back to the final end dir
 
@@ -456,17 +507,20 @@ def run_autogrow_docker_main(vars):
     # 3) make a JSON file with modified information for within docker
     json_vars, outfolder_path = handle_json_info(vars)
 
-    # Run part 4) run build.bash
+    # Run build docker image
     make_docker()
 
     # Run part 5) run AutoGrow in the container
-    # docker cp foo.txt mycontainer:/foo.txt
     print("\nRunning AutoGrow4 in Docker")
-    tmp_path = os.path.abspath("temp_user_files")
-    script_dir = str(os.path.dirname(os.path.realpath(__file__))) + os.sep
-    execute_outside_docker = script_dir + "execute_autogrow_from_outside_docker.sh"
-    command = "bash {} {} {}".format(execute_outside_docker, tmp_path, outfolder_path)
+
+    # Run autogrow in docker
+    temp_outfolder_path = os.path.abspath(outfolder_path)
+    command = "docker run --rm -it -v {}:/Outputfolder/".format(temp_outfolder_path)
+    command = command  +" autogrow4  --name autogrow4 -/UserFiles/docker_json_vars.json"
+    # Execute AutoGrow4
+    print(command)
     os.system(command)
+    change_permissions_recurssively(outfolder_path)
     print("AutoGrow Results placed in: {}".format(outfolder_path))
 #
 

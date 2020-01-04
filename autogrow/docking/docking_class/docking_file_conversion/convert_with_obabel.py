@@ -5,6 +5,7 @@ import __future__
 
 import os
 import subprocess
+import datetime
 
 import rdkit.Chem as Chem
 
@@ -53,7 +54,7 @@ class ObabelConversion(ParentPDBQTConverter):
             receptor_file = vars["filename_of_receptor"]
             obabel_path = self.vars["obabel_path"]
             number_of_processors = vars["number_of_processors"]
-            docking_executable = vars["docking_executable"]
+            # docking_executable = vars["docking_executable"]
 
             ###########################
 
@@ -107,7 +108,7 @@ class ObabelConversion(ParentPDBQTConverter):
             # create a file to run the pdbqt
             for i in need_to_covert_receptor_to_pdbqt:
 
-                output = self.prepare_receptor_multiprocessing(obabel_path, i)
+                self.prepare_receptor_multiprocessing(obabel_path, i)
 
     def prepare_receptor_multiprocessing(self, obabel_path, mol_filename):
         """
@@ -133,10 +134,32 @@ class ObabelConversion(ParentPDBQTConverter):
             os.system(command)
         except:
             raise Exception("Could not convert receptor with obabel")
+        if os.path.exists(mol_filename+"qt") is False:
+            raise Exception("Could not convert receptor with obabel")
 
-    #######################################
+        # Run Clean up on pdbqt receptor
+        # obabel leaves a ROOT, ENDROOT, TORSDOF comments in file which
+        # need to be removed prior to docking
+        # We will comment them out with REMARK
+        # We will also add in a header
+        printout = "REMARK Receptor file prepared using obabel on: "
+        printout = printout + str(datetime.datetime.now()) + "\n"
+        printout = printout + "REMARK Filename is: {}\n".format(mol_filename + "qt")
+        printout = printout + "REMARK Prepared by running: {}\n".format(command)
+        with open(mol_filename+"qt", "r") as fil_path:
+            for line in fil_path.readlines():
+                if "ROOT" in line:
+                    line = "REMARK " + line
+                if "TORSDOF" in line:
+                    line = "REMARK " + line
+                printout = printout + line
+        with open(mol_filename+"qt", "w") as fil_path:
+            fil_path.write(printout)
+
+
+    ###################################################
     # Convert the Ligand from PDB to PDBQT DockingModel
-    ##########################################
+    ###################################################
     def convert_ligand_pdb_file_to_pdbqt(self, pdb_file):
         """
         Convert the ligands of a given directory from pdb to pdbqt format
@@ -344,7 +367,6 @@ class ObabelConversion(ParentPDBQTConverter):
                         line_stripped = line_stripped.replace(
                             "\n", ""
                         ).strip()  # Need to remove whitespaces on both ends
-                        compound_name = line_stripped
 
             # line_stripped is now the name of the smile for this compound
         else:

@@ -58,15 +58,8 @@ For Use in the Host System
     - `-openbabel_bin_directory` should not be specified.
     - `-mgltools_directory` should not be specified.
 
-* `example.bash`: An example of how to use `autogrow_in_docker.py`.
+* `example.bash`: An example of how to run `autogrow_in_docker.py`.
 * `sample_autogrow_docker_json.json`: A sample JSON file to supply `autogrow_in_docker.py`.
-* `build.bash`: Builds the `autogrow` docker image. This should be run by
-    the python wrapper script `autogrow_in_docker.py` from the autogrow4/Docker/
-    directory.
-* `execute_autogrow_from_outside_docker.sh`: Used to execute AutoGrow4 to run within a docker.
-    This script also handles copying the files from the docker container to the `-root_output_folder`.
-    This should be run by the python wrapper script `autogrow_in_docker.py` from the autogrow4/Docker/
-    directory.
 
 For Use in Docker
 -----------------

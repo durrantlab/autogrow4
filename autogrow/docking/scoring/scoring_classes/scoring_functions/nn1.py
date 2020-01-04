@@ -6,6 +6,7 @@ import __future__
 
 import glob
 import os
+import sys
 
 
 from autogrow.docking.scoring.scoring_classes.parent_scoring_class import ParentScoring
@@ -217,9 +218,9 @@ def run_nn_rescoring(vars, vina_output_file):
     )
 
     nn1_output = vina_output_file + ".nn1"
-
+    # sys.executable is the path to python executable
     torun = (
-        "python "
+        sys.executable + " " 
         + nn1_executable
         + " -receptor "
         + receptor

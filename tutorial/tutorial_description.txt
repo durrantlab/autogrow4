@@ -336,7 +336,7 @@ from rdkit.Chem.rdchem import BondStereo
     
 #
 ## Docker submission:
-    The/autogrow4/Docker/ directory contains the scripts to run AutoGrow4 within a docker
+    The /autogrow4/Docker/ directory contains the scripts to run AutoGrow4 within a docker
     container. These scripts are useful when using OS that is not compatible with AutoGrow 
     dependencies or are not supported by our current multithreading approach, such as Windows.
 
@@ -352,6 +352,8 @@ from rdkit.Chem.rdchem import BondStereo
     to run in settings that can handle that will be able to run complete without being
     disrupted or disruptive. Using nohup may be a useful wrapper for longer runs or
     when running jobs remotes (ie running a job over ssh).
+
+    More details are provided at /autogrow4/Docker/README.md
 
 ### Running AutoGrow4 in docker:
     To run AutoGrow4 in a docker, please first install docker software.
