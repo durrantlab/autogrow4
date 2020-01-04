@@ -576,7 +576,7 @@ def run_autogrow_docker_main(vars):
         temp_outfolder_path = temp_outfolder_path.replace(os.sep, "/")
 
     command = "docker run --rm -it -v {}:/Outputfolder/".format(temp_outfolder_path)
-    command = command  +" autogrow4  --name autogrow4"
+    command = command  +" autogrow4  --name autogrow4 -/UserFiles/docker_json_vars.json"
     # Execute AutoGrow4
     print(command)
     os.system(command)
