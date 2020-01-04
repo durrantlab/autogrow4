@@ -71,13 +71,18 @@ def change_permissions_recurssively(file_or_folder_path):
     """
     This will open the permissions for a given file/folder.
 
+    Skip permissions change if Windows.
+
     Inputs:
     :param str file_or_folder_path: Path to a file/folder to open permissions to.
     """
-    if os.path.isdir(file_or_folder_path):
-        if sys.platform == "linux" or sys.platform == "linux2":
-            os.system("chmod -R a+rwx {}".format(file_or_folder_path))
-        else:
+    if os.name == "nt" or os.name == "ce":
+        # so it's running under windows. multiprocessing disabled
+        pass
+    elif sys.platform == "linux" or sys.platform == "linux2":
+        os.system("chmod -R a+rwx {}".format(file_or_folder_path))
+    else:
+        if os.path.isdir(file_or_folder_path):
             directory_path_list = []
             file_list = []
             for top_dir, dir_list, file_list in os.walk(file_or_folder_path, topdown=False):
@@ -93,8 +98,8 @@ def change_permissions_recurssively(file_or_folder_path):
                 change_permissions(file_path)
             for dir_path in directory_path_list:
                 change_permissions(dir_path)
-    else:
-        change_permissions(file_or_folder_path)
+        else:
+            change_permissions(file_or_folder_path)
 
 
 def make_docker():
