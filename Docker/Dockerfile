@@ -48,6 +48,8 @@ ADD ./temp_user_files /UserFiles
 # Copy over the autogrow run script
 ADD ./run_autogrow_in_container.bash /autogrow/run_autogrow_in_container.bash
 RUN chmod -R a+rwx /autogrow/run_autogrow_in_container.bash
+ADD ./run_autogrow_in_container_windows.bash /autogrow/run_autogrow_in_container_windows.bash
+RUN chmod -R a+rwx /autogrow/run_autogrow_in_container_windows.bash
 
 # Make directories for mounted host file systems
 RUN mkdir /Outputfolder
@@ -55,5 +57,9 @@ RUN mkdir /Outputfolder
 
 RUN ls autogrow4
 ENTRYPOINT ["bash", "/autogrow/run_autogrow_in_container.bash"]
+
+# Windows version. Automatically turned on by autogrow_in_docker.py
+# ENTRYPOINT ["bash", "/autogrow/run_autogrow_in_container_windows.bash"]
+
 
 # ENTRYPOINT ["bash"]

@@ -52,6 +52,8 @@ To run AutoGrow4 in a docker, please run the `autogrow_in_docker.py` script:
         # Results will be output to the directory specified by the root_output_folder variable
 
 """
+import __future__
+
 import os
 import shutil
 import json
@@ -100,8 +102,42 @@ def change_permissions_recurssively(file_or_folder_path):
                 change_permissions(dir_path)
         else:
             change_permissions(file_or_folder_path)
+#
+def adjust_dockerfile():
+    """
+    This will open Dockerfile and check if the entrypoint has been switched
+    to the windows version (run_autogrow_in_container.bash) if not it will
+    modify the Dockerfile to use the windows version of the script.
 
+    This only should run on Windows OS.
+    
+    Change:
+        ENTRYPOINT ["bash", "/autogrow/run_autogrow_in_container.bash"]
+    To:
+        # ENTRYPOINT ["bash", "/autogrow/run_autogrow_in_container.bash"]
+        ENTRYPOINT ["bash", "/autogrow/run_autogrow_in_container_windows.bash"]
+        
+    """
+    printout = ""
+    normal_entry = "/autogrow/run_autogrow_in_container.bash"
+    windows_entry = "/autogrow/run_autogrow_in_container_windows.bash"
+    replacement_line = 'ENTRYPOINT ["bash", "/autogrow/run_autogrow_in_container_windows.bash"]\n'
+    print("Modifying the Dockerfile to run for Windows. Changing Entrypoint.")
+    with open(os.path.abspath("Dockerfile"), "r") as f:
+        for line in f.readlines():
+            if "ENTRYPOINT" in line and normal_entry in line:
+                if "#" not in line:
+                    line = "# " + line + "\n"
+                printout = printout + line
+                printout = printout + replacement_line
+                continue
+            if "ENTRYPOINT" in line and  windows_entry in line:
+                continue
+            printout = printout + line
+    with open(os.path.abspath("Dockerfile"), "w") as f:
+        f.write(printout)
 
+#
 def make_docker():
     """
     This will create the docker to run AutoGrow4.
@@ -109,8 +145,11 @@ def make_docker():
 
     If docker image can not be created it will raise an exception.
     """
+    if os.name == "nt" or os.name == "ce":
+        # so it's running under windows. multiprocessing disabled
+        adjust_dockerfile()
+
     print("Creating new docker image for AutoGrow4")
-    script_dir = str(os.path.dirname(os.path.realpath(__file__))) + os.sep
     output_and_log_dir = os.path.abspath("output_and_log_dir") + os.sep
     log_file = "{}log.txt".format(output_and_log_dir)
     printout = "\nAttempting to create the docker container. If 1st time running " + \
@@ -485,6 +524,8 @@ def run_autogrow_docker_main(vars):
             -receptor, .smi files ...
         3) make a JSON file with modified information for within docker
         4) Build docker image and link files to output folder
+            -This includes an adjustment to the Dockerfile if
+            running it on a Windows OS
         5) execute RunAutogrow.py from within the docker containiner
         6) export the files back to the final end dir
 
@@ -518,10 +559,24 @@ def run_autogrow_docker_main(vars):
     # Run part 5) run AutoGrow in the container
     print("\nRunning AutoGrow4 in Docker")
 
-    # Run autogrow in docker
+
     temp_outfolder_path = os.path.abspath(outfolder_path)
+    if os.name == "nt" or os.name == "ce":
+        # temp_outfolder_path should look like:
+        # "/c/Users/Jacob/autogrow4/Docker/Outputfolder/Run_0"
+        # for windows
+        if temp_outfolder_path[0] != "/":
+            temp_outfolder_path = "/" + temp_outfolder_path
+        if temp_outfolder_path[1].islower() is False:
+            temp_outfolder_path = temp_outfolder_path[:1] + \
+                temp_outfolder_path[1].lower() + \
+                temp_outfolder_path[1 + 1:]
+        if temp_outfolder_path[2] == ":":
+            temp_outfolder_path = temp_outfolder_path[:2] + "/" + temp_outfolder_path[2 + 1:]
+        temp_outfolder_path = temp_outfolder_path.replace(os.sep, "/")
+
     command = "docker run --rm -it -v {}:/Outputfolder/".format(temp_outfolder_path)
-    command = command  +" autogrow4  --name autogrow4 -/UserFiles/docker_json_vars.json"
+    command = command  +" autogrow4  --name autogrow4"
     # Execute AutoGrow4
     print(command)
     os.system(command)

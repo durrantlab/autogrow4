@@ -65,4 +65,5 @@ For Use in Docker
 -----------------
 
 * `run_autogrow_in_container.bash`: The docker image's ENTRYPOINT runs this script.
+* `run_autogrow_in_container_windows.bash`: The windows version of docker image's ENTRYPOINT runs this script. It is automatically switched by autogrow_in_docker.py
 * `Dockerfile`: Docker instructions re. how to build the image.
