@@ -79,18 +79,24 @@ def change_permissions_recurssively(file_or_folder_path):
     :param str file_or_folder_path: Path to a file/folder to open permissions to.
     """
     if os.name == "nt" or os.name == "ce":
-        # so it's running under windows. multiprocessing disabled
+        # chmod and os.chmod do not apply to Windows OS so lets skip this.
         pass
     elif sys.platform == "linux" or sys.platform == "linux2":
+        # chmod -R recursively open the permissions
+        os.system("chmod -R a+rwx {}".format(file_or_folder_path))
+    elif sys.platform == "darwin":
+        # chmod -R recursively open the permissions
         os.system("chmod -R a+rwx {}".format(file_or_folder_path))
     else:
+        # chmod may not be a valid command on other OS systems.
+        #  So let's do this the manual way.
         if os.path.isdir(file_or_folder_path):
             directory_path_list = []
             file_list = []
-            for top_dir, dir_list, file_list in os.walk(file_or_folder_path, topdown=False):
+            for top_dir, dir_list, list_of_files in os.walk(file_or_folder_path, topdown=False):
                 for directory in [os.path.join(top_dir, d) for d in dir_list]:
                     directory_path_list.append(directory)
-                for file_path in [os.path.join(top_dir, fil) for fil in file_list]:
+                for file_path in [os.path.join(top_dir, fil) for fil in list_of_files]:
                     file_list.append(file_path)
 
             # Convert mods on all files within a directory
@@ -353,6 +359,7 @@ def set_run_directory(root_folder_path, start_a_new_run):
         run_number = 0
         folder_path = "{}{}{}".format(folder_name_path, run_number, os.sep)
         os.makedirs(folder_path)
+        change_permissions_recurssively(folder_path)
 
     else:
         if start_a_new_run is False:
