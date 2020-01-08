@@ -1,13 +1,14 @@
 import os
 
 
-file_path = "/bgfs/jdurrant/jspiegel/autogrow4/Final_datacollect_scripts/Benchmarks/invest_submit_bench3v4.sh"
+file_path = "/bgfs/jdurrant/jspiegel/autogrow4/Final_datacollect_scripts/Benchmarks/submit_bench3v4_high_mem.sh"
 out_folder = "/bgfs/jdurrant/jspiegel/temp_submits/"
 
 if os.path.exists(out_folder) is False:
     os.mkdir(out_folder)
 
-for x in range(0, 4):
+for x in range(0, 25):
+    # os.system("sleep 2")
     print("")
     printout = ""
     with open(file_path, "r") as f:

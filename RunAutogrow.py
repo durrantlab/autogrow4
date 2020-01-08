@@ -166,7 +166,7 @@ PARSER.add_argument(
 PARSER.add_argument(
     "--rxn_library",
     choices=["click_chem_rxns", "robust_rxns", "all_rxns", "Custom"],
-    default="click_chem_rxns",
+    default="all_rxns",
     help="This set of reactions to be used in Mutation. \
     If Custom, one must also provide rxn_file Path and function_group_library path",
 )

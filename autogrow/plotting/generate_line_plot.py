@@ -268,7 +268,10 @@ def run_plotter(vars, dict_of_averages, outfile):
     if print_twenty is True:
         list_generations_twenty, list_of_scores_twenty = make_graph(top_twenty_dict)
 
-    # print("Graphing top_ten_dict")
+    print_ten = True
+    for key in top_ten_dict.keys():
+        if top_ten_dict[key] == "N/A":
+            print_ten = False
     list_generations_ten, list_of_scores_ten = make_graph(top_ten_dict)
     # print("Graphing top_one_dict")
     list_generations_one, list_of_scores_one = make_graph(top_one_dict)
@@ -286,7 +289,12 @@ def run_plotter(vars, dict_of_averages, outfile):
         ax.plot(
             list_generations_twenty, list_of_scores_twenty, color="m", label="Top 20"
         )
-    ax.plot(list_generations_ten, list_of_scores_ten, color="g", label="Top 10")
+
+    if print_ten is True:
+        ax.plot(
+            list_generations_ten, list_of_scores_ten, color="g", label="Top 10"
+        )
+
     ax.plot(list_generations_one, list_of_scores_one, color="r", label="Top 1")
 
     ax.set_ylim()
@@ -342,7 +350,12 @@ def run_plotter(vars, dict_of_averages, outfile):
 
     plt.xlabel("Generation Number", fontweight="semibold")
 
-    plt.savefig(outfile, bbox_inches="tight", dpi=1000)
+    if print_ten is True:
+        plt.savefig(outfile, bbox_inches="tight", dpi=1000)
+    else:
+        # Remove the bbox_inches="tight" is necessary if
+        # the plot is too small for matplotlib
+        plt.savefig(outfile, dpi=1000)
 
 def print_data_table(infolder, folder_list):
     """
