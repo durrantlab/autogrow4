@@ -35,7 +35,7 @@ do
     outfolder_four=$highest_folder"Run_$i/"
     mkdir $outfolder_four
     
-    echo "START Autogrow 4.0 Run number $i  STABILITY RUN USING with Rank_QVINA2_3"
+    echo "START Autogrow 4.0 Run number $i  RUN USING with Rank_QVINA_5"
     start_time="$(date +%s%N | cut -b1-13)"
     date +%s%N | cut -b1-13
 
