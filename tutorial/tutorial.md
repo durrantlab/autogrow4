@@ -43,7 +43,9 @@ a string of ALL_CAPS:
 ### Bash Dependencies: (Required For MacOS User)
     Most Linux OS comes preinstalled with modern Bash and timeout tools used by AutoGrow.
 
-    For MacOS users please install GNU Tools for Bash. This is required for using Timeout functions in Bash.
+    MacOS requires the additional installation of the coreutils package, available through Homebrew, which provides the gtimeout binary. In contrast, most Linux environments have the equivalent timeout binary installed.
+
+    For MacOS users please install GNU Tools (aka coreutils) for Bash. This is required for using Timeout functions in Bash.
         This can be done by running: sudo brew install coreutils
     
 ### Python Installation:(Required)
