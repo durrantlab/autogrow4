@@ -41,7 +41,7 @@ do
 
     mpirun -n $SLURM_NTASKS \
     ~/miniconda3/envs/py37/bin/python -m mpi4py /bgfs/jdurrant/jspiegel/autogrow4/RunAutogrow.py \
-        --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow4/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
+        --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow4/tutorial/PARP/4r6eA_PARP1_prepared.pdb \
         --center_x -70.76 --center_y  21.82 --center_z 28.33 \
         --size_x 25.0 --size_y 16.0 --size_z 25.0 \
         --source_compound_file /bgfs/jdurrant/jspiegel/autogrow4/source_compounds/Fragment_MW_100_to_150_docked.smi \
@@ -61,9 +61,9 @@ do
         --number_of_processors -1 \
         --dock_choice QuickVina2Docking \
         --scoring_choice VINA \
-        --selector_choice Roulette_Selector \
+        --selector_choice Rank_Selector \
         --LipinskiStrictFilter \
-        --GhoseModifiedFilter \
+        --GhoseFilter \
         --PAINSFilter \
         --reduce_files_sizes True \
         --max_variants_per_compound 5 \

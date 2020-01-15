@@ -296,7 +296,7 @@ from rdkit.Chem.rdchem import BondStereo
              cd /PATH_TO/autogrow4/
 
              python RunAutogrow.py \
-                 --filename_of_receptor /autogrow4/autogrow/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
+                 --filename_of_receptor /autogrow4/autogrow/tutorial/PARP/4r6eA_PARP1_prepared.pdb \
                  --center_x -70.76 --center_y  21.82 --center_z 28.33 \
                  --size_x 25.0 --size_y 16.0 --size_z 25.0 \
                  --source_compound_file /autogrow4/autogrow/source_compounds/naphthalene_smiles.smi \
@@ -856,7 +856,7 @@ from rdkit.Chem.rdchem import BondStereo
                 >> import scoria
                 >> 
                 # define your protein pdb file
-                # The protein pdb file used for the publication can be found at: /autogrow4/autogrow/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb
+                # The protein pdb file used for the publication can be found at: /autogrow4/autogrow/tutorial/PARP/4r6eA_PARP1_prepared.pdb
                 >> pdb_file = "/PATH_TO/OF/PDB_FILE.pdb"
 
                 # create a scoria mol object from the protein pdb file

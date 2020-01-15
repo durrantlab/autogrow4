@@ -60,7 +60,7 @@ do
     date +%s%N | cut -b1-13
 
     time timeout 86400 /ihome/crc/install/python/anaconda2.7-2018.12_westpa/bin/python /bgfs/jdurrant/jspiegel/old_autogrow/autogrow/autogrow/autogrow_3_1_3.py \
-        --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow4/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
+        --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow4/tutorial/PARP/4r6eA_PARP1_prepared.pdb \
         -center_x -70.76 -center_y  21.82 -center_z 28.33 \
         -size_x 25.0 -size_y 16.0 -size_z 25.0 \
         -additional_autoclickchem_parameters "-all_reactions +azide_and_alkyne_to_azole" \
@@ -144,7 +144,7 @@ then
         date +%s%N | cut -b1-13
 
         time /ihome/crc/install/python/anaconda2.7-2018.12_westpa/bin/python /bgfs/jdurrant/jspiegel/autogrow4/RunAutogrow.py \
-            --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow4/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
+            --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow4/tutorial/PARP/4r6eA_PARP1_prepared.pdb \
             --center_x -70.76 --center_y  21.82 --center_z 28.33 \
             --size_x 25.0 --size_y 16.0 --size_z 25.0 \
             --source_compound_file /bgfs/jdurrant/jspiegel/autogrow4/source_compounds/naphthalene_smiles.smi \
@@ -221,7 +221,7 @@ then
         date +%s%N | cut -b1-13
 
         time /ihome/crc/install/python/anaconda2.7-2018.12_westpa/bin/python /bgfs/jdurrant/jspiegel/autogrow4/RunAutogrow.py \
-            --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow4/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
+            --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow4/tutorial/PARP/4r6eA_PARP1_prepared.pdb \
             --center_x -70.76 --center_y  21.82 --center_z 28.33 \
             --size_x 25.0 --size_y 16.0 --size_z 25.0 \
             --source_compound_file /bgfs/jdurrant/jspiegel/autogrow4/source_compounds/naphthalene_smiles.smi \
@@ -301,7 +301,7 @@ then
         date +%s%N | cut -b1-13
 
         time /ihome/crc/install/python/anaconda2.7-2018.12_westpa/bin/python /bgfs/jdurrant/jspiegel/autogrow4/RunAutogrow.py \
-            --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow4/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
+            --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow4/tutorial/PARP/4r6eA_PARP1_prepared.pdb \
             --center_x -70.76 --center_y  21.82 --center_z 28.33 \
             --size_x 25.0 --size_y 16.0 --size_z 25.0 \
             --source_compound_file /bgfs/jdurrant/jspiegel/autogrow4/source_compounds/naphthalene_smiles.smi \
@@ -383,7 +383,7 @@ then
         date +%s%N | cut -b1-13
 
         time /ihome/crc/install/python/anaconda2.7-2018.12_westpa/bin/python /bgfs/jdurrant/jspiegel/autogrow4/RunAutogrow.py \
-            --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow4/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
+            --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow4/tutorial/PARP/4r6eA_PARP1_prepared.pdb \
             --center_x -70.76 --center_y  21.82 --center_z 28.33 \
             --size_x 25.0 --size_y 16.0 --size_z 25.0 \
             --source_compound_file /bgfs/jdurrant/jspiegel/autogrow4/source_compounds/naphthalene_smiles.smi \
@@ -460,7 +460,7 @@ then
         date +%s%N | cut -b1-13
 
         time /ihome/crc/install/python/anaconda2.7-2018.12_westpa/bin/python /bgfs/jdurrant/jspiegel/autogrow4/RunAutogrow.py \
-            --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow4/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
+            --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow4/tutorial/PARP/4r6eA_PARP1_prepared.pdb \
             --center_x -70.76 --center_y  21.82 --center_z 28.33 \
             --size_x 25.0 --size_y 16.0 --size_z 25.0 \
             --source_compound_file /bgfs/jdurrant/jspiegel/autogrow4/source_compounds/naphthalene_smiles.smi \
@@ -540,7 +540,7 @@ then
         date +%s%N | cut -b1-13
 
         time /ihome/crc/install/python/anaconda2.7-2018.12_westpa/bin/python /bgfs/jdurrant/jspiegel/autogrow4/RunAutogrow.py \
-            --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow4/tutorial/PARP/4r6e_removed_smallmol_aligned_Hs.pdb \
+            --filename_of_receptor /bgfs/jdurrant/jspiegel/autogrow4/tutorial/PARP/4r6eA_PARP1_prepared.pdb \
             --center_x -70.76 --center_y  21.82 --center_z 28.33 \
             --size_x 25.0 --size_y 16.0 --size_z 25.0 \
             --source_compound_file /bgfs/jdurrant/jspiegel/autogrow4/source_compounds/naphthalene_smiles.smi \
