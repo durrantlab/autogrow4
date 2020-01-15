@@ -21,7 +21,7 @@ If --max_docking_score is not set it will convert all poses to .pdb;
         It will take the top 5 poses as long as they also have docking scores <=-11.4
 
 Example submit:
-python PATH/autogrow4/utility_scripts/convert_vina_docked_pdbqt_to_pdbs.py \
+python PATH/autogrow4/accessory_scripts/convert_vina_docked_pdbqt_to_pdbs.py \
     --vina_docked_pdbqt_file \
         PATH/Run_1/Run_0/generation_30/PDBs/Gen_30_Cross_313228__1.pdbqt.vina \
     --output_folder PATH/outfolder/ \

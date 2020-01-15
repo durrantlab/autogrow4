@@ -657,7 +657,7 @@ from rdkit.Chem.rdchem import BondStereo
     about the reaction as the item. 
 
     We provide a script to check Complimentary and Reaction libraries molecule libraries at:
-        /autogrow4/utility_scripts/test_complimentary_mol_library.py
+        /autogrow4/accessory_scripts/test_complimentary_mol_library.py
         A tutorial is provided in the Utility Scripts section of this document
 
     If using this you will need three pieces of information each explained below:
@@ -776,7 +776,7 @@ from rdkit.Chem.rdchem import BondStereo
     If a ligand does not match the inteded functional group the reaction will fail and it will slow the process of mutant creation.
 
     We provide a script to check Complimentary molecule libraries at:
-        /autogrow4/utility_scripts/test_complimentary_mol_library.py
+        /autogrow4/accessory_scripts/test_complimentary_mol_library.py
         A tutorial is provided in the Utility Scripts section of this document
 
     THERE MUST BE ONE ENTRY PER FUNCTIONAL GROUP. NAMES ARE CAP SENSITIVE.
@@ -959,10 +959,10 @@ from rdkit.Chem.rdchem import BondStereo
 #
 ##  Utility Scripts:
     AutoGrow 4.0.0 provides several accessory scripts for preparing files, processing data, and analyzing data. 
-    These files can be found within the /autogrow4/utility_scripts/ folder.
+    These files can be found within the /autogrow4/accessory_scripts/ folder.
 
 ### Preparation scripts pre-run:
-####    /autogrow4/utility_scripts/remove_duplicates_from_smi.sh:
+####    /autogrow4/accessory_scripts/remove_duplicates_from_smi.sh:
     This script will take a file path to a tab-delineated .smi file. It will then filter it for redundancies in the 1st and 2nd columns of the file. 
     
     The output file is the input file + '_no_dup.smi'
@@ -974,10 +974,10 @@ from rdkit.Chem.rdchem import BondStereo
         This is the path to the tab-delineated .smi file to remove any redundancies.
     
     Example submit:
-    bash /autogrow4/utility_scripts/remove_duplicates_from_smi.sh \
+    bash /autogrow4/accessory_scripts/remove_duplicates_from_smi.sh \
         /PATH_TO/TO/SMILES.smi
 
-####    /autogrow4/utility_scripts/convert_directory_ligands_pdb_to_smi.py:
+####    /autogrow4/accessory_scripts/convert_directory_ligands_pdb_to_smi.py:
     This script will convert a directory of pdb files (small molecules only, not proteins) to SMILES and create a single .smi file with all SMILES.
 
     This script takes 3 input arguments:
@@ -992,12 +992,12 @@ from rdkit.Chem.rdchem import BondStereo
             This script is not MPI enable but is able to multithread using SMP architecture. Set to -1 for all availble CPUs.
 
     Example run:
-    python /autogrow4/utility_scripts/convert_directory_ligands_pdb_to_smi.py \
+    python /autogrow4/accessory_scripts/convert_directory_ligands_pdb_to_smi.py \
         --source_folder /PATH_TO/OF/PDBS/ \
         --output_folder /PATH_TO/TO/OUTPUT/ \
         --number_of_processors -1
 
-####    /autogrow4/utility_scripts/fragmenter_of_smi_mol.py:
+####    /autogrow4/accessory_scripts/fragmenter_of_smi_mol.py:
     This script will fragment compounds from a .smi file. It is useful for lead-optimization. This script was used for the PARPi lead-optimizations in the AutoGrow 4.0.0 paper.
     
     This can fragment compounds in 2 manners:
@@ -1035,11 +1035,11 @@ from rdkit.Chem.rdchem import BondStereo
             This script is not MPI enable but is able to multithread using SMP architecture. Set to -1 for all availble CPUs.
 
     Example run:
-    python /autogrow4/utility_scripts/fragmenter_of_smi_mol.py \
+    python /autogrow4/accessory_scripts/fragmenter_of_smi_mol.py \
         -smi_file /PATH_TO/OF/SMILES.smi
 
 ### Preparation custom Reaction libraries pre-run:
-####    /autogrow4/utility_scripts/test_complimentary_mol_library.py:
+####    /autogrow4/accessory_scripts/test_complimentary_mol_library.py:
     This script will test a complimentary molecule library to ensure all compounds
     react in all reactions they may be used in.
 
@@ -1060,14 +1060,14 @@ from rdkit.Chem.rdchem import BondStereo
             This script is not MPI enable but is able to multithread using SMP architecture. Set to -1 for all availble CPUs.
 
     Example submit:
-        python /autogrow4/utility_scripts/test_complimentary_mol_library.py \
+        python /autogrow4/accessory_scripts/test_complimentary_mol_library.py \
             --rxn_library_file /autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/ClickChem_rxn_library.json \
             --function_group_library /autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/ClickChem_functional_groups.json \
             --complimentary_mol_directory /autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/complimentary_mol_dir \
-            --output_folder /autogrow4/utility_scripts/output/
+            --output_folder /autogrow4/accessory_scripts/output/
 ### File handling post-run:
 
-####    /autogrow4/utility_scripts/convert_single_ligand_pdbqt_to_pdb.py:
+####    /autogrow4/accessory_scripts/convert_single_ligand_pdbqt_to_pdb.py:
     This script will convert a pdbqt file into a .pdb file.
 
     This is done by removing a column of the PDB file.
@@ -1079,11 +1079,11 @@ from rdkit.Chem.rdchem import BondStereo
             Path to file where we will output .pdb file. If not provide the output .pdb will be the same as the input pdbqt_file but ending with .pdb instead of .pdbqt.
 
     Example run:
-    python /autogrow4/utility_scripts/convert_single_ligand_pdbqt_to_pdb.py \
+    python /autogrow4/accessory_scripts/convert_single_ligand_pdbqt_to_pdb.py \
         --pdbqt_file /PATH_TO/OF/PDBQT_file.pdbqt \
         --output_folder /PATH_TO/TO/OUTPUT/FOLDER/
 
-####    /autogrow4/utility_scripts/convert_vina_docked_pdbqt_to_pdbs.py:
+####    /autogrow4/accessory_scripts/convert_vina_docked_pdbqt_to_pdbs.py:
     This script will convert a docked .pdbqt.vina file into seperate .pdb file.
 
     This is done by splitting up a single .pdbqt.vina into seperate .pdbqt files for each docked pose.
@@ -1124,13 +1124,13 @@ from rdkit.Chem.rdchem import BondStereo
             This script is not MPI enable but is able to multithread using SMP architecture. Set to -1 for all availble CPUs.
 
     Example submit:
-    python /autogrow4/utility_scripts/convert_vina_docked_pdbqt_to_pdbs.py \
+    python /autogrow4/accessory_scripts/convert_vina_docked_pdbqt_to_pdbs.py \
         --vina_docked_pdbqt_file /PATH_TO/Run_1/Run_0/generation_30/PDBs/Gen_30_Cross_313228__1.pdbqt.vina \
         --output_folder /PATH_TO/outfolder/ \
         --max_num_of_poses 1 --number_of_processors -1
 
 
-####    /autogrow4/utility_scripts/convert_single_ligand_pdbqt_to_pdb.py:
+####    /autogrow4/accessory_scripts/convert_single_ligand_pdbqt_to_pdb.py:
     This script is used to decompress or recompress AutoGrow data.
 
     If you use the reduce_files_sizes option AutoGrow will convert concatinate and compress all files in the PDBs directory of each generation. This is useful when doing larger runs as data transfer is faster and data storage is reduced when files are merged and compressed.
@@ -1160,16 +1160,16 @@ from rdkit.Chem.rdchem import BondStereo
             Path to directory/file to compress or decompress.
 
     Example decompression:
-        python /autogrow4/utility_scripts/file_concatination_and_compression.py \
+        python /autogrow4/accessory_scripts/file_concatination_and_compression.py \
         --compress_or_decompress decompress \
         --input_folder_or_file PATH_TO_RUN/Run_0/generation_1/PDBs/compresed_PDBS.txt.gz
     Example compression:
-        python /autogrow4/utility_scripts/file_concatination_and_compression.py \
+        python /autogrow4/accessory_scripts/file_concatination_and_compression.py \
         --compress_or_decompress compress \
         --input_folder_or_file PATH_TO_RUN/Run_0/generation_1/PDBs/
 
 ### Graph generation for post-run analysis:
-####    /autogrow4/utility_scripts/plot_autogrow_run.py:
+####    /autogrow4/accessory_scripts/plot_autogrow_run.py:
     This script will create a line plot of the average score for each generation of AutoGrow run. This is the same type of figure as the --generate_plot option that AutoGrow 4.0.0 already provides, but this also allows plotting of reference lines.
 
     This script takes 4 input arguments:
@@ -1188,11 +1188,11 @@ from rdkit.Chem.rdchem import BondStereo
         Spaces must be within quotes and not be between variables. matplotlib colors can be found with mcolors.get_named_colors_mapping().keys() 
 
     Example submit:
-    python /autogrow4/utility_scripts/plot_autogrow_run.py\
+    python /autogrow4/accessory_scripts/plot_autogrow_run.py\
         -i /PATH_TO/Run_1/Run_0/ \
         --plot_reference_lines [['Olaparib Score',-12.8,'y'],['Niraparib',-10.7,'k'],['NAD/NADH',-10.3,'purple'],['ADP-ribose',-9.3,'maroon']]
 
-####    /autogrow4/utility_scripts/make_lineage_figures.py:
+####    /autogrow4/accessory_scripts/make_lineage_figures.py:
     This script creates figures for all ligands which parented a given ligand.
 
     All compounds for the entire AutoGrow run will be compiled into a dictionary which is used to search when tracing lineages. We pickle these dictionaries so that if this script is run multiple times these dictionaries do not need to be recreated. For this reason the 1st time running this script on a data set will take longer than future runs. A pre-run option will compile these data sets without generating figures.
@@ -1215,7 +1215,7 @@ from rdkit.Chem.rdchem import BondStereo
         If True this will compile the necessary dictions/picklefiles and then terminate. These pickle files are stored in the input folder containing the vars.json file from the AutoGrow run.
 
     Example submit:
-    python /autogrow4/utility_scripts/make_lineage_figures.py \
+    python /autogrow4/accessory_scripts/make_lineage_figures.py \
         -o /PATH_TO/output_folder/ \
         -i /PATH_TO/INPUT_RUN/Run_3/ \
         --source_compound_file /autogrow4/source_compounds/PARPI_BRICS_frags.smi \

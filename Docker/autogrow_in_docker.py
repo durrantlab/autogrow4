@@ -484,7 +484,7 @@ def move_files_to_temp_dir(json_vars):
     change_permissions_recurssively(temp_autogrow4_path)
 
     # Copy all files in autogrow4 directory into a temp except the Docker folder
-    for fol_to_copy in ["autogrow", "source_compounds", "utility_scripts", "tutorial"]:
+    for fol_to_copy in ["autogrow", "source_compounds", "accessory_scripts", "tutorial"]:
         shutil.copytree(autogrow4_top_dir + fol_to_copy, temp_autogrow4_path + fol_to_copy)
     shutil.copyfile(autogrow4_top_dir + "RunAutogrow.py", temp_autogrow4_path + "RunAutogrow.py")
     # Open permissions

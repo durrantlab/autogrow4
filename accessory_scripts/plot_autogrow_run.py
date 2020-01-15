@@ -2,7 +2,7 @@
 Plots a line plot of the average score for each generation of AutoGrow run.
 
 Example submit:
-    python autogrow4/utility_scripts/plot_autogrow_run.py\
+    python autogrow4/accessory_scripts/plot_autogrow_run.py\
         -i $PATH/Run_1/Run_0/ \
         --plot_reference_lines [['Olaparib Score',-12.8,'y'],\
             ['Niraparib',-10.7,'k'],['NAD/NADH',-10.3,'purple'],\

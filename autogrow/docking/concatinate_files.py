@@ -1,7 +1,7 @@
 """
 This script compresses files which makes it easier to transfer data To
     decompress the files use the script in
-    $PATH/autogrow/utility_scripts/file_concatination_and_compression.py .
+    $PATH/autogrow4/accessory_scripts/file_concatination_and_compression.py .
 """
 import __future__
 
@@ -153,8 +153,8 @@ def run_concatination(parallelizer_object, directory):
     This function concatinates and compresses every file in a directory. This
     makes data transfer easier later on.
 
-    To decompress the folder please script in
-    $PATH/autogrow/utility_scripts/file_concatination_and_compression.py
+    To decompress the folder please use script in
+    $PATH/autogrow4/file_concatination_and_compression.py
 
     parallelizer_object type is <class
     'autogrow.operators.convert_files.gypsum_dl.gypsum_dl.Parallelizer.Parallelizer'>

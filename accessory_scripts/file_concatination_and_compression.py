@@ -21,11 +21,11 @@ The formating of the concatination is:
     "\n##############################$$END_FILE$$ {}".format(os.path.basename(file_name_2))
 
 Example decompression:
-    python autogrow4/utility_scripts/file_concatination_and_compression.py \
+    python autogrow4/accessory_scripts/file_concatination_and_compression.py \
     --compress_or_decompress decompress \
     --input_folder_or_file PATH_TO_RUN/Run_0/generation_1/PDBs/compresed_PDBS.txt.gz
 Example compression:
-    python autogrow4/utility_scripts/file_concatination_and_compression.py \
+    python autogrow4/accessory_scripts/file_concatination_and_compression.py \
     --compress_or_decompress compress \
     --input_folder_or_file PATH_TO_RUN/Run_0/generation_1/PDBs/
 
@@ -184,8 +184,8 @@ def run_concatination(directory):
     This function concatinates and compresses every file in a directory. This
     makes data transfer easier later on.
 
-    To decompress the folder please script in
-    $PATH/autogrow/utility_scripts/file_concatination_and_compression.py
+    To decompress the folder please use script in
+    $PATH/autogrow4/accessory_scripts/file_concatination_and_compression.py
 
     Inputs:
     :param str directory: the path to the folder which will be compiled and compressed.

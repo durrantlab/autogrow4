@@ -4,14 +4,14 @@ react in all reactions they may be used in.
 
 Example submit:
 
-python autogrow4/utility_scripts/test_complimentary_mol_library.py \
+python autogrow4/accessory_scripts/test_complimentary_mol_library.py \
 --rxn_library_file \
 autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/ClickChem_rxn_library.json \
 --function_group_library \
 autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/ClickChem_functional_groups.json \
 --complimentary_mol_directory \
 autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/complimentary_mol_dir \
---output_folder autogrow4/utility_scripts/output/
+--output_folder autogrow4/accessory_scripts/output/
 """
 import __future__
 
