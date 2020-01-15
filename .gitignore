@@ -3,5 +3,8 @@
 *.pyc
 *__pycache__
 
+# Ignore output folders from example files
 Outputfolder
 Outputfolder/*
+Docker/Outputfolder
+Docker/Outputfolder/*
