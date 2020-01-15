@@ -1,3 +1,5 @@
 .DS_Store
+# Ignore cache files from Python
 *.pyc
-mac_sample_submit_autogrow.output_dir
+*__pycache__
+
