@@ -29,10 +29,6 @@ module load python/anaconda2.7-2018.12_westpa
 highest_folder="/bgfs/jdurrant/jspiegel/Benchmarks/Run_0/"
 mkdir $highest_folder
 
-
-##Pre Run the process to prevent EOF Errors                                     
-python RunAutogrow.py -c
-
 higher_outdir=$highest_folder"313/"
 mkdir $higher_outdir
 
