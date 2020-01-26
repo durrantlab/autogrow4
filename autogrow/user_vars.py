@@ -28,7 +28,10 @@ def program_info():
         program_output
         + "If you use AutoGrow 4.0.0 in your research, please cite the following reference:\n"
     )
-    program_output = program_output + "Spiegel, J, Durrant, J. D. \n"
+    program_output = program_output + "Jacob O. Spiegel, Jacob D. Durrant. \n"
+    program_output = program_output + "(2020) AutoGrow4: an open-source genetic algorithm for "
+    program_output = program_output + "de novo drug design and lead optimization. \n"
+    program_output = program_output + "Publication Pending \n"
     program_output = program_output + " ================== \n\n"
 
     return program_output
