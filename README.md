@@ -10,6 +10,16 @@ A detailed tutorial for using AutoGrow can be found in the directory /autogrow4/
 
 The default fragment libraries included with AutoGrow were derived from a subset of the ZINC database (https://zinc.docking.org/). We thank ZINC for allowing us to distribute these fragment libraries to AutoGrow users.
 
+# Getting Started with AutoGrow4:
+A detailed tutorial of running AutoGrow4 can be found within the tutorial folder at: /autogrow4/tutorial/tutorial.md
+The tutorial details all dependencies, and running instructions. Additional details for AutoGrow4 parameters can be obtained by running:
+    python RunAutogrow.py -h
+
+AutoGrow4 is executed through the script RunAutogrow.py and supports commandline and JSON file submission for parameters. 
+AutoGrow4 can also be run through Docker, using the script: /autogrow4/Docker/autogrow_in_docker.py
+Details for running AutoGrow4 using Docker are provided within the tutorial (/autogrow4/tutorial/tutorial.md)
+
+
 # Developer Note:
 Gypsum-DL is Version 1.1.2 with two sys.flush() commands added to the Parallelizer.py script.
     These help to ensure print statements properly output in large MPI runs.
