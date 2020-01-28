@@ -6,5 +6,10 @@
 # Ignore output folders from example files
 Outputfolder
 Outputfolder/*
+# ignore Docker files that are created if running example scripts
 Docker/Outputfolder
 Docker/Outputfolder/*
+Docker/output_and_log_dir
+Docker/output_and_log_dir/*
+Docker/temp_user_files
+Docker/temp_user_files/*
