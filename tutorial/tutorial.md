@@ -369,15 +369,15 @@ from rdkit.Chem.rdchem import BondStereo
             # normal pathing of your system.
             # Please note that the docker downloads its own copy of obabel and MGLTools
             # so you do not need to provide those paths.
-            2) `sudo python autogrow_in_docker.py -j ./sample_autogrow_docker_json.json`
+            2) `sudo python autogrow_in_docker.py -j ./examples/sample_autogrow_docker_json.json`
 
             # Results will be output to the directory specified by the root_output_folder variable
 
         Example on Windows OS:
             1) open a docker enabled and bash enabled terminal with administrative priveledges
-            #  cd to this directory in a bash terminal
+            #  cd to this directory in a bash enabled terminal
             3) cd /autogrow4/Docker/
-            4)  `python autogrow_in_docker.py -j ./sample_autogrow_docker_json.json`
+            4)  `python autogrow_in_docker.py -j ./examples/sample_autogrow_docker_json.json`
 
             # Results will be output to the directory specified by the root_output_folder variable
 
