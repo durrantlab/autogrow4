@@ -1,5 +1,5 @@
 # To install dependencies.
-# This is based on a Linux enviorment.
+# This is based on a Linux environment.
 
 # Need package managers conda will install both pip and conda so go with conda
 # Download conda

@@ -85,7 +85,7 @@ class PAINSFilter(ParentFilter):
         This will filter a ligand using a PAINS filter. PAINS eliminates of
         Pan Assay Interference Compounds using substructure a search.
 
-        Based on the PAINS filter implimentation in RDKit described in
+        Based on the PAINS filter implementation in RDKit described in
         http://rdkit.blogspot.com/2016/04/changes-in-201603-release-filtercatalog.html
 
         Inputs:

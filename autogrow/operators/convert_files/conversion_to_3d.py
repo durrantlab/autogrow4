@@ -231,7 +231,7 @@ def make_smi_and_gyspum_params(gen_smiles_file, folder_path,
                 continue
             line = line.replace("\n", "")
             line = line.replace("    ", "\t")
-            parts = line.split("\t")  # split line into parts seperated by 4-spaces
+            parts = line.split("\t")  # split line into parts separated by 4-spaces
             if len(parts) == 0 or len(parts) == 1:
                 print(parts)
             smile = parts[0]
@@ -249,7 +249,7 @@ def make_smi_and_gyspum_params(gen_smiles_file, folder_path,
                 lig_name_short = ligand_name
             else:
                 printout = "Ligand name failed to abridge. Smiles may be \
-                            named in improper format please seperate with _ \
+                            named in improper format please separate with _ \
                             or camelcase. Our formatting is: \
                             (Gen_2_Cross_631+Gen_3_Cross_744)Gen_4_Cross_702 \
                             which reads as Gen_34_Cross_702 (aka ligand 702) \
@@ -449,7 +449,7 @@ def convert_sdf_to_pdbs(vars, gen_folder_path, sdfs_folder_path):
 
 def convert_single_sdf_to_pdb(pdb_subfolder_path, sdf_file_path):
     """
-    This will convert a given .sdf into seperate .pdb files.
+    This will convert a given .sdf into separate .pdb files.
 
     Inputs:
     :param str pdb_subfolder_path: Path of the folder to place all created pdb

@@ -39,7 +39,7 @@ class ParentDocking(object):
 
     def run_dock(self, pdbqt_filename):
         """
-        run_dock is needs to be implimented in each class.
+        run_dock is needs to be implemented in each class.
 
         Inputs:
         :param str pdbqt_filename: a string for docking process raise exception
@@ -52,7 +52,7 @@ class ParentDocking(object):
                                  current_gen_int, smile_file,
                                  deleted_smiles_names_list):
         """
-        rank_and_save_output_smi is needs to be implimented in each class.
+        rank_and_save_output_smi is needs to be implemented in each class.
         raise exception if missing
 
         Given a folder with PDBQT's, rank all the SMILES based on docking

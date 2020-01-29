@@ -7,7 +7,7 @@ Several modifications included:
 1) AutoClickChem would identify Carboxyl groups as alchohols and perform reactions on those moieties as if they were alcohols.
     -This defect was removed. In the modern reactions Carboxyl groups ARE NOT CONSIDERED alcohols
     -Similarly Thiol-Carboxyl (aka thiol_acid) groups are not considered alcohols/thiols. 
-2) AutoClickChem seperated halides by acyl, alkyl, and aryl halides. 
+2) AutoClickChem separated halides by acyl, alkyl, and aryl halides. 
     -This made sense as the mechanism of reaction differs between these halides:
         ie) 
             Alcyl halide ---> azide   would be performed using a Nucleophilic Acyl Substitution

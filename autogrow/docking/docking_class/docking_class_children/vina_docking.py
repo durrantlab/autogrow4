@@ -449,13 +449,13 @@ class VinaDocking(ParentDocking):
             print("Docking unsuccessful: " + os.path.basename(pdb_file) + "...")
             return False, smile_name
 
-        # Sucessfully docked
+        # Successfully docked
         return True, smile_name
 
     ##########################################
     # Convert the dock outputs to a usable formatted .smi file
     # This is mandatory for all Docking classes but
-    # implimentation and approach varies by docking and scoring choice
+    # implementation and approach varies by docking and scoring choice
     ##########################################
 
     def rank_and_save_output_smi(self, vars, current_generation_dir,

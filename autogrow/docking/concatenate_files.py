@@ -1,7 +1,7 @@
 """
 This script compresses files which makes it easier to transfer data To
     decompress the files use the script in
-    $PATH/autogrow4/accessory_scripts/file_concatination_and_compression.py .
+    $PATH/autogrow4/accessory_scripts/file_concatenation_and_compression.py .
 """
 import __future__
 
@@ -13,7 +13,7 @@ import shutil
 
 def compress_file(file_name):
     """
-    Compress the concatinated file
+    Compress the concatenated file
 
     Inputs:
     :param str file_name: the path to the file to compress.
@@ -46,13 +46,13 @@ def decompress_file(decompressed_file):
 
 
 #######
-def seperate_files(compressed_file):
+def separate_files(compressed_file):
     """
-    Seperate a concatinated file. Not used in running the program but is the
+    separate a concatenated file. Not used in running the program but is the
     counter of def compress_file(file_name)
 
     Inputs:
-    :param str compressed_file: the path to the file to seperate/decompress.
+    :param str compressed_file: the path to the file to separate/decompress.
     """
 
     directory = (
@@ -110,7 +110,7 @@ def seperate_files(compressed_file):
 #######
 def get_file_info(file_name):
     """
-    Used for concatinating files together. This function appends a seperator
+    Used for concatenating files together. This function appends a seperator
     and the filename of a file before and after the text of the file
     file_name. It returns it as a string
 
@@ -148,13 +148,13 @@ def del_files(file_name):
 
 
 #######
-def run_concatination(parallelizer_object, directory):
+def run_concatenation(parallelizer_object, directory):
     """
-    This function concatinates and compresses every file in a directory. This
+    This function concatenates and compresses every file in a directory. This
     makes data transfer easier later on.
 
     To decompress the folder please use script in
-    $PATH/autogrow4/file_concatination_and_compression.py
+    $PATH/autogrow4/file_concatenation_and_compression.py
 
     parallelizer_object type is <class
     'autogrow.operators.convert_files.gypsum_dl.gypsum_dl.Parallelizer.Parallelizer'>
@@ -168,8 +168,8 @@ def run_concatination(parallelizer_object, directory):
 
     concat_file = directory + os.sep + "compresed_PDBS.txt"
     print(
-        "Start Concatination: To seperate files use the \
-        file_concatination_and_compression.py in the Utility script folder."
+        "Start Concatenation: To separate files use the \
+        file_concatenation_and_compression.py in the Utility script folder."
     )
     file_list = glob.glob(directory + os.sep + "*")
     file_list = [os.path.abspath(x) for x in file_list]
@@ -179,8 +179,8 @@ def run_concatination(parallelizer_object, directory):
             f.write(get_file_info(file_name))
 
     job_list = tuple([(file_path,) for file_path in file_list])
-    print("\tFinish Concatination")
-    print("\tRemoving files that were concatinated")
+    print("\tFinish Concatenation")
+    print("\tRemoving files that were concatenated")
     parallelizer_object.run(job_list, del_files)
     print("\tCompressing file")
     compress_file(concat_file)

@@ -140,7 +140,7 @@ def multiprocess_handling(vars):
 
     else:
         # Lower level mpi (ie making a new Parallelizer within an mpi)
-        #   has problems with importing the MPI enviorment and mpi4py
+        #   has problems with importing the MPI environment and mpi4py
         #   So we will flag it to skip the MPI mode and just go to multithread/serial
         # This is a saftey precaution
         from autogrow.operators.convert_files.gypsum_dl.gypsum_dl.Parallelizer import Parallelizer

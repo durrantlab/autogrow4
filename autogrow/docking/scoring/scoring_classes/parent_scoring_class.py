@@ -6,7 +6,7 @@ import __future__
 
 class ParentScoring(object):
     """
-    This is a scipt containing all of the scoring functions.
+    This is a script containing all of the scoring functions.
     """
 
     def get_name(self):
@@ -20,7 +20,7 @@ class ParentScoring(object):
 
     def run_scoring(self, input_string):
         """
-        run_scoring is needs to be implimented in each class.
+        run_scoring is needs to be implemented in each class.
 
         Inputs:
         :param str input_string:  A string to raise an exception

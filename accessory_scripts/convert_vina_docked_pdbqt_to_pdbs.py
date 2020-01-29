@@ -1,7 +1,7 @@
 """
-This script will convert a docked .pdbqt.vina file into seperate .pdb file.
+This script will convert a docked .pdbqt.vina file into separate .pdb file.
 
-This is done by splitting up a single .pdbqt.vina into seperate .pdbqt
+This is done by splitting up a single .pdbqt.vina into separate .pdbqt
 files for each docked pose.
 Then it removes a column of the .pdbqt and saves as a .pdb file.
 
@@ -331,7 +331,7 @@ PARSER.add_argument(
     metavar="N",
     default=-1,
     help="Number of processors to use for parallel calculations.\
-         Set to -1 for all availble CPUs."
+         Set to -1 for all available CPUs."
 )
 
 

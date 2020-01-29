@@ -1,18 +1,18 @@
 """
 This script is used to decompress or recompress AutoGrow data.
 
-If you use the reduce_files_sizes option AutoGrow will convert concatinate and compress
+If you use the reduce_files_sizes option AutoGrow will convert concatenate and compress
 all files in the PDBs directory of each generation. This is useful when doing larger runs as
 data transfer is faster and data storage is reduced when files are merged and compressed.
-    -The concatination script that is run in AutoGrow 4 can be found at:
-            autogrow4/autogrow/docking/concatinate_files.py
+    -The concatenation script that is run in AutoGrow 4 can be found at:
+            autogrow4/autogrow/docking/concatenate_files.py
 This script will either:
-    1) Return the files back to their original uncompressed and deconcatinated formating
+    1) Return the files back to their original uncompressed and deconcatenated formatting
                 or
-    2) Concatinate and then compress the files into a single file.
+    2) concatenate and then compress the files into a single file.
 
 
-The formating of the concatination is:
+The formatting of the concatenation is:
     "\n##############################File_name: {}\n".format(os.path.basename(file_name_1))
     ... Content of the 1st file...
     "\n##############################$$END_FILE$$ {}".format(os.path.basename(file_name_1))
@@ -21,15 +21,15 @@ The formating of the concatination is:
     "\n##############################$$END_FILE$$ {}".format(os.path.basename(file_name_2))
 
 Example decompression:
-    python autogrow4/accessory_scripts/file_concatination_and_compression.py \
+    python autogrow4/accessory_scripts/file_concatenation_and_compression.py \
     --compress_or_decompress decompress \
     --input_folder_or_file PATH_TO_RUN/Run_0/generation_1/PDBs/compresed_PDBS.txt.gz
 Example compression:
-    python autogrow4/accessory_scripts/file_concatination_and_compression.py \
+    python autogrow4/accessory_scripts/file_concatenation_and_compression.py \
     --compress_or_decompress compress \
     --input_folder_or_file PATH_TO_RUN/Run_0/generation_1/PDBs/
 
-This concatinated file is tar.gz compressed.
+This concatenated file is tar.gz compressed.
 """
 import __future__
 
@@ -44,7 +44,7 @@ import support_scripts.Multiprocess as mp
 
 def compress_file(file_name):
     """
-    Compress the concatinated file
+    Compress the concatenated file
 
     Inputs:
     :param str file_name: the path to the file to compress.
@@ -77,13 +77,13 @@ def decompress_file(decompressed_file):
 
 
 #######
-def seperate_files(compressed_file):
+def separate_files(compressed_file):
     """
-    Seperate a concatinated file. Not used in running the program but is the
+    Separate a concatenated file. Not used in running the program but is the
     counter of def compress_file(file_name)
 
     Inputs:
-    :param str compressed_file: the path to the file to seperate/decompress.
+    :param str compressed_file: the path to the file to separate/decompress.
     """
 
     directory = (
@@ -141,7 +141,7 @@ def seperate_files(compressed_file):
 #######
 def get_file_info(file_name):
     """
-    Used for concatinating files together. This function appends a seperator
+    Used for concatenating files together. This function appends a seperator
     and the filename of a file before and after the text of the file
     file_name. It returns it as a string
 
@@ -179,13 +179,13 @@ def del_files(file_name):
 
 
 #######
-def run_concatination(directory):
+def run_concatenation(directory):
     """
-    This function concatinates and compresses every file in a directory. This
+    This function concatenates and compresses every file in a directory. This
     makes data transfer easier later on.
 
     To decompress the folder please use script in
-    $PATH/autogrow4/accessory_scripts/file_concatination_and_compression.py
+    $PATH/autogrow4/accessory_scripts/file_concatenation_and_compression.py
 
     Inputs:
     :param str directory: the path to the folder which will be compiled and compressed.
@@ -193,8 +193,8 @@ def run_concatination(directory):
 
     concat_file = directory + os.sep + "compresed_PDBS.txt"
     print(
-        "Start Concatination: To seperate files use the \
-        file_concatination_and_compression.py in the Utility script folder."
+        "Start Concatenation: To separate files use the \
+        file_concatenation_and_compression.py in the Utility script folder."
     )
     file_list = glob.glob(directory + os.sep + "*")
     file_list = [os.path.abspath(x) for x in file_list]
@@ -204,8 +204,8 @@ def run_concatination(directory):
             f.write(get_file_info(file_name))
 
     job_list = tuple([(file_path,) for file_path in file_list])
-    print("\tFinish Concatination")
-    print("\tRemoving files that were concatinated")
+    print("\tFinish Concatenation")
+    print("\tRemoving files that were concatenated")
     mp.multi_threading(job_list, -1, del_files)
     print("\tCompressing file")
     compress_file(concat_file)
@@ -226,7 +226,7 @@ def run_main(vars):
         input_folder = vars["input_folder_or_file"]
         print(os.path.getsize(input_folder))
 
-        run_concatination(input_folder)
+        run_concatenation(input_folder)
         print("FINISH CONCAT")
         print("After concate")
         print(os.path.getsize(input_folder))
@@ -242,7 +242,7 @@ def run_main(vars):
         print("BEFORE")
         print(os.path.getsize(input_folder))
 
-        seperate_files(compressed_file)
+        separate_files(compressed_file)
         print("After deconcate")
         print(os.path.getsize(input_folder))
 

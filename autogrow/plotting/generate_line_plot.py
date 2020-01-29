@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 def get_usable_fomat(infile):
     """
-    This code takes a string for an file which is formated as an .smi file. It
+    This code takes a string for an file which is formatted as an .smi file. It
     opens the file and reads in the components into a usable list.
 
     The .smi must follow the following format for each line:
@@ -36,7 +36,7 @@ def get_usable_fomat(infile):
 
     Returns:
     :returns: list usable_list_of_smiles: list of SMILES and their associated
-        information formated into a list which is usable by the rest of Autogrow
+        information formatted into a list which is usable by the rest of Autogrow
     """
 
     # IMPORT SMILES FROM THE PREVIOUS GENERATION
@@ -49,11 +49,11 @@ def get_usable_fomat(infile):
     with open(infile) as smiles_file:
         for line in smiles_file:
             line = line.replace("\n", "")
-            parts = line.split("\t")  # split line into parts seperated by 4-spaces
+            parts = line.split("\t")  # split line into parts separated by 4-spaces
             if len(parts) == 1:
                 parts = line.split(
                     "    "
-                )  # split line into parts seperated by 4-spaces
+                )  # split line into parts separated by 4-spaces
 
             choice_list = []
             for i in range(0, len(parts)):
@@ -75,7 +75,7 @@ def get_average_score_per_gen(infolder, folder_list):
 
     Returns:
     :returns: list usable_list_of_smiles: list of SMILES and their associated
-        information formated into a list which is usable by the rest of Autogrow
+        information formatted into a list which is usable by the rest of Autogrow
     """
 
     average_affinity_dict = {}
@@ -92,7 +92,7 @@ def get_average_score_per_gen(infolder, folder_list):
                     line = line.replace("\n", "")
                     parts = line.split(
                         "\t"
-                    )  # split line into parts seperated by 4-spaces
+                    )  # split line into parts separated by 4-spaces
 
                     choice_list = []
                     for i in range(0, len(parts)):
@@ -153,7 +153,7 @@ def get_average_top_score_per_gen(infolder, folder_list, top_score_per_gen):
                         line = line.replace("\n", "")
                         parts = line.split(
                             "\t"
-                        )  # split line into parts seperated by 4-spaces
+                        )  # split line into parts separated by 4-spaces
 
                         choice_list = []
                         for j in range(0, len(parts)):
@@ -354,8 +354,14 @@ def run_plotter(vars, dict_of_averages, outfile):
         plt.savefig(outfile, bbox_inches="tight", dpi=1000)
     else:
         # Remove the bbox_inches="tight" is necessary if
-        # the plot is too small for matplotlib
-        plt.savefig(outfile, dpi=1000)
+        # the plot is too small for 
+        try:
+            plt.savefig(outfile, dpi=500)
+        except:
+            printout = "\nUNABLE TO CREATE PLOT: \n"
+            printout = printout + "Population size or number of generations was "
+            printout = printout + " too small to effectively plot. \n"
+            print(printout)
 
 def print_data_table(infolder, folder_list):
     """

@@ -165,12 +165,12 @@ def mol_handling_of_fragmenting_labeling_and_indexing(mol, mcs_mol, lig_number):
     """
     B-dictionaries:
     Ligmerge will randomly select R-groups to append to a shared common core
-    from 2 seperate ligands but so anchor atoms in the common core may have
+    from 2 separate ligands but so anchor atoms in the common core may have
     more than 1 R-group attached to it.
 
     ie. if an anchor carbon has di-methyls attached to it (which are not part
-        of the shared core) are these di-methyls 2 seperate R-groups or is the
-        contextual chemical enviorment created by having both methyls
+        of the shared core) are these di-methyls 2 separate R-groups or is the
+        contextual chemical environment created by having both methyls
         different from having one alone and thus should be treated as a single
         R-group which just happen to branch. This author would argue that
         context is important here and so this version of Ligmerge treats

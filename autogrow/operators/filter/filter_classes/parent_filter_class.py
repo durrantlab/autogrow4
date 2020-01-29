@@ -5,7 +5,7 @@ This is used as the basis for all filter classes.
 import __future__
 class ParentFilter(object):
     """
-    This is a scipt containing all of the filters for drug likeliness
+    This is a script containing all of the filters for drug likeliness
 
     Filters for orally bio-available drugs:
         1) Lipinski
@@ -35,7 +35,7 @@ class ParentFilter(object):
 
     def run_filter(self, input_string):
         """
-        run_filter is needs to be implimented in each class.
+        run_filter is needs to be implemented in each class.
 
         Inputs:
         :param str input_string:  A string to raise an exception

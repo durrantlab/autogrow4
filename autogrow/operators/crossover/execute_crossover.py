@@ -72,7 +72,7 @@ def test_for_mcs(vars, mol_1, mol_2):
         return None
 
     # could be used for a theoretical timeout prefilter was to be implement
-    # (but this isn't implimented) (ie. if it times out the prefilter dont use
+    # (but this isn't implemented) (ie. if it times out the prefilter dont use
     # in thorough MCS ligmerge) canceled: if True, the MCS calculation did not
     # finish
 

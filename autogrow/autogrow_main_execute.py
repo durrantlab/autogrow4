@@ -12,7 +12,7 @@ import shutil
 
 import autogrow.docking.execute_docking as DockingClass
 import autogrow.operators.operations as operations
-import autogrow.docking.concatinate_files as concatinate_files
+import autogrow.docking.concatenate_files as concatenate_files
 
 def main_execute(vars):
     """
@@ -117,9 +117,9 @@ def main_execute(vars):
             # data
             pdbs_folder = "{}{}PDBs{}".format(current_generation_dir, os.sep, os.sep)
             if os.path.exists(pdbs_folder) is True:
-                concatinate_files.run_concatination(vars["parallelizer"], pdbs_folder)
+                concatenate_files.run_concatenation(vars["parallelizer"], pdbs_folder)
             else:
-                print("\nNo PDB folder to concatinate and compress. This is likely generation 0 seeded with a Ranked .smi file.\n")
+                print("\nNo PDB folder to concatenate and compress. This is likely generation 0 seeded with a Ranked .smi file.\n")
         print("")
         print("Finished generation ", current_generation_number)
 

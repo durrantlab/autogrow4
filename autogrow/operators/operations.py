@@ -534,12 +534,12 @@ def test_source_smiles_convert(smile_info):
         return printout
 
     if len(smile_info) == 1:
-        printout = "REMOVING SMILES FROM SOURCE LIST: Unformated or blank "
+        printout = "REMOVING SMILES FROM SOURCE LIST: Unformatted or blank "
         printout = printout + "entry in source compound list.\n"
         printout = printout + "\tRemoving: {}".format(smile_info)
         return printout
 
-    # Seperate out SMILES str and ID
+    # separate out SMILES str and ID
     smile_str = smile_info[0]
     smile_id = str(smile_info[1])
 
@@ -643,10 +643,10 @@ def get_complete_list_prev_gen_or_source_compounds(vars, generation_num):
 
         if len(usable_list_of_smiles) == 0:
             print(
-                "\nThere were no available ligands in source compound. Check formating\n"
+                "\nThere were no available ligands in source compound. Check formatting\n"
             )
             raise Exception(
-                "There were no available ligands in source compound. Check formating"
+                "There were no available ligands in source compound. Check formatting"
             )
 
     elif generation_num == 1 and os.path.exists(source_file_gen_0) is False:
@@ -656,10 +656,10 @@ def get_complete_list_prev_gen_or_source_compounds(vars, generation_num):
 
         if len(usable_list_of_smiles) == 0:
             print(
-                "\nThere were no available ligands in source compound. Check formating\n"
+                "\nThere were no available ligands in source compound. Check formatting\n"
             )
             raise Exception(
-                "There were no available ligands in source compound. Check formating"
+                "There were no available ligands in source compound. Check formatting"
             )
 
     else:
@@ -674,7 +674,7 @@ def get_complete_list_prev_gen_or_source_compounds(vars, generation_num):
                 + "There were no available ligands in previous"
                 + " generation ranked ligand file.\n"
             )
-            printout = printout + "\tCheck formating or if file has been moved.\n"
+            printout = printout + "\tCheck formatting or if file has been moved.\n"
             print(printout)
             raise Exception(printout)
 
@@ -686,7 +686,7 @@ def get_complete_list_prev_gen_or_source_compounds(vars, generation_num):
                 + "There were no available ligands in previous"
                 + " generation ranked ligand file.\n"
             )
-            printout = printout + "\tCheck formating or if file has been moved. \n"
+            printout = printout + "\tCheck formatting or if file has been moved. \n"
             print(printout)
             raise Exception(printout)
 

@@ -152,7 +152,7 @@ PARSER.add_argument(
     '--number_of_processors', '-p', type=int, metavar='N', default=1,
     help='Number of processors to use for parallel calculations. \
     This script is not MPI enable but is able to multithread using SMP architecture. \
-    Set to -1 for all availble CPUs.'
+    Set to -1 for all available CPUs.'
 )
 
 ARGS_DICT = vars(PARSER.parse_args())

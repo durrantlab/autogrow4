@@ -7,7 +7,7 @@ always run these scripts with sudo (Linux/MacOS) or administrative
 priveledges (Window).
 
 The first time running AutoGrow4 with docker (or if docker images have been purged),
-will take a few minutes longer to install dependencies within the docker enviorment.
+will take a few minutes longer to install dependencies within the docker environment.
 
 Depending on the AutoGrow4 settings, processor speed/count... AutoGrow4 may complete
 within minutes or may take as long as multiple days. For this reason please make sure

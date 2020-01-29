@@ -218,16 +218,16 @@ def remove_bonds(mol, list_of_atomiso_bondsets_to_remove):
 #
 def make_list_of_all_unique_frags(fragment_list):
     """
-    This function takes a list of all molecules after fragmentation and seperates the
+    This function takes a list of all molecules after fragmentation and separates the
     the fragments into individual rdkit mol objects, sanitizes each, removes isotopes
     and converts them into a SMILES string. The SMILES are compiled into a list,
-    and then redudant strings are reduced to a single entry.
+    and then redundant strings are reduced to a single entry.
 
     It returns a list of all unique sanitized canonical SMILES for every fragment made
     from all permutations of bond breaking.
 
     Inputs:
-    :param list fragment_list: list of fragmented rdkit mols which haven't been seperated
+    :param list fragment_list: list of fragmented rdkit mols which haven't been separated
         yet
 
     Returns:
@@ -242,7 +242,7 @@ def make_list_of_all_unique_frags(fragment_list):
             if frag is None:
                 continue
 
-            # Remove those under 2 atoms minumum
+            # Remove those under 2 atoms minimum
             list_mol_atoms = frag.GetAtoms()
             if len(list_mol_atoms) < 3:
                 continue
@@ -375,9 +375,9 @@ def get_ligands_from_smi(smi_file):
         for line in smiles_file:
             line_counter = line_counter + 1
             line = line.replace("\n", "")
-            parts = line.split('\t')      # split line into parts seperated by 4-spaces
+            parts = line.split('\t')      # split line into parts separated by 4-spaces
             if len(parts) == 1:
-                parts = line.split('    ')      # split line into parts seperated by 4-spaces
+                parts = line.split('    ')      # split line into parts separated by 4-spaces
 
             if len(parts) == 2 or len(parts) > 2:
                 mol_string = parts[0]
@@ -589,7 +589,7 @@ PARSER.add_argument(
 PARSER.add_argument(
     "--number_of_processors", "-p", type=int, metavar="N", default=-1,
     help="Number of processors to use for parallel calculations. \
-    Set to -1 for all availble CPUs.")
+    Set to -1 for all available CPUs.")
 
 
 ARGS_DICT = vars(PARSER.parse_args())

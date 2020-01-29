@@ -206,7 +206,7 @@ PARSER.add_argument(
     type=int,
     metavar="N",
     default=1,
-    help="Number of processors to use for parallel calculations. Set to -1 for all availble CPUs.",
+    help="Number of processors to use for parallel calculations. Set to -1 for all available CPUs.",
 )
 PARSER.add_argument(
     "--multithread_mode",
@@ -335,7 +335,7 @@ PARSER.add_argument(
     default=False,
     help="Lipinski filters for orally available drugs following Lipinski rule of fives. \
     Filters by molecular weight, logP and number of hydrogen bond donors and acceptors. \
-    Strict implimentation means a ligand must pass all requirements.",
+    Strict implementation means a ligand must pass all requirements.",
 )
 PARSER.add_argument(
     "--LipinskiLenientFilter",
@@ -343,7 +343,7 @@ PARSER.add_argument(
     default=False,
     help="Lipinski filters for orally available drugs following Lipinski rule of fives. \
     Filters by molecular weight, logP and number of hydrogen bond donors and acceptors. \
-    Lenient implimentation means a ligand may fail all but one requirement and still passs.",
+    Lenient implementation means a ligand may fail all but one requirement and still passs.",
 )
 PARSER.add_argument(
     "--GhoseFilter",
@@ -605,8 +605,8 @@ PARSER.add_argument(
 # Reduce files down. This compiles and compresses the files in the PDBs folder
 # (contains docking outputs, pdb,pdbqt...). This reduces the data size and
 # makes data transfer quicker, but requires running the
-# file_concatination_and_compression.py in the Utility script folder to
-# seperate these files out for readability.
+# file_concatenation_and_compression.py in the Utility script folder to
+# separate these files out for readability.
 PARSER.add_argument(
     "--reduce_files_sizes",
     choices=[True, False, "True", "False", "true", "false"],

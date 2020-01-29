@@ -3,7 +3,7 @@ This runs a Ghose filter for drug-likeliness. Ghose filter filters molecules
 by Molecular weight (MW), the number of atoms, and the logP value.
 
 We protonate the mol in this filter because hydrogens affect
-atom count. Our Ghose implimentation counts hydrogens in against
+atom count. Our Ghose implementation counts hydrogens in against
 the total number of atoms.
 
 To pass the filter a molecule must be:
@@ -40,7 +40,7 @@ class GhoseFilter(ParentFilter):
     value.
 
     We protonate the mol in this filter because hydrogens affect
-    atom count. Our Ghose implimentation counts hydrogens in against
+    atom count. Our Ghose implementation counts hydrogens in against
     the total number of atoms.
 
     To pass the filter a molecule must be:
@@ -65,7 +65,7 @@ class GhoseFilter(ParentFilter):
         value.
 
         We protonate the mol in this filter because hydrogens affect
-        atom count. Our Ghose implimentation counts hydrogens in against
+        atom count. Our Ghose implementation counts hydrogens in against
         the total number of atoms.
 
         To pass the filter a molecule must be:

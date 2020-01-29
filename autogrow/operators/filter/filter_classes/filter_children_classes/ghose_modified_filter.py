@@ -6,7 +6,7 @@ less restrictive and works in conjunction with Lipinski. This is also
 to retro-match AutoGrow 3.1.3 which set Lipinski's upper limit to 500Da.
 
 We protonate the mol in this filter because hydrogens affect
-atom count. Our Ghose implimentation counts hydrogens in against
+atom count. Our Ghose implementation counts hydrogens in against
 the total number of atoms.
 
 To pass the filter a molecule must be:
@@ -45,7 +45,7 @@ class GhoseModifiedFilter(ParentFilter):
     to retro-match AutoGrow 3.1.3 which set Lipinski's upper limit to 500Da.
 
     We protonate the mol in this filter because hydrogens affect
-    atom count. Our Ghose implimentation counts hydrogens in against
+    atom count. Our Ghose implementation counts hydrogens in against
     the total number of atoms.
 
     To pass the filter a molecule must be:
@@ -70,7 +70,7 @@ class GhoseModifiedFilter(ParentFilter):
         value.
 
         We protonate the mol in this filter because hydrogens affect
-        atom count. Our Ghose implimentation counts hydrogens in against
+        atom count. Our Ghose implementation counts hydrogens in against
         the total number of atoms.
 
         To pass the filter a molecule must be:

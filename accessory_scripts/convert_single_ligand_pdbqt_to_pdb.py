@@ -23,7 +23,7 @@ def convert_pdbqt_to_pdb(pdbqt_file_in, pdb_file_out):
     """
     Converts a pdbqt file to a pdb file by removing the 3rd to last column.
     Inputs:
-    :param str pdbqt_file_in: the string of .pdbqt to be formated
+    :param str pdbqt_file_in: the string of .pdbqt to be formatted
     :param str pdb_file_out: the string of the output .pdb
     """
     printout = ""

@@ -63,7 +63,7 @@ class BRENKFilter(ParentFilter):
         Runs a BRENK filter by matching common false positive molecules to the
         current mol. Filters for for lead-likeliness.
 
-        Based on the PAINS filter implimentation in RDKit described in
+        Based on the PAINS filter implementation in RDKit described in
         http://rdkit.blogspot.com/2016/04/changes-in-201603-release-filtercatalog.html
 
         Inputs:

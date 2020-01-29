@@ -28,7 +28,7 @@ ZINC molecules:
 
     This list was further filtered to ensure that the SMILES could be converted to rdkit mol object
     and filtered with Lipinski Strict Filter.
-    We then seperated the compounds into populations of functional group libraries for the click_chem_rxns
+    We then separated the compounds into populations of functional group libraries for the click_chem_rxns
     and robust_rxns.
 
     We then randomly selected 100 compounds per functional group for each of the MW ranges... 

@@ -212,7 +212,7 @@ class ObabelConversion(ParentPDBQTConverter):
     def prepare_ligand_processing(self, obabel_path, mol_filename):
         """
         This function will convert a single ligand from PDB to PDBQT using
-        obabel. It has 10seconds to sucessfull convert this. It will try to
+        obabel. It has 10seconds to successfully convert this. It will try to
         convert the ligand up to 3 times If it fails to do so 3 times, whether
         because it timed out or because obabel failed or because of an obabel
         Glitch, it will stop and the ligand won't be docked.
@@ -220,7 +220,7 @@ class ObabelConversion(ParentPDBQTConverter):
         It will print the ligand if it fails 3 times. It will also fail if the
         molecule is unable to be imported into rdkit and sanitized. This is
         because obabel is sensitive to issues like atoms replaced with *,
-        formating errors, and improper valences. Because obabel will crash
+        formatting errors, and improper valences. Because obabel will crash
         with these issues the RDKit check is especially useful to prevent hard
         crashes.
 

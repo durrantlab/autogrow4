@@ -160,7 +160,7 @@ class SmilesClickChem():
             Custom means you've defined a path to a Custom library in
             vars['rxn_library_file']
         :param str rxn_library_file: a PATH to a Custom reaction library file
-            formated in a dictionary of dictionaries. in a .json file. This will
+            formatted in a dictionary of dictionaries. in a .json file. This will
             be a blank string if one choses a predefined rxn_library option.
 
         Returns:
@@ -212,7 +212,7 @@ class SmilesClickChem():
             except:
                 raise Exception(
                     "rxn_library_file json file not able to be imported."
-                    + " Check that the rxn_library is formated correctly"
+                    + " Check that the rxn_library is formatted correctly"
                 )
 
         elif type(rxn_library_file) == str:
@@ -248,7 +248,7 @@ class SmilesClickChem():
                 raise Exception(
                     "Custom specified rxn_library_file json file not able to "
                     + "be imported. Check that the rxn_library is "
-                    + "formated correctly"
+                    + "formatted correctly"
                 )
 
         else:
@@ -283,7 +283,7 @@ class SmilesClickChem():
 
         Please note if your functional groups involve stereochemistry
             notations such as '\' please replace with '\\' (all functional
-            groups should be formated as SMARTS)
+            groups should be formatted as SMARTS)
 
         Inputs:
         :param str rxn_library: A string defining the choice of the reaction
@@ -340,7 +340,7 @@ class SmilesClickChem():
             except:
                 raise Exception(
                     "function_group_library json file not able to be imported. "
-                    + "Check that the rxn_library is formated correctly"
+                    + "Check that the rxn_library is formatted correctly"
                 )
 
         elif type(function_group_library) == str:
@@ -373,7 +373,7 @@ class SmilesClickChem():
             except:
                 raise Exception(
                     "function_group_library json file not able to be imported."
-                    + " Check that the rxn_library is formated correctly"
+                    + " Check that the rxn_library is formatted correctly"
                 )
         else:
             raise Exception(
@@ -389,8 +389,8 @@ class SmilesClickChem():
 
     def retrieve_complimentary_dictionary(self, rxn_library, complimentary_mol_dir):
         """
-        Based on user controled variables, this definition will retrieve a
-        dictionary of molecules seperated into classes by their functional
+        Based on user controlled variables, this definition will retrieve a
+        dictionary of molecules separated into classes by their functional
         groups. The sorting of a .smi file into this should be handled in the
         user parameter testing when autogrow is initailly started.
 
@@ -453,7 +453,7 @@ class SmilesClickChem():
                 )
 
         # Make a list of all the functional groups. These will be the name of
-        # the .smi folders already seperated by group.
+        # the .smi folders already separated by group.
         functional_groups = self.functional_group_dict.keys()
 
         missing_smi_files = []
@@ -482,7 +482,7 @@ class SmilesClickChem():
 #
 def get_usable_fomat(infile):
     """
-    This code takes a string for an file which is formated as an .smi file. It
+    This code takes a string for an file which is formatted as an .smi file. It
     opens the file and reads in the components into a usable list.
 
     The .smi must follow the following format for each line:
@@ -508,7 +508,7 @@ def get_usable_fomat(infile):
 
     Returns:
     :returns: list usable_list_of_smiles: list of SMILES and their associated
-        information formated into a list which is usable by the rest of Autogrow
+        information formatted into a list which is usable by the rest of Autogrow
     """
 
     # IMPORT SMILES FROM THE PREVIOUS GENERATION
@@ -521,11 +521,11 @@ def get_usable_fomat(infile):
     with open(infile) as smiles_file:
         for line in smiles_file:
             line = line.replace("\n", "")
-            parts = line.split("\t")  # split line into parts seperated by 4-spaces
+            parts = line.split("\t")  # split line into parts separated by 4-spaces
             if len(parts) == 1:
                 parts = line.split(
                     "    "
-                )  # split line into parts seperated by 4-spaces
+                )  # split line into parts separated by 4-spaces
 
             choice_list = []
             for i in range(0, len(parts)):
@@ -946,7 +946,7 @@ PARSER.add_argument(
     type=int,
     default=-1,
     help="Number of processors to use for parallel calculations. \
-    Set to -1 for all availble CPUs.",
+    Set to -1 for all available CPUs.",
 )
 
 

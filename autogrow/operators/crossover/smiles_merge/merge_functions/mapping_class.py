@@ -154,10 +154,10 @@ class Mapping(object):
         Chose your B from a given i. This makes the decision which B-group
         will be chosen for a specific i.
 
-        Current implimentation is that there are no null choice options. ie.
+        Current implementation is that there are no null choice options. ie.
         if an anchor has only 1 option to pick from then it must pick that
         B-group. It can not chose nothing or to leave it blank, even if
-        chosing that B-group forces the future decision because of it's
+        choosing that B-group forces the future decision because of it's
         connections to anchors which have yet to have B-group decisions.
 
         this has bearings on B-groups which connect to multiple anchors as
@@ -166,7 +166,7 @@ class Mapping(object):
 
         in the case of one parent having a B-group attached to an anchor but
         nothing attached to the anchor for the other parent, this
-        implimentation will always chose to keep the B-group and never can
+        implementation will always chose to keep the B-group and never can
         leave it blank.
 
         ie (if 1B1 is connected to multiple anchors)
@@ -185,7 +185,7 @@ class Mapping(object):
 
         # Developers Notes
 
-        # Current implimentation has no Null/None as choices this means that
+        # Current implementation has no Null/None as choices this means that
         # if one parent has a B-group bound to anchor and the other has
         # nothing bound to that anchor, then the program will always chose to
         # add the B-group, resulting in a larger child molecule.
@@ -194,7 +194,7 @@ class Mapping(object):
         # connections are weighted against because 1 decision on 1 node will
         # determine if they can't be chosen...
 
-        # Two alternative implimentations which could be added are listed
+        # Two alternative implementations which could be added are listed
         # below, both with advantages and disadvantages:
 
         # 1) Dominant Nulls: (Null is an option which cannot be override)
@@ -203,9 +203,9 @@ class Mapping(object):
         #  we add a Null B-group. This Null group means nothing can be added
         #  to that anchor.
 
-        #  This could be implimented in this step in mapping_class.py or this
-        #  could be implimented at the R-groups to B-group consolidation step
-        #  -implimented it at the R-group to B-group consolidation may be a
+        #  This could be implemented in this step in mapping_class.py or this
+        #  could be implemented at the R-groups to B-group consolidation step
+        #  -implemented it at the R-group to B-group consolidation may be a
         #  better option because it will simplify issues of when is it
         #  appropriate to add Null.
         #    ie) if parent lig_1 has 1B1 attached to anchors 10000,10001,10002
@@ -220,10 +220,10 @@ class Mapping(object):
 
         #            When the program needs to make a decision for anchor
         #            10003 what should its option be????:
-        #                - It shuld have to chose 1B2
-        #                   IF WE IMPLIMENT THE NULLS IN THIS PART OF THE CODE WE
+        #                - It should have to chose 1B2
+        #                   IF WE implement THE NULLS IN THIS PART OF THE CODE WE
         #                   WOULD HAVE TO CODE IN THAT AS A CONSIDERATION IF WE
-        #                   IMPLIMENT NULLS AT THE R- TO B-GROUP CONSOLIDATION PHASE
+        #                   implement NULLS AT THE R- TO B-GROUP CONSOLIDATION PHASE
         #                   WE WOULDN'T NEED TO ADD EXTRA CODE HERE TO PREVENT A NULL
         #                   FROM BEING ADDED
 
@@ -233,11 +233,11 @@ class Mapping(object):
         #  nothing can be added
 
         #  Effects:
-        #  1) easier to impliment
+        #  1) easier to implement
         #  2) affects the weighting of multi connection point B-groups -A
         #     single decision more dramatically impacts chains with many
         #     connections
-        #  3) a Null is perminent so its easier to code and process
+        #  3) a Null is permanent so its easier to code and process
 
         # 2) Recessive Nulls: (A Null can be chosen but it can be overriden)
         #     (soft Null). If a recessive null is chosen instead of a B-group
@@ -253,7 +253,7 @@ class Mapping(object):
         #  -Recessive Nulls favors the selection of B-groups with multiple
         #   connections, but still allows for a null to be chosen.
         #  -A more balanced option between No-Nulls (the current
-        #   implimentation) and Dominant Nulls. But this does bias the
+        #   implementation) and Dominant Nulls. But this does bias the
         #   statistics of choices
         #  -this also makes the decision tree more complicated and makes
         #   coding this more difficult
