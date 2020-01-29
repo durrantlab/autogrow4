@@ -9,6 +9,7 @@ import __future__
 
 import argparse
 import copy
+import datetime
 
 # Imports of files are burried below to prevent EOF issues in MPI mode
 
@@ -642,6 +643,8 @@ for k, v in args_dict.items():
         del INPUTS[k]
 
 if args_dict["cache_prerun"] is False:
+
+    start_time = str(datetime.datetime.now())
     # load the commandline parameters
     from autogrow.user_vars import load_in_commandline_parameters
 
@@ -657,6 +660,12 @@ if args_dict["cache_prerun"] is False:
     import autogrow.autogrow_main_execute as AutogrowMainExecute
 
     AutogrowMainExecute.main_execute(vars)
+
+    # Print completion message
+
+    printout = "\nAutoGrow4 run started at:   {}\nAutoGrow4 ".format(start_time)
+    printout = printout + "run completed at: {}\n".format(str(datetime.datetime.now()))
+    print(printout)
 
     print("AUTOGROW FINISHED")
 

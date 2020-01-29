@@ -86,7 +86,7 @@ def main_execute(vars):
             if new_gen_ligands_list is None:
                 raise ValueError("Population failed to make enough mutants or crossovers... \
                                     Errors could include not enough diversity, too few seeds to the generation, \
-                                    the seed mols are unable to cross-over due to lack of similariy,\
+                                    the seed mols are unable to cross-over due to lack of similarity,\
                                     or all of the seed lack functional groups for performing reactions.")
 
             # Run file conversions of PDB to docking specific file type and

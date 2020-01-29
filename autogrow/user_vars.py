@@ -991,7 +991,7 @@ def load_in_commandline_parameters(argv):
     ###########################################
 
     # Check if Custom docking option if so there's a few things which
-    # need to also be specifie
+    # need to also be specified
     # if not lets flag the error
     if vars["dock_choice"] == "Custom":
         if vars["docking_executable"] is None:

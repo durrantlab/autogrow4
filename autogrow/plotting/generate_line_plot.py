@@ -349,19 +349,19 @@ def run_plotter(vars, dict_of_averages, outfile):
     plt.ylabel(y_label, fontweight="semibold")
 
     plt.xlabel("Generation Number", fontweight="semibold")
-
-    if print_ten is True:
-        plt.savefig(outfile, bbox_inches="tight", dpi=1000)
-    else:
-        # Remove the bbox_inches="tight" is necessary if
-        # the plot is too small for 
-        try:
+    
+    try:        
+        if print_ten is True:
+            plt.savefig(outfile, bbox_inches="tight", dpi=1000)
+        else:
+            # Remove the bbox_inches="tight" is necessary if
+            # the plot is too small for 
             plt.savefig(outfile, dpi=500)
-        except:
-            printout = "\nUNABLE TO CREATE PLOT: \n"
-            printout = printout + "Population size or number of generations was "
-            printout = printout + " too small to effectively plot. \n"
-            print(printout)
+    except:
+        printout = "\nUNABLE TO CREATE PLOT: \n"
+        printout = printout + "Population size or number of generations was "
+        printout = printout + "too small to effectively plot. \n"
+        print(printout)
 
 def print_data_table(infolder, folder_list):
     """
