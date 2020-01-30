@@ -34,7 +34,7 @@ An example JSON is provided in: ./sample_autogrow_docker_json.json
 To run AutoGrow4 in a docker, please run the `autogrow_in_docker.py` script:
     Example on Linux/MacOS:
         #  cd to this directory in a bash terminal
-        1) cd autogrow4/Docker/
+        1) cd autogrow4/docker/
         # Run autogrow_in_docker.py with sudo and supply a json file using the
         # normal pathing of your system.
         # Please note that the docker downloads its own copy of obabel and MGLTools
@@ -46,7 +46,7 @@ To run AutoGrow4 in a docker, please run the `autogrow_in_docker.py` script:
     Example on Windows OS:
         1) open a docker enabled and bash enabled terminal with administrative priveledges
         #  cd to this directory in a bash terminal
-        3) cd autogrow4/Docker/
+        3) cd autogrow4/docker/
         4)  `python autogrow_in_docker.py -j ./examples/sample_autogrow_docker_json.json`
 
         # Results will be output to the directory specified by the root_output_folder variable
@@ -570,7 +570,7 @@ def run_autogrow_docker_main(vars):
     temp_outfolder_path = os.path.abspath(outfolder_path)
     if os.name == "nt" or os.name == "ce":
         # temp_outfolder_path should look like:
-        # "/c/Users/Jacob/autogrow4/Docker/Outputfolder/Run_0"
+        # "/c/Users/Jacob/autogrow4/docker/Outputfolder/Run_0"
         # for windows
         if temp_outfolder_path[0] != "/":
             temp_outfolder_path = "/" + temp_outfolder_path

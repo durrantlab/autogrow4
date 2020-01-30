@@ -29,7 +29,7 @@ running RedHat Enterprise Server release 7.3 Maipo.
 AutoGrow4 has not been configured for Windows OS, but a script capable of
 running AutoGrow4 within a docker container on Windows can be found:
 
-`/autogrow4/autogrow/Docker/`
+`/autogrow4/docker/`
 
 This script should be capable of running on any docker enable machine and
 should be capable of multithreading. Details on running AutoGrow4 within a
@@ -504,7 +504,7 @@ document in the Section
 
 ## Docker Submission
 
-The `/autogrow4/Docker/` directory contains the scripts to run AutoGrow4
+The `/autogrow4/docker/` directory contains the scripts to run AutoGrow4
 within a docker container. These scripts are useful when using OS that is not
 compatible with AutoGrow4 dependencies or are not supported by our current
 multithreading approach, such as Windows.
@@ -536,14 +536,14 @@ Then run the `autogrow_in_docker.py` script.
 
 Linux/MacOS:
 
-1. cd to the `/autogrow4/Docker/` directory in a bash terminal: `cd
-   /autogrow4/Docker/`
+1. cd to the `/autogrow4/docker/` directory in a bash terminal: `cd
+   /autogrow4/docker/`
 2. Run `autogrow_in_docker.py` with sudo and supply a json file using the
    normal pathing of your system. Please note that the docker downloads its
    own copy of `obabel` and `MGLTools` so you do not need to provide those
    paths.
 3. Execute `autogrow_in_docker.py` with sudo privileges, providing it with a
-   JSON file (MUST EXECUTE FROM `/autogrow4/Docker/`): `sudo python
+   JSON file (MUST EXECUTE FROM `/autogrow4/docker/`): `sudo python
    autogrow_in_docker.py -j ./examples/sample_autogrow_docker_json.json`
 4. Results will be output to the directory specified by the root_output_folder
    variable
@@ -551,10 +551,10 @@ Linux/MacOS:
 Windows OS:
 
 1. Open a docker enabled and bash enabled terminal with administrative privileges
-2. cd to the `/autogrow4/Docker/` directory in a bash enabled terminal: `cd
-   /autogrow4/Docker/`
+2. cd to the `/autogrow4/docker/` directory in a bash enabled terminal: `cd
+   /autogrow4/docker/`
 3. Execute 'autogrow_in_docker.py' with sudo privileges, providing it with a
-   JSON file (MUST EXECUTE FROM `/autogrow4/Docker/`): `python
+   JSON file (MUST EXECUTE FROM `/autogrow4/docker/`): `python
    autogrow_in_docker.py -j ./examples/sample_autogrow_docker_json.json`
 4. Results will be output to the directory specified by the `root_output_folder`
    parameter.

@@ -7,9 +7,9 @@
 Outputfolder
 Outputfolder/*
 # ignore Docker files that are created if running example scripts
-Docker/Outputfolder
-Docker/Outputfolder/*
-Docker/output_and_log_dir
-Docker/output_and_log_dir/*
-Docker/temp_user_files
-Docker/temp_user_files/*
+docker/Outputfolder
+docker/Outputfolder/*
+docker/output_and_log_dir
+docker/output_and_log_dir/*
+docker/temp_user_files
+docker/temp_user_files/*
