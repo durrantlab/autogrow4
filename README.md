@@ -1,31 +1,47 @@
-#   AutoGrow 4.0
-AutoGrow 4.0 is a complete rewrite of the evolutionary algorithm that optimizes candidate ligands for predicted binding affinity and other druglike properties. Though no substitute for the medicinal chemist, AutoGrow attempts to introduce some chemical intuition into the automated optimization process. By carefully crafting chemically feasible druglike molecules, we hope that AutoGrow 4.0 will help supplement the chemist's efforts.
+# AutoGrow4
 
-Autogrow 4.0 takes advantage of the recent advancements in multiprocessing, cheminformatics, and docking. Autogrow 4.0 handles all ligand manipulations using 1D SMILES strings using the API RDKit, which is faster and more maintainable than handling manipulations in 3D using PDB's. As docking softwares require 3D versions of the file, we use Gypsum-DL to convert the 1D SMILES to 3D and Dimorphite-DL to handle the protanation of the ligands using biologically relevant pH settings.
+AutoGrow4 is an evolutionary algorithm that optimizes candidate ligands for
+predicted binding affinity and other drug-like properties. Though no
+substitute for the medicinal chemist, AutoGrow4 attempts to introduce some
+chemical intuition into the automated optimization process.
 
-Autogrow 4.0 was designed with modularity in mind. We've expanded new user options for drug-likeliness, reaction library options for Crossover, docking executable softwares, ranking, and selection algorithms. All of these as well as scoring functions have been designed to allow the user to add their own custom options. Please see the tutorial for how and where to expand these options. We hope Autogrow will become a living code base.
+AutoGrow4 takes advantage of recent advancements in multiprocessing,
+cheminformatics, and docking. It handles all ligand manipulations using 1D
+SMILES strings via the RDKit API. Docking programs require 3D small-molecule
+models, so AutoGrow4 use Gypsum-DL to convert the 1D SMILES to 3D.
 
-A detailed tutorial for using AutoGrow can be found in the directory /autogrow4/tutorial/tutorial.md
+AutoGrow4 was designed with modularity in mind. New options allow users to
+control drug-likeness, access new reaction libraries, use additional docking
+programs, rank AutoGrow4-generated compounds using alternate schemes, and
+advance candidate compounds via several selection algorithms. The codebase has
+been redesigned so users can easily add their own custom options as well.
+Please see the tutorial, which describes how to expand these various options.
 
+The default fragment libraries included with AutoGrow4 were derived from a
+subset of the ZINC database (https://zinc.docking.org/). We thank ZINC for
+allowing us to distribute these fragment libraries to AutoGrow4 users.
 
-The default fragment libraries included with AutoGrow were derived from a subset of the ZINC database (https://zinc.docking.org/). We thank ZINC for allowing us to distribute these fragment libraries to AutoGrow users.
+# Getting Started with AutoGrow4
 
-# Getting Started with AutoGrow4:
-A detailed tutorial of running AutoGrow4 can be found within the tutorial folder at: /autogrow4/tutorial/tutorial.md
-The tutorial details all dependencies, and running instructions. Additional details for AutoGrow4 parameters can be obtained by running:
-    python RunAutogrow.py -h
+Use the `RunAutogrow.py` script to run AutoGrow4. The script supports both
+command-line parameters and a JSON parameter file. A detailed tutorial
+describing AutoGrow4's dependencies and general use is located at
+`/autogrow4/tutorial/tutorial.md`. Additional descriptions of all AutoGrow4
+parameters can be obtained by running: `python RunAutogrow.py -h`.
 
-AutoGrow4 is executed through the script RunAutogrow.py and supports commandline and JSON file submission for parameters. 
-AutoGrow4 can also be run through Docker, using the script: /autogrow4/Docker/autogrow_in_docker.py
-Details for running AutoGrow4 using Docker are provided within the tutorial (/autogrow4/tutorial/tutorial.md)
+We strongly recommend running AutoGrow4 via Docker using
+`/autogrow4/Docker/autogrow_in_docker.py`. See the tutorial at
+`/autogrow4/tutorial/tutorial.md` for more details.
 
+# Developer Note
 
-# Developer Note:
-Gypsum-DL is Version 1.1.2 with two sys.flush() commands added to the Parallelizer.py script.
-    These help to ensure print statements properly output in large MPI runs.
+Gypsum-DL is Version 1.1.2 with two `sys.flush()` commands added to the
+`Parallelizer.py` script. These minor changes help ensure that print
+statements properly output in large MPI runs.
+
 Dimorphite is Version 1.2.2 with the citation print statement commented out.
-    This was done to keep the print logs resonably sized in larger AutoGrow4 runs.
-    Please remember to cite Dimorphite-DL:
-        Ropp PJ, Kaminsky JC, Yablonski S, Durrant JD (2019) 
-        Dimorphite-DL: An open-source program for enumerating the ionization states of drug-like small molecules. 
-        J Cheminform 11:14. doi:10.1186/s13321-019-0336-9.
+We commented out the citation to prevent the AutoGrow4 print logs from growing
+too large. Please remember to cite Dimorphite-DL: Ropp PJ, Kaminsky JC,
+Yablonski S, Durrant JD (2019) Dimorphite-DL: An open-source program for
+enumerating the ionization states of drug-like small molecules. J Cheminform
+11:14. doi:10.1186/s13321-019-0336-9.
