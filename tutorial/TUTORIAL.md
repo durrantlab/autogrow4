@@ -574,7 +574,7 @@ functions include:
 3. Custom ligand conversion code from PDB to dockable format (ie PDBQT) ***
 4. Custom Scoring/Rescoring code ***
 5. Custom Reaction libraries
-6. Custom complimentary molecules libraries
+6. Custom complementary molecules libraries
 
 *** Indicates that when using this feature the code is automatically copied
 into the directory that is required to house that code. This is only done once
@@ -969,8 +969,8 @@ Reaction Libraries are stored in .json files and are dictionaries of
 dictionaries. The outer dictionary uses the reaction's name as the key and the
 sub-dictionary containing all information about the reaction as the item.
 
-We provide a script to check Complimentary and Reaction libraries molecule
-libraries at: `/autogrow4/accessory_scripts/test_complimentary_mol_library.py`
+We provide a script to check complementary and Reaction libraries molecule
+libraries at: `/autogrow4/accessory_scripts/test_complementary_mol_library.py`
 
 A tutorial is provided in the Utility Scripts section of this document
 
@@ -1097,9 +1097,9 @@ group names of reactants found under sub-dictionary key "functional_groups" and
 placing the SMARTS string of the group in the list of functional group SMARTS
 of reactants found under sub-dictionary key "group_smarts"
 
-##### 3) Directory Of Complimentary Molecule Libraries, Directory of .smi Files
+##### 3) Directory Of complementary Molecule Libraries, Directory of .smi Files
 
-Any reaction containing more than one reactant will require a complimentary
+Any reaction containing more than one reactant will require a complementary
 molecule to supplement the reaction.
 
 For this reason we require a directory populated with .smi files containing
@@ -1110,13 +1110,13 @@ keys of the Functional group library .json file) +.smi
 
 Example: The .smi file for the functional group
 "Acid_Anhydride_Noncyclic_clickchem" should be
-`/PATH_TO/complimentary_mol_directory/Acid_Anhydride_Noncyclic_clickchem.smi`
+`/PATH_TO/complementary_mol_directory/Acid_Anhydride_Noncyclic_clickchem.smi`
 
 THERE MUST BE ONE ENTRY PER FUNCTIONAL GROUP. BECAUSE NAMES ARE CAP SENSITIVE
 IN SOME OS'S AND NOT IN OTHERS, PLEASE CHECK THAT YOUR NAME IS UNIQUE
 INDEPENDENT OF CAPS.
 
-#### Important Formatting Notes About the .smi File for complimentary_mol_directory
+#### Important Formatting Notes About the .smi File for complementary_mol_directory
 
 1. No headers are allowed in the file.
 2. .smi files can be either tab or 4-space delineated.
@@ -1137,7 +1137,7 @@ Running a custom reaction library requires 4 parameters to be set:
 1. rxn_library
 2. rxn_library_file
 3. function_group_library
-4. complimentary_mol_directory
+4. complementary_mol_directory
 
 Submission through .json format:
 
@@ -1146,8 +1146,8 @@ Submission through .json format:
   `/PATH_TO/rxn_library_file.json`
 * Where function group JSON file is located at:
   `/PATH_TO/function_group_library.json`
-* Where directory of SMI for complimentary libraries is located at:
-  `/PATH_TO/complimentary_mol_directory/`
+* Where directory of SMI for complementary libraries is located at:
+  `/PATH_TO/complementary_mol_directory/`
 
 ```json
 {
@@ -1155,7 +1155,7 @@ Submission through .json format:
     "rxn_library": "Custom",
     "rxn_library_file": "/PATH_TO/rxn_library_file.json",
     "function_group_library": "/PATH_TO/function_group_library.json",
-    "complimentary_mol_directory": "/PATH_TO/complimentary_mol_directory/",
+    "complementary_mol_directory": "/PATH_TO/complementary_mol_directory/",
 }
 ```
 
@@ -1168,8 +1168,8 @@ Command-line submission format:
   `/PATH_TO/rxn_library_file.json`
 * Where function group JSON file is located at:
   `/PATH_TO/function_group_library.json`
-* Where directory of SMI for complimentary libraries is located at:
-  `/PATH_TO/complimentary_mol_directory/`
+* Where directory of SMI for complementary libraries is located at:
+  `/PATH_TO/complementary_mol_directory/`
 
 ```bash
 python RunAutogrow.py \
@@ -1177,18 +1177,18 @@ python RunAutogrow.py \
     --rxn_library Custom \
     --rxn_library_file /PATH_TO/rxn_library_file.json \
     --function_group_library /PATH_TO/function_group_library.json \
-    --complimentary_mol_directory /PATH_TO/complimentary_mol_directory/
+    --complementary_mol_directory /PATH_TO/complementary_mol_directory/
 ```
 
-### 6) Custom Complimentary Molecule Libraries For Mutation
+### 6) Custom complementary Molecule Libraries For Mutation
 
 One can provide custom libraries of molecules to suppliment reactions by using
-the `--complimentary_mol_directory` option.
+the `--complementary_mol_directory` option.
 
 This can be used in conjunction with any of the predefined reactions sets (ie
 ClickChem, robust_rxns, all_rxns), but this requires that all functional
 groups used by those reaction libraries have a .smi file contained within the
-custom complimentary_mol_directory
+custom complementary_mol_directory
 
 We strongly recommend thoroughly checking that each molecule in each library
 matches the intended functional group.
@@ -1196,8 +1196,8 @@ matches the intended functional group.
 If a ligand does not match the intended functional group the reaction will
 fail and it will slow the process of mutant creation.
 
-We provide a script to check Complimentary molecule libraries at
-`/autogrow4/accessory_scripts/test_complimentary_mol_library.py`
+We provide a script to check complementary molecule libraries at
+`/autogrow4/accessory_scripts/test_complementary_mol_library.py`
 
 A tutorial is provided in the Utility Scripts section of this document
 
@@ -1205,7 +1205,7 @@ THERE MUST BE ONE ENTRY PER FUNCTIONAL GROUP. BECAUSE NAMES ARE CAP SENSITIVE
 IN SOME OS'S AND NOT IN OTHERS, PLEASE CHECK THAT YOUR NAME IS UNIQUE
 INDEPENDENT OF CAPS.
 
-#### Important Formatting Notes About the .smi File for complimentary_mol_directory
+#### Important Formatting Notes About the .smi File for complementary_mol_directory
 
 1. No headers are allowed in the file.
 2. .smi files can be either tab or 4-space delineated.
@@ -1218,26 +1218,26 @@ INDEPENDENT OF CAPS.
 Submission through .json format:
 
 * Where JSON is located at: `/PATH_TO/To/json_file_with_variable.json`
-* Where directory of SMI for complimentary libraries is located at:
-  `/PATH_TO/complimentary_mol_directory/`
+* Where directory of SMI for complementary libraries is located at:
+  `/PATH_TO/complementary_mol_directory/`
 
 ```json
 {
     ...
-    "complimentary_mol_directory": "/PATH_TO/complimentary_mol_directory/",
+    "complementary_mol_directory": "/PATH_TO/complementary_mol_directory/",
 }
 ```
 
 Submit via terminal: `python RunAutogrow.py -j
 /PATH_TO/json_file_with_variable.json`
 
-Command- line submission format, where directory of SMI for complimentary
-libraries is located at: `/PATH_TO/complimentary_mol_directory/`
+Command- line submission format, where directory of SMI for complementary
+libraries is located at: `/PATH_TO/complementary_mol_directory/`
 
 ```bash
 python RunAutogrow.py \
     ... \
-    --complimentary_mol_directory /PATH_TO/complimentary_mol_directory/
+    --complementary_mol_directory /PATH_TO/complementary_mol_directory/
 ```
 
 ## Prepping Receptor
@@ -1545,12 +1545,12 @@ python /autogrow4/accessory_scripts/fragmenter_of_smi_mol.py \
 
 ### Preparation Custom Reaction Libraries Pre-Run
 
-#### /autogrow4/accessory_scripts/test_complimentary_mol_library.py
+#### /autogrow4/accessory_scripts/test_complementary_mol_library.py
 
-This script will test a complimentary molecule library to ensure all compounds
+This script will test a complementary molecule library to ensure all compounds
 react in all reactions they may be used in.
 
-We recommend running this test if creating custom complimentary libraries or
+We recommend running this test if creating custom complementary libraries or
 reaction libraries.
 
 This script takes 5 input arguments:
@@ -1559,7 +1559,7 @@ This script takes 5 input arguments:
    reactions to use for Mutation.
 2. `--function_group_library` str: Required. type=strThis PATH for a dictionary
    of functional groups to be used for Mutation.
-3. `--complimentary_mol_directory` str: Required.  This PATH to the directory
+3. `--complementary_mol_directory` str: Required.  This PATH to the directory
    containing all the molecules being used to react with. The directory should
    contain .smi files contain SMILES of molecules containing the functional
    group represented by that file. Each file should be named with the same
@@ -1579,10 +1579,10 @@ This script takes 5 input arguments:
 Example submit:
 
 ```bash
-python /autogrow4/accessory_scripts/test_complimentary_mol_library.py \
+python /autogrow4/accessory_scripts/test_complementary_mol_library.py \
     --rxn_library_file /autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/ClickChem_rxn_library.json \
     --function_group_library /autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/ClickChem_functional_groups.json \
-    --complimentary_mol_directory /autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/complimentary_mol_dir \
+    --complementary_mol_directory /autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/complementary_mol_dir \
     --output_folder /autogrow4/accessory_scripts/output/
 ```
 
@@ -1784,10 +1784,10 @@ without generating figures.
     the vars.json file from the AutoGrow4 run. Example mol_name:
     `Gen_5_Cross_203131 or Gen_4_Mutant_7_802531`. Can also be provided as
     full-name ie: (`Gen_2_Mutant_7_97143`)`Gen_4_Mutant_7_802531`
-4. `--complimentary_mol_directory` str. If using a custom complimentary molecule
+4. `--complementary_mol_directory` str. If using a custom complementary molecule
     library for mutations this path is required. If not the script will try to
-    autodetect the location of the predefined complimentary_mol_directory.
-    Many molecules generated by mutation will required the complimentary
+    autodetect the location of the predefined complementary_mol_directory.
+    Many molecules generated by mutation will required the complementary
     molecule that helped spawn them.
 5. `--source_compound_file` str: Required. This is the source .smi file used to
     seed generation zero of the AutoGrow4 run. This is an essential file.

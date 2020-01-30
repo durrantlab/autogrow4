@@ -29,10 +29,10 @@ class SmilesClickChem(object):
         Inputs:
         :param list rxn_library_variables: a list of user variables which
             define the rxn_library, rxn_library_file,
-            complimentary_mol_directory, and function_group_library. ie.
+            complementary_mol_directory, and function_group_library. ie.
             rxn_library_variables = [vars['rxn_library'],
             vars['rxn_library_file'],
-            vars['function_group_library'],vars['complimentary_mol_directory']]
+            vars['function_group_library'],vars['complementary_mol_directory']]
         :param list list_of_already_made_smiles: a list of lists. Each
             sublist contains info about a smiles made in this generation via
             mutation ie.[['O=C([O-])',
@@ -46,7 +46,7 @@ class SmilesClickChem(object):
         rxn_library = rxn_library_variables[0]
         rxn_library_file = rxn_library_variables[1]
         function_group_library = rxn_library_variables[2]
-        complimentary_mol_dir = rxn_library_variables[3]
+        complementary_mol_dir = rxn_library_variables[3]
         self.reaction_dict = self.retrieve_reaction_dict(
             rxn_library, rxn_library_file
         )
@@ -57,8 +57,8 @@ class SmilesClickChem(object):
         self.functional_group_dict = self.retrieve_functional_group_dict(
             rxn_library, function_group_library
         )
-        self.complimentary_mol_dict = self.retrieve_complimentary_dictionary(
-            rxn_library, complimentary_mol_dir
+        self.complementary_mol_dict = self.retrieve_complementary_dictionary(
+            rxn_library, complementary_mol_dir
         )
 
         # List of already predicted smiles
@@ -403,7 +403,7 @@ class SmilesClickChem(object):
         random.shuffle(keys)
         return keys
 
-    def retrieve_complimentary_dictionary(self, rxn_library, complimentary_mol_dir):
+    def retrieve_complementary_dictionary(self, rxn_library, complementary_mol_dir):
         """
         Based on user controlled variables, this definition will retrieve a
         dictionary of molecules separated into classes by their functional
@@ -414,45 +414,45 @@ class SmilesClickChem(object):
         :param str rxn_library: A string defining the choice of the reaction
             library. ClickChem uses the set of reactions from Autogrow 3.1.2.
             Custom means you've defined a path to a Custom library in
-            vars['complimentary_mol_dir']
-        :param dict complimentary_mol_dir: the path to the
-            complimentary_mol_dir directory. It may be an empty string in which
-            case the complimentary_mol_dir directory will default to those of the
+            vars['complementary_mol_dir']
+        :param dict complementary_mol_dir: the path to the
+            complementary_mol_dir directory. It may be an empty string in which
+            case the complementary_mol_dir directory will default to those of the
             rxn_library
 
         Returns:
-        :returns: dict complimentary_mols_dict: a dictionary of complimentary molecules
+        :returns: dict complementary_mols_dict: a dictionary of complementary molecules
         """
         script_dir = os.path.dirname(os.path.realpath(__file__))
 
-        if complimentary_mol_dir == "":
+        if complementary_mol_dir == "":
             if rxn_library == "click_chem_rxns":
-                complimentary_mol_dir = os.path.join(
+                complementary_mol_dir = os.path.join(
                     script_dir,
                     "reaction_libraries",
                     "click_chem_rxns",
-                    "complimentary_mol_dir",
+                    "complementary_mol_dir",
                 )
             elif rxn_library == "robust_rxns":
-                complimentary_mol_dir = os.path.join(
+                complementary_mol_dir = os.path.join(
                     script_dir,
                     "reaction_libraries",
                     "robust_rxns",
-                    "complimentary_mol_dir",
+                    "complementary_mol_dir",
                 )
             elif rxn_library == "all_rxns":
-                complimentary_mol_dir = os.path.join(
+                complementary_mol_dir = os.path.join(
                     script_dir,
                     "reaction_libraries",
                     "all_rxns",
-                    "complimentary_mol_dir",
+                    "complementary_mol_dir",
                 )
             elif rxn_library == "Custom":
-                if os.path.isdir(complimentary_mol_dir) is False:
+                if os.path.isdir(complementary_mol_dir) is False:
                     raise Exception(
-                        "Custom complimentary_mol_dir cannot be found. "
+                        "Custom complementary_mol_dir cannot be found. "
                         + "Please check the path: ",
-                        complimentary_mol_dir,
+                        complementary_mol_dir,
                     )
             else:
                 raise Exception(
@@ -460,12 +460,12 @@ class SmilesClickChem(object):
                 )
 
         else:
-            if os.path.isdir(complimentary_mol_dir) is False:
+            if os.path.isdir(complementary_mol_dir) is False:
                 raise Exception(
-                    "complimentary_mol_dir is not a directory. It must be a \
+                    "complementary_mol_dir is not a directory. It must be a \
                     directory with .smi files containing SMILES specified by \
                     functional groups.These .smi files must be named the same \
-                    as the files in the complimentary_mol_dir."
+                    as the files in the complementary_mol_dir."
                 )
 
         # Make a list of all the functional groups. These will be the name of
@@ -473,35 +473,35 @@ class SmilesClickChem(object):
         functional_groups = self.functional_group_dict.keys()
 
         missing_smi_files = []
-        complimentary_mols_dict = {}
+        complementary_mols_dict = {}
         for group in functional_groups:
-            filepath = "{}{}{}.smi".format(complimentary_mol_dir, os.sep, group)
+            filepath = "{}{}{}.smi".format(complementary_mol_dir, os.sep, group)
 
             if os.path.isfile(filepath) is True:
-                complimentary_mols_dict[group] = filepath
+                complementary_mols_dict[group] = filepath
 
             else:
                 missing_smi_files.append(filepath)
                 print(
-                    "Could not find the following .smi file for complimentary "
+                    "Could not find the following .smi file for complementary "
                     + " molecules for Mutation: {}".format(filepath)
                 )
 
         if len(missing_smi_files) != 0:
             raise Exception(
-                "The following .smi file for complimentary molecules "
+                "The following .smi file for complementary molecules "
                 + "for Mutation is missing: ",
                 missing_smi_files,
             )
 
-        return complimentary_mols_dict
+        return complementary_mols_dict
 
     def make_reactant_order_list(self, substructure_search_result,
                                  has_substructure_matches_count):
         """
         make an ordered list of reactants which composed of 0 and 1. This list
         will be used (in later steps) to determine which reactant is the
-        ligand and which requires a complimentary molecule.
+        ligand and which requires a complementary molecule.
 
         Inputs:
         :param list substructure_search_result: list composed of 0 and 1. 1
@@ -518,11 +518,11 @@ class SmilesClickChem(object):
         elif has_substructure_matches_count > 1:
             # if more than 1 reactant is found in the ligand than we need to
             # randomly pick 1 to be the molecule in the reaction and the
-            # other(s) to be mols chosen from the complimentary molecule
+            # other(s) to be mols chosen from the complementary molecule
             # dictionary
 
             # create a list to be used to determine which reactants need
-            # complimentary mol and which will use the Ligand
+            # complementary mol and which will use the Ligand
             reactant_order_list = []
 
             chosen_as_mol_num = random.randint(0, has_substructure_matches_count - 1)
@@ -544,19 +544,19 @@ class SmilesClickChem(object):
                     reactant_order_list.append(0)
         return reactant_order_list
 
-    def get_random_complimentary_mol(self, functional_group):
+    def get_random_complementary_mol(self, functional_group):
         """
-        This function will get a dictionary of complimentary mols
+        This function will get a dictionary of complementary mols
 
         Inputs:
         :param str functional_group: the functional group of the needed
-            complimentary molecule for the reaction
+            complementary molecule for the reaction
 
         Returns:
         :returns: list random_comp_mol: list with the SMILES string and name
             of molecule for the randomly chosen comp mol
         """
-        infile = self.complimentary_mol_dict[functional_group]
+        infile = self.complementary_mol_dict[functional_group]
 
         with open(infile, "r") as f:
             random_comp_mol_line = random.choice(f.readlines())
@@ -625,7 +625,7 @@ class SmilesClickChem(object):
         Returns:
         :returns: list product_info: list containing the reaction product, the
             id_number of the reaction as found in the reaction_dict and the id for
-            the complimentary mol (None if it was a single reactant reaction)
+            the complementary mol (None if it was a single reactant reaction)
             [reaction_product_smilestring, reaction_id_number,
             zinc_database_comp_mol_name]. returns None if all reactions failed or
             input failed to convert to a sanitizable rdkit mol.
@@ -779,7 +779,7 @@ class SmilesClickChem(object):
 
                     else:
                         # for reactants which need to be taken from the
-                        # complimentary dictionary. Find the reactants
+                        # complementary dictionary. Find the reactants
                         # functional group
                         functional_group_name = str(
                             a_reaction_dict["functional_groups"][i]
@@ -795,16 +795,16 @@ class SmilesClickChem(object):
                         # which is viable
                         for find_mol_tries in range(0, 100):
 
-                            # find that group in the complimentary dictionary.
+                            # find that group in the complementary dictionary.
                             # comp_molecule = ["cccc", "ZINC123"]
-                            comp_molecule = self.get_random_complimentary_mol(
+                            comp_molecule = self.get_random_complementary_mol(
                                 functional_group_name
                             )
 
                             # zinc_database name
                             zinc_database_comp_mol_name = comp_molecule[1]
 
-                            # Smiles String of complimentary molecule
+                            # Smiles String of complementary molecule
                             comp_smiles_string = comp_molecule[0]
 
                             # check this is a santizable molecule

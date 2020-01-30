@@ -6,7 +6,7 @@ Many small modifications have been the reactions in this set which are derived f
 Small changes which were made include:
     - Adjusting some SMARTs to be more inclusive, when chemically acceptable.
     - Canonicalizing functional groups so that all reactions which use a functional group
-        able to use the same functional group complimentary_mol library
+        able to use the same functional group complementary_mol library
         - ie. 6 reactions require a general alkyne, but originally used multiple versions of
             same SMART even though there was no limiting factor that differed between them.
             So we made adapted those reactions to use the canonical smart parttern.

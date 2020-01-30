@@ -708,7 +708,7 @@ def define_defaults():
     vars["rxn_library"] = "click_chem_rxns"
     vars["rxn_library_file"] = ""
     vars["function_group_library"] = ""
-    vars["complimentary_mol_directory"] = ""
+    vars["complementary_mol_directory"] = ""
 
     # processors
     vars["number_of_processors"] = 1
@@ -1062,15 +1062,15 @@ def load_in_commandline_parameters(argv):
                 THE PATH TO THE REACTION LIBRARY USING INPUT PARAMETER rxn_library"
             )
 
-        if vars["complimentary_mol_directory"] == "":
+        if vars["complementary_mol_directory"] == "":
             raise ValueError(
                 "TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY THE PATH \
                 TO THE REACTION LIBRARY USING INPUT PARAMETER function_group_library"
             )
-        if os.path.isdir(vars["complimentary_mol_directory"]) is False:
+        if os.path.isdir(vars["complementary_mol_directory"]) is False:
             raise ValueError(
                 "TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY THE PATH \
-                TO THE REACTION LIBRARY USING INPUT PARAMETER complimentary_mol_directory"
+                TO THE REACTION LIBRARY USING INPUT PARAMETER complementary_mol_directory"
             )
     else:  # Using default settings
         if vars["rxn_library_file"] != "":
@@ -1087,9 +1087,9 @@ def load_in_commandline_parameters(argv):
             either the provided rxn_library options or chose the Custom option \
             for rxn_library"
             )
-        if vars["complimentary_mol_directory"] != "":
+        if vars["complementary_mol_directory"] != "":
             raise ValueError(
-                "You have selected a Custom complimentary_mol_directory\
+                "You have selected a Custom complementary_mol_directory\
             but not chosen to use the Custom option for rxn_library. \
             Please use either the provided rxn_library options or chose the Custom\
             option for rxn_library"

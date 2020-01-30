@@ -29,8 +29,8 @@ All compounds were tested to ensure they will react in all reactions they may be
 
 Total number of different Zinc15 compounds: 185,615
 ###################################################################################################################
-The complimentary molecule libraries used in robust_rxns and ClickChem were copied
-    to from the all_rxns complimentary molecule library
+The complementary molecule libraries used in robust_rxns and ClickChem were copied
+    to from the all_rxns complementary molecule library
 ###################################################################################################################
 The default fragment libraries included with AutoGrow were derived 
 from a subset of the ZINC database (https://zinc.docking.org/).

@@ -186,7 +186,7 @@ PARSER.add_argument(
     Only provide if using the Custom option for rxn_library.",
 )
 PARSER.add_argument(
-    "--complimentary_mol_directory",
+    "--complementary_mol_directory",
     type=str,
     default="",
     help="This PATH to the directory containing all the molecules being used \

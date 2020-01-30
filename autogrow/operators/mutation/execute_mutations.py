@@ -98,7 +98,7 @@ def make_mutants(vars, generation_num, number_of_processors,
                     reaction_id_number = i[1]
 
                     # get the ID for the parent of a child mol and the
-                    # complimentary parent mol. comp mol could be None or a
+                    # complementary parent mol. comp mol could be None or a
                     # zinc database ID
                     parent_lig_id = smile_names[index]
                     zinc_id_comp_mol = i[2]

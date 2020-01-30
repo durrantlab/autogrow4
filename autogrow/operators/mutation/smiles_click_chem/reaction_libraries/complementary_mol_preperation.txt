@@ -22,7 +22,7 @@ We favored low molecular weight as AutoGrow tends to grow compounds.
 All compounds were tested to ensure they will react in all reactions they may be called in.
 
 ###################################################################################################################
-The complimentary molecule libraries used in robust_rxns and click_chem_rxns were copied to form the all_rxns complimentary molecule library
+The complementary molecule libraries used in robust_rxns and click_chem_rxns were copied to form the all_rxns complementary molecule library
 ###################################################################################################################
 
 The resulting libraries (when removing redundancies) uses: 185,615

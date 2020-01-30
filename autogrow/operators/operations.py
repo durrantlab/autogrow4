@@ -110,7 +110,7 @@ def populate_generation(vars, generation_num):
         vars["rxn_library"],
         vars["rxn_library_file"],
         vars["function_group_library"],
-        vars["complimentary_mol_directory"],
+        vars["complementary_mol_directory"],
     ]
 
     # List of SMILES from mutation

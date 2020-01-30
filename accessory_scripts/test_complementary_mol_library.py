@@ -1,16 +1,16 @@
 """
-This script will test a complimentary molecule library to ensure all compounds
+This script will test a complementary molecule library to ensure all compounds
 react in all reactions they may be used in.
 
 Example submit:
 
-python autogrow4/accessory_scripts/test_complimentary_mol_library.py \
+python autogrow4/accessory_scripts/test_complementary_mol_library.py \
 --rxn_library_file \
 autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/ClickChem_rxn_library.json \
 --function_group_library \
 autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/ClickChem_functional_groups.json \
---complimentary_mol_directory \
-autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/complimentary_mol_dir \
+--complementary_mol_directory \
+autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/complementary_mol_dir \
 --output_folder autogrow4/accessory_scripts/output/
 """
 import __future__
@@ -48,10 +48,10 @@ class SmilesClickChem():
         Inputs:
         :param list rxn_library_variables: a list of user variables which
             define the rxn_library, rxn_library_file,
-            complimentary_mol_directory, and function_group_library. ie.
+            complementary_mol_directory, and function_group_library. ie.
             rxn_library_variables = [vars['rxn_library'],
             vars['rxn_library_file'],
-            vars['function_group_library'],vars['complimentary_mol_directory']]
+            vars['function_group_library'],vars['complementary_mol_directory']]
         :param list list_of_already_made_smiles: a list of lists. Each
             sublist contains info about a smiles made in this generation via
             mutation ie.[['O=C([O-])',
@@ -63,7 +63,7 @@ class SmilesClickChem():
         rxn_library = rxn_library_variables[0]
         rxn_library_file = rxn_library_variables[1]
         function_group_library = rxn_library_variables[2]
-        complimentary_mol_dir = rxn_library_variables[3]
+        complementary_mol_dir = rxn_library_variables[3]
         self.reaction_dict = self.retrieve_reaction_dict(
             rxn_library, rxn_library_file
         )
@@ -74,8 +74,8 @@ class SmilesClickChem():
         self.functional_group_dict = self.retrieve_functional_group_dict(
             rxn_library, function_group_library
         )
-        self.complimentary_mol_dict = self.retrieve_complimentary_dictionary(
-            rxn_library, complimentary_mol_dir
+        self.complementary_mol_dict = self.retrieve_complementary_dictionary(
+            rxn_library, complementary_mol_dir
         )
 
         # List of already predicted smiles
@@ -387,7 +387,7 @@ class SmilesClickChem():
 
         return functional_group_dict
 
-    def retrieve_complimentary_dictionary(self, rxn_library, complimentary_mol_dir):
+    def retrieve_complementary_dictionary(self, rxn_library, complementary_mol_dir):
         """
         Based on user controlled variables, this definition will retrieve a
         dictionary of molecules separated into classes by their functional
@@ -398,45 +398,45 @@ class SmilesClickChem():
         :param str rxn_library: A string defining the choice of the reaction
             library. ClickChem uses the set of reactions from Autogrow 3.1.2.
             Custom means you've defined a path to a Custom library in
-            vars['complimentary_mol_dir']
-        :param dict complimentary_mol_dir: the path to the
-            complimentary_mol_dir directory. It may be an empty string in which
-            case the complimentary_mol_dir directory will default to those of the
+            vars['complementary_mol_dir']
+        :param dict complementary_mol_dir: the path to the
+            complementary_mol_dir directory. It may be an empty string in which
+            case the complementary_mol_dir directory will default to those of the
             rxn_library
 
         Returns:
-        :returns: dict complimentary_mols_dict: a dictionary of complimentary molecules
+        :returns: dict complementary_mols_dict: a dictionary of complementary molecules
         """
         script_dir = os.path.dirname(os.path.realpath(__file__))
 
-        if complimentary_mol_dir == "":
+        if complementary_mol_dir == "":
             if rxn_library == "click_chem_rxns":
-                complimentary_mol_dir = os.path.join(
+                complementary_mol_dir = os.path.join(
                     script_dir,
                     "reaction_libraries",
                     "click_chem_rxns",
-                    "complimentary_mol_dir",
+                    "complementary_mol_dir",
                 )
             elif rxn_library == "robust_rxns":
-                complimentary_mol_dir = os.path.join(
+                complementary_mol_dir = os.path.join(
                     script_dir,
                     "reaction_libraries",
                     "robust_rxns",
-                    "complimentary_mol_dir",
+                    "complementary_mol_dir",
                 )
             elif rxn_library == "all_rxns":
-                complimentary_mol_dir = os.path.join(
+                complementary_mol_dir = os.path.join(
                     script_dir,
                     "reaction_libraries",
                     "all_rxns",
-                    "complimentary_mol_dir",
+                    "complementary_mol_dir",
                 )
             elif rxn_library == "Custom":
-                if os.path.isdir(complimentary_mol_dir) is False:
+                if os.path.isdir(complementary_mol_dir) is False:
                     raise Exception(
-                        "Custom complimentary_mol_dir cannot be found. "
+                        "Custom complementary_mol_dir cannot be found. "
                         + "Please check the path: ",
-                        complimentary_mol_dir,
+                        complementary_mol_dir,
                     )
             else:
                 raise Exception(
@@ -444,12 +444,12 @@ class SmilesClickChem():
                 )
 
         else:
-            if os.path.isdir(complimentary_mol_dir) is False:
+            if os.path.isdir(complementary_mol_dir) is False:
                 raise Exception(
-                    "complimentary_mol_dir is not a directory. It must be a \
+                    "complementary_mol_dir is not a directory. It must be a \
                     directory with .smi files containing SMILES specified by \
                     functional groups.These .smi files must be named the same \
-                    as the files in the complimentary_mol_dir."
+                    as the files in the complementary_mol_dir."
                 )
 
         # Make a list of all the functional groups. These will be the name of
@@ -457,28 +457,28 @@ class SmilesClickChem():
         functional_groups = self.functional_group_dict.keys()
 
         missing_smi_files = []
-        complimentary_mols_dict = {}
+        complementary_mols_dict = {}
         for group in functional_groups:
-            filepath = "{}{}{}.smi".format(complimentary_mol_dir, os.sep, group)
+            filepath = "{}{}{}.smi".format(complementary_mol_dir, os.sep, group)
 
             if os.path.isfile(filepath) is True:
-                complimentary_mols_dict[group] = filepath
+                complementary_mols_dict[group] = filepath
 
             else:
                 missing_smi_files.append(filepath)
                 print(
-                    "Could not find the following .smi file for complimentary "
+                    "Could not find the following .smi file for complementary "
                     + " molecules for Mutation: {}".format(filepath)
                 )
 
         if len(missing_smi_files) != 0:
             raise Exception(
-                "The following .smi file for complimentary molecules "
+                "The following .smi file for complementary molecules "
                 + "for Mutation is missing: ",
                 missing_smi_files,
             )
 
-        return complimentary_mols_dict
+        return complementary_mols_dict
 #
 def get_usable_fomat(infile):
     """
@@ -672,12 +672,12 @@ def run_all_for_fun_group(vars, fun_group, rxns_by_fun_group, a_smiles_click_obj
     :returns: list failed_to_sanitize: a list of mol names which failed to sanitize
     """
     # unpack variables
-    complimentary_mol_dict = a_smiles_click_object.complimentary_mol_dict
+    complementary_mol_dict = a_smiles_click_object.complementary_mol_dict
     reaction_dict = a_smiles_click_object.reaction_dict
     number_of_processors = vars["number_of_processors"]
     output_folder = vars["output_folder"]
 
-    smi_comp_file = complimentary_mol_dict[fun_group]
+    smi_comp_file = complementary_mol_dict[fun_group]
     fun_group_list = get_usable_fomat(smi_comp_file)
     fun_group_mol_list = []
     failed_to_sanitize = []
@@ -767,13 +767,13 @@ def run_main(vars):
     output_folder = vars["output_folder"]
     rxn_library_file = vars["rxn_library_file"]
     function_group_library = vars["function_group_library"]
-    complimentary_mol_dir = vars["complimentary_mol_directory"]
+    complementary_mol_dir = vars["complementary_mol_directory"]
 
     rxn_library_variables = [
         rxn_library,
         rxn_library_file,
         function_group_library,
-        complimentary_mol_dir
+        complementary_mol_dir
     ]
     new_mutation_smiles_list = []
 
@@ -844,15 +844,15 @@ def get_arguments_from_argparse(args_dict):
             THE PATH TO THE REACTION LIBRARY USING INPUT PARAMETER rxn_library"
         )
 
-    if args_dict["complimentary_mol_directory"] == "":
+    if args_dict["complementary_mol_directory"] == "":
         raise ValueError(
             "TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY THE PATH \
             TO THE REACTION LIBRARY USING INPUT PARAMETER function_group_library"
         )
-    if os.path.isdir(args_dict["complimentary_mol_directory"]) is False:
+    if os.path.isdir(args_dict["complementary_mol_directory"]) is False:
         raise ValueError(
             "TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY THE PATH \
-            TO THE REACTION LIBRARY USING INPUT PARAMETER complimentary_mol_directory"
+            TO THE REACTION LIBRARY USING INPUT PARAMETER complementary_mol_directory"
         )
 
     if "number_of_processors" not in args_dict.keys():
@@ -916,7 +916,7 @@ PARSER.add_argument(
     help="This PATH for a dictionary of functional groups to be used for Mutation.",
 )
 PARSER.add_argument(
-    "--complimentary_mol_directory",
+    "--complementary_mol_directory",
     type=str,
     default="",
     required=True,
