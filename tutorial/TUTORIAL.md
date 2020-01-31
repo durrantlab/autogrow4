@@ -79,14 +79,18 @@ interpreter and bash are required.
 
 A modern version of python can be installed using `conda`:
 
-* https://docs.conda.io/projects/conda/en/latest/user-guide/install/, or
-* [http://www.python.org/getit/](http://www.python.org/getit/).
+- [https://docs.conda.io/projects/conda/en/latest/user-guide/install/](https://docs.conda.io/projects/conda/en/latest/user-guide/install/),
+  or
+- [http://www.python.org/getit/](http://www.python.org/getit/).
 
 AutoGrow4 has been tested with python 2.7, 3.6, and 3.7. Future support and
 updates will be using 3.7 We recommend using the most current version of
 python available. 3.7 or newer.
 
-### MGLTools (Optional: *must use either MGLTools, obabel, or a custom file converter/docking software)
+### MGLTools
+
+MGLTolls is optional, but you must use either MGLTools, `obabel`, or custom
+file converter/docking software.
 
 Morris, G. M., Huey, R., Lindstrom, W., Sanner, M. F., Belew, R. K., Goodsell,
 D. S. and Olson, A. J. (2009) Autodock4 and AutoDockTools4: automated docking
@@ -96,20 +100,19 @@ with selective receptor flexibility. J. Computational Chemistry 2009, 16:
 MGLTools is a program by the creators of Autodock Vina. It is used by
 AutoGrow4 to convert .pdb files to .pdbqt format.
 
-* .pdbqt format is required by Vina type docking programs including Autodock
+- .pdbqt format is required by Vina type docking programs including Autodock
   Vina and QuickVina2
-* An alternative conversion option is `obabel`.
+- An alternative conversion option is `obabel`.
 
 #### Installation
 
-WARNING: MGLTools installation can be tricky!  We recommend you DO NOT pip or
-conda install MGLTools  as it uses an outdated python package and creates
+WARNING: MGLTools installation can be tricky!  We recommend you DO NOT `pip`
+or `conda` install MGLTools as it uses an outdated python package and creates
 issues with environments.
 
 The best way to install this is to download the latest release of the
-command-line version (NOT THE GUI VERSION) of MGLTools from:
-
-* http://mgltools.scripps.edu/downloads
+command-line version (NOT THE GUI VERSION) of MGLTools from
+[http://mgltools.scripps.edu/downloads](http://mgltools.scripps.edu/downloads)
 
 Once the command-line version of MGLTools package has been downloaded follow
 example installation provided below, which uses a Linux system with the 1.5.6
@@ -119,10 +122,11 @@ version of MGLTools.
    /PATH_TO/mgltools_x86_64Linux2_1.5.6.tar.gz`
 2. Go to the extract folder: `cd  /PATH_TO/mgltools_x86_64Linux2_1.5.6`
 3. Run the installation script and make sure MGLToolsPckgs is unpacked:
-    * If `/PATH_TO/mgltools_x86_64Linux2_1.5.6/MGLToolsPckgs/` is a folder: `bash install.sh`
-    * If `/PATH_TO/mgltools_x86_64Linux2_1.5.6/MGLToolsPckgs/` is not a
-      folder, you must manually unzip/untar `MGLToolsPckgs.tar.gz`: `tar -xvf
-      /PATH_TO/mgltools_x86_64Linux2_1.5.6/MGLToolsPckgs.tar.gz`
+   - If `/PATH_TO/mgltools_x86_64Linux2_1.5.6/MGLToolsPckgs/` is a folder:
+     `bash install.sh`
+   - If `/PATH_TO/mgltools_x86_64Linux2_1.5.6/MGLToolsPckgs/` is not a folder,
+     you must manually unzip/untar `MGLToolsPckgs.tar.gz`: `tar -xvf
+     /PATH_TO/mgltools_x86_64Linux2_1.5.6/MGLToolsPckgs.tar.gz`
 4. Click 'OK' to the licensing agreement. Please note MGLTools is free for
    academic use but may require a license for commercial usage. This should
    open automatically
@@ -165,7 +169,10 @@ python RunAutogrow.py .. \
 If one wants to provide a custom pathing to these location, providing these
 variables at the command line will override any auto-location.
 
-### obabel (Optional: *must use either MGLTools, obabel, or a custom file converter/docking software)
+### obabel
+
+Openbabel is optional. But you must use either MGLTools, `obabel`, or custom
+file converter/docking software.
 
 Openbabel citations:
 
@@ -178,9 +185,9 @@ The Open Babel Package, version 2.3.1 http://openbabel.org (accessed Oct 2011)
 `obabel` is a command-line tool for cheminformatic file conversion. It is used
 by AutoGrow4 to convert .pdb files to .pdbqt format.
 
-* .pdbqt format is required by Vina type docking programs including Autodock
+- .pdbqt format is required by Vina type docking programs including Autodock
   Vina and QuickVina2
-* An alternative conversion option is `MGLTools`.
+- An alternative conversion option is `MGLTools`.
 
 #### Installation
 
@@ -252,8 +259,8 @@ from rdkit.Chem.rdchem import BondStereo
 ```
 
 NumPy (mathematical functions) can be downloaded via `conda`/`pip`. It can be
-`conda` installed using the command `conda install -c anaconda numpy`. AutoGrow4
-has been tested using `numpy` version 1.15.0.
+`conda` installed using the command `conda install -c anaconda numpy`.
+AutoGrow4 has been tested using `numpy` version 1.15.0.
 
 SciPy (mathematical functions) can be downloaded via `conda`/`pip`. It can be
 `conda` installed using the command `conda install -c anaconda scipy`.
@@ -271,12 +278,12 @@ been tested using `func_timeout` version 4.3.5
 
 The following APIs are only required for users using mpi multithreading.
 
-mpi4py (mpi multithreading python library) can be downloaded via `conda`/`pip`. It
-can be `conda` installed using the command `conda install -c anaconda mpi4py`.
-AutoGrow4 has been tested using `mpi4py` version 3.0.1. This may require a
-preinstallation of `mpich`: `sudo apt install mpich`
+mpi4py (mpi multithreading python library) can be downloaded via
+`conda`/`pip`. It can be `conda` installed using the command `conda install -c
+anaconda mpi4py`. AutoGrow4 has been tested using `mpi4py` version 3.0.1. This
+may require a preinstallation of `mpich`: `sudo apt install mpich`
 
-* AutoGrow4 requires `mpi4py` version 2.1.0 and higher. To check the version:
+AutoGrow4 requires `mpi4py` version 2.1.0 and higher. To check the version:
 
 1. open a python window.
 2. enter into the window:
@@ -319,28 +326,27 @@ current as these dependencies advance, but we appreciate any messages on how
 to keep it current. If a dependency updates please feel free to contact us and
 we will do our best to make our code future-compatible.
 
-#### PreInstalled Software
-
-##### Docking Programs
+#### Docking Programs
 
 AutoGrow4 comes preinstalled with two docking programs:
 
-* Autodock Vina 1.1.2 (packaged with executables for Linux, MacOS, and
+- Autodock Vina 1.1.2 (packaged with executables for Linux, MacOS, and
   Windows)
-  * Version: 1.1.2
-  * Location: `/autogrow4/autogrow/docking/docking_executables/vina/`
-  * Citation: Trott, O., & Olson, A. J. (2010). AutoDock Vina: improving the
+  - Version: 1.1.2
+  - Location: `/autogrow4/autogrow/docking/docking_executables/vina/`
+  - Citation: Trott, O., & Olson, A. J. (2010). AutoDock Vina: improving the
     speed and accuracy of docking with a new scoring function, efficient
     optimization, and multithreading. Journal of computational chemistry,
     31(2), 455–461. doi:10.1002/jcc.21334
-  * License: Apache version 2
-* QuickVina2.1 (compatible with Linux OS)
-  * Version: 2.1
-  * Location: `/autogrow4/autogrow/docking/docking_executables/q_vina_2/`
-  * Citation: Amr Alhossary, Stephanus Daniel Handoko, Yuguang Mu, and
+  - License: Apache version 2
+
+- QuickVina2.1 (compatible with Linux OS)
+  - Version: 2.1
+  - Location: `/autogrow4/autogrow/docking/docking_executables/q_vina_2/`
+  - Citation: Amr Alhossary, Stephanus Daniel Handoko, Yuguang Mu, and
     Chee-Keong Kwoh. Bioinformatics (2015) 31 (13): 2214-2216.
     [DOI:10.1093/bioinformatics/btv082](https://doi.org/10.1093/bioinformatics/btv082)
-  * License: Apache version 2
+  - License: Apache version 2
 
 These softwares can be found within the directory
 `/autogrow4/autogrow/docking/docking_executables/`
@@ -355,7 +361,7 @@ python RunAutogrow.py ... --docking_executable /PATH_TO/Autodock_Vina_version_X_
 Details re. how to use custom docking suites are provided below in the section
 "Providing Custom Options".
 
-##### Scoring/Rescoring Programs
+#### Scoring/Rescoring Programs
 
 NNScore 1 and NNScore 2 are free and open-source programs that are distributed
 with AutoGrow4. Both NNScore1 and NNScore2 reassess ligand docking. They were
@@ -366,54 +372,57 @@ AutoGrow4 allows users to provide custom Scoring/Rescoring software. Details
 for custom Scoring/Rescoring suites are provided below in the section
 "Providing Custom options
 
-* NNScore 1:
-  * Version: 1.1
-  * Location: `/autogrow4/autogrow/docking/scoring/nn_score_exe/nnscore1/`
-  * Citation: NScore: A Neural-Network-Based Scoring Function for the
+- NNScore 1:
+  - Version: 1.1
+  - Location: `/autogrow4/autogrow/docking/scoring/nn_score_exe/nnscore1/`
+  - Citation: NScore: A Neural-Network-Based Scoring Function for the
     Characterization of Protein-Ligandomplexes. Jacob D. Durrant, J. Andrew
     McCammon. Journal of Chemical Information and Modeling, 2010, 50 (10),
     pp865-1871.
-  * License: GNU General Public version 3
-* NNScore 2:
-  * Version: 2.02
-  * Location: `/autogrow4/autogrow/docking/scoring/nn_score_exe/nnscore2/`
-  * Citation: NNScore 2.0: A Neural-Network Receptor–Ligand Scoring Function.
+  - License: GNU General Public version 3
+
+- NNScore 2:
+  - Version: 2.02
+  - Location: `/autogrow4/autogrow/docking/scoring/nn_score_exe/nnscore2/`
+  - Citation: NNScore 2.0: A Neural-Network Receptor–Ligand Scoring Function.
     Jacob D. Durrant, Andrew McCammon. Journal of Chemical Information and
     Modeling, 2011, 51 (11), pp 2897-2903.
-  * License: GNU General Public version 3
+  - License: GNU General Public version 3
 
-##### SMILES Conversion to 3D and Protonation Adjustments
+#### SMILES Conversion to 3D and Protonation Adjustments
 
 AutoGrow4 performs most of its ligand handling using 2D SMILES. AutoGrow4 uses
 the free and open-source program Gypsum-DL to convert from SMILES to 3D SDF
 format. Gypsum_dl is prepackaged in AutoGrow4. Gypsum_dl also prepackages two
 software packages: MolVS and Dimorphite-DL.
 
-* Gypsum_dl:
-  * Version: 1.1.1
-  * Location: `/autogrow4/autogrow/operators/convert_files/gypsum_dl/`
-  * Citation: Ropp PJ, Spiegel JO, Walker JL, Green H, Morales GA, Milliken
+- Gypsum_dl:
+  - Version: 1.1.1
+  - Location: `/autogrow4/autogrow/operators/convert_files/gypsum_dl/`
+  - Citation: Ropp PJ, Spiegel JO, Walker JL, Green H, Morales GA, Milliken
     KA, Ringe JJ, Durrant JD. Gypsum-DL: An Open-Source Program for Preparing
     Small-Molecule Libraries for Structure-Based Virtual Screening. J
     Cheminform. 11(1):34, 2019. [PMID: 31127411] [doi:
     10.1186/s13321-019-0358-3]
-  * License: Apache version 2.0
-* Dimorphite_dl:
-  * Version: 1.2.2
-  * Location:
+  - License: Apache version 2.0
+
+- Dimorphite_dl:
+  - Version: 1.2.2
+  - Location:
     `/autogrow4/autogrow/operators/convert_files/gypsum_dl/gypsum_dl/Steps/SMILES/dimorphite_dl`
-  * Citation: Ropp PJ, Kaminsky JC, Yablonski S, Durrant JD (2019)
+  - Citation: Ropp PJ, Kaminsky JC, Yablonski S, Durrant JD (2019)
     Dimorphite-DL: An open-source program for enumerating the ionization
     states of drug-like small molecules. J Cheminform 11:14.
     doi:10.1186/s13321-019-0336-9.
-  * License: Apache version 2.0
-* MolVS:
-  * Version: v0.1.1 2019 release
-  * Location:
+  - License: Apache version 2.0
+
+- MolVS:
+  - Version: v0.1.1 2019 release
+  - Location:
     `/autogrow4/autogrow/operators/convert_files/gypsum_dl/gypsum_dl/molvs`
-  * Citation: https://molvs.readthedocs.io; Take from
+  - Citation: https://molvs.readthedocs.io; Take from
     https://github.com/mcs07/MolVS
-  * License: MIT License
+  - License: MIT License
 
 ## Running AutoGrow4
 
@@ -528,6 +537,8 @@ More details are provided at `/autogrow4/docker/README.md`.
 
 ### Running AutoGrow4 in Docker
 
+JDD: Why is this repeated here? Please organize.
+
 To run AutoGrow4 in a docker, please first install docker software.
 
 Dockerized AutoGrow4 requires parameters provided as a JSON file.
@@ -588,12 +599,12 @@ AutoGrow4 ASSUMES ALL CUSTOM CODE HAS BEEN TESTED AND FUNCTIONS WITH SPECIFIED
 I/O. For example, it assumes that scoring favors the most negative docking
 score.
 
-* AutoGrow4 will continue to assume all custom Scoring scripts set the most
+- AutoGrow4 will continue to assume all custom Scoring scripts set the most
   fit score to the most negative for all metrics besides diversity.
-* It also assumes in ranked .smi files that the last column is the diversity
+- It also assumes in ranked .smi files that the last column is the diversity
   fitness and assumes the second to last column to be the metric for
   "docking/rescored" fitness.
-* If a custom script scores ligands such that the most fit ligand has the
+- If a custom script scores ligands such that the most fit ligand has the
   highest score, AutoGrow4 may inadvertently be favoring ligands that are
   least fit.
 
@@ -606,7 +617,7 @@ by mutation/crossover but before Gypsum_dl conversion to 3D.
 This custom code will be copied to the directory:
 `/autogrow4/autogrow/operators/filter/filter_classes/filter_children_classes/`
 
-##### Script Formatting
+#### Script Formatting
 
 These filters use a class-based inheritance architecture which require:
 
@@ -617,16 +628,18 @@ These filters use a class-based inheritance architecture which require:
 3. Must have at least one function called `run_filter`. `run_filter` takes a
    single variable which must be an rdkit molecule object.
 
-##### Running Custom Filters
+#### Running Custom Filters
 
-1. To submit for a single custom filter it should be:
+JDD: Need to clean up this section.
 
-    * Where the custom file is:
-        * Located at `/PATH_TO/custom_filter_1.py`
-        * Unique class name is: `custom_filter_1` (this will be how it is called in future submissions)
+1. To submit for a single custom filter it should be: JDD:
+    - Where the custom file is:
+        - Located at `/PATH_TO/custom_filter_1.py`
+        - Unique class name is: `custom_filter_1` (this will be how it is
+          called in future submissions)
 
     1. Submission through .json format:
-        * JSON FILE (located at: `/PATH_TO/json_file_with_variable.json`):
+        - JSON FILE (located at: `/PATH_TO/json_file_with_variable.json`):
 
 ```json
 {
@@ -634,9 +647,10 @@ These filters use a class-based inheritance architecture which require:
     "alternative_filter": [["custom_filter_1","/PATH_TO/custom_filter_1.py"]]
 }
 ```
-        * Submit in terminal: `python RunAutogrow.py -j /PATH_TO/json_file_with_variable.json`
 
-    2. Commandline submission format:
+Submit in terminal: `python RunAutogrow.py -j /PATH_TO/json_file_with_variable.json`
+
+2. Commandline submission format:
 
 ```bash
 python RunAutogrow.py \
@@ -644,14 +658,14 @@ python RunAutogrow.py \
     --alternative_filter [["custom_filter_1","/PATH_TO/custom_filter_1.py"]]
 ```
 
-2.  To sumbit multiple custom filters:
+2. To sumbit multiple custom filters:
 
-    * Where the custom files are:
-        * Located at: `/PATH_TO/custom_filter_1.py" and "/PATH_TO/custom_filter_2.py`
-        * Unique class names are: `custom_filter_1` and `custom_filter_2` (this will be how they will be called in future submissions)
+    - Where the custom files are:
+        - Located at: `/PATH_TO/custom_filter_1.py" and "/PATH_TO/custom_filter_2.py`
+        - Unique class names are: `custom_filter_1` and `custom_filter_2` (this will be how they will be called in future submissions)
 
     1. Submission through .json format:
-        * JSON FILE (located at: `/PATH_TO/json_file_with_variable.json`):
+        - JSON FILE (located at: `/PATH_TO/json_file_with_variable.json`):
 
 ```json
 {
@@ -660,9 +674,9 @@ python RunAutogrow.py \
 }
 ```
 
-        * Submit in terminal: `python RunAutogrow.py -j /PATH_TO/json_file_with_variable.json`
+Submit in terminal: `python RunAutogrow.py -j /PATH_TO/json_file_with_variable.json`
 
-    2. Commandline submission format:
+2. Command-line submission format:
 
 ```bash
 python RunAutogrow.py \
@@ -670,7 +684,7 @@ python RunAutogrow.py \
     --alternative_filter [["custom_filter_1","/PATH_TO/custom_filter_1.py"],["custom_filter_2","/PATH_TO/custom_filter_2.py"]]
 ```
 
-### 2) Custom Docking Code
+### Custom Docking Code
 
 This feature allows the user to incorporate custom python scripts for docking
 ligands.
@@ -683,15 +697,15 @@ A custom script can be added to run docking using virtually any software.
 This custom code will be copied to the directory:
 `/autogrow4/autogrow/docking/docking_class/docking_class_children/`
 
-##### Script Formatting
+#### Script Formatting
 
 These docking scripts use a class-based inheritance architecture which require:
 
 1. Docking class object must be instanced off of the ParentDocking located:
-    * `/autogrow4/autogrow/docking/docking_class/parent_dock_class.py`
-2. Have a unique name: `class unique_name(ParentDocking)`
-    * `unique_name` can not be one of the predefined docking scripts (currently just VinaDocking and QuickVina2Docking)
-
+   `/autogrow4/autogrow/docking/docking_class/parent_dock_class.py`
+2. Have a unique name: `class unique_name(ParentDocking)`, `unique_name` can
+   not be one of the predefined docking scripts (currently just VinaDocking
+   and QuickVina2Docking)
 3. Must have at least have three functions following the below formatting:
 
 ```python
@@ -737,7 +751,7 @@ def rank_and_save_output_smi(self, vars, current_generation_dir, current_gen_int
     """
 ```
 
-##### Running Custom Docking scripts
+#### Running Custom Docking scripts
 
 Please note using a new docking software will likely also require custom
 conversion script and scoring scripts. Documentation for these is provided in
@@ -748,12 +762,12 @@ the code base.
 
 Submission through .json format:
 
-* Where JSON is located at: `/PATH_TO/To/json_file_with_variable.json`
-* Where docking software executable is located at:
+- Where JSON is located at: `/PATH_TO/To/json_file_with_variable.json`
+- Where docking software executable is located at:
   `/PATH_TO/EXECUTABLE_FOR_CUSTOM_DOCKING/custom_docking`
-* Where python script for running docking is located at:
+- Where python script for running docking is located at:
   `/PATH_TO/CLASS_OBJECT_FOR_CUSTOM_DOCKING/custom_docking.py`
-* Where name of custom docking class is: custom_docking
+- Where name of custom docking class is: custom_docking
 
 ```json
 {
@@ -764,16 +778,16 @@ Submission through .json format:
 }
 ```
 
-* Submit via terminal: `python RunAutogrow.py -j
-  /PATH_TO/To/json_file_with_variable.json`
+Submit via terminal: `python RunAutogrow.py -j
+/PATH_TO/To/json_file_with_variable.json`
 
 Command-line submission format:
 
-* Where docking software executable is located at:
+- Where docking software executable is located at:
   `/PATH_TO/EXECUTABLE_FOR_CUSTOM_DOCKING/custom_docking`
-* Where python script for running docking is located at:
+- Where python script for running docking is located at:
   `/PATH_TO/CLASS_OBJECT_FOR_CUSTOM_DOCKING/custom_docking.py`
-* Where name of custom docking class is: `custom_docking`
+- Where name of custom docking class is: `custom_docking`
 
 ```bash
 python RunAutogrow.py \
@@ -793,20 +807,19 @@ custom script to convert ligands (or simply do nothing if it takes .pdbs).
 This custom code will be copied to the directory:
 `/autogrow4/autogrow/docking/docking_class/docking_class_children/`
 
-##### Script Formatting
+#### Script Formatting
 
 These conversion scripts use a class-based inheritance architecture which require:
 
 1. Conversion class object must be instanced off of the ParentPDBQTConverter
    located:
    `/autogrow4/autogrow/docking/docking_class/parent_pdbqt_converter.py`
-2. Have a unique name: class unique_name(ParentPDBQTConverter)
-
-* unique_name can not be one of the predefined docking scripts
-  * Currently files named: convert_with_mgltools.py and convert_with_obabel.py
-  * Classes named ObabelConversion and MGLToolsConversion
-
-3. Must have atleast have two functions following the below formatting:
+2. Have a unique name: `class unique_name(ParentPDBQTConverter)`.
+   `unique_name` can not be one of the predefined docking scripts.
+   - Currently files named: `convert_with_mgltools.py` and
+    `convert_with_obabel.py`
+   - Classes named `MGLToolsConversion` and `ObabelConversion`
+3. Must have at least have two functions following the below formatting:
 
 ```python
 def convert_receptor_pdb_files_to_pdbqt(self, receptor_file, mgl_python, receptor_template, number_of_processors):
@@ -836,17 +849,17 @@ def convert_ligand_pdb_file_to_pdbqt(self, pdb_file):
     raise NotImplementedError("rank_and_save_output_smi() not implemented")
 ```
 
-##### Running Custom Conversion Scripts
+#### Running Custom Conversion Scripts
 
 AutoGrow4 will need to be restarted once after this has been incorporated into
 the code base.
 
 Submission through .json format:
 
-* Where JSON is located at: `/PATH_TO/To/json_file_with_variable.json`
-* Where python conversionscript is located at:
+- Where JSON is located at: `/PATH_TO/To/json_file_with_variable.json`
+- Where python conversionscript is located at:
   `/PATH_TO/CLASS_OBJECT_FOR/custom_conversion.py`
-* Where name of custom conversion class is: `custom_conversion`
+- Where name of custom conversion class is: `custom_conversion`
 
 ```json
 {
@@ -856,13 +869,14 @@ Submission through .json format:
 }
 ```
 
-* Submit via terminal: `python RunAutogrow.py -j /PATH_TO/JSON_FILE/json_file_with_variable.json`
+Submit via terminal: `python RunAutogrow.py -j
+/PATH_TO/JSON_FILE/json_file_with_variable.json`
 
 Command-line submission format:
 
-* Where python conversionscript is located at:
+- Where python conversionscript is located at:
   `/PATH_TO/CLASS_OBJECT_FOR/custom_conversion.py`
-* Where name of custom conversion class is: `custom_conversion`
+- Where name of custom conversion class is: `custom_conversion`
 
 ```bash
 python RunAutogrow.py \
@@ -887,7 +901,7 @@ Users can incorporate custom scoring and rescoring options into AutoGrow4.
 This custom code will be copied to the directory:
 `/autogrow4/autogrow/docking/scoring/scoring_classes/`
 
-##### Script Formatting
+#### Script Formatting
 
 These conversion scripts use a class-based inheritance architecture which require:
 
@@ -895,10 +909,10 @@ These conversion scripts use a class-based inheritance architecture which requir
    located:
    `/autogrow4/autogrow/docking/scoring/scoring_classes/parent_scoring_class.py`
 2. Have a unique name: `class unique_name(parent_scoring_class)`
-   * `unique_name` can not be one of the predefined docking scripts.
-   * Currently files named: `vina.py`, `nn1.py`, `nn2.py`, and
+   - `unique_name` can not be one of the predefined docking scripts.
+   - Currently files named: `vina.py`, `nn1.py`, `nn2.py`, and
      `lig_efficiency.py`
-   * Classes named `VINA`, `NN1`, `NN2`, and `LigEfficiency`
+   - Classes named `VINA`, `NN1`, `NN2`, and `LigEfficiency`
 3. Must have at least have two functions following the below formatting:
 
 ```python
@@ -919,17 +933,17 @@ def run_scoring(self, input_string):
     raise NotImplementedError("run_scoring() not implemented")
 ```
 
-##### Running Custom Scoring/Rescoring Scripts
+#### Running Custom Scoring/Rescoring Scripts
 
 AutoGrow4 will need to be restarted once after this has been incorporated into
 the code base.
 
 Submission through .json format:
 
-* Where JSON is located at: `/PATH_TO/To/json_file_with_variable.json`
-* Where python scoring script is located at:
+- Where JSON is located at: `/PATH_TO/To/json_file_with_variable.json`
+- Where python scoring script is located at:
   `/PATH_TO/CLASS_OBJECT_FOR/custom_scoring.py`
-* Where name of custom scoring class is: `custom_scoring_name`
+- Where name of custom scoring class is: `custom_scoring_name`
 
 ```json
 {
@@ -939,13 +953,14 @@ Submission through .json format:
 }
 ```
 
-* Submit via terminal: `python RunAutogrow.py -j /PATH_TO/JSON_FILE/json_file_with_variable.json`
+Submit via terminal: `python RunAutogrow.py -j
+/PATH_TO/JSON_FILE/json_file_with_variable.json`
 
 Command-line submission format:
 
-* Where python scoring script is located at:
+- Where python scoring script is located at:
   `/PATH_TO/CLASS_OBJECT_FOR/custom_scoring.py`
-* Where name of custom scoring class is: `custom_scoring_name`
+- Where name of custom scoring class is: `custom_scoring_name`
 
 ```bash
 python RunAutogrow.py \
@@ -978,31 +993,31 @@ If using this you will need three pieces of information each explained below:
 
 #### Three Requirements For Custom Reaction Libraries
 
-##### 1) Reaction Library .json File Contains Reactions And All Reaction Information
+##### Reaction Library .json File Contains Reactions And All Reaction Information
 
 Each sub-dictionary must contain the following information:
 
-* "reaction_name": "Name of the reaction",
-* "example_rxn_product": "SMILES of Product using example
+- "reaction_name": "Name of the reaction",
+- "example_rxn_product": "SMILES of Product using example
   example_rxn_reactants",
-* "example_rxn_reactants": ["SMILES of example reactant_1"],
-  * if two or more reactants in reaction ["SMILES of example
+- "example_rxn_reactants": ["SMILES of example reactant_1"],
+  - if two or more reactants in reaction ["SMILES of example
     reactant_1","SMILES of example reactant_2",...]
-* "functional_groups": ["functional group name reactant_1"],
-  * if two or more reactants in reaction ["functional group name
+- "functional_groups": ["functional group name reactant_1"],
+  - if two or more reactants in reaction ["functional group name
     reactant_1","functional group name reactant_2",...]
-* "group_smarts": ["functional_group SMARTS reactant_1"],
-  * if two or more reactants in reaction ["functional_group SMARTS
+- "group_smarts": ["functional_group SMARTS reactant_1"],
+  - if two or more reactants in reaction ["functional_group SMARTS
     reactant_1","functional_group SMARTS reactant_2",...]
-* "num_reactants": 1,
-  * (int) if 2 or more reactants change accordingly
-* "reaction_string": "reaction string ie
+- "num_reactants": 1,
+  - (int) if 2 or more reactants change accordingly
+- "reaction_string": "reaction string ie
   reactant_1_smart.reactant_2_smart>>product_SMART",
-  * This uses Daylights SMARTS reaction notation
-* "RXN_NUM": 3
-  * (int) a unique reaction number. This is used in naming products of
+  - This uses Daylights SMARTS reaction notation
+- "RXN_NUM": 3
+  - (int) a unique reaction number. This is used in naming products of
     mutation:
-    * ie ) a ligand named Gen_1_Mutant_72_867328 is a ligand from generation 1
+    - ie ) a ligand named Gen_1_Mutant_72_867328 is a ligand from generation 1
       created by the 72 reaction in a reaction library
 
 Simplified Example of a Reaction library (from click_chem_rxns_library.json):
@@ -1045,15 +1060,15 @@ Simplified Example of a Reaction library (from click_chem_rxns_library.json):
 
 PLEASE SEE THE EXAMPLE REACTION LIBRARIES FOUND AT:
 
-* `/autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/all_rxns/All_Rxns_rxn_library.json`
-* `/autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/click_chem_rxns_library.json`
-* `/autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/robust_rxns/Robust_Rxns_rxn_library.json`
+- `/autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/all_rxns/All_Rxns_rxn_library.json`
+- `/autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/click_chem_rxns_library.json`
+- `/autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/robust_rxns/Robust_Rxns_rxn_library.json`
 
 Reaction libraries identify ligands capable of reacting in a given reaction
 using the information found in the sub-dictionary's items "functional_groups"
 and "group_smarts".
 
-##### 2) Functional Group Library .json File Simple Json Diction Containing Each Functional Group And Its Smarts Definition.
+##### Functional Group Library .json File Simple JSON Dictionary Containing Each Functional Group And Its Smarts Definition
 
 Functional group library are simple dictionaries of the functional groups used
 by a reaction library. Every moiety used by the reaction library must have an
@@ -1086,9 +1101,9 @@ click_chem_functional_groups.json)
 
 Examples can be found:
 
-* `/autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/all_rxns/All_Rxns_functional_groups.json`
-* `/autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/click_chem_functional_groups.json`
-* `/autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/robust_rxns/Robust_Rxns_functional_groups.json`
+- `/autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/all_rxns/All_Rxns_functional_groups.json`
+- `/autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/click_chem_functional_groups.json`
+- `/autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/robust_rxns/Robust_Rxns_functional_groups.json`
 
 The SMARTS strings provided in this file should also be present in each
 sub-dictionary of the Reaction library .json file that references that
@@ -1097,7 +1112,7 @@ group names of reactants found under sub-dictionary key "functional_groups" and
 placing the SMARTS string of the group in the list of functional group SMARTS
 of reactants found under sub-dictionary key "group_smarts"
 
-##### 3) Directory Of complementary Molecule Libraries, Directory of .smi Files
+##### Directory of Complementary Molecule Libraries, Directory of .smi Files
 
 Any reaction containing more than one reactant will require a complementary
 molecule to supplement the reaction.
@@ -1121,8 +1136,8 @@ INDEPENDENT OF CAPS.
 1. No headers are allowed in the file.
 2. .smi files can be either tab or 4-space delineated.
 3. The only columns are the 1st two columns.
-   * Column 1: SMILES string
-   * Column 2: ligand name/identifier (1 WORD, NO SPACES)
+   - Column 1: SMILES string
+   - Column 2: ligand name/identifier (1 WORD, NO SPACES)
 
 We strongly recommend thoroughly checking that each molecule in each library
 matches the intended functional group.
@@ -1141,12 +1156,12 @@ Running a custom reaction library requires 4 parameters to be set:
 
 Submission through .json format:
 
-* Where JSON is located at: `/PATH_TO/To/json_file_with_variable.json`
-* Where reaction library JSON file is located at:
+- Where JSON is located at: `/PATH_TO/To/json_file_with_variable.json`
+- Where reaction library JSON file is located at:
   `/PATH_TO/rxn_library_file.json`
-* Where function group JSON file is located at:
+- Where function group JSON file is located at:
   `/PATH_TO/function_group_library.json`
-* Where directory of SMI for complementary libraries is located at:
+- Where directory of SMI for complementary libraries is located at:
   `/PATH_TO/complementary_mol_directory/`
 
 ```json
@@ -1164,11 +1179,11 @@ Submit via terminal: `python RunAutogrow.py -j
 
 Command-line submission format:
 
-* Where reaction library JSON file is located at:
+- Where reaction library JSON file is located at:
   `/PATH_TO/rxn_library_file.json`
-* Where function group JSON file is located at:
+- Where function group JSON file is located at:
   `/PATH_TO/function_group_library.json`
-* Where directory of SMI for complementary libraries is located at:
+- Where directory of SMI for complementary libraries is located at:
   `/PATH_TO/complementary_mol_directory/`
 
 ```bash
@@ -1180,7 +1195,7 @@ python RunAutogrow.py \
     --complementary_mol_directory /PATH_TO/complementary_mol_directory/
 ```
 
-### 6) Custom complementary Molecule Libraries For Mutation
+### Custom Complementary Molecule Libraries For Mutation
 
 One can provide custom libraries of molecules to suppliment reactions by using
 the `--complementary_mol_directory` option.
@@ -1210,15 +1225,15 @@ INDEPENDENT OF CAPS.
 1. No headers are allowed in the file.
 2. .smi files can be either tab or 4-space delineated.
 3. The only columns are the 1st two columns.
-   * Column 1: SMILES string
-   * Column 2: ligand name/identifier (1 WORD, NO SPACES)
+   - Column 1: SMILES string
+   - Column 2: ligand name/identifier (1 WORD, NO SPACES)
 
 #### Running Custom Reactions
 
 Submission through .json format:
 
-* Where JSON is located at: `/PATH_TO/To/json_file_with_variable.json`
-* Where directory of SMI for complementary libraries is located at:
+- Where JSON is located at: `/PATH_TO/To/json_file_with_variable.json`
+- Where directory of SMI for complementary libraries is located at:
   `/PATH_TO/complementary_mol_directory/`
 
 ```json
@@ -1248,55 +1263,54 @@ AutoGrow4.
 
 1. Remove all ligands, water, or non-protein atoms. This can be done in a PDB
    viewer such as Pymol or VMD.
-   * If drugs are already bound to target pocket, one may want to use that
+   - If drugs are already bound to target pocket, one may want to use that
      ligand to define the pocket prior to removing it.
 2. Remove chains not being tested.
-   * ie. Many protein structures contains multiple protein chains and even
+   - ie. Many protein structures contains multiple protein chains and even
      multiple proteins. We recommend removing all chains you are not
      explicitly testing. This can be done in a PDB viewer such as Pymol or
      VMD.
 3. Adjust protonation of the receptor to the appropriate pH. Crystal
    structures are often not at biologically relevant pH.
-    * More accurate scoring requires proper protonation. This can be done
+    - More accurate scoring requires proper protonation. This can be done
       using the program PDB2PQR. This can be accessed via the webserver
       http://nbcr-222.ucsd.edu/pdb2pqr_2.0.0/
-      * If you use the PDB2PQR to protonate the receptor, you will need to
+      - If you use the PDB2PQR to protonate the receptor, you will need to
         convert it back to pdb.
-        * To convert back we recommend obabel.
-          * Installation instructions for obabel are provided in the
+        - To convert back we recommend obabel.
+          - Installation instructions for obabel are provided in the
             Dependencies section.
-        * Convert PQR to PDB via obabel: `obabel -ipqr /PATH_TO/PQR_FILE.pqr
+        - Convert PQR to PDB via obabel: `obabel -ipqr /PATH_TO/PQR_FILE.pqr
             -opdb -O /PATH_TO/PDB_OUTPUT_FILE.pdb`
-
 4. Determine and define the binding pocket:
-  * Docking software such as Vina and QuickVina require 6 float parameters to
-    define a binding pocket:
-      * Coordinates: The center of the pocket location in x,y,z axis:
+    - Docking software such as Vina and QuickVina require 6 float parameters
+      to define a binding pocket:
+      - Coordinates: The center of the pocket location in x,y,z axis:
         center_x,center_y,center_z
-      * Dimensions: The distance from the center of the pocket which will be
+      - Dimensions: The distance from the center of the pocket which will be
         considered part of the pocket in x,y,z axis: size_x, size_y, size_z
-   * AutoGrow4 requires all 6 parameters to run the docking portion of the
-     code.
-   * To determine these we recommend using the python API library scoria:
-     Citation Scoria: Ropp, P., Friedman, A., & Durrant, J. D. (2017).
-     Scoria: a Python module for manipulating 3D molecular data. Journal of
-     cheminformatics, 9(1), 52. doi:10.1186/s13321-017-0237-8
-       * Installation of Scoria:
-           * Scoria can be installed either by pip installation or manual
-             download.
-           * We recommend pip installation: `pip install scoria`
-           * Download scoria from https://durrantlab.pitt.edu/scoria/
-       * Once Scoria is installed:
-           1. Manually inspect the pocket of your protein in a protein
-              visualizer such as Pymol, Chimera, or VMD.
-              * Pick out 3 to 6 residues which will be used to define the
-                protein pocket.
-              * For the AutoGrow4 publication we used Chain A of the PARP-1
-                catayltic domain xray structure 4r6e. The selected residues
-                used to define the pocket were: 763, 872, 888, 907, 988
-           2. Determine the geometric center of the pocket with Scoria's
-              get_geometric_center function in python.
-              * In a python terminal or in a jupyter notebook environment:
+    - AutoGrow4 requires all 6 parameters to run the docking portion of the
+      code.
+    - To determine these we recommend using the python API library scoria:
+      Citation Scoria: Ropp, P., Friedman, A., & Durrant, J. D. (2017).
+      Scoria: a Python module for manipulating 3D molecular data. Journal of
+      cheminformatics, 9(1), 52. doi:10.1186/s13321-017-0237-8
+      - Installation of Scoria:
+        - Scoria can be installed either by pip installation or manual
+          download.
+        - We recommend pip installation: `pip install scoria`
+        - Download scoria from https://durrantlab.pitt.edu/scoria/
+      - Once Scoria is installed:
+        1. Manually inspect the pocket of your protein in a protein
+           visualizer such as Pymol, Chimera, or VMD.
+           - Pick out 3 to 6 residues which will be used to define the
+             protein pocket.
+           - For the AutoGrow4 publication we used Chain A of the PARP-1
+             catayltic domain xray structure 4r6e. The selected residues
+             used to define the pocket were: 763, 872, 888, 907, 988
+        2. Determine the geometric center of the pocket with Scoria's
+           get_geometric_center function in python.
+           - In a python terminal or in a jupyter notebook environment:
 
 ```python
 # Import the scoria API
@@ -1319,13 +1333,10 @@ AutoGrow4.
 array([-70.75619481,  21.815     ,  28.32835065])
 ```
 
-                From this you can set:
+From this you can set: `"center_x" = -70.756,"center_y" =21.815 ,"center_z"=
+28.328`
 
-                    "center_x" = -70.756,"center_y" =21.815 ,"center_z"= 28.328
-
-            3. Determine the dimensions of the pocket with Scoria's bounding_box function in python.
-
-                In python:
+5. Determine the dimensions of the pocket with Scoria's bounding_box function in python.
 
 ```python
 # Import the scoria API
@@ -1344,25 +1355,18 @@ array([[-83.764,  15.015,  15.305],
     [-60.814,  29.578,  36.727]])
 ```
 
-            From this we need to take the difference from the 1st and 2nd coordinate for x,y,z:
+From this we need to take the difference from the 1st and 2nd coordinate for
+x,y,z:
 
-                1. 1st box coordinate:
+1. 1st box coordinate: `x_1st = -83.764,  y_1st = 15.015, z_1st = 15.305`
+2. 2nd box coordinate: `x_2nd = -60.814,  y_2nd = 29.578, z_2nd = 36.727`
+3. Absolute value of diff from 1st and 2nd: `"size_x" = 22.950,"size_y" =
+   14.563,"size_z"= 21.422`
 
-                        x_1st = -83.764,  y_1st = 15.015, z_1st = 15.305
+We suggest rounding these up to ensure the entire pocket is included:
+`"size_x" = 25.00,"size_y" = 16.00,"size_z"= 25.00
 
-                2. 2nd box coordinate:
-
-                        x_2nd = -60.814,  y_2nd = 29.578, z_2nd = 36.727
-
-                3. Absolute value of diff from 1st and 2nd:
-
-                        "size_x" = 22.950,"size_y" = 14.563,"size_z"= 21.422
-
-            We suggest rounding these up to ensure the entire pocket is included:
-
-                    "size_x" = 25.00,"size_y" = 16.00,"size_z"= 25.00
-
-## Other Factors for Consideration Prior to Running Autogrow4
+## Other Factors for Consideration Prior to Running AutoGrow4
 
 ### Processors and Multiprocessing Style
 
@@ -1374,9 +1378,9 @@ can be run on a local computer such as a laptop or PC.
 We recommend lowering some factors of AutoGrow4 to lower the computational
 overhead for smaller machines.
 
-* Lower the population size and number of generations. This will mean a less
+- Lower the population size and number of generations. This will mean a less
   intense search of chemistry space but will make run times more reasonable.
-* Lower the max_variation to 1. This means for every ligand created by
+- Lower the max_variation to 1. This means for every ligand created by
   AutoGrow4 we will only create 1 conformer and thus only dock once per
   ligand. This of course means a trade-off of getting more useful information
   for each ligand for computational efficiency.
@@ -1418,26 +1422,25 @@ manners:
 
 1. Multiprocessing: When running AutoGrow4 in Multiprocessing mode using
    SLURM, one should:
-    1. 1st run the `cache_prerun` option on a single processor. `srun -n 1 python RunAutogrow.py -c`
-
-       * USE `srun` or `mpirun` for the `cache_prerun`. This limits the `prerun` to a single processor thus preventing errors caused by race conditions when creating pycache files.
-
-    2. Then run the simulation as intended. `python RunAutogrow.py -j custom_parameters.json`
-
-       * Do not use `srun` or `mpirun` for the production run. cpu/job distribution is handled internally.
-            Using `srun` or `mpirun` can cause errors with the `mpi4py` universe.
-
+   1. 1st run the `cache_prerun` option on a single processor. `srun -n 1 python RunAutogrow.py -c`
+      - USE `srun` or `mpirun` for the `cache_prerun`. This limits the
+        `prerun` to a single processor thus preventing errors caused by race
+        conditions when creating pycache files.
+   2. Then run the simulation as intended. `python RunAutogrow.py -j
+      custom_parameters.json`
+      - Do not use `srun` or `mpirun` for the production run. cpu/job
+        distribution is handled internally. Using `srun` or `mpirun` can cause
+        errors with the `mpi4py` universe.
 2. MPI: When running AutoGrow4 in mpi mode using SLURM, one should:
-
     1. 1st run the `cache_prerun` option on a single processor. `srun -n 1 python RunAutogrow.py -c`
-
-       * USE `srun` or `mpirun` for the `cache_prerun`. This limits the prerun to a
-            single processor thus preventing errors caused by race conditions when creating pycache files.
-
-    2. Then run the simulation as intended. `python RunAutogrow.py -j custom_parameters.json`
-
-       * Do not use `srun` or `mpirun` for the production run. cpu/job distribution is handled internally.
-            Using `srun` or `mpirun` can cause errors with the `mpi4py` universe.
+       - USE `srun` or `mpirun` for the `cache_prerun`. This limits the prerun
+         to a single processor thus preventing errors caused by race
+         conditions when creating pycache files.
+    2. Then run the simulation as intended. `python RunAutogrow.py -j
+       custom_parameters.json`
+       - Do not use `srun` or `mpirun` for the production run. cpu/job
+         distribution is handled internally. Using `srun` or `mpirun` can
+         cause errors with the `mpi4py` universe.
 
 ## Utility Scripts
 
@@ -1509,10 +1512,10 @@ This can fragment compounds in 2 manners:
 For each molecule all permutation of fragments are calculated (ie) fragment
 rotatable bonds `C-O-C1CCCC1` could produce the following fragments:
 
-* `C-O-C1CCCC1` No bond breaks
-* `C` and `O-C1CCCC1` breaking the 1st bond
-* `C-O` and `C1CCCC1` breaking the 2nd bond
-* `C` and `O` and `C1CCCC1` breaking the 1st bond and 2nd bond
+- `C-O-C1CCCC1` No bond breaks
+- `C` and `O-C1CCCC1` breaking the 1st bond
+- `C-O` and `C1CCCC1` breaking the 2nd bond
+- `C` and `O` and `C1CCCC1` breaking the 1st bond and 2nd bond
 
 A limit on maximum number of fragments per compound and a minimum number of
 atoms per fragment can be set.
@@ -1616,18 +1619,20 @@ for each docked pose. Then it removes a column of the .pdbqt and saves as a
 
 If parameter `--max_num_of_poses` is not set it will convert all poses.
 
-* If `--max_num_of_poses` == 1 it will only convert the top docked pose to .pdb
-* If `--max_num_of_poses` == 2 it will only convert the top 2 docked poses to .pdb
-* If `--max_num_of_poses` == 10 but there only 8 poses it will convert the 8 poses and stop
+- If `--max_num_of_poses` == 1 it will only convert the top docked pose to .pdb
+- If `--max_num_of_poses` == 2 it will only convert the top 2 docked poses to .pdb
+- If `--max_num_of_poses` == 10 but there only 8 poses it will convert the 8 poses and stop
+
+JDD: Please clean up below.
 
 If --`max_docking_score` is not set it will convert all poses to .pdb.
-* If --`max_docking_score` == -10.0 it will only convert poses with docking scores less than or equal to -10.0 (Remember docking scores are better when more negative)
+- If --`max_docking_score` == -10.0 it will only convert poses with docking scores less than or equal to -10.0 (Remember docking scores are better when more negative)
 
-* --`max_docking_score` and `--max_num_of_poses` work as AND type operators.
-  * Example:
-    * --`max_docking_score` == -11.4 and `--max_num_of_poses`==5
+- --`max_docking_score` and `--max_num_of_poses` work as AND type operators.
+  - Example:
+    - --`max_docking_score` == -11.4 and `--max_num_of_poses`==5
 
-      * It will take the top 5 poses as long as they also have docking scores <=-11.4
+      - It will take the top 5 poses as long as they also have docking scores <=-11.4
 
 This script takes 6 input arguments:
 
