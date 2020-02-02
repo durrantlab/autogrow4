@@ -533,7 +533,7 @@ class VinaDocking(ParentDocking):
 
                 # Get the data for all ligands from previous generation ranked
                 # file
-                prev_gen_data_list = Ranking.get_usable_fomat(ranked_smi_file_prev_gen)
+                prev_gen_data_list = Ranking.get_usable_format(ranked_smi_file_prev_gen)
 
                 # Get the list of pass through ligands
                 current_gen_pass_through_smi = (
@@ -542,7 +542,7 @@ class VinaDocking(ParentDocking):
                         os.sep, str(current_gen_int)
                     )
                 )
-                pass_through_list = Ranking.get_usable_fomat(
+                pass_through_list = Ranking.get_usable_format(
                     current_gen_pass_through_smi
                 )
 

@@ -18,7 +18,7 @@
     "diversity_seed_depreciation_per_gen": 0,
     "num_generations": 3,
     "number_of_processors": -1,
-    "selector_choice": "Rank_Selector",
+    "selector_choice": "Tournament_Selector",
     "max_variants_per_compound": 1,
     "filter_source_compounds": false,
     "use_docked_source_compounds": false,

@@ -51,7 +51,7 @@ def write_pickle_to_file(file_path, obj):
     with open(file_path, 'wb') as handle:
         pickle.dump(obj, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-def get_usable_fomat(infile):
+def get_usable_format(infile):
     """
     This code takes a string for an file which is formatted as an .smi file. It
     opens the file and reads in the components into a usable list.
@@ -111,7 +111,7 @@ def get_usable_fomat(infile):
 
 def get_image_dimensions(imagefile):
     """
-    Helper function that returns the image dimentions
+    Helper function that returns the image dimensions.
 
     :param: imagefile str (path to image)
     :return dict (of the form: {width:<int>, height=<int>, size_bytes=<size_bytes>)
@@ -121,7 +121,7 @@ def get_image_dimensions(imagefile):
         # Calculate the width and hight of an image
         width, height = img.size
 
-    # calculat ethe size in bytes
+    # calculate the size in bytes
     size_bytes = os.path.getsize(imagefile)
 
     return dict(width=width, height=height, size_bytes=size_bytes)
@@ -344,7 +344,7 @@ def get_all_ancestors(mol_name, master_shortname_mol_dict):
     mol the user requested) and the items are lists of full-length molecule names.
 
     These lists must be ordered and will contain None as a place holder.
-    Each previous generation will be double the length of its sucessors, even if
+    Each previous generation will be double the length of its successors, even if
     multiple entries are None. This way we can create a lineage tree.
 
     Gen 0: [ A,    None,      B,     C,      D,    None,     None,     None]
@@ -504,7 +504,7 @@ def make_comp_mol_dict(vars):
             "please check: {}".format(vars["complementary_mol_directory"]))
     comp_dict = {}
     for smi in comp_smi_list:
-        comp_mol_list = get_usable_fomat(smi)
+        comp_mol_list = get_usable_format(smi)
         for mol_entry in comp_mol_list:
             comp_dict[mol_entry[1]] = mol_entry[0]
         del comp_mol_list
@@ -547,7 +547,7 @@ def make_ranked_files_mol_dict(vars):
     # make a list of molecule information
     mol_list = []
     for i in ranked_file_list:
-        mol_list.extend(get_usable_fomat(i))
+        mol_list.extend(get_usable_format(i))
 
     new_list = []
     for x in mol_list:

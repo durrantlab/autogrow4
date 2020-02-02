@@ -561,7 +561,7 @@ def process_inputs(inputs):
 
     return inputs
 
-# Argment parsing
+# Argument parsing
 PARSER = argparse.ArgumentParser()
 PARSER.add_argument(
     '--smi_file', required=True, default=None,

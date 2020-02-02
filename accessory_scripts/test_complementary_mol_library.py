@@ -97,7 +97,7 @@ class SmilesClickChem():
 
         Inputs:
         :param dic old_dict: a dictionary of the the reaction library or
-            functional groups. This is what is importated from the .json file.
+            functional groups. This is what is importanted from the .json file.
 
         Returns:
         :returns: dic new_dict: a dictionary of the the reaction library or
@@ -392,7 +392,7 @@ class SmilesClickChem():
         Based on user controlled variables, this definition will retrieve a
         dictionary of molecules separated into classes by their functional
         groups. The sorting of a .smi file into this should be handled in the
-        user parameter testing when autogrow is initailly started.
+        user parameter testing when autogrow is initially started.
 
         Inputs:
         :param str rxn_library: A string defining the choice of the reaction
@@ -480,7 +480,7 @@ class SmilesClickChem():
 
         return complementary_mols_dict
 #
-def get_usable_fomat(infile):
+def get_usable_format(infile):
     """
     This code takes a string for an file which is formatted as an .smi file. It
     opens the file and reads in the components into a usable list.
@@ -678,7 +678,7 @@ def run_all_for_fun_group(vars, fun_group, rxns_by_fun_group, a_smiles_click_obj
     output_folder = vars["output_folder"]
 
     smi_comp_file = complementary_mol_dict[fun_group]
-    fun_group_list = get_usable_fomat(smi_comp_file)
+    fun_group_list = get_usable_format(smi_comp_file)
     fun_group_mol_list = []
     failed_to_sanitize = []
     for info in fun_group_list:
@@ -747,7 +747,7 @@ def run_all_for_fun_group(vars, fun_group, rxns_by_fun_group, a_smiles_click_obj
         if mol_info[1] in master_failed_to_react:
             continue
         master_passes_reactions.append("    ".join(mol_info))
-    # write to ouput .smi file
+    # write to output .smi file
     with open(output_folder + fun_group + ".smi", "w") as f:
         f.write("\n".join(master_passes_reactions))
 
@@ -898,7 +898,7 @@ def get_arguments_from_argparse(args_dict):
 #
 
 
-# Argment parsing
+# Argument parsing
 PARSER = argparse.ArgumentParser()
 # Mutation Settings
 PARSER.add_argument(

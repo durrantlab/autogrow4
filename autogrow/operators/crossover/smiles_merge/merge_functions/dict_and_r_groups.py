@@ -51,7 +51,7 @@ def handle_dicts_and_select_b_groups(mol_1, mol_2, mcs_mol):
     if r_smiles_dict_2 is None:
         return None
 
-    # Merg b_to_anchor_master_dict into 1 master dictionary of B_to_anchors.
+    # Merge b_to_anchor_master_dict into 1 master dictionary of B_to_anchors.
     # the keys will be all be unique so we can add these dictionaries together
     # without worry of overrighting an entry. We will invert the dict after to
     # get anchors as the keys and the B's as the items. example
@@ -61,7 +61,7 @@ def handle_dicts_and_select_b_groups(mol_1, mol_2, mcs_mol):
     for i in list(b_to_anchor_master_dict_2.keys()):
         b_to_anchor_master[i] = b_to_anchor_master_dict_2[i]
 
-    # Invert b_dictionary to produce a master I dicitonary. example
+    # Invert b_dictionary to produce a master I dictionary. example
     # anchor_to_b_master = {10008:['1B1','2B1'],10000:['1B2','2B2']}
     anchor_to_b_master = invert_dictionary(b_to_anchor_master)
 
@@ -175,7 +175,7 @@ def mol_handling_of_fragmenting_labeling_and_indexing(mol, mcs_mol, lig_number):
         R-group which just happen to branch. This author would argue that
         context is important here and so this version of Ligmerge treats
         anything attached to an anchor atom in the common core as a singular
-        contextual functional group which shall be refered to as a B-groups.
+        contextual functional group which shall be referred to as a B-groups.
     ie. a B-group consists of 1 or more R-groups which are attached to an
         anchor atom in the shared common core. This makes a significant
         difference in how we select for which pieces are added to build our
@@ -183,7 +183,7 @@ def mol_handling_of_fragmenting_labeling_and_indexing(mol, mcs_mol, lig_number):
         tree use to build a child molecule. An R/B group can be connected to
         multiple anchor atoms so once we chose a B group we will need to know
         which anchor atoms are affected by that decision. This is something
-        handled more in the Mapping class, but this is why the nominclature
+        handled more in the Mapping class, but this is why the nomenclature
         change from R-groups to B-groups and why the next several steps are
         important.
     make_b_dictionaries (B is the name we gave to R-groups sets)
@@ -321,7 +321,7 @@ def r_groups_dict(mol_frags, lig_number_for_multiplier):
     Input
     :param rdkit.Chem.rdchem.Mol mol_frags: a rdkit mol containing fragments
     :param int lig_number_for_multiplier: an int either 1 for mol_1 or 2 for
-        mol_2, used to make labels which are tracable to the ligand being used
+        mol_2, used to make labels which are traceable to the ligand being used
 
     Returns:
     :returns: dict r_chain_dictionary: a dictionary with the R-groups and the

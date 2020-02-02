@@ -135,7 +135,7 @@ def get_arguments_from_argparse(args_dict):
     return args_dict
 #
 
-# Argment parsing
+# Argument parsing
 PARSER = argparse.ArgumentParser()
 PARSER.add_argument(
     '--source_folder', '-s', required=True, default=None,

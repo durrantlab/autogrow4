@@ -19,7 +19,7 @@ import argparse
 import matplotlib
 import matplotlib.pyplot as plt
 
-def get_usable_fomat(infile):
+def get_usable_format(infile):
     """
     This code takes a string for an file which is formatted as an .smi file. It
     opens the file and reads in the components into a usable list.

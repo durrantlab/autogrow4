@@ -166,7 +166,7 @@ def run_concatenation(parallelizer_object, directory):
     :param str directory: the path to the folder which will be compiled and compressed.
     """
 
-    concat_file = directory + os.sep + "compresed_PDBS.txt"
+    concat_file = directory + os.sep + "compressed_PDBS.txt"
     print(
         "Start Concatenation: To separate files use the \
         file_concatenation_and_compression.py in the Utility script folder."

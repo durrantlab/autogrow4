@@ -2094,7 +2094,7 @@ def picked_filters(vars):
     :returns: list filter_list: a list of the class of filter which will be used
         later to check for drug likeliness for a generation.
         If a User adds their own filter they just need to follow
-        the same nominclature and enter that filter in the user
+        the same nomenclature and enter that filter in the user
         vars["alternative_filters"] as the name of that class and place
         that file in the same folder as the other filter classes.
     """

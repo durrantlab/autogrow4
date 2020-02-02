@@ -23,7 +23,7 @@ The formatting of the concatenation is:
 Example decompression:
     python autogrow4/accessory_scripts/file_concatenation_and_compression.py \
     --compress_or_decompress decompress \
-    --input_folder_or_file PATH_TO_RUN/Run_0/generation_1/PDBs/compresed_PDBS.txt.gz
+    --input_folder_or_file PATH_TO_RUN/Run_0/generation_1/PDBs/compressed_PDBS.txt.gz
 Example compression:
     python autogrow4/accessory_scripts/file_concatenation_and_compression.py \
     --compress_or_decompress compress \
@@ -69,6 +69,7 @@ def decompress_file(decompressed_file):
     Returns:
     :returns: str decompressed_file: the path to the file to decompress.
     """
+
     out_file = decompressed_file.replace(".gz", "")
     with gzip.open(decompressed_file, "rb") as f_comp:
         with open(out_file, "wb") as f_decomp:
@@ -134,8 +135,8 @@ def separate_files(compressed_file):
             print("file failed to decompress: {}".format(f))
             all_are_made = False
     if all_are_made is True:
-        torun = "rm {}".format(decompressed_file)
-        os.system(torun)
+        to_run = "rm {}".format(decompressed_file)
+        os.system(to_run)
 
 
 #######
@@ -191,7 +192,7 @@ def run_concatenation(directory):
     :param str directory: the path to the folder which will be compiled and compressed.
     """
 
-    concat_file = directory + os.sep + "compresed_PDBS.txt"
+    concat_file = directory + os.sep + "compressed_PDBS.txt"
     print(
         "Start Concatenation: To separate files use the \
         file_concatenation_and_compression.py in the Utility script folder."
@@ -227,8 +228,8 @@ def run_main(vars):
         print(os.path.getsize(input_folder))
 
         run_concatenation(input_folder)
-        print("FINISH CONCAT")
-        print("After concate")
+        print("FINISH CONCATENATE")
+        print("After concatenate")
         print(os.path.getsize(input_folder))
 
     elif vars["compress_or_decompress"] == "decompress":
@@ -243,11 +244,11 @@ def run_main(vars):
         print(os.path.getsize(input_folder))
 
         separate_files(compressed_file)
-        print("After deconcate")
+        print("After deconcatenate")
         print(os.path.getsize(input_folder))
 
         del_files(compressed_file)
-        print("After deconcate")
+        print("After deconcatenate")
         print(os.path.getsize(input_folder))
 
 #######
@@ -263,7 +264,6 @@ def get_arguments_from_argparse(arg_dict):
     Returns:
     :returns: dict arg_dict: dictionary of parameters
     """
-
 
     # Argument handling
     if type(arg_dict["compress_or_decompress"]) != str:
@@ -290,7 +290,7 @@ def get_arguments_from_argparse(arg_dict):
     return arg_dict
 #
 
-# Argment parsing
+# Argument parsing
 PARSER = argparse.ArgumentParser()
 PARSER.add_argument('--compress_or_decompress', type=str, required=True,
                     choices=["compress", "decompress"],

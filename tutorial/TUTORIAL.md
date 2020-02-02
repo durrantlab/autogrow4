@@ -1646,20 +1646,20 @@ This script takes 6 input arguments:
    ligand. This setting controls how many are converted. default is -1 which
    means all poses possible. max_num_of_poses=1 means only the best docked
    pose will be converted. If additional criteria like max_docking_score is
-   applied a pose must meet both criterias to be converted. ie) if
+   applied a pose must meet both criteria to be converted. ie) if
    max_num_of_poses= 5 and max_docking_score=-13.0 for a pose to be converted
    it must be between the 1st and 5th pose in the file and must have docked
    with a score less than or equal to -13.0.
 4. `--max_docking_score` float. The most positive docking score to be converted.
    (More negative scores     are predicted to bind better). If additional
    criteria such as max_num_of_poses is applied a pose must meet both
-   criterias to be converted. ie) if max_num_of_poses= 5 and
+   criteria to be converted. ie) if max_num_of_poses= 5 and
    max_docking_score=-13.0 for a pose to be converted it must be between the
    1st and 5th pose in the file and must have docked with a score less than or
    equal to -13.0.
 5. `--min_docking_score` float. The most negative docking score to be converted.
    (More negative scores are predicted to bind better). If additional criteria
-   such as max_num_of_poses is applied a pose must meet both criterias to be
+   such as max_num_of_poses is applied a pose must meet both criteria to be
    converted. ie) if min_docking_score= -15.0 and max_docking_score=-13.0 for
    a pose to be converted it must: -13.0. <= docking score <= -15.0
 6. `--number_of_processors` int (-p). Number of processors to use for parallel
@@ -1718,7 +1718,7 @@ Example decompression:
 ```bash
 python /autogrow4/accessory_scripts/file_concatenation_and_compression.py \
     --compress_or_decompress decompress \
-    --input_folder_or_file PATH_TO_RUN/Run_0/generation_1/PDBs/compresed_PDBS.txt.gz
+    --input_folder_or_file PATH_TO_RUN/Run_0/generation_1/PDBs/compressed_PDBS.txt.gz
 ```
 
 Example compression:

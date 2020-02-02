@@ -188,7 +188,7 @@ def get_chosen_mol_full_data_list(chosen_mol_list, usable_list_of_smiles):
     return weighted_order_list
 
 
-def get_usable_fomat(infile):
+def get_usable_format(infile):
     """
     This code takes a string for an file which is formatted as an .smi file. It
     opens the file and reads in the components into a usable list.
@@ -245,7 +245,7 @@ def get_usable_fomat(infile):
 
 def convert_usable_list_to_lig_dict(usable_list_of_smiles):
     """
-    This will convert a list created by get_usable_fomat() to a dictionary
+    This will convert a list created by get_usable_format() to a dictionary
     using the ligand smile+lig_id as the key. This makes for faster searching
     in larger Autogrow runs.
 

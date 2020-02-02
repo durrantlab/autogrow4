@@ -104,7 +104,7 @@ def get_arguments_from_argparse(args_dict):
 #
 
 
-# Argment parsing
+# Argument parsing
 PARSER = argparse.ArgumentParser()
 PARSER.add_argument(
     '--pdbqt_file', '-f', required=True, default=None,

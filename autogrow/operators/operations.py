@@ -639,7 +639,7 @@ def get_complete_list_prev_gen_or_source_compounds(vars, generation_num):
     if generation_num == 0:
         # This will be the full length list of starting molecules as the seed
         source_file = str(vars["source_compound_file"])
-        usable_list_of_smiles = Ranking.get_usable_fomat(source_file)
+        usable_list_of_smiles = Ranking.get_usable_format(source_file)
 
         if len(usable_list_of_smiles) == 0:
             print(
@@ -652,7 +652,7 @@ def get_complete_list_prev_gen_or_source_compounds(vars, generation_num):
     elif generation_num == 1 and os.path.exists(source_file_gen_0) is False:
         # This will be the full length list of starting molecules as the seed
         source_file = str(vars["source_compound_file"])
-        usable_list_of_smiles = Ranking.get_usable_fomat(source_file)
+        usable_list_of_smiles = Ranking.get_usable_format(source_file)
 
         if len(usable_list_of_smiles) == 0:
             print(
@@ -678,7 +678,7 @@ def get_complete_list_prev_gen_or_source_compounds(vars, generation_num):
             print(printout)
             raise Exception(printout)
 
-        usable_list_of_smiles = Ranking.get_usable_fomat(source_file)
+        usable_list_of_smiles = Ranking.get_usable_format(source_file)
 
         if len(usable_list_of_smiles) == 0:
             printout = (
@@ -1025,7 +1025,7 @@ def make_pass_through_list(vars, smiles_from_previous_gen_list,
 # Saving Output files for generations and seeds
 #############
 def save_generation_smi(output_directory, generation_num,
-                        formatted_smile_list, nominclature_tag):
+                        formatted_smile_list, nomenclature_tag):
     """"
     This function saves a list of newly generated population of ligands as an
     .smi file. .smi file column 1 is the SMILES string and column 2 is its
@@ -1038,7 +1038,7 @@ def save_generation_smi(output_directory, generation_num,
     :param int generation_num: the interger of the current generation
     :param list formatted_smile_list: list of the newly generated population
         of ligands
-    :param str nominclature_tag: The str describing the ligand list if None
+    :param str nomenclature_tag: The str describing the ligand list if None
         than don't add tag. It is the full list of all ligands for the
         generation
         If it says '_to_convert' its the list of ligands which will need to be
@@ -1054,7 +1054,7 @@ def save_generation_smi(output_directory, generation_num,
     new_gen_folder_path = output_directory + "generation_{}{}".format(
         generation_num, os.sep
     )
-    if nominclature_tag is None:
+    if nomenclature_tag is None:
         # make the name for the new generation file
         output_file_name = new_gen_folder_path + "generation_{}.smi".format(
             generation_num
@@ -1062,7 +1062,7 @@ def save_generation_smi(output_directory, generation_num,
     else:
         # make the name for the new generation file
         output_file_name = new_gen_folder_path + "generation_{}{}.smi".format(
-            generation_num, nominclature_tag
+            generation_num, nomenclature_tag
         )
 
     # write as a tab delineated .smi file
@@ -1078,9 +1078,9 @@ def save_generation_smi(output_directory, generation_num,
 
 
 def save_ligand_list(output_directory, generation_num,
-                     list_of_chosen_ligands, nominclature_tag):
+                     list_of_chosen_ligands, nomenclature_tag):
     """
-    Save the list of ligands. nominclature_tag is a string such as "Mutation"
+    Save the list of ligands. nomenclature_tag is a string such as "Mutation"
     or "Crossover" or "Previous_Gen_choice" describing what this data is used
     for. If it says seeding it is the chosen mols from the previous generation
     being used to seed the next generation
@@ -1091,7 +1091,7 @@ def save_ligand_list(output_directory, generation_num,
     :param int generation_num: The generation number
     :param list list_of_chosen_ligands: The formatted list of ligands to seed
         a generation
-    :param str nominclature_tag: The str describing the ligand list
+    :param str nomenclature_tag: The str describing the ligand list
         -ie seeding_mutations is the list that seeded the mutations while
             mutations would be the list of mutations generated from the
             seeding_mutations list
@@ -1112,7 +1112,7 @@ def save_ligand_list(output_directory, generation_num,
         os.makedirs(seed_folder_path)
 
     output_file_name = "{}{}_Gen_{}.smi".format(
-        seed_folder_path, nominclature_tag, generation_num
+        seed_folder_path, nomenclature_tag, generation_num
     )
 
     # save to a new output smiles file. ie. save to ranked_smiles_file

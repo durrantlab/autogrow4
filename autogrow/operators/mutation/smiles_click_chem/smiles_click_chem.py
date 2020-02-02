@@ -97,7 +97,7 @@ class SmilesClickChem(object):
 
         Inputs:
         :param dic old_dict: a dictionary of the the reaction library or
-            functional groups. This is what is importated from the .json file.
+            functional groups. This is what is importanted from the .json file.
 
         Returns:
         :returns: dic new_dict: a dictionary of the the reaction library or
@@ -408,7 +408,7 @@ class SmilesClickChem(object):
         Based on user controlled variables, this definition will retrieve a
         dictionary of molecules separated into classes by their functional
         groups. The sorting of a .smi file into this should be handled in the
-        user parameter testing when autogrow is initailly started.
+        user parameter testing when autogrow is initially started.
 
         Inputs:
         :param str rxn_library: A string defining the choice of the reaction
@@ -512,7 +512,7 @@ class SmilesClickChem(object):
         :returns: list reactant_order_list: an ordered list of reactants which
             composed of 0 and 1.
         """
-        # for mols w atleast 1 substructure
+        # for mols w at least 1 substructure
         if has_substructure_matches_count == 1:
             reactant_order_list = substructure_search_result
         elif has_substructure_matches_count > 1:
@@ -673,7 +673,7 @@ class SmilesClickChem(object):
 
         tries = 0
         is_rxn_complete = False
-        # go through all possible rxns in dicitonary of rxns using the random
+        # go through all possible rxns in dictionary of rxns using the random
         # order of rxns loop ends when a rxn is successful or when it runs out
         # of reactions
         while tries < len(shuffled_reaction_list) and is_rxn_complete is False:
@@ -903,7 +903,7 @@ class SmilesClickChem(object):
         # end of the big while loop (while tries < len(shuffled_reaction_list)
         # and is_rxn_complete is False)
 
-        # check that a reaction was sucessful
+        # check that a reaction was successful
         if is_rxn_complete is True:
             reaction_product = MOH.check_sanitization(reaction_product)
             if reaction_product is None:
@@ -938,7 +938,7 @@ class SmilesClickChem(object):
             requirements:
             1) Mol sanitizes
             2) It isn't in the self.list_of_already_made_smiles
-            3) It passes Filterization
+            3) It passes Filters
         Returns the smile if it passes; returns None if it fails.
 
         Inputs:
