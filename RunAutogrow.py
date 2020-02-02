@@ -221,11 +221,11 @@ PARSER.add_argument(
 # Genetic Algorithm Options
 PARSER.add_argument(
     "--selector_choice",
-    choices=["Roulette_Selector", "Rank_Selector", "Tournement_Selector"],
+    choices=["Roulette_Selector", "Rank_Selector", "Tournament_Selector"],
     default="Roulette_Selector",
     help="This determines whether the fitness criteria are chosen by a Weighted Roulette, \
-    Ranked, or Tournement style Selector. The Rank option is a non-redudant selector.\
-    Roulette and Tournement chose without replacement and are stoichastic options. \
+    Ranked, or Tournament style Selector. The Rank option is a non-redudant selector.\
+    Roulette and Tournament chose without replacement and are stoichastic options. \
     Warning do not use Rank_Selector for small runs as there is potential that \
     the number of desired ligands exceed the number of ligands to chose from.",
 )
@@ -233,8 +233,8 @@ PARSER.add_argument(
     "--tourn_size",
     type=float,
     default=0.1,
-    help="If using the Tournement_Selector this determines the size of each \
-    tournement. The number of ligands used for each tournement will the \
+    help="If using the Tournament_Selector this determines the size of each \
+    tournament. The number of ligands used for each tournament will the \
     tourn_size * the number of considered ligands.",
 )
 
@@ -344,7 +344,7 @@ PARSER.add_argument(
     default=False,
     help="Lipinski filters for orally available drugs following Lipinski rule of fives. \
     Filters by molecular weight, logP and number of hydrogen bond donors and acceptors. \
-    Lenient implementation means a ligand may fail all but one requirement and still passs.",
+    Lenient implementation means a ligand may fail all but one requirement and still passes.",
 )
 PARSER.add_argument(
     "--GhoseFilter",
@@ -381,14 +381,14 @@ PARSER.add_argument(
     "--PAINSFilter",
     action="store_true",
     default=False,
-    help="PAINS filteres against Pan Assay Interference Compounds using \
+    help="PAINS filters against Pan Assay Interference Compounds using \
     substructure a search.",
 )
 PARSER.add_argument(
     "--NIHFilter",
     action="store_true",
     default=False,
-    help="NIH filteres against molecules with undersirable functional groups \
+    help="NIH filters against molecules with undersirable functional groups \
     using substructure a search.",
 )
 PARSER.add_argument(
@@ -503,7 +503,7 @@ PARSER.add_argument(
     default=120,
     help="The maximum amount of time allowed to dock a single ligand into a \
     pocket in seconds. Many factors influence the time required to dock, such as: \
-    processor speed, the docking software, # rotatable bonds, exhaustiveness docking,\
+    processor speed, the docking software, rotatable bonds, exhaustiveness docking,\
     and number of docking modes... \
     The default docking_timeout_limit is 120 seconds, which is excess for most \
     docking events using QuickVina2Docking under default settings. If run with \
@@ -528,7 +528,7 @@ PARSER.add_argument(
     help="The scoring_choice to use to assess the ligands docking fitness. \
     Default is using Vina/QuickVina2 ligand affinity while NN1/NN2 use a Neural Network \
     to assess the docking pose. Custom requires providing a file path for a Custom \
-    scoring funciton. If Custom scoring function, confirm it selects properly, \
+    scoring function. If Custom scoring function, confirm it selects properly, \
     Autogrow is largely set to select for a more negative score.",
 )
 PARSER.add_argument(
@@ -597,14 +597,14 @@ PARSER.add_argument(
     default=15,
     help="Maximum time gypsum is allowed to run for a given ligand in seconds. \
     On average Gypsum-DL takes on several seconds to run for a given ligand, but \
-    factors such as mol size, # rotatable bonds, processor speed, and gypsum \
+    factors such as mol size, rotatable bonds, processor speed, and gypsum \
     settings (ie gypsum_thoroughness or max_variants_per_compound) will change \
     how long it takes to run. If increasing gypsum settings it is best to increase \
     the gypsum_timeout_limit. Default gypsum_timeout_limit is 15 seconds",
 )
 
 # Reduce files down. This compiles and compresses the files in the PDBs folder
-# (contains docking outputs, pdb,pdbqt...). This reduces the data size and
+# (contains docking outputs, pdb, pdbqt...). This reduces the data size and
 # makes data transfer quicker, but requires running the
 # file_concatenation_and_compression.py in the Utility script folder to
 # separate these files out for readability.
@@ -613,7 +613,7 @@ PARSER.add_argument(
     choices=[True, False, "True", "False", "true", "false"],
     default=True,
     help="Run this combines all files in the PDBs folder into a \
-    single text file. Useful when data needs to be transfered.",
+    single text file. Useful when data needs to be transferred.",
 )
 
 # Make a line plot of the simulation at the end of the run.
@@ -651,8 +651,15 @@ if args_dict["cache_prerun"] is False:
     vars, printout = load_in_commandline_parameters(INPUTS)
 
     # print out the UserVars for the record
+    print("=====================================================")
+    print("\n==============   Parameters as list:  ===============")
     for key in list(vars.keys()):
         print(key, vars[key])
+    print("\n=====================================================")
+    print("===========   Parameters as dictionary:  ============")
+    print(vars)
+    print("=====================================================")
+    print("=====================================================\n\n")
 
     # Run AUTOGROW. Import move here to prevent EOF in MPI mode. importing
     # files before the Parallelizer class is established in MPI mode can have

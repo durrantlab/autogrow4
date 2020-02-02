@@ -17,7 +17,7 @@ rdkit.RDLogger.DisableLog("rdApp.*")
 import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
 import autogrow.docking.ranking.selecting.rank_selection as Rank_Sel
 import autogrow.docking.ranking.selecting.roulette_selection as Roulette_Sel
-import autogrow.docking.ranking.selecting.tournement_selection as Tournement_Sel
+import autogrow.docking.ranking.selecting.tournament_selection as Tournament_Sel
 
 
 def create_seed_list(usable_list_of_smiles, num_seed_diversity,
@@ -46,9 +46,9 @@ def create_seed_list(usable_list_of_smiles, num_seed_diversity,
     :param int num_seed_dock_fitness: the number of seed molecules which come
         from eite selection by docking score
     :param int selector_choice: the choice of selector method. Choices are
-        Roulette_Selector, Rank_Selector, or Tournement_Selector
+        Roulette_Selector, Rank_Selector, or Tournament_Selector
     :param float tourn_size: percentage of the total pool of ligands to be
-        tested in each tournement.
+        tested in each tournament.
 
     Returns:
     :returns: list chosen_mol_full_data_list: a list of all the smiles in a
@@ -85,27 +85,27 @@ def create_seed_list(usable_list_of_smiles, num_seed_diversity,
             usable_list_of_smiles, num_seed_diversity, -1, False
         )
 
-    elif selector_choice == "Tournement_Selector":
-        print("Tournement_Selector")
+    elif selector_choice == "Tournament_Selector":
+        print("Tournament_Selector")
         # This assumes the most negative number is the best option which is
         # true for both This is true for both the diversity score and the
         # docking score. This may need to be adjusted for different scoring
         # functions.
 
         # Get seed molecules based on docking scores
-        docking_fitness_smiles_list = Tournement_Sel.run_tournement_selector(
+        docking_fitness_smiles_list = Tournament_Sel.run_Tournament_Selector(
             usable_list_of_smiles, num_seed_dock_fitness, tourn_size, -2, True
         )
 
         # Get seed molecules based on diversity scores
-        diversity_smile_list = Tournement_Sel.run_tournement_selector(
+        diversity_smile_list = Tournament_Sel.run_Tournament_Selector(
             usable_list_of_smiles, num_seed_diversity, tourn_size, -1, True
         )
 
     else:
         print(selector_choice)
         raise Exception(
-            "selector_choice value is not Roulette_Selector, Rank_Selector, nor Tournement_Selector"
+            "selector_choice value is not Roulette_Selector, Rank_Selector, nor Tournament_Selector"
         )
 
     chosen_mol_list = [x for x in docking_fitness_smiles_list]
@@ -121,15 +121,15 @@ def create_seed_list(usable_list_of_smiles, num_seed_diversity,
             chosen_mol_list, usable_list_of_smiles
         )
 
-    elif selector_choice == "Tournement_Selector":
-        # Tournement_Selector returns an already full list of ligands so you
+    elif selector_choice == "Tournament_Selector":
+        # Tournament_Selector returns an already full list of ligands so you
         # can skip the get_chosen_mol_full_data_list step
         chosen_mol_full_data_list = chosen_mol_list
 
     else:
         print(selector_choice)
         raise Exception(
-            "selector_choice value is not Roulette_Selector, Rank_Selector, nor Tournement_Selector"
+            "selector_choice value is not Roulette_Selector, Rank_Selector, nor Tournament_Selector"
         )
 
     return chosen_mol_full_data_list

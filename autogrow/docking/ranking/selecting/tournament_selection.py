@@ -1,5 +1,5 @@
 """
-This script is use to select molecules using a tournement selector
+This script is use to select molecules using a tournament selector
 """
 import __future__
 
@@ -8,11 +8,11 @@ import math
 import copy
 
 
-def run_tournement_selector(list_of_ligands, num_to_chose, tourn_size,
+def run_Tournament_Selector(list_of_ligands, num_to_chose, tourn_size,
                             idx_to_sel, favor_most_negative=True):
     """
-    This runs a tournement style selector given a list of ligands and
-    specified metric. It will randomly select ligands for tournements. The
+    This runs a tournament style selector given a list of ligands and
+    specified metric. It will randomly select ligands for tournaments. The
     best scoring ligand for each of these groups will end up in the
     chosen_ligands list.
 
@@ -22,18 +22,18 @@ def run_tournement_selector(list_of_ligands, num_to_chose, tourn_size,
     tourn_size increases.
         -ie tourn_size=1.0 will randomly pick N number of ligands equal to the
             total number of ligands in the list this means theres a high chance that
-            the top ligand will be chosen enter every tournement and will win
+            the top ligand will be chosen enter every tournament and will win
             everytime. This could result in a very homogenous choice.
 
     Inputs:
     :param list list_of_ligands: The list of lists containing info about
         ligands with scores to select from.
     :param int num_to_chose: the number of ligands to be chosen total this
-        also is the number of tournements that will be conducted.
+        also is the number of tournaments that will be conducted.
     :param float tourn_size: percentage of the total pool of ligands to be
-        tested in each tournement.
+        tested in each tournament.
     :param int idx_to_sel: the idx within each sublist which will serve as
-        the metric for each tournement.
+        the metric for each tournament.
     :param bol favor_most_negative: True if the most negative number is
         the best solution. False if the most positive number is the best
         solution default to True.
@@ -63,7 +63,7 @@ def run_tournement_selector(list_of_ligands, num_to_chose, tourn_size,
     chosen_ligands = []
     list_of_ligands_reduced = copy.deepcopy(list_of_ligands)
     for i in range(0, num_to_chose):
-        chosen_ligand = run_one_tournement(
+        chosen_ligand = run_one_tournament(
             list_of_ligands, num_per_tourn, idx_to_sel, favor_most_negative
         )
         list_of_ligands_reduced = [
@@ -75,12 +75,12 @@ def run_tournement_selector(list_of_ligands, num_to_chose, tourn_size,
 #
 
 
-def run_one_tournement(list_of_ligands, num_per_tourn, idx_to_sel,
+def run_one_tournament(list_of_ligands, num_per_tourn, idx_to_sel,
                        favor_most_negative=True):
     """
-    This runs a single tournement style selection given a list of ligands and
-    specified metric. It will randomly select ligands for the tournement. The
-    best scoring ligand from the tournement will be returned.
+    This runs a single tournament style selection given a list of ligands and
+    specified metric. It will randomly select ligands for the tournament. The
+    best scoring ligand from the tournament will be returned.
 
     This is done WITHOUT REPLACEMENT. This does provide an opportunity for any
     ligand to make it into the chosen_ligands list even if it doesn't have a
@@ -88,7 +88,7 @@ def run_one_tournement(list_of_ligands, num_per_tourn, idx_to_sel,
     tourn_size increases.
         -ie tourn_size=1.0 will randomly pick N number of ligands equal to the
             total number of ligands in the list this means theres a high chance
-            that the top ligand will be chosen enter every tournement and will
+            that the top ligand will be chosen enter every tournament and will
             win everytime. This could result in a very homogenous choice.
 
         -num_per_tourn is the int(math.ceil(num_ligands * tourn_size)) so that
@@ -98,16 +98,16 @@ def run_one_tournement(list_of_ligands, num_per_tourn, idx_to_sel,
     :param list list_of_ligands: The list of lists containing info about
         ligands with scores to select from.
     :param int num_per_tourn: the number of ligands to be tested in each
-        tournement.
+        tournament.
     :param int idx_to_sel: the idx within each sublist which will serve as
-        the metric for each tournement.
+        the metric for each tournament.
     :param bol favor_most_negative: True if the most negative number is
         the best solution. False if the most positive number is the best
         solution default to True.
 
     Returns:
     :returns: list chosen_option: a list with a single ligand chosen from a
-        single tournement
+        single tournament
     """
 
     num_ligands = len(list_of_ligands)

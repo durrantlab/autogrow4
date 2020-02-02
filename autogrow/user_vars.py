@@ -829,7 +829,7 @@ def check_value_types(vars, argv):
     Given the many uservars and the possibility for intentional differences,
     especially as the program is developed, this function tries to be
     NOT OPINIONATED, only correcting for several obvious and easy to correct issues
-    of type discrepencies occur between argv[key] and vars[key]
+    of type discrepancies occur between argv[key] and vars[key]
         ie
             1) argv[key] = "true" and vars[key] = False
                 this script will not change argv[key] to False... it will
@@ -840,11 +840,11 @@ def check_value_types(vars, argv):
 
     Inputs:
     :param dict vars: Dictionary of program defaults, which will later be
-        overwriten by argv values
+        overwritten by argv values
     :param dict argv: Dictionary of User specified variables
     Returns:
     :returns: dict vars: Dictionary of program defaults, which will later
-        be overwriten by argv values
+        be overwritten by argv values
     :returns: dict argv: Dictionary of User specified variables
     """
     for key in list(argv.keys()):
@@ -1385,7 +1385,7 @@ def handle_custom_inputs_if_argparsed(input_params):
      using the commandline argparse
 
     This function will handle those if there are used and return
-    the modified input_parpams dict
+    the modified input_params dict
 
     Inputs:
     :param dict input_params: The parameters. A dictionary of
@@ -1467,7 +1467,7 @@ def handle_alternative_filters(vars, filter_list):
     :param list filter_list: a list of the class of filter which will be used
         later to check for drug likeliness for a generation.
         If a User adds their own filter they just need to follow the same
-        nominclature and enter that filter in the user vars["alternative_filters"]
+        nomenclature and enter that filter in the user vars["alternative_filters"]
         as the name of that class and place that file in the same folder as the
         other filter classes.
 
@@ -1475,7 +1475,7 @@ def handle_alternative_filters(vars, filter_list):
     :returns: list filter_list: a list of the class of filter which will be used
         later to check for drug likeliness for a generation.
         If a User adds their own filter they just need to follow the same
-        nominclature and enter that filter in the user vars["alternative_filters"]
+        nomenclature and enter that filter in the user vars["alternative_filters"]
         as the name of that class and place that file in the same folder as the
         other filter classes.
     """
@@ -1561,7 +1561,7 @@ def handle_alternative_filters(vars, filter_list):
                 )
                 print(
                     "Please ensure you unit test this code properly before \
-                    incorprating.\n"
+                    incorporating.\n"
                 )
                 copyfile(filter_info[0], filter_info[1])
 
@@ -1575,7 +1575,7 @@ def handle_alternative_filters(vars, filter_list):
                 " AutoGrow needs to be restarted and should now "
                 + "be able to run custom scripts."
             )
-            print("Please ensure you unit test this code properly before incorprating.")
+            print("Please ensure you unit test this code properly before incorporating.")
             print(
                 "#####################################"
                 + "########################################\n"
@@ -1722,7 +1722,7 @@ def handle_custom_conversion_script(vars):
             )
             print(
                 "Please ensure you unit test this code properly before \
-                incorprating."
+                incorporating."
             )
             copyfile(custom_class[1], new_file)
 
@@ -1744,7 +1744,7 @@ def handle_custom_conversion_script(vars):
             printout = (
                 printout
                 + "Please ensure you unit test this code properly "
-                + "before incorprating."
+                + "before incorporating."
             )
             printout = (
                 printout
@@ -1855,7 +1855,7 @@ def handle_custom_docking_script(vars):
                 children folder."
             )
             print(
-                "Please ensure you unit test this code properly before incorprating."
+                "Please ensure you unit test this code properly before incorporating."
             )
             copyfile(custom_class[1], new_file)
 
@@ -1874,7 +1874,7 @@ def handle_custom_docking_script(vars):
             )
             printout = (
                 printout
-                + "Please ensure you unit test this code properly before incorprating."
+                + "Please ensure you unit test this code properly before incorporating."
             )
             printout = (
                 printout
@@ -1983,7 +1983,7 @@ def handle_custom_scoring_script(vars):
                 the scoring_choices folder."
             )
             print(
-                "Please ensure you unit test this code properly before incorprating."
+                "Please ensure you unit test this code properly before incorporating."
             )
             copyfile(custom_class[1], new_file)
 
@@ -1999,7 +1999,7 @@ def handle_custom_scoring_script(vars):
             )
             printout = (
                 printout
-                + "Please ensure you unit test this code properly before incorprating."
+                + "Please ensure you unit test this code properly before incorporating."
             )
             printout = (
                 printout
@@ -2068,7 +2068,6 @@ def filter_choice_handling(vars):
         if vars["No_Filters"] is True:
             chosen_ligand_filters = None
         else:
-            print(vars)
             chosen_ligand_filters, vars = picked_filters(vars)
     else:
         chosen_ligand_filters, vars = picked_filters(vars)
