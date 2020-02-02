@@ -93,7 +93,7 @@ PARSER.add_argument(
     "-s",
     type=str,
     help="PATH to the file containing the source compounds. It must be \
-    tab-deliniated .smi file. These ligands will seed the first generation.",
+    tab-delineated .smi file. These ligands will seed the first generation.",
 )
 PARSER.add_argument(
     "--filter_source_compounds",
@@ -224,7 +224,7 @@ PARSER.add_argument(
     choices=["Roulette_Selector", "Rank_Selector", "Tournament_Selector"],
     default="Roulette_Selector",
     help="This determines whether the fitness criteria are chosen by a Weighted Roulette, \
-    Ranked, or Tournament style Selector. The Rank option is a non-redudant selector.\
+    Ranked, or Tournament style Selector. The Rank option is a non-redundant selector.\
     Roulette and Tournament chose without replacement and are stoichastic options. \
     Warning do not use Rank_Selector for small runs as there is potential that \
     the number of desired ligands exceed the number of ligands to chose from.",
