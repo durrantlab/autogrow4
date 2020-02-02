@@ -116,13 +116,12 @@ def adjust_dockerfile():
     modify the Dockerfile to use the windows version of the script.
 
     This only should run on Windows OS.
-    
+
     Change:
         ENTRYPOINT ["bash", "/autogrow/run_autogrow_in_container.bash"]
     To:
         # ENTRYPOINT ["bash", "/autogrow/run_autogrow_in_container.bash"]
         ENTRYPOINT ["bash", "/autogrow/run_autogrow_in_container_windows.bash"]
-        
     """
     printout = ""
     normal_entry = "/autogrow/run_autogrow_in_container.bash"
@@ -323,8 +322,8 @@ def get_run_number(root_folder_path, start_a_new_run):
     """
     Determine run number for the new directory.
         If start_a_new_run is True    Start a fresh new run.
-            -If no previous runs exist in the root_folder_path 
-            -If there are previous runs in the root_folder_path 
+            -If no previous runs exist in the root_folder_path
+            -If there are previous runs in the root_folder_path
                 incremental increasing the name by 1 from the last
                 run in the same output directory.
         If start_a_new_run is False    Find the last run folder and return that path
@@ -353,7 +352,7 @@ def get_run_number(root_folder_path, start_a_new_run):
 
         # make a folder for the new generation
         run_number = 0
-    
+
     else:
         if start_a_new_run is False:
             # Continue from the last simulation run
@@ -551,7 +550,7 @@ def run_autogrow_docker_main(vars):
     # 2) copy files to a temp directory
     #     -receptor, .smi files ...
     # 3) make a JSON file with modified information for within docker
-    json_vars, outfolder_path, run_num= handle_json_info(vars)
+    json_vars, outfolder_path, run_num = handle_json_info(vars)
 
     # Run build docker image
     make_docker()

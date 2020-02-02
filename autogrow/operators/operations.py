@@ -717,7 +717,7 @@ def get_complete_list_prev_gen_or_source_compounds(vars, generation_num):
         print("")
         print("Running Filter on the Compounds from last generation/Source")
         usable_list_of_smiles = Filter.run_filter(vars, usable_list_of_smiles)
-        
+
         # Remove Nones:
         usable_list_of_smiles = [x for x in usable_list_of_smiles if x is not None]
 

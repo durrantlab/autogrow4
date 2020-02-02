@@ -349,13 +349,13 @@ def run_plotter(vars, dict_of_averages, outfile):
     plt.ylabel(y_label, fontweight="semibold")
 
     plt.xlabel("Generation Number", fontweight="semibold")
-    
-    try:        
+
+    try:
         if print_ten is True:
             plt.savefig(outfile, bbox_inches="tight", dpi=1000)
         else:
             # Remove the bbox_inches="tight" is necessary if
-            # the plot is too small for 
+            # the plot is too small for
             plt.savefig(outfile, dpi=500)
     except:
         printout = "\nUNABLE TO CREATE PLOT: \n"
