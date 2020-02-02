@@ -655,42 +655,29 @@ These filters use a class-based inheritance architecture which require:
 
 #### Running Custom Filters
 
-JDD: Need to clean up this section.
 Because parameters can be supplied to AutoGrow4 by command-line or by JSON file,
-we provide an example of each when submitting custom filters. Additionally, AutoGrow4
-can run as many filters in series so we provide examples of sumbitting multiple custom
-filters in each submission style:
+we provide an example of each when submitting custom filters.
 
-Command-line submission:
-1. Submitting a single custom filter:
-   - Where the custom file is:
-       - Located at `/PATH_TO/custom_filter_1.py`
-       - Unique class name is: `custom_filter_1` (this will be how it is
+
+1. Command-line submission:
+    - Where the custom file is:
+        - Located at `/PATH_TO/custom_filter_1.py`
+        - Unique class name is: `custom_filter_1` (this will be how it is
           called in future submissions)
+    -  To run multiple custom filters replace `[["custom_filter_1","/PATH_TO/custom_filter_1.py"]]` with: `[["custom_filter_1","/PATH_TO/custom_filter_1.py"],["custom_filter_2","/PATH_TO/custom_filter_2.py"]]`
 ```bash
 python RunAutogrow.py \
     ... \
     --alternative_filter [["custom_filter_1","/PATH_TO/custom_filter_1.py"]]
 ```
 
-2. Submitting a multiple custom filters:
-    - Where the custom files are:
-        - Located at: `/PATH_TO/custom_filter_1.py" and "/PATH_TO/custom_filter_2.py`
-        - Unique class names are: `custom_filter_1` and `custom_filter_2` (this will be how they will be called in future submissions)
 
-```bash
-python RunAutogrow.py \
-    ... \
-    --alternative_filter [["custom_filter_1","/PATH_TO/custom_filter_1.py"],["custom_filter_2","/PATH_TO/custom_filter_2.py"]]
-```
-
-
-JSON file submission:
-1. Submitting a single custom filter:
-   - Where the custom file is:
+2. JSON file submission:
+    - Where the custom file is:
        - Located at `/PATH_TO/custom_filter_1.py`
        - Unique class name is: `custom_filter_1` (this will be how it is
           called in future submissions)
+    -  To run multple files  Replace `[["custom_filter_1","/PATH_TO/custom_filter_1.py"]]` with: `[["custom_filter_1","/PATH_TO/custom_filter_1.py"],["custom_filter_2","/PATH_TO/custom_filter_2.py"]]`
 
 ```json
 {
@@ -699,19 +686,6 @@ JSON file submission:
 }
 ```
 
-Submit in terminal: `python RunAutogrow.py -j /PATH_TO/json_file_with_variable.json`
-
-
-2. Submitting a multiple custom filters:
-    - Where the custom files are:
-        - Located at: `/PATH_TO/custom_filter_1.py" and "/PATH_TO/custom_filter_2.py`
-        - Unique class names are: `custom_filter_1` and `custom_filter_2` (this will be how they will be called in future submissions)
-
-```bash
-python RunAutogrow.py \
-    ... \
-    --alternative_filter [["custom_filter_1","/PATH_TO/custom_filter_1.py"],["custom_filter_2","/PATH_TO/custom_filter_2.py"]]
-```
 Submit in terminal: `python RunAutogrow.py -j /PATH_TO/json_file_with_variable.json`
 
 
@@ -1756,7 +1730,6 @@ python /autogrow4/accessory_scripts/file_concatenation_and_compression.py \
 ```
 
 ### Graph Generation For Post-Run Analysis
-@@@JAKE LEFT OFF HERE
 #### /autogrow4/accessory_scripts/plot_autogrow_run.py
 
 This script will create a line plot of the average score for each generation
