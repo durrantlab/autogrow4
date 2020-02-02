@@ -10,7 +10,7 @@
 
 
 # sudo should only be run in Linux or MacOS
-# If Windows please instead just open the terminal with admin priveledges
+# If Windows please instead just open the terminal with admin privileges
 #   and omit the 'sudo'
 
 sudo python ./autogrow_in_docker.py -j ./examples/sample_autogrow_docker_json.json

@@ -44,7 +44,7 @@ To run AutoGrow4 in a docker, please run the `autogrow_in_docker.py` script:
         # Results will be output to the directory specified by the root_output_folder variable
 
     Example on Windows OS:
-        1) open a docker enabled and bash enabled terminal with administrative priveledges
+        1) open a docker enabled and bash enabled terminal with administrative privileges
         #  cd to this directory in a bash terminal
         3) cd autogrow4/docker/
         4)  `python autogrow_in_docker.py -j ./examples/sample_autogrow_docker_json.json`
@@ -69,7 +69,7 @@ def change_permissions(file_path):
     """
     os.chmod(file_path, 0o777)
 #
-def change_permissions_recurssively(file_or_folder_path):
+def change_permissions_recursively(file_or_folder_path):
     """
     This will open the permissions for a given file/folder.
 
@@ -142,7 +142,6 @@ def adjust_dockerfile():
             printout = printout + line
     with open(os.path.abspath("Dockerfile"), "w") as f:
         f.write(printout)
-
 #
 def make_docker():
     """
@@ -167,10 +166,10 @@ def make_docker():
         os.system("docker build -t autogrow4 . > {}".format(log_file))
     except:
         printout = "\nCan not create a docker file. Please make sure to run the " + \
-            "script with sudo/administrative priveledges.\nIf Linux/MacOS:\n" + \
+            "script with sudo/administrative privileges.\nIf Linux/MacOS:\n" + \
             "\t'sudo python autogrow_in_docker.py -j PATH/JSON.json'\n" + \
             "If Windows:\n\tRun from bash and " + \
-            "docker enabled terminal with administrative priveledges.\n" + \
+            "docker enabled terminal with administrative privileges.\n" + \
             "Please also make sure docker is installed on the system."
         print(printout)
         raise Exception(printout)
@@ -255,7 +254,7 @@ def check_for_required_inputs(json_vars):
         # directory doesn't exist, then make it
         try:
             os.makedirs(json_vars["root_output_folder"])
-            change_permissions_recurssively(json_vars["root_output_folder"])
+            change_permissions_recursively(json_vars["root_output_folder"])
         except:
             raise NotImplementedError(
                 "root_output_folder could not be found and could not be created. \
@@ -320,18 +319,16 @@ def find_previous_runs(folder_name_path):
     last_run_number = i - 1
     return last_run_number
 #
-def set_run_directory(root_folder_path, start_a_new_run):
+def get_run_number(root_folder_path, start_a_new_run):
     """
-    Determine and make the folder for the run directory.
-        If start_a_new_run is True    Start a frest new run.
-            -If no previous runs exist in the root_folder_path then make a new
-                folder named root_folder_path + "Run_0"
-            -If there are previous runs in the root_folder_path then make a
-                new folder incremental increasing the name by 1 from the last
+    Determine run number for the new directory.
+        If start_a_new_run is True    Start a fresh new run.
+            -If no previous runs exist in the root_folder_path 
+            -If there are previous runs in the root_folder_path 
+                incremental increasing the name by 1 from the last
                 run in the same output directory.
         If start_a_new_run is False    Find the last run folder and return that path
-            -If no previous runs exist in the root_folder_path then make a new
-            folder named root_folder_path + "Run_0"
+            -If no previous runs exist in the root_folder_path then  "Run_0"
 
     Inputs:
     :param str root_folder_path: is the path of the root output folder. We will
@@ -341,8 +338,7 @@ def set_run_directory(root_folder_path, start_a_new_run):
         - This is set as a vars["start_a_new_run"]
         - The default is vars["start_a_new_run"] = True
     Returns:
-    :returns: str folder_path: the string of the newly created directory for
-        puting output folders
+    :returns: str run_num: the string of the run number "Run_*"
     """
 
     folder_name_path = root_folder_path + "Run_"
@@ -357,28 +353,22 @@ def set_run_directory(root_folder_path, start_a_new_run):
 
         # make a folder for the new generation
         run_number = 0
-        folder_path = "{}{}{}".format(folder_name_path, run_number, os.sep)
-        os.makedirs(folder_path)
-        change_permissions_recurssively(folder_path)
-
+    
     else:
         if start_a_new_run is False:
             # Continue from the last simulation run
             run_number = last_run_number
-            folder_path = "{}{}{}".format(folder_name_path, last_run_number, os.sep)
         else:  # start_a_new_run is True
             # Start a new fresh simulation
             # Make a directory for the new run by increasing run number by +1
             # from last_run_number
             run_number = last_run_number + 1
-            folder_path = "{}{}{}".format(folder_name_path, run_number, os.sep)
-            os.mkdir(folder_path)
-            change_permissions_recurssively(folder_path)
 
+    folder_name_path = root_folder_path + "Run_" + str(run_number) + os.sep
     print("The Run number is: ", run_number)
-    print("The Run folder path is: ", folder_path)
+    print("The Run folder path is: ", folder_name_path)
     print("")
-    return folder_path
+    return "Run_{}".format(run_number)
 #
 def get_output_folder(json_vars):
     """
@@ -387,8 +377,9 @@ def get_output_folder(json_vars):
     Inputs:
     :param dict json_vars: The parameters. A dictionary of {parameter name: value}.
     Returns:
-    :returns: str folder_path: the string of the newly created directory for
+    :returns: str root_output_folder: the string of the directory for
         puting output folders
+    :returns: str run_num: the string of the run number "Run_*"
     """
     if "start_a_new_run" in json_vars.keys():
         start_a_new_run = json_vars["start_a_new_run"]
@@ -396,9 +387,10 @@ def get_output_folder(json_vars):
         start_a_new_run = False
 
     root_output_folder = os.path.abspath(json_vars["root_output_folder"]) + os.sep
-    folder_path = set_run_directory(root_output_folder, start_a_new_run)
+    change_permissions_recursively(root_output_folder)
+    run_num = get_run_number(root_output_folder, start_a_new_run)
 
-    return folder_path
+    return root_output_folder, run_num
 #
 def move_files_to_temp_dir(json_vars):
     """
@@ -415,14 +407,14 @@ def move_files_to_temp_dir(json_vars):
     if os.path.exists(temp_dir_path):
         shutil.rmtree(temp_dir_path)
     os.mkdir(temp_dir_path)
-    change_permissions_recurssively(temp_dir_path)
+    change_permissions_recursively(temp_dir_path)
 
     # make or remove and make an output_and_log_dir
     output_and_log_dir = os.path.abspath("output_and_log_dir") + os.sep
     if os.path.exists(output_and_log_dir):
         shutil.rmtree(output_and_log_dir)
     os.mkdir(output_and_log_dir)
-    change_permissions_recurssively(output_and_log_dir)
+    change_permissions_recursively(output_and_log_dir)
 
     print("copying files into temp directory: temp_user_files")
     # get files from json_vars
@@ -469,8 +461,8 @@ def move_files_to_temp_dir(json_vars):
         json.dump(docker_json_vars, file_item, indent=4)
 
     # update permissions so files can be manipulated without sudo/admin
-    change_permissions_recurssively(temp_dir_path)
-    change_permissions_recurssively(output_and_log_dir)
+    change_permissions_recursively(temp_dir_path)
+    change_permissions_recursively(output_and_log_dir)
 
     # Copy over AutoGrow4 files into a temp directory
     temp_autogrow4_path = os.path.abspath("autogrow4") + os.sep
@@ -481,14 +473,14 @@ def move_files_to_temp_dir(json_vars):
         shutil.rmtree(temp_autogrow4_path)
     os.mkdir(temp_autogrow4_path)
     autogrow4_top_dir = autogrow4_top_dir + os.sep
-    change_permissions_recurssively(temp_autogrow4_path)
+    change_permissions_recursively(temp_autogrow4_path)
 
     # Copy all files in autogrow4 directory into a temp except the Docker folder
     for fol_to_copy in ["autogrow", "source_compounds", "accessory_scripts", "tutorial"]:
         shutil.copytree(autogrow4_top_dir + fol_to_copy, temp_autogrow4_path + fol_to_copy)
     shutil.copyfile(autogrow4_top_dir + "RunAutogrow.py", temp_autogrow4_path + "RunAutogrow.py")
     # Open permissions
-    change_permissions_recurssively(temp_autogrow4_path)
+    change_permissions_recursively(temp_autogrow4_path)
 #
 def handle_json_info(vars):
     """
@@ -503,8 +495,9 @@ def handle_json_info(vars):
 
     Returns:
     :param dict json_vars: Dictionary of User specified variables
-    :returns: str folder_path: the string of the newly created directory for
+    :returns: str root_output_folder: the string of the directory for
         puting output folders
+    :returns: str run_num: the string of the run number "Run_*"
     """
     print("Handling files")
 
@@ -518,9 +511,9 @@ def handle_json_info(vars):
     move_files_to_temp_dir(json_vars)
 
     # get output folder
-    outfolder_path = get_output_folder(json_vars)
+    outfolder_path, run_num = get_output_folder(json_vars)
 
-    return json_vars, outfolder_path
+    return json_vars, outfolder_path, run_num
 #
 def run_autogrow_docker_main(vars):
     """
@@ -533,7 +526,7 @@ def run_autogrow_docker_main(vars):
         4) Build docker image and link files to output folder
             -This includes an adjustment to the Dockerfile if
             running it on a Windows OS
-        5) execute RunAutogrow.py from within the docker containiner
+        5) execute RunAutogrow.py from within the docker container
         6) export the files back to the final end dir
 
     Inputs:
@@ -558,7 +551,7 @@ def run_autogrow_docker_main(vars):
     # 2) copy files to a temp directory
     #     -receptor, .smi files ...
     # 3) make a JSON file with modified information for within docker
-    json_vars, outfolder_path = handle_json_info(vars)
+    json_vars, outfolder_path, run_num= handle_json_info(vars)
 
     # Run build docker image
     make_docker()
@@ -567,27 +560,12 @@ def run_autogrow_docker_main(vars):
     print("\nRunning AutoGrow4 in Docker")
 
 
-    temp_outfolder_path = os.path.abspath(outfolder_path)
-    if os.name == "nt" or os.name == "ce":
-        # temp_outfolder_path should look like:
-        # "/c/Users/Jacob/autogrow4/docker/Outputfolder/Run_0"
-        # for windows
-        if temp_outfolder_path[0] != "/":
-            temp_outfolder_path = "/" + temp_outfolder_path
-        if temp_outfolder_path[1].islower() is False:
-            temp_outfolder_path = temp_outfolder_path[:1] + \
-                temp_outfolder_path[1].lower() + \
-                temp_outfolder_path[1 + 1:]
-        if temp_outfolder_path[2] == ":":
-            temp_outfolder_path = temp_outfolder_path[:2] + "/" + temp_outfolder_path[2 + 1:]
-        temp_outfolder_path = temp_outfolder_path.replace(os.sep, "/")
-
-    command = "docker run --rm -it -v {}:/Outputfolder/".format(temp_outfolder_path)
-    command = command  +" autogrow4  --name autogrow4 -/UserFiles/docker_json_vars.json"
+    command = "docker run -it -v {}:/Outputfolder/".format(outfolder_path)
+    command = command  +" autogrow4  --name autogrow4  --{}".format(run_num)
     # Execute AutoGrow4
     print(command)
     os.system(command)
-    change_permissions_recurssively(outfolder_path)
+    change_permissions_recursively(outfolder_path)
     print("AutoGrow Results placed in: {}".format(outfolder_path))
 #
 

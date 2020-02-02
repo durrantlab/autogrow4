@@ -4,7 +4,7 @@ are not supported by our current multithreading approach, such as Windows.
 
 Prior to running these scripts please install docker software. Please also
 always run these scripts with sudo (Linux/MacOS) or administrative
-priveledges (Window).
+privileges (Window).
 
 The first time running AutoGrow4 with docker (or if docker images have been purged),
 will take a few minutes longer to install dependencies within the docker environment.
@@ -29,7 +29,7 @@ To run AutoGrow4 in a docker, please run the `autogrow_in_docker.py` script:
         # Results will be output to the directory specified by the root_output_folder variable
 
     Example on Windows OS:
-        1) open a docker enabled and bash enabled terminal with administrative priveledges
+        1) open a docker enabled and bash enabled terminal with administrative privileges
         #  cd to this directory in a bash terminal
         3) cd autogrow4/docker/
         4)  `python autogrow_in_docker.py -j ./examples/sample_autogrow_docker_json.json`
