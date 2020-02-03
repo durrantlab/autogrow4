@@ -583,4 +583,10 @@ PARSER.add_argument(
 )
 
 ARGS_DICT = vars(PARSER.parse_args())
+
+print("")
+print("BE SURE TO RUN THIS SCRIPT WITH SUDO (LINUX/MACOS) OR ADMINISTRATOR")
+print("(WINDOWS) PRIVILEGES!")
+print("")
+
 run_autogrow_docker_main(ARGS_DICT)

@@ -506,7 +506,7 @@ not compatible with AutoGrow4 or its dependencies, such as Windows.
 
 Prior to running these scripts, please install the docker software. Also, be
 sure to ***also always run these scripts with sudo (linux/macOS) or
-administrative privileges (Window)***.
+administrator privileges (Windows).***.
 
 Running AutoGrow4 via docker the first time will take a few minutes longer
 because docker must install the dependencies. The same is true if docker
@@ -544,7 +544,7 @@ Linux/MacOS:
 
 Windows OS:
 
-1. Open a docker-enabled and bash-enabled terminal with administrative
+1. Open a docker-enabled and bash-enabled terminal with administrator
    privileges.
 2. Change into the `/autogrow4/docker/` directory in a bash enabled terminal:
    `cd /autogrow4/docker/`
