@@ -651,8 +651,8 @@ if args_dict["cache_prerun"] is False:
     vars, printout = load_in_commandline_parameters(INPUTS)
 
     # print out the UserVars for the record
-    print("=====================================================")
-    print("\n==============   Parameters as list:  ===============")
+    print("\n=====================================================")
+    print("==============   Parameters as list:  ===============")
     for key in list(vars.keys()):
         print(key, vars[key])
     print("\n=====================================================")

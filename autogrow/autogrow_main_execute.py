@@ -135,7 +135,7 @@ def main_execute(vars):
         if matplotlib_is_callable is False:
             print("Can not make figure as matplotlib is not installed")
         else:
-            print("plotting")
+            print("Plotting")
             import autogrow.plotting.generate_line_plot as plot
             plot.generate_figures(vars)
 
