@@ -262,7 +262,7 @@ AutoGrow4 requires `mpi4py` version 2.1.0 and higher. To check the version:
     3.0.1
 ```
 
-MPI uee also requires an MPI-enabled computer environment. The authors use
+MPI mode also requires an MPI-enabled computer environment. The authors use
 OpenMPI. OpenMPI installation instructions can be found:
 http://lsi.ugr.es/jmantas/pdp/ayuda/datos/instalaciones/Install_OpenMPI_en.pdf
 
