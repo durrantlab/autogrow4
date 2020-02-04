@@ -114,11 +114,11 @@ class NN1(VINA):
         """
         Make a list of a ligands information including its docking score.
 
-        Because a higher score is better for both NNScore functions, but 
+        Because a higher score is better for both NNScore functions, but
         AutoGrow4 selects based on most negative score, we multiple each NNScore
         value by -1.0. This ensures that the best score is the most negative
         score.
-        
+
         Inputs:
         :param str file_path: the path to the file to be scored
 
@@ -152,6 +152,7 @@ class NN1(VINA):
                         tmp = line.split(" ")
 
                         # because for both NNScore functions, a higher score is better
+                        # multiply score to be negative
                         temp_score = tmp[2].replace(",", "")
                         temp_score = float(temp_score) * float(-1.0)
                     except:
