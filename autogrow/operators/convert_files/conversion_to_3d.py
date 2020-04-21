@@ -443,6 +443,15 @@ def convert_sdf_to_pdbs(vars, gen_folder_path, sdfs_folder_path):
         job_inputs.append(tuple([pdb_subfolder_path, file_path]))
     job_inputs = tuple(job_inputs)
 
+    # Check that there are .sdf files to test. If not raise Exception
+    if len(job_inputs) == 0:
+        printout = "\n\nThere are no SDF files were found to convert to PDB. "
+        printout = printout + "This may be a problem with the Gypsum-DL "
+        printout = printout + "settings.\nPlease check that the `--gypsum_timeout_limit` "
+        printout = printout + "is appropriate relative to the `--gypsum_thoroughness` "
+        printout = printout + "and `--max_variants_per_compound` parameters.\n"
+        raise Exception(printout)
+
     # Convert sdf files to pdbs in multithread
     vars["parallelizer"].run(job_inputs, convert_single_sdf_to_pdb)
 
@@ -471,18 +480,20 @@ def convert_single_sdf_to_pdb(pdb_subfolder_path, sdf_file_path):
             )
         except:
             mols = None
-        try:
-            mols_no_hydrogen = Chem.SDMolSupplier(
-                sdf_file_path, sanitize=True, removeHs=True, strictParsing=False
-            )
-        except:
-            mols_no_hydrogen = [None for x in range(0, len(mols))]
 
+        # if mols is None rdkit couldn't import the sdf so we will not do anything else
         if mols is None:
             pass
         elif len(mols) == 0:
             pass
         else:
+            try:
+                mols_no_hydrogen = Chem.SDMolSupplier(
+                    sdf_file_path, sanitize=True, removeHs=True, strictParsing=False
+                )
+            except:
+                mols_no_hydrogen = [None for x in range(0, len(mols))]
+
             # if len(mols)==0 gypsum output a blank file by accident
             # if mols is None rdkit couldn't import the sdf
             if len(mols) != 0:
