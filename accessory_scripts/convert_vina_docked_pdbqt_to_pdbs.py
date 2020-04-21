@@ -145,7 +145,7 @@ def convert_pdbqt_to_pdb(list_of_lines):
     line_index_range = [x for x in range(0, 61)] + [x for x in range(70, 80)]
 
     for line in list_of_lines:
-        if "ATOM" in line:
+        if "ATOM" in line or "HETATM" in line:
             short_line = ""
             for i in line_index_range:
                 # print(i)
