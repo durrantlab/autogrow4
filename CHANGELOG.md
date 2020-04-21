@@ -1,7 +1,7 @@
 Changes
 =======
 
-1.0.1
+4.0.1
 -----
 
 * Updated `$PATH/autogrow4/accessory_scripts/convert_vina_docked_pdbqt_to_pdbs.py`
@@ -16,7 +16,7 @@ Changes
 * Added a AutoGrow4 citation to the print statement and `RunAutogrow.py`.
 * Added `$PATH/autogrow4/CHANGELOG.MD`.
 
-1.0.0
+4.0.0
 -----
 
 The original version described in:
