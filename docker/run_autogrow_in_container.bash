@@ -12,7 +12,7 @@ if echo $* | grep -q "Run"; then
     date "+%m_%d_%y"
     }
 
-    chmod -R a+rwx Outputfolder/
+    # chmod -R a+rwx Outputfolder/
     echo "Running AutoGrow4"
 
     date_time=$(my_date)
@@ -58,7 +58,7 @@ if echo $* | grep -q "Run"; then
         -j /UserFiles/docker_json_vars.json >> $output_file 2>> $error_file
 
     echo "Completed AutoGrow4 Run"
-    chmod -R a+rwx Outputfolder/
+    # chmod -R a+rwx Outputfolder/
 fi
 exit
 # For interactive/debug add bottom line

@@ -60,6 +60,7 @@ import json
 import argparse
 import sys
 
+
 def change_permissions(file_path):
     """
     This will open the permissions for a given file.
@@ -68,7 +69,8 @@ def change_permissions(file_path):
     :param str file_path: Path to a file to open permissions to.
     """
     os.chmod(file_path, 0o777)
-#
+
+
 def change_permissions_recursively(file_or_folder_path):
     """
     This will open the permissions for a given file/folder.
@@ -93,7 +95,9 @@ def change_permissions_recursively(file_or_folder_path):
         if os.path.isdir(file_or_folder_path):
             directory_path_list = []
             file_list = []
-            for top_dir, dir_list, list_of_files in os.walk(file_or_folder_path, topdown=False):
+            for top_dir, dir_list, list_of_files in os.walk(
+                file_or_folder_path, topdown=False
+            ):
                 for directory in [os.path.join(top_dir, d) for d in dir_list]:
                     directory_path_list.append(directory)
                 for file_path in [os.path.join(top_dir, fil) for fil in list_of_files]:
@@ -108,7 +112,8 @@ def change_permissions_recursively(file_or_folder_path):
                 change_permissions(dir_path)
         else:
             change_permissions(file_or_folder_path)
-#
+
+
 def adjust_dockerfile():
     """
     This will open Dockerfile and check if the entrypoint has been switched
@@ -126,7 +131,9 @@ def adjust_dockerfile():
     printout = ""
     normal_entry = "/autogrow/run_autogrow_in_container.bash"
     windows_entry = "/autogrow/run_autogrow_in_container_windows.bash"
-    replacement_line = 'ENTRYPOINT ["bash", "/autogrow/run_autogrow_in_container_windows.bash"]\n'
+    replacement_line = (
+        'ENTRYPOINT ["bash", "/autogrow/run_autogrow_in_container_windows.bash"]\n'
+    )
     print("Modifying the Dockerfile to run for Windows. Changing Entrypoint.")
     with open(os.path.abspath("Dockerfile"), "r") as f:
         for line in f.readlines():
@@ -136,12 +143,13 @@ def adjust_dockerfile():
                 printout = printout + line
                 printout = printout + replacement_line
                 continue
-            if "ENTRYPOINT" in line and  windows_entry in line:
+            if "ENTRYPOINT" in line and windows_entry in line:
                 continue
             printout = printout + line
     with open(os.path.abspath("Dockerfile"), "w") as f:
         f.write(printout)
-#
+
+
 def make_docker():
     """
     This will create the docker to run AutoGrow4.
@@ -156,26 +164,31 @@ def make_docker():
     print("Creating new docker image for AutoGrow4")
     output_and_log_dir = os.path.abspath("output_and_log_dir") + os.sep
     log_file = "{}log.txt".format(output_and_log_dir)
-    printout = "\nAttempting to create the docker container. If 1st time running " + \
-        "this script it may take a few minutes. Output details are piped to: " + \
-        "{}\n".format(log_file)
+    printout = (
+        "\nAttempting to create the docker container. If 1st time running "
+        + "this script it may take a few minutes. Output details are piped to: "
+        + "{}\n".format(log_file)
+    )
 
     print(printout)
     try:
         os.system("docker build -t autogrow4 . > {}".format(log_file))
     except:
-        printout = "\nCan not create a docker file. Please make sure to run the " + \
-            "script with sudo/administrative privileges.\nIf Linux/MacOS:\n" + \
-            "\t'sudo python autogrow_in_docker.py -j PATH/JSON.json'\n" + \
-            "If Windows:\n\tRun from bash and " + \
-            "docker enabled terminal with administrative privileges.\n" + \
-            "Please also make sure docker is installed on the system."
+        printout = (
+            "\nCan not create a docker file. Please make sure to run the "
+            + "script with sudo/administrative privileges.\nIf Linux/MacOS:\n"
+            + "\t'sudo python autogrow_in_docker.py -j PATH/JSON.json'\n"
+            + "If Windows:\n\tRun from bash and "
+            + "docker enabled terminal with administrative privileges.\n"
+            + "Please also make sure docker is installed on the system."
+        )
         print(printout)
         raise Exception(printout)
 
     # Remove the temporary autogrow4 directory
     shutil.rmtree("autogrow4")
-#
+
+
 def check_for_required_inputs(json_vars):
     """
     Confirm all the required inputs were provided.
@@ -183,8 +196,14 @@ def check_for_required_inputs(json_vars):
     Required Variables go here.
 
     Inputs:
-    :param dict json_vars: The parameters. A dictionary of {parameter name: value}.
+    :param dict json_vars: The parameters. A dictionary of {parameter name:
+                           value}.
+
+    Returns:
+    :returns: dict json_vars: The updated json_vars with input-file paths
+                              changed to the output dir/inputs/ subdirectory.
     """
+
     keys_from_input = list(json_vars.keys())
 
     list_of_required_inputs = [
@@ -224,7 +243,6 @@ def check_for_required_inputs(json_vars):
         print(printout)
         raise Exception(printout)
 
-
     #######################################
     # Check that all required files exist #
     #######################################
@@ -233,9 +251,7 @@ def check_for_required_inputs(json_vars):
     json_vars["filename_of_receptor"] = os.path.abspath(
         json_vars["filename_of_receptor"]
     )
-    json_vars["root_output_folder"] = os.path.abspath(
-        json_vars["root_output_folder"]
-    )
+    json_vars["root_output_folder"] = os.path.abspath(json_vars["root_output_folder"])
     json_vars["source_compound_file"] = os.path.abspath(
         json_vars["source_compound_file"]
     )
@@ -253,6 +269,7 @@ def check_for_required_inputs(json_vars):
         # directory doesn't exist, then make it
         try:
             os.makedirs(json_vars["root_output_folder"])
+            os.makedirs(json_vars["root_output_folder"] + os.sep + "inputs")
             change_permissions_recursively(json_vars["root_output_folder"])
         except:
             raise NotImplementedError(
@@ -277,14 +294,35 @@ def check_for_required_inputs(json_vars):
         raise NotImplementedError(
             "source_compound_file must be a tab delineated .smi file. \
             source_compound_file can not be found: \
-            {}.".format(json_vars["source_compound_file"])
+            {}.".format(
+                json_vars["source_compound_file"]
+            )
         )
     if ".smi" not in json_vars["source_compound_file"]:
         raise NotImplementedError(
             "source_compound_file must be a \
             tab delineated .smi file."
         )
-#
+
+    # You need to copy the input files to the output directory, so it can be
+    # easily access from the docker container. (JDD addition.)
+    shutil.copy2(
+        json_vars["source_compound_file"],
+        json_vars["root_output_folder"]
+        + os.sep + "inputs" + os.sep
+        + os.path.basename(json_vars["source_compound_file"]),
+    )
+    json_vars["source_compound_file"] = "/Outputfolder/inputs/" + os.path.basename(json_vars["source_compound_file"])
+    shutil.copy2(
+        json_vars["filename_of_receptor"],
+        json_vars["root_output_folder"]
+        + os.sep + "inputs" + os.sep
+        + os.path.basename(json_vars["filename_of_receptor"]),
+    )
+    json_vars["filename_of_receptor"] = "/Outputfolder/inputs/" + os.path.basename(json_vars["filename_of_receptor"])
+
+    return json_vars
+
 def find_previous_runs(folder_name_path):
     """
     This will check if there are any previous runs in the output directory.
@@ -317,7 +355,8 @@ def find_previous_runs(folder_name_path):
     # A previous run exists. The number of the last run.
     last_run_number = i - 1
     return last_run_number
-#
+
+
 def get_run_number(root_folder_path, start_a_new_run):
     """
     Determine run number for the new directory.
@@ -368,7 +407,8 @@ def get_run_number(root_folder_path, start_a_new_run):
     print("The Run folder path is: ", folder_name_path)
     print("")
     return "Run_{}".format(run_number)
-#
+
+
 def get_output_folder(json_vars):
     """
     Find the folder for where to place output runs on host system.
@@ -390,7 +430,8 @@ def get_output_folder(json_vars):
     run_num = get_run_number(root_output_folder, start_a_new_run)
 
     return root_output_folder, run_num
-#
+
+
 def move_files_to_temp_dir(json_vars):
     """
     This will move all files needed to a temp_user_files directory and will created a modified
@@ -400,6 +441,7 @@ def move_files_to_temp_dir(json_vars):
     Inputs:
     :param dict json_vars: The parameters. A dictionary of {parameter name: value}.
     """
+
     docker_json_vars = {}
     # make or remove and make the temp_user_files dir
     temp_dir_path = os.path.abspath("temp_user_files") + os.sep
@@ -475,12 +517,22 @@ def move_files_to_temp_dir(json_vars):
     change_permissions_recursively(temp_autogrow4_path)
 
     # Copy all files in autogrow4 directory into a temp except the Docker folder
-    for fol_to_copy in ["autogrow", "source_compounds", "accessory_scripts", "tutorial"]:
-        shutil.copytree(autogrow4_top_dir + fol_to_copy, temp_autogrow4_path + fol_to_copy)
-    shutil.copyfile(autogrow4_top_dir + "RunAutogrow.py", temp_autogrow4_path + "RunAutogrow.py")
+    for fol_to_copy in [
+        "autogrow",
+        "source_compounds",
+        "accessory_scripts",
+        "tutorial",
+    ]:
+        shutil.copytree(
+            autogrow4_top_dir + fol_to_copy, temp_autogrow4_path + fol_to_copy
+        )
+    shutil.copyfile(
+        autogrow4_top_dir + "RunAutogrow.py", temp_autogrow4_path + "RunAutogrow.py"
+    )
     # Open permissions
     change_permissions_recursively(temp_autogrow4_path)
-#
+
+
 def handle_json_info(vars):
     """
     This will open the json file.
@@ -502,18 +554,21 @@ def handle_json_info(vars):
 
     json_file = vars["json_file"]
     if os.path.exists(json_file) is False:
-        printout = "\njson_file is required. Can not find json_file: {}.\n".format(json_file)
+        printout = "\njson_file is required. Can not find json_file: {}.\n".format(
+            json_file
+        )
         print(printout)
         raise Exception(printout)
     json_vars = json.load(open(json_file))
-    check_for_required_inputs(json_vars)
+    json_vars = check_for_required_inputs(json_vars)
     move_files_to_temp_dir(json_vars)
 
     # get output folder
     outfolder_path, run_num = get_output_folder(json_vars)
 
     return json_vars, outfolder_path, run_num
-#
+
+
 def run_autogrow_docker_main(vars):
     """
     This function runs the processing to:
@@ -531,15 +586,19 @@ def run_autogrow_docker_main(vars):
     Inputs:
     :param dict vars: Dictionary of User specified variables
     """
-    printout = "\n\nThis script builds a docker for AutoGrow4 and runs AutoGrow4 " + \
-        "within the docker. The setup may take a few minutes the first time being run " + \
-        "and AutoGrow may take a long time depending on the settings.\n\n"
+    printout = (
+        "\n\nThis script builds a docker for AutoGrow4 and runs AutoGrow4 "
+        + "within the docker. The setup may take a few minutes the first time being run "
+        + "and AutoGrow may take a long time depending on the settings.\n\n"
+    )
     print(printout)
 
     # Check that we are in the correct directory if not raise exception
     script_dir = str(os.path.dirname(os.path.realpath(__file__))) + os.sep
     if os.path.abspath(os.getcwd()) != os.path.abspath(script_dir):
-        printout = "\nMust execute this script from this directory: {}\n".format(script_dir)
+        printout = "\nMust execute this script from this directory: {}\n".format(
+            script_dir
+        )
         printout = printout + "Before running please 'cd {}'\n".format(script_dir)
         print(printout)
         raise Exception(printout)
@@ -558,15 +617,14 @@ def run_autogrow_docker_main(vars):
     # Run part 5) run AutoGrow in the container
     print("\nRunning AutoGrow4 in Docker")
 
-
-    command = "docker run -it -v {}:/Outputfolder/".format(outfolder_path)
-    command = command  +" autogrow4  --name autogrow4  --{}".format(run_num)
+    command = "docker run --rm -it -v {}:/Outputfolder/".format(outfolder_path)
+    command = command + " autogrow4  --name autogrow4  --{}".format(run_num)
     # Execute AutoGrow4
     print(command)
     os.system(command)
     change_permissions_recursively(outfolder_path)
     print("AutoGrow Results placed in: {}".format(outfolder_path))
-#
+
 
 PARSER = argparse.ArgumentParser()
 
