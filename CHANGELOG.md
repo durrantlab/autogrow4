@@ -12,6 +12,7 @@ WIP (4.0.1)
   `$PATH/autogrow4/autogrow/operators/convert_files/conversion_to_3d.py` to
   remove `None` objects which failed to be imported into RDKit. This prevents
   the `None` objects from causing errors in `def convert_single_sdf_to_pdb`.
+* Updated Gypsum-DL to version 1.1.3.
 * Add `raise Exception` in
   `$PATH/autogrow4/autogrow/operators/convert_files/conversion_to_3d.py` with
   debugging instructions if Gypsum-Dl produced are no SDF files. `raise

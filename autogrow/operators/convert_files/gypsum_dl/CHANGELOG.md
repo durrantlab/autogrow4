@@ -1,6 +1,21 @@
 Changes
 =======
 
+1.1.3
+-----
+
+* Gypsum-DL used to crash when provided with certain mal-formed SMILES
+  strings. It now just skips those SMILES and warns the user that they are
+  poorly formed. See Start.py:303 and MyMol.py:747.
+* Durrant-lab filters now remove molecules containing metal and boron atoms.
+* Some Durrant-lab filters are now applied immediately after desalting. We
+  discovered that certain substructures cause Gypsum-DL to delay during the
+  add-hydrogens step, specifically when Gypsum-DL generates the 3D structures
+  required to rank conformers. Removing these compounds before adding
+  hydrogens avoids the problem.
+* Improved code formatting.
+* Made minor spelling corrections to the output.
+
 1.1.2
 -----
 

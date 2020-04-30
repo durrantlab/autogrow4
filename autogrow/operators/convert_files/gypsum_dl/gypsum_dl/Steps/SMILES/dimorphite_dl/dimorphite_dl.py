@@ -52,7 +52,7 @@ def main(params=None):
     """The main definition run when you call the script from the commandline.
 
     :param params: The parameters to use. Entirely optional. If absent,
-                   defaults to None, in which case Arguments will be taken from
+                   defaults to None, in which case argments will be taken from
                    those given at the command line.
     :param params: dict, optional
     :return: Returns a list of the SMILES strings return_as_list parameter is
