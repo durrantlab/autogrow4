@@ -59,7 +59,6 @@ import shutil
 import json
 import argparse
 import sys
-import platform
 
 def change_permissions(file_path):
     """
@@ -647,7 +646,7 @@ print("BE SURE TO RUN THIS SCRIPT WITH SUDO (LINUX/MACOS) OR ADMINISTRATOR")
 print("(WINDOWS) PRIVILEGES!")
 print("")
 
-if sys.platform == "darwin" or platform.system() == "Linux":
+if sys.platform.lower() in ["darwin", "linux", "linux2"]:
     if os.getuid() != 0:
         printout = "\n\nMust run this script with `sudo` privileges.\n\t"
         printout = printout + "Please retry running with `sudo` privileges.\n\n"
