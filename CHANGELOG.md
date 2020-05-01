@@ -17,6 +17,9 @@ WIP (4.0.1)
   `$PATH/autogrow4/autogrow/operators/convert_files/conversion_to_3d.py` with
   debugging instructions if Gypsum-Dl produced are no SDF files. `raise
   Exception` added to `def convert_sdf_to_pdbs`.
+* Add `raise Exception` in
+  `$PATH/autogrow4/docker/autogrow_in_docker.py` to check for `sudo` and administer
+  privileges.
 * Added a AutoGrow4 citation to the print statement and `RunAutogrow.py`.
 * Revised `./docker/README.md` to clarify docker use.
 * Updated the docker scripts. Bug fixes, added `--rm` to the docker command,
