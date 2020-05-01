@@ -22,7 +22,7 @@ RUN echo "alias python=/root/miniconda3/bin/python" >> /root/.bashrc
 
 
 # Get python dependencies
-RUN /root/miniconda3/bin/conda install -y -c conda-forge rdkit
+RUN /root/miniconda3/bin/conda install -y -c conda-forge rdkit rdkit="2019.03.4"
 RUN /root/miniconda3/bin/conda install -y numpy
 RUN /root/miniconda3/bin/conda install -y scipy
 RUN /root/miniconda3/bin/pip install matplotlib
