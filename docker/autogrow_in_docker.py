@@ -638,7 +638,16 @@ PARSER.add_argument(
     RunAutogrow.py. MGLTools and openbabel paths can be ignored as they are \
     already installed in the docker image.",
 )
-
+PARSER.add_argument(
+    "--override_sudo_admin_privelledges",
+    metavar="param.override_sudo_admin_privelledges",
+    default=False,
+    help="Docker normally requires `sudo` (linux/macos) or `Administrator` \
+    privileges (windows/cygwin). If an system does not have such privelledges, \
+    or does not require such privelledges, setting this to True, will skip the \
+    check for privelledges. This variable is provided via commandline, and \
+    IS NOT RECOMMENDED for most OS. ",
+)
 ARGS_DICT = vars(PARSER.parse_args())
 
 print("")
@@ -646,11 +655,35 @@ print("BE SURE TO RUN THIS SCRIPT WITH SUDO (LINUX/MACOS) OR ADMINISTRATOR")
 print("(WINDOWS) PRIVILEGES!")
 print("")
 
-if sys.platform.lower() in ["darwin", "linux", "linux2"]:
-    if os.getuid() != 0:
-        printout = "\n\nMust run this script with `sudo` privileges.\n\t"
-        printout = printout + "Please retry running with `sudo` privileges.\n\n"
-        print(printout)
-        raise Exception(printout)
+# Check that this is running with appropriate privelledges.
+# i.e., sudo (linux/macos) or Administrator privelledges (Windows/cygwin)
+if ARGS_DICT["override_sudo_admin_privelledges"] == False:
+    if sys.platform.lower() in ["darwin", "linux", "linux2"]:
+        if os.getuid() != 0:
+            printout = "\n\nMust run this script with `sudo` privileges.\n\t"
+            printout = printout + "Please retry running with `sudo` privileges.\n\n"
+            print(printout)
+            raise Exception(printout)
+    elif sys.platform.lower() == "win32" or sys.platform.lower() == "cygwin":
+        import ctypes
+        if ctypes.windll.shell32.IsUserAnAdmin() != 1:
+            printout = "\n\nMust run this script from a terminal with `Administrator` privileges.\n\t"
+            printout = printout + "Please retry running with `Administrator` privileges.\n\n"
+            print(printout)
+            raise Exception(printout)
+    else:
+        print("")
+        print("BE SURE TO RUN THIS SCRIPT WITH SUDO (LINUX/MACOS) OR ADMINISTRATOR")
+        print("(WINDOWS) PRIVILEGES!")
+        print("")
+else:
+
+    print("\n##############################################################")
+    print("WARNING: Skipping check for privelledges.")
+    print("\tBE SURE TO RUN THIS SCRIPT WITH APPROPRIATE PRIVELLEDGES:")
+    print("\tSUDO (LINUX/MACOS) OR ADMINISTRATOR (WINDOWS) PRIVILEGES!")
+    print("\tFailure to do so may result in Docker failures.")
+    print("##############################################################\n")
+
 
 run_autogrow_docker_main(ARGS_DICT)

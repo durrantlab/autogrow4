@@ -19,7 +19,10 @@ WIP (4.0.1)
   Exception` added to `def convert_sdf_to_pdbs`.
 * Add `raise Exception` in
   `$PATH/autogrow4/docker/autogrow_in_docker.py` to check for `sudo` and administer
-  privileges.
+  privileges. 
+* Add `--override_sudo_admin_privelledges` variable for 
+  `$PATH/autogrow4/docker/autogrow_in_docker.py` skip the check for `sudo` and administer
+  privileges for docker-compatible OS that do not have such permissions.  
 * Added a AutoGrow4 citation to the print statement and `RunAutogrow.py`.
 * Revised `./docker/README.md` to clarify docker use.
 * Updated the docker scripts. Bug fixes, added `--rm` to the docker command,
