@@ -24,7 +24,7 @@ WIP (4.0.1)
 * Revised `./docker/README.md` to clarify docker use.
 * Updated the docker scripts. Bug fixes, added `--rm` to the docker command,
   etc.
-* Revised `$PATH/autogrow4/autogrow/user_vars.py` to correct minor typo.
+* Revised `$PATH/autogrow4/autogrow/user_vars.py` to correct minor typo with sys.platform checks.
 * Added `$PATH/autogrow4/CHANGELOG.md`.
 
 4.0.0
