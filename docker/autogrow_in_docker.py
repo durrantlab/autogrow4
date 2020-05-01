@@ -82,10 +82,10 @@ def change_permissions_recursively(file_or_folder_path):
     if os.name == "nt" or os.name == "ce":
         # chmod and os.chmod do not apply to Windows OS so lets skip this.
         pass
-    elif sys.platform == "linux" or sys.platform == "linux2":
+    elif sys.platform.lower() in ["linux", "linux2"]:
         # chmod -R recursively open the permissions
         os.system("chmod -R a+rwx {}".format(file_or_folder_path))
-    elif sys.platform == "darwin":
+    elif sys.platform.lower() == "darwin":
         # chmod -R recursively open the permissions
         os.system("chmod -R a+rwx {}".format(file_or_folder_path))
     else:

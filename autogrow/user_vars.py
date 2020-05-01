@@ -1016,7 +1016,7 @@ def load_in_commandline_parameters(argv):
                 PATH TO THE Custom DOCKING SCRIPT"
             )
     if vars["dock_choice"] in ["VinaDocking", "QuickVina2Docking"]:
-        if sys.platform == "darwin":
+        if sys.platform.lower() == "darwin":
             # Some MacOS require docking software to be notarized.
             # This will require an internet signal
             run_macos_notarization(vars)
