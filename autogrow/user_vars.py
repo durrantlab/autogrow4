@@ -497,7 +497,7 @@ def determine_bash_timeout_vs_gtimeout():
      whether the bash terminal is able to use the bash function timeout or gtimeout
     """
 
-    if platform.system() == "Linux":
+    if platform.system == "linux":
         # Should be true and default installed in all Linux machines
         return "timeout"
 
