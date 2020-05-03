@@ -33,6 +33,8 @@ WIP (4.0.1)
   etc.
 * Revised `$PATH/autogrow4/autogrow/user_vars.py` to correct minor typos with OS checks.
 * Updated `$PATH/autogrow4/README.md` with minor updates and developer notes.
+* Added `Dependencies Notes` to `$PATH/autogrow4/README.md`.
+* Added `Developer Notes` to `$PATH/autogrow4/docker/README.md`.
 * Added `$PATH/autogrow4/CHANGELOG.md`.
 
 4.0.0

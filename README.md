@@ -34,7 +34,7 @@ We strongly recommend running AutoGrow4 via Docker using
 `/autogrow4/docker/autogrow_in_docker.py`. See the tutorial at
 `/autogrow4/tutorial/TUTORIAL.md` for more details.
 
-## Dependencies
+## Dependencies Notes
 
 AutoGrow4 version 4.0.1 has been tested to run using the following dependencies:
   ```python
