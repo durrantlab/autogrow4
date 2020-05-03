@@ -36,13 +36,13 @@ We strongly recommend running AutoGrow4 via Docker using
 
 ## Developer Note
 
-Gypsum-DL is Version 1.1.2 with two `sys.flush()` commands added to the
-`Parallelizer.py` script. These minor changes help ensure that print
-statements properly output in large MPI runs.
-
-Dimorphite is Version 1.2.2 with the citation print statement commented out.
-We commented out the citation to prevent the AutoGrow4 print logs from growing
-too large. Please remember to cite Dimorphite-DL: Ropp PJ, Kaminsky JC,
+Dimorphite is Version 1.2.3 with the citation print statements silenced.
+Please remember to cite Dimorphite-DL: Ropp PJ, Kaminsky JC,
 Yablonski S, Durrant JD (2019) Dimorphite-DL: An open-source program for
 enumerating the ionization states of drug-like small molecules. J Cheminform
 11:14. doi:10.1186/s13321-019-0336-9.
+
+Running AutoGrow4 using Docker uses the most current versions of its dependencies
+as of May 2020. These have been tested to be compatible with AutoGrow4. Future
+development of AutoGrow4 should test the most current versions of these dependencies
+and update `$PATH/docker/Dockerfile` appropriately.
