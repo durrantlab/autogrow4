@@ -19,15 +19,16 @@ RUN chmod -R a+rwx Miniconda3-latest-Linux-x86_64.sh
 RUN ./Miniconda3-latest-Linux-x86_64.sh -b
 RUN rm ./Miniconda3-latest-Linux-x86_64.sh
 RUN echo "alias python=/root/miniconda3/bin/python" >> /root/.bashrc
+RUN echo "alias conda=/root/miniconda3/bin/conda" >> /root/.bashrc
+RUN echo "alias pip=/root/miniconda3/bin/pip" >> /root/.bashrc
 
 
 # Get python dependencies
-RUN /root/miniconda3/bin/conda install -y -c conda-forge rdkit rdkit="2019.03.4"
-RUN /root/miniconda3/bin/conda install -y numpy
-RUN /root/miniconda3/bin/conda install -y scipy
-RUN /root/miniconda3/bin/pip install matplotlib
-RUN /root/miniconda3/bin/pip install func-timeout
-
+RUN conda install -y -c conda-forge rdkit rdkit=2020.03.1
+RUN conda install -y numpy numpy=1.18.1
+RUN conda install -y scipy scipy=1.4.1
+RUN pip install matplotlib matplotlib=3.2.1
+RUN pip install func-timeout func_timeout=4.3.5
 
 # Install mgltools
 RUN wget http://mgltools.scripps.edu/downloads/downloads/tars/releases/REL1.5.6/mgltools_x86_64Linux2_1.5.6.tar.gz
