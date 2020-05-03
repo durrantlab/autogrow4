@@ -91,13 +91,15 @@ To run AutoGrow4 in a docker, please use the `autogrow_in_docker.py` script:
 - AutoGrow4's Docker has been tested and fixed to install the following dependencies:
   ```python
   >>> rdkit.__version__
-  '2019.03.4'
+  '2020.03.1'
   >>> numpy.__version__
-  '1.17.2'
+  '1.18.1'
   >>> scipy.__version__
   '1.4.1'
   >>> matplotlib.__version__
-  '3.1.1'
+  '3.2.1'
+  >>> func_timeout.__version__
+  '4.3.5'
   ```
 
 - Please test and update `$PATH/docker/Dockerfile` these as new versions of AutoGrow4 and

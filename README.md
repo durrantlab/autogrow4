@@ -39,13 +39,15 @@ We strongly recommend running AutoGrow4 via Docker using
 AutoGrow4 version 4.0.1 has been tested to run using the following dependencies:
   ```python
   >>> rdkit.__version__
-  '2019.03.4'
+  '2020.03.1'
   >>> numpy.__version__
-  '1.17.2'
+  '1.18.1'
   >>> scipy.__version__
   '1.4.1'
   >>> matplotlib.__version__
-  '3.1.1'
+  '3.2.1'
+  >>> func_timeout.__version__
+  '4.3.5'
   ```
 
 If you are unable to run AutoGrow4, please try running AutoGrow4 in an environment
@@ -62,7 +64,7 @@ Yablonski S, Durrant JD (2019) Dimorphite-DL: An open-source program for
 enumerating the ionization states of drug-like small molecules. J Cheminform
 11:14. doi:10.1186/s13321-019-0336-9.
 
-Running AutoGrow4 using Docker uses the most current versions of its dependencies
+Running AutoGrow4 using Docker uses current versions of its dependencies
 as of May 2020. These have been tested to be compatible with AutoGrow4. Future
-development of AutoGrow4 should test the most current versions of these dependencies
+development of AutoGrow4 should test the current versions of these dependencies
 and update `$PATH/docker/Dockerfile` appropriately.
