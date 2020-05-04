@@ -175,7 +175,7 @@ class NN2(VINA):
                         continue
                     score = float(tmp[0])
                     # Make it a negative number since NN2 & NN2 a higher
-                    # number is best But autogrow 4.0.0 uses the most negative
+                    # number is best But autogrow 4.0.1 uses the most negative
                     # number is best.
 
                     score = score * -1.0

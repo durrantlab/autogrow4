@@ -1,11 +1,11 @@
 # !/usr/bin/env python
 
-"""This is the executable file for Autogrow 4.0.0. This script should come
+"""This is the executable file for Autogrow 4.0.1. This script should come
 first. It should obtain and verify all the parameters work. This than should
 pass these parameters variables to the main execution function titled
 AutogrowMainExecute.py found in MainFunctions
 
-If you use AutoGrow 4.0.0 in your research, please cite the following reference:
+If you use AutoGrow 4.0.1 in your research, please cite the following reference:
 Spiegel, J.O., Durrant, J.D. AutoGrow4: an open-source genetic algorithm
 for de novo drug design and lead optimization. J Cheminform 12, 25 (2020).
 [doi: 10.1186/s13321-020-00429-4]
