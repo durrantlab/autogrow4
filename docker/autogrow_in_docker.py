@@ -639,13 +639,13 @@ PARSER.add_argument(
     already installed in the docker image.",
 )
 PARSER.add_argument(
-    "--override_sudo_admin_privelledges",
-    metavar="param.override_sudo_admin_privelledges",
+    "--override_sudo_admin_privileges",
+    metavar="param.override_sudo_admin_privileges",
     default=False,
     help="Docker normally requires `sudo` (linux/macos) or `Administrator` \
-    privileges (windows/cygwin). If an system does not have such privelledges, \
-    or does not require such privelledges, setting this to True, will skip the \
-    check for privelledges. This variable is provided via commandline, and \
+    privileges (windows/cygwin). If an system does not have such privileges, \
+    or does not require such privileges, setting this to True, will skip the \
+    check for privileges. This variable is provided via commandline, and \
     IS NOT RECOMMENDED for most OS. ",
 )
 ARGS_DICT = vars(PARSER.parse_args())
@@ -655,9 +655,9 @@ print("BE SURE TO RUN THIS SCRIPT WITH SUDO (LINUX/MACOS) OR ADMINISTRATOR")
 print("(WINDOWS) PRIVILEGES!")
 print("")
 
-# Check that this is running with appropriate privelledges.
-# i.e., sudo (linux/macos) or Administrator privelledges (Windows/cygwin)
-if ARGS_DICT["override_sudo_admin_privelledges"] == False:
+# Check that this is running with appropriate privileges.
+# i.e., sudo (linux/macos) or Administrator privileges (Windows/cygwin)
+if ARGS_DICT["override_sudo_admin_privileges"] == False:
     if sys.platform.lower() in ["darwin", "linux", "linux2"]:
         if os.getuid() != 0:
             printout = "\n\nMust run this script with `sudo` privileges.\n\t"
@@ -679,8 +679,8 @@ if ARGS_DICT["override_sudo_admin_privelledges"] == False:
 else:
 
     print("\n##############################################################")
-    print("WARNING: Skipping check for privelledges.")
-    print("\tBE SURE TO RUN THIS SCRIPT WITH APPROPRIATE PRIVELLEDGES:")
+    print("WARNING: Skipping check for privileges.")
+    print("\tBE SURE TO RUN THIS SCRIPT WITH APPROPRIATE PRIVILEGES:")
     print("\tSUDO (LINUX/MACOS) OR ADMINISTRATOR (WINDOWS) PRIVILEGES!")
     print("\tFailure to do so may result in Docker failures.")
     print("##############################################################\n")
