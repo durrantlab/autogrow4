@@ -1,4 +1,4 @@
-# Gypsum-DL 1.1.4
+# Gypsum-DL 1.1.5
 
 Gypsum-DL is a free, open-source program for preparing 3D small-molecule
 models. Beyond simply assigning atomic coordinates, Gypsum-DL accounts for
@@ -217,9 +217,9 @@ outputs to ensure they are chemically feasible.
 
 ### Durrant-Lab Filters
 
-In looking over many Gypsum-DL-generated variants, we have identified several
-substructures that, though technically possible, strike us as improbable. Here
-are some examples:
+In looking over many Gypsum-DL-generated variants, we have identified a number
+of substructures that, though technically possible, strike us as improbable or
+otherwise poorly suited for virtual screening. Here are some examples:
 
 * `C=[N-]`
 * `[N-]C=[N+]`
@@ -227,9 +227,14 @@ are some examples:
 * `[#7+]~[#7+]`
 * `[#7-]~[#7-]`
 * `[!#7]~[#7+]~[#7-]~[!#7]`
+* `[#5]` (boron)
+* `O=[PH](=O)([#8])([#8])`
+* `N=c1cc[#7]c[#7]1`
+* `[$([NX2H1]),$([NX3H2])]=C[$([OH]),$([O-])]`
+* Metals
 
-If you'd like to discard molecular variants with these substructures, use the
-`--use_durrant_lab_filters` flag.
+If you'd like to discard molecular variants with substructures such as these,
+use the `--use_durrant_lab_filters` flag.
 
 ### Advanced Methods for Eliminating Problematic Compounds
 

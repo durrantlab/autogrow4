@@ -4,6 +4,8 @@ Changes
 4.0.2
 -----
 
+* Updated Gypsum-DL to version 1.1.5.
+* Updated Dimorphite-DL to version 1.2.4.
 * Fixed failure in `$PATH/autogrow4/accessory_scripts/make_lineage_figures.py`
   to detect source compounds when run had `--use_docked_source_compounds` set
   to False. This patched required the added user variable

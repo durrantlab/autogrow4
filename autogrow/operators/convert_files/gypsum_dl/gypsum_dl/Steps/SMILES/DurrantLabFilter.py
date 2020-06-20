@@ -28,7 +28,8 @@ try:
 except:
     Utils.exception("You need to install rdkit and its dependencies.")
 
-# Get the substructures you won't permit (per substructure matching)
+# Get the substructures you won't permit (per substructure matching, not
+# substring matching)
 prohibited_smi_substrs_for_substruc = [
     "C=[N-]",
     "[N-]C=[N+]",
@@ -38,6 +39,10 @@ prohibited_smi_substrs_for_substruc = [
     "[!#7]~[#7+]~[#7-]~[!#7]",  # Doesn't hit azide.
     # Vina can't process boron anyway...
     "[#5]",  # B
+    "O=[PH](=O)([#8])([#8])",  # molvs does odd tautomer: OP(O)(O)=O => O=[PH](=O)(O)O
+    "[#7]=C1[#7]=C[#7]C=C1",  # Prevents an odd tautomer sometimes seen with adenine.
+    "N=c1cc[#7]c[#7]1",  # Variant of above
+    "[$([NX2H1]),$([NX3H2])]=C[$([OH]),$([O-])]"  # Terminal iminol
 ]
 
 # Get the substrings you won't permit (per substring matching)
@@ -63,7 +68,8 @@ prohibited_smi_substrs_for_substr = [
     "[Mo",  # Mo
     "[Cd",  # Cd
     "[Au",  # Au
-    "[Pb" "[Bi",  # Pb  # Bi
+    "[Pb",  # Pb
+    "[Bi",  # Bi
 ]
 
 
@@ -147,7 +153,7 @@ def parallel_durrant_lab_filter(contnr, prohibited_substructs):
 
     :param contnr: The molecule container.
     :type contnr: MolContainer.MolContainer
-    :param prohibited_substructs: A list of the prohibited subsstructures.
+    :param prohibited_substructs: A list of the prohibited substructures.
     :type prohibited_substructs: list
     :return: Either the container with bad molecules removed, or a None
       object.

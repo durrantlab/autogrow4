@@ -1,6 +1,34 @@
 Changes
 =======
 
+1.1.5
+-----
+
+* Updated Dimorphite-DL to 1.2.4. Now better handles compounds with
+  polyphosphate chains (e.g., ATP).
+* Minor updates to the Durrant-lab filters:
+  * When running Gypsum-DL without the `--use_durrant_lab_filters` parameter,
+    Gypsum-DL now displays a warning. We strongly recommend using these
+    filters, but we choose not to turn them on by default in order to maintain
+    backwards compatibility.
+  * Added filter to compensate for a phosphate-related bug in MolVS, one of
+    Gypsum-DL's dependencies. MolVS sometimes tautomerizes `[O]P(O)([O])=O` to
+    `[O][PH](=O)([O])=O`, so the Durrant-lab filters now remove any tautomers
+    with substructures that match the SMARTS string `O=[PH](=O)([#8])([#8])`.
+  * Added filters to compensate for frequently seen, unusual MolVS
+    tautomerization of adenine. The Durrant-lab filters now remove tautomers
+    with substructures that match `[#7]=C1[#7]=C[#7]C=C1` and
+    `N=c1cc[#7]c[#7]1`.
+  * Added filter to remove terminal iminols. While amide-iminol
+    tautomerization is valid, amides are far more common, and accounting for
+    this tautomerization produces many improbable iminol componds. The
+    Durrant-lab filters now remove compounds with substructures that match
+    `[$([NX2H1]),$([NX3H2])]=C[$([OH]),$([O-])]`.
+  * Added filter to remove molecules containing `[Bi]`.
+* Gypsum-DL now outputs molecules with total charges between -4e and +4e.
+  Before, the cutoff was -2e to 2e. We expanded the range to permit ATP and
+  other similar molecules.
+
 1.1.4
 -----
 
