@@ -1,6 +1,15 @@
 Changes
 =======
 
+4.0.2
+-----
+
+* Fixed failure in `$PATH/autogrow4/accessory_scripts/make_lineage_figures.py`
+  to detect source compounds when run had `--use_docked_source_compounds` set
+  to False. This patched required the added user variable
+  `--use_docked_source_compounds`. To maintain back-compatibility the default
+  setting is to auto-detect from the `vars.json` file.
+
 4.0.1
 -----
 

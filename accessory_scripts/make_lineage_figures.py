@@ -540,14 +540,44 @@ def make_ranked_files_mol_dict(vars):
             Please make sure input_dir has folders named 'generation_' + int that \
             contain .smi files named 'generation_{}_ranked.smi'.format(int) ")
 
-    # Add Source compounds
-    ranked_file_list.append(vars["source_compound_file"])
-    ranked_file_list = list(set(ranked_file_list))
+    source_compound_file = vars["source_compound_file"]
+    ranked_file_list = [x for x in list(set(ranked_file_list)) if x is not source_compound_file]
 
     # make a list of molecule information
     mol_list = []
     for i in ranked_file_list:
         mol_list.extend(get_usable_format(i))
+
+    # Add Source compounds
+    source_compound_list = get_usable_format(source_compound_file)
+    len_of_each_mol_info = [len(x) for x in source_compound_list]
+    if len(list(set(len_of_each_mol_info))) != 1:
+        print(list(set(len_of_each_mol_info)))
+        raise Exception("The source compound file is inconsistently with the number\
+            of columns per line. Please correct this so that each line has the \
+            same number of columns.")
+
+    # If the source compounds were previously docked keep all info because there is docking info
+    if vars["use_docked_source_compounds"] is True:
+        mol_list.extend(mol_list)
+    else:
+        # If there are only two columns we assume it is the SMILES and the source name
+        # Otherwise we print a message saying we are ignoring any additional information
+        # because the --use_docked_source_compounds==False
+        if list(set(len_of_each_mol_info))[0] != 2:
+            print("\nWARNING: There are multiple columns within the source \
+                compound file ({}), but --use_docked_source_compounds is set \
+                to False. You will also need to delete the pickled dictionaries \
+                produced by this script before re-running the script. \n\
+                We will ignore any information other than the first \
+                two columns in the source compound file. This may mean that we \
+                ignore docking scores or use the full-length names of compounds \
+                in generation zero.\n".format(source_compound_file))
+        new_source_compound_list = []
+        for mol_info in source_compound_list:
+            temp_info = [mol_info[0], mol_info[1], mol_info[1], mol_info[1], None, None]
+            new_source_compound_list.append(temp_info)
+        mol_list.extend(new_source_compound_list)
 
     new_list = []
     for x in mol_list:
@@ -796,6 +826,26 @@ def process_inputs(inputs):
             # They provided 1 directory up...
             inputs["complementary_mol_directory"] = sub_dir
 
+    if "use_docked_source_compounds" not in inputs.keys() or inputs["use_docked_source_compounds"] in ["", None]:
+        # Get whether they used use_docked_source_compounds from vars.json
+        if "use_docked_source_compounds" in vars_dict:
+            if vars_dict["use_docked_source_compounds"] in [True, False]:
+                inputs["use_docked_source_compounds"] = vars_dict["use_docked_source_compounds"]
+            else:
+                raise Exception("Please provide the --use_docked_source_compounds setting \
+                    used during the run. We could not auto-detect from the vars file.")
+        else:
+            raise Exception("Please provide the --use_docked_source_compounds setting \
+                used during the run. We could not auto-detect from the vars file.")
+    else:
+        if inputs["use_docked_source_compounds"] in [True, "true", "True"]:
+            inputs["use_docked_source_compounds"] = True
+        elif inputs["use_docked_source_compounds"] in [False, "false", "False"]:
+            inputs["use_docked_source_compounds"] = False
+        else:
+            raise Exception("Please check the --use_docked_source_compounds setting provided." \
+                " --use_docked_source_compounds should be True or False.")
+
     # Handle output directory
     inputs["output_dir"] = os.path.abspath(inputs["output_dir"]) + os.sep
     if os.path.exists(inputs["output_dir"]) is False:
@@ -879,7 +929,8 @@ def run_everything(vars):
         lineage_list.extend(lineage_dict[gen_num])
     printout = ""
     for lig_name in lineage_list:
-        if lig_name is None: continue
+        if lig_name is None:
+            continue
         temp = copy.deepcopy(mol_dict[lig_name])
         del temp[-1] # remove last item which is rdkit mol
         temp = "\t".join([str(x) for x in temp]) + "\n"
@@ -950,7 +1001,19 @@ PARSER.add_argument(
         can also be provided as full-name ie: \
             (Gen_2_Mutant_7_97143)Gen_4_Mutant_7_802531",
 )
-
+PARSER.add_argument(
+    "--use_docked_source_compounds",
+    metavar="param.use_docked_source_compounds",
+    choices=[True, False, "True", "False", "true", "false"],
+    default=None,
+    help="If True source ligands were docked prior to seeding generation 1. \
+    If True and the source_compound file may already have the docking/fitness \
+    metric score in -2 column of .smi file.\
+    If False, generation 1 was randomly seeded by the source compounds with \
+    no preference and there was no generation 0 testing. \
+    If not provided this script will autodetect it from the vars.json \
+    file if possible.",
+)
 
 ARGSDICT = vars(PARSER.parse_args())
 
