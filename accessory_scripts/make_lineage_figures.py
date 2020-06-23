@@ -745,6 +745,51 @@ def get_full_length_mol_name(vars, master_mol_dict, master_shortname_mol_dict):
 
     return mol_name
 #
+def run_purge_previous_pickled_files(vars):
+    """
+    This will delete previously created pickled files within the input_dir.
+    The four files it will delete are:
+    `$input_dir/comp_dict_pickle`, `$input_dir/master_mol_dict_pickle`,
+    `$input_dir/master_shortname_mol_dict_pickle`,
+    and `$input_dir/ranked_mol_dict_pickle`.
+
+    These files save time when you are tracing the lineage of multiple
+    compounds, however purging these files may be helpful for space saving
+    or if it had been previously run with an invalid input variable.=
+
+    Following file deletion the program will terminate.
+
+    inputs:
+    :params vars inputs: dictionary of argparse parameters
+    """
+    print("\nDELETING PREVIOUSLY GENERATED PICKLED FILES.\n")
+    input_dir = vars["input_dir"] + os.sep
+    if os.path.exists(input_dir) is False:
+        raise Exception("Input folder {} does not\
+            exist.".format(input_dir))
+    for file_name in ["comp_dict_pickle", "master_mol_dict_pickle",
+                      "master_shortname_mol_dict_pickle", "ranked_mol_dict_pickle"]:
+        file_path = input_dir + file_name
+        if os.path.exists(file_path) is False:
+            printout = "Could not delete {} file".format(file_name)
+            printout = printout + " as it was not located at:\n\t {}\n".format(file_path)
+            print(printout)
+        else:
+            try:
+                os.remove(file_path)
+                print("Deleted: {}".format(file_path))
+            except:
+                printout = "WARNING: Could not delete {} file.\n".format(file_name)
+                printout = printout + "\tPlease check file permissions of:"
+                printout = printout + "\n\t\t {}\n".format(file_path)
+                print(printout)
+            # Check that is was successfully deleted
+            if os.path.exists(file_path) is False:
+                print("Deleted: {}".format(file_path))
+
+    print("Attempt to delete files completed.")
+    sys.exit(0)
+
 def process_inputs(inputs):
     """
     This will handle processing all parameters.
@@ -826,7 +871,8 @@ def process_inputs(inputs):
             # They provided 1 directory up...
             inputs["complementary_mol_directory"] = sub_dir
 
-    if "use_docked_source_compounds" not in inputs.keys() or inputs["use_docked_source_compounds"] in ["", None]:
+    if "use_docked_source_compounds" not in inputs.keys() or \
+                inputs["use_docked_source_compounds"] in ["", None]:
         # Get whether they used use_docked_source_compounds from vars.json
         if "use_docked_source_compounds" in vars_dict:
             if vars_dict["use_docked_source_compounds"] in [True, False]:
@@ -891,6 +937,24 @@ def process_inputs(inputs):
         inputs["ancestry_image_folder"] = inputs["output_dir"]  \
             + "ancestry_"+ inputs["mol_name"]  + os.sep
     # Will wait to create this folder until its needed
+
+    # Handle the cleanup variable purge_previous_pickled_files
+    if "purge_previous_pickled_files" in inputs.keys():
+        if inputs["purge_previous_pickled_files"] in [True, "true", "True"]:
+            # We will delete files
+            inputs["purge_previous_pickled_files"] = True
+        elif inputs["purge_previous_pickled_files"] in [False, "false", "False"]:
+            # We will not delete files
+            inputs["purge_previous_pickled_files"] = False
+        else:
+            # Can not understand the input option
+            raise Exception("Please check the --purge_previous_pickled_files setting provided." \
+                " --purge_previous_pickled_files should be True or False.")
+    else:
+        inputs["purge_previous_pickled_files"] = False
+    # If true delete files and terminate program
+    if inputs["purge_previous_pickled_files"] is True:
+        run_purge_previous_pickled_files(inputs)
 
     return inputs
 #
@@ -1014,6 +1078,21 @@ PARSER.add_argument(
     If not provided this script will autodetect it from the vars.json \
     file if possible.",
 )
+PARSER.add_argument(
+    "--purge_previous_pickled_files",
+    metavar="param.purge_previous_pickled_files",
+    choices=[True, False, "True", "False", "true", "false"],
+    default=False,
+    help="If True the script will delete the four pickled files previously \
+    created by this script: `comp_dict_pickle`, `master_mol_dict_pickle`, \
+    `master_shortname_mol_dict_pickle`, and `ranked_mol_dict_pickle`. \
+    These files save time when you are tracing the lineage of multiple \
+    compounds, however purging these files may be helpful for space saving \
+    or if it had been previously run with an invalid input variable. \
+    This does not affect the lineage files located in `output_dir`. \
+    Program will terminate once these files are deleted.",
+)
+
 
 ARGSDICT = vars(PARSER.parse_args())
 
