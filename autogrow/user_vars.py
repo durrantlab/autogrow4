@@ -1495,7 +1495,7 @@ def handle_alternative_filters(vars, filter_list):
                 [[name_filter1, Path/to/name_filter1.py],[name_filter2, Path/to/name_filter2.py]]"
             )
 
-        full_children_dict = make_complete_children_dict("Filter")
+        full_children_dict = make_complete_children_dict("filter")
         scripts_to_copy = []
         for custom_class in vars["alternative_filter"]:
             if custom_class[0] not in full_children_dict.keys():
@@ -1515,7 +1515,7 @@ def handle_alternative_filters(vars, filter_list):
                         "operators",
                         "filter",
                         "filter_classes",
-                        "filter_classes",
+                        "filter_children_classes",
                         os.path.basename(custom_class[0]) + ".py",
                     ]
                 )
