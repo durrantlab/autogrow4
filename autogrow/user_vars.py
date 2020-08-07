@@ -22,11 +22,11 @@ def program_info():
     Returns:
     :returns: str program_output: a string for the print of the program information
     """
-    program_output = "\nAutoGrow Version 4.0.1\n"
+    program_output = "\nAutoGrow Version 4.0.2\n"
     program_output = program_output + " ================== \n"
     program_output = (
         program_output
-        + "If you use AutoGrow 4.0.1 in your research, please cite the following reference:\n"
+        + "If you use AutoGrow 4.0.2 in your research, please cite the following reference:\n"
     )
     program_output = program_output + "Spiegel, J.O., Durrant, J.D. \n"
     program_output = program_output + "AutoGrow4: an open-source genetic algorithm "

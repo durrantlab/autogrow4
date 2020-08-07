@@ -54,7 +54,7 @@ AutoGrow4 version 4.0.1 has been tested with the following dependencies:
 If you are unable to run AutoGrow4, please try running AutoGrow4 in a python
 environment with these specific dependencies. Alternatively, the Docker
 version of AutoGrow4 automatically installs dependencies that are verified to
-work with AutoGrow4. If you discover tha tAutoGrow4 is no longer compatible
+work with AutoGrow4. If you discover that AutoGrow4 is no longer compatible
 with current library releases, please contact us, and we will attempt to
 correct the code.
 
