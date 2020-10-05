@@ -1255,23 +1255,40 @@ def load_in_commandline_parameters(argv):
     # CHECK THAT NN1/NN2 are using only traditional Vina Docking
     if vars["scoring_choice"] == "NN1" or vars["scoring_choice"] == "NN2":
         if vars["dock_choice"] != "VinaDocking":
-            printout = "\nNeural Networks 1 and 2 (NN1/NN2) are trained on data "
+            printout = "\n\nNeural Networks 1 and 2 (NN1/NN2) are trained on data "
             printout = printout + "using PDBQT files converted by MGLTools \n"
             printout = printout + "and docked using Autodock Vina 1.1.2.\n"
             printout = (
                 printout
-                + "Using conversion or docking software besides \
-                these will not work. \n"
+                + "\nUsing conversion or docking software besides" +
+                " these will not work. \n"
             )
             printout = (
                 printout
-                + "Please switch dock_choice option to VinaDocking \
-                or deselect NN1/NN2 as the scoring_choice.\n"
+                + "\nPlease switch dock_choice option to VinaDocking" +
+                " or deselect NN1/NN2 as the scoring_choice.\n"
             )
             print(printout)
             raise Exception(printout)
 
-    # IF ALTERNATIVE CONVERSION OF PDB2PDBQT CHECK THAT NN1/NN2 are using only MGLTOOLS
+        # IF ALTERNATIVE CONVERSION OF PDB2PDBQT CHECK THAT NN1/NN2 are using only MGLTOOLS
+        if vars["conversion_choice"] != "MGLToolsConversion":
+            for i in range(10): print(vars["conversion_choice"] )
+            printout = "\n\nNeural Networks 1 and 2 (NN1/NN2) are trained on data "
+            printout = printout + "using PDBQT files converted by MGLTools \n"
+            printout = printout + "and docked using Autodock Vina 1.1.2.\n"
+            printout = (
+                printout
+                + "\nUsing conversion or docking software besides" +
+                " these will not work. \n"
+            )
+            printout = (
+                printout
+                + "Please switch conversion_choice option to MGLToolsConversion" +
+                " or deselect NN1/NN2 as the scoring_choice.\n"
+            )
+            print(printout)
+            raise Exception(printout)
 
     # Check if the user wants to continue a run or start a new run.
     # Make new run directory if necessary. return the Run folder path

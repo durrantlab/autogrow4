@@ -8,6 +8,10 @@ Changes
 * Revised `$PATH/autogrow4/autogrow/user_vars.py` to correct for error in 
   handling the `--conversion_choice`. Obabel can now be run as the
   `--conversion_choice` without providing an MGLTools path (`mgltools_directory`).
+* Revised `$PATH/autogrow4/autogrow/user_vars.py` to enforce
+  `MGLToolsConversion` as the only conversion option (`--conversion_choice`) 
+  when scoring with NN1/NN2 (`--scoring_choice`).
+* Minor code clean-up to `$PATH/autogrow4/autogrow/user_vars.py`
 
 4.0.2
 -----
