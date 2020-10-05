@@ -1106,7 +1106,7 @@ def load_in_commandline_parameters(argv):
     if vars["conversion_choice"] == "MGLToolsConversion":
         if "mgltools_directory" not in vars.keys():
             printout = "\nmgltools_directory was not provide but conversion_choice"
-            printout = printout + " is set to MGLToolsConversion. Please " 
+            printout = printout + " is set to MGLToolsConversion. Please "
             printout = printout + " provide the path to the mgltools_directory\n"
             print(printout)
             raise NotImplementedError(printout)
