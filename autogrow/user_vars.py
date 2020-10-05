@@ -22,11 +22,11 @@ def program_info():
     Returns:
     :returns: str program_output: a string for the print of the program information
     """
-    program_output = "\nAutoGrow Version 4.0.2\n"
+    program_output = "\nAutoGrow Version 4.0.3\n"
     program_output = program_output + " ================== \n"
     program_output = (
         program_output
-        + "If you use AutoGrow 4.0.2 in your research, please cite the following reference:\n"
+        + "If you use AutoGrow 4.0.3 in your research, please cite the following reference:\n"
     )
     program_output = program_output + "Spiegel, J.O., Durrant, J.D. \n"
     program_output = program_output + "AutoGrow4: an open-source genetic algorithm "
@@ -293,8 +293,7 @@ def check_for_required_inputs(input_params):
         "size_y",
         "size_z",
         "root_output_folder",
-        "source_compound_file",
-        "mgltools_directory",
+        "source_compound_file"
     ]
 
     missing_variables = []
@@ -428,9 +427,6 @@ def check_for_required_inputs(input_params):
     input_params["source_compound_file"] = os.path.abspath(
         input_params["source_compound_file"]
     )
-    input_params["mgltools_directory"] = os.path.abspath(
-        input_params["mgltools_directory"]
-    )
 
     # Check filename_of_receptor exists
     if os.path.isfile(input_params["filename_of_receptor"]) is False:
@@ -476,14 +472,6 @@ def check_for_required_inputs(input_params):
             tab delineated .smi file."
         )
 
-    # Check mgltools_directory exists
-    if os.path.exists(input_params["mgltools_directory"]) is False:
-        raise NotImplementedError("mgltools_directory does not exist")
-    if os.path.isdir(input_params["mgltools_directory"]) is False:
-        raise NotImplementedError(
-            "mgltools_directory is not a directory. \
-        Check your input parameters."
-        )
 
 
 def determine_bash_timeout_vs_gtimeout():
@@ -1113,34 +1101,54 @@ def load_in_commandline_parameters(argv):
     # make sure directories end in os.sep
     if vars["root_output_folder"][-1] != os.sep:
         vars["root_output_folder"] = vars["root_output_folder"] + os.sep
-    if vars["mgltools_directory"][-1] != os.sep:
-        vars["mgltools_directory"] = vars["mgltools_directory"] + os.sep
 
-    # find other mgltools-related scripts
-    if vars["prepare_ligand4.py"] == "":
-        vars["prepare_ligand4.py"] = (
+    # If MGLTools is being used handle its paths
+    if vars["conversion_choice"] == "MGLToolsConversion":
+        if "mgltools_directory" not in vars.keys():
+            printout = "\nmgltools_directory was not provide but conversion_choice"
+            printout = printout + " is set to MGLToolsConversion. Please " 
+            printout = printout + " provide the path to the mgltools_directory\n"
+            print(printout)
+            raise NotImplementedError(printout)
+
+        vars["mgltools_directory"] = os.path.abspath(
             vars["mgltools_directory"]
-            + "MGLToolsPckgs"
-            + os.sep
-            + "AutoDockTools"
-            + os.sep
-            + "Utilities24"
-            + os.sep
-            + "prepare_ligand4.py"
         )
-    if vars["prepare_receptor4.py"] == "":
-        vars["prepare_receptor4.py"] = (
-            vars["mgltools_directory"]
-            + "MGLToolsPckgs"
-            + os.sep
-            + "AutoDockTools"
-            + os.sep
-            + "Utilities24"
-            + os.sep
-            + "prepare_receptor4.py"
-        )
-    if vars["mgl_python"] == "":
-        vars["mgl_python"] = vars["mgltools_directory"] + "bin" + os.sep + "pythonsh"
+        if os.path.exists(vars["mgltools_directory"]) is False:
+            raise NotImplementedError("mgltools_directory does not exist")
+        if os.path.isdir(vars["mgltools_directory"]) is False:
+            raise NotImplementedError(
+                "mgltools_directory is not a directory. \
+            Check your input parameters."
+            )
+        if vars["mgltools_directory"][-1] != os.sep:
+            vars["mgltools_directory"] = vars["mgltools_directory"] + os.sep
+
+        # find other mgltools-related scripts
+        if vars["prepare_ligand4.py"] == "":
+            vars["prepare_ligand4.py"] = (
+                vars["mgltools_directory"]
+                + "MGLToolsPckgs"
+                + os.sep
+                + "AutoDockTools"
+                + os.sep
+                + "Utilities24"
+                + os.sep
+                + "prepare_ligand4.py"
+            )
+        if vars["prepare_receptor4.py"] == "":
+            vars["prepare_receptor4.py"] = (
+                vars["mgltools_directory"]
+                + "MGLToolsPckgs"
+                + os.sep
+                + "AutoDockTools"
+                + os.sep
+                + "Utilities24"
+                + os.sep
+                + "prepare_receptor4.py"
+            )
+        if vars["mgl_python"] == "":
+            vars["mgl_python"] = vars["mgltools_directory"] + "bin" + os.sep + "pythonsh"
 
     # More Handling for Windows OS
     # convert path names with spaces if this is windows
@@ -1151,57 +1159,62 @@ def load_in_commandline_parameters(argv):
             vars["filename_of_receptor"] = '"' + vars["filename_of_receptor"] + '"'
         if " " in vars["root_output_folder"]:
             vars["root_output_folder"] = '"' + vars["root_output_folder"] + '"'
-        if " " in vars["mgltools_directory"]:
-            vars["mgltools_directory"] = '"' + vars["mgltools_directory"] + '"'
         if " " in vars["nn1_script"]:
             vars["nn1_script"] = '"' + vars["nn1_script"] + '"'
         if " " in vars["nn2_script"]:
             vars["nn2_script"] = '"' + vars["nn2_script"] + '"'
-        if " " in vars["prepare_ligand4.py"]:
-            vars["prepare_ligand4.py"] = '"' + vars["prepare_ligand4.py"] + '"'
-        if " " in vars["prepare_receptor4.py"]:
-            vars["prepare_receptor4.py"] = '"' + vars["prepare_receptor4.py"] + '"'
-        if " " in vars["mgl_python"]:
-            vars["mgl_python"] = '"' + vars["mgl_python"] + '"'
+        # If MGLTools is being used handle its paths
+        if vars["conversion_choice"] == "MGLToolsConversion":
+            if " " in vars["mgltools_directory"]:
+                vars["mgltools_directory"] = '"' + vars["mgltools_directory"] + '"'
+            if " " in vars["prepare_ligand4.py"]:
+                vars["prepare_ligand4.py"] = '"' + vars["prepare_ligand4.py"] + '"'
+            if " " in vars["prepare_receptor4.py"]:
+                vars["prepare_receptor4.py"] = '"' + vars["prepare_receptor4.py"] + '"'
+            if " " in vars["mgl_python"]:
+                vars["mgl_python"] = '"' + vars["mgl_python"] + '"'
 
     # output the paramters used
     printout = printout + "\nPARAMETERS" + "\n"
     printout = printout + " ========== " + "\n"
 
     # Make sure scripts and executables exist
-    if not os.path.exists(vars["prepare_ligand4.py"]) and not os.path.exists(
-            vars["prepare_ligand4.py"].replace('"', "")
-    ):
-        printout = (
-            printout
-            + "\nERROR: Could not find prepare_ligand4.py at "
-            + vars["prepare_ligand4.py"]
-            + "\n"
-        )
-        print(printout)
-        raise NotImplementedError(printout)
-    if not os.path.exists(vars["prepare_receptor4.py"]) and not os.path.exists(
-            vars["prepare_receptor4.py"].replace('"', "")
-    ):
-        printout = (
-            printout
-            + "\nERROR: Could not find prepare_receptor4.py at "
-            + vars["prepare_receptor4.py"]
-            + "\n"
-        )
-        print(printout)
-        raise NotImplementedError(printout)
-    if not os.path.exists(vars["mgl_python"]) and not os.path.exists(
-            vars["mgl_python"].replace('"', "")
-    ):
-        printout = (
-            printout
-            + "\nERROR: Could not find pythonsh at "
-            + vars["mgl_python"]
-            + "\n"
-        )
-        print(printout)
-        raise NotImplementedError(printout)
+    # If MGLTools is being used handle its paths
+    if vars["conversion_choice"] == "MGLToolsConversion":
+        if not os.path.exists(vars["prepare_ligand4.py"]) and not os.path.exists(
+                vars["prepare_ligand4.py"].replace('"', "")
+        ):
+            printout = (
+                printout
+                + "\nERROR: Could not find prepare_ligand4.py at "
+                + vars["prepare_ligand4.py"]
+                + "\n"
+            )
+            print(printout)
+            raise NotImplementedError(printout)
+        if not os.path.exists(vars["prepare_receptor4.py"]) and not os.path.exists(
+                vars["prepare_receptor4.py"].replace('"', "")
+        ):
+            printout = (
+                printout
+                + "\nERROR: Could not find prepare_receptor4.py at "
+                + vars["prepare_receptor4.py"]
+                + "\n"
+            )
+            print(printout)
+            raise NotImplementedError(printout)
+        if not os.path.exists(vars["mgl_python"]) and not os.path.exists(
+                vars["mgl_python"].replace('"', "")
+        ):
+            printout = (
+                printout
+                + "\nERROR: Could not find pythonsh at "
+                + vars["mgl_python"]
+                + "\n"
+            )
+            print(printout)
+            raise NotImplementedError(printout)
+
     if not os.path.exists(vars["nn1_script"]) and not os.path.exists(
             vars["nn1_script"].replace('"', "")
     ):
