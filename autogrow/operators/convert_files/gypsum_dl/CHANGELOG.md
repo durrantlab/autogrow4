@@ -1,6 +1,25 @@
 Changes
 =======
 
+1.1.7
+-----
+
+* Updated the `README.md` file, specifically the `Important Caveats` section.
+* Modest speed improvements when enumerating compounds with many chiral
+  centers. (No need to enumerate far more compounds than will ultimately be
+  used, given the values of the `thoroughness` and `max_variants_per_compound`
+  user parameters.) This update should also allow Gypsum-DL to more
+  efficiently use available memory.
+* Similar speed and memory improvements when enumerating compounds with many
+  double bonds that have unspecified stereochemistries.
+
+1.1.6
+-----
+
+* Corrected minor bug that caused Durrant-lab filters to inappropriately
+  retain some compounds when running in multiprocessing mode.
+* Fixed testing scripts, now that Durrant-lab filters remove iminols.
+
 1.1.5
 -----
 
@@ -21,7 +40,7 @@ Changes
     `N=c1cc[#7]c[#7]1`.
   * Added filter to remove terminal iminols. While amide-iminol
     tautomerization is valid, amides are far more common, and accounting for
-    this tautomerization produces many improbable iminol componds. The
+    this tautomerization produces many improbable iminol compounds. The
     Durrant-lab filters now remove compounds with substructures that match
     `[$([NX2H1]),$([NX3H2])]=C[$([OH]),$([O-])]`.
   * Added filter to remove molecules containing `[Bi]`.
