@@ -1273,7 +1273,6 @@ def load_in_commandline_parameters(argv):
 
         # IF ALTERNATIVE CONVERSION OF PDB2PDBQT CHECK THAT NN1/NN2 are using only MGLTOOLS
         if vars["conversion_choice"] != "MGLToolsConversion":
-            for i in range(10): print(vars["conversion_choice"] )
             printout = "\n\nNeural Networks 1 and 2 (NN1/NN2) are trained on data "
             printout = printout + "using PDBQT files converted by MGLTools \n"
             printout = printout + "and docked using Autodock Vina 1.1.2.\n"
