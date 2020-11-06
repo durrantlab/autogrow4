@@ -5,13 +5,17 @@ Changes
 -----
 
 * Updated Gypsum-DL to version 1.1.7.
-* Revised `$PATH/autogrow4/autogrow/user_vars.py` to correct for error in 
+* Revised `$PATH/autogrow4/autogrow/user_vars.py` to correct for error in
   handling the `--conversion_choice`. Obabel can now be run as the
-  `--conversion_choice` without providing an MGLTools path (`mgltools_directory`).
+  `--conversion_choice` without providing an MGLTools path
+  (`mgltools_directory`).
 * Revised `$PATH/autogrow4/autogrow/user_vars.py` to enforce
-  `MGLToolsConversion` as the only conversion option (`--conversion_choice`) 
+  `MGLToolsConversion` as the only conversion option (`--conversion_choice`)
   when scoring with NN1/NN2 (`--scoring_choice`).
-* Minor code clean-up to `$PATH/autogrow4/autogrow/user_vars.py`
+* Minor code clean-up to `$PATH/autogrow4/autogrow/user_vars.py`.
+* Fixed [user-reported
+  bug](https://durrantlab.pitt.edu/forums/topic/autogrow4-bug-report-in-accessory_scripts-fragmenter_of_smi_mol-py/)
+  in `fragmenter_of_smi_mol.py`.
 
 4.0.2
 -----
