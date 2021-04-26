@@ -122,7 +122,8 @@ def load_sdf_file(filename):
     for mol in suppl:
         # Convert mols to smiles. That's what the rest of the program is
         # designed to deal with.
-        smiles = Chem.MolToSmiles(mol, isomericSmiles=True, canonical=True)
+        if (mol):
+            smiles = Chem.MolToSmiles(mol, isomericSmiles=True, canonical=True)
 
         try:
             name = mol.GetProp("_Name")
