@@ -1,6 +1,12 @@
 Changes
 =======
 
+WIP
+---
+
+* Improved error handling. (Actually, instead of this, just use latest version of gypsum. Need to bring that over. That should be the update.)
+
+
 4.0.3
 -----
 
