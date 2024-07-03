@@ -210,7 +210,9 @@ def run_test():
     if len(all_smiles ^ target_smiles) > 0:
         print(all_smiles)
         print(target_smiles)
-        import pdb; pdb.set_trace()
+        import pdb
+
+        pdb.set_trace()
 
         Utils.exception(
             "FAILED. "

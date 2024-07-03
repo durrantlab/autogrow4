@@ -14,6 +14,7 @@ import autogrow.docking.execute_docking as DockingClass
 import autogrow.operators.operations as operations
 import autogrow.docking.concatenate_files as concatenate_files
 
+
 def main_execute(vars):
     """
     This function takes the user variables and runs Autogrow
@@ -43,10 +44,14 @@ def main_execute(vars):
         starting_generation_num = last_generation + 1
 
     if starting_generation_num > num_gens_to_make:
-        print("This simulation has already been completed to the user defined number \
-                of generations. Please check your user variables.")
-        raise Exception("This simulation has already been completed to the user defined number \
-                of generations. Please check your user variables.")
+        print(
+            "This simulation has already been completed to the user defined number \
+                of generations. Please check your user variables."
+        )
+        raise Exception(
+            "This simulation has already been completed to the user defined number \
+                of generations. Please check your user variables."
+        )
 
     # This is the main loop which will control and execute all commands This
     # is broken into 3 main sections:
@@ -56,19 +61,35 @@ def main_execute(vars):
     # 2)  Docking which handles converting from PDBs to Docking specific
     #     formats and running the actual Docking simulations
     # 3)  Ranking the generation based on the Docking scores
-    for current_generation_number in range(starting_generation_num, num_gens_to_make+1):
+    for current_generation_number in range(
+        starting_generation_num, num_gens_to_make + 1
+    ):
         sys.stdout.flush()
 
         # Get directory for smi to go
-        current_generation_dir = vars["output_directory"] + "generation_{}{}".format(current_generation_number, os.sep)
+        current_generation_dir = vars["output_directory"] + "generation_{}{}".format(
+            current_generation_number, os.sep
+        )
         print(current_generation_dir)
         sys.stdout.flush()
 
-        if current_generation_number == 0 and vars["use_docked_source_compounds"] is True:
-            if os.path.exists(current_generation_dir + os.sep + "generation_0_ranked.smi") is True:
+        if (
+            current_generation_number == 0
+            and vars["use_docked_source_compounds"] is True
+        ):
+            if (
+                os.path.exists(
+                    current_generation_dir + os.sep + "generation_0_ranked.smi"
+                )
+                is True
+            ):
                 continue
 
-            already_docked, smile_file_new_gen, new_gen_ligands_list = operations.populate_generation_zero(vars, generation_num=0)
+            (
+                already_docked,
+                smile_file_new_gen,
+                new_gen_ligands_list,
+            ) = operations.populate_generation_zero(vars, generation_num=0)
             sys.stdout.flush()
 
             if already_docked is False:
@@ -76,35 +97,57 @@ def main_execute(vars):
                 # and Begin Docking unweighted_ranked_smile_file is the file
                 # name where the unweighted ranked but score .smi file resides
                 unweighted_ranked_smile_file = DockingClass.run_docking_common(
-                    vars, current_generation_number,
-                    current_generation_dir, smile_file_new_gen)
+                    vars,
+                    current_generation_number,
+                    current_generation_dir,
+                    smile_file_new_gen,
+                )
 
         else:
-            smile_file_new_gen, new_gen_ligands_list = operations.populate_generation(vars, current_generation_number)
+            smile_file_new_gen, new_gen_ligands_list = operations.populate_generation(
+                vars, current_generation_number
+            )
             sys.stdout.flush()
 
             if new_gen_ligands_list is None:
-                raise ValueError("Population failed to make enough mutants or crossovers... \
+                raise ValueError(
+                    "Population failed to make enough mutants or crossovers... \
                                     Errors could include not enough diversity, too few seeds to the generation, \
                                     the seed mols are unable to cross-over due to lack of similarity,\
-                                    or all of the seed lack functional groups for performing reactions.")
+                                    or all of the seed lack functional groups for performing reactions."
+                )
 
             # Run file conversions of PDB to docking specific file type and
             # Begin Docking unweighted_ranked_smile_file is the file name
             # where the unweighted ranked but score .smi file resides
-            unweighted_ranked_smile_file = DockingClass.run_docking_common(vars, current_generation_number, current_generation_dir, smile_file_new_gen)
+            unweighted_ranked_smile_file = DockingClass.run_docking_common(
+                vars,
+                current_generation_number,
+                current_generation_dir,
+                smile_file_new_gen,
+            )
 
         # Delete all temporary files; Skip if in Debugging Mode
         if vars["debug_mode"] is False:
             print("Deleting temporary files and directories")
             files_to_del = []
-            folders_to_del = ["{}{}3D_SDFs{}".format(current_generation_dir, os.sep, os.sep), "{}{}3D_SDFs{}log{}".format(current_generation_dir, os.sep, os.sep, os.sep), "{}{}gypsum_submission_files{}".format(current_generation_dir, os.sep, os.sep)]
+            folders_to_del = [
+                "{}{}3D_SDFs{}".format(current_generation_dir, os.sep, os.sep),
+                "{}{}3D_SDFs{}log{}".format(
+                    current_generation_dir, os.sep, os.sep, os.sep
+                ),
+                "{}{}gypsum_submission_files{}".format(
+                    current_generation_dir, os.sep, os.sep
+                ),
+            ]
             for folder in folders_to_del:
                 if os.path.exists(folder) is False:
                     continue
-                files_to_del.extend(glob.glob(folder+"*"))
+                files_to_del.extend(glob.glob(folder + "*"))
 
-            job_input = tuple([tuple([x]) for x in files_to_del if os.path.isfile(x) is True])
+            job_input = tuple(
+                [tuple([x]) for x in files_to_del if os.path.isfile(x) is True]
+            )
             vars["parallelizer"].run(job_input, delete_temporary_files_and_folders)
             # Delete Folders in an ordered manor incase folders are nested
             for i in range(0, len(folders_to_del)):
@@ -119,7 +162,9 @@ def main_execute(vars):
             if os.path.exists(pdbs_folder) is True:
                 concatenate_files.run_concatenation(vars["parallelizer"], pdbs_folder)
             else:
-                print("\nNo PDB folder to concatenate and compress. This is likely generation 0 seeded with a Ranked .smi file.\n")
+                print(
+                    "\nNo PDB folder to concatenate and compress. This is likely generation 0 seeded with a Ranked .smi file.\n"
+                )
         print("")
         print("Finished generation ", current_generation_number)
 
@@ -129,6 +174,7 @@ def main_execute(vars):
         matplotlib_is_callable = False
         try:
             import matplotlib
+
             matplotlib_is_callable = True
         except:
             matplotlib_is_callable = False
@@ -137,10 +183,14 @@ def main_execute(vars):
         else:
             print("Plotting")
             import autogrow.plotting.generate_line_plot as plot
+
             plot.generate_figures(vars)
 
     sys.stdout.flush()
+
+
 #
+
 
 def determine_current_gen(output_directory):
     """
@@ -179,8 +229,10 @@ def determine_current_gen(output_directory):
         if tries == 2:
             print("We are in the following directory:", output_directory)
 
-            raise Exception("The last 2 generations in this Run have failed to complete. \
-                            Please check that the Run folder that there is something to continue off of.")
+            raise Exception(
+                "The last 2 generations in this Run have failed to complete. \
+                            Please check that the Run folder that there is something to continue off of."
+            )
 
         last_gen_number = find_last_generation(folder_path_gen)
         if last_gen_number is None:
@@ -201,7 +253,9 @@ def determine_current_gen(output_directory):
         # So we will rename the directory by appending _FAILED to the
         # folder name
 
-        printout = "Generation {} in {} failed in the previous simulation.".format(last_gen_number, folder_path)
+        printout = "Generation {} in {} failed in the previous simulation.".format(
+            last_gen_number, folder_path
+        )
         print(printout)
 
         counter = 0
@@ -217,9 +271,14 @@ def determine_current_gen(output_directory):
 
         os.rename(folder_path, failed_folder_rename_count)
         printout = "Renaming folder: {} \
-                    to: {}".format(folder_path, failed_folder_rename)
+                    to: {}".format(
+            folder_path, failed_folder_rename
+        )
         print(printout)
+
+
 #
+
 
 def find_last_generation(folder_path_string_no_gen):
     """
@@ -266,7 +325,10 @@ def find_last_generation(folder_path_string_no_gen):
         last_gen_number = i - 1
 
     return last_gen_number
+
+
 #
+
 
 def determine_if_gen_completed(gen_dir_path, gen_number):
     """
@@ -291,7 +353,10 @@ def determine_if_gen_completed(gen_dir_path, gen_number):
     file_path = "{}{}{}".format(gen_dir_path, os.sep, ranked_file_name)
 
     return os.path.isfile(file_path)
+
+
 #
+
 
 def delete_temporary_files_and_folders(file_or_folder):
     """
@@ -322,4 +387,6 @@ def delete_temporary_files_and_folders(file_or_folder):
                 pass
     else:
         pass
+
+
 #

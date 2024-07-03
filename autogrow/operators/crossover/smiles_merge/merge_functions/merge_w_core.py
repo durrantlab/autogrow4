@@ -14,7 +14,6 @@ rdkit.RDLogger.DisableLog("rdApp.*")
 import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
 
 
-
 # HANDLE THE MERGING OF THE R-groups and the MCS And cleanup
 # Final steps
 def merge_smiles_with_core(rs_chosen_smiles, mcs_mol):
@@ -118,14 +117,21 @@ def merge_smiles_with_core(rs_chosen_smiles, mcs_mol):
 
             # make a dictionary of every atom in rw_core_merg with Iso as the
             # key and the Idx as its value
-            core_merg_iso_to_idx_dict = make_dict_all_atoms_iso_to_idx_dict(rw_core_merg)
+            core_merg_iso_to_idx_dict = make_dict_all_atoms_iso_to_idx_dict(
+                rw_core_merg
+            )
 
             for anchor_atom_iso in list(anchor_to_connection_dict.keys()):
                 # Idx of the anchor in merged core
                 idx_for_anchor = core_merg_iso_to_idx_dict[anchor_atom_iso]
                 # unpack list of atom to connect idx and bond types
-                list_of_atom_idx, list_of_bond_types = unpack_lists_of_atoms_and_bond_type(
-                    anchor_to_connection_dict, anchor_atom_iso, core_merg_iso_to_idx_dict
+                (
+                    list_of_atom_idx,
+                    list_of_bond_types,
+                ) = unpack_lists_of_atoms_and_bond_type(
+                    anchor_to_connection_dict,
+                    anchor_atom_iso,
+                    core_merg_iso_to_idx_dict,
                 )
 
                 # USING THE BOND INFO DRAW BONDS TO MAKE NEW CHILD MOL. THIS
@@ -229,8 +235,9 @@ def make_dict_all_atoms_iso_to_idx_dict(mol):
     return mol_iso_to_idx_dict
 
 
-def unpack_lists_of_atoms_and_bond_type(anchor_to_connection_dict, anchor_atom_iso,
-                                        core_merg_iso_to_idx_dict):
+def unpack_lists_of_atoms_and_bond_type(
+    anchor_to_connection_dict, anchor_atom_iso, core_merg_iso_to_idx_dict
+):
     """
     Iterate through all atoms which will be bound to the anchor and unpackage
     all the bond types in a list.
@@ -321,8 +328,8 @@ def remove_all_isolabels(rw_core_merg):
 
     # If mol is wrong data type (excluding None) raise TypeError
     if (
-            type(rw_core_merg) != rdkit.Chem.rdchem.Mol
-            and type(rw_core_merg) != rdkit.Chem.rdchem.RWMol
+        type(rw_core_merg) != rdkit.Chem.rdchem.Mol
+        and type(rw_core_merg) != rdkit.Chem.rdchem.RWMol
     ):
         printout = "rw_core_merg is the wrong data type. \n"
         printout = (

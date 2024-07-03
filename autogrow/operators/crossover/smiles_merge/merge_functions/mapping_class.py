@@ -100,6 +100,7 @@ class Mapping(object):
             parent ligands which are bound to that anchor. ie) ['1B1','2B1']
         """
         return self.i_to_bs[i]
+
     #
 
     def locate_i(self, b):
@@ -114,6 +115,7 @@ class Mapping(object):
             B-groups is bound. ie) [10001]
         """
         return self.b_to_is[b]
+
     #
 
     def delete_b(self, b):
@@ -130,6 +132,7 @@ class Mapping(object):
         for i in i_list_to_modify:
             blank = self.i_to_bs[i].remove(b)
         del self.b_to_is[b]
+
     #
 
     def delete_i(self, i):
@@ -147,6 +150,7 @@ class Mapping(object):
         for b in bs_to_modify:
             self.b_to_is[b].remove(i)
         del self.i_to_bs[i]
+
     #
 
     def chose_b_from_i(self, i):
@@ -273,7 +277,7 @@ class Mapping(object):
             elif len(options) == 1:
                 b_x = options[0]
             else:
-                return  "None"
+                return "None"
 
             list_is = self.locate_i(b_x)
             list_bs = []
@@ -295,7 +299,8 @@ class Mapping(object):
         # the i is not in list(self.i_to_bs.keys())
         # return the string "None"
         return "None"
-#
+
+    #
     def testing_function_return_self_dicts(self):
         """
         Return the properties: self.b_to_is and self.i_to_bs
@@ -313,6 +318,7 @@ class Mapping(object):
             ['1B1', '2B2'], 10005: ['2B3']}
         """
         return self.b_to_is, self.i_to_bs
+
 
 # i_dict = {10000: ['1B1', '2B1'], 10004: ['2B2'], 10005: ['2B3'], 10006: \
 #       ['2B4'], 10007: ['1B3'], 10008: ['1B2']}
@@ -353,4 +359,6 @@ def run_mapping(b_dict, i_dict):
 
     return bs_chosen
     #
+
+
 #

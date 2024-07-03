@@ -105,7 +105,8 @@ def log(txt, trailing_whitespace=""):
             width=80,
             initial_indent=whitespace_before,
             subsequent_indent=whitespace_before + "    ",
-        ) + trailing_whitespace
+        )
+        + trailing_whitespace
     )
 
 

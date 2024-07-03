@@ -14,10 +14,15 @@ import autogrow.operators.mutation.smiles_click_chem.smiles_click_chem as SmileC
 #######################################
 # Functions for creating molecular models
 ##########################################
-def make_mutants(vars, generation_num, number_of_processors,
-                 num_mutants_to_make, ligands_list,
-                 new_mutation_smiles_list,
-                 rxn_library_variables):
+def make_mutants(
+    vars,
+    generation_num,
+    number_of_processors,
+    num_mutants_to_make,
+    ligands_list,
+    new_mutation_smiles_list,
+    rxn_library_variables,
+):
     """
     Make mutant compounds in a list to be returned
 
@@ -63,7 +68,9 @@ def make_mutants(vars, generation_num, number_of_processors,
 
         while len(new_ligands_list) < num_mutants_to_make and len(react_list) > 0:
 
-            a_smiles_click_chem_object.update_list_of_already_made_smiles(new_ligands_list)
+            a_smiles_click_chem_object.update_list_of_already_made_smiles(
+                new_ligands_list
+            )
             num_to_grab = num_mutants_to_make - len(new_ligands_list)
             num_to_make = num_to_grab
 

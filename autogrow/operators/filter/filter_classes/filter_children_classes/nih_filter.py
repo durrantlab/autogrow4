@@ -57,10 +57,9 @@ class NIHFilter(ParentFilter):
         params = FilterCatalogParams()
         params.AddCatalog(FilterCatalogParams.FilterCatalogs.NIH)
         # This is our set of all the NIH filters
-        filters = FilterCatalog.FilterCatalog(params)
-        return filters
+        return FilterCatalog.FilterCatalog(params)
 
-    def run_filter(self, mol):
+    def run_filter(self, mol: rdkit.Chem.rdchem.Mol) -> bool:
         """
         Runs a NIH filter by matching common false positive molecules to the
         current mol.
@@ -80,11 +79,7 @@ class NIHFilter(ParentFilter):
             fails the filter
         """
 
-        # If the mol matches a mol in the filter list. we return a False (as
-        # it failed the filter)
-        if self.filters.HasMatch(mol) is True:
-            return False
-
-        # if No matches are found to filter list this will return a True
-        # as it Passed the filter.
-        return True
+        # If the mol matches a mol in the filter list. we return a False (as it
+        # failed the filter). if No matches are found to filter list this will
+        # return a True as it Passed the filter.
+        return self.filters.HasMatch(mol) is not True

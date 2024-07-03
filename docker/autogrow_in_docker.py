@@ -60,6 +60,7 @@ import json
 import argparse
 import sys
 
+
 def change_permissions(file_path):
     """
     This will open the permissions for a given file.
@@ -308,19 +309,28 @@ def check_for_required_inputs(json_vars):
     shutil.copy2(
         json_vars["source_compound_file"],
         json_vars["root_output_folder"]
-        + os.sep + "inputs" + os.sep
+        + os.sep
+        + "inputs"
+        + os.sep
         + os.path.basename(json_vars["source_compound_file"]),
     )
-    json_vars["source_compound_file"] = "/Outputfolder/inputs/" + os.path.basename(json_vars["source_compound_file"])
+    json_vars["source_compound_file"] = "/Outputfolder/inputs/" + os.path.basename(
+        json_vars["source_compound_file"]
+    )
     shutil.copy2(
         json_vars["filename_of_receptor"],
         json_vars["root_output_folder"]
-        + os.sep + "inputs" + os.sep
+        + os.sep
+        + "inputs"
+        + os.sep
         + os.path.basename(json_vars["filename_of_receptor"]),
     )
-    json_vars["filename_of_receptor"] = "/Outputfolder/inputs/" + os.path.basename(json_vars["filename_of_receptor"])
+    json_vars["filename_of_receptor"] = "/Outputfolder/inputs/" + os.path.basename(
+        json_vars["filename_of_receptor"]
+    )
 
     return json_vars
+
 
 def find_previous_runs(folder_name_path):
     """
@@ -666,9 +676,12 @@ if ARGS_DICT["override_sudo_admin_privileges"] == False:
             raise Exception(printout)
     elif sys.platform.lower() == "win32" or sys.platform.lower() == "cygwin":
         import ctypes
+
         if ctypes.windll.shell32.IsUserAnAdmin() != 1:
             printout = "\n\nMust run this script from a terminal with `Administrator` privileges.\n\t"
-            printout = printout + "Please retry running with `Administrator` privileges.\n\n"
+            printout = (
+                printout + "Please retry running with `Administrator` privileges.\n\n"
+            )
             print(printout)
             raise Exception(printout)
     else:

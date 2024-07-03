@@ -60,9 +60,9 @@ class MGLToolsConversion(ParentPDBQTConverter):
 
             self.receptor_pdbqt_file = receptor_file + "qt"
 
-    def convert_receptor_pdb_files_to_pdbqt(self, receptor_file, mgl_python,
-                                            receptor_template,
-                                            number_of_processors):
+    def convert_receptor_pdb_files_to_pdbqt(
+        self, receptor_file, mgl_python, receptor_template, number_of_processors
+    ):
         """
         Make sure a PDB file is properly formatted for conversion to pdbqt
 
@@ -108,8 +108,9 @@ class MGLToolsConversion(ParentPDBQTConverter):
                     mgl_python, receptor_template, i
                 )
 
-    def prepare_receptor_multiprocessing(self, mgl_python, prepare_script,
-                                         mol_filename):
+    def prepare_receptor_multiprocessing(
+        self, mgl_python, prepare_script, mol_filename
+    ):
         """
         This prepares the receptor for multiprocessing.
 
@@ -306,8 +307,7 @@ class MGLToolsConversion(ParentPDBQTConverter):
                         middle_lastpart = middle_firstpart[2:] + middle_lastpart
                         middle_firstpart = middle_firstpart[:2]
 
-                    if middle_firstpart not in ["BR", "ZN", "FE",
-                                                "MN", "CL", "MG"]:
+                    if middle_firstpart not in ["BR", "ZN", "FE", "MN", "CL", "MG"]:
                         # so just keep the first letter for the element part
                         # of the atom name
                         middle_lastpart = middle_firstpart[1:] + middle_lastpart

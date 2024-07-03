@@ -21,8 +21,9 @@ import rdkit.Chem as Chem
 import rdkit.Chem.Lipinski as Lipinski
 import rdkit.Chem.Crippen as Crippen
 import rdkit.Chem.Descriptors as Descriptors
-#Disable the unnecessary RDKit warnings
-rdkit.RDLogger.DisableLog('rdApp.*')
+
+# Disable the unnecessary RDKit warnings
+rdkit.RDLogger.DisableLog("rdApp.*")
 
 from autogrow.operators.filter.filter_classes.parent_filter_class import ParentFilter
 
@@ -45,7 +46,7 @@ class LipinskiStrictFilter(ParentFilter):
     :param class ParentFilter: a parent class to initialize off
     """
 
-    def run_filter(self, mol):
+    def run_filter(self, mol: rdkit.Chem.rdchem.Mol) -> bool:
         """
         This runs a Strict Lipinski filter. Lipinski filter refines for orally
         available drugs. It filters molecules by Molecular weight (MW), the

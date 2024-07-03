@@ -31,6 +31,7 @@ from rdkit import Chem
 import support_scripts.mol_object_handling as MOH
 import support_scripts.Multiprocess as mp
 
+
 def run_convert_on_single_pdb(pdb):
 
     """
@@ -56,7 +57,10 @@ def run_convert_on_single_pdb(pdb):
     except:
         pass
     return output_data
+
+
 #
+
 
 def make_smile_list(sub_folder):
     """
@@ -70,16 +74,18 @@ def make_smile_list(sub_folder):
     :returns: list smiles_list: A list of lists containing all SMILES from
         the .pdb files and their respective name
     """
-    sub_folder = sub_folder+os.sep
+    sub_folder = sub_folder + os.sep
     smiles_list = []
-    pdb_list = glob.glob(os.sep + sub_folder+"*.pdb")
-    pdb_list.extend(glob.glob(os.sep + sub_folder+"*.PDB"))
+    pdb_list = glob.glob(os.sep + sub_folder + "*.pdb")
+    pdb_list.extend(glob.glob(os.sep + sub_folder + "*.PDB"))
     pdb_list = tuple([tuple([pdb]) for pdb in pdb_list])
 
     # run convert in multithread
     smiles_list = mp.multi_threading(pdb_list, -1, run_convert_on_single_pdb)
 
     return smiles_list
+
+
 #
 def start_run_main(vars):
     """
@@ -90,12 +96,13 @@ def start_run_main(vars):
     """
     # Running converter
     smiles_list = make_smile_list(vars["source_folder"])
-    name = [x for x in vars["source_folder"].split(os.sep)if x != ""][-1]
+    name = [x for x in vars["source_folder"].split(os.sep) if x != ""][-1]
     output_file = vars["output_folder"] + os.sep + name + ".smi"
     with open(output_file, "w") as f:
         f.write("\n".join(smiles_list))
 
     print("Converted ligands to .smi located:\n\t{}".format(output_file))
+
 
 def get_arguments_from_argparse(args_dict):
     """
@@ -107,7 +114,6 @@ def get_arguments_from_argparse(args_dict):
     :returns: dict args_dict: dictionary of parameters
     """
 
-
     # Argument handling
     if type(args_dict["source_folder"]) != str:
         raise Exception("provided source folder must be a directory.")
@@ -115,9 +121,13 @@ def get_arguments_from_argparse(args_dict):
         raise Exception("provided output_folder must be a directory.")
 
     #  argument_handling
-    if os.path.exists(args_dict["source_folder"]) is False or \
-        os.path.isdir(args_dict["source_folder"]) is False:
-        raise Exception("provided source folder can not be found or is not a directory.")
+    if (
+        os.path.exists(args_dict["source_folder"]) is False
+        or os.path.isdir(args_dict["source_folder"]) is False
+    ):
+        raise Exception(
+            "provided source folder can not be found or is not a directory."
+        )
     args_dict["source_folder"] = os.path.abspath(args_dict["source_folder"]) + os.sep
 
     if os.path.exists(args_dict["output_folder"]) is False:
@@ -130,29 +140,43 @@ def get_arguments_from_argparse(args_dict):
     else:
         if os.path.isdir(args_dict["output_folder"]) is False:
             raise Exception("output_folder needs to be a directory.")
-        args_dict["output_folder"] = os.path.abspath(args_dict["output_folder"]) + os.sep
+        args_dict["output_folder"] = (
+            os.path.abspath(args_dict["output_folder"]) + os.sep
+        )
 
     return args_dict
+
+
 #
 
 # Argument parsing
 PARSER = argparse.ArgumentParser()
 PARSER.add_argument(
-    '--source_folder', '-s', required=True, default=None,
-    help='Path to folder containing .pdb files to convert. \
+    "--source_folder",
+    "-s",
+    required=True,
+    default=None,
+    help="Path to folder containing .pdb files to convert. \
     File must contain a single small molecules. Without protein. \
-    Files must end with either .pdb or .PDB'
+    Files must end with either .pdb or .PDB",
 )
 PARSER.add_argument(
-    '--output_folder', '-o', required=True, default=None,
-    help='Path to folder where we will output a .smi file of converted .pdb files.'
+    "--output_folder",
+    "-o",
+    required=True,
+    default=None,
+    help="Path to folder where we will output a .smi file of converted .pdb files.",
 )
 # processors and multithread mode
 PARSER.add_argument(
-    '--number_of_processors', '-p', type=int, metavar='N', default=1,
-    help='Number of processors to use for parallel calculations. \
+    "--number_of_processors",
+    "-p",
+    type=int,
+    metavar="N",
+    default=1,
+    help="Number of processors to use for parallel calculations. \
     This script is not MPI enable but is able to multithread using SMP architecture. \
-    Set to -1 for all available CPUs.'
+    Set to -1 for all available CPUs.",
 )
 
 ARGS_DICT = vars(PARSER.parse_args())

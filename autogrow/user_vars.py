@@ -30,7 +30,9 @@ def program_info():
     )
     program_output = program_output + "Spiegel, J.O., Durrant, J.D. \n"
     program_output = program_output + "AutoGrow4: an open-source genetic algorithm "
-    program_output = program_output + "for de novo drug design and lead optimization. \n"
+    program_output = (
+        program_output + "for de novo drug design and lead optimization. \n"
+    )
     program_output = program_output + "J Cheminform 12, 25 (2020). \n"
     program_output = program_output + "[doi: 10.1186/s13321-020-00429-4]\n"
     program_output = program_output + " ================== \n\n"
@@ -144,13 +146,16 @@ def multiprocess_handling(vars):
         #   has problems with importing the MPI environment and mpi4py
         #   So we will flag it to skip the MPI mode and just go to multithread/serial
         # This is a saftey precaution
-        from autogrow.operators.convert_files.gypsum_dl.gypsum_dl.Parallelizer import Parallelizer
+        from autogrow.operators.convert_files.gypsum_dl.gypsum_dl.Parallelizer import (
+            Parallelizer,
+        )
 
         vars["parallelizer"] = Parallelizer(
             vars["multithread_mode"], vars["number_of_processors"], True
         )
 
     return vars
+
 
 def test_docking_executables(vars, vina_exe, qvina2_exe):
     """
@@ -173,11 +178,17 @@ def test_docking_executables(vars, vina_exe, qvina2_exe):
     Returns:
     :returns: bool bool: returns True if both docking executables work; False if either fails
     """
-    test_vina_outfile = vars["root_output_folder"] + os.sep + "docking_exe_MACOS_test.txt"
+    test_vina_outfile = (
+        vars["root_output_folder"] + os.sep + "docking_exe_MACOS_test.txt"
+    )
     try:
-        command = "{} --version > {arg_2} 2>> {arg_2}".format(vina_exe, arg_2=test_vina_outfile)
+        command = "{} --version > {arg_2} 2>> {arg_2}".format(
+            vina_exe, arg_2=test_vina_outfile
+        )
         os.system(command)
-        command = "{} --version >> {arg_2} 2>> {arg_2}".format(qvina2_exe, arg_2=test_vina_outfile)
+        command = "{} --version >> {arg_2} 2>> {arg_2}".format(
+            qvina2_exe, arg_2=test_vina_outfile
+        )
         os.system(command)
     except:
         printout = "Docking executables could not be found."
@@ -194,12 +205,17 @@ def test_docking_executables(vars, vina_exe, qvina2_exe):
             return False
 
     if "QuickVina 2.1" not in lines[1]:
-        printout = "QuickVina 2.1 docking is not compatible on this OS. \nPlease use docker"
-        printout = printout + " or try provide a Vina executable compatible with the OS.\n"
+        printout = (
+            "QuickVina 2.1 docking is not compatible on this OS. \nPlease use docker"
+        )
+        printout = (
+            printout + " or try provide a Vina executable compatible with the OS.\n"
+        )
         print(printout)
         if vars["dock_choice"] == "QuickVina2Docking":
             return False
     return True
+
 
 def run_macos_notarization(vars):
     """
@@ -212,10 +228,19 @@ def run_macos_notarization(vars):
     :param dict vars: dict of user variables which will govern how the programs runs
     """
     current_dir = os.path.dirname(os.path.realpath(__file__)) + os.sep
-    vina_exe = current_dir + os.sep.join(["docking", "docking_executables", "vina", \
-                                          "autodock_vina_1_1_2_mac", "bin", "vina"])
-    qvina2_exe = current_dir + os.sep.join(["docking", "docking_executables", \
-                                            "q_vina_2", "q_vina_2_1_mac", "qvina2.1"])
+    vina_exe = current_dir + os.sep.join(
+        [
+            "docking",
+            "docking_executables",
+            "vina",
+            "autodock_vina_1_1_2_mac",
+            "bin",
+            "vina",
+        ]
+    )
+    qvina2_exe = current_dir + os.sep.join(
+        ["docking", "docking_executables", "q_vina_2", "q_vina_2_1_mac", "qvina2.1"]
+    )
 
     # Check executables exist. raise exception if not
     if os.path.exists(vina_exe) is False or os.path.exists(qvina2_exe) is False:
@@ -239,23 +264,29 @@ def run_macos_notarization(vars):
         # Check Platform information
         mac_version = platform.mac_ver()[0].split(".")
         if int(mac_version[0]) < 10:
-            printout = "We do not provide support for MacOS less than 10.7.\n" + \
-                "Please run using docker version of AutoGrow."
+            printout = (
+                "We do not provide support for MacOS less than 10.7.\n"
+                + "Please run using docker version of AutoGrow."
+            )
             print(printout)
             raise Exception(printout)
 
         if int(mac_version[0]) == 10:
             if int(mac_version[1]) < 7:
-                printout = "We do not support for MacOS less than 10.7.\n" + \
-                    "Please run using docker version of AutoGrow."
+                printout = (
+                    "We do not support for MacOS less than 10.7.\n"
+                    + "Please run using docker version of AutoGrow."
+                )
                 print(printout)
                 raise Exception(printout)
 
             if int(mac_version[1]) > 15:
                 # 10.15 is Catalina which requires notarizing docking software
 
-                printout = "We have not tested MacOS higher than 10.15.\n" + \
-                    "Please run using docker version of AutoGrow."
+                printout = (
+                    "We have not tested MacOS higher than 10.15.\n"
+                    + "Please run using docker version of AutoGrow."
+                )
                 print(printout)
                 raise Exception(printout)
 
@@ -266,9 +297,10 @@ def run_macos_notarization(vars):
                 os.system(command)
             except:
                 printout = "Please install xattr. Can be installed using the command:"
-                printout = printout  + "\n\tpip install xattr"
+                printout = printout + "\n\tpip install xattr"
                 print(printout)
                 raise Exception(printout)
+
 
 ############################################
 ###### Variables Handlining Settings #######
@@ -293,7 +325,7 @@ def check_for_required_inputs(input_params):
         "size_y",
         "size_z",
         "root_output_folder",
-        "source_compound_file"
+        "source_compound_file",
     ]
 
     missing_variables = []
@@ -337,8 +369,8 @@ def check_for_required_inputs(input_params):
             except:
                 pass
             if (
-                    type(input_params["docking_exhaustiveness"]) != int
-                    and type(input_params["docking_exhaustiveness"]) != float
+                type(input_params["docking_exhaustiveness"]) != int
+                and type(input_params["docking_exhaustiveness"]) != float
             ):
                 raise Exception(
                     "docking_exhaustiveness needs to be an interger. \
@@ -357,8 +389,8 @@ def check_for_required_inputs(input_params):
                 pass
 
             if (
-                    type(input_params["docking_num_modes"]) != int
-                    and type(input_params["docking_num_modes"]) != float
+                type(input_params["docking_num_modes"]) != int
+                and type(input_params["docking_num_modes"]) != float
             ):
                 raise Exception(
                     "docking_num_modes needs to be an interger. \
@@ -368,7 +400,7 @@ def check_for_required_inputs(input_params):
 
     # Check numbers which may be defined by first generation
     if "top_mols_to_seed_next_generation_first_generation" not in list(
-            input_params.keys()
+        input_params.keys()
     ):
         if "top_mols_to_seed_next_generation" not in list(input_params.keys()):
             # Use defined default of 10
@@ -400,7 +432,7 @@ def check_for_required_inputs(input_params):
             ]
 
     if "number_elitism_advance_from_previous_gen_first_generation" not in list(
-            input_params.keys()
+        input_params.keys()
     ):
         if "number_elitism_advance_from_previous_gen" not in list(input_params.keys()):
             # Use defined default of 10
@@ -473,7 +505,6 @@ def check_for_required_inputs(input_params):
         )
 
 
-
 def determine_bash_timeout_vs_gtimeout():
     """
     This function tests whether we should use the BASH command "timeout" (for linux)
@@ -520,8 +551,7 @@ def determine_bash_timeout_vs_gtimeout():
 
     printout = "Need to install GNU tools for Bash to work. \n"
     printout = (
-        printout
-        + "This is essential to use Bash Timeout function in Autogrow. \n"
+        printout + "This is essential to use Bash Timeout function in Autogrow. \n"
     )
     printout = printout + "\t This will require 1st installing homebrew. \n"
     printout = printout + "\t\t Instructions found at: https://brew.sh/ \n"
@@ -766,7 +796,7 @@ def define_defaults():
     # Check Bash Timeout function (There's a difference between MacOS and linux)
     # Linux uses timeout while MacOS uses gtimeout
     timeout_option = determine_bash_timeout_vs_gtimeout()
-    if timeout_option in  ["timeout", "gtimeout"]:
+    if timeout_option in ["timeout", "gtimeout"]:
         vars["timeout_vs_gtimeout"] = timeout_option
     else:
         raise Exception(
@@ -996,8 +1026,8 @@ def load_in_commandline_parameters(argv):
                 )
             )
         if (
-                type(vars["custom_docking_script"]) != list
-                or os.path.exists(vars["custom_docking_script"][1]) is not True
+            type(vars["custom_docking_script"]) != list
+            or os.path.exists(vars["custom_docking_script"][1]) is not True
         ):
             raise ValueError(
                 "TO USE Custom DOCKING OPTION, MUST SPECIFY THE \
@@ -1011,8 +1041,8 @@ def load_in_commandline_parameters(argv):
 
     if vars["conversion_choice"] == "Custom":
         if (
-                type(vars["custom_conversion_script"]) != list
-                or os.path.exists(vars["custom_conversion_script"][1]) is not True
+            type(vars["custom_conversion_script"]) != list
+            or os.path.exists(vars["custom_conversion_script"][1]) is not True
         ):
 
             raise ValueError(
@@ -1022,8 +1052,8 @@ def load_in_commandline_parameters(argv):
 
     if vars["scoring_choice"] == "Custom":
         if (
-                type(vars["custom_scoring_script"]) != list
-                or os.path.exists(vars["custom_scoring_script"][1]) is not True
+            type(vars["custom_scoring_script"]) != list
+            or os.path.exists(vars["custom_scoring_script"][1]) is not True
         ):
 
             raise ValueError(
@@ -1032,9 +1062,9 @@ def load_in_commandline_parameters(argv):
             )
 
     if (
-            vars["conversion_choice"] == "Custom"
-            or vars["dock_choice"] == "Custom"
-            or vars["scoring_choice"] == "Custom"
+        vars["conversion_choice"] == "Custom"
+        or vars["dock_choice"] == "Custom"
+        or vars["scoring_choice"] == "Custom"
     ):
         vars = handle_custom_dock_and_conversion_scoring_options(vars)
 
@@ -1111,9 +1141,7 @@ def load_in_commandline_parameters(argv):
             print(printout)
             raise NotImplementedError(printout)
 
-        vars["mgltools_directory"] = os.path.abspath(
-            vars["mgltools_directory"]
-        )
+        vars["mgltools_directory"] = os.path.abspath(vars["mgltools_directory"])
         if os.path.exists(vars["mgltools_directory"]) is False:
             raise NotImplementedError("mgltools_directory does not exist")
         if os.path.isdir(vars["mgltools_directory"]) is False:
@@ -1148,7 +1176,9 @@ def load_in_commandline_parameters(argv):
                 + "prepare_receptor4.py"
             )
         if vars["mgl_python"] == "":
-            vars["mgl_python"] = vars["mgltools_directory"] + "bin" + os.sep + "pythonsh"
+            vars["mgl_python"] = (
+                vars["mgltools_directory"] + "bin" + os.sep + "pythonsh"
+            )
 
     # More Handling for Windows OS
     # convert path names with spaces if this is windows
@@ -1182,7 +1212,7 @@ def load_in_commandline_parameters(argv):
     # If MGLTools is being used handle its paths
     if vars["conversion_choice"] == "MGLToolsConversion":
         if not os.path.exists(vars["prepare_ligand4.py"]) and not os.path.exists(
-                vars["prepare_ligand4.py"].replace('"', "")
+            vars["prepare_ligand4.py"].replace('"', "")
         ):
             printout = (
                 printout
@@ -1193,7 +1223,7 @@ def load_in_commandline_parameters(argv):
             print(printout)
             raise NotImplementedError(printout)
         if not os.path.exists(vars["prepare_receptor4.py"]) and not os.path.exists(
-                vars["prepare_receptor4.py"].replace('"', "")
+            vars["prepare_receptor4.py"].replace('"', "")
         ):
             printout = (
                 printout
@@ -1204,7 +1234,7 @@ def load_in_commandline_parameters(argv):
             print(printout)
             raise NotImplementedError(printout)
         if not os.path.exists(vars["mgl_python"]) and not os.path.exists(
-                vars["mgl_python"].replace('"', "")
+            vars["mgl_python"].replace('"', "")
         ):
             printout = (
                 printout
@@ -1216,7 +1246,7 @@ def load_in_commandline_parameters(argv):
             raise NotImplementedError(printout)
 
     if not os.path.exists(vars["nn1_script"]) and not os.path.exists(
-            vars["nn1_script"].replace('"', "")
+        vars["nn1_script"].replace('"', "")
     ):
         printout = (
             printout
@@ -1229,7 +1259,7 @@ def load_in_commandline_parameters(argv):
         print(printout)
         raise NotImplementedError(printout)
     if not os.path.exists(vars["nn2_script"]) and not os.path.exists(
-            vars["nn2_script"].replace('"', "")
+        vars["nn2_script"].replace('"', "")
     ):
         printout = (
             printout
@@ -1260,13 +1290,13 @@ def load_in_commandline_parameters(argv):
             printout = printout + "and docked using Autodock Vina 1.1.2.\n"
             printout = (
                 printout
-                + "\nUsing conversion or docking software besides" +
-                " these will not work. \n"
+                + "\nUsing conversion or docking software besides"
+                + " these will not work. \n"
             )
             printout = (
                 printout
-                + "\nPlease switch dock_choice option to VinaDocking" +
-                " or deselect NN1/NN2 as the scoring_choice.\n"
+                + "\nPlease switch dock_choice option to VinaDocking"
+                + " or deselect NN1/NN2 as the scoring_choice.\n"
             )
             print(printout)
             raise Exception(printout)
@@ -1278,13 +1308,13 @@ def load_in_commandline_parameters(argv):
             printout = printout + "and docked using Autodock Vina 1.1.2.\n"
             printout = (
                 printout
-                + "\nUsing conversion or docking software besides" +
-                " these will not work. \n"
+                + "\nUsing conversion or docking software besides"
+                + " these will not work. \n"
             )
             printout = (
                 printout
-                + "Please switch conversion_choice option to MGLToolsConversion" +
-                " or deselect NN1/NN2 as the scoring_choice.\n"
+                + "Please switch conversion_choice option to MGLToolsConversion"
+                + " or deselect NN1/NN2 as the scoring_choice.\n"
             )
             print(printout)
             raise Exception(printout)
@@ -1429,8 +1459,8 @@ def handle_custom_inputs_if_argparsed(input_params):
     if "alternative_filter" not in input_params.keys():
         input_params["alternative_filter"] = None
     if (
-            input_params["alternative_filter"] is not None
-            and input_params["alternative_filter"] != []
+        input_params["alternative_filter"] is not None
+        and input_params["alternative_filter"] != []
     ):
         orginal = input_params["alternative_filter"][0]
         orginal = orginal.replace("[[", "[").replace("]]", "]")
@@ -1535,7 +1565,9 @@ def handle_alternative_filters(vars, filter_list):
                         {}\n If you want to add Custom filters to the filter child \
                         classes Must be a list of lists \
                         [[name_filter1, Path/to/name_filter1.py],\
-                        [name_filter2, Path/to/name_filter2.py]]".format(custom_class[1])
+                        [name_filter2, Path/to/name_filter2.py]]".format(
+                            custom_class[1]
+                        )
                     )
 
                 new_file = os.sep.join(
@@ -1552,7 +1584,9 @@ def handle_alternative_filters(vars, filter_list):
                 if os.path.exists(new_file) is True:
                     # File has been copied to proper dir but is not being found by the code
                     printout = "A copy of the custom script {} has been moved \
-                        to {}\n".format(custom_class[1], new_file)
+                        to {}\n".format(
+                        custom_class[1], new_file
+                    )
                     printout = (
                         printout
                         + "Unfortunately this could not be  \
@@ -1599,13 +1633,17 @@ def handle_alternative_filters(vars, filter_list):
                 "\n########################################"
                 + "#####################################"
             )
-            print("AutoGrow has incorporated the custom files into"
-                  + " the filter Module.")
+            print(
+                "AutoGrow has incorporated the custom files into"
+                + " the filter Module."
+            )
             print(
                 " AutoGrow needs to be restarted and should now "
                 + "be able to run custom scripts."
             )
-            print("Please ensure you unit test this code properly before incorporating.")
+            print(
+                "Please ensure you unit test this code properly before incorporating."
+            )
             print(
                 "#####################################"
                 + "########################################\n"
@@ -1613,6 +1651,7 @@ def handle_alternative_filters(vars, filter_list):
             # Technically Exit intentionally but maybe should be a raise Exception
             sys.exit(0)
     return filter_list
+
 
 #
 def make_complete_children_dict(purpose_of_object):
@@ -1630,20 +1669,30 @@ def make_complete_children_dict(purpose_of_object):
     """
     if purpose_of_object == "filter":
         import autogrow.operators.filter.filter_classes.filter_children_classes
-        from autogrow.operators.filter.filter_classes.parent_filter_class import ParentFilter as parent_object
-        from autogrow.operators.filter.filter_classes.get_child_filter_class import get_all_subclasses
+        from autogrow.operators.filter.filter_classes.parent_filter_class import (
+            ParentFilter as parent_object,
+        )
+        from autogrow.operators.filter.filter_classes.get_child_filter_class import (
+            get_all_subclasses,
+        )
 
     elif purpose_of_object == "parent_pdbqt_converter":
         import autogrow.docking.docking_class.docking_file_conversion
-        from autogrow.docking.docking_class.parent_pdbqt_converter import ParentPDBQTConverter as parent_object
+        from autogrow.docking.docking_class.parent_pdbqt_converter import (
+            ParentPDBQTConverter as parent_object,
+        )
         from autogrow.docking.docking_class.get_child_class import get_all_subclasses
     elif purpose_of_object == "ParentDocking":
         import autogrow.docking.docking_class.docking_class_children
-        from autogrow.docking.docking_class.parent_dock_class import ParentDocking as parent_object
+        from autogrow.docking.docking_class.parent_dock_class import (
+            ParentDocking as parent_object,
+        )
         from autogrow.docking.docking_class.get_child_class import get_all_subclasses
     elif purpose_of_object == "ParentScoring":
         import autogrow.docking.scoring.scoring_classes.scoring_functions
-        from autogrow.docking.scoring.scoring_classes.parent_scoring_class import ParentScoring as parent_object
+        from autogrow.docking.scoring.scoring_classes.parent_scoring_class import (
+            ParentScoring as parent_object,
+        )
         from autogrow.docking.docking_class.get_child_class import get_all_subclasses
 
     children = get_all_subclasses(parent_object)
@@ -1718,7 +1767,9 @@ def handle_custom_conversion_script(vars):
             if os.path.exists(new_file) is True:
                 # File has been copied to proper dir but is not being found by the code
                 printout = "A copy of the custom script {} has been moved \
-                    to {}\n".format(custom_class[1], new_file)
+                    to {}\n".format(
+                    custom_class[1], new_file
+                )
                 printout = (
                     printout
                     + "Unfortunately this could not be \
@@ -1737,9 +1788,7 @@ def handle_custom_conversion_script(vars):
             # Add copy the script to the docking_file_conversion folder
             print("copying Custom class file into the Conversion_script folder:")
             print(
-                "\t Copying : {}\n\t New file: {}\n".format(
-                    custom_class[1], new_file
-                )
+                "\t Copying : {}\n\t New file: {}\n".format(custom_class[1], new_file)
             )
             print(
                 "AutoGrow will need to be restarted once the custom script \
@@ -1851,8 +1900,8 @@ def handle_custom_docking_script(vars):
                 # File has been copied to proper dir but is not being found by the code
                 printout = "A copy of the custom script {} has been moved \
                     to {}\n".format(
-                        custom_class[1], new_file
-                    )
+                    custom_class[1], new_file
+                )
                 printout = (
                     printout
                     + "Unfortunately this could not be imported \
@@ -1871,9 +1920,7 @@ def handle_custom_docking_script(vars):
             # Add copy the script to the children folder
             print("copying Custom class file into the children folder:")
             print(
-                "\t Copying : {}\n\t New file: {}\n".format(
-                    custom_class[1], new_file
-                )
+                "\t Copying : {}\n\t New file: {}\n".format(custom_class[1], new_file)
             )
             print(
                 "AutoGrow will need to be restarted once the custom \
@@ -1999,9 +2046,7 @@ def handle_custom_scoring_script(vars):
             # Add copy the script to the scoring_choices folder
             print("copying Custom class file into the scoring_choices folder:")
             print(
-                "\t Copying : {}\n\t New file: {}\n".format(
-                    custom_class[1], new_file
-                )
+                "\t Copying : {}\n\t New file: {}\n".format(custom_class[1], new_file)
             )
             print(
                 "AutoGrow will need to be restarted once the custom script \
@@ -2104,7 +2149,6 @@ def filter_choice_handling(vars):
     vars["chosen_ligand_filters"] = chosen_ligand_filters
 
     import autogrow.operators.filter.execute_filters as Filter
-
 
     # get child filter class object function dictionary
     vars["filter_object_dict"] = Filter.make_run_class_dict(chosen_ligand_filters)

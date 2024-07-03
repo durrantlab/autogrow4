@@ -23,7 +23,6 @@ import autogrow.operators.convert_files.conversion_to_3d as conversion_to_3d
 import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
 
 
-
 #############
 # Main run Autogrow operators to make a generation
 #############
@@ -165,8 +164,8 @@ def populate_generation(vars, generation_num):
     )
 
     if (
-            new_mutation_smiles_list is None
-            or len(new_mutation_smiles_list) < num_mutations
+        new_mutation_smiles_list is None
+        or len(new_mutation_smiles_list) < num_mutations
     ):
         print("")
         print("")
@@ -251,8 +250,8 @@ def populate_generation(vars, generation_num):
     )
 
     if (
-            new_crossover_smiles_list is None
-            or len(new_crossover_smiles_list) < num_crossovers
+        new_crossover_smiles_list is None
+        or len(new_crossover_smiles_list) < num_crossovers
     ):
         print("")
         print("")
@@ -496,9 +495,7 @@ def populate_generation_zero(vars, generation_num=0):
     # is not a valid mol, but all the others will be valid the 1st Smiles
     # in the original .smi file is saved as .smi.1.sdf and 2nd file is
     # saved as .smi.2.sdf
-    conversion_to_3d.convert_to_3d(
-        vars, smiles_to_convert_file, new_gen_folder_path
-    )
+    conversion_to_3d.convert_to_3d(vars, smiles_to_convert_file, new_gen_folder_path)
 
     return already_docked, full_generation_smiles_file, full_generation_smiles_list
 
@@ -743,8 +740,13 @@ def get_complete_list_prev_gen_or_source_compounds(vars, generation_num):
     return usable_list_of_smiles
 
 
-def make_seed_list(vars, source_compounds_list, generation_num, num_seed_diversity,
-                   num_seed_dock_fitness):
+def make_seed_list(
+    vars,
+    source_compounds_list,
+    generation_num,
+    num_seed_diversity,
+    num_seed_dock_fitness,
+):
     """
     Get the starting compound list for running the Mutation and Crossovers
 
@@ -798,8 +800,8 @@ def make_seed_list(vars, source_compounds_list, generation_num, num_seed_diversi
                 # generation 1 if the number to seed is greater than exists
                 # but will provide a warning message.
                 if (
-                        len(usable_list_of_smiles) < num_seed_diversity
-                        or len(usable_list_of_smiles) < num_seed_diversity
+                    len(usable_list_of_smiles) < num_seed_diversity
+                    or len(usable_list_of_smiles) < num_seed_diversity
                 ):
                     # This is problematic so just use what is available
                     printout = "\n\nNot enough ligands in source compound \
@@ -889,9 +891,12 @@ def determine_seed_population_sizes(vars, generation_num):
     return num_seed_diversity, num_seed_dock_fitness
 
 
-def make_pass_through_list(vars, smiles_from_previous_gen_list,
-                           num_elite_to_advance_from_previous_gen,
-                           generation_num):
+def make_pass_through_list(
+    vars,
+    smiles_from_previous_gen_list,
+    num_elite_to_advance_from_previous_gen,
+    generation_num,
+):
     """
     This function determines the molecules which elite ligands will advance
     from the previous generation without being altered into the next
@@ -917,16 +922,17 @@ def make_pass_through_list(vars, smiles_from_previous_gen_list,
     # If not enough of your previous generation sanitize to make the list
     # Return None and trigger an Error
     if (
-            generation_num != 0
-            and len(smiles_from_previous_gen_list) < num_elite_to_advance_from_previous_gen
+        generation_num != 0
+        and len(smiles_from_previous_gen_list) < num_elite_to_advance_from_previous_gen
     ):
         printout = "Not enough ligands in initial list the filter to progress"
         printout = (
             printout
             + "\n len(smiles_from_previous_gen_list): {} ; \
                 num_elite_to_advance_from_previous_gen: {}".format(
-                    len(smiles_from_previous_gen_list),
-                    num_elite_to_advance_from_previous_gen)
+                len(smiles_from_previous_gen_list),
+                num_elite_to_advance_from_previous_gen,
+            )
         )
         return printout
 
@@ -950,8 +956,8 @@ def make_pass_through_list(vars, smiles_from_previous_gen_list,
     # If not enough of your previous generation sanitize to make the list
     # Return None and trigger an Error
     if (
-            generation_num != 0
-            and len(ligands_which_passed_filters) < num_elite_to_advance_from_previous_gen
+        generation_num != 0
+        and len(ligands_which_passed_filters) < num_elite_to_advance_from_previous_gen
     ):
         printout = "Not enough ligands passed the filter to progress"
         return printout
@@ -1024,8 +1030,9 @@ def make_pass_through_list(vars, smiles_from_previous_gen_list,
 #############
 # Saving Output files for generations and seeds
 #############
-def save_generation_smi(output_directory, generation_num,
-                        formatted_smile_list, nomenclature_tag):
+def save_generation_smi(
+    output_directory, generation_num, formatted_smile_list, nomenclature_tag
+):
     """"
     This function saves a list of newly generated population of ligands as an
     .smi file. .smi file column 1 is the SMILES string and column 2 is its
@@ -1077,8 +1084,9 @@ def save_generation_smi(output_directory, generation_num,
     return output_file_name, new_gen_folder_path
 
 
-def save_ligand_list(output_directory, generation_num,
-                     list_of_chosen_ligands, nomenclature_tag):
+def save_ligand_list(
+    output_directory, generation_num, list_of_chosen_ligands, nomenclature_tag
+):
     """
     Save the list of ligands. nomenclature_tag is a string such as "Mutation"
     or "Crossover" or "Previous_Gen_choice" describing what this data is used

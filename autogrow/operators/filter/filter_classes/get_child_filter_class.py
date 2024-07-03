@@ -4,6 +4,7 @@ An object for auto-detecting and creating jobs with the proper templates.
 
 # You'll need to import the base class first
 
+
 def get_all_subclasses(base_class):
     """
     Method for getting all child classes from a parent object. Taken from:

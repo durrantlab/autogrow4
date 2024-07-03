@@ -267,8 +267,9 @@ def make_lig_score_dictionary(list_of_list_of_lig_data):
     return lig_dict
 
 
-def score_files_multithread(scoring_object, file_path, rescore_lig_efficiency,
-                            lig_efficiency_scoring_object):
+def score_files_multithread(
+    scoring_object, file_path, rescore_lig_efficiency, lig_efficiency_scoring_object
+):
     """
     Run the scoring of a single molecule.
 

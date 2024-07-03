@@ -13,8 +13,6 @@ rdkit.RDLogger.DisableLog("rdApp.*")
 import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
 
 
-
-
 # handle_mcs_alignments_labeling_and_cyclicbreaks
 def handle_mcs_align_labeling_and_cyclicbreaks(mol_1, mol_2, mcs_mol):
     """
@@ -112,6 +110,7 @@ def handle_mcs_align_labeling_and_cyclicbreaks(mol_1, mol_2, mcs_mol):
 # FUNCTIONS
 ##########################
 
+
 def check_cyclic_breaks(alignment_tuple, mol_1, mol_2, core):
     """
     Check for cyclic breaks and fixes them.
@@ -166,7 +165,7 @@ def check_cyclic_breaks(alignment_tuple, mol_1, mol_2, core):
         # ring breaks can occur when an atom in either lig is a ring atom
         # but the common substructure has that as a non-ring atom
         if atom_c.IsInRing() is False and (
-                atom1.IsInRing() is True or atom2.IsInRing() is True
+            atom1.IsInRing() is True or atom2.IsInRing() is True
         ):
             mcs_ringbreak_idx.append(l1)
             mol_1_ringbreak_idx.append(l2)
@@ -231,7 +230,7 @@ def check_cyclic_breaks(alignment_tuple, mol_1, mol_2, core):
         # removed from mcs.
         count = 0
         for l1, l2, c1 in zip(
-                alignment_tuple[0], alignment_tuple[1], alignment_tuple[2]
+            alignment_tuple[0], alignment_tuple[1], alignment_tuple[2]
         ):
             if c1 not in all_atoms_to_delete:
                 new_align_list_l1.append(l1)
@@ -498,7 +497,7 @@ def add_mcs_isolabels(mol_1, mol_2, common_core, picked_alignment):
     i = 0
     index_list = []
     for lig1, lig2, c1 in zip(
-            picked_alignment[0], picked_alignment[1], picked_alignment[2]
+        picked_alignment[0], picked_alignment[1], picked_alignment[2]
     ):
         atom1 = mol_1.GetAtomWithIdx(lig1)
         atom2 = mol_2.GetAtomWithIdx(lig2)

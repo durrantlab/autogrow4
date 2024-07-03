@@ -20,8 +20,13 @@ import autogrow.docking.ranking.selecting.roulette_selection as Roulette_Sel
 import autogrow.docking.ranking.selecting.tournament_selection as Tournament_Sel
 
 
-def create_seed_list(usable_list_of_smiles, num_seed_diversity,
-                     num_seed_dock_fitness, selector_choice, tourn_size):
+def create_seed_list(
+    usable_list_of_smiles,
+    num_seed_diversity,
+    num_seed_dock_fitness,
+    selector_choice,
+    tourn_size,
+):
     """
     this function will take ausable_list_of_smiles which can be derived from
     either the previous generation or a source_compounds_file. Then it will

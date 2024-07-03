@@ -29,8 +29,6 @@ import autogrow.operators.crossover.smiles_merge.smiles_merge as smiles_merge
 import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
 
 
-
-
 def test_for_mcs(vars, mol_1, mol_2):
     """
     Takes a ligand and a random selected molecule and looks for the Most
@@ -176,8 +174,14 @@ def convert_mol_from_smiles(smiles_string):
 #########################
 #### RUN MAIN PARTS #####
 #########################
-def make_crossovers(vars, generation_num, number_of_processors,
-    num_crossovers_to_make, list_previous_gen_smiles, new_crossover_smiles_list):
+def make_crossovers(
+    vars,
+    generation_num,
+    number_of_processors,
+    num_crossovers_to_make,
+    list_previous_gen_smiles,
+    new_crossover_smiles_list,
+):
     """
     Make crossover compounds in a list to be returned.
 

@@ -162,8 +162,8 @@ class NN2(VINA):
                     score = score * -1.0
                     break
                 elif (
-                        "When the poses were ranked by the best of the 20 network scores"
-                        in line
+                    "When the poses were ranked by the best of the 20 network scores"
+                    in line
                 ):
                     line = f.readline()
 
@@ -195,6 +195,7 @@ class NN2(VINA):
         lig_info = [str(x) for x in lig_info]
 
         return lig_info
+
 
 ###Outside class for multithreading
 # Run NN2 rescoring

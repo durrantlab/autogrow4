@@ -12,6 +12,7 @@ ChemMedChem 3 (2008) 435-444. doi:10.1002/cmdc.200700139.
 
 import __future__
 
+import rdkit
 from rdkit.Chem import FilterCatalog
 from rdkit.Chem.FilterCatalog import FilterCatalogParams
 
@@ -55,10 +56,9 @@ class BRENKFilter(ParentFilter):
         params = FilterCatalogParams()
         params.AddCatalog(FilterCatalogParams.FilterCatalogs.BRENK)
         # This is our set of all the BRENK filters
-        filters = FilterCatalog.FilterCatalog(params)
-        return filters
+        FilterCatalog.FilterCatalog(params)
 
-    def run_filter(self, mol):
+    def run_filter(self, mol: rdkit.Chem.rdchem.Mol) -> bool:
         """
         Runs a BRENK filter by matching common false positive molecules to the
         current mol. Filters for for lead-likeliness.
@@ -75,11 +75,8 @@ class BRENKFilter(ParentFilter):
             fails the filter
         """
 
-        # If the mol matches a mol in the filter list. we return a False (as
-        # it failed the filter).
-        if self.filters.HasMatch(mol) is True:
-            return False
+        # If the mol matches a mol in the filter list. we return a False (as it
+        # failed the filter). If No matches are found to filter list this will
+        # return a True as it Passed the filter.
 
-        # if No matches are found to filter list this will return a True
-        # as it Passed the filter.
-        return True
+        return self.filters.HasMatch(mol) is not True

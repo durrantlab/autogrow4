@@ -6,8 +6,9 @@ import __future__
 import numpy.random as rn
 
 
-def spin_roulette_selector(usable_list_of_smiles, number_to_chose,
-                           docking_or_diversity):
+def spin_roulette_selector(
+    usable_list_of_smiles, number_to_chose, docking_or_diversity
+):
     """
     make a list of ligands chosen by a random weighted roulette selection,
     without replacement, weighted by its docking score

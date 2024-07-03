@@ -65,8 +65,9 @@ class ObabelConversion(ParentPDBQTConverter):
 
             self.receptor_pdbqt_file = receptor_file + "qt"
 
-    def convert_receptor_pdb_files_to_pdbqt(self, receptor_file, obabel_path,
-                                            number_of_processors):
+    def convert_receptor_pdb_files_to_pdbqt(
+        self, receptor_file, obabel_path, number_of_processors
+    ):
         """
         Make sure a PDB file is properly formatted for conversion to pdbqt
 
@@ -134,7 +135,7 @@ class ObabelConversion(ParentPDBQTConverter):
             os.system(command)
         except:
             raise Exception("Could not convert receptor with obabel")
-        if os.path.exists(mol_filename+"qt") is False:
+        if os.path.exists(mol_filename + "qt") is False:
             raise Exception("Could not convert receptor with obabel")
 
         # Run Clean up on pdbqt receptor
@@ -146,16 +147,15 @@ class ObabelConversion(ParentPDBQTConverter):
         printout = printout + str(datetime.datetime.now()) + "\n"
         printout = printout + "REMARK Filename is: {}\n".format(mol_filename + "qt")
         printout = printout + "REMARK Prepared by running: {}\n".format(command)
-        with open(mol_filename+"qt", "r") as fil_path:
+        with open(mol_filename + "qt", "r") as fil_path:
             for line in fil_path.readlines():
                 if "ROOT" in line:
                     line = "REMARK " + line
                 if "TORSDOF" in line:
                     line = "REMARK " + line
                 printout = printout + line
-        with open(mol_filename+"qt", "w") as fil_path:
+        with open(mol_filename + "qt", "w") as fil_path:
             fil_path.write(printout)
-
 
     ###################################################
     # Convert the Ligand from PDB to PDBQT DockingModel
@@ -319,9 +319,7 @@ class ObabelConversion(ParentPDBQTConverter):
                         middle_lastpart = middle_firstpart[2:] + middle_lastpart
                         middle_firstpart = middle_firstpart[:2]
 
-
-                    if middle_firstpart not in ["BR", "ZN", "FE",
-                                                "MN", "CL", "MG"]:
+                    if middle_firstpart not in ["BR", "ZN", "FE", "MN", "CL", "MG"]:
                         # so just keep the first letter for the element part
                         # of the atom name
                         middle_lastpart = middle_firstpart[1:] + middle_lastpart

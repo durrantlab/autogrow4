@@ -50,11 +50,12 @@ def multi_threading(inputs, num_processors, task_name):
 
     return results
 
+
 #
 # Worker function
 #
 def worker(input, output):
-    for seq, job in iter(input.get, 'STOP'):
+    for seq, job in iter(input.get, "STOP"):
         func, args = job
         result = func(*args)
         ret_val = (seq, result)
@@ -73,7 +74,7 @@ def count_processors(num_inputs, num_processors):
     """
     # first, if num_processors<= 0, determine the number of processors to
     # use programatically
-    if num_processors<= 0:
+    if num_processors <= 0:
         num_processors = multiprocessing.cpu_count()
 
     # reduce the number of processors if too many have been specified
@@ -81,6 +82,7 @@ def count_processors(num_inputs, num_processors):
         num_processors = num_inputs
 
     return num_processors
+
 
 def start_processes(inputs, num_processors):
     """
@@ -97,7 +99,7 @@ def start_processes(inputs, num_processors):
 
     # Start worker processes
     for i in range(num_processors):
-        multiprocessing.Process(target = worker, args = (task_queue, done_queue)).start()
+        multiprocessing.Process(target=worker, args=(task_queue, done_queue)).start()
 
     # Get and print results
     results = []
@@ -106,15 +108,17 @@ def start_processes(inputs, num_processors):
 
     # Tell child processes to stop
     for i in range(num_processors):
-        task_queue.put('STOP')
+        task_queue.put("STOP")
 
-    results.sort(key = lambda tup: tup[0])
+    results.sort(key=lambda tup: tup[0])
 
-    return  [item[1] for item in map(list, results)]
+    return [item[1] for item in map(list, results)]
+
 
 ###
 # Helper functions
 ###
+
 
 def flatten_list(tier_list):
     """
@@ -128,6 +132,7 @@ def flatten_list(tier_list):
         return []
     flat_list = [item for sublist in tier_list for item in sublist]
     return flat_list
+
 
 def strip_none(none_list):
     """

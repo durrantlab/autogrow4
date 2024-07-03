@@ -25,9 +25,12 @@ import __future__
 
 import rdkit
 from rdkit import Chem
-#Disable the unnecessary RDKit warnings
+
+# Disable the unnecessary RDKit warnings
 from rdkit import RDLogger
-RDLogger.DisableLog('rdApp.*')
+
+RDLogger.DisableLog("rdApp.*")
+
 
 def check_sanitization(mol):
     """
@@ -51,7 +54,11 @@ def check_sanitization(mol):
 
     # easiest nearly everything should get through
     try:
-        sanitize_string =  Chem.SanitizeMol(mol, sanitizeOps = rdkit.Chem.rdmolops.SanitizeFlags.SANITIZE_ALL, catchErrors = True)
+        sanitize_string = Chem.SanitizeMol(
+            mol,
+            sanitizeOps=rdkit.Chem.rdmolops.SanitizeFlags.SANITIZE_ALL,
+            catchErrors=True,
+        )
     except:
         return None
 
@@ -60,19 +67,34 @@ def check_sanitization(mol):
     else:
         # try to fix the nitrogen (common problem that 4 bonded Nitrogens improperly lose their + charges)
         mol = nitrogen_charge_adjustment(mol)
-        Chem.SanitizeMol(mol, sanitizeOps = rdkit.Chem.rdmolops.SanitizeFlags.SANITIZE_ALL, catchErrors = True)
-        sanitize_string =  Chem.SanitizeMol(mol, sanitizeOps = rdkit.Chem.rdmolops.SanitizeFlags.SANITIZE_ALL, catchErrors = True)
+        Chem.SanitizeMol(
+            mol,
+            sanitizeOps=rdkit.Chem.rdmolops.SanitizeFlags.SANITIZE_ALL,
+            catchErrors=True,
+        )
+        sanitize_string = Chem.SanitizeMol(
+            mol,
+            sanitizeOps=rdkit.Chem.rdmolops.SanitizeFlags.SANITIZE_ALL,
+            catchErrors=True,
+        )
         if sanitize_string.name == "SANITIZE_NONE":
             return mol
 
     # run a  sanitation Filter 1 more time incase something slipped through
     # ie. if there are any forms of sanition which fail ie. KEKULIZE then return None
-    sanitize_string =  Chem.SanitizeMol(mol, sanitizeOps = rdkit.Chem.rdmolops.SanitizeFlags.SANITIZE_ALL, catchErrors = True)
+    sanitize_string = Chem.SanitizeMol(
+        mol,
+        sanitizeOps=rdkit.Chem.rdmolops.SanitizeFlags.SANITIZE_ALL,
+        catchErrors=True,
+    )
     if sanitize_string.name != "SANITIZE_NONE":
         return None
     else:
         return mol
+
+
 #
+
 
 def handle_hydrogens(mol, protanate_step):
     """
@@ -97,7 +119,7 @@ def handle_hydrogens(mol, protanate_step):
 
     mol = try_deprotanation(mol)
     if mol is None:
-            # mol failed deprotanation
+        # mol failed deprotanation
         return None
 
     if protanate_step is True:
@@ -108,7 +130,10 @@ def handle_hydrogens(mol, protanate_step):
             return None
 
     return mol
+
+
 #
+
 
 def try_deprotanation(sanitized_mol):
     """
@@ -126,11 +151,13 @@ def try_deprotanation(sanitized_mol):
     except:
         return None
 
-
     mol_sanitized = check_sanitization(mol)
 
     return mol_sanitized
+
+
 #
+
 
 def try_reprotanation(sanitized_deprotanated_mol):
     """
@@ -150,12 +177,14 @@ def try_reprotanation(sanitized_deprotanated_mol):
         except:
             mol = None
 
-
         mol_sanitized = check_sanitization(mol)
         return mol_sanitized
     else:
         return None
+
+
 #
+
 
 def remove_atoms(mol, list_of_idx_to_remove):
     """
@@ -178,7 +207,7 @@ def remove_atoms(mol, list_of_idx_to_remove):
 
     try:
         atomsToRemove = list_of_idx_to_remove
-        atomsToRemove.sort(reverse = True)
+        atomsToRemove.sort(reverse=True)
     except:
         return None
 
@@ -192,7 +221,10 @@ def remove_atoms(mol, list_of_idx_to_remove):
         return new_mol
     except:
         return None
+
+
 #
+
 
 def nitrogen_charge_adjustment(mol):
     """
@@ -236,7 +268,10 @@ def nitrogen_charge_adjustment(mol):
             if num_bond_sums == 4.0:
                 atom.SetFormalCharge(+1)
     return mol
+
+
 #
+
 
 def check_for_unassigned_atom(mol):
     """
@@ -252,10 +287,13 @@ def check_for_unassigned_atom(mol):
         return None
 
     for atom in atoms:
-        if atom.GetAtomicNum()==0:
+        if atom.GetAtomicNum() == 0:
             return None
     return mol
+
+
 #
+
 
 def handle_frag_check(mol):
     """
@@ -271,8 +309,7 @@ def handle_frag_check(mol):
     except:
         return None
 
-
-    if len(frags)==1:
+    if len(frags) == 1:
         return mol
     else:
         frag_info_list = []
@@ -291,8 +328,10 @@ def handle_frag_check(mol):
         if len(frag_info_list) == 0:
             return None
         # Get the largest Fragment
-        frag_info_list.sort(key = lambda x: float(x[-1]),reverse = True)
+        frag_info_list.sort(key=lambda x: float(x[-1]), reverse=True)
         largest_frag_idx = frag_info_list[0][0]
         largest_frag = frags[largest_frag_idx]
         return largest_frag
+
+
 #

@@ -213,6 +213,8 @@ def run_concatenation(directory):
     if os.path.exists(concat_file + ".gz"):
         del_files(concat_file)
     print("Finished Compression")
+
+
 ######
 def run_main(vars):
     """
@@ -238,7 +240,10 @@ def run_main(vars):
         if os.path.exists(compressed_file) is False:
             raise Exception("File to Decompress doesn't exist")
 
-        input_folder = os.path.abspath(compressed_file.split(os.path.basename(compressed_file))[0]) + os.sep
+        input_folder = (
+            os.path.abspath(compressed_file.split(os.path.basename(compressed_file))[0])
+            + os.sep
+        )
 
         print("BEFORE")
         print(os.path.getsize(input_folder))
@@ -251,8 +256,8 @@ def run_main(vars):
         print("After deconcatenate")
         print(os.path.getsize(input_folder))
 
-#######
 
+#######
 
 
 def get_arguments_from_argparse(arg_dict):
@@ -276,11 +281,17 @@ def get_arguments_from_argparse(arg_dict):
 
     #  argument_handling
     if type(arg_dict["input_folder_or_file"]) is not str:
-        raise Exception("--input_folder_or_file required: Path to directory to \
-                        compress or decompress.")
+        raise Exception(
+            "--input_folder_or_file required: Path to directory to \
+                        compress or decompress."
+        )
     if os.path.exists(arg_dict["input_folder_or_file"]) is False:
-        raise Exception("--input_folder_or_file could not be found: \
-                        {}".format(arg_dict["input_folder_or_file"]))
+        raise Exception(
+            "--input_folder_or_file could not be found: \
+                        {}".format(
+                arg_dict["input_folder_or_file"]
+            )
+        )
 
     # Make sure variable is full path and add os.sep if directory
     arg_dict["input_folder_or_file"] = os.path.abspath(arg_dict["input_folder_or_file"])
@@ -288,16 +299,27 @@ def get_arguments_from_argparse(arg_dict):
         arg_dict["input_folder_or_file"] = arg_dict["input_folder_or_file"] + os.sep
 
     return arg_dict
+
+
 #
 
 # Argument parsing
 PARSER = argparse.ArgumentParser()
-PARSER.add_argument('--compress_or_decompress', type=str, required=True,
-                    choices=["compress", "decompress"],
-                    help='Chose whether to compress or decompress a directory')
-PARSER.add_argument('--input_folder_or_file', '-i', type=str,
-                    required=True, default=None,
-                    help='Path to directory/file to compress or decompress.')
+PARSER.add_argument(
+    "--compress_or_decompress",
+    type=str,
+    required=True,
+    choices=["compress", "decompress"],
+    help="Chose whether to compress or decompress a directory",
+)
+PARSER.add_argument(
+    "--input_folder_or_file",
+    "-i",
+    type=str,
+    required=True,
+    default=None,
+    help="Path to directory/file to compress or decompress.",
+)
 
 ARGS_DICT = vars(PARSER.parse_args())
 ARGS_DICT = get_arguments_from_argparse(ARGS_DICT)

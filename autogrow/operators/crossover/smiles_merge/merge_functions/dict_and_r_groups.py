@@ -37,16 +37,20 @@ def handle_dicts_and_select_b_groups(mol_1, mol_2, mcs_mol):
     if they_pass is False:
         return None
 
-    r_smiles_dict_1, b_to_r_master_dict_1, b_to_anchor_master_dict_1 = mol_handling_of_fragmenting_labeling_and_indexing(
-        mol_1, mcs_mol, 1
-    )
+    (
+        r_smiles_dict_1,
+        b_to_r_master_dict_1,
+        b_to_anchor_master_dict_1,
+    ) = mol_handling_of_fragmenting_labeling_and_indexing(mol_1, mcs_mol, 1)
     # check that this worked (ie if it failed they will return None)
     if r_smiles_dict_1 is None:
         return None
 
-    r_smiles_dict_2, b_to_r_master_dict_2, b_to_anchor_master_dict_2 = mol_handling_of_fragmenting_labeling_and_indexing(
-        mol_2, mcs_mol, 2
-    )
+    (
+        r_smiles_dict_2,
+        b_to_r_master_dict_2,
+        b_to_anchor_master_dict_2,
+    ) = mol_handling_of_fragmenting_labeling_and_indexing(mol_2, mcs_mol, 2)
     # check that this worked (ie if it failed they will return None)
     if r_smiles_dict_2 is None:
         return None
@@ -263,6 +267,7 @@ def r_group_list(mol, core_mol):
 
     return replace_core_mol
 
+
 def replace_core_mol_dummy_atoms(mol, mcs, replace_core_mol):
     """
     This function will replace the dummy atoms (*) with the isotope label from
@@ -287,7 +292,6 @@ def replace_core_mol_dummy_atoms(mol, mcs, replace_core_mol):
         to make lists of R-groups. The * atoms will be isotope labeled with the
         isotope label from the core.
     """
-
 
     replace_core_mol_original = copy.deepcopy(replace_core_mol)
     anchor_dict = {}

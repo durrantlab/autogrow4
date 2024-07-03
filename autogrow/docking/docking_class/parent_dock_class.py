@@ -3,8 +3,11 @@ This script holds the parent class for docking.
 This is used as the basis for all docking classes.
 """
 import __future__
+from abc import ABC, abstractmethod
+from typing import Any, Dict, List, Optional, Union
 
-class ParentDocking(object):
+
+class ParentDocking(ABC):
     """
     Docking
 
@@ -12,8 +15,13 @@ class ParentDocking(object):
     :param class object: a class to initialize on
     """
 
-    def __init__(self, vars=None, receptor_file=None,
-                 file_conversion_class_object=None, test_boot=True):
+    def __init__(
+        self,
+        vars: Optional[Dict[str, Any]] = None,
+        receptor_file: Optional[str] = None,
+        file_conversion_class_object: Optional[Any] = None,
+        test_boot: bool = True,
+    ) -> None:
         """
         Require to initialize any pdbqt conversion class.
 
@@ -28,7 +36,7 @@ class ParentDocking(object):
 
         pass
 
-    def get_name(self):
+    def get_name(self) -> str:
         """
         Returns the current class name.
 
@@ -37,7 +45,8 @@ class ParentDocking(object):
         """
         return self.__class__.__name__
 
-    def run_dock(self, pdbqt_filename):
+    @abstractmethod
+    def run_dock(self, pdbqt_filename: str) -> None:
         """
         run_dock is needs to be implemented in each class.
 
@@ -46,11 +55,18 @@ class ParentDocking(object):
             if missing
         """
 
-        raise NotImplementedError("run_dock() not implemented")
+        # raise NotImplementedError("run_dock() not implemented")
+        pass
 
-    def rank_and_save_output_smi(self, vars, current_generation_dir,
-                                 current_gen_int, smile_file,
-                                 deleted_smiles_names_list):
+    @abstractmethod
+    def rank_and_save_output_smi(
+        self,
+        vars: Dict[str, Any],
+        current_generation_dir: str,
+        current_gen_int: int,
+        smile_file: str,
+        deleted_smiles_names_list: List[str],
+    ) -> str:
         """
         rank_and_save_output_smi is needs to be implemented in each class.
         raise exception if missing
@@ -76,4 +92,5 @@ class ParentDocking(object):
             .smi file
         """
 
-        raise NotImplementedError("rank_and_save_output_smi() not implemented")
+        pass
+        # raise NotImplementedError("rank_and_save_output_smi() not implemented")

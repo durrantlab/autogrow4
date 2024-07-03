@@ -58,7 +58,7 @@ class GhoseFilter(ParentFilter):
     :param class ParentFilter: a parent class to initialize off
     """
 
-    def run_filter(self, mol):
+    def run_filter(self, mol: rdkit.Chem.rdchem.Mol) -> bool:
         """
         This runs a Ghose filter for drug-likeliness. Ghose filter filters
         molecules by Molecular weight (MW), the number of atoms, and the logP
@@ -87,21 +87,21 @@ class GhoseFilter(ParentFilter):
         copy_mol = copy.deepcopy(mol)
         copy_mol = Chem.AddHs(copy_mol)
         exact_mwt = Descriptors.ExactMolWt(copy_mol)
-        if ((exact_mwt < 160) or (exact_mwt > 480)):
+        if (exact_mwt < 160) or (exact_mwt > 480):
             return False
 
         num_atoms = copy_mol.GetNumAtoms()
-        if ((num_atoms < 20) or (num_atoms > 70)):
+        if (num_atoms < 20) or (num_atoms > 70):
             return False
 
         # molar Refractivity
         MolMR = Crippen.MolMR(copy_mol)
-        if ((MolMR < 40) or (MolMR > 130)):
+        if (MolMR < 40) or (MolMR > 130):
             return False
 
         # molar LogP
         mol_log_p = Crippen.MolLogP(copy_mol)
-        if ((mol_log_p < -0.4) or (mol_log_p > 5.6)):
+        if (mol_log_p < -0.4) or (mol_log_p > 5.6):
             return False
 
         # passed all filters

@@ -62,6 +62,7 @@ def get_usable_format(infile):
 
     return usable_list_of_smiles
 
+
 def get_average_score_per_gen(infolder, folder_list):
     """
     This script will get the average docking score from the ranked .smi file
@@ -109,6 +110,7 @@ def get_average_score_per_gen(infolder, folder_list):
 
     print_gens(average_affinity_dict)
     return average_affinity_dict
+
 
 def get_average_top_score_per_gen(infolder, folder_list, top_score_per_gen):
     """
@@ -175,6 +177,7 @@ def get_average_top_score_per_gen(infolder, folder_list, top_score_per_gen):
     print_gens(average_affinity_dict)
     return average_affinity_dict
 
+
 def print_gens(average_affinity_dict):
     """
     This prints out the average scores for each generation
@@ -189,6 +192,7 @@ def print_gens(average_affinity_dict):
     affinity_keys.sort(key=lambda x: int(x.split("_")[1]))
     for gen in affinity_keys:
         print(gen, "                  ", average_affinity_dict[gen])
+
 
 def make_graph(dictionary):
     """
@@ -230,6 +234,7 @@ def make_graph(dictionary):
             return None, None
 
     return list_generations, list_of_scores
+
 
 def run_plotter(vars, dict_of_averages, outfile):
     """
@@ -291,9 +296,7 @@ def run_plotter(vars, dict_of_averages, outfile):
         )
 
     if print_ten is True:
-        ax.plot(
-            list_generations_ten, list_of_scores_ten, color="g", label="Top 10"
-        )
+        ax.plot(list_generations_ten, list_of_scores_ten, color="g", label="Top 10")
 
     ax.plot(list_generations_one, list_of_scores_one, color="r", label="Top 1")
 
@@ -363,6 +366,7 @@ def run_plotter(vars, dict_of_averages, outfile):
         printout = printout + "too small to effectively plot. \n"
         print(printout)
 
+
 def print_data_table(infolder, folder_list):
     """
     This function takes a folder of an Autogrow Run and a list of all folders
@@ -411,6 +415,7 @@ def print_data_table(infolder, folder_list):
     dict_of_averages["top_ten_dict"] = top_ten_dict
     dict_of_averages["top_one_dict"] = top_one_dict
     return dict_of_averages
+
 
 # Run Everything
 def generate_figures(vars):

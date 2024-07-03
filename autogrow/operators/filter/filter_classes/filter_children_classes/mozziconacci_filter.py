@@ -51,7 +51,7 @@ class MozziconacciFilter(ParentFilter):
     :param class ParentFilter: a parent class to initialize off
     """
 
-    def run_filter(self, mol):
+    def run_filter(self, mol: rdkit.Chem.rdchem.Mol) -> bool:
         """
         This runs a Mozziconacci filter. Mozziconacci filter is a filter for
         Drug-likeliness which filters molecules by the number of:

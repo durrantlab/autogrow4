@@ -8,8 +8,9 @@ import math
 import copy
 
 
-def run_Tournament_Selector(list_of_ligands, num_to_chose, tourn_size,
-                            idx_to_sel, favor_most_negative=True):
+def run_Tournament_Selector(
+    list_of_ligands, num_to_chose, tourn_size, idx_to_sel, favor_most_negative=True
+):
     """
     This runs a tournament style selector given a list of ligands and
     specified metric. It will randomly select ligands for tournaments. The
@@ -72,11 +73,14 @@ def run_Tournament_Selector(list_of_ligands, num_to_chose, tourn_size,
         chosen_ligands.append(chosen_ligand)
 
     return chosen_ligands
+
+
 #
 
 
-def run_one_tournament(list_of_ligands, num_per_tourn, idx_to_sel,
-                       favor_most_negative=True):
+def run_one_tournament(
+    list_of_ligands, num_per_tourn, idx_to_sel, favor_most_negative=True
+):
     """
     This runs a single tournament style selection given a list of ligands and
     specified metric. It will randomly select ligands for the tournament. The

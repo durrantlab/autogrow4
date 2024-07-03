@@ -634,7 +634,6 @@ Adapted from examples on https://docs.python.org/2/library/multiprocessing.html
 """
 
 
-
 def MultiThreading(inputs, num_procs, task_name):
     """Initialize this object.
 
@@ -657,7 +656,6 @@ def MultiThreading(inputs, num_procs, task_name):
     num_procs = count_processors(len(inputs), num_procs)
 
     tasks = []
-
 
     for index, item in enumerate(inputs):
         if not isinstance(item, tuple):

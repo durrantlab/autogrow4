@@ -33,7 +33,6 @@ import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as
 from autogrow.operators.convert_files.gypsum_dl.gypsum_dl.Start import prepare_molecules
 
 
-
 class StdoutRedirection:
     """Standard output redirection context manager
 
@@ -159,24 +158,14 @@ def convert_smi_to_sdfs_with_gypsum(vars, gen_smiles_file, smile_file_directory)
     # create a the job_inputs to run gypsum in multithread
     job_input = tuple(
         [
-            tuple(
-                [
-                    gypsum_log_path,
-                    gypsum_params,
-                    gypsum_timeout_limit,
-                ]
-            )
+            tuple([gypsum_log_path, gypsum_params, gypsum_timeout_limit,])
             for gypsum_params in list_of_gypsum_params
         ]
     )
 
-
     sys.stdout.flush()
-    failed_to_convert = vars["parallelizer"].run(
-        job_input, run_gypsum_multiprocessing
-    )
+    failed_to_convert = vars["parallelizer"].run(job_input, run_gypsum_multiprocessing)
     sys.stdout.flush()
-
 
     lig_failed_to_convert = [x for x in failed_to_convert if x is not None]
     lig_failed_to_convert = list(set(lig_failed_to_convert))
@@ -188,10 +177,16 @@ def convert_smi_to_sdfs_with_gypsum(vars, gen_smiles_file, smile_file_directory)
     return gypsum_output_folder_path
 
 
-def make_smi_and_gyspum_params(gen_smiles_file, folder_path,
-                               gypsum_output_folder_path, max_variance,
-                               gypsum_thoroughness, min_ph, max_ph,
-                               pka_precision):
+def make_smi_and_gyspum_params(
+    gen_smiles_file,
+    folder_path,
+    gypsum_output_folder_path,
+    max_variance,
+    gypsum_thoroughness,
+    min_ph,
+    max_ph,
+    pka_precision,
+):
     """
     Make an individual .smi file and parameter dictionary to submit to Gypsum
     for every ligand in the generation_*_to_convert.smi file.
@@ -257,7 +252,9 @@ def make_smi_and_gyspum_params(gen_smiles_file, folder_path,
                             Gen_2_Cross_631 and Gen_3_Cross_744. \
                             This will abridge to Gen_4_Cross_702 for saving \
                             files.\nThe failed ligand name was \
-                            {}".format(ligand_name)
+                            {}".format(
+                    ligand_name
+                )
 
                 print(printout)
                 raise Exception(printout)
@@ -302,8 +299,7 @@ def make_smi_and_gyspum_params(gen_smiles_file, folder_path,
     return list_of_gypsum_params
 
 
-def run_gypsum_multiprocessing(gypsum_log_path, gypsum_params,
-                               gypsum_timeout_limit):
+def run_gypsum_multiprocessing(gypsum_log_path, gypsum_params, gypsum_timeout_limit):
     """
     This converts the a single ligand from a SMILE to a 3D SDF using Gypsum.
     This is used within a multithread.
@@ -330,7 +326,6 @@ def run_gypsum_multiprocessing(gypsum_log_path, gypsum_params,
     )
     gypsum_gypsum_dir = str(gypsum_dir) + os.sep + "gypsum_dl" + os.sep
     sys.path.extend([current_dir, gypsum_dir, gypsum_gypsum_dir])
-
 
     lig_id = gypsum_params["source"].split(os.sep)[-1].replace(".smi", "")
     log_file = "{}{}_log.txt".format(gypsum_log_path, lig_id)
@@ -447,7 +442,9 @@ def convert_sdf_to_pdbs(vars, gen_folder_path, sdfs_folder_path):
     if len(job_inputs) == 0:
         printout = "\n\nThere are no SDF files were found to convert to PDB. "
         printout = printout + "This may be a problem with the Gypsum-DL "
-        printout = printout + "settings.\nPlease check that the `--gypsum_timeout_limit` "
+        printout = (
+            printout + "settings.\nPlease check that the `--gypsum_timeout_limit` "
+        )
         printout = printout + "is appropriate relative to the `--gypsum_thoroughness` "
         printout = printout + "and `--max_variants_per_compound` parameters.\n"
         raise Exception(printout)

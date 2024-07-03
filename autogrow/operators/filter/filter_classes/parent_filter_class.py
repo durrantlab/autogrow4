@@ -3,7 +3,10 @@ This script holds the parent class for filtering.
 This is used as the basis for all filter classes.
 """
 import __future__
-class ParentFilter(object):
+from abc import ABC, abstractmethod
+import rdkit
+
+class ParentFilter(ABC):
     """
     This is a script containing all of the filters for drug likeliness
 
@@ -23,7 +26,8 @@ class ParentFilter(object):
         2) NIHFilter
         3) BRENKFilter
     """
-    def get_name(self):
+
+    def get_name(self) -> str:
         """
         Returns the current class name.
 
@@ -33,12 +37,17 @@ class ParentFilter(object):
 
         return self.__class__.__name__
 
-    def run_filter(self, input_string):
+    @abstractmethod 
+    def run_filter(self, mol: rdkit.Chem.rdchem.Mol) -> bool:
         """
         run_filter is needs to be implemented in each class.
 
         Inputs:
-        :param str input_string:  A string to raise an exception
+        :param rdkit.Chem.rdchem.Mol mol: a molecule to filter
+
+        Returns:
+        :returns: bool: True if the molecule passes the filter, False if it fails
         """
 
-        raise NotImplementedError("run_filter() not implemented")
+        # raise NotImplementedError("run_filter() not implemented")
+        pass

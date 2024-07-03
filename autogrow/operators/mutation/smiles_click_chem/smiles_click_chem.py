@@ -20,8 +20,9 @@ import autogrow.operators.filter.execute_filters as Filter
 class SmilesClickChem(object):
     """    This class will take a molecule and Mutate it by reacting it.    """
 
-    def __init__(self, rxn_library_variables, list_of_already_made_smiles,
-                 filter_object_dict):
+    def __init__(
+        self, rxn_library_variables, list_of_already_made_smiles, filter_object_dict
+    ):
         """
         init for SmilesClickChem. This will set up all the reaction and
         functional dictionaries required to Mutate a molecular
@@ -47,9 +48,7 @@ class SmilesClickChem(object):
         rxn_library_file = rxn_library_variables[1]
         function_group_library = rxn_library_variables[2]
         complementary_mol_dir = rxn_library_variables[3]
-        self.reaction_dict = self.retrieve_reaction_dict(
-            rxn_library, rxn_library_file
-        )
+        self.reaction_dict = self.retrieve_reaction_dict(rxn_library, rxn_library_file)
         # Retrieve the dictionary containing
         # all the possible ClickChem Reactions
         self.list_of_reaction_names = list(self.reaction_dict.keys())
@@ -138,7 +137,6 @@ class SmilesClickChem(object):
 
         return new_dict
 
-
     def retrieve_reaction_dict(self, rxn_library, rxn_library_file):
         """
         This is where all the chemical reactions for SmartClickChem are
@@ -178,22 +176,19 @@ class SmilesClickChem(object):
                     pwd,
                     "reaction_libraries",
                     "click_chem_rxns",
-                    "ClickChem_rxn_library.json"
+                    "ClickChem_rxn_library.json",
                 )
             elif rxn_library == "robust_rxns":
                 rxn_library_file = os.path.join(
                     pwd,
                     "reaction_libraries",
                     "robust_rxns",
-                    "Robust_Rxns_rxn_library.json"
+                    "Robust_Rxns_rxn_library.json",
                 )
             elif rxn_library == "all_rxns":
                 rxn_library_file = os.path.join(
-                    pwd,
-                    "reaction_libraries",
-                    "all_rxns",
-                    "All_Rxns_rxn_library.json"
-                    )
+                    pwd, "reaction_libraries", "all_rxns", "All_Rxns_rxn_library.json"
+                )
             elif rxn_library == "Custom":
                 if os.path.exists(rxn_library_file) is False:
                     raise Exception(
@@ -223,9 +218,7 @@ class SmilesClickChem(object):
                 )
 
             if os.path.isfile(rxn_library_file) is False:
-                raise Exception(
-                    "Custom specified rxn_library_file is not a file"
-                )
+                raise Exception("Custom specified rxn_library_file is not a file")
 
             try:
                 extension = os.path.splitext(rxn_library_file)[1]
@@ -307,20 +300,24 @@ class SmilesClickChem(object):
 
             if rxn_library == "click_chem_rxns":
                 function_group_library = os.path.join(
-                    pwd, "reaction_libraries",
+                    pwd,
+                    "reaction_libraries",
                     "click_chem_rxns",
                     "ClickChem_functional_groups.json",
                 )
             elif rxn_library == "robust_rxns":
                 function_group_library = os.path.join(
-                    pwd, "reaction_libraries",
+                    pwd,
+                    "reaction_libraries",
                     "robust_rxns",
                     "Robust_Rxns_functional_groups.json",
                 )
             elif rxn_library == "all_rxns":
                 function_group_library = os.path.join(
-                    pwd, "reaction_libraries",
-                    "all_rxns", "All_Rxns_functional_groups.json",
+                    pwd,
+                    "reaction_libraries",
+                    "all_rxns",
+                    "All_Rxns_functional_groups.json",
                 )
             elif rxn_library == "Custom":
                 if os.path.exists(function_group_library) is False:
@@ -496,8 +493,9 @@ class SmilesClickChem(object):
 
         return complementary_mols_dict
 
-    def make_reactant_order_list(self, substructure_search_result,
-                                 has_substructure_matches_count):
+    def make_reactant_order_list(
+        self, substructure_search_result, has_substructure_matches_count
+    ):
         """
         make an ordered list of reactants which composed of 0 and 1. This list
         will be used (in later steps) to determine which reactant is the
@@ -529,14 +527,14 @@ class SmilesClickChem(object):
             counter_of_matches = 0
             for i in range(0, len(substructure_search_result)):
                 if (
-                        substructure_search_result[i] == 1
-                        and counter_of_matches == chosen_as_mol_num
+                    substructure_search_result[i] == 1
+                    and counter_of_matches == chosen_as_mol_num
                 ):
                     reactant_order_list.append(1)
                     counter_of_matches = counter_of_matches + 1
                 elif (
-                        substructure_search_result[i] == 1
-                        and counter_of_matches != chosen_as_mol_num
+                    substructure_search_result[i] == 1
+                    and counter_of_matches != chosen_as_mol_num
                 ):
                     reactant_order_list.append(0)
                     counter_of_matches = counter_of_matches + 1
@@ -733,8 +731,8 @@ class SmilesClickChem(object):
                     random.shuffle(reaction_products_list)
 
                     if (
-                            reaction_products_list in [(), []]
-                            or len(reaction_products_list) == 0
+                        reaction_products_list in [(), []]
+                        or len(reaction_products_list) == 0
                     ):
                         # if reaction fails then lets move on to the next
                         # reaction
@@ -753,8 +751,8 @@ class SmilesClickChem(object):
                                 is_rxn_complete = True
                                 break
                         if (
-                                reaction_product_smilestring is not None
-                                and is_rxn_complete is True
+                            reaction_product_smilestring is not None
+                            and is_rxn_complete is True
                         ):
                             # REACTION WORKED!
                             break
@@ -875,8 +873,8 @@ class SmilesClickChem(object):
                     continue
 
                 if (
-                        reaction_products_list in [(), []]
-                        or len(reaction_products_list) == 0
+                    reaction_products_list in [(), []]
+                    or len(reaction_products_list) == 0
                 ):
                     reaction_id_number = a_reaction_dict["RXN_NUM"]
                     tries = tries + 1
@@ -894,7 +892,10 @@ class SmilesClickChem(object):
                             # REACTION WORKED!
                             is_rxn_complete = True
                             break
-                    if reaction_product_smilestring is not None and is_rxn_complete is True:
+                    if (
+                        reaction_product_smilestring is not None
+                        and is_rxn_complete is True
+                    ):
                         # REACTION WORKED!
                         break
                     # try again

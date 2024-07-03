@@ -35,8 +35,10 @@ import glob
 
 import support_scripts.Multiprocess as mp
 
-def run_conversion_for_a_vina_file(vina_file, output_folder, max_num_of_poses,
-                                   max_docking_score, min_docking_score):
+
+def run_conversion_for_a_vina_file(
+    vina_file, output_folder, max_num_of_poses, max_docking_score, min_docking_score
+):
     """
     This script will convert .pdbqt.vina file to multiple .pdb files.
 
@@ -82,18 +84,21 @@ def run_conversion_for_a_vina_file(vina_file, output_folder, max_num_of_poses,
                     for i in range(10):
                         temp_line = temp_line.replace("  ", " ")
                     temp_line = temp_line.split("RESULT:")[1]
-                    temp_line = [x for x in temp_line.split(" ") if x != "" and x != " "]
+                    temp_line = [
+                        x for x in temp_line.split(" ") if x != "" and x != " "
+                    ]
                     try:
                         score = float(temp_line[0])
                     except:
-                        raise Exception("Score not in remark line for {}".format(vina_file))
+                        raise Exception(
+                            "Score not in remark line for {}".format(vina_file)
+                        )
 
                     if max_docking_score is not None:
                         if score > max_docking_score:
                             terminate_run = True
                             write_pose = False
                             break
-
 
                     if min_docking_score is not None:
                         if score < min_docking_score:
@@ -114,8 +119,12 @@ def run_conversion_for_a_vina_file(vina_file, output_folder, max_num_of_poses,
                     printout_pdb = convert_pdbqt_to_pdb(printout_list)
 
                     # write to a file
-                    outfile = output_folder + os.sep + short_name +\
-                        "_pose_{}.pdb".format(pose_number)
+                    outfile = (
+                        output_folder
+                        + os.sep
+                        + short_name
+                        + "_pose_{}.pdb".format(pose_number)
+                    )
 
                     with open(outfile, "w") as f:
                         f.write(printout_pdb)
@@ -132,6 +141,8 @@ def run_conversion_for_a_vina_file(vina_file, output_folder, max_num_of_poses,
                 pose_number += 1
             else:
                 printout_list.append(line)
+
+
 #
 def convert_pdbqt_to_pdb(list_of_lines):
     """
@@ -155,10 +166,14 @@ def convert_pdbqt_to_pdb(list_of_lines):
                 short_line = short_line + line[i]
 
             printout = printout + short_line
-        elif "REMARK                            x       y       z     vdW  Elec" + \
-            "       q    Type" in line \
-            or "REMARK                         _______ _______ _______ _____ _____" + \
-            "    ______ ____" in line:
+        elif (
+            "REMARK                            x       y       z     vdW  Elec"
+            + "       q    Type"
+            in line
+            or "REMARK                         _______ _______ _______ _____ _____"
+            + "    ______ ____"
+            in line
+        ):
             short_line = ""
             for i in line_index_range:
                 # print(i)
@@ -171,6 +186,8 @@ def convert_pdbqt_to_pdb(list_of_lines):
         else:
             printout = printout + line
     return printout
+
+
 #
 def start_run_main(vars):
     """
@@ -184,14 +201,16 @@ def start_run_main(vars):
     max_docking_score = vars["max_docking_score"]
     min_docking_score = vars["min_docking_score"]
 
-
-
     vina_docked_pdbqt_file = vars["vina_docked_pdbqt_file"]
     if os.path.isfile(vina_docked_pdbqt_file) is True:
 
-        run_conversion_for_a_vina_file(vina_docked_pdbqt_file, output_folder,
-                                       max_num_of_poses, max_docking_score,
-                                       min_docking_score)
+        run_conversion_for_a_vina_file(
+            vina_docked_pdbqt_file,
+            output_folder,
+            max_num_of_poses,
+            max_docking_score,
+            min_docking_score,
+        )
 
     else:
 
@@ -204,11 +223,26 @@ def start_run_main(vars):
         if len(pdbqt_files) == 0:
             printout = "No .pdbqt.vina were found at: {}".format(vina_docked_pdbqt_file)
             raise Exception(printout)
-        job_input = tuple([tuple([vina_docked_pdbqt_file, output_folder, max_num_of_poses,
-                                  max_docking_score, min_docking_score]) \
-                                 for vina_docked_pdbqt_file in pdbqt_files])
+        job_input = tuple(
+            [
+                tuple(
+                    [
+                        vina_docked_pdbqt_file,
+                        output_folder,
+                        max_num_of_poses,
+                        max_docking_score,
+                        min_docking_score,
+                    ]
+                )
+                for vina_docked_pdbqt_file in pdbqt_files
+            ]
+        )
         # run convert in multithread
-        mol_usable_list = mp.multi_threading(job_input, -1, run_conversion_for_a_vina_file)
+        mol_usable_list = mp.multi_threading(
+            job_input, -1, run_conversion_for_a_vina_file
+        )
+
+
 #
 def get_arguments_from_argparse(args_dict):
     """
@@ -220,11 +254,12 @@ def get_arguments_from_argparse(args_dict):
     :returns: dict args_dict: dictionary of parameters
     """
 
-
     # Argument handling
     if type(args_dict["vina_docked_pdbqt_file"]) != str:
-        raise Exception("provided vina_docked_pdbqt_file must be either a docked vina file or \
-            a directory of docked vina files.")
+        raise Exception(
+            "provided vina_docked_pdbqt_file must be either a docked vina file or \
+            a directory of docked vina files."
+        )
 
     if type(args_dict["output_folder"]) != str:
         raise Exception("provided output_folder must be a directory.")
@@ -234,10 +269,14 @@ def get_arguments_from_argparse(args_dict):
         raise Exception("provided vina_docked_pdbqt_file can not be found.")
     if ".pdbqt.vina" not in args_dict["vina_docked_pdbqt_file"].lower():
         if os.path.isdir(args_dict["vina_docked_pdbqt_file"]) is False:
-            raise Exception("provided vina_docked_pdbqt_file must be either a docked vina file \
-            containing .pdbqt.vina in file name or a directory of docked vina files.")
+            raise Exception(
+                "provided vina_docked_pdbqt_file must be either a docked vina file \
+            containing .pdbqt.vina in file name or a directory of docked vina files."
+            )
 
-        args_dict["vina_docked_pdbqt_file"] = args_dict["vina_docked_pdbqt_file"] + os.sep
+        args_dict["vina_docked_pdbqt_file"] = (
+            args_dict["vina_docked_pdbqt_file"] + os.sep
+        )
 
     if os.path.exists(args_dict["output_folder"]) is False:
         try:
@@ -250,78 +289,102 @@ def get_arguments_from_argparse(args_dict):
         if os.path.isdir(args_dict["output_folder"]) is False:
             raise Exception("output_folder needs to be a directory.")
 
-        args_dict["output_folder"] = os.path.abspath(args_dict["output_folder"]) + os.sep
+        args_dict["output_folder"] = (
+            os.path.abspath(args_dict["output_folder"]) + os.sep
+        )
 
     # handle max_num_of_poses
     if args_dict["max_num_of_poses"] is not None:
-        if type(args_dict["max_num_of_poses"]) != float and \
-            type(args_dict["max_num_of_poses"]) != int:
+        if (
+            type(args_dict["max_num_of_poses"]) != float
+            and type(args_dict["max_num_of_poses"]) != int
+        ):
             raise Exception("max_num_of_poses must be a int or None")
         if type(args_dict["max_num_of_poses"]) == float:
             args_dict["max_num_of_poses"] = int(args_dict["max_num_of_poses"])
     # handle max_docking_score
     if args_dict["max_docking_score"] is not None:
-        if type(args_dict["max_docking_score"]) != float or \
-            type(args_dict["max_docking_score"]) != int:
+        if (
+            type(args_dict["max_docking_score"]) != float
+            or type(args_dict["max_docking_score"]) != int
+        ):
             raise Exception("max_docking_score must be a float or None")
         if type(args_dict["max_docking_score"]) == int:
             args_dict["max_docking_score"] = float(args_dict["max_num_of_poses"])
     # handle min_docking_score
     if args_dict["min_docking_score"] is not None:
-        if type(args_dict["min_docking_score"]) != float or \
-            type(args_dict["min_docking_score"]) != int:
+        if (
+            type(args_dict["min_docking_score"]) != float
+            or type(args_dict["min_docking_score"]) != int
+        ):
             raise Exception("min_docking_score must be a float or None")
         if type(args_dict["min_docking_score"]) == int:
             args_dict["min_docking_score"] = float(args_dict["max_num_of_poses"])
 
     return args_dict
+
+
 #
 
 
 # Argument parsing
 PARSER = argparse.ArgumentParser()
 PARSER.add_argument(
-    '--vina_docked_pdbqt_file', '-f',
-    required=True, default=None,
-    help='Path to .pdbqt.vina file to split into 1 .pdb file per pose that matches all criteria. \
-    if this is a directory it will convert all of the files with the extension .pdbqt.vina'
+    "--vina_docked_pdbqt_file",
+    "-f",
+    required=True,
+    default=None,
+    help="Path to .pdbqt.vina file to split into 1 .pdb file per pose that matches all criteria. \
+    if this is a directory it will convert all of the files with the extension .pdbqt.vina",
 )
 
 PARSER.add_argument(
-    '--output_folder', '-o', type=str, default=None,
-    help='Path to folder where the .pdb files will be placed. \
+    "--output_folder",
+    "-o",
+    type=str,
+    default=None,
+    help="Path to folder where the .pdb files will be placed. \
     Files will be the basename of the docked file with _pose_{pose_number}.pdb \
-    replacing the extension .pdbqt.vina.'
+    replacing the extension .pdbqt.vina.",
 )
 PARSER.add_argument(
-    '--max_num_of_poses', type=int, required=False, default=-1,
-    help='Each docked file will have 1 or more poses of the ligand. This setting \
+    "--max_num_of_poses",
+    type=int,
+    required=False,
+    default=-1,
+    help="Each docked file will have 1 or more poses of the ligand. This setting \
     controls how many are converted. default is -1 which means all poses possible. \
     max_num_of_poses=1 means only the best docked pose will be converted. \
     If additional criteria like max_docking_score is applied a pose must meet both criteria \
     to be converted. ie) if max_num_of_poses= 5 and max_docking_score=-13.0 \
     for a pose to be converted it must be between the 1st and 5th pose in the file and \
-    must have docked with a score less than or equal to -13.0.'
+    must have docked with a score less than or equal to -13.0.",
 )
 
 PARSER.add_argument(
-    '--max_docking_score', type=float, required=False, default=None,
-    help='The most positive docking score to be converted. (More negative scores \
+    "--max_docking_score",
+    type=float,
+    required=False,
+    default=None,
+    help="The most positive docking score to be converted. (More negative scores \
     are predicted to bind better). If additional criteria such as \
     max_num_of_poses is applied a pose must meet both criteria \
     to be converted. ie) if max_num_of_poses= 5 and max_docking_score=-13.0 \
     for a pose to be converted it must be between the 1st and 5th pose in the file and \
-    must have docked with a score less than or equal to -13.0.'
+    must have docked with a score less than or equal to -13.0.",
 )
 
 PARSER.add_argument(
-    '--min_docking_score', type=float, required=False, default=None,
-    help='The most negative docking score to be converted. (More negative scores \
+    "--min_docking_score",
+    type=float,
+    required=False,
+    default=None,
+    help="The most negative docking score to be converted. (More negative scores \
     are predicted to bind better). If additional criteria such as \
     max_num_of_poses is applied a pose must meet both criteria \
     to be converted. ie) if min_docking_score= -15.0 and max_docking_score=-13.0 \
     for a pose to be converted it must: \
-    -13.0. <= docking score <= -15.0'
+    -13.0. <= docking score <= -15.0",
 )
 
 PARSER.add_argument(
@@ -331,7 +394,7 @@ PARSER.add_argument(
     metavar="N",
     default=-1,
     help="Number of processors to use for parallel calculations.\
-         Set to -1 for all available CPUs."
+         Set to -1 for all available CPUs.",
 )
 
 

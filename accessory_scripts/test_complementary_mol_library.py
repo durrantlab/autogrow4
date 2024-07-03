@@ -31,7 +31,8 @@ rdkit.RDLogger.DisableLog("rdApp.*")
 import support_scripts.Multiprocess as mp
 import support_scripts.mol_object_handling as MOH
 
-class SmilesClickChem():
+
+class SmilesClickChem:
     """
     This class will take a molecule and Mutate it by reacting it.
 
@@ -64,9 +65,7 @@ class SmilesClickChem():
         rxn_library_file = rxn_library_variables[1]
         function_group_library = rxn_library_variables[2]
         complementary_mol_dir = rxn_library_variables[3]
-        self.reaction_dict = self.retrieve_reaction_dict(
-            rxn_library, rxn_library_file
-        )
+        self.reaction_dict = self.retrieve_reaction_dict(rxn_library, rxn_library_file)
         # Retrieve the dictionary containing
         # all the possible ClickChem Reactions
         self.list_of_reaction_names = list(self.reaction_dict.keys())
@@ -177,22 +176,19 @@ class SmilesClickChem():
                     pwd,
                     "reaction_libraries",
                     "click_chem_rxns",
-                    "ClickChem_rxn_library.json"
+                    "ClickChem_rxn_library.json",
                 )
             elif rxn_library == "robust_rxns":
                 rxn_library_file = os.path.join(
                     pwd,
                     "reaction_libraries",
                     "robust_rxns",
-                    "Robust_Rxns_rxn_library.json"
+                    "Robust_Rxns_rxn_library.json",
                 )
             elif rxn_library == "all_rxns":
                 rxn_library_file = os.path.join(
-                    pwd,
-                    "reaction_libraries",
-                    "all_rxns",
-                    "All_Rxns_rxn_library.json"
-                    )
+                    pwd, "reaction_libraries", "all_rxns", "All_Rxns_rxn_library.json"
+                )
             elif rxn_library == "Custom":
                 if os.path.exists(rxn_library_file) is False:
                     raise Exception(
@@ -222,9 +218,7 @@ class SmilesClickChem():
                 )
 
             if os.path.isfile(rxn_library_file) is False:
-                raise Exception(
-                    "Custom specified rxn_library_file is not a file"
-                )
+                raise Exception("Custom specified rxn_library_file is not a file")
 
             try:
                 extension = os.path.splitext(rxn_library_file)[1]
@@ -306,20 +300,24 @@ class SmilesClickChem():
 
             if rxn_library == "click_chem_rxns":
                 function_group_library = os.path.join(
-                    pwd, "reaction_libraries",
+                    pwd,
+                    "reaction_libraries",
                     "click_chem_rxns",
                     "ClickChem_functional_groups.json",
                 )
             elif rxn_library == "robust_rxns":
                 function_group_library = os.path.join(
-                    pwd, "reaction_libraries",
+                    pwd,
+                    "reaction_libraries",
                     "robust_rxns",
                     "Robust_Rxns_functional_groups.json",
                 )
             elif rxn_library == "all_rxns":
                 function_group_library = os.path.join(
-                    pwd, "reaction_libraries",
-                    "all_rxns", "All_Rxns_functional_groups.json",
+                    pwd,
+                    "reaction_libraries",
+                    "all_rxns",
+                    "All_Rxns_functional_groups.json",
                 )
             elif rxn_library == "Custom":
                 if os.path.exists(function_group_library) is False:
@@ -479,6 +477,8 @@ class SmilesClickChem():
             )
 
         return complementary_mols_dict
+
+
 #
 def get_usable_format(infile):
     """
@@ -533,6 +533,8 @@ def get_usable_format(infile):
             usable_list_of_smiles.append(choice_list)
 
     return usable_list_of_smiles
+
+
 #
 def react_with_multiple_reactants(mol_tuple, mol_name, rxn_obj):
     """
@@ -551,9 +553,7 @@ def react_with_multiple_reactants(mol_tuple, mol_name, rxn_obj):
     """
     try:
         # if reaction works keep it
-        reaction_products_list = [
-                        x[0] for x in rxn_obj.RunReactants(mol_tuple)
-        ]
+        reaction_products_list = [x[0] for x in rxn_obj.RunReactants(mol_tuple)]
     except:
         return mol_name
 
@@ -561,6 +561,8 @@ def react_with_multiple_reactants(mol_tuple, mol_name, rxn_obj):
         return mol_name
     # created a new compound so it passes
     return None
+
+
 #
 def run_a_single_reactant_reaction(mol_info, rxn_obj):
     """
@@ -591,6 +593,8 @@ def run_a_single_reactant_reaction(mol_info, rxn_obj):
         return mol_name
     # created a new compound so it passes
     return None
+
+
 #
 def get_rxn_and_examples(current_rxn_dict):
     """
@@ -609,8 +613,12 @@ def get_rxn_and_examples(current_rxn_dict):
     rxn_name = current_rxn_dict["reaction_name"]
     # Test example reactants
     example_smiles_rxn_reactants = current_rxn_dict["example_rxn_reactants"]
-    example_smiles_rxn_reactants = example_smiles_rxn_reactants.replace("['", "").replace("']", "")
-    example_smiles_rxn_reactants = example_smiles_rxn_reactants.replace(" ", "").replace('"', "")
+    example_smiles_rxn_reactants = example_smiles_rxn_reactants.replace(
+        "['", ""
+    ).replace("']", "")
+    example_smiles_rxn_reactants = example_smiles_rxn_reactants.replace(
+        " ", ""
+    ).replace('"', "")
     example_smiles_rxn_reactants = example_smiles_rxn_reactants.split("','")
 
     example_rxn_reactants = []
@@ -641,10 +649,10 @@ def get_rxn_and_examples(current_rxn_dict):
         print(printout)
         raise Exception(printout)
 
-
     # Demo on example reactants
-    example_results = react_with_multiple_reactants(example_rxn_reactants,
-                                                    "test_reactions", rxn_obj)
+    example_results = react_with_multiple_reactants(
+        example_rxn_reactants, "test_reactions", rxn_obj
+    )
     if example_results is not None:
         printout = "rxn {} failed to run on example compounds.".format(rxn_name)
         printout = printout + "\nPlease check example compounds"
@@ -652,6 +660,8 @@ def get_rxn_and_examples(current_rxn_dict):
         raise Exception(printout)
 
     return example_rxn_reactants, rxn_obj
+
+
 #
 def run_all_for_fun_group(vars, fun_group, rxns_by_fun_group, a_smiles_click_object):
     """
@@ -725,10 +735,13 @@ def run_all_for_fun_group(vars, fun_group, rxns_by_fun_group, a_smiles_click_obj
                 else:
                     mol_tuple_temp.append(example_reactants[i_count])
 
-            list_of_reactants.append(tuple([tuple(mol_tuple_temp), mol_info[1], rxn_obj]))
+            list_of_reactants.append(
+                tuple([tuple(mol_tuple_temp), mol_info[1], rxn_obj])
+            )
 
-        output = mp.multi_threading(list_of_reactants, number_of_processors,
-                                    react_with_multiple_reactants)
+        output = mp.multi_threading(
+            list_of_reactants, number_of_processors, react_with_multiple_reactants
+        )
         output = [x for x in output if x is not None]
         failed_to_react.append([rxn_name, output])
 
@@ -752,6 +765,8 @@ def run_all_for_fun_group(vars, fun_group, rxns_by_fun_group, a_smiles_click_obj
         f.write("\n".join(master_passes_reactions))
 
     return failed_to_react, failed_to_sanitize
+
+
 #
 def run_main(vars):
     """
@@ -773,7 +788,7 @@ def run_main(vars):
         rxn_library,
         rxn_library_file,
         function_group_library,
-        complementary_mol_dir
+        complementary_mol_dir,
     ]
     new_mutation_smiles_list = []
 
@@ -799,9 +814,9 @@ def run_main(vars):
     failed_to_react_by_fun_group = {}
 
     for fun_group in rxns_by_fun_group.keys():
-        failed_to_react, failed_to_sanitize = run_all_for_fun_group(vars, fun_group,
-                                                                    rxns_by_fun_group,
-                                                                    a_smiles_click_chem_object)
+        failed_to_react, failed_to_sanitize = run_all_for_fun_group(
+            vars, fun_group, rxns_by_fun_group, a_smiles_click_chem_object
+        )
         failed_to_react_by_fun_group[fun_group] = failed_to_react
         failed_to_sanitize_by_fun_group[fun_group] = failed_to_sanitize
 
@@ -822,6 +837,8 @@ def run_main(vars):
         print("All compounds passed!")
     else:
         print("{} compounds failed. Please check logs".format(len(master_failed_list)))
+
+
 #
 def get_arguments_from_argparse(args_dict):
     """
@@ -862,22 +879,27 @@ def get_arguments_from_argparse(args_dict):
     except:
         raise ValueError(
             "number_of_processors must be an int. \
-            To use all processors set to -1.")
+            To use all processors set to -1."
+        )
 
     if "output_folder" not in args_dict.keys():
-        printout = "output_folder is a required variable. it is the PATH to where " + \
-            "filtered .smi file and log files will be placed. Will save a file " + \
-            "in this directory for mols which failed sanitization, mols which " + \
-            "failed to react in specific reactions, and .smi files that contain " + \
-            "all mols that reacted properly."
+        printout = (
+            "output_folder is a required variable. it is the PATH to where "
+            + "filtered .smi file and log files will be placed. Will save a file "
+            + "in this directory for mols which failed sanitization, mols which "
+            + "failed to react in specific reactions, and .smi files that contain "
+            + "all mols that reacted properly."
+        )
         raise ValueError(printout)
 
     if type(args_dict["output_folder"]) != str or args_dict["output_folder"] == "":
-        printout = "output_folder is a required variable. it is the PATH to where " + \
-            "filtered .smi file and log files will be placed. Will save a file " + \
-            "in this directory for mols which failed sanitization, mols which " + \
-            "failed to react in specific reactions, and .smi files that contain " + \
-            "all mols that reacted properly."
+        printout = (
+            "output_folder is a required variable. it is the PATH to where "
+            + "filtered .smi file and log files will be placed. Will save a file "
+            + "in this directory for mols which failed sanitization, mols which "
+            + "failed to react in specific reactions, and .smi files that contain "
+            + "all mols that reacted properly."
+        )
         raise ValueError(printout)
 
     args_dict["output_folder"] = os.path.abspath(args_dict["output_folder"]) + os.sep
@@ -895,6 +917,8 @@ def get_arguments_from_argparse(args_dict):
             raise Exception("output_folder could not be made or found.")
 
     return args_dict
+
+
 #
 
 
@@ -906,7 +930,7 @@ PARSER.add_argument(
     type=str,
     default="",
     required=True,
-    help="This PATH to a Custom json file of SMARTS reactions to use for Mutation."
+    help="This PATH to a Custom json file of SMARTS reactions to use for Mutation.",
 )
 PARSER.add_argument(
     "--function_group_library",
@@ -948,7 +972,6 @@ PARSER.add_argument(
     help="Number of processors to use for parallel calculations. \
     Set to -1 for all available CPUs.",
 )
-
 
 
 ARGS_DICT = vars(PARSER.parse_args())

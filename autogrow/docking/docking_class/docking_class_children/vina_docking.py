@@ -21,8 +21,13 @@ class VinaDocking(ParentDocking):
     :param class ParentDocking: Parent docking class to inherit from
     """
 
-    def __init__(self, vars=None, receptor_file=None,
-                 file_conversion_class_object=None, test_boot=True):
+    def __init__(
+        self,
+        vars=None,
+        receptor_file=None,
+        file_conversion_class_object=None,
+        test_boot=True,
+    ):
         """
         get the specifications for Vina/QuickVina2 from vars load them into
         the self variables we will need and convert the receptor to the proper
@@ -74,10 +79,10 @@ class VinaDocking(ParentDocking):
 
         # convert ligands to pdbqt format
         # log("\nConverting ligand PDB files to PDBQT format...")
-        did_it_convert, smile_name = \
-            self.file_conversion_class_object.convert_ligand_pdb_file_to_pdbqt(
-                pdb_file
-            )
+        (
+            did_it_convert,
+            smile_name,
+        ) = self.file_conversion_class_object.convert_ligand_pdb_file_to_pdbqt(pdb_file)
 
         if did_it_convert is False:
             # conversion failed
@@ -270,22 +275,25 @@ class VinaDocking(ParentDocking):
 
         # Add optional user variables additional variable
         if (
-                vars["docking_exhaustiveness"] is not None
-                and vars["docking_exhaustiveness"] != "None"
+            vars["docking_exhaustiveness"] is not None
+            and vars["docking_exhaustiveness"] != "None"
         ):
             if (
-                    type(vars["docking_exhaustiveness"]) == int
-                    or type(vars["docking_exhaustiveness"]) == float
+                type(vars["docking_exhaustiveness"]) == int
+                or type(vars["docking_exhaustiveness"]) == float
             ):
                 torun = (
                     torun
                     + " --exhaustiveness "
                     + str(int(vars["docking_exhaustiveness"]))
                 )
-        if vars["docking_num_modes"] is not None and vars["docking_num_modes"] != "None":
+        if (
+            vars["docking_num_modes"] is not None
+            and vars["docking_num_modes"] != "None"
+        ):
             if (
-                    type(vars["docking_num_modes"]) == int
-                    or type(vars["docking_num_modes"]) == float
+                type(vars["docking_num_modes"]) == int
+                or type(vars["docking_num_modes"]) == float
             ):
                 torun = torun + " --num_modes " + str(int(vars["docking_num_modes"]))
 
@@ -424,11 +432,9 @@ class VinaDocking(ParentDocking):
         if not os.path.exists(pdb_file):
             # PDB file doesn't exist
             return False, None
-        smile_name = self.file_conversion_class_object.get_smile_name_from_pdb(
-            pdb_file
-        )
+        smile_name = self.file_conversion_class_object.get_smile_name_from_pdb(pdb_file)
         if not os.path.exists(pdb_file + "qt.vina"):
-        # so this pdbqt.vina file didn't exist
+            # so this pdbqt.vina file didn't exist
             if self.debug_mode is False:
                 print(
                     "Docking unsuccessful: Deleting "
@@ -458,9 +464,14 @@ class VinaDocking(ParentDocking):
     # implementation and approach varies by docking and scoring choice
     ##########################################
 
-    def rank_and_save_output_smi(self, vars, current_generation_dir,
-                                 current_gen_int, smile_file,
-                                 deleted_smiles_names_list):
+    def rank_and_save_output_smi(
+        self,
+        vars,
+        current_generation_dir,
+        current_gen_int,
+        smile_file,
+        deleted_smiles_names_list,
+    ):
         """
         Given a folder with PDBQT's, rank all the SMILES based on docking
         score (High to low). Then format it into a .smi file. Then save the
@@ -500,8 +511,8 @@ class VinaDocking(ParentDocking):
 
         # Only add these when we haven't already redocked the ligand
         if (
-                self.vars["redock_elite_from_previous_gen"] is False
-                and current_gen_int != 0
+            self.vars["redock_elite_from_previous_gen"] is False
+            and current_gen_int != 0
         ):
             # Go to previous generation folder
             prev_gen_num = str(current_gen_int - 1)
@@ -517,8 +528,8 @@ class VinaDocking(ParentDocking):
             # Also check sometimes Generation 1 won't have a previous
             # generation to do this with and sometimes it will
             if (
-                    current_gen_int == 1
-                    and os.path.exists(ranked_smi_file_prev_gen) is False
+                current_gen_int == 1
+                and os.path.exists(ranked_smi_file_prev_gen) is False
             ):
                 pass
             else:

@@ -42,7 +42,6 @@ class NN1(VINA):
             print("######################")
             print("Running NN1 rescoring on vina files")
 
-
     #######################
     # Executed by the Execute_Scoring.py script
     #######################
@@ -225,7 +224,8 @@ def run_nn_rescoring(vars, vina_output_file):
     nn1_output = vina_output_file + ".nn1"
     # sys.executable is the path to python executable
     torun = (
-        sys.executable + " "
+        sys.executable
+        + " "
         + nn1_executable
         + " -receptor "
         + receptor

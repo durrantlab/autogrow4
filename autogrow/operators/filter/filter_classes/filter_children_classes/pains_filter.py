@@ -15,6 +15,7 @@ doi:10.1021/jm901137j.
 
 import __future__
 
+import rdkit
 from rdkit.Chem import FilterCatalog
 from rdkit.Chem.FilterCatalog import FilterCatalogParams
 
@@ -72,12 +73,12 @@ class PAINSFilter(ParentFilter):
         params_list = [params_PAINS_A, params_PAINS_B, params_PAINS_C, params_PAINS]
         filters_list = []
         for param in params_list:
-            filter = FilterCatalog.FilterCatalog(param)
-            filters_list.append(filter)
+            filtr = FilterCatalog.FilterCatalog(param)
+            filters_list.append(filtr)
 
         return filters_list
 
-    def run_filter(self, mol):
+    def run_filter(self, mol: rdkit.Chem.rdchem.Mol) -> bool:
         """
         Runs a PAINS filter by matching common false positive molecules to the
         current mol.

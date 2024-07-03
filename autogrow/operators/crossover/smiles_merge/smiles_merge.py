@@ -15,6 +15,7 @@ import autogrow.operators.crossover.smiles_merge.merge_functions.dict_and_r_grou
 import autogrow.operators.crossover.smiles_merge.merge_functions.alignment_and_breaks as AnB
 import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
 
+
 def process_ligand_new_mol(ligand_new_mol):
     """
     This function processes the ligand_new_mol.
@@ -54,6 +55,7 @@ def process_ligand_new_mol(ligand_new_mol):
     ligand_new_smiles = Chem.MolToSmiles(ligand_new_mol, isomericSmiles=True)
 
     return ligand_new_smiles
+
 
 def run_main_smiles_merge(vars, lig_string_1, lig_string_2):
     """

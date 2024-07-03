@@ -82,6 +82,7 @@ class LigEfficiency(VINA):
 # These Functions are placed outside the class for multithreading reasons.
 # Multithreading doesn't like being executed within the class.
 
+
 def get_number_heavy_atoms(smiles_str):
     """
     Get the number of non Hydrogens in a SMILE

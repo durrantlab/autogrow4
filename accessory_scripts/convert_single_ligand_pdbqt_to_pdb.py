@@ -41,10 +41,14 @@ def convert_pdbqt_to_pdb(pdbqt_file_in, pdb_file_out):
                     short_line = short_line + line[i]
 
                 printout = printout + short_line
-            elif "REMARK                            x       y       z     vdW  Elec" + \
-                "       q    Type" in line \
-                or "REMARK                         _______ _______ _______ _____ _____"+ \
-                "    ______ ____" in line:
+            elif (
+                "REMARK                            x       y       z     vdW  Elec"
+                + "       q    Type"
+                in line
+                or "REMARK                         _______ _______ _______ _____ _____"
+                + "    ______ ____"
+                in line
+            ):
                 short_line = ""
                 for i in line_index_range:
                     # print(i)
@@ -58,7 +62,10 @@ def convert_pdbqt_to_pdb(pdbqt_file_in, pdb_file_out):
                 printout = printout + line
     with open(pdb_file_out, "w") as f:
         f.write(printout)
+
+
 #
+
 
 def get_arguments_from_argparse(args_dict):
     """
@@ -70,7 +77,6 @@ def get_arguments_from_argparse(args_dict):
     :returns: dict args_dict: dictionary of parameters
     """
 
-
     # Argument handling
     if type(args_dict["pdbqt_file"]) != str:
         raise Exception("provided pdbqt_file must be a .pdbqt file.")
@@ -79,14 +85,18 @@ def get_arguments_from_argparse(args_dict):
     if os.path.exists(args_dict["pdbqt_file"]) is False:
         raise Exception("provided pdbqt_file must be a .pdbqt file.")
     else:
-        if args_dict["pdbqt_file"].split(".")[-1] != "pdbqt" and \
-            args_dict["pdbqt_file"].split(".")[-1] != "PDBQT":
+        if (
+            args_dict["pdbqt_file"].split(".")[-1] != "pdbqt"
+            and args_dict["pdbqt_file"].split(".")[-1] != "PDBQT"
+        ):
 
             raise Exception("provided pdbqt_file must be a .pdbqt file.")
 
     if args_dict["output_file"] is not None:
-        if args_dict["output_file"].split(".")[-1] != "pdb" and \
-            args_dict["output_file"].split(".")[-1] != "PDB":
+        if (
+            args_dict["output_file"].split(".")[-1] != "pdb"
+            and args_dict["output_file"].split(".")[-1] != "PDB"
+        ):
             raise Exception("provided output_file must be a .pdb file.")
 
         if os.path.exists(os.path.dirname(args_dict["output_file"])) is False:
@@ -95,26 +105,39 @@ def get_arguments_from_argparse(args_dict):
             except:
                 pass
             if os.path.exists(os.path.dirname(args_dict["output_file"])) is False:
-                raise Exception("directory to output the file could not be made or found.")
+                raise Exception(
+                    "directory to output the file could not be made or found."
+                )
     else:
-        args_dict["output_file"] = os.path.dirname(args_dict["pdbqt_file"]) + \
-            args_dict["pdbqt_file"].replace(".pdbqt", ".pdb").replace(".PDBQT", ".pdb")
+        args_dict["output_file"] = os.path.dirname(args_dict["pdbqt_file"]) + args_dict[
+            "pdbqt_file"
+        ].replace(".pdbqt", ".pdb").replace(".PDBQT", ".pdb")
 
     return args_dict
+
+
 #
 
 
 # Argument parsing
 PARSER = argparse.ArgumentParser()
 PARSER.add_argument(
-    '--pdbqt_file', '-f', required=True, default=None,
-    help='Path to .pdbqt file to convert to a .pdb file. This must be a single \
-    ligand and must end with .pdbqt')
+    "--pdbqt_file",
+    "-f",
+    required=True,
+    default=None,
+    help="Path to .pdbqt file to convert to a .pdb file. This must be a single \
+    ligand and must end with .pdbqt",
+)
 PARSER.add_argument(
-    '--output_file', '-o', type=str, default=None,
-    help='Path to file where we will output .pdb file. \
+    "--output_file",
+    "-o",
+    type=str,
+    default=None,
+    help="Path to file where we will output .pdb file. \
     If not provide the output .pdb will be the same as the input \
-    pdbqt_file but ending with .pdb instead of .pdbqt.')
+    pdbqt_file but ending with .pdb instead of .pdbqt.",
+)
 
 ARGS_DICT = vars(PARSER.parse_args())
 ARGS_DICT = get_arguments_from_argparse(ARGS_DICT)

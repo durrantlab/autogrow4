@@ -3,13 +3,15 @@ This script holds the parent class for scoring/rescoring.
 This is used as the basis for all scoring/rescoring classes.
 """
 import __future__
+from abc import ABC, abstractmethod
 
-class ParentScoring(object):
+
+class ParentScoring(ABC):
     """
     This is a script containing all of the scoring functions.
     """
 
-    def get_name(self):
+    def get_name(self) -> str:
         """
         Returns the current class name.
 
@@ -18,7 +20,8 @@ class ParentScoring(object):
         """
         return self.__class__.__name__
 
-    def run_scoring(self, input_string):
+    @abstractmethod
+    def run_scoring(self, input_string: str) -> None:
         """
         run_scoring is needs to be implemented in each class.
 
@@ -26,4 +29,5 @@ class ParentScoring(object):
         :param str input_string:  A string to raise an exception
         """
 
-        raise NotImplementedError("run_scoring() not implemented")
+        # raise NotImplementedError("run_scoring() not implemented")
+        pass

@@ -21,8 +21,9 @@ import rdkit.Chem as Chem
 import rdkit.Chem.Lipinski as Lipinski
 import rdkit.Chem.Crippen as Crippen
 import rdkit.Chem.Descriptors as Descriptors
-#Disable the unnecessary RDKit warnings
-rdkit.RDLogger.DisableLog('rdApp.*')
+
+# Disable the unnecessary RDKit warnings
+rdkit.RDLogger.DisableLog("rdApp.*")
 
 from autogrow.operators.filter.filter_classes.parent_filter_class import ParentFilter
 
@@ -51,7 +52,7 @@ class LipinskiLenientFilter(ParentFilter):
     :param class ParentFilter: a parent class to initialize off
     """
 
-    def run_filter(self, mol):
+    def run_filter(self, mol: rdkit.Chem.rdchem.Mol) -> bool:
         """
         This runs the Lenient Lipinski filter. Lipinski filter refines for
         orally available drugs. It filters molecules by Molecular weight (MW),
@@ -80,18 +81,18 @@ class LipinskiLenientFilter(ParentFilter):
 
         exact_mwt = Descriptors.ExactMolWt(mol)
         if exact_mwt > 500:
-            violation_counter = violation_counter + 1
+            violation_counter += 1
 
         num_hydrogen_bond_donors = Lipinski.NumHDonors(mol)
         if num_hydrogen_bond_donors > 5:
-            violation_counter = violation_counter + 1
+            violation_counter += 1
 
         num_hydrogen_bond_acceptors = Lipinski.NumHAcceptors(mol)
         if num_hydrogen_bond_acceptors > 10:
-            violation_counter = violation_counter + 1
+            violation_counter += 1
         mol_log_p = Crippen.MolLogP(mol)
         if mol_log_p > 5:
-            violation_counter = violation_counter + 1
+            violation_counter += 1
 
         if violation_counter < 2:
             return True

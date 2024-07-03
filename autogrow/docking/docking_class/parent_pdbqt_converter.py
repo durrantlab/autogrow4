@@ -3,8 +3,11 @@ This script holds the parent class for file conversion for docking.
 This is used as the basis for all file conversion classes.
 """
 import __future__
+from abc import ABC, abstractmethod
+from typing import Dict, Optional, Tuple
 
-class ParentPDBQTConverter(object):
+
+class ParentPDBQTConverter(ABC):
     """
     Docking
 
@@ -12,7 +15,12 @@ class ParentPDBQTConverter(object):
     :param class object: a class to initialize on
     """
 
-    def __init__(self, vars=None, receptor_file=None, test_boot=True):
+    def __init__(
+        self,
+        vars: Optional[Dict] = None,
+        receptor_file: Optional[str] = None,
+        test_boot: bool = True,
+    ):
         """
         Require to initialize any pdbqt conversion class.
 
@@ -25,7 +33,7 @@ class ParentPDBQTConverter(object):
 
         pass
 
-    def get_name(self):
+    def get_name(self) -> str:
         """
         Returns the current class name.
 
@@ -35,9 +43,14 @@ class ParentPDBQTConverter(object):
 
         return self.__class__.__name__
 
-    def convert_receptor_pdb_files_to_pdbqt(self, receptor_file, mgl_python,
-                                            receptor_template,
-                                            number_of_processors):
+    @abstractmethod
+    def convert_receptor_pdb_files_to_pdbqt(
+        self,
+        receptor_file: str,
+        mgl_python: str,
+        receptor_template: str,
+        number_of_processors: int,
+    ) -> None:
         """
         Make sure a PDB file is properly formatted for conversion to pdbqt
 
@@ -49,11 +62,16 @@ class ParentPDBQTConverter(object):
         :param int number_of_processors: number of processors to multithread
         """
 
-        raise NotImplementedError(
-            "convert_receptor_pdb_files_to_pdbqt() not implemented"
-        )
+        # raise NotImplementedError(
+        #     "convert_receptor_pdb_files_to_pdbqt() not implemented"
+        # )
 
-    def convert_ligand_pdb_file_to_pdbqt(self, pdb_file):
+        pass
+
+    @abstractmethod
+    def convert_ligand_pdb_file_to_pdbqt(
+        self, pdb_file: str
+    ) -> Tuple[bool, Optional[str]]:
         """
         Convert the ligands of a given directory from pdb to pdbqt format
 
@@ -66,4 +84,5 @@ class ParentPDBQTConverter(object):
             None if its the param file
         """
 
-        raise NotImplementedError("rank_and_save_output_smi() not implemented")
+        # raise NotImplementedError("rank_and_save_output_smi() not implemented")
+        pass

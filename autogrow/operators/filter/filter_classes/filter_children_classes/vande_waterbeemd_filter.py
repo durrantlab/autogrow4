@@ -47,7 +47,7 @@ class VandeWaterbeemdFilter(ParentFilter):
     :returns: bool bool: True if the mol passes the filter; False if it fails the filter
     """
 
-    def run_filter(self, mol):
+    def run_filter(self, mol: rdkit.Chem.rdchem.Mol) -> bool:
         """
         This runs a VandeWaterbeemd filter for drugs which are likely to be
         blood brain barrier permeable. VandeWaterbeemd filter filters

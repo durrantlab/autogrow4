@@ -19,6 +19,7 @@ import argparse
 import matplotlib
 import matplotlib.pyplot as plt
 
+
 def get_usable_format(infile):
     """
     This code takes a string for an file which is formatted as an .smi file. It
@@ -114,13 +115,13 @@ def get_average_score_per_gen(infolder, folder_list):
 
             gen_affinity_average = gen_affinity_sum / num_lines_counter
 
-
             gen_num = os.path.basename(rank_file).split("_")[1]
             gen_name = "generation_{}".format(gen_num)
             average_affinity_dict[gen_name] = gen_affinity_average
 
     print_gens(average_affinity_dict)
     return average_affinity_dict
+
 
 def get_average_top_score_per_gen(infolder, folder_list, top_score_per_gen):
     """
@@ -187,6 +188,7 @@ def get_average_top_score_per_gen(infolder, folder_list, top_score_per_gen):
     print_gens(average_affinity_dict)
     return average_affinity_dict
 
+
 def print_gens(average_affinity_dict):
     """
     This prints out the average scores for each generation
@@ -201,6 +203,7 @@ def print_gens(average_affinity_dict):
     affinity_keys.sort(key=lambda x: int(x.split("_")[1]))
     for gen in affinity_keys:
         print(gen, "                  ", average_affinity_dict[gen])
+
 
 def make_graph(dictionary):
     """
@@ -219,10 +222,10 @@ def make_graph(dictionary):
     list_generations = []
     list_of_gen_names = []
     list_of_scores = []
-    #print(dictionary)
+    # print(dictionary)
 
     for key in dictionary.keys():
-        #print(key)
+        # print(key)
         list_of_gen_names.append(key)
 
         score = dictionary[key]
@@ -239,6 +242,7 @@ def make_graph(dictionary):
             return None, None
 
     return list_generations, list_of_scores
+
 
 def run_plotter(vars, dict_of_averages, outfile):
     """
@@ -300,7 +304,9 @@ def run_plotter(vars, dict_of_averages, outfile):
 
     if vars["plot_reference_lines"] is not None:
         for ref_info in vars["plot_reference_lines"]:
-            ax.axhline(y=ref_info[1], color=ref_info[2], linestyle=':', label=ref_info[0])
+            ax.axhline(
+                y=ref_info[1], color=ref_info[2], linestyle=":", label=ref_info[0]
+            )
 
     ax.set_ylim()
 
@@ -355,8 +361,8 @@ def run_plotter(vars, dict_of_averages, outfile):
 
     plt.xlabel("Generation Number", fontweight="semibold")
 
-    plt.savefig(outfile, bbox_inches="tight", \
-        foramt=vars["outfile_format"], dpi=1000)
+    plt.savefig(outfile, bbox_inches="tight", foramt=vars["outfile_format"], dpi=1000)
+
 
 def print_data_table(infolder, folder_list):
     """
@@ -408,6 +414,7 @@ def print_data_table(infolder, folder_list):
 
     return dict_of_averages
 
+
 def generate_figures(vars):
     """
     This runs everything to make a line plot of the results of an Autogrow
@@ -434,6 +441,7 @@ def generate_figures(vars):
     dict_of_averages = print_data_table(infolder, folder_list)
     run_plotter(vars, dict_of_averages, outfile)
 
+
 ######## Handle Variables #####
 def retrieve_vars_dict(autogrow_vars_json):
     """
@@ -445,15 +453,21 @@ def retrieve_vars_dict(autogrow_vars_json):
     :returns: dict vars: a dictionary of variable to use
     """
     if os.path.exists(autogrow_vars_json) is False:
-        raise Exception("variable file could not be found. It should be the \
-            vars.json file written by AutoGrow in the output folder of the run.")
+        raise Exception(
+            "variable file could not be found. It should be the \
+            vars.json file written by AutoGrow in the output folder of the run."
+        )
     try:
         with open(autogrow_vars_json, "r") as f:
             vars = json.load(f)
     except:
-        raise Exception("variable file would not import. It should be the \
-            vars.json file written by AutoGrow in the output folder of the run.")
+        raise Exception(
+            "variable file would not import. It should be the \
+            vars.json file written by AutoGrow in the output folder of the run."
+        )
     return vars
+
+
 #
 def process_inputs(inputs):
     """
@@ -468,23 +482,32 @@ def process_inputs(inputs):
     # handle input information
     inputs["infolder"] = os.path.abspath(inputs["infolder"]) + os.sep
     if os.path.exists(inputs["infolder"]) is False:
-        raise Exception("Input folder {} does not\
-            exist.".format(inputs["infolder"]))
+        raise Exception(
+            "Input folder {} does not\
+            exist.".format(
+                inputs["infolder"]
+            )
+        )
 
     # get vars dict from last run
     inputs["vars_json"] = inputs["infolder"] + "vars.json"
     if os.path.exists(inputs["vars_json"]) is False:
-        raise Exception("Input folder {} does not contain the vars.json file \
+        raise Exception(
+            "Input folder {} does not contain the vars.json file \
             necessary to run script. Please make sure the vars.json is in the \
-            folder.".format(inputs["infolder"]))
+            folder.".format(
+                inputs["infolder"]
+            )
+        )
 
     try:
         with open(inputs["vars_json"], "r") as f:
             vars_dict = json.load(f)
     except:
-        raise Exception("variable file would not import. It should be the \
-            vars.json file written by AutoGrow in the output folder of the run.")
-
+        raise Exception(
+            "variable file would not import. It should be the \
+            vars.json file written by AutoGrow in the output folder of the run."
+        )
 
     if "outfile_format" in inputs.keys():
         if inputs["outfile_format"] is None:
@@ -502,12 +525,17 @@ def process_inputs(inputs):
             if os.path.dirname(inputs["outfile"]) is False:
                 raise Exception("outfile directory does not exist")
         else:
-            inputs["outfile"] = inputs["infolder"] + os.sep + \
-                "data_line_plot." + inputs["outfile_format"]
+            inputs["outfile"] = (
+                inputs["infolder"]
+                + os.sep
+                + "data_line_plot."
+                + inputs["outfile_format"]
+            )
 
     else:
-        inputs["outfile"] = inputs["infolder"] + os.sep + \
-            "data_line_plot." + inputs["outfile_format"]
+        inputs["outfile"] = (
+            inputs["infolder"] + os.sep + "data_line_plot." + inputs["outfile_format"]
+        )
 
     # update --plot_reference_lines
     if "plot_reference_lines" not in inputs.keys():
@@ -519,7 +547,9 @@ def process_inputs(inputs):
 
         ref_lines = inputs["plot_reference_lines"].replace("[[", "[").replace("]]", "]")
         ref_lines = ref_lines.split("],")
-        ref_lines = [ref.replace("]", "").replace("[", "").split(",") for ref in ref_lines]
+        ref_lines = [
+            ref.replace("]", "").replace("[", "").split(",") for ref in ref_lines
+        ]
 
         new_ref_lines = []
         failed_io = False
@@ -556,6 +586,8 @@ def process_inputs(inputs):
         vars_dict[key] = inputs[key]
 
     return vars_dict
+
+
 #
 
 ######################################
@@ -576,7 +608,8 @@ PARSER.add_argument(
 PARSER.add_argument(
     "--outfile_format",
     metavar="param.outfile_format",
-    type=str, default="svg",
+    type=str,
+    default="svg",
     choices=["svg", "png", "jpg", "pdf"],
     help="The type of file for figure to be exported as default is .svg file.",
 )
@@ -598,7 +631,7 @@ PARSER.add_argument(
         will add horizontal dotted lines at -12.8 (yellow) and -10.7 (black) \
         with Olaparib and Niraparib added to the legend. \
         Spaces must be within quotes and not be between variables. \
-        matplotlib colors can be found with mcolors.get_named_colors_mapping().keys()"
+        matplotlib colors can be found with mcolors.get_named_colors_mapping().keys()",
 )
 
 
