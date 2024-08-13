@@ -1,11 +1,11 @@
 # Copyright 2018 Jacob D. Durrant
-#
+
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-#
+
 #     http://www.apache.org/licenses/LICENSE-2.0
-#
+
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -85,9 +85,6 @@ def check_sanitization(mol):
         return mol
 
 
-#
-
-
 def handleHs(mol, protanate_step):
     """
     Given a rdkit.Chem.rdchem.Mol this script will sanitize the molecule, remove all non-explicit H's
@@ -124,9 +121,6 @@ def handleHs(mol, protanate_step):
     return mol
 
 
-#
-
-
 def try_deprotanation(sanitized_mol):
     """
     Given an already sanitize rdkit.Chem.rdchem.Mol object, we will try to deprotanate the mol of all non-explicit
@@ -146,9 +140,6 @@ def try_deprotanation(sanitized_mol):
     mol_sanitized = check_sanitization(mol)
 
     return mol_sanitized
-
-
-#
 
 
 def try_reprotanation(sanitized_deprotanated_mol):
@@ -173,9 +164,6 @@ def try_reprotanation(sanitized_deprotanated_mol):
         return mol_sanitized
     else:
         return None
-
-
-#
 
 
 def remove_atoms(mol, list_of_idx_to_remove):
@@ -213,9 +201,6 @@ def remove_atoms(mol, list_of_idx_to_remove):
         return new_mol
     except:
         return None
-
-
-#
 
 
 def Nitrogen_charge_adjustment(mol):
@@ -262,9 +247,6 @@ def Nitrogen_charge_adjustment(mol):
     return mol
 
 
-#
-
-
 def check_for_unassigned_atom(mol):
     """
     Check there isn't a missing atom group ie. '*'
@@ -282,9 +264,6 @@ def check_for_unassigned_atom(mol):
         if atom.GetAtomicNum() == 0:
             return None
     return mol
-
-
-#
 
 
 def handle_frag_check(mol):
@@ -324,6 +303,3 @@ def handle_frag_check(mol):
         largest_frag_idx = frag_info_list[0][0]
         largest_frag = frags[largest_frag_idx]
         return largest_frag
-
-
-#

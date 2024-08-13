@@ -132,7 +132,7 @@ directory. The path can be found by:
    directory.
 
 When using AutoGrow, specify the path to this MGLTools directory using the
-`--mgltools_directory` parameter: `python RunAutogrow.py ..
+`--mgltools_directory` parameter: `python run_autogrow.py ..
 --mgltools_directory /PATH_TO/mgltools_x86_64Linux2_1.5.6 ...`
 
 On Linux and macOS machines, AutoGrow4 will auto-locate three important file
@@ -148,7 +148,7 @@ If running on Windows OS (limited support) please provide those paths to
 AutoGrow4 explicitly:
 
 ```bash
-python RunAutogrow.py .. \
+python run_autogrow.py .. \
     --mgltools_directory /PATH_TO/mgltools_win32_1.5.6\ \
     --prepare_ligand4.py /PATH_TO/mgltools_win32_1.5.6\ \
     --prepare_receptor4.py /PATH_TO/mgltools_win32_1.5.6\ \
@@ -197,7 +197,7 @@ can be found by running `which obabel`
 This path should be provided to AutoGrow4 using the `--obabel_path` variable:
 
 ```bash
-python RunAutogrow.py .. --obabel_path /PATH_TO/obabel ...
+python run_autogrow.py .. --obabel_path /PATH_TO/obabel ...
 ```
 
 ### Python APIs (Required)
@@ -314,7 +314,7 @@ AutoGrow4 allows users to provide custom docking software. This could be as
 simple as using a different version of Autodock Vina:
 
 ```bash
-python RunAutogrow.py ... --docking_executable /PATH_TO/Autodock_Vina_version_X_executable
+python run_autogrow.py ... --docking_executable /PATH_TO/Autodock_Vina_version_X_executable
 ```
 
 More advanced use allows users to provide a custom docking program. Details
@@ -386,7 +386,7 @@ the MolVS and Dimorphite-DL packages.
 
 ## Running AutoGrow4
 
-To run AutoGrow4, use the python script `RunAutogrow.py`, located in the top
+To run AutoGrow4, use the python script `run_autogrow.py`, located in the top
 AutoGrow4 directory, from the command line. AutoGrow4 accepts user input via
 two methods:
 
@@ -395,7 +395,7 @@ two methods:
 ```bash
 cd /PATH_TO/autogrow4/
 
-python RunAutogrow.py \
+python run_autogrow.py \
     --filename_of_receptor /autogrow4/autogrow/tutorial/PARP/4r6eA_PARP1_prepared.pdb \
     --center_x -70.76 --center_y  21.82 --center_z 28.33 \
     --size_x 25.0 --size_y 16.0 --size_z 25.0 \
@@ -431,7 +431,7 @@ python RunAutogrow.py \
 
 ```bash
 cd /PATH_TO/autogrow4/
-python RunAutogrow.py -j /PATH_TO/json_file_with_variable.json
+python run_autogrow.py -j /PATH_TO/json_file_with_variable.json
 ```
 
 Examples of the json files can be found in the folder
@@ -442,7 +442,7 @@ Examples of the json files can be found in the folder
 An explanation of every parameter can be retrieved by running:
 
 ```bash
-python /autogrow4/RunAutogrow.py --help
+python /autogrow4/run_autogrow.py --help
 ```
 
 Custom options such as custom filters, docking software, reaction libraries,
@@ -494,9 +494,9 @@ pocket. Changing the coordinates, protein, docking software, or (re)scoring
 method will invalidate any information.
 
 More information is provided in the `use_docked_source_compounds` section of
-the `RunAutoGrow.py` help menu, which can be displayed by running:
+the `run_autogrow.py` help menu, which can be displayed by running:
 
-```bash python RunAutoGrow.py --help```
+```bash python run_autogrow.py --help```
 
 ## Docker Submission
 
@@ -628,7 +628,7 @@ an example of each when submitting custom filters.
        `[["custom_filter_1","/PATH_TO/custom_filter_1.py"],["custom_filter_2","/PATH_TO/custom_filter_2.py"]]`
 
 ```bash
-python RunAutogrow.py \
+python run_autogrow.py \
     ... \
     --alternative_filter [["custom_filter_1","/PATH_TO/custom_filter_1.py"]]
 ```
@@ -648,7 +648,7 @@ python RunAutogrow.py \
 }
 ```
 
-Submit in terminal: `python RunAutogrow.py -j
+Submit in terminal: `python run_autogrow.py -j
 /PATH_TO/json_file_with_variable.json`
 
 ### 2. Custom Docking Code ***
@@ -744,7 +744,7 @@ Submission through .json format:
 }
 ```
 
-Submit via terminal: `python RunAutogrow.py -j
+Submit via terminal: `python run_autogrow.py -j
 /PATH_TO/To/json_file_with_variable.json`
 
 Command-line submission format:
@@ -756,7 +756,7 @@ Command-line submission format:
 - Where name of custom docking class is: `custom_docking`
 
 ```bash
-python RunAutogrow.py \
+python run_autogrow.py \
     ... \
     --docking_executable "/PATH_TO/EXECUTABLE_FOR_CUSTOM_DOCKING/custom_docking" \
     --dock_choice Custom \
@@ -833,7 +833,7 @@ Submission through .json format:
 }
 ```
 
-Submit via terminal: `python RunAutogrow.py -j
+Submit via terminal: `python run_autogrow.py -j
 /PATH_TO/JSON_FILE/json_file_with_variable.json`
 
 Command-line submission format:
@@ -843,7 +843,7 @@ Command-line submission format:
 - Where name of custom conversion class is: `custom_conversion`
 
 ```bash
-python RunAutogrow.py \
+python run_autogrow.py \
     ... \
     --conversion_choice Custom \
     --custom_conversion_script ["custom_conversion", "/PATH_TO/CLASS_OBJECT_FOR/for/custom_conversion.py"]
@@ -916,7 +916,7 @@ Submission through .json format:
 }
 ```
 
-Submit via terminal: `python RunAutogrow.py -j
+Submit via terminal: `python run_autogrow.py -j
 /PATH_TO/JSON_FILE/json_file_with_variable.json`
 
 Command-line submission format:
@@ -926,7 +926,7 @@ Command-line submission format:
 - Where name of custom scoring class is: `custom_scoring_name`
 
 ```bash
-python RunAutogrow.py \
+python run_autogrow.py \
     ... \
     --conversion_choice Custom \
     --custom_conversion_script ["custom_scoring_name", "/PATH_TO/CLASS_OBJECT_FOR/custom_scoring.py"]
@@ -1135,7 +1135,7 @@ Submission through .json format:
 }
 ```
 
-Submit via terminal: `python RunAutogrow.py -j
+Submit via terminal: `python run_autogrow.py -j
 /PATH_TO/json_file_with_variable.json`
 
 Command-line submission format:
@@ -1148,7 +1148,7 @@ Command-line submission format:
   `/PATH_TO/complementary_mol_directory/`
 
 ```bash
-python RunAutogrow.py \
+python run_autogrow.py \
     ... \
     --rxn_library Custom \
     --rxn_library_file /PATH_TO/rxn_library_file.json \
@@ -1203,14 +1203,14 @@ Submission through .json format:
 }
 ```
 
-Submit via terminal: `python RunAutogrow.py -j
+Submit via terminal: `python run_autogrow.py -j
 /PATH_TO/json_file_with_variable.json`
 
 Command- line submission format, where directory of SMI for complementary
 libraries is located at: `/PATH_TO/complementary_mol_directory/`
 
 ```bash
-python RunAutogrow.py \
+python run_autogrow.py \
     ... \
     --complementary_mol_directory /PATH_TO/complementary_mol_directory/
 ```
@@ -1384,25 +1384,25 @@ manners:
 1. Multiprocessing: When running AutoGrow4 in **Multiprocessing mode** using
    SLURM, one should:
    1. 1st run the `cache_prerun` option on a single processor. `srun -n 1
-      python RunAutogrow.py -c`
+      python run_autogrow.py -c`
       - USE `srun` or `mpirun` for the `cache_prerun`. This limits the
         `prerun` to a single processor thus preventing errors caused by race
         conditions when creating pycache files.
-   2. Then run AutoGrow4 as intended. `python RunAutogrow.py -j
+   2. Then run AutoGrow4 as intended. `python run_autogrow.py -j
       custom_parameters.json`
       - Do not use `srun` or `mpirun` for the production run. cpu/job
         distribution is handled internally. Using `srun` or `mpirun` can cause
         errors with the `mpi4py` universe.
 2. MPI: When running AutoGrow4 in **MPI mode** using SLURM, one should:
     1. 1st run the `cache_prerun` option on a single processor. `srun -n 1
-       python RunAutogrow.py -c`
+       python run_autogrow.py -c`
        - USE `srun` or `mpirun` for the `cache_prerun`. This limits the prerun
          to a single processor thus preventing errors caused by race
          conditions when creating pycache files.
     2. Then run the simulation as intended.
-        - `mpirun -n num_processors python -m mpi4py RunAutogrow.py -j
+        - `mpirun -n num_processors python -m mpi4py run_autogrow.py -j
           custom_parameters.json`
-        - Make sure to provide the `-m mpi4py` before `RunAutoGrow.py`. This
+        - Make sure to provide the `-m mpi4py` before `run_autogrow.py`. This
           tells python how to handle Exceptions.
 
 ## Accessory Scripts

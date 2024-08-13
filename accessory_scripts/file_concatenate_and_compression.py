@@ -301,8 +301,6 @@ def get_arguments_from_argparse(arg_dict):
     return arg_dict
 
 
-#
-
 # Argument parsing
 PARSER = argparse.ArgumentParser()
 PARSER.add_argument(

@@ -225,7 +225,6 @@ def make_single_image_files(vars, lineage_dict, mol_dict):
         del tmp
 
 
-#
 def make_image_files(vars, lineage_dict, mol_dict):
     """
     This function will create individual image files for each ligand in
@@ -352,7 +351,6 @@ def get_parents_full_names(child_name, master_shortname_mol_dict):
     return [parent_1_name, parent_2_name]
 
 
-#
 def get_all_ancestors(mol_name, master_shortname_mol_dict):
     """
     This function will obtain all ancestors and store them in a
@@ -439,7 +437,6 @@ def get_all_ancestors(mol_name, master_shortname_mol_dict):
     return lineage_dictionary
 
 
-#
 #####################################################################
 # make/retrive pickle dictionaries
 #####################################################################
@@ -472,7 +469,6 @@ def make_master_shortname_mol_dict(vars, master_mol_dict):
     return master_shortname_mol_dict
 
 
-#
 def merge_comp_and_ranked_dicts(vars):
     """
     Merge two dictions into one.
@@ -509,7 +505,6 @@ def merge_comp_and_ranked_dicts(vars):
     return master_mol_dict
 
 
-#
 def make_comp_mol_dict(vars):
     """
     Create and pickled dictionary of all complementary molecules.
@@ -549,7 +544,6 @@ def make_comp_mol_dict(vars):
     del comp_dict
 
 
-#
 def make_ranked_files_mol_dict(vars):
     """
     Create and pickle dictionary of all ranked ligands.
@@ -665,7 +659,6 @@ def make_ranked_files_mol_dict(vars):
     del mol_dict
 
 
-#
 def get_mol_dict(vars):
     """
     Retrieve pickled dictionary of all ligand information if it already has
@@ -802,7 +795,6 @@ def get_full_length_mol_name(vars, master_mol_dict, master_shortname_mol_dict):
     return mol_name
 
 
-#
 def run_purge_previous_pickled_files(vars):
     """
     This will delete previously created pickled files within the input_dir.
@@ -1098,7 +1090,6 @@ def process_inputs(inputs):
     return inputs
 
 
-#
 def run_everything(vars):
     """
     This script runs everything

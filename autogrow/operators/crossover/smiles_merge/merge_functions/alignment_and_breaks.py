@@ -314,7 +314,6 @@ def ringbreak_frag_handling(new_core, mcs_ringbreak_idx):
     return iso_core_frag_list
 
 
-#
 def find_biggest_frag(frag_mols_obj):
     """
     This will take a frag mol object and return the largest fragment and the

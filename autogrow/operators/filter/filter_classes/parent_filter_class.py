@@ -6,6 +6,7 @@ import __future__
 from abc import ABC, abstractmethod
 import rdkit
 
+
 class ParentFilter(ABC):
     """
     This is a script containing all of the filters for drug likeliness
@@ -37,7 +38,7 @@ class ParentFilter(ABC):
 
         return self.__class__.__name__
 
-    @abstractmethod 
+    @abstractmethod
     def run_filter(self, mol: rdkit.Chem.rdchem.Mol) -> bool:
         """
         run_filter is needs to be implemented in each class.

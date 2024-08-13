@@ -69,7 +69,7 @@ WIP
   This ensures that AutoGrow4 continues to run in Docker even if future
   dependency updates cause compatibility issues.
 * Added an AutoGrow4 citation to the print statement in
-  `$PATH/autogrow4/RunAutogrow.py`.
+  `$PATH/autogrow4/run_autogrow.py`.
 * Revised `./docker/README.md` to clarify docker use.
 * Updated the docker scripts. Bug fixes, added `--rm` to the docker command,
   etc.

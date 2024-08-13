@@ -51,9 +51,9 @@ def multi_threading(inputs, num_processors, task_name):
     return results
 
 
-#
 # Worker function
-#
+
+
 def worker(input, output):
     for seq, job in iter(input.get, "STOP"):
         func, args = job

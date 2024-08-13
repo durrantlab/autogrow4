@@ -4,7 +4,7 @@ This script will convert a pdbqt file into a .pdb file.
 This is done by removing a column of the PDB file.
 
 # Run example:
-#
+
 # output example:
 # python convert_ligands_pdb_to_smi.py \
 #   -source_folder $PATH/OF/PDBS/ \
@@ -64,9 +64,6 @@ def convert_pdbqt_to_pdb(pdbqt_file_in, pdb_file_out):
         f.write(printout)
 
 
-#
-
-
 def get_arguments_from_argparse(args_dict):
     """
     This function handles the arg parser arguments for the script.
@@ -114,9 +111,6 @@ def get_arguments_from_argparse(args_dict):
         ].replace(".pdbqt", ".pdb").replace(".PDBQT", ".pdb")
 
     return args_dict
-
-
-#
 
 
 # Argument parsing

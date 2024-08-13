@@ -75,9 +75,6 @@ def run_Tournament_Selector(
     return chosen_ligands
 
 
-#
-
-
 def run_one_tournament(
     list_of_ligands, num_per_tourn, idx_to_sel, favor_most_negative=True
 ):

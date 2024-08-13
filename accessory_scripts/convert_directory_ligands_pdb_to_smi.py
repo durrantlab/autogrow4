@@ -59,9 +59,6 @@ def run_convert_on_single_pdb(pdb):
     return output_data
 
 
-#
-
-
 def make_smile_list(sub_folder):
     """
     This function converts every ligand within a folder into SMILES
@@ -86,7 +83,6 @@ def make_smile_list(sub_folder):
     return smiles_list
 
 
-#
 def start_run_main(vars):
     """
     This will run the main arguments for the script.
@@ -146,8 +142,6 @@ def get_arguments_from_argparse(args_dict):
 
     return args_dict
 
-
-#
 
 # Argument parsing
 PARSER = argparse.ArgumentParser()

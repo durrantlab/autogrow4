@@ -24,11 +24,11 @@ allowing us to distribute these fragment libraries to AutoGrow4 users.
 
 ## Getting Started with AutoGrow4
 
-Use the `RunAutogrow.py` script to run AutoGrow4. The script supports both
+Use the `run_autogrow.py` script to run AutoGrow4. The script supports both
 command-line parameters and a JSON parameter file. A detailed tutorial
 describing AutoGrow4's dependencies and general use is located at
 `/autogrow4/tutorial/TUTORIAL.md`. Additional descriptions of all AutoGrow4
-parameters can be obtained by running: `python RunAutogrow.py -h`.
+parameters can be obtained by running: `python run_autogrow.py -h`.
 
 We strongly recommend running AutoGrow4 via Docker using
 `/autogrow4/docker/autogrow_in_docker.py`. See the tutorial at

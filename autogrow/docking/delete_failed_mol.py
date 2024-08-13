@@ -37,6 +37,3 @@ def delete_all_associated_files(pdb_filename):
     for todel in toremove:
         if os.path.exists(todel):
             os.remove(todel)
-
-
-#

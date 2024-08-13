@@ -189,7 +189,7 @@ def make_docker():
     shutil.rmtree("autogrow4")
 
 
-def check_for_required_inputs(json_vars):
+def check_for_required_params(json_vars):
     """
     Confirm all the required inputs were provided.
 
@@ -536,7 +536,7 @@ def move_files_to_temp_dir(json_vars):
             autogrow4_top_dir + fol_to_copy, temp_autogrow4_path + fol_to_copy
         )
     shutil.copyfile(
-        autogrow4_top_dir + "RunAutogrow.py", temp_autogrow4_path + "RunAutogrow.py"
+        autogrow4_top_dir + "run_autogrow.py", temp_autogrow4_path + "run_autogrow.py"
     )
     # Open permissions
     change_permissions_recursively(temp_autogrow4_path)
@@ -569,7 +569,7 @@ def handle_json_info(vars):
         print(printout)
         raise Exception(printout)
     json_vars = json.load(open(json_file))
-    json_vars = check_for_required_inputs(json_vars)
+    json_vars = check_for_required_params(json_vars)
     move_files_to_temp_dir(json_vars)
 
     # get output folder
@@ -589,7 +589,7 @@ def run_autogrow_docker_main(vars):
         4) Build docker image and link files to output folder
             -This includes an adjustment to the Dockerfile if
             running it on a Windows OS
-        5) execute RunAutogrow.py from within the docker container
+        5) execute run_autogrow.py from within the docker container
         6) export the files back to the final end dir
 
     Inputs:
@@ -645,7 +645,7 @@ PARSER.add_argument(
     required=True,
     help="Name of a json file containing all parameters. \
     Overrides other arguments. This takes all the parameters described in \
-    RunAutogrow.py. MGLTools and openbabel paths can be ignored as they are \
+    run_autogrow.py. MGLTools and openbabel paths can be ignored as they are \
     already installed in the docker image.",
 )
 PARSER.add_argument(

@@ -145,7 +145,6 @@ def run_scoring_common(vars, smile_file, folder_to_search):
     return list_of_smiles_with_scores
 
 
-#
 def run_rescoring(vars, scoring_object, files_to_score):
     """
     Run a rescoring function on docked ligands.
@@ -206,7 +205,6 @@ def run_rescoring(vars, scoring_object, files_to_score):
     return completed_rescore
 
 
-#
 def rescore_single_file(file_path, scoring_object):
     """
     Run scoring_object.run_rescoring through this function so multithread

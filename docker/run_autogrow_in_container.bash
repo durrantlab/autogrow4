@@ -52,9 +52,9 @@ if echo $* | grep -q "Run"; then
         echo "" >> $error_file
     fi
 
-    echo "/root/miniconda3/bin/python autogrow4/RunAutogrow.py -j /UserFiles/docker_json_vars.json >> $output_file 2> $error_file"
+    echo "/root/miniconda3/bin/python autogrow4/run_autogrow.py -j /UserFiles/docker_json_vars.json >> $output_file 2> $error_file"
     # Run autogrow
-    /root/miniconda3/bin/python autogrow4/RunAutogrow.py \
+    /root/miniconda3/bin/python autogrow4/run_autogrow.py \
         -j /UserFiles/docker_json_vars.json >> $output_file 2>> $error_file
 
     echo "Completed AutoGrow4 Run"

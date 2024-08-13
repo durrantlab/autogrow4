@@ -468,7 +468,6 @@ def retrieve_vars_dict(autogrow_vars_json):
     return vars
 
 
-#
 def process_inputs(inputs):
     """
     This will handle processing all parameters.
@@ -587,8 +586,6 @@ def process_inputs(inputs):
 
     return vars_dict
 
-
-#
 
 ######################################
 ######################################

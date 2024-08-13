@@ -10,7 +10,7 @@
 # json_path: the 2nd uservar and is the path to the json file to submit to gypsum.
 #           This provides gypsum with information like number of conformers to make, 
 #               the SMILES string to convert, the number of processors (1), output path.
-#
+
 # This will echo Timeout if it timed out
 # Echo completed the gypsum run if it completed the ligand conversion to 3D
 # echo "FAILED ERRORS WITH THE LIGAND" if it failed conversion for any other reason.

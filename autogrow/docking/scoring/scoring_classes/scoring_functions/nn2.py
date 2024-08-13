@@ -171,7 +171,7 @@ class NN2(VINA):
                     try:
                         tmp = line.split(" ")
                         score = float(tmp[0])
-                    except:
+                    except Exception:
                         continue
                     score = float(tmp[0])
                     # Make it a negative number since NN2 & NN2 a higher

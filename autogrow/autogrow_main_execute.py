@@ -189,9 +189,6 @@ def main_execute(vars):
     sys.stdout.flush()
 
 
-#
-
-
 def determine_current_gen(output_directory):
     """
     Check if there has been any previous runs in the output directory. Returns
@@ -277,9 +274,6 @@ def determine_current_gen(output_directory):
         print(printout)
 
 
-#
-
-
 def find_last_generation(folder_path_string_no_gen):
     """
     This will take a folder path which is missing an interger at the end, and
@@ -327,9 +321,6 @@ def find_last_generation(folder_path_string_no_gen):
     return last_gen_number
 
 
-#
-
-
 def determine_if_gen_completed(gen_dir_path, gen_number):
     """
     Check if this generation has completed or if it failed. Every generation
@@ -353,9 +344,6 @@ def determine_if_gen_completed(gen_dir_path, gen_number):
     file_path = "{}{}{}".format(gen_dir_path, os.sep, ranked_file_name)
 
     return os.path.isfile(file_path)
-
-
-#
 
 
 def delete_temporary_files_and_folders(file_or_folder):
@@ -387,6 +375,3 @@ def delete_temporary_files_and_folders(file_or_folder):
                 pass
     else:
         pass
-
-
-#

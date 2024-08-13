@@ -479,7 +479,6 @@ class SmilesClickChem:
         return complementary_mols_dict
 
 
-#
 def get_usable_format(infile):
     """
     This code takes a string for an file which is formatted as an .smi file. It
@@ -535,7 +534,6 @@ def get_usable_format(infile):
     return usable_list_of_smiles
 
 
-#
 def react_with_multiple_reactants(mol_tuple, mol_name, rxn_obj):
     """
     This will run a single molecule through a 1-reactant reaction.
@@ -563,7 +561,6 @@ def react_with_multiple_reactants(mol_tuple, mol_name, rxn_obj):
     return None
 
 
-#
 def run_a_single_reactant_reaction(mol_info, rxn_obj):
     """
     This will run a single molecule through a 1-reactant reaction.
@@ -595,7 +592,6 @@ def run_a_single_reactant_reaction(mol_info, rxn_obj):
     return None
 
 
-#
 def get_rxn_and_examples(current_rxn_dict):
     """
     get the example reaction molecules from current_rxn_dict, create the rxn_obj,
@@ -662,7 +658,6 @@ def get_rxn_and_examples(current_rxn_dict):
     return example_rxn_reactants, rxn_obj
 
 
-#
 def run_all_for_fun_group(vars, fun_group, rxns_by_fun_group, a_smiles_click_object):
     """
     This runs the all testing for a single functional group.
@@ -767,7 +762,6 @@ def run_all_for_fun_group(vars, fun_group, rxns_by_fun_group, a_smiles_click_obj
     return failed_to_react, failed_to_sanitize
 
 
-#
 def run_main(vars):
     """
     This runs the main testing.
@@ -839,7 +833,6 @@ def run_main(vars):
         print("{} compounds failed. Please check logs".format(len(master_failed_list)))
 
 
-#
 def get_arguments_from_argparse(args_dict):
     """
     This function handles the arg parser arguments for the script.
@@ -917,9 +910,6 @@ def get_arguments_from_argparse(args_dict):
             raise Exception("output_folder could not be made or found.")
 
     return args_dict
-
-
-#
 
 
 # Argument parsing

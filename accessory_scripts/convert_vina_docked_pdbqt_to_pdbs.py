@@ -143,7 +143,6 @@ def run_conversion_for_a_vina_file(
                 printout_list.append(line)
 
 
-#
 def convert_pdbqt_to_pdb(list_of_lines):
     """
     Converts lines from a pdbqt.vina file pose to pdb format.
@@ -188,7 +187,6 @@ def convert_pdbqt_to_pdb(list_of_lines):
     return printout
 
 
-#
 def start_run_main(vars):
     """
     This will run the main arguments for the script.
@@ -243,7 +241,6 @@ def start_run_main(vars):
         )
 
 
-#
 def get_arguments_from_argparse(args_dict):
     """
     This function handles the arg parser arguments for the script.
@@ -322,9 +319,6 @@ def get_arguments_from_argparse(args_dict):
             args_dict["min_docking_score"] = float(args_dict["max_num_of_poses"])
 
     return args_dict
-
-
-#
 
 
 # Argument parsing

@@ -60,4 +60,3 @@ if __name__ == "__main__":
         )
 
     renumber_file(OLD_PATH, NEW_PATH, NEW_RXN_NUM)
-#

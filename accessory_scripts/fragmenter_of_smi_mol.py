@@ -41,7 +41,6 @@ def get_atom_w_iso_num(mol, iso_num):
     return None
 
 
-#
 def label_iso_num_w_idx(mol):
     """
     Find all permutations of bonds to cut on a molecule.
@@ -57,7 +56,6 @@ def label_iso_num_w_idx(mol):
     return mol
 
 
-#
 def get_rot_bond_permutations_to_cut(mol, c_c_bonds_off=False):
     """
     Find all permutations of bonds to cut on a molecule.
@@ -100,7 +98,6 @@ def get_rot_bond_permutations_to_cut(mol, c_c_bonds_off=False):
     return permutations_of_bonds_to_remove
 
 
-#
 def remove_atoms(mol, list_of_idx_to_remove):
     """
     This function removes atoms from an rdkit mol based on
@@ -138,7 +135,6 @@ def remove_atoms(mol, list_of_idx_to_remove):
         return None
 
 
-#
 def get_brics_permutations(mol, min_frag_size=3):
     """
     Fragment a mol using BRICS methods.
@@ -177,7 +173,6 @@ def get_brics_permutations(mol, min_frag_size=3):
     return clean_frag_list
 
 
-#
 def remove_bonds(mol, list_of_atomiso_bondsets_to_remove):
     """
     This function removes bond from an rdkit mol based on
@@ -233,7 +228,6 @@ def remove_bonds(mol, list_of_atomiso_bondsets_to_remove):
     return new_mol
 
 
-#
 def make_list_of_all_unique_frags(fragment_list):
     """
     This function takes a list of all molecules after fragmentation and separates the
@@ -275,7 +269,6 @@ def make_list_of_all_unique_frags(fragment_list):
     return clean_frag_list
 
 
-#
 def make_unique_lig_id(parent_lig_name, current_lig_list):
     """
     This will make a ligand name from the parent name. Keep start names simple.
@@ -304,7 +297,6 @@ def make_unique_lig_id(parent_lig_name, current_lig_list):
     return unique_lig_id
 
 
-#
 def make_frag_list_for_one_mol(
     mol_info, frags_per_seed_lig, run_brics, run_frag, c_c_bonds_off=False
 ):
@@ -388,7 +380,6 @@ def make_frag_list_for_one_mol(
     return final_frag_list
 
 
-#
 def get_ligands_from_smi(smi_file):
     """
     Get the ligands from the smi_file
@@ -460,7 +451,6 @@ def get_ligands_from_smi(smi_file):
     return list_of_ligands
 
 
-#
 def run_fragmentation_main(vars):
     """
     This runs the fragmenter.
