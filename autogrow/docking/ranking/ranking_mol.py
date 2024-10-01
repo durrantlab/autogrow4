@@ -5,11 +5,13 @@ import __future__
 
 import os
 import random
+from typing import Dict, List, Optional, Tuple, Union
 
-import rdkit
-import rdkit.Chem as Chem
-from rdkit.Chem.rdMolDescriptors import GetMorganFingerprint
-from rdkit import DataStructs
+from autogrow.types import CompoundInfo
+import rdkit  # type: ignore
+import rdkit.Chem as Chem  # type: ignore
+from rdkit.Chem.rdMolDescriptors import GetMorganFingerprint  # type: ignore
+from rdkit import DataStructs  # type: ignore
 
 # Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog("rdApp.*")
@@ -21,12 +23,12 @@ import autogrow.docking.ranking.selecting.tournament_selection as Tournament_Sel
 
 
 def create_seed_list(
-    usable_list_of_smiles,
-    num_seed_diversity,
-    num_seed_dock_fitness,
-    selector_choice,
-    tourn_size,
-):
+    usable_list_of_smiles: List[CompoundInfo],
+    num_seed_diversity: int,
+    num_seed_dock_fitness: int,
+    selector_choice: str,
+    tourn_size: float,
+) -> List[CompoundInfo]:
     """
     this function will take ausable_list_of_smiles which can be derived from
     either the previous generation or a source_compounds_file. Then it will
@@ -60,20 +62,7 @@ def create_seed_list(
         weighted ranking ie ["CCCC"  "zinc123"   1    -0.1]
     """
 
-    if selector_choice == "Roulette_Selector":
-
-        print("Roulette_Selector")
-        # Get seed molecules based on docking scores
-        docking_fitness_smiles_list = Roulette_Sel.spin_roulette_selector(
-            usable_list_of_smiles, num_seed_dock_fitness, "docking"
-        )
-
-        # Get seed molecules based on diversity scores
-        diversity_smile_list = Roulette_Sel.spin_roulette_selector(
-            usable_list_of_smiles, num_seed_diversity, "diversity"
-        )
-
-    elif selector_choice == "Rank_Selector":
+    if selector_choice == "Rank_Selector":
         print("Rank_Selector")
         # This assumes the most negative number is the best option which is
         # true for both This is true for both the diversity score and the
@@ -88,6 +77,18 @@ def create_seed_list(
         # Get seed molecules based on diversity scores
         diversity_smile_list = Rank_Sel.run_rank_selector(
             usable_list_of_smiles, num_seed_diversity, -1, False
+        )
+
+    elif selector_choice == "Roulette_Selector":
+        print("Roulette_Selector")
+        # Get seed molecules based on docking scores
+        docking_fitness_smiles_list = Roulette_Sel.spin_roulette_selector(
+            usable_list_of_smiles, num_seed_dock_fitness, "docking"
+        )
+
+        # Get seed molecules based on diversity scores
+        diversity_smile_list = Roulette_Sel.spin_roulette_selector(
+            usable_list_of_smiles, num_seed_diversity, "diversity"
         )
 
     elif selector_choice == "Tournament_Selector":
@@ -113,10 +114,10 @@ def create_seed_list(
             "selector_choice value is not Roulette_Selector, Rank_Selector, nor Tournament_Selector"
         )
 
-    chosen_mol_list = [x for x in docking_fitness_smiles_list]
+    chosen_mol_list = list(docking_fitness_smiles_list)
     chosen_mol_list.extend(diversity_smile_list)
 
-    if selector_choice in ["Rank_Selector", "Roulette_Selector"]:
+    if selector_choice in {"Rank_Selector", "Roulette_Selector"}:
         # Get all the information about the chosen molecules. chosen_mol_list
         # is 1D list of all chosen ligands chosen_mol_full_data_list is a 1D
         # list with each item of the list having multiple pieces of
@@ -140,7 +141,9 @@ def create_seed_list(
     return chosen_mol_full_data_list
 
 
-def get_chosen_mol_full_data_list(chosen_mol_list, usable_list_of_smiles):
+def get_chosen_mol_full_data_list(
+    chosen_mol_list: List[CompoundInfo], usable_list_of_smiles: List[CompoundInfo]
+) -> List[CompoundInfo]:
     """
     This function will take a list of chosen molecules and a list of all the
     SMILES which could have been chosen and all of the information about those
@@ -175,11 +178,12 @@ def get_chosen_mol_full_data_list(chosen_mol_list, usable_list_of_smiles):
         the associated information in a random order
     """
 
+    import pdb; pdb.set_trace()
     sorted_list = sorted(usable_list_of_smiles, key=lambda x: float(x[-2]))
     weighted_order_list = []
     for smile in chosen_mol_list:
         for smile_pair in sorted_list:
-            if smile == smile_pair[0]:
+            if smile == smile_pair.smiles:
                 weighted_order_list.append(smile_pair)
                 break
 
@@ -193,7 +197,7 @@ def get_chosen_mol_full_data_list(chosen_mol_list, usable_list_of_smiles):
     return weighted_order_list
 
 
-def get_usable_format(infile):
+def get_usable_format(infile: str) -> List[CompoundInfo]:
     """
     This code takes a string for an file which is formatted as an .smi file. It
     opens the file and reads in the components into a usable list.
@@ -225,10 +229,10 @@ def get_usable_format(infile):
     """
 
     # IMPORT SMILES FROM THE PREVIOUS GENERATION
-    usable_list_of_smiles = []
+    usable_list_of_smiles: List[CompoundInfo] = []
 
     if os.path.exists(infile) is False:
-        print("\nFile of Source compounds does not exist: {}\n".format(infile))
+        print(f"\nFile of Source compounds does not exist: {infile}\n")
         raise Exception("File of Source compounds does not exist")
 
     with open(infile) as smiles_file:
@@ -236,19 +240,19 @@ def get_usable_format(infile):
             line = line.replace("\n", "")
             parts = line.split("\t")  # split line into parts separated by 4-spaces
             if len(parts) == 1:
-                parts = line.split(
-                    "    "
-                )  # split line into parts separated by 4-spaces
+                # split line into parts separated by 4-spaces
+                parts = line.split("    ")
 
-            choice_list = []
-            for i in range(0, len(parts)):
-                choice_list.append(parts[i])
-            usable_list_of_smiles.append(choice_list)
+            # choice_list = [parts[i] for i in range(len(parts))]
+            compoundInfo = CompoundInfo(smiles=parts[0], name=parts[1])
+            usable_list_of_smiles.append(compoundInfo)
 
     return usable_list_of_smiles
 
 
-def convert_usable_list_to_lig_dict(usable_list_of_smiles):
+def convert_usable_list_to_lig_dict(
+    usable_list_of_smiles: List[CompoundInfo],
+) -> Optional[Dict[str, CompoundInfo]]:
     """
     This will convert a list created by get_usable_format() to a dictionary
     using the ligand smile+lig_id as the key. This makes for faster searching
@@ -266,18 +270,24 @@ def convert_usable_list_to_lig_dict(usable_list_of_smiles):
     if type(usable_list_of_smiles) is not type([]):
         return None
 
-    usable_dict_of_smiles = {}
+    usable_dict_of_smiles: Dict[str, CompoundInfo] = {}
     for item in usable_list_of_smiles:
-        key = str(item[0]) + str(item[1])
-        if key in usable_dict_of_smiles.keys():
-            if usable_dict_of_smiles[key][-1] < item[-2]:
-                continue
+        key = item.smiles + item.name
+        if key in usable_dict_of_smiles and usable_dict_of_smiles[
+            key
+        ].score_by_index_lookup(-1) < item.score_by_index_lookup(
+            -2
+        ):  
+            # TODO: Why -1 vs. -2?
+            continue
         usable_dict_of_smiles[key] = item
     return usable_dict_of_smiles
 
 
 ##### Called in the docking class ######
-def score_and_append_diversity_scores(molecules_list):
+def score_and_append_diversity_scores(
+    molecules_list: List[CompoundInfo],
+) -> List[CompoundInfo]:
     """
     This function will take list of molecules which makes up a population. It
     will then create a diversity score for each molecules:
@@ -323,11 +333,11 @@ def score_and_append_diversity_scores(molecules_list):
 
     for pair in molecules_list:
         if pair is not None:
-            smile = pair[0]
+            smile = pair.smiles
             # name = pair[1]
             try:
                 mol = Chem.MolFromSmiles(smile, sanitize=False)
-            except:
+            except Exception:
                 mol = None
 
             if mol is None:
@@ -350,28 +360,27 @@ def score_and_append_diversity_scores(molecules_list):
                                         def score_and_append_diversity_scores"
                 )
 
-            temp = [x for x in pair]
+            temp = pair.to_list()
             temp.append(mol)
             if temp[-1] is None:
                 print(temp)
                 print("None in temp list, skip this one")
                 continue
-            if temp[-1] is not None:
-                mol_list.append(temp)
+            mol_list.append(temp)
         else:
             print("noneitem in molecules_list in score_and_append_diversity_scores")
 
     fps_list = []
     for molecule in mol_list:
         fp = GetMorganFingerprint(molecule[-1], 10, useFeatures=True)
-        temp = [x for x in molecule]
+        temp = list(molecule)
         temp.append(fp)
         fps_list.append(temp)
 
     fps_list_w_div_score = []
-    for i in range(0, len(fps_list)):
+    for i in range(len(fps_list)):
         diversity_score = 0
-        for j in range(0, len(fps_list)):
+        for j in range(len(fps_list)):
             if i != j:
                 # if DiceSimilarity=1.0 its a perfect match, the smaller the
                 # number the more diverse it is. The sum of all of these gives
@@ -380,14 +389,14 @@ def score_and_append_diversity_scores(molecules_list):
                 diversity_score = diversity_score + DataStructs.DiceSimilarity(
                     fps_list[i][-1], fps_list[j][-1]
                 )
-        temp = [x for x in fps_list[i]]
+        temp = list(fps_list[i])
         temp.append(str(diversity_score))
         fps_list_w_div_score.append(temp)
 
     # take the diversity score and append to the last column in the original
     # list
 
-    for i in range(0, len(molecules_list)):
+    for i in range(len(molecules_list)):
         if molecules_list[i][0] == fps_list_w_div_score[i][0]:
 
             molecules_list[i].append(fps_list_w_div_score[i][-1])

@@ -1,9 +1,9 @@
-
-from typing import List
+from typing import Any, Dict, List
 import os
 from shutil import copyfile
 
-def make_complete_children_dict(purpose_of_object):
+
+def make_complete_children_dict(purpose_of_object: str) -> Dict[str, Any]:
     """
     This will retrieve all the names of every child class of the parent class
     This can be either filter, parent_pdbqt_converter, ParentDocking,
@@ -57,7 +57,7 @@ def make_complete_children_dict(purpose_of_object):
 
 
 def get_path_to_custom_script(
-    custom_class, param_name: str, type_desc: str, path_prts: List[str]
+    custom_class: List[str], param_name: str, type_desc: str, path_prts: List[str]
 ) -> str:
     cname = custom_class[0]
     py_file_path = custom_class[1]
@@ -89,8 +89,7 @@ def get_path_to_custom_script(
     return new_file
 
 
-
-def copy_new_custom_py_file(src_file: str, dest_file: str):
+def copy_new_custom_py_file(src_file: str, dest_file: str) -> None:
     print(
         "copying custom class file:\n"
         + f"\t Source: {src_file}\n\t Destination: {dest_file}\n\n"
@@ -110,5 +109,3 @@ def copy_new_custom_py_file(src_file: str, dest_file: str):
         + "#####################################"
         + "########################################\n"
     )
-
-

@@ -7,6 +7,7 @@ import __future__
 
 import random
 import copy
+from typing import Dict, List, Tuple, Union
 
 
 class Mapping(object):
@@ -60,7 +61,7 @@ class Mapping(object):
     These type of decisions are handled by this class.
     """
 
-    def __init__(self, b_to_is, i_to_bs):
+    def __init__(self, b_to_is: Dict[str, List[int]], i_to_bs: Dict[int, List[str]]):
         """
         When a Mapping object is initialized, it imports 2 input dictionaries,
         which can be referenced throughout the class.
@@ -86,7 +87,7 @@ class Mapping(object):
             i_to_bs
         )  # I-B mapping dictionary from outside class
 
-    def locate_b(self, i):
+    def locate_b(self, i: int) -> List[str]:
         """
         Given a specified anchor/I return a list of all the B-groups from both
         parent ligands, bound to that anchor
@@ -103,7 +104,7 @@ class Mapping(object):
 
     #
 
-    def locate_i(self, b):
+    def locate_i(self, b: str) -> List[int]:
         """
         Given a specified B-group return the anchor/I/node it connects to.
 
@@ -118,7 +119,7 @@ class Mapping(object):
 
     #
 
-    def delete_b(self, b):
+    def delete_b(self, b: str) -> None:
         """
         Removes the b from b_to_is and all references to b in i_to_bs.
             b is a Key in b_to_is. B is one or more items in i_to_bs.
@@ -135,7 +136,7 @@ class Mapping(object):
 
     #
 
-    def delete_i(self, i):
+    def delete_i(self, i: int) -> None:
         """
         Removes the i from i_to_bs and all references to i in b_to_is. i is
             a Key in i_to_bs. i is one or more items in b_to_is.
@@ -153,7 +154,7 @@ class Mapping(object):
 
     #
 
-    def chose_b_from_i(self, i):
+    def chose_b_from_i(self, i: int) -> Union[str, None]:
         """
         Chose your B from a given i. This makes the decision which B-group
         will be chosen for a specific i.
@@ -269,39 +270,36 @@ class Mapping(object):
         #  against shrinking the child molecule
 
         # Select an B to keep
-        if i in list(self.i_to_bs.keys()):
+        if i not in list(self.i_to_bs.keys()):
+            # the i is not in list(self.i_to_bs.keys())
+            # return the string "None"
+            return "None"
+        options = self.locate_b(i)
+        if len(options) > 1:
+            b_x = random.choice(options)
+        elif len(options) == 1:
+            b_x = options[0]
+        else:
+            return "None"
 
-            options = self.locate_b(i)
-            if len(options) > 1:
-                b_x = random.choice(options)
-            elif len(options) == 1:
-                b_x = options[0]
-            else:
-                return "None"
+        list_is = self.locate_i(b_x)
+        list_bs = [self.locate_b(x) for x in list_is]
+        flattened = [val for sublist in list_bs for val in sublist]
+        unique_bs = list(
+            set(flattened)
+        )  # convert list to set to list to remove redundant B's
+        # delete the B's and I's
+        for b in unique_bs:
+            self.delete_b(b)
 
-            list_is = self.locate_i(b_x)
-            list_bs = []
-            for x in list_is:
-                list_bs.append(self.locate_b(x))
-
-            flattened = [val for sublist in list_bs for val in sublist]
-            unique_bs = list(
-                set(flattened)
-            )  # convert list to set to list to remove redundant B's
-            # delete the B's and I's
-            for b in unique_bs:
-                self.delete_b(b)
-
-            for x in list_is:
-                self.delete_i(x)
-            return b_x
-
-        # the i is not in list(self.i_to_bs.keys())
-        # return the string "None"
-        return "None"
+        for x in list_is:
+            self.delete_i(x)
+        return b_x
 
     #
-    def testing_function_return_self_dicts(self):
+    def testing_function_return_self_dicts(
+        self,
+    ) -> Tuple[Dict[str, List[int]], Dict[int, List[str]]]:
         """
         Return the properties: self.b_to_is and self.i_to_bs
 
@@ -324,7 +322,9 @@ class Mapping(object):
 #       ['2B4'], 10007: ['1B3'], 10008: ['1B2']}
 # b_dict = {'1B1': [10000], '1B2': [10008], '1B3': [10007], '2B4': [10006], \
 # '2B3': [10005], '2B2': [10004], '2B1': [10000]}
-def run_mapping(b_dict, i_dict):
+def run_mapping(
+    b_dict: Dict[str, List[int]], i_dict: Dict[int, List[str]]
+) -> List[str]:
     """
     This runs the mapping class which can determine which B-groups/R-groups we
     will append in SmileMerge.

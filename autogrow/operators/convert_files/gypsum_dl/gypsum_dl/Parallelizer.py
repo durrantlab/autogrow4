@@ -36,7 +36,7 @@ try:
     import mpi4py
 
     MPI_installed = True
-except:
+except Exception:
     MPI_installed = False
 
 
@@ -194,7 +194,7 @@ class Parallelizer(object):
                     return False
 
                 return True
-            except:
+            except Exception:
                 return False
 
         return False
@@ -345,7 +345,7 @@ class Parallelizer(object):
             try:
                 if mpi4py.MPI.COMM_WORLD.Get_size() > 1:
                     return "mpi"
-            except:
+            except Exception:
                 return "multiprocessing"
             else:
                 return "multiprocessing"
@@ -495,7 +495,7 @@ class ParallelMPI(object):
         chuck_list = []
         temp = []
         counter = 0
-        for x in range(0, len(arr)):
+        for x in range(len(arr)):
 
             # add 1 per group until remainder is removed
             if remainder != 0:
@@ -541,7 +541,7 @@ class ParallelMPI(object):
             raise Exception(printout)
 
         item_type = type(args[0])
-        for i in range(0, len(args)):
+        for i in range(len(args)):
             if type(args[i]) == item_type:
                 continue
             else:
@@ -689,7 +689,7 @@ def check_and_format_inputs_to_list_of_tuples(args):
         raise Exception(printout)
 
     item_type = type(args[0])
-    for i in range(0, len(args)):
+    for i in range(len(args)):
         if type(args[i]) == item_type:
             continue
         else:

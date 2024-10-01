@@ -19,9 +19,9 @@ Virtual Screening Applications: Gathering, Structural Analysis and Filtering.
 
 import __future__
 
-import rdkit
-import rdkit.Chem as Chem
-import rdkit.Chem.Lipinski as Lipinski
+import rdkit  # type: ignore
+import rdkit.Chem as Chem  # type: ignore
+import rdkit.Chem.Lipinski as Lipinski  # type: ignore
 
 # Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog("rdApp.*")

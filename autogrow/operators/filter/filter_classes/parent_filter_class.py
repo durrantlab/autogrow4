@@ -4,7 +4,7 @@ This is used as the basis for all filter classes.
 """
 import __future__
 from abc import ABC, abstractmethod
-import rdkit
+import rdkit  # type: ignore
 
 
 class ParentFilter(ABC):

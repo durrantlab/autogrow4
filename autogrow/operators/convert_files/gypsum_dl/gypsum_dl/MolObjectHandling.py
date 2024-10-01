@@ -51,7 +51,7 @@ def check_sanitization(mol):
             sanitizeOps=rdkit.Chem.rdmolops.SanitizeFlags.SANITIZE_ALL,
             catchErrors=True,
         )
-    except:
+    except Exception:
         return None
 
     if sanitize_string.name == "SANITIZE_NONE":
@@ -134,7 +134,7 @@ def try_deprotanation(sanitized_mol):
     """
     try:
         mol = Chem.RemoveHs(sanitized_mol, sanitize=False)
-    except:
+    except Exception:
         return None
 
     mol_sanitized = check_sanitization(mol)
@@ -157,7 +157,7 @@ def try_reprotanation(sanitized_deprotanated_mol):
     if sanitized_deprotanated_mol is not None:
         try:
             mol = Chem.AddHs(sanitized_deprotanated_mol)
-        except:
+        except Exception:
             mol = None
 
         mol_sanitized = check_sanitization(mol)
@@ -188,7 +188,7 @@ def remove_atoms(mol, list_of_idx_to_remove):
     try:
         atomsToRemove = list_of_idx_to_remove
         atomsToRemove.sort(reverse=True)
-    except:
+    except Exception:
         return None
 
     try:
@@ -199,7 +199,7 @@ def remove_atoms(mol, list_of_idx_to_remove):
         new_mol = em1.GetMol()
 
         return new_mol
-    except:
+    except Exception:
         return None
 
 
@@ -228,7 +228,7 @@ def Nitrogen_charge_adjustment(mol):
     # makes sure its an rdkit obj
     try:
         atoms = mol.GetAtoms()
-    except:
+    except Exception:
         return None
 
     for atom in atoms:
@@ -257,7 +257,7 @@ def check_for_unassigned_atom(mol):
 
     try:
         atoms = mol.GetAtoms()
-    except:
+    except Exception:
         return None
 
     for atom in atoms:
@@ -277,7 +277,7 @@ def handle_frag_check(mol):
 
     try:
         frags = Chem.GetMolFrags(mol, asMols=True, sanitizeFrags=False)
-    except:
+    except Exception:
         return None
 
     if len(frags) == 1:

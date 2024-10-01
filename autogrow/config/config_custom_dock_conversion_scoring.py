@@ -1,9 +1,17 @@
 import os
 import sys
-from autogrow.config.config_utils import copy_new_custom_py_file, get_path_to_custom_script, make_complete_children_dict
+from typing import Any, Dict, Tuple
+from autogrow.config.config_utils import (
+    copy_new_custom_py_file,
+    get_path_to_custom_script,
+    make_complete_children_dict,
+)
 from autogrow.validation.validate_custom_classes import validate_custom_param_type
 
-def setup_custom_dock_and_conversion_scoring_options(params: dict) -> dict:
+
+def setup_custom_dock_and_conversion_scoring_options(
+    params: Dict[str, Any]
+) -> Dict[str, Any]:
     """
     This function handles selecting the user defined Custom options
     for Custom docking Conversion, and scoring scripts.
@@ -20,7 +28,7 @@ def setup_custom_dock_and_conversion_scoring_options(params: dict) -> dict:
     ):
         # It's not a custom approach.
         return params
-    
+
     master_need_restart = False
     master_printout = ""
     if params["conversion_choice"] == "Custom":
@@ -47,7 +55,9 @@ def setup_custom_dock_and_conversion_scoring_options(params: dict) -> dict:
     return params
 
 
-def _setup_custom_scoring_script(params):
+def _setup_custom_scoring_script(
+    params: Dict[str, Any]
+) -> Tuple[Dict[str, Any], bool, str]:
     """
     This will handle Custom scoring_scripts
 
@@ -93,8 +103,9 @@ def _setup_custom_scoring_script(params):
     return params, need_restart, printout
 
 
-
-def _setup_custom_conversion_script(params):
+def _setup_custom_conversion_script(
+    params: Dict[str, Any]
+) -> Tuple[Dict[str, Any], bool, str]:
     """
     This will handle Custom Conversion_scripts
 
@@ -143,7 +154,9 @@ def _setup_custom_conversion_script(params):
     return params, need_restart, printout
 
 
-def _setup_custom_docking_script(params):
+def _setup_custom_docking_script(
+    params: Dict[str, Any]
+) -> Tuple[Dict[str, Any], bool, str]:
     """
     This will handle Custom Docking_scripts
 
@@ -188,4 +201,3 @@ def _setup_custom_docking_script(params):
 
     params["dock_choice"] = custom_class[0]
     return params, need_restart, printout
-

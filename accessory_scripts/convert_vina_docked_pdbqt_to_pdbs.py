@@ -28,17 +28,24 @@ python PATH/autogrow4/accessory_scripts/convert_vina_docked_pdbqt_to_pdbs.py \
     --max_num_of_poses 1 --number_of_processors -1
 """
 
+
 import os
 import copy
 import argparse
+import contextlib
 import glob
+from typing import Any, Dict, List, Optional
 
 import support_scripts.Multiprocess as mp
 
 
 def run_conversion_for_a_vina_file(
-    vina_file, output_folder, max_num_of_poses, max_docking_score, min_docking_score
-):
+    vina_file: str,
+    output_folder: str,
+    max_num_of_poses: int,
+    max_docking_score: Optional[float],
+    min_docking_score: Optional[float],
+) -> None:
     """
     This script will convert .pdbqt.vina file to multiple .pdb files.
 
@@ -67,7 +74,7 @@ def run_conversion_for_a_vina_file(
         score = 0.0
         terminate_run = False
         write_pose = True
-        for line in f.readlines():
+        for line in f:
             if pose_number > max_num_of_poses and max_num_of_poses != -1:
                 # break if hit max number of poses
                 break
@@ -76,40 +83,31 @@ def run_conversion_for_a_vina_file(
 
             if "REMARK VINA RESULT" in line:
                 write_pose = True
-                if max_docking_score is None and min_docking_score is None:
-                    printout_list.append(line)
-                else:
-
+                if max_docking_score is not None or min_docking_score is not None:
                     temp_line = copy.deepcopy(line)
-                    for i in range(10):
+                    for _ in range(10):
                         temp_line = temp_line.replace("  ", " ")
                     temp_line = temp_line.split("RESULT:")[1]
-                    temp_line = [
-                        x for x in temp_line.split(" ") if x != "" and x != " "
-                    ]
+                    temp_line = [x for x in temp_line.split(" ") if x not in ["", " "]]
                     try:
                         score = float(temp_line[0])
-                    except:
+                    except Exception as e:
                         raise Exception(
-                            "Score not in remark line for {}".format(vina_file)
-                        )
+                            f"Score not in remark line for {vina_file}"
+                        ) from e
 
-                    if max_docking_score is not None:
-                        if score > max_docking_score:
-                            terminate_run = True
-                            write_pose = False
-                            break
+                if max_docking_score is not None and score > max_docking_score:
+                    terminate_run = True
+                    write_pose = False
+                    break
 
-                    if min_docking_score is not None:
-                        if score < min_docking_score:
-                            # This score is bellow the minimum but the
-                            # poses after may not be docked as well.
-                            # Normally this should be a stop but may
-                            # be useful for studying poor poses...
-                            write_pose = False
+                if min_docking_score is not None and score < min_docking_score:
+                    # This score is bellow the minimum but the poses after
+                    # may not be docked as well. Normally this should be a
+                    # stop but may be useful for studying poor poses...
+                    write_pose = False
 
-                    printout_list.append(line)
-
+                printout_list.append(line)
             elif "ENDMDL" in line:
                 if write_pose is True:
                     printout_list.append(line)
@@ -120,10 +118,7 @@ def run_conversion_for_a_vina_file(
 
                     # write to a file
                     outfile = (
-                        output_folder
-                        + os.sep
-                        + short_name
-                        + "_pose_{}.pdb".format(pose_number)
+                        output_folder + os.sep + short_name + f"_pose_{pose_number}.pdb"
                     )
 
                     with open(outfile, "w") as f:
@@ -143,7 +138,7 @@ def run_conversion_for_a_vina_file(
                 printout_list.append(line)
 
 
-def convert_pdbqt_to_pdb(list_of_lines):
+def convert_pdbqt_to_pdb(list_of_lines: List[str]) -> str:
     """
     Converts lines from a pdbqt.vina file pose to pdb format.
     Inputs:
@@ -152,7 +147,7 @@ def convert_pdbqt_to_pdb(list_of_lines):
     :returns: str printout: A string for a .pdb to write to a file
     """
     printout = ""
-    line_index_range = [x for x in range(0, 61)] + [x for x in range(70, 80)]
+    line_index_range = list(range(61)) + list(range(70, 80))
 
     for line in list_of_lines:
         if "ATOM" in line or "HETATM" in line:
@@ -187,20 +182,20 @@ def convert_pdbqt_to_pdb(list_of_lines):
     return printout
 
 
-def start_run_main(vars):
+def start_run_main(params: Dict[str, Any]) -> None:
     """
     This will run the main arguments for the script.
 
     Inputs:
-    :param dict vars: dictionary of user variables.
+    :param dict params: dictionary of user variables.
     """
-    output_folder = vars["output_folder"] + os.sep
-    max_num_of_poses = vars["max_num_of_poses"]
-    max_docking_score = vars["max_docking_score"]
-    min_docking_score = vars["min_docking_score"]
+    output_folder = str(params["output_folder"]) + os.sep
+    max_num_of_poses = params["max_num_of_poses"]
+    max_docking_score = params["max_docking_score"]
+    min_docking_score = params["min_docking_score"]
 
-    vina_docked_pdbqt_file = vars["vina_docked_pdbqt_file"]
-    if os.path.isfile(vina_docked_pdbqt_file) is True:
+    vina_docked_pdbqt_file = params["vina_docked_pdbqt_file"]
+    if os.path.isfile(str(vina_docked_pdbqt_file)) is True:
 
         run_conversion_for_a_vina_file(
             vina_docked_pdbqt_file,
@@ -213,27 +208,25 @@ def start_run_main(vars):
     else:
 
         # vina_docked_pdbqt_file is a folder run for all .pdbqt.vina files
-        pdbqt_files = glob.glob(vina_docked_pdbqt_file + "*.pdbqt.vina")
-        pdbqt_files.extend(glob.glob(vina_docked_pdbqt_file + "*.PDBQT.vina"))
-        pdbqt_files.extend(glob.glob(vina_docked_pdbqt_file + "*.pdbqt.VINA"))
-        pdbqt_files.extend(glob.glob(vina_docked_pdbqt_file + "*.PDBQT.VINA"))
+        pdbqt_files = glob.glob(f"{vina_docked_pdbqt_file}*.pdbqt.vina")
+        pdbqt_files.extend(glob.glob(f"{vina_docked_pdbqt_file}*.PDBQT.vina"))
+        pdbqt_files.extend(glob.glob(f"{vina_docked_pdbqt_file}*.pdbqt.VINA"))
+        pdbqt_files.extend(glob.glob(f"{vina_docked_pdbqt_file}*.PDBQT.VINA"))
         pdbqt_files = list(set(pdbqt_files))
-        if len(pdbqt_files) == 0:
-            printout = "No .pdbqt.vina were found at: {}".format(vina_docked_pdbqt_file)
+        if not pdbqt_files:
+            printout = f"No .pdbqt.vina were found at: {vina_docked_pdbqt_file}"
             raise Exception(printout)
-        job_input = tuple(
-            [
-                tuple(
-                    [
-                        vina_docked_pdbqt_file,
-                        output_folder,
-                        max_num_of_poses,
-                        max_docking_score,
-                        min_docking_score,
-                    ]
+        job_input = list(
+            tuple(
+                (
+                    vina_docked_pdbqt_file,
+                    output_folder,
+                    max_num_of_poses,
+                    max_docking_score,
+                    min_docking_score,
                 )
                 for vina_docked_pdbqt_file in pdbqt_files
-            ]
+            )
         )
         # run convert in multithread
         mol_usable_list = mp.multi_threading(
@@ -275,27 +268,22 @@ def get_arguments_from_argparse(args_dict):
             args_dict["vina_docked_pdbqt_file"] + os.sep
         )
 
-    if os.path.exists(args_dict["output_folder"]) is False:
-        try:
+    if not os.path.exists(args_dict["output_folder"]):
+        with contextlib.suppress(Exception):
             os.mkdir(args_dict["output_folder"])
-        except:
-            pass
-        if os.path.exists(args_dict["output_folder"]) is False:
+        if not os.path.exists(args_dict["output_folder"]):
             raise Exception("output_folder could not be made or found.")
-    else:
-        if os.path.isdir(args_dict["output_folder"]) is False:
-            raise Exception("output_folder needs to be a directory.")
+    elif not os.path.isdir(args_dict["output_folder"]):
+        raise Exception("output_folder needs to be a directory.")
 
+    else:
         args_dict["output_folder"] = (
             os.path.abspath(args_dict["output_folder"]) + os.sep
         )
 
     # handle max_num_of_poses
     if args_dict["max_num_of_poses"] is not None:
-        if (
-            type(args_dict["max_num_of_poses"]) != float
-            and type(args_dict["max_num_of_poses"]) != int
-        ):
+        if type(args_dict["max_num_of_poses"]) not in [float, int]:
             raise Exception("max_num_of_poses must be a int or None")
         if type(args_dict["max_num_of_poses"]) == float:
             args_dict["max_num_of_poses"] = int(args_dict["max_num_of_poses"])
@@ -306,8 +294,7 @@ def get_arguments_from_argparse(args_dict):
             or type(args_dict["max_docking_score"]) != int
         ):
             raise Exception("max_docking_score must be a float or None")
-        if type(args_dict["max_docking_score"]) == int:
-            args_dict["max_docking_score"] = float(args_dict["max_num_of_poses"])
+        args_dict["max_docking_score"] = float(args_dict["max_num_of_poses"])
     # handle min_docking_score
     if args_dict["min_docking_score"] is not None:
         if (
@@ -315,8 +302,7 @@ def get_arguments_from_argparse(args_dict):
             or type(args_dict["min_docking_score"]) != int
         ):
             raise Exception("min_docking_score must be a float or None")
-        if type(args_dict["min_docking_score"]) == int:
-            args_dict["min_docking_score"] = float(args_dict["max_num_of_poses"])
+        args_dict["min_docking_score"] = float(args_dict["max_num_of_poses"])
 
     return args_dict
 

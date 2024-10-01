@@ -3,15 +3,20 @@ This function handles the scoring/rescoring of docked molecules.
 """
 
 import __future__
+from typing import Any, Dict, List, Optional, Tuple
 
 from autogrow.docking.docking_class.get_child_class import get_all_subclasses
 
 # importing scoring_functions is necessary to find rescoring modules
 import autogrow.docking.scoring.scoring_classes.scoring_functions
 from autogrow.docking.scoring.scoring_classes.parent_scoring_class import ParentScoring
+from autogrow.docking.scoring.scoring_classes.scoring_functions.lig_efficiency import (
+    LigEfficiency,
+)
+from autogrow.types import CompoundInfo
 
 
-def pick_run_class_dict(scoring_choice):
+def pick_run_class_dict(scoring_choice: str) -> type:
     """
     This will retrieve all the names of every child class of the parent class
     ParentScoring
@@ -26,16 +31,15 @@ def pick_run_class_dict(scoring_choice):
 
     children = get_all_subclasses(ParentScoring)
 
-    child_dict = {}
-    for child in children:
-        child_name = child.__name__
-        child_dict[child_name] = child
+    child_dict = {child.__name__: child for child in children}
     return child_dict[scoring_choice]
 
 
 ############
 ############
-def run_scoring_common(vars, smile_file, folder_to_search):
+def run_scoring_common(
+    params: Dict[str, Any], smile_file: str, folder_to_search: str
+) -> List[CompoundInfo]:
     """
     This section runs the functions common to all scoring functions.
 
@@ -45,7 +49,7 @@ def run_scoring_common(vars, smile_file, folder_to_search):
     ############## VERY IMPORTANT SECTION########################
 
     Inputs:
-    :param dict vars: User variables which will govern how the programs runs
+    :param dict params: User variables which will govern how the programs runs
     :param str smile_file: File path for the file with the ligands for the
         generation which will be a .smi file
     :param str folder_to_search: a directory to search containing docked
@@ -59,7 +63,7 @@ def run_scoring_common(vars, smile_file, folder_to_search):
 
     # Retrieve a list of all files with the proper information within
     # folder_to_search
-    scoring_choice = vars["scoring_choice"]
+    scoring_choice = params["scoring_choice"]
     scoring_class = pick_run_class_dict(scoring_choice)
 
     # Make a dictionary of all ligands which may have been docked. This will
@@ -68,16 +72,13 @@ def run_scoring_common(vars, smile_file, folder_to_search):
     # the ligand id full name
     smiles_dict = make_dict_of_smiles(smile_file)
 
-    # Use a temp vars dict so you don't put mpi multiprocess info through
+    # Use a temp params dict so you don't put mpi multiprocess info through
     # itself...
-    temp_vars = {}
-    for key in list(vars.keys()):
-        if key == "parallelizer":
-            continue
-        temp_vars[key] = vars[key]
-
+    temp_params = {
+        key: params[key] for key in list(params.keys()) if key != "parallelizer"
+    }
     # Initialize the scoring class
-    scoring_object = scoring_class(temp_vars, smiles_dict, test_boot=False)
+    scoring_object = scoring_class(temp_params, smiles_dict, test_boot=False)
 
     # Find all the files that need to be scored. Because this depends on the
     # scoring function these may be different file types
@@ -85,40 +86,36 @@ def run_scoring_common(vars, smile_file, folder_to_search):
 
     # Run Rescoring If applicable (All classes should have this even if its
     # just returning None)
-    files_to_score = run_rescoring(vars, scoring_object, files_to_score)
+    files_to_score = run_rescoring(params, scoring_object, files_to_score)
     files_to_score = [x for x in files_to_score if x is not None]
 
     # Determine if the values from the Scoring function should be adjusted by
     # the number of non-H atoms in the ligand ie) rescoring_lig_efficiency
-    rescore_lig_efficiency = vars["rescore_lig_efficiency"]
+    rescore_lig_efficiency = params["rescore_lig_efficiency"]
 
     # create rescore_lig_efficiency object if needed
     if rescore_lig_efficiency is True:
         rescore_lig_efficiency_class = pick_run_class_dict("LigEfficiency")
         # Initialize the scoring class
         rescore_lig_efficiency_scoring_object = rescore_lig_efficiency_class(
-            temp_vars, smiles_dict, test_boot=False
+            temp_params, smiles_dict, test_boot=False
         )
     else:
         rescore_lig_efficiency_scoring_object = None
 
     job_input_files_to_score = tuple(
-        [
-            tuple(
-                [
-                    scoring_object,
-                    file_path,
-                    rescore_lig_efficiency,
-                    rescore_lig_efficiency_scoring_object,
-                ]
-            )
-            for file_path in files_to_score
-        ]
+        (
+            scoring_object,
+            file_path,
+            rescore_lig_efficiency,
+            rescore_lig_efficiency_scoring_object,
+        )
+        for file_path in files_to_score
     )
 
     # Format for list_of_raw_data must be [lig_id_shortname, any_details,
     # fitness_score_to_use]
-    list_of_list_of_lig_data = vars["parallelizer"].run(
+    list_of_list_of_lig_data = params["parallelizer"].run(
         job_input_files_to_score, score_files_multithread
     )
 
@@ -128,13 +125,13 @@ def run_scoring_common(vars, smile_file, folder_to_search):
     lig_dict = make_lig_score_dictionary(list_of_list_of_lig_data)
 
     # Convert Dictionary to the final list form
-    list_of_smiles_with_scores = []
+    list_of_smiles_with_scores: List[CompoundInfo] = []
     for key in list(lig_dict.keys()):
 
         lig_info = lig_dict[key]
         if lig_info is None:
             continue
-        lig_info = [str(x) for x in lig_info]
+        # lig_info = [str(x) for x in lig_info]
 
         # Make sure every value is a string
 
@@ -145,12 +142,14 @@ def run_scoring_common(vars, smile_file, folder_to_search):
     return list_of_smiles_with_scores
 
 
-def run_rescoring(vars, scoring_object, files_to_score):
+def run_rescoring(
+    params: Dict[str, Any], scoring_object: ParentScoring, files_to_score: List[str]
+) -> List[str]:
     """
     Run a rescoring function on docked ligands.
 
     Inputs:
-    :param dict vars: User variables which will govern how the programs runs
+    :param dict params: User variables which will govern how the programs runs
     :param object scoring_object: the class for running the chosen scoring
         method
     :param list files_to_score: list of files to rescores
@@ -165,12 +164,12 @@ def run_rescoring(vars, scoring_object, files_to_score):
     # Run Rescoring If applicable (All classes should have this even if its
     # just returning None)
     job_input_files_to_score = tuple(
-        [tuple([file_path, scoring_object]) for file_path in files_to_score]
+        (file_path, scoring_object) for file_path in files_to_score
     )
 
     # Format for list_of_raw_data must be [lig_id_shortname, any_details,
     # fitness_score_to_use]
-    results_rescore = vars["parallelizer"].run(
+    results_rescore = params["parallelizer"].run(
         job_input_files_to_score, rescore_single_file
     )
 
@@ -185,27 +184,33 @@ def run_rescoring(vars, scoring_object, files_to_score):
 
     # print fails which made it through the try statement but failed to
     # produce an output file.
-    if len(failed_to_rescore) != 0:
-        print("The following files failed to be rescored: ")
-        print(failed_to_rescore)
-        print("")
+    if failed_to_rescore:
+        _extracted_from_run_rescoring_42(
+            "The following files failed to be rescored: ", failed_to_rescore
+        )
     else:
         print("All rescoring attempts were successful")
 
-    if len(completed_rescore) == 0:
+    if not completed_rescore:
         printout = (
             "All Rescoring attempts failed to create output files. No data to report."
         )
         raise Exception(printout)
 
-    print("Finished rescoring")
-    print("######################")
-    print("")
-
+    _extracted_from_run_rescoring_42("Finished rescoring", "######################")
     return completed_rescore
 
 
-def rescore_single_file(file_path, scoring_object):
+# TODO Rename this here and in `run_rescoring`
+def _extracted_from_run_rescoring_42(arg0: Any, arg1: Any) -> None:
+    print(arg0)
+    print(arg1)
+    print("")
+
+
+def rescore_single_file(
+    file_path: str, scoring_object: ParentScoring
+) -> Tuple[str, bool]:
     """
     Run scoring_object.run_rescoring through this function so multithread
     doesn't break.
@@ -224,7 +229,9 @@ def rescore_single_file(file_path, scoring_object):
     return scoring_object.run_rescoring(file_path)
 
 
-def make_lig_score_dictionary(list_of_list_of_lig_data):
+def make_lig_score_dictionary(
+    list_of_list_of_lig_data: List[CompoundInfo],
+) -> Dict[str, CompoundInfo]:
     """
     Given a list of ligands with the scoring data make a dictionary.
 
@@ -246,16 +253,23 @@ def make_lig_score_dictionary(list_of_list_of_lig_data):
         ligand with the most negative fitness score.
     """
 
-    lig_dict = {}
+    lig_dict: Dict[str, CompoundInfo] = {}
     for lig in list_of_list_of_lig_data:
         if lig is None:
             continue
-        lig_short_id = str(lig[2])
-        fitness_score = float(lig[-1])
+        lig_short_id = lig.short_id
+
+        assert lig_short_id is not None, "lig_short_id is None"
 
         # Handle if Multiple Conformers and Poses
-        if lig_short_id in lig_dict.keys():
-            if float(lig_dict[lig_short_id][-1]) > float(fitness_score):
+        if lig_short_id in lig_dict:
+            fitness_score = lig.fitness_score
+            lig_short_id_fitness_score = lig_dict[lig_short_id].fitness_score
+
+            assert fitness_score is not None, "fitness_score is None"
+            assert lig_short_id_fitness_score is not None, "lig_fitness_score is None"
+
+            if lig_short_id_fitness_score > fitness_score:
                 lig_dict[lig_short_id] = lig
             else:
                 continue
@@ -266,8 +280,11 @@ def make_lig_score_dictionary(list_of_list_of_lig_data):
 
 
 def score_files_multithread(
-    scoring_object, file_path, rescore_lig_efficiency, lig_efficiency_scoring_object
-):
+    scoring_object: ParentScoring,
+    file_path: str,
+    rescore_lig_efficiency: bool,
+    lig_efficiency_scoring_object: Optional[LigEfficiency],
+) -> Optional[List[str]]:
     """
     Run the scoring of a single molecule.
 
@@ -288,8 +305,11 @@ def score_files_multithread(
     """
 
     list_of_lig_data = scoring_object.run_scoring(file_path)
-    if rescore_lig_efficiency is True:
-
+    if rescore_lig_efficiency:
+        assert (
+            lig_efficiency_scoring_object is not None
+        ), "lig_efficiency_scoring_object is None"
+        assert list_of_lig_data is not None, "list_of_lig_data is None"
         list_of_lig_data = lig_efficiency_scoring_object.get_lig_efficiency_rescore_from_a_file(
             file_path, list_of_lig_data
         )
@@ -301,7 +321,7 @@ def score_files_multithread(
 ############
 
 
-def make_dict_of_smiles(smile_file):
+def make_dict_of_smiles(smile_file: str) -> Dict[str, CompoundInfo]:
     """
     This will take a .smi file and make a dictionary with all of the info
     about the smiles. This list won't have scores yet but will have all of the
@@ -316,9 +336,9 @@ def make_dict_of_smiles(smile_file):
     :return dict smiles_dict: a list of ligand info before docking
     """
 
-    smiles_dict = {}
+    smiles_dict: Dict[str, CompoundInfo] = {}
     # load smile file and convert to list with index
-    with open(str(smile_file), "r") as smi:
+    with open(smile_file, "r") as smi:
 
         # index for this for-loop is zero based indexing while ligand naming
         # index is one-based-indexing so we will use index = index+1
@@ -329,11 +349,17 @@ def make_dict_of_smiles(smile_file):
             # ligand_name should be something like: ['CCC',
             # '(ZINC123+ZINC345)Gen_0_Cross_99571'] or ['CCC', 'ZINC123']
 
-            if len(ligand_name.split(")")) == 2:
-                lig_name_short = ligand_name.split(")")[1]
-            elif len(ligand_name.split(")")) == 1:
+            lig_name_short = None
+            prts = ligand_name.split(")")
+            if len(prts) == 2:
+                lig_name_short = prts[1]
+            elif len(prts) == 1:
                 lig_name_short = ligand_name
 
-            smiles_dict[lig_name_short] = split_line
+            assert lig_name_short is not None, "lig_name_short is None"
+
+            smiles_dict[lig_name_short] = CompoundInfo(
+                smiles=split_line[0], name=split_line[1]
+            )
 
     return smiles_dict

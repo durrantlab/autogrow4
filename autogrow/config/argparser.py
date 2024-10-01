@@ -1,8 +1,9 @@
 import argparse
 import copy
+from typing import Any, Dict
 
 
-def get_argparse_vars() -> dict:
+def get_argparse_vars() -> Dict[str, Any]:
     parser = argparse.ArgumentParser()
 
     # Allows the run commands to be submitted via a .json file.

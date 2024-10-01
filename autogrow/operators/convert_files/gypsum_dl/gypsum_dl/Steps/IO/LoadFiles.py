@@ -21,7 +21,7 @@ from gypsum_dl import Utils
 
 try:
     from rdkit import Chem
-except:
+except Exception:
     Utils.exception("You need to install rdkit and its dependencies.")
 
 
@@ -127,7 +127,7 @@ def load_sdf_file(filename):
 
         try:
             name = mol.GetProp("_Name")
-        except:
+        except Exception:
             name = ""
 
         # Handle unnamed ligands
@@ -183,7 +183,7 @@ def load_sdf_file(filename):
         # SDF files may also contain properties. Get those as well.
         try:
             properties = mol.GetPropsAsDict()
-        except:
+        except Exception:
             properties = {}
 
         if smiles != "":

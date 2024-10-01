@@ -1,6 +1,8 @@
 import os
+from typing import Any, Dict
 
-def validate_mgltools(params: dict, printout: str):
+
+def validate_mgltools(params: Dict[str, Any], printout: str) -> None:
     if params["conversion_choice"] != "MGLToolsConversion":
         # mgl tools not used, no need to validate
         return
@@ -43,7 +45,5 @@ def validate_mgltools(params: dict, printout: str):
     if not os.path.exists(params["mgl_python"]) and not os.path.exists(
         params["mgl_python"].replace('"', "")
     ):
-        printout += (
-            "\nERROR: Could not find pythonsh at " + params["mgl_python"] + "\n"
-        )
+        printout += "\nERROR: Could not find pythonsh at " + params["mgl_python"] + "\n"
         raise NotImplementedError(printout)

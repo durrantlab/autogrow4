@@ -12,9 +12,9 @@ doi:10.1021/jm901070c.
 """
 import __future__
 
-import rdkit
-from rdkit.Chem import FilterCatalog
-from rdkit.Chem.FilterCatalog import FilterCatalogParams
+import rdkit  # type: ignore
+from rdkit.Chem import FilterCatalog  # type: ignore
+from rdkit.Chem.FilterCatalog import FilterCatalogParams  # type: ignore
 
 from autogrow.operators.filter.filter_classes.parent_filter_class import ParentFilter
 
@@ -37,14 +37,14 @@ class NIHFilter(ParentFilter):
     :param class ParentFilter: a parent class to initialize off of.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """
         This loads in the filters which will be used.
         """
 
         self.filters = self.get_filters()
 
-    def get_filters(self):
+    def get_filters(self) -> FilterCatalog.FilterCatalog:
         """
         This loads in the filters which will be used.
 

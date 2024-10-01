@@ -1,6 +1,8 @@
 import os
+from typing import Any, Dict, List
 
-def validate_params(params: dict):
+
+def validate_params(params: Dict[str, Any]) -> None:
     """
     Check for missing variables in the required inputs.
 
@@ -22,9 +24,7 @@ def validate_params(params: dict):
     ]
 
     missing_params = [
-        param
-        for param in list_of_required_params
-        if param not in keys_from_input
+        param for param in list_of_required_params if param not in keys_from_input
     ]
 
     if missing_params:
@@ -43,7 +43,18 @@ def validate_params(params: dict):
         )
 
 
-def _throw_missing_params_error(missing_params):
+def _throw_missing_params_error(missing_params: List[str]) -> None:
+    """
+    Raises an error if any required parameters are missing.
+
+    This function generates and prints a message listing all the missing parameters
+    that are required for the program to run. It raises a NotImplementedError with 
+    the list of missing parameters and instructions for how to obtain help.
+
+    Inputs:
+    :param List[str] missing_params: A list of the required parameter names that 
+                                     are missing from the input.
+    """
     printout = "\nRequired variables are missing from the input. A description \
             of each of these can be found by running python ./RunAutogrow -h"
     printout += "\nThe following required variables are missing: "
@@ -54,7 +65,27 @@ def _throw_missing_params_error(missing_params):
     print("")
     raise NotImplementedError("\n" + printout + "\n")
 
-def _check_file_exists(pname: str, ext: str, file_desc: str, params: dict):
+
+def _check_file_exists(
+    pname: str, ext: str, file_desc: str, params: Dict[str, Any]
+) -> None:
+    """
+    Verifies that a specified file exists and has the correct extension.
+
+    This function checks whether the file specified by the parameter name exists 
+    in the provided dictionary of parameters. It also ensures the file has the 
+    expected extension (e.g., ".pdb" for PDB files). If the file does not exist or 
+    has an incorrect extension, a NotImplementedError is raised.
+
+    Inputs:
+    :param str pname: The key in the params dictionary representing the file path.
+    :param str ext: The expected file extension (e.g., "pdb", "smi").
+    :param str file_desc: A description of the expected file type (e.g., ".PDB file").
+    :param Dict[str, Any] params: A dictionary of parameter names and values.
+
+    Raises:
+    :raises NotImplementedError: If the file does not exist or does not have the expected extension.
+    """
     if os.path.isfile(params[pname]) is False:
         raise NotImplementedError(
             f"{pname} can not be found. \
@@ -62,4 +93,3 @@ def _check_file_exists(pname: str, ext: str, file_desc: str, params: dict):
         )
     if f".{ext}" not in params[pname]:
         raise NotImplementedError(f"{pname} must be a {file_desc}.")
-

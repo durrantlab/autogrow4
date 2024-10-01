@@ -2,9 +2,12 @@ import json
 import copy
 import os
 import sys
+from typing import Dict, Union
 
 
-def convert_json_params_from_unicode(params_unicode):
+def convert_json_params_from_unicode(
+    params_unicode: Dict[str, Union[str, int]]
+) -> Dict[str, Union[str, int]]:
     """
     Set the parameters that will control this ConfGenerator object.
 
@@ -18,23 +21,20 @@ def convert_json_params_from_unicode(params_unicode):
     # Because Python2 & Python3 use different string objects, we separate their
     # usecases here.
     params = {}
-    if sys.version_info < (3,):
-        for param in params_unicode:
-            val = params_unicode[param]
+    for param, val in params_unicode.items():
+        if sys.version_info < (3,):
             if isinstance(val, unicode):
                 val = str(val).encode("utf8")
             key = param.encode("utf8")
-            params[key] = val
-    else:
-        for param in params_unicode:
-            val = params_unicode[param]
+        else:
             key = param
-            params[key] = val
+        params[key] = val
     return params
 
-def save_vars_as_json(vars):
+
+def save_vars_as_json(params: Dict[str, Union[str, int]]) -> None:
     """
-    This function saves the vars dictionary as a json file. This can be used
+    This function saves the params dictionary as a json file. This can be used
     later to track experiments and is necessary for several of the utility
     scripts.
     It saves all variables except the parallelizer class object.
@@ -46,9 +46,9 @@ def save_vars_as_json(vars):
             ie) output_directory + "vars_2.json"
 
     Inputs:
-    :param dict vars: dict of user variables which will govern how the programs runs
+    :param dict params: dict of user variables which will govern how the programs runs
     """
-    output_directory = vars["output_directory"]
+    output_directory = str(params["output_directory"])
 
     vars_file = output_directory + os.sep + "vars.json"
     if os.path.exists(vars_file):
@@ -62,13 +62,10 @@ def save_vars_as_json(vars):
             else:
                 path_exists = False
 
-    temp_vars = {}
-    for k in vars.keys():
-        if "parallelizer" in k or k == "filter_object_dict":
-            continue
-
-        temp_vars[k] = copy.deepcopy(vars[k])
-
+    temp_vars = {
+        k: copy.deepcopy(params[k])
+        for k in params
+        if "parallelizer" not in k and k != "filter_object_dict"
+    }
     with open(vars_file, "w") as fp:
         json.dump(temp_vars, fp, indent=4)
-

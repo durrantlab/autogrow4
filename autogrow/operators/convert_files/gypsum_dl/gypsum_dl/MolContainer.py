@@ -29,7 +29,7 @@ import gypsum_dl.MyMol as MyMol
 
 try:
     from rdkit import Chem
-except:
+except Exception:
     Utils.exception("You need to install rdkit and its dependencies.")
 
 

@@ -57,7 +57,7 @@ def print_gypsum_citation():
         rank = comm.rank
         if rank == 0:
             print(citation_print)
-    except:
+    except Exception:
         print(citation_print)
 
 

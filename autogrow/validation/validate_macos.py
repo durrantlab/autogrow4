@@ -1,8 +1,10 @@
 import platform
 import os
 import sys
+from typing import Any, Dict
 
-def run_macos_notarization(params):
+
+def run_macos_notarization(params: Dict[str, Any]) -> None:
     """
     Some MacOS require docking software to be notarized. This will require
     an internet signal. This function runs notarization on vina and qvina2
@@ -13,12 +15,11 @@ def run_macos_notarization(params):
     Inputs:
     :param dict params: dict of user variables which will govern how the programs runs
     """
-    if (
-        sys.platform.lower() != "darwin"
-        or params["dock_choice"] not in ["VinaDocking", "QuickVina2Docking"]
-    ):
+    if sys.platform.lower() != "darwin" or params["dock_choice"] not in [
+        "VinaDocking",
+        "QuickVina2Docking",
+    ]:
         return
-
 
     current_dir = os.path.dirname(os.path.realpath(__file__)) + os.sep
     vina_exe = current_dir + os.sep.join(
@@ -54,10 +55,10 @@ def run_macos_notarization(params):
         # Ensure permissions are unrestricted
         try:
             _run_cmd_on_docking_execs("chmod -R a+rwx ", vina_exe, qvina2_exe)
-        except:
+        except Exception as e:
             printout = "Permissions could not be adjusted on docking executable files."
             print(printout)
-            raise Exception(printout)
+            raise Exception(printout) from e
 
         # Check Platform information
         mac_version = platform.mac_ver()[0].split(".")
@@ -97,20 +98,63 @@ def run_macos_notarization(params):
                 )
 
 
-def _run_cmd_on_docking_execs(cmd, vina_exe, qvina2_exe):
+def _run_cmd_on_docking_execs(cmd: str, vina_exe: str, qvina2_exe: str) -> None:
+    """
+    Executes a given command on both Vina and QuickVina2 executables.
+
+    This function runs the specified command on both the Vina and QuickVina2 
+    executables using os.system(). It's typically used for operations like 
+    changing permissions or setting attributes.
+
+    Inputs:
+    :param str cmd: The command to be executed on the executables
+    :param str vina_exe: The path to the Vina executable
+    :param str qvina2_exe: The path to the QuickVina2 executable
+
+    Returns:
+    :returns: None
+
+    Note:
+    This function uses os.system() which can be a security risk if the 
+    input is not properly sanitized. Ensure that 'cmd' is safe to execute.
+    """
     command = f"{cmd}{vina_exe}"
     os.system(command)
     command = f"{cmd}{qvina2_exe}"
     os.system(command)
 
 
-def _throw_error(msg1, msg2):
+def _throw_error(msg1: str, msg2: str) -> None:
+    """
+    Prints an error message and raises an exception.
+
+    This function concatenates two message strings, prints the resulting message,
+    and then raises an Exception with the same message. It's used to handle
+    error conditions in a consistent manner.
+
+    Inputs:
+    :param str msg1: The first part of the error message
+    :param str msg2: The second part of the error message
+
+    Returns:
+    :returns: None
+
+    Raises:
+    :raises Exception: Always raises an exception with the concatenated error message
+
+    Note:
+    Although this function has a return type of None, it will never actually
+    return due to the raised exception. The None return type is used for
+    compatibility with type checking tools.
+    """
     printout = msg1 + msg2
     print(printout)
     raise Exception(printout)
 
 
-def _validate_docking_executables(vars, vina_exe, qvina2_exe):
+def _validate_docking_executables(
+    params: Dict[str, Any], vina_exe: str, qvina2_exe: str
+) -> bool:
     """
     This will test if docking executables are compatible with OS.
     This is only required for MacOS.
@@ -125,14 +169,14 @@ def _validate_docking_executables(vars, vina_exe, qvina2_exe):
     Returns True if both work and returns False.
 
     Inputs:
-    :param dict vars: dict of user variables which will govern how the programs runs
+    :param dict params: dict of user variables which will govern how the programs runs
     :param str vina_exe: path to vina executable
     :param str qvina2_exe: path to quick vina 2 executable
     Returns:
     :returns: bool bool: returns True if both docking executables work; False if either fails
     """
     test_vina_outfile = (
-        vars["root_output_folder"] + os.sep + "docking_exe_MACOS_test.txt"
+        params["root_output_folder"] + os.sep + "docking_exe_MACOS_test.txt"
     )
 
     try:
@@ -155,7 +199,7 @@ def _validate_docking_executables(vars, vina_exe, qvina2_exe):
             + "try provide a Vina executable compatible with the OS.\n"
         )
         print(printout)
-        if vars["dock_choice"] == "VinaDocking":
+        if params["dock_choice"] == "VinaDocking":
             return False
 
     if "QuickVina 2.1" not in lines[1]:
@@ -164,6 +208,6 @@ def _validate_docking_executables(vars, vina_exe, qvina2_exe):
             + " or try provide a Vina executable compatible with the OS.\n"
         )
         print(printout)
-        if vars["dock_choice"] == "QuickVina2Docking":
+        if params["dock_choice"] == "QuickVina2Docking":
             return False
     return True

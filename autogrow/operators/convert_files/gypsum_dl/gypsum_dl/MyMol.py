@@ -41,12 +41,12 @@ try:
     from rdkit.Chem import AllChem
     from rdkit import Chem
     from rdkit.Chem.rdchem import BondStereo
-except:
+except Exception:
     Utils.exception("You need to install rdkit and its dependencies.")
 
 try:
     from gypsum_dl.molvs import standardize_smiles as ssmiles
-except:
+except Exception:
     Utils.exception("You need to install molvs and its dependencies.")
 
 
@@ -85,7 +85,7 @@ class MyMol:
 
                 # In this case you know it's cannonical.
                 self.can_smi = smiles
-            except:
+            except Exception:
                 # Sometimes this conversion just can't happen. Happened once
                 # with this beast, for example:
                 # CC(=O)NC1=CC(=C=[N+]([O-])O)C=C1O
@@ -131,7 +131,7 @@ class MyMol:
 
         try:
             self.stdrd_smiles = ssmiles(self.smiles())
-        except:
+        except Exception:
             Utils.log("\tCould not standardize " + self.smiles(True) + ". Skipping.")
             self.stdrd_smiles = self.smiles()
 
@@ -244,7 +244,7 @@ class MyMol:
             try:
                 # sanitize = False makes it respect double-bond stereochemistry
                 m = Chem.MolFromSmiles(self.orig_smi_deslt, sanitize=False)
-            except:
+            except Exception:
                 m = None
         else:  # If given a RDKit Mol Obj
             m = self.rdkit_mol
@@ -299,7 +299,7 @@ class MyMol:
                     can_smi = Chem.MolToSmiles(
                         self.rdkit_mol, isomericSmiles=True, canonical=True
                     )
-                except:
+                except Exception:
                     # Sometimes this conversion just can't happen. Happened
                     # once with this beast, for example:
                     # CC(=O)NC1=CC(=C=[N+]([O-])O)C=C1O
@@ -558,7 +558,7 @@ class MyMol:
 
         try:
             self.rdkit_mol.SetProp(key, val)
-        except:
+        except Exception:
             pass
 
     def set_all_rdkit_mol_props(self):
@@ -620,7 +620,7 @@ class MyMol:
         """
 
         # Eliminate redundant ones.
-        for i1 in range(0, len(self.conformers) - 1):
+        for i1 in range(len(self.conformers) - 1):
             if self.conformers[i1] is not None:
                 for i2 in range(i1 + 1, len(self.conformers)):
                     if self.conformers[i2] is not None:
@@ -716,7 +716,7 @@ class MyConformer:
                 # Try to use ETKDGv2, but it is only present in the python 3.6
                 # version of RDKit.
                 params = AllChem.ETKDGv2()
-            except:
+            except Exception:
                 # Use the original version of ETKDG if python 2.7 RDKit. This
                 # may be resolved in next RDKit update so we encased this in a
                 # try statement.
@@ -767,7 +767,7 @@ class MyConformer:
             try:
                 ff = AllChem.UFFGetMoleculeForceField(self.mol)
                 self.energy = ff.CalcEnergy()
-            except:
+            except Exception:
                 Utils.log(
                     "Warning: Could not calculate energy for molecule "
                     + Chem.MolToSmiles(self.mol)
@@ -810,7 +810,7 @@ class MyConformer:
             ff = AllChem.UFFGetMoleculeForceField(self.mol)
             ff.Minimize()
             self.energy = ff.CalcEnergy()
-        except:
+        except Exception:
             Utils.log(
                 "Warning: Could not calculate energy for molecule "
                 + Chem.MolToSmiles(self.mol)

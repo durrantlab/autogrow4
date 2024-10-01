@@ -32,17 +32,17 @@ from gypsum_dl.Parallelizer import flatten_list
 try:
     from rdkit.Chem import AllChem
     from rdkit import Chem
-except:
+except Exception:
     Utils.exception("You need to install rdkit and its dependencies.")
 
 try:
     import numpy
-except:
+except Exception:
     Utils.exception("You need to install numpy and its dependencies.")
 
 try:
     from scipy.cluster.vq import kmeans2
-except:
+except Exception:
     Utils.exception("You need to install scipy and its dependencies.")
 
 from gypsum_dl.MolContainer import MolContainer
@@ -86,7 +86,7 @@ def prepare_molecules(args):
         # "json" is one of the parameters, so we'll be ignoring the rest.
         try:
             params = json.load(open(args["json"]))
-        except:
+        except Exception:
             Utils.exception("Is your input json file properly formed?")
 
         params = set_parameters(params)
@@ -119,7 +119,7 @@ def prepare_molecules(args):
         # Check mpi4py import
         try:
             import mpi4py
-        except:
+        except Exception:
             printout = "\nmpi4py not installed but --job_manager is set to mpi. \n Either install mpi4py or switch job_manager to multiprocessing or serial.\n"
             print(printout)
             Utils.exception(printout)
@@ -228,10 +228,10 @@ def prepare_molecules(args):
     # Make the molecule containers.
     contnrs = []
     idx_counter = 0
-    for i in range(0, len(smiles_data)):
+    for i in range(len(smiles_data)):
         try:
             smiles, name, props = smiles_data[i]
-        except:
+        except Exception:
             msg = 'Unexpected error. Does your "source" parameter specify a '
             msg = msg + "filename that ends in a .can, .smi, or .sdf extension?"
             Utils.exception(msg)
@@ -533,7 +533,7 @@ def finalize_params(params):
     # Check some required variables.
     try:
         params["source"] = os.path.abspath(params["source"])
-    except:
+    except Exception:
         Utils.exception("Source file doesn't exist.")
     source_dir = params["source"].strip(os.path.basename(params["source"]))
 

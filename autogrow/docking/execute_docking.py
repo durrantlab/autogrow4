@@ -4,6 +4,7 @@ This script handles the docking and file conversion for docking.
 import __future__
 
 import os
+from typing import Any, Dict, Type, Union
 
 from autogrow.docking.docking_class.get_child_class import get_all_subclasses
 
@@ -20,7 +21,7 @@ from autogrow.docking.docking_class.parent_pdbqt_converter import ParentPDBQTCon
 #                           import convert_with_obabel, convert_with_mgltools
 
 
-def pick_docking_class_dict(dock_choice):
+def pick_docking_class_dict(dock_choice: str) -> Type[ParentDocking]:
     """
     This will retrieve all the names of every child class of the parent class
     ParentDocking
@@ -35,15 +36,13 @@ def pick_docking_class_dict(dock_choice):
 
     children = get_all_subclasses(ParentDocking)
 
-    child_dict = {}
-    for child in children:
-        child_name = child.__name__
-        child_dict[child_name] = child
-
+    child_dict = {child.__name__: child for child in children}
     return child_dict[dock_choice]
 
 
-def pick_run_conversion_class_dict(conversion_choice):
+def pick_run_conversion_class_dict(
+    conversion_choice: str,
+) -> Type[ParentPDBQTConverter]:
     """
     This will retrieve all the names of every child class of the parent class
     ParentDocking
@@ -59,17 +58,16 @@ def pick_run_conversion_class_dict(conversion_choice):
 
     children = get_all_subclasses(ParentPDBQTConverter)
 
-    child_dict = {}
-    for child in children:
-        child_name = child.__name__
-        child_dict[child_name] = child
-
+    child_dict = {child.__name__: child for child in children}
     return child_dict[conversion_choice]
 
 
 def run_docking_common(
-    vars, current_gen_int, current_generation_dir, smile_file_new_gen
-):
+    params: Dict[str, Any],
+    current_gen_int: int,
+    current_generation_dir: str,
+    smile_file_new_gen: str,
+) -> str:
     """
     This section runs the functions common to all Docking programs.
 
@@ -79,7 +77,7 @@ def run_docking_common(
     ############## VERY IMPORTANT SECTION ########################
 
     Inputs:
-    :param dict vars: User variables which will govern how the programs runs
+    :param dict params: User variables which will govern how the programs runs
     :param int current_gen_int: the interger of the current generation indexed
         to zero
     :param str current_generation_dir: the current generation directory to
@@ -93,23 +91,21 @@ def run_docking_common(
     """
 
     # Get directory string of PDB files for Ligands
-    current_generation_pdb_dir = current_generation_dir + "PDBs" + os.sep
+    current_generation_pdb_dir = f"{current_generation_dir}PDBs{os.sep}"
 
-    dock_choice = vars["dock_choice"]
-    conversion_choice = vars["conversion_choice"]
-    receptor = vars["filename_of_receptor"]
+    dock_choice = params["dock_choice"]
+    conversion_choice = params["conversion_choice"]
+    receptor = params["filename_of_receptor"]
 
-    # Use a temp vars dict so you don't put mpi multiprocess info through
-    # itself...
-    temp_vars = {}
-    for key in list(vars.keys()):
-        if key == "parallelizer":
-            continue
-        temp_vars[key] = vars[key]
-
+    temp_vars = {
+        key: params[key] for key in list(params.keys()) if key != "parallelizer"
+    }
     file_conversion_class_object = pick_run_conversion_class_dict(conversion_choice)
+
+    # TODO: new file_conversion_class_object automatically converts receptor. To
+    # convert ligand, must access object function. That's pretty awkward.
     file_conversion_class_object = file_conversion_class_object(
-        temp_vars, receptor, test_boot=False
+        temp_vars, test_boot=False
     )
 
     dock_class = pick_docking_class_dict(dock_choice)
@@ -117,19 +113,17 @@ def run_docking_common(
         temp_vars, receptor, file_conversion_class_object, test_boot=False
     )
 
-    if vars["docking_executable"] is None:
+    if params["docking_executable"] is None:
         docking_executable = docking_object.get_docking_executable_file(temp_vars)
-        vars["docking_executable"] = docking_executable
+        params["docking_executable"] = docking_executable
 
     # Find PDB's
     pdbs_in_folder = docking_object.find_pdb_ligands(current_generation_pdb_dir)
-    job_input_convert_lig = tuple(
-        [tuple([docking_object, pdb]) for pdb in pdbs_in_folder]
-    )
+    job_input_convert_lig = tuple((docking_object, pdb) for pdb in pdbs_in_folder)
 
     print("####################")
     print("Convert Ligand to PDBQT format Begun")
-    smiles_names_failed_to_convert = vars["parallelizer"].run(
+    smiles_names_failed_to_convert = params["parallelizer"].run(
         job_input_convert_lig, lig_convert_multithread
     )
 
@@ -139,7 +133,7 @@ def run_docking_common(
     ]
     deleted_smiles_names_list_convert = list(set(deleted_smiles_names_list_convert))
 
-    if len(deleted_smiles_names_list_convert) != 0:
+    if deleted_smiles_names_list_convert:
         print("THE FOLLOWING LIGANDS WHICH FAILED TO CONVERT:")
         print(deleted_smiles_names_list_convert)
     print("####################")
@@ -147,27 +141,20 @@ def run_docking_common(
     # Docking the ligands which converted to PDBQT Find PDBQT's
     pdbqts_in_folder = docking_object.find_converted_ligands(current_generation_pdb_dir)
 
-    job_input_dock_lig = tuple(
-        [tuple([docking_object, pdbqt]) for pdbqt in pdbqts_in_folder]
-    )
+    job_input_dock_lig = tuple((docking_object, pdbqt) for pdbqt in pdbqts_in_folder)
     print("####################")
     print("Docking Begun")
-    smiles_names_failed_to_dock = vars["parallelizer"].run(
+    smiles_names_failed_to_dock = params["parallelizer"].run(
         job_input_dock_lig, run_dock_multithread
     )
 
-    print("")
-    # print("")
-    # print("")
-    print("Docking Completed")
-    print("####################")
-
+    _print_three_vars("", "Docking Completed", "####################")
     deleted_smiles_names_list_dock = [
         x for x in smiles_names_failed_to_dock if x is not None
     ]
     deleted_smiles_names_list_dock = list(set(deleted_smiles_names_list_dock))
 
-    if len(deleted_smiles_names_list_dock) != 0:
+    if deleted_smiles_names_list_dock:
         print("THE FOLLOWING LIGANDS WHICH FAILED TO DOCK:")
         print(deleted_smiles_names_list_dock)
 
@@ -177,28 +164,40 @@ def run_docking_common(
     )
 
     if len(deleted_smiles_names_list) != 0:
-        print("")
-        print("THE FOLLOWING LIGANDS WHERE DELETED FOR FAILURE TO CONVERT OR DOCK:")
-        print(deleted_smiles_names_list)
-
-    print("#################### ")
-    print("")
-    print("Begin Ranking and Saving results")
+        _print_three_vars(
+            "",
+            "THE FOLLOWING LIGANDS WHERE DELETED FOR FAILURE TO CONVERT OR DOCK:",
+            deleted_smiles_names_list,
+        )
+    _print_three_vars("#################### ", "", "Begin Ranking and Saving results")
     unweighted_ranked_smile_file = docking_object.rank_and_save_output_smi(
-        vars,
+        params,
         current_generation_dir,
         current_gen_int,
         smile_file_new_gen,
         deleted_smiles_names_list,
     )
-    print("")
-    print("Completed Ranking and Saving results")
-    print("")
-
+    _print_three_vars("", "Completed Ranking and Saving results", "")
     return unweighted_ranked_smile_file
 
 
-def lig_convert_multithread(docking_object, pdb):
+def _print_three_vars(arg0: Any, arg1: Any, arg2: Any) -> None:
+    """
+    Print three variables.
+
+    Inputs:
+    :param any arg0: the first variable to print
+    :param any arg1: the second variable to print
+    :param any arg2: the third variable to print    
+    """
+    print(arg0)
+    print(arg1)
+    print(arg2)
+
+
+def lig_convert_multithread(
+    docking_object: ParentDocking, pdb: str
+) -> Union[str, None]:
     """
     Run the ligand conversion of a single molecule. If it failed
     failed_smiles_name will be a string of the SMILE which failed to convert
@@ -214,11 +213,10 @@ def lig_convert_multithread(docking_object, pdb):
         final format. (ie. pdbqt conversion fail)
     """
 
-    failed_smiles_name = docking_object.run_ligand_handling_for_docking(pdb)
-    return failed_smiles_name
+    return docking_object.run_ligand_handling_for_docking(pdb)
 
 
-def run_dock_multithread(docking_object, pdb):
+def run_dock_multithread(docking_object: ParentDocking, pdb: str) -> Union[str, None]:
     """
     Run the docking of a single molecule.
 
@@ -233,5 +231,4 @@ def run_dock_multithread(docking_object, pdb):
     """
 
     print("Attempt to Dock complete: ", pdb)
-    failed_smiles_names = docking_object.run_dock(pdb)
-    return failed_smiles_names
+    return docking_object.run_dock(pdb)

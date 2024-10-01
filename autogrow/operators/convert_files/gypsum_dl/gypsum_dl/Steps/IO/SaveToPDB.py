@@ -25,7 +25,7 @@ from os.path import basename
 
 from gypsum_dl import Utils
 import rdkit
-import rdkit.Chem as Chem
+import rdkit.Chem as Chem  # type: ignore
 
 # Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog("rdApp.*")

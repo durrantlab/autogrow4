@@ -21,11 +21,11 @@ import __future__
 
 import copy
 
-import rdkit
-import rdkit.Chem as Chem
-import rdkit.Chem.Lipinski as Lipinski
-import rdkit.Chem.Crippen as Crippen
-import rdkit.Chem.Descriptors as Descriptors
+import rdkit  # type: ignore
+import rdkit.Chem as Chem  # type: ignore
+import rdkit.Chem.Lipinski as Lipinski  # type: ignore
+import rdkit.Chem.Crippen as Crippen  # type: ignore
+import rdkit.Chem.Descriptors as Descriptors  # type: ignore
 
 # Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog("rdApp.*")

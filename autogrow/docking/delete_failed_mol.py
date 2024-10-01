@@ -10,15 +10,14 @@ import glob
 import os
 
 
-def delete_all_associated_files(pdb_filename):
+def delete_all_associated_files(pdb_filename: str) -> None:
     """Delete files associated with a compound
 
     Inputs:
     :param str pdb_filename: the filename of the compounds.
     """
 
-    toremove = [pdb_filename]
-    toremove.extend(glob.glob(pdb_filename[:-3] + "*"))
+    toremove = [pdb_filename, *glob.glob(f"{pdb_filename[:-3]}*")]
     toremove.extend(
         glob.glob(
             os.path.dirname(pdb_filename)

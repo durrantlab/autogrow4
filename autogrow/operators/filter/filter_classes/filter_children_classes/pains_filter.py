@@ -14,10 +14,11 @@ doi:10.1021/jm901137j.
 """
 
 import __future__
+from typing import List
 
-import rdkit
-from rdkit.Chem import FilterCatalog
-from rdkit.Chem.FilterCatalog import FilterCatalogParams
+import rdkit  # type: ignore
+from rdkit.Chem import FilterCatalog  # type: ignore
+from rdkit.Chem.FilterCatalog import FilterCatalogParams  # type: ignore
 
 from autogrow.operators.filter.filter_classes.parent_filter_class import ParentFilter
 
@@ -41,14 +42,14 @@ class PAINSFilter(ParentFilter):
     :param class ParentFilter: a parent class to initialize off
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """
         This loads in the filters which will be used.
         """
 
         self.filters_list = self.get_filters_list()
 
-    def get_filters_list(self):
+    def get_filters_list(self) -> List[FilterCatalog.FilterCatalog]:
         """
         This loads in the filters which will be used.
 

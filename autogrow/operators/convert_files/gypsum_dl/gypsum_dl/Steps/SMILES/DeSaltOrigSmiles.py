@@ -26,7 +26,7 @@ import gypsum_dl.MyMol as MyMol
 
 try:
     from rdkit import Chem
-except:
+except Exception:
     Utils.exception("You need to install rdkit and its dependencies.")
 
 
@@ -55,7 +55,7 @@ def desalt_orig_smi(
     # Go through each contnr and update the orig_smi_deslt. If we update it,
     # also add a note in the genealogy record.
     tmp = Parallelizer.strip_none(tmp)
-    for idx in range(0, len(tmp)):
+    for idx in range(len(tmp)):
         desalt_mol = tmp[idx]
         # idx = desalt_mol.contnr_idx
         cont = contnrs[idx]

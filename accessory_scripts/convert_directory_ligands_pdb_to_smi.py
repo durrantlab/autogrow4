@@ -20,20 +20,22 @@ CC1COC(=O)OC(=O)O1    ZINC60039447
 O = C1OC(=O)N2CCC12    ZINC59199492
 O = C1CC(C(=O)O)C(=O)O1    ZINC59901386
 """
+
 import __future__
 
 import glob
 import os
 import argparse
 
-from rdkit import Chem
+import contextlib
+from typing import Any, Dict, Union, List
+from rdkit import Chem  # type: ignore
 
 import support_scripts.mol_object_handling as MOH
 import support_scripts.Multiprocess as mp
 
 
-def run_convert_on_single_pdb(pdb):
-
+def run_convert_on_single_pdb(pdb: str) -> str:
     """
     This function converts a ligand into SMILES
     and returns the list with the smiles with a name.
@@ -45,7 +47,8 @@ def run_convert_on_single_pdb(pdb):
     :returns: list output_data: A list containing all SMILES info from the file
     """
 
-    try:
+    output_data = ""
+    with contextlib.suppress(Exception):
         mol = Chem.MolFromPDBFile(pdb)
 
         mol_sanitized = MOH.check_sanitization(mol)
@@ -54,12 +57,10 @@ def run_convert_on_single_pdb(pdb):
             file_name = os.path.basename(pdb)
             file_stripped = file_name.replace(".pdb", "")
             output_data = smiles + "\t" + file_stripped
-    except:
-        pass
     return output_data
 
 
-def make_smile_list(sub_folder):
+def make_smile_list(sub_folder: str) -> List[str]:
     """
     This function converts every ligand within a folder into SMILES
     and returns the list of smiles with a name.
@@ -71,36 +72,34 @@ def make_smile_list(sub_folder):
     :returns: list smiles_list: A list of lists containing all SMILES from
         the .pdb files and their respective name
     """
-    sub_folder = sub_folder + os.sep
+    sub_folder += os.sep
     smiles_list = []
     pdb_list = glob.glob(os.sep + sub_folder + "*.pdb")
     pdb_list.extend(glob.glob(os.sep + sub_folder + "*.PDB"))
-    pdb_list = tuple([tuple([pdb]) for pdb in pdb_list])
+    pdb_list = list(tuple((pdb,) for pdb in pdb_list))
 
     # run convert in multithread
-    smiles_list = mp.multi_threading(pdb_list, -1, run_convert_on_single_pdb)
-
-    return smiles_list
+    return mp.multi_threading(pdb_list, -1, run_convert_on_single_pdb)
 
 
-def start_run_main(vars):
+def start_run_main(params: Dict[str, Any]) -> None:
     """
     This will run the main arguments for the script.
 
     Inputs:
-    :param dict vars: dictionary of user variables.
+    :param dict params: dictionary of user variables.
     """
     # Running converter
-    smiles_list = make_smile_list(vars["source_folder"])
-    name = [x for x in vars["source_folder"].split(os.sep) if x != ""][-1]
-    output_file = vars["output_folder"] + os.sep + name + ".smi"
+    smiles_list = make_smile_list(str(params["source_folder"]))
+    name = [x for x in str(params["source_folder"]).split(os.sep) if x != ""][-1]
+    output_file = str(params["output_folder"]) + os.sep + name + ".smi"
     with open(output_file, "w") as f:
         f.write("\n".join(smiles_list))
 
-    print("Converted ligands to .smi located:\n\t{}".format(output_file))
+    print(f"Converted ligands to .smi located:\n\t{output_file}")
 
 
-def get_arguments_from_argparse(args_dict):
+def get_arguments_from_argparse(args_dict: Dict[str, Any]) -> Dict[str, Any]:
     """
     This function handles the arg parser arguments for the script.
 
@@ -117,25 +116,22 @@ def get_arguments_from_argparse(args_dict):
         raise Exception("provided output_folder must be a directory.")
 
     #  argument_handling
-    if (
-        os.path.exists(args_dict["source_folder"]) is False
-        or os.path.isdir(args_dict["source_folder"]) is False
+    if not os.path.exists(args_dict["source_folder"]) or not os.path.isdir(
+        args_dict["source_folder"]
     ):
         raise Exception(
             "provided source folder can not be found or is not a directory."
         )
     args_dict["source_folder"] = os.path.abspath(args_dict["source_folder"]) + os.sep
 
-    if os.path.exists(args_dict["output_folder"]) is False:
-        try:
+    if not os.path.exists(args_dict["output_folder"]):
+        with contextlib.suppress(Exception):
             os.mkdir(args_dict["output_folder"])
-        except:
-            pass
-        if os.path.exists(args_dict["output_folder"]) is False:
+        if not os.path.exists(args_dict["output_folder"]):
             raise Exception("output_folder could not be made or found.")
+    elif not os.path.isdir(args_dict["output_folder"]):
+        raise Exception("output_folder needs to be a directory.")
     else:
-        if os.path.isdir(args_dict["output_folder"]) is False:
-            raise Exception("output_folder needs to be a directory.")
         args_dict["output_folder"] = (
             os.path.abspath(args_dict["output_folder"]) + os.sep
         )

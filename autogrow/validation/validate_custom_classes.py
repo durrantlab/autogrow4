@@ -1,8 +1,14 @@
 import os
+from typing import Any, Dict, Type
+
 
 def validate_custom_param_type(
-    param_name: str, params: dict, outer_type, inner_type, type_desc: str
-):
+    param_name: str,
+    params: Dict[str, Any],
+    outer_type: Type,
+    inner_type: Type,
+    type_desc: str,
+) -> None:
     # Note that this is called from custom_classes.py
 
     if type(params[param_name]) != outer_type:
@@ -22,7 +28,8 @@ def validate_custom_param_type(
         #     [[name_filter1, Path/to/name_filter1.py],[name_filter2, Path/to/name_filter2.py]]"
         # )
 
-def validate_custom_params(params):
+
+def validate_custom_params(params: Dict[str, Any]) -> None:
     # Check if Custom docking option if so there's a few things which need to
     # also be specified. if not lets flag the error.
     if params["dock_choice"] == "Custom":
@@ -36,9 +43,9 @@ def validate_custom_params(params):
                 f"Custom docking_executable could not be found at:\
                 {params['docking_executable']}"
             )
-        if type(
-            params["custom_docking_script"]
-        ) != list or not os.path.exists(params["custom_docking_script"][1]):
+        if type(params["custom_docking_script"]) != list or not os.path.exists(
+            params["custom_docking_script"][1]
+        ):
             raise ValueError(
                 "TO USE Custom DOCKING OPTION, MUST SPECIFY THE \
                 PATH TO THE Custom DOCKING SCRIPT"
@@ -65,10 +72,7 @@ def validate_custom_params(params):
 
     # Mutation Settings
     if params["rxn_library"] == "Custom":
-        if (
-            params["rxn_library_file"] == ""
-            or params["function_group_library"] == ""
-        ):
+        if params["rxn_library_file"] == "" or params["function_group_library"] == "":
             raise ValueError(
                 "TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY \
                  THE PATH TO THE REACTION LIBRARY USING INPUT PARAMETER rxn_library"
@@ -111,4 +115,3 @@ def validate_custom_params(params):
             Please use either the provided rxn_library options or chose the Custom\
             option for rxn_library"
             )
-

@@ -1,6 +1,8 @@
 import os
+from typing import Optional
 
-def set_run_directory(root_folder_path, start_a_new_run):
+
+def set_run_directory(root_folder_path: str, start_a_new_run: bool) -> str:
     """
     Determine and make the folder for the run directory.
         If start_a_new_run is True    Start a frest new run.
@@ -18,8 +20,8 @@ def set_run_directory(root_folder_path, start_a_new_run):
         make a directory within this folder to store our output files
     :param bol start_a_new_run: True or False to determine if we continue from
         the last run or start a new run
-        - This is set as a vars["start_a_new_run"]
-        - The default is vars["start_a_new_run"] = True
+        - This is set as a params["start_a_new_run"]
+        - The default is params["start_a_new_run"] = True
     Returns:
     :returns: str folder_path: the string of the newly created directory for
         puting output folders
@@ -37,28 +39,28 @@ def set_run_directory(root_folder_path, start_a_new_run):
 
         # make a folder for the new generation
         run_number = 0
-        folder_path = "{}{}{}".format(folder_name_path, run_number, os.sep)
+        folder_path = f"{folder_name_path}{run_number}{os.sep}"
         os.makedirs(folder_path)
 
-    else:
-        if start_a_new_run is False:
-            # Continue from the last simulation run
-            run_number = last_run_number
-            folder_path = "{}{}{}".format(folder_name_path, last_run_number, os.sep)
-        else:  # start_a_new_run is True
-            # Start a new fresh simulation
-            # Make a directory for the new run by increasing run number by +1
-            # from last_run_number
-            run_number = last_run_number + 1
-            folder_path = "{}{}{}".format(folder_name_path, run_number, os.sep)
-            os.makedirs(folder_path)
+    elif not start_a_new_run:
+        # Continue from the last simulation run
+        run_number = last_run_number
+        folder_path = f"{folder_name_path}{last_run_number}{os.sep}"
+    else:  # start_a_new_run is True
+        # Start a new fresh simulation
+        # Make a directory for the new run by increasing run number by +1
+        # from last_run_number
+        run_number = last_run_number + 1
+        folder_path = f"{folder_name_path}{run_number}{os.sep}"
+        os.makedirs(folder_path)
 
     print("The Run number is: ", run_number)
     print("The Run folder path is: ", folder_path)
     print("")
     return folder_path
 
-def _find_previous_runs(folder_name_path):
+
+def _find_previous_runs(folder_name_path: str) -> Optional[int]:
     """
     This will check if there are any previous runs in the output directory.
         - If there are it will return the interger of the number label of the last Run folder path.
@@ -89,5 +91,3 @@ def _find_previous_runs(folder_name_path):
 
     # A previous run exists. The number of the last run.
     return i - 1  # last_run_number
-
-

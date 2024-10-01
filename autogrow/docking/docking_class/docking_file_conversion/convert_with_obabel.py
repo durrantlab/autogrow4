@@ -1,13 +1,16 @@
 """
 The child classes from ParentExample
 """
+
 import __future__
 
+import contextlib
 import os
 import subprocess
 import datetime
+from typing import Any, Dict, Optional, Union
 
-import rdkit.Chem as Chem
+import rdkit.Chem as Chem  # type: ignore
 
 import autogrow.docking.delete_failed_mol as Delete
 import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
@@ -32,53 +35,60 @@ class ObabelConversion(ParentPDBQTConverter):
       from
     """
 
-    def __init__(self, vars=None, receptor_file=None, test_boot=True):
+    def __init__(
+        self, params: Optional[Dict[str, Any]] = None, test_boot: bool = True,
+    ) -> None:
         """
         get the specifications for Vina from vars load them into the self
         variables we will need and convert the receptor to the proper file
         format (ie pdb-> pdbqt)
 
         Inputs:
-        :param dict vars: Dictionary of User variables
-        :param str receptor_file: the path for the receptor pdb
+        :param dict params: Dictionary of User variables
         :param bool test_boot: used to initialize class without objects for
             testing purpose
         """
 
-        if test_boot is False:
+        if not test_boot:
 
-            self.vars = vars
-            self.debug_mode = vars["debug_mode"]
+            assert params is not None, "params must be passed to ObabelConversion"
+
+            self.params = params
+            self.debug_mode = params["debug_mode"]
 
             # VINA SPECIFIC VARS
-            receptor_file = vars["filename_of_receptor"]
-            obabel_path = self.vars["obabel_path"]
-            number_of_processors = vars["number_of_processors"]
-            # docking_executable = vars["docking_executable"]
+            receptor_file = params["filename_of_receptor"]
+            obabel_path = self.params["obabel_path"]
+            number_of_processors = params["number_of_processors"]
+            # docking_executable = params["docking_executable"]
 
             ###########################
 
             # convert Receptor from PDB to PDBQT
             self.convert_receptor_pdb_files_to_pdbqt(
-                receptor_file, obabel_path, number_of_processors
+                receptor_file, obabel_path, None, number_of_processors
             )
 
-            self.receptor_pdbqt_file = receptor_file + "qt"
+            self.receptor_pdbqt_file = f"{receptor_file}qt"
 
     def convert_receptor_pdb_files_to_pdbqt(
-        self, receptor_file, obabel_path, number_of_processors
-    ):
+        self,
+        receptor_file: str,
+        run_path: str,
+        aux_script_path: Optional[str],
+        number_of_processors: int,
+    ) -> None:
         """
         Make sure a PDB file is properly formatted for conversion to pdbqt
 
         Inputs:
         :param str receptor_file:  the file path of the receptor
-        :param str obabel_path: file path of the obabel_path executable
+        :param str run_path: file path of the obabel_path executable
         :param int number_of_processors: number of processors to multithread
         """
 
         count = 0
-        while not os.path.exists(receptor_file + "qt"):
+        while not os.path.exists(f"{receptor_file}qt"):
 
             count = count + 1
             if count > 10000:
@@ -96,11 +106,11 @@ class ObabelConversion(ParentPDBQTConverter):
             # make sure the receptors have been converted to PDBQT. If not, do
             # the conversion.
             receptors = [receptor_file]
-            need_to_covert_receptor_to_pdbqt = []
-            for filename in receptors:
-                if not os.path.exists(filename + "qt"):
-                    need_to_covert_receptor_to_pdbqt.append(filename)
-
+            need_to_covert_receptor_to_pdbqt = [
+                filename
+                for filename in receptors
+                if not os.path.exists(f"{filename}qt")
+            ]
             # This should only be 1 receptor. If Autogrow is expanded to
             # handle multiple receptor, one will need Multiprocess this. Fix
             # this to 1 processor, so no overwriting issues, but could be
@@ -109,7 +119,7 @@ class ObabelConversion(ParentPDBQTConverter):
             # create a file to run the pdbqt
             for i in need_to_covert_receptor_to_pdbqt:
 
-                self.prepare_receptor_multiprocessing(obabel_path, i)
+                self.prepare_receptor_multiprocessing(run_path, i)
 
     def prepare_receptor_multiprocessing(self, obabel_path, mol_filename):
         """
@@ -127,15 +137,13 @@ class ObabelConversion(ParentPDBQTConverter):
         # Developer note should replace this when better option becomes
         # available
         print("Converting receptor PDB file to PDBQT using obabel")
-        command = "{} -ipdb {} -opdbqt -xrp > {}qt".format(
-            obabel_path, mol_filename, mol_filename
-        )
+        command = f"{obabel_path} -ipdb {mol_filename} -opdbqt -xrp > {mol_filename}qt"
 
         try:
             os.system(command)
-        except:
-            raise Exception("Could not convert receptor with obabel")
-        if os.path.exists(mol_filename + "qt") is False:
+        except Exception as e:
+            raise Exception("Could not convert receptor with obabel") from e
+        if os.path.exists(f"{mol_filename}qt") is False:
             raise Exception("Could not convert receptor with obabel")
 
         # Run Clean up on pdbqt receptor
@@ -145,16 +153,16 @@ class ObabelConversion(ParentPDBQTConverter):
         # We will also add in a header
         printout = "REMARK Receptor file prepared using obabel on: "
         printout = printout + str(datetime.datetime.now()) + "\n"
-        printout = printout + "REMARK Filename is: {}\n".format(mol_filename + "qt")
-        printout = printout + "REMARK Prepared by running: {}\n".format(command)
-        with open(mol_filename + "qt", "r") as fil_path:
-            for line in fil_path.readlines():
+        printout += f"REMARK Filename is: {mol_filename}qt\n"
+        printout += f"REMARK Prepared by running: {command}\n"
+        with open(f"{mol_filename}qt", "r") as fil_path:
+            for line in fil_path:
                 if "ROOT" in line:
-                    line = "REMARK " + line
+                    line = f"REMARK {line}"
                 if "TORSDOF" in line:
-                    line = "REMARK " + line
+                    line = f"REMARK {line}"
                 printout = printout + line
-        with open(mol_filename + "qt", "w") as fil_path:
+        with open(f"{mol_filename}qt", "w") as fil_path:
             fil_path.write(printout)
 
     ###################################################
@@ -176,34 +184,31 @@ class ObabelConversion(ParentPDBQTConverter):
 
         smile_name = self.get_smile_name_from_pdb(pdb_file)
 
-        obabel_path = self.vars["obabel_path"]
-
         # gypsum makes 1 files labeled params which is not a valid pdb, but is
         # actually a log Do not convert the params files
         if "params" in pdb_file:
             return False, None
 
+        obabel_path = self.params["obabel_path"]
         # if the file already has been converted to a .pbdqt skip this file
         # take all other pdb file names
-        if not os.path.exists(pdb_file + "qt"):
+        if not os.path.exists(f"{pdb_file}qt"):
 
             # make sure its in proper format
             self.convert_pdb_to_pdbqt_acceptable_format(pdb_file)
             self.prepare_ligand_processing(obabel_path, pdb_file)
-            if not os.path.exists(pdb_file + "qt"):
+            if not os.path.exists(f"{pdb_file}qt"):
                 # FILE FAILED TO CONVERT TO PDBQT DELETE PDB AND RETURN FALSE
                 if self.debug_mode is False:
                     print(
-                        "PDBQT not generated: Deleting "
-                        + os.path.basename(pdb_file)
-                        + "..."
+                        f"PDBQT not generated: Deleting {os.path.basename(pdb_file)}..."
                     )
 
                     # REMOVED FOR LIGANDS WHICH FAILED TO CONVERT TO PDBQT
                     Delete.delete_all_associated_files(pdb_file)
                     return False, smile_name
                 # In debug mode but pdbqt file does not exist
-                print("PDBQT not generated: " + os.path.basename(pdb_file) + "...")
+                print(f"PDBQT not generated: {os.path.basename(pdb_file)}...")
                 return False, smile_name
 
         return True, smile_name
@@ -229,58 +234,51 @@ class ObabelConversion(ParentPDBQTConverter):
         :param str mol_filename:  the file path of the ligand
         """
 
-        vars = self.vars
-        timeout_option = vars["timeout_vs_gtimeout"]
+        params = self.params
+        timeout_option = params["timeout_vs_gtimeout"]
 
         # Check that the PDB is a valid PDB file in RDKIT
         try:
             mol = Chem.MolFromPDBFile(mol_filename, sanitize=False, removeHs=False)
             if mol is not None:
                 mol = MOH.check_sanitization(mol)
-        except:
+        except Exception:
             mol = None
 
-        temp_file = "{}_temp".format(mol_filename)
+        temp_file = f"{mol_filename}_temp"
         if mol is not None:
             count = 0
             # timeout or gtimeout
 
-            command = timeout_option + " 10 {} -ipdb {} -opdbqt > {}qt".format(
-                obabel_path, mol_filename, mol_filename
-            )
+            command = f"{timeout_option} 10 {obabel_path} -ipdb {mol_filename} -opdbqt > {mol_filename}qt"
 
-            while not os.path.exists(mol_filename + "qt"):
+            while not os.path.exists(f"{mol_filename}qt"):
                 if count < 3:
                     # We will try up to 3 times
                     try:
-                        subprocess.check_output(
-                            command + " 2> " + temp_file, shell=True
-                        )
-                    except:
-                        try:
-                            os.system(command + " 2> " + temp_file)
-                        except:
-                            pass
-                        if os.path.exists(mol_filename + "qt") is False:
-                            printout = "Failed to convert {} times: {}".format(
-                                count, mol_filename
+                        subprocess.check_output(f"{command} 2> {temp_file}", shell=True)
+                    except Exception:
+                        with contextlib.suppress(Exception):
+                            os.system(f"{command} 2> {temp_file}")
+                        if not os.path.exists(f"{mol_filename}qt"):
+                            printout = (
+                                f"Failed to convert {count} times: {mol_filename}"
                             )
                             print(printout)
 
                     count = count + 1
 
                 else:
-                    printout = "COMPLETELY FAILED TO CONVERT: {}".format(mol_filename)
+                    printout = f"COMPLETELY FAILED TO CONVERT: {mol_filename}"
                     print(printout)
                     break
 
-        if self.debug_mode is False:
-            if os.path.exists(temp_file) is True:
-                command = "rm {}".format(temp_file)
-                try:
-                    os.system(command)
-                except:
-                    print("Check permissions. Could not delete {}".format(temp_file))
+        if os.path.exists(temp_file) and self.debug_mode is False:
+            command = f"rm {temp_file}"
+            try:
+                os.system(command)
+            except Exception:
+                print(f"Check permissions. Could not delete {temp_file}")
 
     # Convert PDB to acceptable PDBQT file format before converting
     def convert_pdb_to_pdbqt_acceptable_format(self, filename):
@@ -293,7 +291,7 @@ class ObabelConversion(ParentPDBQTConverter):
         # read in the file
         output_lines = []
         with open(filename, "r") as f:
-            for line in f.readlines():
+            for line in f:
                 line = line.replace("\n", "")
                 if line[:5] == "ATOM " or line[:7] == "HETATM ":
                     # fix things like atom names with two letters
@@ -306,13 +304,12 @@ class ObabelConversion(ParentPDBQTConverter):
                     middle_firstpart = ""
                     middle_lastpart = middle
 
-                    for i in range(len(middle_lastpart)):
-                        if middle_lastpart[:1].isupper() is True:
-                            middle_firstpart = middle_firstpart + middle_lastpart[:1]
-                            middle_lastpart = middle_lastpart[1:]
-                        else:
+                    for _ in range(len(middle_lastpart)):
+                        if middle_lastpart[:1].isupper() is not True:
                             break  # you reached the first number
 
+                        middle_firstpart = middle_firstpart + middle_lastpart[:1]
+                        middle_lastpart = middle_lastpart[1:]
                     # now if there are more than two letters in
                     # middle_firstpart, keep just two
                     if len(middle_firstpart) > 2:
@@ -331,42 +328,10 @@ class ObabelConversion(ParentPDBQTConverter):
 
                     # make sure all parts of the molecule belong to the same
                     # chain and resid
-                    line = line[:17] + "LIG X 999" + line[26:]
+                    line = f"{line[:17]}LIG X 999{line[26:]}"
 
-                    output_lines.append(line)
-                else:
-                    output_lines.append(line)
-
+                output_lines.append(line)
         with open(filename, "w") as f:
 
             for line in output_lines:
                 f.write(line + "\n")
-
-    #######################################
-    # Handle Failed PDBS                  #
-    #######################################
-    def get_smile_name_from_pdb(self, pdb_file):
-        """
-        This will return the unique identifier name for the compound
-
-        Inputs:
-        :param str pdb_file: pdb file path
-        Returns:
-        :returns: str line_stripped: the name of the SMILES string
-                                with the new lines and COMPND removed
-        """
-        if os.path.exists(pdb_file):
-            with open(pdb_file, "r") as f:
-                for line in f.readlines():
-                    if "COMPND" in line:
-                        line_stripped = line.replace(
-                            "COMPND", ""
-                        ).strip()  # Need to remove whitespaces on both ends
-                        line_stripped = line_stripped.replace(
-                            "\n", ""
-                        ).strip()  # Need to remove whitespaces on both ends
-
-            # line_stripped is now the name of the smile for this compound
-        else:
-            line_stripped = "unknown"
-        return line_stripped

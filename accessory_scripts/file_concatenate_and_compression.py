@@ -38,11 +38,12 @@ import os
 import gzip
 import shutil
 import argparse
+from typing import Any, Dict
 
 import support_scripts.Multiprocess as mp
 
 
-def compress_file(file_name):
+def compress_file(file_name: str) -> None:
     """
     Compress the concatenated file
 
@@ -53,12 +54,12 @@ def compress_file(file_name):
     with open(file_name, "r") as f:
         printout = f.read()
     printout = printout.encode("utf-8")
-    with gzip.open(file_name + ".gz", "wb") as f:
+    with gzip.open(f"{file_name}.gz", "wb") as f:
         f.write(printout)
 
 
 #######
-def decompress_file(decompressed_file):
+def decompress_file(decompressed_file: str) -> str:
     """
     Decompress a file. Not used in running the program but is the counter of
     def compress_file(file_name)
@@ -78,7 +79,7 @@ def decompress_file(decompressed_file):
 
 
 #######
-def separate_files(compressed_file):
+def separate_files(compressed_file: str) -> None:
     """
     Separate a concatenated file. Not used in running the program but is the
     counter of def compress_file(file_name)
@@ -101,7 +102,7 @@ def separate_files(compressed_file):
     list_of_new_files = []
     out_file = None
     with open(decompressed_file, "r") as f:
-        for line in f.readlines():
+        for line in f:
             if "$$END_FILE$$" in line:
                 if out_file is not None and os.path.exists(out_file) is False:
                     with open(out_file, "w") as f:
@@ -132,15 +133,15 @@ def separate_files(compressed_file):
     all_are_made = True
     for f in list_of_new_files:
         if os.path.exists(f) is False:
-            print("file failed to decompress: {}".format(f))
+            print(f"file failed to decompress: {f}")
             all_are_made = False
     if all_are_made is True:
-        to_run = "rm {}".format(decompressed_file)
+        to_run = f"rm {decompressed_file}"
         os.system(to_run)
 
 
 #######
-def get_file_info(file_name):
+def get_file_info(file_name: str) -> str:
     """
     Used for concatenating files together. This function appends a seperator
     and the filename of a file before and after the text of the file
@@ -153,18 +154,17 @@ def get_file_info(file_name):
     :returns: str concat: the text of the file file_name with a seperator and
         label before and after the file text.
     """
-    file_name_insert = "\n##############################File_name: {}\n".format(
-        os.path.basename(file_name)
+    file_name_insert = (
+        f"\n##############################File_name: {os.path.basename(file_name)}\n"
     )
-    file_termination_insert = "\n##############################$$END_FILE$$ {}".format(
-        os.path.basename(file_name)
+    file_termination_insert = (
+        f"\n##############################$$END_FILE$$ {os.path.basename(file_name)}"
     )
-    concat = file_name_insert + open(file_name).read() + file_termination_insert
-    return concat
+    return file_name_insert + open(file_name).read() + file_termination_insert
 
 
 #######
-def del_files(file_name):
+def del_files(file_name: str) -> None:
     """
     This function deletes a given file file_name.
 
@@ -174,13 +174,13 @@ def del_files(file_name):
 
     if os.path.exists(file_name):
         try:
-            os.system("rm {}".format(file_name))
-        except:
-            print("couldn't delete file: {}".format(file_name))
+            os.system(f"rm {file_name}")
+        except Exception:
+            print(f"couldn't delete file: {file_name}")
 
 
 #######
-def run_concatenation(directory):
+def run_concatenation(directory: str) -> None:
     """
     This function concatenates and compresses every file in a directory. This
     makes data transfer easier later on.
@@ -204,38 +204,29 @@ def run_concatenation(directory):
         for file_name in file_list:
             f.write(get_file_info(file_name))
 
-    job_list = tuple([(file_path,) for file_path in file_list])
+    job_list = list(tuple((file_path,) for file_path in file_list))
     print("\tFinish Concatenation")
     print("\tRemoving files that were concatenated")
     mp.multi_threading(job_list, -1, del_files)
     print("\tCompressing file")
     compress_file(concat_file)
-    if os.path.exists(concat_file + ".gz"):
+    if os.path.exists(f"{concat_file}.gz"):
         del_files(concat_file)
     print("Finished Compression")
 
 
 ######
-def run_main(vars):
+def run_main(params: Dict[str, Any]) -> None:
     """
     This function runs the functions for compression or decompression.
     Inputs:
-    :param dict vars: dictionary of user variables.
+    :param dict params: dictionary of user variables.
     """
 
-    if vars["compress_or_decompress"] == "compress":
-
-        print("BEFORE")
-        input_folder = vars["input_folder_or_file"]
-        print(os.path.getsize(input_folder))
-
-        run_concatenation(input_folder)
-        print("FINISH CONCATENATE")
-        print("After concatenate")
-        print(os.path.getsize(input_folder))
-
-    elif vars["compress_or_decompress"] == "decompress":
-        compressed_file = vars["input_folder_or_file"]
+    if params["compress_or_decompress"] == "compress":
+        _concatenate_and_compress_folder(params)
+    elif params["compress_or_decompress"] == "decompress":
+        compressed_file = params["input_folder_or_file"]
 
         if os.path.exists(compressed_file) is False:
             raise Exception("File to Decompress doesn't exist")
@@ -257,10 +248,21 @@ def run_main(vars):
         print(os.path.getsize(input_folder))
 
 
+def _concatenate_and_compress_folder(params: Dict[str, Any]) -> None:
+    print("BEFORE")
+    input_folder = params["input_folder_or_file"]
+    print(os.path.getsize(input_folder))
+
+    run_concatenation(input_folder)
+    print("FINISH CONCATENATE")
+    print("After concatenate")
+    print(os.path.getsize(input_folder))
+
+
 #######
 
 
-def get_arguments_from_argparse(arg_dict):
+def get_arguments_from_argparse(arg_dict: Dict[str, Any]) -> Dict[str, Any]:
     """
     This function handles the arg parser arguments for the script.
 

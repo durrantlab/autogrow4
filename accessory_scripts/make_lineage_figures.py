@@ -14,13 +14,15 @@ import argparse
 import json
 import copy
 import pickle
+from typing import Any, Dict, List, Optional, Tuple, Union
 
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt  # type: ignore
+from matplotlib.axes import Axes  # type: ignore
 
-import rdkit
-import rdkit.Chem as Chem
-from rdkit.Chem import Draw, AllChem
-from PIL import Image
+import rdkit  # type: ignore
+import rdkit.Chem as Chem  # type: ignore
+from rdkit.Chem import Draw, AllChem  # type: ignore
+from PIL import Image  # type: ignore
 
 # Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog("rdApp.*")
@@ -29,7 +31,7 @@ rdkit.RDLogger.DisableLog("rdApp.*")
 ########### BASIC OPERATIONS #####################################
 ##################################################################
 ##################################################################
-def get_obj_from_pickle_file(file_path):
+def get_obj_from_pickle_file(file_path: str) -> Any:
     """
     This functions retrieves objects from a pickle_file
     Inputs:
@@ -42,7 +44,7 @@ def get_obj_from_pickle_file(file_path):
     return objects
 
 
-def write_pickle_to_file(file_path, obj):
+def write_pickle_to_file(file_path: str, obj: Any) -> None:
     """
     This functions pickles an object into a pickle_file
     Inputs:
@@ -53,7 +55,7 @@ def write_pickle_to_file(file_path, obj):
         pickle.dump(obj, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-def get_usable_format(infile):
+def get_usable_format(infile: str) -> List[List[str]]:
     """
     This code takes a string for an file which is formatted as an .smi file. It
     opens the file and reads in the components into a usable list.
@@ -85,10 +87,10 @@ def get_usable_format(infile):
     """
 
     # IMPORT SMILES FROM THE PREVIOUS GENERATION
-    usable_list_of_smiles = []
+    usable_list_of_smiles: List[List[str]] = []
 
     if os.path.exists(infile) is False:
-        print("\nFile of Source compounds does not exist: {}\n".format(infile))
+        print(f"\nFile of Source compounds does not exist: {infile}\n")
         raise Exception("File of Source compounds does not exist")
 
     with open(infile) as smiles_file:
@@ -100,9 +102,7 @@ def get_usable_format(infile):
                     "    "
                 )  # split line into parts separated by 4-spaces
 
-            choice_list = []
-            for i in range(0, len(parts)):
-                choice_list.append(parts[i])
+            choice_list = [parts[i] for i in range(len(parts))]
             usable_list_of_smiles.append(choice_list)
 
     return usable_list_of_smiles
@@ -113,7 +113,7 @@ def get_usable_format(infile):
 #####################################################################
 
 
-def get_image_dimensions(imagefile):
+def get_image_dimensions(imagefile: str) -> Dict[str, int]:
     """
     Helper function that returns the image dimensions.
 
@@ -131,7 +131,9 @@ def get_image_dimensions(imagefile):
     return dict(width=width, height=height, size_bytes=size_bytes)
 
 
-def get_grid_img(img_files_list, list_printout_info, result_grid_filename):
+def get_grid_img(
+    img_files_list: List[str], list_printout_info: List[str], result_grid_filename: str
+) -> None:
     """
     This will plot a row of imgs and save them to a file.
 
@@ -143,9 +145,9 @@ def get_grid_img(img_files_list, list_printout_info, result_grid_filename):
     """
 
     images_count = len(img_files_list)
-    dimmension_dict = get_image_dimensions(img_files_list[0])
-    width = dimmension_dict["width"] / 30
-    height = dimmension_dict["height"] / 30
+    dimension_dict = get_image_dimensions(img_files_list[0])
+    width = dimension_dict["width"] / 30
+    height = dimension_dict["height"] / 30
     # size_bytes = dimmension_dict["size_bytes"]
 
     fig, axs_list = plt.subplots(
@@ -153,17 +155,7 @@ def get_grid_img(img_files_list, list_printout_info, result_grid_filename):
     )
 
     if len(img_files_list) == 1:
-        sub_ax = axs_list
-        image_filename = img_files_list[0]
-        printout = list_printout_info[0]
-        plt_image = plt.imread(os.path.abspath(image_filename), printout)
-        sub_ax.imshow(plt_image)
-
-        sub_ax.set_title(printout, fontsize=40, fontweight="bold")
-        sub_ax.grid(False)
-        sub_ax.axis(False)
-        sub_ax.autoscale_view("tight")
-
+        _plot_single_image_grid(axs_list, img_files_list, list_printout_info)
     else:
         for sub_ax, image_filename, printout in zip(
             axs_list, img_files_list, list_printout_info
@@ -172,23 +164,56 @@ def get_grid_img(img_files_list, list_printout_info, result_grid_filename):
             sub_ax.imshow(plt_image)
 
             sub_ax.set_title(printout, fontsize=40)
-            sub_ax.grid(False)
-            sub_ax.axis(False)
-            sub_ax.autoscale_view("tight")
-
+            _configure_subplot_display(sub_ax)
             del plt_image
 
     plt.savefig(result_grid_filename)
     del fig
 
 
-def make_single_image_files(vars, lineage_dict, mol_dict):
+def _plot_single_image_grid(
+    sub_ax: Any, img_files_list: List[str], list_printout_info: List[str]
+) -> None:
+    """
+    Plots a single image with its caption.
+
+    Inputs:
+    :param sub_ax: Matplotlib Axes object to plot on.
+    :param img_files_list: List containing a single path to an image file.
+    :param list_printout_info: List containing a single caption for the subplot.
+    """
+    image_filename = img_files_list[0]
+    printout = list_printout_info[0]
+    plt_image = plt.imread(os.path.abspath(image_filename))
+    sub_ax.imshow(plt_image)
+
+    sub_ax.set_title(printout, fontsize=40, fontweight="bold")
+    _configure_subplot_display(sub_ax)
+
+
+def _configure_subplot_display(sub_ax: Axes) -> None:
+    """
+    Configures the subplot display settings.
+
+    Inputs:
+    :param sub_ax: Matplotlib Axes object to configure.
+    """
+    sub_ax.grid(False)
+    sub_ax.axis("off")
+    sub_ax.autoscale_view("tight")  # type: ignore
+
+
+def make_single_image_files(
+    params: Dict[str, Any],
+    lineage_dict: Dict[int, List[Optional[str]]],
+    mol_dict: Dict[str, List[Any]],
+) -> None:
     """
     This function will create individual image files for each ligand in
     an ancestry
 
     Inputs:
-    :param dict vars: dictionary of variable to use
+    :param dict params: dictionary of variable to use
     :param dict lineage: a dict of lists of ancestors where the keys are the
         generation number relative to the creation of mol_name and the lists
         are each parent ligands full-length name, or None if there aren't two
@@ -201,10 +226,7 @@ def make_single_image_files(vars, lineage_dict, mol_dict):
         are each parent ligands full-length name, or None if there aren't two
         parents
     """
-    if len(list(lineage_dict.keys())) <= 6:
-        img_size = 500
-    else:
-        img_size = 250
+    img_size = 500 if len(list(lineage_dict.keys())) <= 6 else 250
 
     # make single img files for each ligand
     # make a blank None image used later for spacers
@@ -212,26 +234,30 @@ def make_single_image_files(vars, lineage_dict, mol_dict):
     img = Draw.MolsToGridImage(
         [mol_none], molsPerRow=1, subImgSize=(img_size, img_size)
     )
-    img_file_name = vars["single_image_folder"] + "None.png"
+    img_file_name = params["single_image_folder"] + "None.png"
     img.save(img_file_name)
 
-    for mol_name in mol_dict.keys():
+    for mol_name in mol_dict:
         mol = copy.deepcopy(mol_dict[mol_name][-1])
         tmp = AllChem.Compute2DCoords(mol)
 
         img = Draw.MolsToGridImage([mol], molsPerRow=1, subImgSize=(img_size, img_size))
-        img_file_name = vars["single_image_folder"] + mol_name + ".png"
+        img_file_name = params["single_image_folder"] + mol_name + ".png"
         img.save(img_file_name)
         del tmp
 
 
-def make_image_files(vars, lineage_dict, mol_dict):
+def make_image_files(
+    params: Dict[str, Any],
+    lineage_dict: Dict[int, List[Optional[str]]],
+    mol_dict: Dict[str, List[Any]],
+) -> None:
     """
     This function will create individual image files for each ligand in
     an ancestry and a full ancestry
 
     Inputs:
-    :param dict vars: dictionary of variable to use
+    :param dict params: dictionary of variable to use
     :param dict lineage: a dict of lists of ancestors where the keys are the
         generation number relative to the creation of mol_name and the lists
         are each parent ligands full-length name, or None if there aren't two
@@ -246,34 +272,33 @@ def make_image_files(vars, lineage_dict, mol_dict):
     """
 
     # make individual ligand images
-    make_single_image_files(vars, lineage_dict, mol_dict)
+    make_single_image_files(params, lineage_dict, mol_dict)
 
-    if os.path.exists(vars["ancestry_image_folder"]) is False:
-        os.mkdir(vars["ancestry_image_folder"])
+    if os.path.exists(params["ancestry_image_folder"]) is False:
+        os.mkdir(params["ancestry_image_folder"])
 
-    for gen_num in lineage_dict.keys():
-        result_grid_filename = vars["ancestry_image_folder"] + str(gen_num) + ".png"
-        lineage_name_list = lineage_dict[gen_num]
+    for gen_num, lineage_name_list in lineage_dict.items():
+        result_grid_filename = params["ancestry_image_folder"] + str(gen_num) + ".png"
         img_files_list = []
         list_printout_info = []
         for mol_name in lineage_name_list:
             if mol_name is None:
-                img_files_list.append(vars["single_image_folder"] + "None.png")
+                img_files_list.append(params["single_image_folder"] + "None.png")
                 list_printout_info.append("")
             else:
-                img_files_list.append(vars["single_image_folder"] + mol_name + ".png")
+                img_files_list.append(params["single_image_folder"] + mol_name + ".png")
 
                 # set properties
-                if mol_dict[mol_name][4] is None:
-                    printout = str(mol_dict[mol_name][2]) + "\nVina: " + "COMP kcal/mol"
-                else:
-                    printout = (
+                printout = (
+                    str(mol_dict[mol_name][2]) + "\nVina: " + "COMP kcal/mol"
+                    if mol_dict[mol_name][4] is None
+                    else (
                         str(mol_dict[mol_name][2])
                         + "\nVina: "
                         + str(mol_dict[mol_name][4])
                         + " kcal/mol"
                     )
-
+                )
                 list_printout_info.append(printout)
 
         get_grid_img(img_files_list, list_printout_info, result_grid_filename)
@@ -284,7 +309,9 @@ def make_image_files(vars, lineage_dict, mol_dict):
 #####################################################################
 
 
-def get_parents_full_names(child_name, master_shortname_mol_dict):
+def get_parents_full_names(
+    child_name: str, master_shortname_mol_dict: Dict[str, str]
+) -> Tuple[Optional[str], Optional[str]]:
     """
     Get full-length names for each parent for a given child ligand.
     Will return as list of names for parents. This will always be a list of 2.
@@ -312,7 +339,7 @@ def get_parents_full_names(child_name, master_shortname_mol_dict):
     """
     # Handle if no parents
     if "(" not in child_name and ")" not in child_name:
-        return [None, None]
+        return (None, None)
 
     parents_info = child_name.split(")")[0].replace("(", "")
     # Handle single parent cases
@@ -320,38 +347,46 @@ def get_parents_full_names(child_name, master_shortname_mol_dict):
         parent_1_short = parents_info
         if parent_1_short not in master_shortname_mol_dict.keys():
             raise Exception(
-                "a parent is not in master_shortname_mol_dict "
-                + "this means that the dictionary is missing information on"
-                + " a ligand. missing parrent is: {}".format(parent_1_short)
+                (
+                    "a parent is not in master_shortname_mol_dict "
+                    + "this means that the dictionary is missing information on"
+                    + f" a ligand. missing parrent is: {parent_1_short}"
+                )
             )
 
         parent_1_name = master_shortname_mol_dict[parent_1_short]
-        return [parent_1_name, None]
+        return (parent_1_name, None)
 
     parent_1_short = parents_info.split("+")[0]
     parent_2_short = parents_info.split("+")[1]
 
     if parent_1_short not in master_shortname_mol_dict.keys():
         raise Exception(
-            "a parent is not in master_shortname_mol_dict "
-            + "this means that the dictionary is missing information on"
-            + " a ligand. missing parrent is: {}".format(parent_1_short)
+            (
+                "a parent is not in master_shortname_mol_dict "
+                + "this means that the dictionary is missing information on"
+                + f" a ligand. missing parrent is: {parent_1_short}"
+            )
         )
 
     if parent_2_short not in master_shortname_mol_dict.keys():
         raise Exception(
-            "a parent is not in master_shortname_mol_dict "
-            + "this means that the dictionary is missing information on"
-            + " a ligand. missing parrent is: {}".format(parent_2_short)
+            (
+                "a parent is not in master_shortname_mol_dict "
+                + "this means that the dictionary is missing information on"
+                + f" a ligand. missing parrent is: {parent_2_short}"
+            )
         )
 
     parent_1_name = master_shortname_mol_dict[parent_1_short]
     parent_2_name = master_shortname_mol_dict[parent_2_short]
 
-    return [parent_1_name, parent_2_name]
+    return (parent_1_name, parent_2_name)
 
 
-def get_all_ancestors(mol_name, master_shortname_mol_dict):
+def get_all_ancestors(
+    mol_name: str, master_shortname_mol_dict: Dict[str, str]
+) -> Dict[int, List[Optional[str]]]:
     """
     This function will obtain all ancestors and store them in a
     diction where the key is the generation number (relative to the creation of the
@@ -401,9 +436,6 @@ def get_all_ancestors(mol_name, master_shortname_mol_dict):
             + "and is likely from source compound list."
         )
     start_generation = int(mol_name.split(")Gen_")[-1].split("_")[0])
-    lineage_dictionary = {}
-
-    lineage_dictionary[start_generation] = [mol_name]
     # check that parents exist for main mol
     parents_to_check = get_parents_full_names(mol_name, master_shortname_mol_dict)
     if parents_to_check == [None, None]:
@@ -412,8 +444,10 @@ def get_all_ancestors(mol_name, master_shortname_mol_dict):
             + "and is likely from source compound list."
         )
 
-    lineage_dictionary[start_generation - 1] = parents_to_check
-
+    lineage_dictionary = {
+        start_generation: [mol_name],
+        start_generation - 1: parents_to_check,
+    }
     current_gen = start_generation - 2
     while current_gen >= 0:
         grand_parent_list = []
@@ -442,7 +476,9 @@ def get_all_ancestors(mol_name, master_shortname_mol_dict):
 #####################################################################
 
 
-def make_master_shortname_mol_dict(vars, master_mol_dict):
+def make_master_shortname_mol_dict(
+    params: Dict[str, Any], master_mol_dict: Dict[str, List[Any]]
+) -> Dict[str, str]:
     """
     Create and save a dictionary that can look up a full-length name using
     a shorthand name; keys are shorthand name w full-length names as items
@@ -450,7 +486,7 @@ def make_master_shortname_mol_dict(vars, master_mol_dict):
     Save to a pickle file named master_shortname_mol_dict_pickle.
 
     Inputs:
-    :param dict vars: dictionary of variable to use
+    :param dict params: dictionary of variable to use
     :param dict master_mol_dict: master dictionary with
         the long names of ligands as keys
     Returns:
@@ -458,30 +494,30 @@ def make_master_shortname_mol_dict(vars, master_mol_dict):
         shorthand names and the items the full-length name.
     """
     master_shortname_mol_dict = {}
-    for mol_entry in master_mol_dict.keys():
+    for mol_entry in master_mol_dict:
         short_name = master_mol_dict[mol_entry][2]
         master_shortname_mol_dict[short_name] = mol_entry
 
     # Write to pickle file
-    master_shortname_mol_dict_pickle = vars["master_shortname_mol_dict_pickle"]
+    master_shortname_mol_dict_pickle = params["master_shortname_mol_dict_pickle"]
     write_pickle_to_file(master_shortname_mol_dict_pickle, master_shortname_mol_dict)
 
     return master_shortname_mol_dict
 
 
-def merge_comp_and_ranked_dicts(vars):
+def merge_comp_and_ranked_dicts(params: Dict[str, Any]) -> Dict[str, Any]:
     """
     Merge two dictions into one.
 
     Save to a pickle file named master_mol_dict_pickle.
 
     Inputs:
-    :param dict vars: dictionary of variable to use
+    :param dict params: dictionary of variable to use
     Returns:
     :returns: dict master_mol_dict: master dictionary with all ligands entered
     """
-    ranked_mol_dict_pickle = vars["ranked_mol_dict_pickle"]
-    comp_dict_pickle = vars["comp_dict_pickle"]
+    ranked_mol_dict_pickle = params["ranked_mol_dict_pickle"]
+    comp_dict_pickle = params["comp_dict_pickle"]
 
     comp_mol_dict = get_obj_from_pickle_file(comp_dict_pickle)
 
@@ -493,19 +529,19 @@ def merge_comp_and_ranked_dicts(vars):
     # we can feel free to overwrite any duplicate entries. Any duplicate
     # entries would be caused by a ligand being in both the source ligands
     # and the complementary molecule library.
-    for mol_entry in ranked_mol_dict.keys():
+    for mol_entry in ranked_mol_dict:
         master_mol_dict[mol_entry] = ranked_mol_dict[mol_entry]
 
     del ranked_mol_dict
 
     # Write to pickle file
-    master_mol_dict_pickle = vars["master_mol_dict_pickle"]
+    master_mol_dict_pickle = params["master_mol_dict_pickle"]
     write_pickle_to_file(master_mol_dict_pickle, master_mol_dict)
 
     return master_mol_dict
 
 
-def make_comp_mol_dict(vars):
+def make_comp_mol_dict(params: Dict[str, Any]) -> None:
     """
     Create and pickled dictionary of all complementary molecules.
 
@@ -513,16 +549,18 @@ def make_comp_mol_dict(vars):
     and save as pickle. And reopen later to minimize memory overhead.
 
     Inputs:
-    :param dict vars: dictionary of variable to use
+    :param dict params: dictionary of variable to use
     """
     # Add complementary mols from reactions
     # Only valid for autoclickchem rxns
 
-    comp_smi_list = glob.glob(vars["complementary_mol_directory"] + os.sep + "*.smi")
-    if len(comp_smi_list) == 0:
+    comp_smi_list = glob.glob(params["complementary_mol_directory"] + os.sep + "*.smi")
+    if not comp_smi_list:
         raise Exception(
-            "No .smi files found for complementary_mol_directory.\n"
-            + "please check: {}".format(vars["complementary_mol_directory"])
+            (
+                "No .smi files found for complementary_mol_directory.\n"
+                + f'please check: {params["complementary_mol_directory"]}'
+            )
         )
     comp_dict = {}
     for smi in comp_smi_list:
@@ -533,18 +571,18 @@ def make_comp_mol_dict(vars):
     del comp_smi_list
 
     # Make this match those with scores
-    for mol_name in comp_dict.keys():
+    for mol_name in comp_dict:
         mol = Chem.MolFromSmiles(comp_dict[mol_name])
         temp_info = [comp_dict[mol_name], mol_name, mol_name, mol_name, None, None, mol]
 
         comp_dict[mol_name] = temp_info
 
-    comp_dict_pickle = vars["comp_dict_pickle"]
+    comp_dict_pickle = params["comp_dict_pickle"]
     write_pickle_to_file(comp_dict_pickle, comp_dict)
     del comp_dict
 
 
-def make_ranked_files_mol_dict(vars):
+def make_ranked_files_mol_dict(params: Dict[str, Any]) -> None:
     """
     Create and pickle dictionary of all ranked ligands.
 
@@ -552,20 +590,20 @@ def make_ranked_files_mol_dict(vars):
     and save as pickle. And reopen later to minimize memory overhead.
 
     Inputs:
-    :param dict vars: dictionary of variable to use
+    :param dict params: dictionary of variable to use
     """
-    dir_w_all_gens = vars["input_dir"]
+    dir_w_all_gens = params["input_dir"]
     ranked_file_list = glob.glob(
         str(os.sep).join([dir_w_all_gens, "generation_*", "generation_*_ranked.smi"])
     )
-    if len(ranked_file_list) == 0:
+    if not ranked_file_list:
         raise Exception(
             "Could not find any ranked.smi files within the input_dir.\
             Please make sure input_dir has folders named 'generation_' + int that \
             contain .smi files named 'generation_{}_ranked.smi'.format(int) "
         )
 
-    source_compound_file = vars["source_compound_file"]
+    source_compound_file = params["source_compound_file"]
     ranked_file_list = [
         x for x in list(set(ranked_file_list)) if x is not source_compound_file
     ]
@@ -587,7 +625,7 @@ def make_ranked_files_mol_dict(vars):
         )
 
     # If the source compounds were previously docked keep all info because there is docking info
-    if vars["use_docked_source_compounds"] is True:
+    if params["use_docked_source_compounds"] is True:
         mol_list.extend(mol_list)
     else:
         # If there are only two columns we assume it is the SMILES and the source name
@@ -619,7 +657,7 @@ def make_ranked_files_mol_dict(vars):
             try:
                 y = float(y)
                 temp.append(y)
-            except:
+            except Exception:
                 temp.append(y)
         temp.append(Chem.MolFromSmiles(temp[0]))
         new_list.append(temp)
@@ -627,7 +665,7 @@ def make_ranked_files_mol_dict(vars):
     del mol_list
     mol_dict = {}
     for mol_entry in new_list:
-        if mol_entry[1] in mol_dict.keys():
+        if mol_entry[1] in mol_dict:
 
             # source compounds may be unranked or may
             # be ranked from advancement but not in the source compound .smi
@@ -654,49 +692,30 @@ def make_ranked_files_mol_dict(vars):
 
     del new_list
     # Write to pickle file
-    ranked_mol_dict_pickle = vars["ranked_mol_dict_pickle"]
+    ranked_mol_dict_pickle = params["ranked_mol_dict_pickle"]
     write_pickle_to_file(ranked_mol_dict_pickle, mol_dict)
     del mol_dict
 
 
-def get_mol_dict(vars):
+def get_mol_dict(params: Dict[str, Any]) -> Tuple[Dict[str, List[Any]], Dict[str, str]]:
     """
     Retrieve pickled dictionary of all ligand information if it already has
     been created, or it creates the dictionary of ligand information and saves
     it as a pickle file.
 
     Inputs:
-    :param dict vars: dictionary of variable to use
+    :param dict params: dictionary of variable to use
     Returns:
     :returns: dict master_mol_dict: dictionary containing the information from every
         ligand from the AutoGrow run. keys are full-length name of the ligands.
     :returns: dict master_shortname_mol_dict: dictionary where keys are
         shorthand names and the items the full-length name.
     """
-    ranked_mol_dict_pickle = vars["ranked_mol_dict_pickle"]
-    comp_dict_pickle = vars["comp_dict_pickle"]
-    master_mol_dict_pickle = vars["master_mol_dict_pickle"]
-    master_shortname_mol_dict_pickle = vars["master_shortname_mol_dict_pickle"]
+    master_mol_dict_pickle = params["master_mol_dict_pickle"]
+    master_shortname_mol_dict_pickle = params["master_shortname_mol_dict_pickle"]
 
     if os.path.exists(master_mol_dict_pickle) is False:
-        # Handle ranked files
-        if os.path.exists(ranked_mol_dict_pickle) is False:
-            # ranked_mol_dict_pickle does not exist. Need to make and pickle
-            # Will reopen later to minimize memory overhead
-            print("Creating ranked_files_mol_dict")
-            make_ranked_files_mol_dict(vars)
-
-        # Handle complementary molecules
-        if os.path.exists(comp_dict_pickle) is False:
-            # comp_dict_pickle does not exist. Need to make and pickle
-            # Will reopen later to minimize memory overhead
-            print("Creating comp_mol_dict")
-            make_comp_mol_dict(vars)
-
-        # merge molecule dictionaries together to create a master dictionary
-        print("Creating master_mol_dict")
-        master_mol_dict = merge_comp_and_ranked_dicts(vars)
-
+        master_mol_dict = _create_master_mol_dict(params)
     else:
 
         # The master dictionary already exists so we don't need to make the
@@ -708,7 +727,7 @@ def get_mol_dict(vars):
     if os.path.exists(master_shortname_mol_dict_pickle) is False:
         # Need to create the master_shortname_mol_dict
         master_shortname_mol_dict = make_master_shortname_mol_dict(
-            vars, master_mol_dict
+            params, master_mol_dict
         )
     else:
         # The master_shortname_mol_dict
@@ -721,17 +740,43 @@ def get_mol_dict(vars):
     return master_mol_dict, master_shortname_mol_dict
 
 
+def _create_master_mol_dict(params: Dict[str, Any]) -> Dict[str, List[Any]]:
+    ranked_mol_dict_pickle = params["ranked_mol_dict_pickle"]
+    # Handle ranked files
+    if os.path.exists(ranked_mol_dict_pickle) is False:
+        # ranked_mol_dict_pickle does not exist. Need to make and pickle
+        # Will reopen later to minimize memory overhead
+        print("Creating ranked_files_mol_dict")
+        make_ranked_files_mol_dict(params)
+
+    comp_dict_pickle = params["comp_dict_pickle"]
+    # Handle complementary molecules
+    if os.path.exists(comp_dict_pickle) is False:
+        # comp_dict_pickle does not exist. Need to make and pickle
+        # Will reopen later to minimize memory overhead
+        print("Creating comp_mol_dict")
+        make_comp_mol_dict(params)
+
+    # merge molecule dictionaries together to create a master dictionary
+    print("Creating master_mol_dict")
+    return merge_comp_and_ranked_dicts(params)
+
+
 ##################################################################
 
 #####################################################################
 # I/O
 #####################################################################
-def get_full_length_mol_name(vars, master_mol_dict, master_shortname_mol_dict):
+def get_full_length_mol_name(
+    params: Dict[str, Any],
+    master_mol_dict: Dict[str, List[Any]],
+    master_shortname_mol_dict: Dict[str, str],
+) -> str:
     """
     Get full-length mol_name and make sure that it is in the master_mol_dict
 
     Inputs:
-    :param dict vars: dictionary of variable to use
+    :param dict params: dictionary of variable to use
 
     :param dict master_mol_dict: dictionary containing the information from every
         ligand from the AutoGrow run. keys are full-length name of the ligands.
@@ -740,62 +785,48 @@ def get_full_length_mol_name(vars, master_mol_dict, master_shortname_mol_dict):
     Returns:
     :returns: str mol_name: full-length name of ligand.
     """
-    if vars["mol_name"] not in master_mol_dict.keys():
-        if vars["mol_name"] not in master_shortname_mol_dict.keys():
+    if params["mol_name"] in master_mol_dict:
+        # original name is already full-length name
+        mol_name = params["mol_name"]
+
+    else:
+        if params["mol_name"] not in master_shortname_mol_dict.keys():
 
             # may be a gypsum variant with '__{}'.format(num) at the end
             # ie Gen_5_Mutant_46_684401 could be represented as Gen_5_Mutant_46_684401__1
-            if "__" in vars["mol_name"]:
-                test_name = vars["mol_name"].split("__")[0]
+            if "__" in params["mol_name"]:
+                test_name = params["mol_name"].split("__")[0]
                 if (
                     test_name not in master_shortname_mol_dict.keys()
                     and test_name not in master_mol_dict.keys()
                 ):
-                    printout = (
-                        "mol_name provided not found in shorthand or"
-                        + "full-length dictionaries. Please check that mol_name is in"
-                        + "the AutoGrow run tested. \n"
-                        + "Name provided is :\n\t{}".format(
-                            vars["mol_name"]
-                            + "\nName should look like is :"
-                            + "\n\t  (Gen_2_Mutant_7_97143)Gen_4_Mutant_7_802531"
-                            + "\n\t\t or \n\t Gen_4_Mutant_7_802531"
-                        )
-                    )
-                    print(printout)
-
-                    raise Exception(printout)
-
-                if test_name in master_shortname_mol_dict.keys():
-                    mol_name = master_shortname_mol_dict[test_name]
-                else:
-                    mol_name = test_name
+                    _validate_molecule_name_format(params)
+                mol_name = master_shortname_mol_dict.get(test_name, test_name)
                 del test_name
             else:
-                printout = (
-                    "mol_name provided not found in shorthand or"
-                    + "full-length dictionaries. Please check that mol_name is in"
-                    + "the AutoGrow run tested. \n"
-                    + "Name provided is :\n\t{}".format(
-                        vars["mol_name"]
-                        + "\nName should look like is :"
-                        + "\n\t  (Gen_2_Mutant_7_97143)Gen_4_Mutant_7_802531"
-                        + "\n\t\t or \n\t Gen_4_Mutant_7_802531"
-                    )
-                )
-                print(printout)
-
-                raise Exception(printout)
-
-        mol_name = master_shortname_mol_dict[vars["mol_name"]]
-    else:
-        # original name is already full-length name
-        mol_name = vars["mol_name"]
-
+                _validate_molecule_name_format(params)
+        mol_name = master_shortname_mol_dict[params["mol_name"]]
     return mol_name
 
 
-def run_purge_previous_pickled_files(vars):
+def _validate_molecule_name_format(params: Dict[str, Any]) -> None:
+    printout = (
+        "mol_name provided not found in shorthand or"
+        + "full-length dictionaries. Please check that mol_name is in"
+        + "the AutoGrow run tested. \n"
+        + "Name provided is :\n\t{}".format(
+            params["mol_name"]
+            + "\nName should look like is :"
+            + "\n\t  (Gen_2_Mutant_7_97143)Gen_4_Mutant_7_802531"
+            + "\n\t\t or \n\t Gen_4_Mutant_7_802531"
+        )
+    )
+    print(printout)
+
+    raise Exception(printout)
+
+
+def run_purge_previous_pickled_files(params: Dict[str, Any]) -> None:
     """
     This will delete previously created pickled files within the input_dir.
     The four files it will delete are:
@@ -810,10 +841,10 @@ def run_purge_previous_pickled_files(vars):
     Following file deletion the program will terminate.
 
     inputs:
-    :params vars inputs: dictionary of argparse parameters
+    :params params inputs: dictionary of argparse parameters
     """
     print("\nDELETING PREVIOUSLY GENERATED PICKLED FILES.\n")
-    input_dir = vars["input_dir"] + os.sep
+    input_dir = params["input_dir"] + os.sep
     if os.path.exists(input_dir) is False:
         raise Exception(
             "Input folder {} does not\
@@ -829,29 +860,31 @@ def run_purge_previous_pickled_files(vars):
     ]:
         file_path = input_dir + file_name
         if os.path.exists(file_path) is False:
-            printout = "Could not delete {} file".format(file_name)
-            printout = printout + " as it was not located at:\n\t {}\n".format(
-                file_path
+            printout = (
+                f"Could not delete {file_name} file"
+                + f" as it was not located at:\n\t {file_path}\n"
             )
             print(printout)
         else:
             try:
                 os.remove(file_path)
-                print("Deleted: {}".format(file_path))
-            except:
-                printout = "WARNING: Could not delete {} file.\n".format(file_name)
-                printout = printout + "\tPlease check file permissions of:"
-                printout = printout + "\n\t\t {}\n".format(file_path)
+                print(f"Deleted: {file_path}")
+            except Exception:
+                printout = (
+                    f"WARNING: Could not delete {file_name} file.\n"
+                    + "\tPlease check file permissions of:"
+                )
+                printout += f"\n\t\t {file_path}\n"
                 print(printout)
             # Check that is was successfully deleted
             if os.path.exists(file_path) is False:
-                print("Deleted: {}".format(file_path))
+                print(f"Deleted: {file_path}")
 
     print("Attempt to delete files completed.")
     sys.exit(0)
 
 
-def process_inputs(inputs):
+def process_inputs(inputs: Dict[str, Any]) -> Dict[str, Any]:
     """
     This will handle processing all parameters.
 
@@ -871,7 +904,7 @@ def process_inputs(inputs):
             )
         )
 
-    # get vars dict from last run
+    # get params dict from last run
     inputs["vars_json"] = inputs["input_dir"] + "vars.json"
     if os.path.exists(inputs["vars_json"]) is False:
         raise Exception(
@@ -885,11 +918,11 @@ def process_inputs(inputs):
     try:
         with open(inputs["vars_json"], "r") as f:
             vars_dict = json.load(f)
-    except:
+    except Exception as e:
         raise Exception(
             "variable file would not import. It should be the \
             vars.json file written by AutoGrow in the output folder of the run."
-        )
+        ) from e
     if inputs["complementary_mol_directory"] in ["", None]:
 
         # Get complementary_mol_directory from vars.json
@@ -1009,7 +1042,7 @@ def process_inputs(inputs):
         try:
             os.mkdir(inputs["output_dir"])
             print("Made the output dir at: {}".format((inputs["output_dir"])))
-        except:
+        except Exception:
             pass
         if os.path.exists(inputs["output_dir"]) is False:
             raise Exception(
@@ -1090,19 +1123,20 @@ def process_inputs(inputs):
     return inputs
 
 
-def run_everything(vars):
+def run_everything(params: Dict[str, Any]) -> None:
+
     """
     This script runs everything
     Inputs:
-    :params dict INPUTS: dictionary of argparse parameters
+    :params dict params: dictionary of argparse parameters
     """
-    master_mol_dict, master_shortname_mol_dict = get_mol_dict(vars)
+    master_mol_dict, master_shortname_mol_dict = get_mol_dict(params)
 
-    if vars["pre_run"] is True or vars["mol_name"] in [None, "None", ""]:
+    if params["pre_run"] is True or params["mol_name"] in [None, "None", ""]:
         print("pre-run completed")
         sys.exit(0)
     mol_name = get_full_length_mol_name(
-        vars, master_mol_dict, master_shortname_mol_dict
+        params, master_mol_dict, master_shortname_mol_dict
     )
 
     print("The full-length name of the ligand is: ", mol_name)
@@ -1120,7 +1154,7 @@ def run_everything(vars):
     del master_shortname_mol_dict
 
     # Write all information of lieage to .smi file
-    lineage_smi = vars["output_dir"] + str(mol_name) + "_lineage.smi"
+    lineage_smi = params["output_dir"] + str(mol_name) + "_lineage.smi"
     lineage_list = []
     for gen_num in lineage_dict.keys():
         lineage_list.extend(lineage_dict[gen_num])
@@ -1137,7 +1171,7 @@ def run_everything(vars):
         f.write(printout)
 
     # generate images
-    make_image_files(vars, lineage_dict, mol_dict)
+    make_image_files(params, lineage_dict, mol_dict)
 
 
 ######################################

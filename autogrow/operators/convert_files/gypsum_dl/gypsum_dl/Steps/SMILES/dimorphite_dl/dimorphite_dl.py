@@ -54,7 +54,7 @@ try:
     from rdkit import RDLogger
 
     RDLogger.DisableLog("rdApp.*")
-except:
+except Exception:
     msg = "Dimorphite-DL requires RDKit. See https://www.rdkit.org/"
     print(msg)
     raise Exception(msg)
@@ -498,7 +498,7 @@ class LoadSMIFile(object):
             # Remove the hydrogens.
             try:
                 mol = Chem.RemoveHs(mol)
-            except:
+            except Exception:
                 if "silent" in self.args and not self.args["silent"]:
                     UtilFuncs.eprint(
                         "WARNING: Skipping poorly formed SMILES string: " + line
@@ -815,7 +815,7 @@ class ProtSubstructFuncs:
         # Try to Add hydrogens. if failed return []
         try:
             mol_used_to_idx_sites = Chem.AddHs(mol_used_to_idx_sites)
-        except:
+        except Exception:
             UtilFuncs.eprint("ERROR:   ", smi)
             return []
 
@@ -912,7 +912,7 @@ class ProtSubstructFuncs:
                 # Remove hydrogen atoms.
                 try:
                     mol_copy = Chem.RemoveHs(mol_copy)
-                except:
+                except Exception:
                     if (
                         "silent" in ProtSubstructFuncs.args
                         and not ProtSubstructFuncs.args["silent"]

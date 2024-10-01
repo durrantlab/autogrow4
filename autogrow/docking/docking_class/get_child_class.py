@@ -3,8 +3,14 @@ An object for auto-detecting and creating jobs with the proper templates.
 You'll need to import the base class first
 """
 
+# Define a TypeVar that can be any class type
+from typing import List, Type, TypeVar
 
-def get_all_subclasses(base_class):
+
+C = TypeVar("C")
+
+
+def get_all_subclasses(base_class: Type[C]) -> List[Type[C]]:
     """
     Method for getting all child classes from a parent object. Taken from:
     http://stackoverflow.com/questions/3862310/how-can-i-find-all-subclasses-of-a-class-given-its-name

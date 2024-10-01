@@ -13,16 +13,19 @@ autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click
 autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/complementary_mol_dir \
 --output_folder autogrow4/accessory_scripts/output/
 """
+
 import __future__
 
 import os
 import json
 import copy
 import argparse
+import contextlib
+from typing import Any, Dict
 
-import rdkit
-import rdkit.Chem as Chem
-from rdkit.Chem import AllChem
+import rdkit  # type: ignore
+import rdkit.Chem as Chem  # type: ignore
+from rdkit.Chem import AllChem  # type: ignore
 
 # Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog("rdApp.*")
@@ -50,9 +53,9 @@ class SmilesClickChem:
         :param list rxn_library_variables: a list of user variables which
             define the rxn_library, rxn_library_file,
             complementary_mol_directory, and function_group_library. ie.
-            rxn_library_variables = [vars['rxn_library'],
-            vars['rxn_library_file'],
-            vars['function_group_library'],vars['complementary_mol_directory']]
+            rxn_library_variables = [params['rxn_library'],
+            params['rxn_library_file'],
+            params['function_group_library'],params['complementary_mol_directory']]
         :param list list_of_already_made_smiles: a list of lists. Each
             sublist contains info about a smiles made in this generation via
             mutation ie.[['O=C([O-])',
@@ -157,7 +160,7 @@ class SmilesClickChem:
         :param str rxn_library: A string defining the choice of the reaction
             library. ClickChem uses the set of reactions from Autogrow 3.1.2.
             Custom means you've defined a path to a Custom library in
-            vars['rxn_library_file']
+            params['rxn_library_file']
         :param str rxn_library_file: a PATH to a Custom reaction library file
             formatted in a dictionary of dictionaries. in a .json file. This will
             be a blank string if one choses a predefined rxn_library option.
@@ -205,11 +208,11 @@ class SmilesClickChem:
             try:
                 with open(rxn_library_file, "r") as rxn_file:
                     reaction_dict_raw = json.load(rxn_file)
-            except:
+            except Exception as e:
                 raise Exception(
                     "rxn_library_file json file not able to be imported."
                     + " Check that the rxn_library is formatted correctly"
-                )
+                ) from e
 
         elif type(rxn_library_file) == str:
             if os.path.exists(rxn_library_file) is False:
@@ -222,11 +225,11 @@ class SmilesClickChem:
 
             try:
                 extension = os.path.splitext(rxn_library_file)[1]
-            except:
+            except Exception as e:
                 raise Exception(
                     "Custom specified rxn_library_file is not .json file."
                     + " It must be a .json dictionary"
-                )
+                ) from e
 
             if extension != ".json":
                 raise Exception(
@@ -238,12 +241,12 @@ class SmilesClickChem:
             try:
                 with open(rxn_library_file, "r") as rxn_file:
                     reaction_dict_raw = json.load(rxn_file)
-            except:
+            except Exception as exc:
                 raise Exception(
                     "Custom specified rxn_library_file json file not able to "
                     + "be imported. Check that the rxn_library is "
                     + "formatted correctly"
-                )
+                ) from exc
 
         else:
             raise Exception(
@@ -251,9 +254,7 @@ class SmilesClickChem:
             )
 
         # Convert the reaction_dict_raw from unicode to the proper
-        reaction_dict = self.rxn_lib_format_json_dict_of_dict(reaction_dict_raw)
-
-        return reaction_dict
+        return self.rxn_lib_format_json_dict_of_dict(reaction_dict_raw)
 
     def retrieve_functional_group_dict(self, rxn_library, function_group_library):
         """
@@ -283,7 +284,7 @@ class SmilesClickChem:
         :param str rxn_library: A string defining the choice of the reaction
             library. ClickChem uses the set of reactions from Autogrow 3.1.2.
             Custom means you've defined a path to a Custom library in
-            vars['function_group_library']
+            params['function_group_library']
         :param str function_group_library: a PATH to a Custom functional group
             dictionary in a .json file. This will be a blank string if one choses
             a predefined functional groups option.
@@ -335,11 +336,11 @@ class SmilesClickChem:
             try:
                 with open(function_group_library, "r") as func_dict_file:
                     functional_group_dict_raw = json.load(func_dict_file)
-            except:
+            except Exception as e:
                 raise Exception(
                     "function_group_library json file not able to be imported. "
                     + "Check that the rxn_library is formatted correctly"
-                )
+                ) from e
 
         elif type(function_group_library) == str:
             if os.path.exists(function_group_library) is False:
@@ -352,11 +353,11 @@ class SmilesClickChem:
 
             try:
                 extension = os.path.splitext(function_group_library)[1]
-            except:
+            except Exception as e:
                 raise Exception(
                     "Custom specified function_group_library is not .json "
                     + "file. It must be a .json dictionary"
-                )
+                ) from e
 
             if extension != ".json":
                 raise Exception(
@@ -368,22 +369,18 @@ class SmilesClickChem:
             try:
                 with open(function_group_library, "r") as func_dict_file:
                     functional_group_dict_raw = json.load(func_dict_file)
-            except:
+            except Exception as exc:
                 raise Exception(
                     "function_group_library json file not able to be imported."
                     + " Check that the rxn_library is formatted correctly"
-                )
+                ) from exc
         else:
             raise Exception(
                 "Custom specified function_group_library directory can not be found"
             )
 
         # Convert the reaction_dict_raw from unicode to the proper
-        functional_group_dict = self.rxn_lib_format_json_dict_of_dict(
-            functional_group_dict_raw
-        )
-
-        return functional_group_dict
+        return self.rxn_lib_format_json_dict_of_dict(functional_group_dict_raw)
 
     def retrieve_complementary_dictionary(self, rxn_library, complementary_mol_dir):
         """
@@ -396,7 +393,7 @@ class SmilesClickChem:
         :param str rxn_library: A string defining the choice of the reaction
             library. ClickChem uses the set of reactions from Autogrow 3.1.2.
             Custom means you've defined a path to a Custom library in
-            vars['complementary_mol_dir']
+            params['complementary_mol_dir']
         :param dict complementary_mol_dir: the path to the
             complementary_mol_dir directory. It may be an empty string in which
             case the complementary_mol_dir directory will default to those of the
@@ -441,14 +438,13 @@ class SmilesClickChem:
                     "rxn_library is not incorporated into smiles_click_chem.py"
                 )
 
-        else:
-            if os.path.isdir(complementary_mol_dir) is False:
-                raise Exception(
-                    "complementary_mol_dir is not a directory. It must be a \
+        elif os.path.isdir(complementary_mol_dir) is False:
+            raise Exception(
+                "complementary_mol_dir is not a directory. It must be a \
                     directory with .smi files containing SMILES specified by \
                     functional groups.These .smi files must be named the same \
                     as the files in the complementary_mol_dir."
-                )
+            )
 
         # Make a list of all the functional groups. These will be the name of
         # the .smi folders already separated by group.
@@ -457,7 +453,7 @@ class SmilesClickChem:
         missing_smi_files = []
         complementary_mols_dict = {}
         for group in functional_groups:
-            filepath = "{}{}{}.smi".format(complementary_mol_dir, os.sep, group)
+            filepath = f"{complementary_mol_dir}{os.sep}{group}.smi"
 
             if os.path.isfile(filepath) is True:
                 complementary_mols_dict[group] = filepath
@@ -465,11 +461,10 @@ class SmilesClickChem:
             else:
                 missing_smi_files.append(filepath)
                 print(
-                    "Could not find the following .smi file for complementary "
-                    + " molecules for Mutation: {}".format(filepath)
+                    f"Could not find the following .smi file for complementary  molecules for Mutation: {filepath}"
                 )
 
-        if len(missing_smi_files) != 0:
+        if missing_smi_files:
             raise Exception(
                 "The following .smi file for complementary molecules "
                 + "for Mutation is missing: ",
@@ -514,7 +509,7 @@ def get_usable_format(infile):
     usable_list_of_smiles = []
 
     if os.path.exists(infile) is False:
-        print("\nFile of Source compounds does not exist: {}\n".format(infile))
+        print(f"\nFile of Source compounds does not exist: {infile}\n")
         raise Exception("File of Source compounds does not exist")
 
     with open(infile) as smiles_file:
@@ -526,9 +521,7 @@ def get_usable_format(infile):
                     "    "
                 )  # split line into parts separated by 4-spaces
 
-            choice_list = []
-            for i in range(0, len(parts)):
-                choice_list.append(parts[i])
+            choice_list = [parts[i] for i in range(len(parts))]
             usable_list_of_smiles.append(choice_list)
 
     return usable_list_of_smiles
@@ -552,10 +545,10 @@ def react_with_multiple_reactants(mol_tuple, mol_name, rxn_obj):
     try:
         # if reaction works keep it
         reaction_products_list = [x[0] for x in rxn_obj.RunReactants(mol_tuple)]
-    except:
+    except Exception:
         return mol_name
 
-    if len(reaction_products_list) == 0:
+    if not reaction_products_list:
         return mol_name
     # created a new compound so it passes
     return None
@@ -584,9 +577,9 @@ def run_a_single_reactant_reaction(mol_info, rxn_obj):
     try:
         # if reaction works keep it
         reaction_products_list = rxn_obj.RunReactants((mol_1,))
-    except:
+    except Exception:
         return mol_name
-    if len(reaction_products_list) == 0:
+    if not reaction_products_list:
         return mol_name
     # created a new compound so it passes
     return None
@@ -618,17 +611,16 @@ def get_rxn_and_examples(current_rxn_dict):
     example_smiles_rxn_reactants = example_smiles_rxn_reactants.split("','")
 
     example_rxn_reactants = []
-    for smile_str in example_smiles_rxn_reactants:
-        smile_str = smile_str.replace("'", "").replace('"', "")
-        smile_str = smile_str.replace(" ", "")
+    for smiles_str in example_smiles_rxn_reactants:
+        smiles_str = smiles_str.replace("'", "").replace('"', "")
+        smiles_str = smiles_str.replace(" ", "")
 
-        example_mol = Chem.MolFromSmiles(smile_str)
+        example_mol = Chem.MolFromSmiles(smiles_str)
 
         example_mol = MOH.check_sanitization(example_mol)
         if example_mol is None:
-            print(smile_str)
-            printout = "example mol from rxn: {}".format(rxn_name)
-            printout = printout + " failed to sanitize in RDKit"
+            print(smiles_str)
+            printout = f"example mol from rxn: {rxn_name} failed to sanitize in RDKit"
             print(printout)
             raise Exception(printout)
         example_rxn_reactants.append(example_mol)
@@ -639,33 +631,34 @@ def get_rxn_and_examples(current_rxn_dict):
     try:
         rxn_obj = AllChem.ReactionFromSmarts(reaction_string)
         rxn_obj.Initialize()
-    except:
-        printout = "rxn {} failed to be created.".format(rxn_name)
-        printout = printout + "Rxn SMART is flawed"
+    except Exception as e:
+        printout = f"rxn {rxn_name} failed to be created. Rxn SMART is flawed"
         print(printout)
-        raise Exception(printout)
+        raise Exception(printout) from e
 
     # Demo on example reactants
     example_results = react_with_multiple_reactants(
         example_rxn_reactants, "test_reactions", rxn_obj
     )
     if example_results is not None:
-        printout = "rxn {} failed to run on example compounds.".format(rxn_name)
-        printout = printout + "\nPlease check example compounds"
+        printout = (
+            f"rxn {rxn_name} failed to run on example compounds."
+            + "\nPlease check example compounds"
+        )
         print(printout)
         raise Exception(printout)
 
     return example_rxn_reactants, rxn_obj
 
 
-def run_all_for_fun_group(vars, fun_group, rxns_by_fun_group, a_smiles_click_object):
+def run_all_for_fun_group(params, fun_group, rxns_by_fun_group, a_smiles_click_object):
     """
     This runs the all testing for a single functional group.
 
     This will also write the compounds which pass to a .smi file.
 
     Inputs:
-    :param dict vars: Dictionary of User variables
+    :param dict params: Dictionary of User variables
     :param str fun_group: functional group name
     :param dict rxns_by_fun_group: Dictionary of rxns names organized by
         functional groups
@@ -679,8 +672,8 @@ def run_all_for_fun_group(vars, fun_group, rxns_by_fun_group, a_smiles_click_obj
     # unpack variables
     complementary_mol_dict = a_smiles_click_object.complementary_mol_dict
     reaction_dict = a_smiles_click_object.reaction_dict
-    number_of_processors = vars["number_of_processors"]
-    output_folder = vars["output_folder"]
+    number_of_processors = params["number_of_processors"]
+    output_folder = params["output_folder"]
 
     smi_comp_file = complementary_mol_dict[fun_group]
     fun_group_list = get_usable_format(smi_comp_file)
@@ -697,9 +690,11 @@ def run_all_for_fun_group(vars, fun_group, rxns_by_fun_group, a_smiles_click_obj
         fun_group_mol_list.append(temp)
 
     # print info about failures
-    if len(failed_to_sanitize) != 0:
-        printout = "{} compounds ".format(len(failed_to_sanitize))
-        printout = printout + "failed to sanitize from: {}".format(fun_group)
+    if failed_to_sanitize:
+        printout = (
+            f"{len(failed_to_sanitize)} compounds "
+            + f"failed to sanitize from: {fun_group}"
+        )
         print(printout)
 
     failed_to_react = []
@@ -730,9 +725,7 @@ def run_all_for_fun_group(vars, fun_group, rxns_by_fun_group, a_smiles_click_obj
                 else:
                     mol_tuple_temp.append(example_reactants[i_count])
 
-            list_of_reactants.append(
-                tuple([tuple(mol_tuple_temp), mol_info[1], rxn_obj])
-            )
+            list_of_reactants.append((tuple(mol_tuple_temp), mol_info[1], rxn_obj))
 
         output = mp.multi_threading(
             list_of_reactants, number_of_processors, react_with_multiple_reactants
@@ -741,10 +734,10 @@ def run_all_for_fun_group(vars, fun_group, rxns_by_fun_group, a_smiles_click_obj
         failed_to_react.append([rxn_name, output])
 
         # print info about failures
-        if len(output) != 0:
+        if output:
             printout = "{} compounds failed to react from ".format(len(output))
-            printout = printout + "react from {} ".format(fun_group)
-            printout = printout + "in rxn: {}".format(rxn_name)
+            printout += "react from {} ".format(fun_group)
+            printout += "in rxn: {}".format(rxn_name)
             print(printout)
 
     master_failed_to_react = []
@@ -760,23 +753,24 @@ def run_all_for_fun_group(vars, fun_group, rxns_by_fun_group, a_smiles_click_obj
         f.write("\n".join(master_passes_reactions))
 
     return failed_to_react, failed_to_sanitize
+    return failed_to_react, failed_to_sanitize
 
 
-def run_main(vars):
+def run_main(params: Dict[str, Any]):
     """
     This runs the main testing.
 
     Inputs:
-    :param dict vars: Dictionary of User variables
+    :param dict params: Dictionary of User variables
     """
 
     # Force rxn_library to be custom because why else run this
     rxn_library = "Custom"
 
-    output_folder = vars["output_folder"]
-    rxn_library_file = vars["rxn_library_file"]
-    function_group_library = vars["function_group_library"]
-    complementary_mol_dir = vars["complementary_mol_directory"]
+    output_folder = params["output_folder"]
+    rxn_library_file = params["rxn_library_file"]
+    function_group_library = params["function_group_library"]
+    complementary_mol_dir = params["complementary_mol_directory"]
 
     rxn_library_variables = [
         rxn_library,
@@ -794,9 +788,7 @@ def run_main(vars):
     functional_group_dict = a_smiles_click_chem_object.functional_group_dict
     reaction_dict = a_smiles_click_chem_object.reaction_dict
 
-    rxns_by_fun_group = {}
-    for fun_group in functional_group_dict.keys():
-        rxns_by_fun_group[fun_group] = []
+    rxns_by_fun_group = {fun_group: [] for fun_group in functional_group_dict.keys()}
     for rxn_name in list_of_reaction_names:
         current_rxn_dict = reaction_dict[rxn_name]
         for fun_group in current_rxn_dict["functional_groups"]:
@@ -807,30 +799,30 @@ def run_main(vars):
     failed_to_sanitize_by_fun_group = {}
     failed_to_react_by_fun_group = {}
 
-    for fun_group in rxns_by_fun_group.keys():
+    for fun_group in rxns_by_fun_group:
         failed_to_react, failed_to_sanitize = run_all_for_fun_group(
-            vars, fun_group, rxns_by_fun_group, a_smiles_click_chem_object
+            params, fun_group, rxns_by_fun_group, a_smiles_click_chem_object
         )
         failed_to_react_by_fun_group[fun_group] = failed_to_react
         failed_to_sanitize_by_fun_group[fun_group] = failed_to_sanitize
 
     # Handle saving log
-    with open(output_folder + "failed_to_sanitize_mol_by_fun_group.json", "w") as fp:
+    with open(f"{output_folder}failed_to_sanitize_mol_by_fun_group.json", "w") as fp:
         json.dump(failed_to_sanitize_by_fun_group, fp, indent=4)
 
-    with open(output_folder + "failed_to_react_by_fun_group.json", "w") as fp:
+    with open(f"{output_folder}failed_to_react_by_fun_group.json", "w") as fp:
         json.dump(failed_to_react_by_fun_group, fp, indent=4)
 
     master_failed_list = []
-    for fun_group in failed_to_react_by_fun_group.keys():
+    for fun_group in failed_to_react_by_fun_group:
         temp = [x[1] for x in failed_to_react_by_fun_group[fun_group]]
         for x in temp:
             master_failed_list.extend(x)
     master_failed_list = list(set(master_failed_list))
-    if len(master_failed_list) == 0:
+    if not master_failed_list:
         print("All compounds passed!")
     else:
-        print("{} compounds failed. Please check logs".format(len(master_failed_list)))
+        print(f"{len(master_failed_list)} compounds failed. Please check logs")
 
 
 def get_arguments_from_argparse(args_dict):
@@ -869,11 +861,11 @@ def get_arguments_from_argparse(args_dict):
         args_dict["number_of_processors"] = -1
     try:
         args_dict["number_of_processors"] = int(args_dict["number_of_processors"])
-    except:
+    except Exception as e:
         raise ValueError(
             "number_of_processors must be an int. \
             To use all processors set to -1."
-        )
+        ) from e
 
     if "output_folder" not in args_dict.keys():
         printout = (
@@ -902,10 +894,8 @@ def get_arguments_from_argparse(args_dict):
             printout = "output_folder must be a directory. Please check input arguments"
             raise ValueError(printout)
     else:
-        try:
+        with contextlib.suppress(Exception):
             os.mkdir(args_dict["output_folder"])
-        except:
-            pass
         if os.path.exists(args_dict["output_folder"]) is False:
             raise Exception("output_folder could not be made or found.")
 

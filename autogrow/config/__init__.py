@@ -3,20 +3,27 @@ import os
 import datetime
 import sys
 import json
+from typing import Any, Dict, Tuple
 
 from autogrow import program_info
 from autogrow.config.config_custom_classes import handle_custom_params_if_argparsed
-from autogrow.config.config_custom_dock_conversion_scoring import setup_custom_dock_and_conversion_scoring_options
+from autogrow.config.config_custom_dock_conversion_scoring import (
+    setup_custom_dock_and_conversion_scoring_options,
+)
 from autogrow.config.config_filters import setup_filters
 from autogrow.config.config_mgltools import config_mgltools
 from autogrow.config.config_multiprocessing import config_multiprocessing
 from autogrow.config.config_paths import config_paths
 from autogrow.config.config_run_directory import set_run_directory
 from autogrow.config.defaults import define_defaults
-from autogrow.config.json_config_utils import convert_json_params_from_unicode, save_vars_as_json
+from autogrow.config.json_config_utils import (
+    convert_json_params_from_unicode,
+    save_vars_as_json,
+)
 from autogrow.validation import validate_all
 
-def load_commandline_parameters(argv: dict) -> tuple:
+
+def load_commandline_parameters(argv: Dict[str, Any]) -> Tuple[Dict[str, Any], str]:
     """
     Load in the command-line parameters
 
@@ -24,7 +31,7 @@ def load_commandline_parameters(argv: dict) -> tuple:
     :param dict argv: Dictionary of User specified variables
 
     Returns:
-    :returns: dict vars: Dictionary of User variables
+    :returns: dict params: Dictionary of User variables
     :returns: str printout: a string to be printed to screen and saved to output file
     """
 
@@ -59,7 +66,17 @@ def load_commandline_parameters(argv: dict) -> tuple:
     return cli_vars, printout
 
 
-def _setup_params(orig_params: dict, is_argparsed: bool):
+def _setup_params(orig_params: Dict[str, Any], is_argparsed: bool) -> Dict[str, Any]:
+    """
+    Set up parameters, correct types, and set defaults.
+
+    Inputs:
+    :param orig_params: Dictionary of original parameters.
+    :param is_argparsed: Boolean indicating if parameters were parsed via argparse.
+
+    Returns:
+    :returns: corrected_params: Dictionary of corrected parameters.
+    """
     _cast_some_params(orig_params)
     _set_missing_first_generation_params(orig_params)
     config_paths(orig_params)
@@ -90,45 +107,45 @@ def _setup_params(orig_params: dict, is_argparsed: bool):
         if key not in list(corrected_params.keys()):
             corrected_params[key] = default_params[key]
 
-
-
     return corrected_params
 
 
-def _correct_param_to_default_types(user_params, default_params_for_ref) -> dict:
+def _correct_param_to_default_types(
+    params: Dict[str, Any], default_params_for_ref: Dict[str, Any]
+) -> Dict[str, Any]:
     """
     This checks that all the user variables loaded in use that same or comparable
-    datatypes as the defaults in vars. This prevents type issues later in the
+    datatypes as the defaults in params. This prevents type issues later in the
     simulation.
 
     Given the many uservars and the possibility for intentional differences,
     especially as the program is developed, this function tries to be
     NOT OPINIONATED, only correcting for several obvious and easy to correct issues
-    of type discrepancies occur between user_params[key] and default_params_for_ref[key]
+    of type discrepancies occur between params[key] and default_params_for_ref[key]
         ie
-            1) user_params[key] = "true" and default_params_for_ref[key] = False
-                this script will not change user_params[key] to False... it will
+            1) params[key] = "true" and default_params_for_ref[key] = False
+                this script will not change params[key] to False... it will
                 convert "true" to True
-                ---> user_params[key]=True
-            2) user_params[key] = "1.01" and default_params_for_ref[key] = 2.1
-                this script will change user_params[key] from "1.01" to float(1.01)
+                ---> params[key]=True
+            2) params[key] = "1.01" and default_params_for_ref[key] = 2.1
+                this script will change params[key] from "1.01" to float(1.01)
 
     Inputs:
-    :param dict user_params: Dictionary of user specified variables, to
+    :param dict params: Dictionary of user specified variables, to
         correct.
     :param dict default_params_for_ref: Dictionary of program defaults, used to 
         identify the proper types.
     
     Returns:
-    :returns: dict user_params: Dictionary of corrected user specified variables
+    :returns: dict params: Dictionary of corrected user specified variables
     """
-    for key in list(user_params.keys()):
+    for key in list(params.keys()):
         if key not in list(default_params_for_ref.keys()):
             # Examples may be things like filename_of_receptor or dimensions of
             # the docking box. Just skip these
             continue
 
-        if type(user_params[key]) == type(default_params_for_ref[key]):
+        if type(params[key]) == type(default_params_for_ref[key]):
             # The types are the same, so you can go on to the text one.
             continue
 
@@ -136,45 +153,46 @@ def _correct_param_to_default_types(user_params, default_params_for_ref) -> dict
         # elsewhere...
         if default_params_for_ref[key] is None:
             # check argv[key] is "none" or "None"
-            if type(user_params[key]) != str:
+            if type(params[key]) != str:
                 continue
 
-            if user_params[key].lower() == "none":
-                user_params[key] = None
+            if params[key].lower() == "none":
+                params[key] = None
         elif type(default_params_for_ref[key]) in [int, float]:
-            if type(user_params[key]) in [int, float]:
+            if type(params[key]) in [int, float]:
                 # this is fine
                 continue
 
-            if type(user_params[key]) == str:
+            if type(params[key]) == str:
                 try:
-                    temp_item = float(user_params[key])
+                    temp_item = float(params[key])
                     if type(temp_item) == float:
-                        user_params[key] = temp_item
+                        params[key] = temp_item
                     else:
-                        _wrong_type_error(key, user_params, default_params_for_ref)
+                        _wrong_type_error(key, params, default_params_for_ref)
                 except Exception:
-                    _wrong_type_error(key, user_params, default_params_for_ref)
+                    _wrong_type_error(key, params, default_params_for_ref)
             else:
-                _wrong_type_error(key, user_params, default_params_for_ref)
+                _wrong_type_error(key, params, default_params_for_ref)
         elif type(default_params_for_ref[key]) == bool:
-            if user_params[key] is None:
+            if params[key] is None:
                 # Do not try to handle this. May make sense.
                 continue
-            if type(user_params[key]) == str:
-                if user_params[key].lower() in ["true", "1"]:
-                    user_params[key] = True
-                elif user_params[key].lower() in ["false", "0"]:
-                    user_params[key] = False
-                elif user_params[key].lower() in ["none"]:
-                    user_params[key] = None
+            if type(params[key]) == str:
+                if params[key].lower() in ["true", "1"]:
+                    params[key] = True
+                elif params[key].lower() in ["false", "0"]:
+                    params[key] = False
+                elif params[key].lower() in ["none"]:
+                    params[key] = None
                 else:
-                    _wrong_type_error(key, user_params, default_params_for_ref)
+                    _wrong_type_error(key, params, default_params_for_ref)
             else:
-                _wrong_type_error(key, user_params, default_params_for_ref)
-    return user_params
+                _wrong_type_error(key, params, default_params_for_ref)
+    return params
 
-def _cast_some_params(input_params):
+
+def _cast_some_params(input_params: Dict[str, Any]) -> None:
     """
     Some parameters must be cast to different types.
 
@@ -200,8 +218,7 @@ def _cast_some_params(input_params):
     _convert_param_to_int_if_needed("docking_num_modes", input_params)
 
 
-
-def _set_missing_first_generation_params(params: dict):
+def _set_missing_first_generation_params(params: Dict[str, Any]) -> None:
     # Check parameters specific to the first generation. If not defined, use the
     # default of 10. If defined, use the same number for the first generation.
 
@@ -224,7 +241,7 @@ def _set_missing_first_generation_params(params: dict):
                 params[f"{pname}_first_generation"] = params[pname]
 
 
-def _wrong_type_error(key, argv, vars):
+def _wrong_type_error(key: str, argv: Dict[str, Any], params: Dict[str, Any]) -> None:
     """
     This function is used to raise an error when the user has inputted the wrong
     type for a variable. It is used in the check_value_types function.
@@ -232,18 +249,29 @@ def _wrong_type_error(key, argv, vars):
     Inputs:
     :param str key: the key of the variable that is the wrong type
     :param dict argv: the dictionary of user specified variables
-    :param dict vars: the dictionary of program defaults
+    :param dict params: the dictionary of program defaults
     """
     printout = (
         "This parameter is the wrong type. \n \t Check :"
         + f" {key} type={type(argv[key])}\n"
     )
-    printout += f"\t Should be type={type(vars[key])}\n\t"
+    printout += f"\t Should be type={type(params[key])}\n\t"
     printout += "Please check Autogrow documentation using -h"
     raise IOError(printout)
 
 
-def _convert_param_to_int_if_needed(param_name: str, input_params: dict):
+def _convert_param_to_int_if_needed(
+    param_name: str, input_params: Dict[str, Any]
+) -> None:
+    """
+    Converts the parameter to an integer if needed.
+
+    If the parameter is a string representation of an integer or "None", it converts it accordingly.
+
+    Inputs:
+    :param param_name: Name of the parameter to convert.
+    :param input_params: Dictionary of input parameters.
+    """
     if param_name not in list(input_params.keys()):
         return
 
@@ -269,5 +297,3 @@ def _convert_param_to_int_if_needed(param_name: str, input_params: dict):
         If you do not know what to use, leave this blank and the \
         default for the docking software will be used."
     )
-
-

@@ -6,7 +6,7 @@ into all_rxns... This script renumbers a rxn_libraries numbering
 import sys
 
 
-def renumber_file(old_path, new_path, new_rxn_num):
+def renumber_file(old_path: str, new_path: str, new_rxn_num: int):
     """
     This is a developers tool to renumber a rxn_library .json file
         Must provide the following:
@@ -25,13 +25,11 @@ def renumber_file(old_path, new_path, new_rxn_num):
 
     original_rxn_num = 1  # index of the 1st reaction to adjust to rxn_num
     with open(old_path, "r") as f:
-        for line in f.readlines():
+        for line in f:
             if '": {' in line or "reaction_name" in line:
-                line = line.replace(
-                    "{}_".format(original_rxn_num), "{}_".format(new_rxn_num)
-                )
+                line = line.replace(f"{original_rxn_num}_", f"{new_rxn_num}_")
             elif '"RXN_NUM": ' in line:
-                line = line.split(": ")[0] + ": {}\n".format(new_rxn_num)
+                line = line.split(": ")[0] + f": {new_rxn_num}\n"
                 new_rxn_num = new_rxn_num + 1
                 original_rxn_num = original_rxn_num + 1
 
@@ -48,15 +46,15 @@ if __name__ == "__main__":
     try:
         OLD_PATH = sys.argv[1]
         NEW_PATH = sys.argv[2]
-        NEW_RXN_NUM = sys.argv[3]
-    except:
-        print(
+        NEW_RXN_NUM = int(sys.argv[3])
+    except Exception as e:
+        raise Exception(
             "This is a developers tool to renumber a rxn_library .json file \
                 Must provide the following: \
                 1) OLD_PATH to original .json rxn_library file \
                 2) NEW_PATH to output renumbered .json rxn_library file \
                 3) NEW_RXN_NUM: number to reindex the 1st reaction to: \
                     ie if NEW_RXN_NUM=37 then rxn_num=1 becomes rxn_num=37"
-        )
+        ) from e
 
     renumber_file(OLD_PATH, NEW_PATH, NEW_RXN_NUM)

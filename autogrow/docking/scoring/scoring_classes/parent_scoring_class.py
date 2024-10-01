@@ -4,6 +4,7 @@ This is used as the basis for all scoring/rescoring classes.
 """
 import __future__
 from abc import ABC, abstractmethod
+from typing import Union
 
 
 class ParentScoring(ABC):
@@ -21,12 +22,17 @@ class ParentScoring(ABC):
         return self.__class__.__name__
 
     @abstractmethod
-    def run_scoring(self, input_string: str) -> None:
+    def run_scoring(self, file_path: str) -> Union[list[str], None]:
         """
         run_scoring is needs to be implemented in each class.
 
         Inputs:
-        :param str input_string:  A string to raise an exception
+        :param str file_path: the path to the file to be scored
+
+        Returns:
+        :returns: list lig_info: a list containing all info from
+            self.smiles_dict for a given ligand and the ligands short_id_name and
+            the docking score from the best pose.
         """
 
         # raise NotImplementedError("run_scoring() not implemented")

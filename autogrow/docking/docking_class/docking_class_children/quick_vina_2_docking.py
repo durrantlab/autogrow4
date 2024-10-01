@@ -5,6 +5,7 @@ import __future__
 
 import os
 import sys
+from typing import Any, Dict, Optional
 
 from autogrow.docking.docking_class.docking_class_children.vina_docking import (
     VinaDocking,
@@ -21,18 +22,18 @@ class QuickVina2Docking(VinaDocking):
 
     def __init__(
         self,
-        vars=None,
-        receptor_file=None,
-        file_conversion_class_object=None,
-        test_boot=True,
-    ):
+        params: Optional[Dict[str, Any]] = None,
+        receptor_file: Optional[str] = None,
+        file_conversion_class_object: Optional[Any] = None,
+        test_boot: bool = True,
+    ) -> None:
         """
-        get the specifications for Vina/QuickVina2 from vars load them into
+        get the specifications for Vina/QuickVina2 from vrs load them into
         the self variables we will need and convert the receptor to the proper
         file format (ie pdb-> pdbqt)
 
         Inputs:
-        :param dict vars: Dictionary of User variables
+        :param dict params: Dictionary of User variables
         :param str receptor_file: the path for the receptor pdb
         :param obj file_conversion_class_object: object which is used to
             convert files from pdb to pdbqt
@@ -40,53 +41,53 @@ class QuickVina2Docking(VinaDocking):
             testing purpose
         """
 
-        if test_boot is False:
+        if not test_boot:
 
-            self.vars = vars
-            self.debug_mode = vars["debug_mode"]
+            assert params is not None, "params must be passed to QuickVina2Docking"
+
+            self.params = params
+            self.debug_mode = params["debug_mode"]
             self.file_conversion_class_object = file_conversion_class_object
 
             # VINA SPECIFIC VARS
-            receptor_file = vars["filename_of_receptor"]
-            # mgl_python = vars["mgl_python"]
-            # receptor_template = vars["prepare_receptor4.py"]
-            # number_of_processors = vars["number_of_processors"]
-            # docking_executable = vars["docking_executable"]
+            receptor_file = params["filename_of_receptor"]
+            # mgl_python = params["mgl_python"]
+            # receptor_template = params["prepare_receptor4.py"]
+            # number_of_processors = params["number_of_processors"]
+            # docking_executable = params["docking_executable"]
 
             ###########################
 
-            self.receptor_pdbqt_file = receptor_file + "qt"
+            self.receptor_pdbqt_file = f"{receptor_file}qt"
 
-            self.vars["docking_executable"] = self.get_docking_executable_file(
-                self.vars
+            self.params["docking_executable"] = self.get_docking_executable_file(
+                self.params
             )
 
-    def get_docking_executable_file(self, vars):
+    def get_docking_executable_file(self, params: Dict[str, Any]) -> str:
         """
         This retrieves the docking executable files Path.
 
         Inputs:
-        :param dict vars: Dictionary of User variables
+        :param dict params: Dictionary of User variables
 
         Returns:
         :returns: str docking_executable: String for the docking executable
             file path
         """
 
-        # This must already be true if we are here vars["dock_choice"] ==
+        # This must already be true if we are here params["dock_choice"] ==
         # "QuickVina2Docking"
 
-        if vars["docking_executable"] is None:
+        if params["docking_executable"] is None:
             # get default docking_executable for QuickVina2
             script_dir = str(os.path.dirname(os.path.realpath(__file__)))
             docking_executable_directory = (
-                script_dir.split(os.sep + "docking_class")[0]
-                + os.sep
+                (script_dir.split(f"{os.sep}docking_class")[0] + os.sep)
                 + "docking_executables"
-                + os.sep
-            )
+            ) + os.sep
 
-            if sys.platform == "linux" or sys.platform == "linux2":
+            if sys.platform in ["linux", "linux2"]:
                 # Use linux version of Autodock Vina
                 docking_executable = (
                     docking_executable_directory
@@ -116,11 +117,10 @@ class QuickVina2Docking(VinaDocking):
 
         else:
             # if user specifies a different QuickVina executable
-            docking_executable = vars["docking_executable"]
+            docking_executable = params["docking_executable"]
 
         if os.path.exists(docking_executable) is False:
-            printout = "Docking executable could not be found at: "
-            printout = printout + "{}".format(docking_executable)
+            printout = f"Docking executable could not be found at: {docking_executable}"
             print(printout)
             raise Exception(printout)
 

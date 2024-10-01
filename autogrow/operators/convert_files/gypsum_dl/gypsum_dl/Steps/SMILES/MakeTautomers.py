@@ -28,12 +28,12 @@ import gypsum_dl.MolObjectHandling as MOH
 
 try:
     from rdkit import Chem
-except:
+except Exception:
     Utils.exception("You need to install rdkit and its dependencies.")
 
 try:
     from gypsum_dl.molvs import tautomer
-except:
+except Exception:
     Utils.exception("You need to install molvs and its dependencies.")
 
 

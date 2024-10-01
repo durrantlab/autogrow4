@@ -30,7 +30,7 @@ import math
 
 try:
     from rdkit import Chem
-except:
+except Exception:
     Utils.exception("You need to install rdkit and its dependencies.")
 
 
@@ -267,7 +267,7 @@ def parallel_get_double_bonded(mol, max_variants_per_compound, thoroughness):
             smiles_to_consider.add(
                 Chem.MolToSmiles(a_rd_mol, isomericSmiles=True, canonical=True)
             )
-        except:
+        except Exception:
             # Some molecules still give troubles. Unfortunate, but these are
             # rare cases. Let's just skip these. Example:
             # CN1C2=C(C=CC=C2)C(C)(C)[C]1=[C]=[CH]C3=CC(=C(O)C(=C3)I)I

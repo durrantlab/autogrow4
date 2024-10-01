@@ -23,16 +23,16 @@
 
 import __future__
 
-import rdkit
-from rdkit import Chem
+import rdkit  # type: ignore
+from rdkit import Chem  # type: ignore
 
 # Disable the unnecessary RDKit warnings
-from rdkit import RDLogger
+from rdkit import RDLogger  # type: ignore
 
 RDLogger.DisableLog("rdApp.*")
 
 
-def check_sanitization(mol):
+def check_sanitization(mol: Chem.Mol) -> Chem.Mol | None:
     """
     Given a rdkit.Chem.rdchem.Mol this script will sanitize the molecule.
     It will be done using a series of try/except statements so that if it fails it will return a None
@@ -59,26 +59,26 @@ def check_sanitization(mol):
             sanitizeOps=rdkit.Chem.rdmolops.SanitizeFlags.SANITIZE_ALL,
             catchErrors=True,
         )
-    except:
+    except Exception:
         return None
 
     if sanitize_string.name == "SANITIZE_NONE":
         return mol
-    else:
-        # try to fix the nitrogen (common problem that 4 bonded Nitrogens improperly lose their + charges)
-        mol = nitrogen_charge_adjustment(mol)
-        Chem.SanitizeMol(
-            mol,
-            sanitizeOps=rdkit.Chem.rdmolops.SanitizeFlags.SANITIZE_ALL,
-            catchErrors=True,
-        )
-        sanitize_string = Chem.SanitizeMol(
-            mol,
-            sanitizeOps=rdkit.Chem.rdmolops.SanitizeFlags.SANITIZE_ALL,
-            catchErrors=True,
-        )
-        if sanitize_string.name == "SANITIZE_NONE":
-            return mol
+
+    # try to fix the nitrogen (common problem that 4 bonded Nitrogens improperly lose their + charges)
+    mol = nitrogen_charge_adjustment(mol)
+    Chem.SanitizeMol(
+        mol,
+        sanitizeOps=rdkit.Chem.rdmolops.SanitizeFlags.SANITIZE_ALL,
+        catchErrors=True,
+    )
+    sanitize_string = Chem.SanitizeMol(
+        mol,
+        sanitizeOps=rdkit.Chem.rdmolops.SanitizeFlags.SANITIZE_ALL,
+        catchErrors=True,
+    )
+    if sanitize_string.name == "SANITIZE_NONE":
+        return mol
 
     # run a  sanitation Filter 1 more time incase something slipped through
     # ie. if there are any forms of sanition which fail ie. KEKULIZE then return None
@@ -87,13 +87,10 @@ def check_sanitization(mol):
         sanitizeOps=rdkit.Chem.rdmolops.SanitizeFlags.SANITIZE_ALL,
         catchErrors=True,
     )
-    if sanitize_string.name != "SANITIZE_NONE":
-        return None
-    else:
-        return mol
+    return None if sanitize_string.name != "SANITIZE_NONE" else mol
 
 
-def handle_hydrogens(mol, protanate_step):
+def handle_hydrogens(mol: Chem.Mol, protanate_step: bool) -> Chem.Mol | None:
     """
     Given a rdkit.Chem.rdchem.Mol this script will sanitize the molecule, remove all non-explicit H's
     and add back on all implicit H's. This is to control for any discrepencies in the smiles strings or presence and
@@ -119,7 +116,7 @@ def handle_hydrogens(mol, protanate_step):
         # mol failed deprotanation
         return None
 
-    if protanate_step is True:
+    if protanate_step:
         # PROTANTION IS ON
         mol = try_reprotanation(mol)
         if mol is None:
@@ -129,7 +126,7 @@ def handle_hydrogens(mol, protanate_step):
     return mol
 
 
-def try_deprotanation(sanitized_mol):
+def try_deprotanation(sanitized_mol: Chem.Mol) -> Chem.Mol | None:
     """
     Given an already sanitize rdkit.Chem.rdchem.Mol object, we will try to deprotanate the mol of all non-explicit
     Hs. If it fails it will return a None rather than causing the outer script to fail.
@@ -142,15 +139,13 @@ def try_deprotanation(sanitized_mol):
     """
     try:
         mol = Chem.RemoveHs(sanitized_mol, sanitize=False)
-    except:
+    except Exception:
         return None
 
-    mol_sanitized = check_sanitization(mol)
-
-    return mol_sanitized
+    return check_sanitization(mol)
 
 
-def try_reprotanation(sanitized_deprotanated_mol):
+def try_reprotanation(sanitized_deprotanated_mol: Chem.Mol) -> Chem.Mol | None:
     """
     Given an already sanitize and deprotanate rdkit.Chem.rdchem.Mol object, we will try to reprotanate the mol with
     implicit Hs. If it fails it will return a None rather than causing the outer script to fail.
@@ -162,19 +157,17 @@ def try_reprotanation(sanitized_deprotanated_mol):
                                             it returns None if H's can't be added or if sanitation fails
     """
 
-    if sanitized_deprotanated_mol is not None:
-        try:
-            mol = Chem.AddHs(sanitized_deprotanated_mol)
-        except:
-            mol = None
-
-        mol_sanitized = check_sanitization(mol)
-        return mol_sanitized
-    else:
+    if sanitized_deprotanated_mol is None:
         return None
+    try:
+        mol = Chem.AddHs(sanitized_deprotanated_mol)
+    except Exception:
+        mol = None
+
+    return check_sanitization(mol)
 
 
-def remove_atoms(mol, list_of_idx_to_remove):
+def remove_atoms(mol: Chem.Mol, list_of_idx_to_remove: list[int]) -> Chem.Mol | None:
     """
     This function removes atoms from an rdkit mol based on
     a provided list. The RemoveAtom function in Rdkit requires
@@ -196,7 +189,7 @@ def remove_atoms(mol, list_of_idx_to_remove):
     try:
         atomsToRemove = list_of_idx_to_remove
         atomsToRemove.sort(reverse=True)
-    except:
+    except Exception:
         return None
 
     try:
@@ -204,14 +197,12 @@ def remove_atoms(mol, list_of_idx_to_remove):
         for atom in atomsToRemove:
             em1.RemoveAtom(atom)
 
-        new_mol = em1.GetMol()
-
-        return new_mol
-    except:
+        return em1.GetMol()
+    except Exception:
         return None
 
 
-def nitrogen_charge_adjustment(mol):
+def nitrogen_charge_adjustment(mol: Chem.Mol) -> Chem.Mol | None:
     """
     When importing ligands with sanitation turned off, one can successfully import
     import a SMILES in which a Nitrogen (N) can have 4 bonds, but no positive charge.
@@ -236,7 +227,7 @@ def nitrogen_charge_adjustment(mol):
     # makes sure its an rdkit obj
     try:
         atoms = mol.GetAtoms()
-    except:
+    except Exception:
         return None
 
     for atom in atoms:
@@ -255,7 +246,7 @@ def nitrogen_charge_adjustment(mol):
     return mol
 
 
-def check_for_unassigned_atom(mol):
+def check_for_unassigned_atom(mol: Chem.Mol) -> Chem.Mol | None:
     """
     Check there isn't a missing atom group ie. '*'
     A '*' in a SMILES string is an atom with an atomic num of 0
@@ -265,7 +256,7 @@ def check_for_unassigned_atom(mol):
 
     try:
         atoms = mol.GetAtoms()
-    except:
+    except Exception:
         return None
 
     for atom in atoms:
@@ -274,40 +265,48 @@ def check_for_unassigned_atom(mol):
     return mol
 
 
-def handle_frag_check(mol):
+def handle_frag_check(mol: Chem.Mol) -> Chem.Mol | None:
     """
-    This will take a RDKit Mol object. It will check if it is fragmented.
-    If it has fragments it will return the largest of the two fragments.
-    If it has no fragments it will return the molecule on harmed.
+    Checks if the molecule is fragmented. If fragmented, it returns the largest fragment.
+
+    Inputs:
+    :param rdkit.Chem.rdchem.Mol mol: an rdkit molecule
+    Returns:
+    :returns: rdkit.Chem.rdchem.Mol: the largest fragment or original molecule if no fragments, None if it fails.
     """
     if mol is None:
         return None
 
     try:
         frags = Chem.GetMolFrags(mol, asMols=True, sanitizeFrags=False)
-    except:
+    except Exception:
         return None
 
-    if len(frags) == 1:
-        return mol
-    else:
-        frag_info_list = []
-        frag_index = 0
-        for frag in frags:
-            # Check for unassigned breaks ie. a '*'
-            frag = check_for_unassigned_atom(frag)
-            if frag is None:
-                frag_index = frag_index + 1
-                continue
-            else:
-                num_atoms = frag.GetNumAtoms()
-                frag_info = [frag_index, num_atoms]
-                frag_info_list.append(frag_info)
-                frag_index = frag_index + 1
-        if len(frag_info_list) == 0:
-            return None
-        # Get the largest Fragment
-        frag_info_list.sort(key=lambda x: float(x[-1]), reverse=True)
-        largest_frag_idx = frag_info_list[0][0]
-        largest_frag = frags[largest_frag_idx]
-        return largest_frag
+    return mol if len(frags) == 1 else _get_largest_checked_fragment(frags)
+
+
+def _get_largest_checked_fragment(frags: list[Chem.Mol]) -> Chem.Mol | None:
+    """
+    Returns the largest fragment from a list of fragments after checking for
+    unassigned atoms.
+
+    Inputs:
+    :param list[rdkit.Chem.rdchem.Mol] frags: list of fragments
+    Returns:
+    :returns: rdkit.Chem.rdchem.Mol: the largest fragment or None if it fails.
+    """
+    frag_info_list = []
+    frag_index = 0
+    for frag in frags:
+        # Check for unassigned breaks ie. a '*'
+        frag = check_for_unassigned_atom(frag)
+        if frag is not None:
+            num_atoms = frag.GetNumAtoms()
+            frag_info = [frag_index, num_atoms]
+            frag_info_list.append(frag_info)
+        frag_index = frag_index + 1
+    if not frag_info_list:
+        return None
+    # Get the largest Fragment
+    frag_info_list.sort(key=lambda x: float(x[-1]), reverse=True)
+    return frags[frag_info_list[0][0]]

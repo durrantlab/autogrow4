@@ -31,17 +31,17 @@ from gypsum_dl.MyMol import MyConformer
 try:
     from rdkit import Chem
     from rdkit.Chem import AllChem
-except:
+except Exception:
     Utils.exception("You need to install rdkit and its dependencies.")
 
 try:
     import numpy
-except:
+except Exception:
     Utils.exception("You need to install numpy and its dependencies.")
 
 try:
     from scipy.cluster.vq import kmeans2
-except:
+except Exception:
     Utils.exception("You need to install scipy and its dependencies.")
 
 

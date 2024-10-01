@@ -7,10 +7,11 @@ import glob
 import sys
 import os
 from os.path import basename
+from typing import Any, Dict, List, Union
 
-import rdkit
-import rdkit.Chem as Chem
-from func_timeout import func_timeout
+import rdkit  # type: ignore
+import rdkit.Chem as Chem  # type: ignore
+from func_timeout import func_timeout  # type: ignore
 
 # Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog("rdApp.*")
@@ -74,14 +75,16 @@ class StdoutRedirection:
         sys.stdout = sys.__stdout__
 
 
-def convert_to_3d(vars, smi_file, smile_file_directory):
+def convert_to_3d(
+    params: Dict[str, Any], smi_file: str, smile_file_directory: str
+) -> None:
     """
     This function converts SMILES from 1D to 3D using gypsum Gypsum converts
     SMILES in an .smi file to 3D .sdf files Then rdkit converts the sdfs to
     PDB files.
 
     Inputs:
-    :param dict vars: User variables which will govern how the programs runs
+    :param dict params: User variables which will govern how the programs runs
     :param str smi_file: the file name of the .smi file
     :param srt smile_file_directory: the directory path which contains the
         .smi file
@@ -90,17 +93,19 @@ def convert_to_3d(vars, smi_file, smile_file_directory):
     print("CONVERTING SMILES TO SDF")
     # convert smiles in an .SMI file to sdfs using gypsum
     gypsum_output_folder_path = convert_smi_to_sdfs_with_gypsum(
-        vars, smi_file, smile_file_directory
+        params, smi_file, smile_file_directory
     )
     print("CONVERTING SMILES TO SDF COMPLETED")
 
     print("CONVERTING SDF TO PDB")
     # convert sdf files to PDBs using rdkit
-    convert_sdf_to_pdbs(vars, smile_file_directory, gypsum_output_folder_path)
+    convert_sdf_to_pdbs(params, smile_file_directory, gypsum_output_folder_path)
     print("CONVERTING SDF TO PDB COMPLETED")
 
 
-def convert_smi_to_sdfs_with_gypsum(vars, gen_smiles_file, smile_file_directory):
+def convert_smi_to_sdfs_with_gypsum(
+    params: Dict[str, Any], gen_smiles_file: str, smile_file_directory: str
+) -> str:
     """
     Convert a file of SMILES to a set of 3d .sdf files using Gypsum. This does
     so by making a set of .json files for running Gypsum for every ligand in
@@ -109,7 +114,7 @@ def convert_smi_to_sdfs_with_gypsum(vars, gen_smiles_file, smile_file_directory)
     This will print out the list of ligands which failed to convert to 3D.
 
     Inputs:
-    :param dict vars: User variables which will govern how the programs runs
+    :param dict params: User variables which will govern how the programs runs
     :param str gen_smiles_file: the file name of the .smi file to be converted
         to 3D sdf's
     :param srt smile_file_directory: the directory path which contains the
@@ -120,26 +125,26 @@ def convert_smi_to_sdfs_with_gypsum(vars, gen_smiles_file, smile_file_directory)
         the 3D sdf's created by gypsum.
     """
 
-    max_variants_per_compound = vars["max_variants_per_compound"]
-    gypsum_thoroughness = vars["gypsum_thoroughness"]
-    min_ph = vars["min_ph"]
-    max_ph = vars["max_ph"]
-    pka_precision = vars["pka_precision"]
-    gypsum_timeout_limit = vars["gypsum_timeout_limit"]
+    max_variants_per_compound = params["max_variants_per_compound"]
+    gypsum_thoroughness = params["gypsum_thoroughness"]
+    min_ph = params["min_ph"]
+    max_ph = params["max_ph"]
+    pka_precision = params["pka_precision"]
+    gypsum_timeout_limit = params["gypsum_timeout_limit"]
 
     # Make a new folder to put gypsum .smi's and json. Name folder
     # gypsum_submission_files.
-    folder_path = "{}gypsum_submission_files{}".format(smile_file_directory, os.sep)
+    folder_path = f"{smile_file_directory}gypsum_submission_files{os.sep}"
     if os.path.exists(folder_path) is False:
         os.makedirs(folder_path)
 
     # Make Output for Gypsum folder (where .sdf's go)
-    gypsum_output_folder_path = "{}3D_SDFs{}".format(smile_file_directory, os.sep)
+    gypsum_output_folder_path = f"{smile_file_directory}3D_SDFs{os.sep}"
     if os.path.exists(gypsum_output_folder_path) is False:
         os.makedirs(gypsum_output_folder_path)
 
     # Make a folder to put the log files into within the 3D_SDFs folder
-    gypsum_log_path = "{}log{}".format(gypsum_output_folder_path, os.sep)
+    gypsum_log_path = f"{gypsum_output_folder_path}log{os.sep}"
     if os.path.exists(gypsum_log_path) is False:
         os.makedirs(gypsum_log_path)
 
@@ -157,19 +162,19 @@ def convert_smi_to_sdfs_with_gypsum(vars, gen_smiles_file, smile_file_directory)
 
     # create a the job_inputs to run gypsum in multithread
     job_input = tuple(
-        [
-            tuple([gypsum_log_path, gypsum_params, gypsum_timeout_limit,])
-            for gypsum_params in list_of_gypsum_params
-        ]
+        (gypsum_log_path, gypsum_params, gypsum_timeout_limit)
+        for gypsum_params in list_of_gypsum_params
     )
 
     sys.stdout.flush()
-    failed_to_convert = vars["parallelizer"].run(job_input, run_gypsum_multiprocessing)
+    failed_to_convert = params["parallelizer"].run(
+        job_input, run_gypsum_multiprocessing
+    )
     sys.stdout.flush()
 
     lig_failed_to_convert = [x for x in failed_to_convert if x is not None]
     lig_failed_to_convert = list(set(lig_failed_to_convert))
-    if len(lig_failed_to_convert) > 0:
+    if lig_failed_to_convert:
         print("The Following ligands Failed to convert in Gypsum")
         print("Likely due to a Timeout")
         print(lig_failed_to_convert)
@@ -178,15 +183,15 @@ def convert_smi_to_sdfs_with_gypsum(vars, gen_smiles_file, smile_file_directory)
 
 
 def make_smi_and_gyspum_params(
-    gen_smiles_file,
-    folder_path,
-    gypsum_output_folder_path,
-    max_variance,
-    gypsum_thoroughness,
-    min_ph,
-    max_ph,
-    pka_precision,
-):
+    gen_smiles_file: str,
+    folder_path: str,
+    gypsum_output_folder_path: str,
+    max_variance: int,
+    gypsum_thoroughness: int,
+    min_ph: float,
+    max_ph: float,
+    pka_precision: float,
+) -> List[Dict[str, Any]]:
     """
     Make an individual .smi file and parameter dictionary to submit to Gypsum
     for every ligand in the generation_*_to_convert.smi file.
@@ -227,7 +232,7 @@ def make_smi_and_gyspum_params(
             line = line.replace("\n", "")
             line = line.replace("    ", "\t")
             parts = line.split("\t")  # split line into parts separated by 4-spaces
-            if len(parts) == 0 or len(parts) == 1:
+            if len(parts) in {0, 1}:
                 print(parts)
             smile = parts[0]
             # ligand_name example
@@ -259,9 +264,9 @@ def make_smi_and_gyspum_params(
                 print(printout)
                 raise Exception(printout)
 
-            smi_line = "{}\t{}".format(smile, lig_name_short)
+            smi_line = f"{smile}\t{lig_name_short}"
 
-            smi_path = "{}{}.smi".format(folder_path, lig_name_short)
+            smi_path = f"{folder_path}{lig_name_short}.smi"
 
             # make .smi file
             with open(smi_path, "w") as smi_file:
@@ -299,7 +304,9 @@ def make_smi_and_gyspum_params(
     return list_of_gypsum_params
 
 
-def run_gypsum_multiprocessing(gypsum_log_path, gypsum_params, gypsum_timeout_limit):
+def run_gypsum_multiprocessing(
+    gypsum_log_path: str, gypsum_params: Dict[str, Any], gypsum_timeout_limit: int
+) -> Union[str, None]:
     """
     This converts the a single ligand from a SMILE to a 3D SDF using Gypsum.
     This is used within a multithread.
@@ -313,7 +320,7 @@ def run_gypsum_multiprocessing(gypsum_log_path, gypsum_params, gypsum_timeout_li
     :param dict gypsum_params: dictionary of params to be feed to Gypsum-DL to
         convert to 3D sdf for a single ligand
     :param int gypsum_timeout_limit: this is taken from
-        vars["gypsum_timeout_limit"]. It determines the maximum amount of time to
+        params["gypsum_timeout_limit"]. It determines the maximum amount of time to
         run Gypsum per ligand
 
     Returns:
@@ -328,14 +335,14 @@ def run_gypsum_multiprocessing(gypsum_log_path, gypsum_params, gypsum_timeout_li
     sys.path.extend([current_dir, gypsum_dir, gypsum_gypsum_dir])
 
     lig_id = gypsum_params["source"].split(os.sep)[-1].replace(".smi", "")
-    log_file = "{}{}_log.txt".format(gypsum_log_path, lig_id)
+    log_file = f"{gypsum_log_path}{lig_id}_log.txt"
 
     try:
         with StdoutRedirection(log_file):
             func_timeout(gypsum_timeout_limit, prepare_molecules, args=(gypsum_params,))
 
         sys.stdout.flush()
-    except:
+    except Exception:
         # This Ligand Timed out
         return lig_id
 
@@ -348,7 +355,7 @@ def run_gypsum_multiprocessing(gypsum_log_path, gypsum_params, gypsum_timeout_li
     return None
 
 
-def check_gypsum_log_did_complete(log_file_path):
+def check_gypsum_log_did_complete(log_file_path: str) -> Union[bool, None]:
     """
     This function checks a log_file_path to see if the last line reads
     "TIMEOUT". If it does then gypsum timed out before converting a .smi. If
@@ -394,14 +401,16 @@ def check_gypsum_log_did_complete(log_file_path):
     return True
 
 
-def convert_sdf_to_pdbs(vars, gen_folder_path, sdfs_folder_path):
+def convert_sdf_to_pdbs(
+    params: Dict[str, Any], gen_folder_path: str, sdfs_folder_path: str
+) -> None:
     """
     It will find any .sdf files within the folder_path and convert them to
     .pdb types using rdkit.Chem. It also makes a subfolder to store the pdb
     files if one doesn't already exist in the folder_path.
 
     Inputs:
-    :param dict vars: User variables which will govern how the programs runs
+    :param dict params: User variables which will govern how the programs runs
     :param str gen_folder_path: Path of the folder for the current generation
     :param str sdfs_folder_path: Path of the folder with all of the 3D .sdf
         files to convert
@@ -412,14 +421,13 @@ def convert_sdf_to_pdbs(vars, gen_folder_path, sdfs_folder_path):
     if os.path.isdir(sdfs_folder_path):
         # so it's a directory, go through the directory and find all the sdf files
         if sdfs_folder_path[-1:] != os.sep:
-            sdfs_folder_path = (
-                sdfs_folder_path + os.sep
-            )  # so add a / to the end of the directory
+            # so add a / to the end of the directory
+            sdfs_folder_path += os.sep
 
-        files.extend(glob.glob(sdfs_folder_path + "*.sdf"))
-        files.extend(glob.glob(sdfs_folder_path + "*.SDF"))
+        files.extend(glob.glob(f"{sdfs_folder_path}*.sdf"))
+        files.extend(glob.glob(f"{sdfs_folder_path}*.SDF"))
     files = list(set(files))
-    if len(files) == 0:
+    if not files:
         printout = "\nThere are no sdf's to convert to PDB's. There may be an issue with Gypsum.\n"
         print(printout)
         raise Exception(printout)
@@ -427,33 +435,33 @@ def convert_sdf_to_pdbs(vars, gen_folder_path, sdfs_folder_path):
     # create a new subfolder if one doesn't already exist. folder will be with
     # the generation and will be titled PDBs pdb_subfolder_path will become
     # the the output folder
-    pdb_subfolder_path = gen_folder_path + "PDBs" + os.sep
+    pdb_subfolder_path = f"{gen_folder_path}PDBs{os.sep}"
     if not os.path.isdir(pdb_subfolder_path):
         os.makedirs(pdb_subfolder_path)
 
-    job_inputs = []
-    for file_path in files:
-        if "params" in file_path:
-            continue
-        job_inputs.append(tuple([pdb_subfolder_path, file_path]))
+    job_inputs = [
+        (pdb_subfolder_path, file_path)
+        for file_path in files
+        if "params" not in file_path
+    ]
     job_inputs = tuple(job_inputs)
 
     # Check that there are .sdf files to test. If not raise Exception
-    if len(job_inputs) == 0:
-        printout = "\n\nThere are no SDF files were found to convert to PDB. "
-        printout = printout + "This may be a problem with the Gypsum-DL "
+    if not job_inputs:
         printout = (
-            printout + "settings.\nPlease check that the `--gypsum_timeout_limit` "
+            "\n\nThere are no SDF files were found to convert to PDB. "
+            + "This may be a problem with the Gypsum-DL "
         )
-        printout = printout + "is appropriate relative to the `--gypsum_thoroughness` "
-        printout = printout + "and `--max_variants_per_compound` parameters.\n"
+        printout += "settings.\nPlease check that the `--gypsum_timeout_limit` "
+        printout += "is appropriate relative to the `--gypsum_thoroughness` "
+        printout += "and `--max_variants_per_compound` parameters.\n"
         raise Exception(printout)
 
     # Convert sdf files to pdbs in multithread
-    vars["parallelizer"].run(job_inputs, convert_single_sdf_to_pdb)
+    params["parallelizer"].run(job_inputs, convert_single_sdf_to_pdb)
 
 
-def convert_single_sdf_to_pdb(pdb_subfolder_path, sdf_file_path):
+def convert_single_sdf_to_pdb(pdb_subfolder_path: str, sdf_file_path: str) -> None:
     """
     This will convert a given .sdf into separate .pdb files.
 
@@ -464,78 +472,70 @@ def convert_single_sdf_to_pdb(pdb_subfolder_path, sdf_file_path):
         files
     """
 
-    if os.path.exists(sdf_file_path) is True:
+    if os.path.exists(sdf_file_path) is not True:
+        return
 
-        file_basename = basename(sdf_file_path)
-        file_basename = file_basename.split("__input1")[0]
+    file_basename = basename(sdf_file_path)
+    file_basename = file_basename.split("__input1")[0]
 
-        file_output_name = "{}{}_".format(pdb_subfolder_path, file_basename)
+    file_output_name = f"{pdb_subfolder_path}{file_basename}_"
 
-        try:
-            mols = Chem.SDMolSupplier(
-                sdf_file_path, sanitize=False, removeHs=False, strictParsing=False
-            )
-        except:
-            mols = None
+    try:
+        mols = Chem.SDMolSupplier(
+            sdf_file_path, sanitize=False, removeHs=False, strictParsing=False
+        )
+    except Exception:
+        mols = None
 
         # if mols is None rdkit couldn't import the sdf so we will not do anything else
-        if mols is None:
-            pass
-        elif len(mols) == 0:
-            pass
-        else:
-            try:
-                mols_no_hydrogen = Chem.SDMolSupplier(
-                    sdf_file_path, sanitize=True, removeHs=True, strictParsing=False
-                )
-            except:
-                mols_no_hydrogen = [None for x in range(0, len(mols))]
+    if mols is not None and len(mols) != 0:
+        try:
+            mols_no_hydrogen = Chem.SDMolSupplier(
+                sdf_file_path, sanitize=True, removeHs=True, strictParsing=False
+            )
+        except Exception:
+            mols_no_hydrogen = [None for _ in range(len(mols))]
 
             # if len(mols)==0 gypsum output a blank file by accident
             # if mols is None rdkit couldn't import the sdf
-            if len(mols) != 0:
-                counter = 0
-                for i in range(0, len(mols)):
-                    mol = mols[i]
-                    # Extra precaution to prevent None's within a set of good
-                    # mols
-                    if mol is None:
-                        continue
+        if len(mols) != 0:
+            counter = 0
+            for i in range(len(mols)):
+                mol = mols[i]
+                # Extra precaution to prevent None's within a set of good
+                # mols
+                if mol is None:
+                    continue
 
-                    mol = MOH.check_sanitization(mol)
-                    # Filter out any which failed
-                    if mol is None:
-                        continue
+                mol = MOH.check_sanitization(mol)
+                # Filter out any which failed
+                if mol is None:
+                    continue
 
                     # pdb_name indexed to 1
-                    pdb_name = "{}_{}.pdb".format(file_output_name, counter + 1)
-                    if mol is not None:  # For extra precaution...
-                        Chem.MolToPDBFile(mol, pdb_name, flavor=32)
-                        # Add header to PDB file with SMILES containing
-                        # protanation and stereochem
+                pdb_name = f"{file_output_name}_{counter + 1}.pdb"
+                if mol is not None:  # For extra precaution...
+                    Chem.MolToPDBFile(mol, pdb_name, flavor=32)
+                    # Add header to PDB file with SMILES containing
+                    # protanation and stereochem
 
-                        no_hydrogen_smiles = mols_no_hydrogen[i]
-                        if no_hydrogen_smiles is None:
-                            no_hydrogen_smiles = Chem.MolToSmiles(mol)
+                    no_hydrogen_smiles = mols_no_hydrogen[i]
+                    if no_hydrogen_smiles is None:
+                        no_hydrogen_smiles = Chem.MolToSmiles(mol)
 
-                        if no_hydrogen_smiles is None:
-                            print("SMILES was None for: ", pdb_name)
-                            printout = "REMARK Final SMILES string: {}\n".format("None")
-                        elif type(no_hydrogen_smiles) == str:
-                            printout = "REMARK Final SMILES string: {}\n".format(
-                                no_hydrogen_smiles
-                            )
-                        elif type(no_hydrogen_smiles) == type(Chem.MolFromSmiles("C")):
-                            printout = "REMARK Final SMILES string: {}\n".format(
-                                Chem.MolToSmiles(no_hydrogen_smiles)
-                            )
+                    printout = ""
+                    if no_hydrogen_smiles is None:
+                        print("SMILES was None for: ", pdb_name)
+                        printout = f"REMARK Final SMILES string: None\n"
+                    elif type(no_hydrogen_smiles) == str:
+                        printout = f"REMARK Final SMILES string: {no_hydrogen_smiles}\n"
+                    elif type(no_hydrogen_smiles) == type(Chem.MolFromSmiles("C")):
+                        printout = f"REMARK Final SMILES string: {Chem.MolToSmiles(no_hydrogen_smiles)}\n"
 
-                        with open(pdb_name) as f:
-                            printout = printout + f.read()
-                        with open(pdb_name, "w") as f:
-                            f.write(printout)
-                        printout = ""
+                    with open(pdb_name) as f:
+                        printout = printout + f.read()
+                    with open(pdb_name, "w") as f:
+                        f.write(printout)
+                    printout = ""
 
-                    counter = counter + 1
-            else:
-                pass
+                counter = counter + 1

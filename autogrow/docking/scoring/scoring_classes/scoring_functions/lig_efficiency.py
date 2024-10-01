@@ -3,9 +3,10 @@ This script contains the class LigEfficiency.
 This is used to rescore a fitness metric by the number of non-hydrogen atoms.
 """
 import __future__
+from typing import Any, Dict, List, Optional
 
-import rdkit
-import rdkit.Chem as Chem
+import rdkit  # type: ignore
+import rdkit.Chem as Chem  # type: ignore
 
 # Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog("rdApp.*")
@@ -29,24 +30,31 @@ class LigEfficiency(VINA):
         from.
     """
 
-    def __init__(self, vars=None, smiles_dict=None, test_boot=True):
+    def __init__(
+        self,
+        params: Optional[Dict[str, Any]] = None,
+        smiles_dict: Optional[Dict[str, List[str]]] = None,
+        test_boot: bool = True,
+    ) -> None:
         """
-        This will take vars and a list of smiles.
+        This will take params and a list of smiles.
 
         Inputs:
-        :param dict vars: Dictionary of User variables
+        :param dict params: Dictionary of User variables
         :param dict smiles_dict: a dict of ligand info of SMILES, IDS, and
             short ID
         :param bool test_boot: used to initialize class without objects for
             testing purpose
         """
 
-        if test_boot is False:
-            self.vars = vars
+        if not test_boot:
+            self.params = params
 
             self.smiles_dict = smiles_dict
 
-    def get_lig_efficiency_rescore_from_a_file(self, file_path, lig_info):
+    def get_lig_efficiency_rescore_from_a_file(
+        self, file_path: str, lig_info: List[str]
+    ) -> Optional[List[str]]:
         """
         This function will simply add a ligand efficiency score to the end of
         the lig_info list and return said list.
@@ -68,22 +76,22 @@ class LigEfficiency(VINA):
         # For saftey remove Nones and empty lists
         if type(lig_info) is not list:
             return None
-        if len(lig_info) == 0:
+        if not lig_info:
             return None
 
-        lig_info = append_lig_effeciency(lig_info)
-        if lig_info is None:
+        lig_info_with_score = append_lig_effeciency(lig_info)
+        if lig_info_with_score is None:
             return None
-        lig_info = [str(x) for x in lig_info]
+        lig_info_with_score = [str(x) for x in lig_info_with_score]
 
-        return lig_info
+        return lig_info_with_score
 
 
 # These Functions are placed outside the class for multithreading reasons.
 # Multithreading doesn't like being executed within the class.
 
 
-def get_number_heavy_atoms(smiles_str):
+def get_number_heavy_atoms(smiles_str: Optional[str]) -> Optional[int]:
     """
     Get the number of non Hydrogens in a SMILE
 
@@ -100,7 +108,7 @@ def get_number_heavy_atoms(smiles_str):
 
     try:
         mol = Chem.MolFromSmiles(smiles_str, sanitize=False)
-    except:
+    except Exception:
         mol = None
 
     if mol is None:
@@ -115,7 +123,7 @@ def get_number_heavy_atoms(smiles_str):
     return num_heavy_atoms
 
 
-def append_lig_effeciency(list_of_lig_info):
+def append_lig_effeciency(list_of_lig_info: List[str]) -> Optional[List[str]]:
     """
     Determine the ligand efficiency and append it to the end of a list which
     has the ligand information.
@@ -147,7 +155,7 @@ def append_lig_effeciency(list_of_lig_info):
         return None
 
     # Convert to Lig efficiency (aka affinity/heavy_atom_count )
-    lig_efficieny = float(affinity) / float(heavy_atom_count)
+    lig_efficieny = affinity / float(heavy_atom_count)
 
     # Append lig_efficiency to list_of_lig_info
     list_of_lig_info.append(str(lig_efficieny))

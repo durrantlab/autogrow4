@@ -74,7 +74,7 @@ def random_sample(lst, num, msg_if_cut=""):
     try:
         # Remove redundancies.
         lst = list(set(lst))
-    except:
+    except Exception:
         # Because someitems lst element may be unhashable.
         pass
 
@@ -131,7 +131,7 @@ def fnd_contnrs_not_represntd(contnrs, results):
     # Get a dictionary of all the input smiles. Keys are indexes, values are
     # smiles.
     idx_to_smi = {}
-    for idx in range(0, len(contnrs)):
+    for idx in range(len(contnrs)):
         contnr = contnrs[idx]
         if not idx in idx_to_smi:
             idx_to_smi[idx] = contnrs[idx].orig_smi_deslt

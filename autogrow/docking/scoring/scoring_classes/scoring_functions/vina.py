@@ -6,6 +6,7 @@ import __future__
 
 import glob
 import os
+from typing import Dict, List, Optional, Union
 
 from autogrow.docking.scoring.scoring_classes.parent_scoring_class import ParentScoring
 
@@ -19,27 +20,32 @@ class VINA(ParentScoring):
     :param class ParentFilter: a parent class to initialize off of.
     """
 
-    def __init__(self, vars=None, smiles_dict=None, test_boot=True):
+    def __init__(
+        self,
+        params: Optional[Dict[str, Union[str, int, float, bool]]] = None,
+        smiles_dict: Optional[Dict[str, List[str]]] = None,
+        test_boot: bool = True,
+    ) -> None:
         """
-        This will take vars and a list of smiles.
+        This will take params and a list of smiles.
 
         Inputs:
-        :param dict vars: Dictionary of User variables
+        :param dict params: Dictionary of User variables
         :param dict smiles_dict: a dict of ligand info of SMILES, IDS, and
             short ID
         :param bool test_boot: used to initialize class without objects for
             testing purpose
         """
 
-        if test_boot is False:
-            self.vars = vars
+        if not test_boot:
+            self.params = params
 
             self.smiles_dict = smiles_dict
 
     #######################
     # Executed by the Execute_Scoring.py script
     #######################
-    def find_files_to_score(self, file_path):
+    def find_files_to_score(self, file_path: str) -> List[str]:
         """
         Find all files of the appropriate file format within the dir. For this
         class its .pdbqt.vina files.
@@ -55,12 +61,9 @@ class VINA(ParentScoring):
         """
 
         self.file_path = file_path
-        list_of_files = []
+        return glob.glob(f"{file_path}*.pdbqt.vina")
 
-        list_of_files = glob.glob(file_path + "*.pdbqt.vina")
-        return list_of_files
-
-    def run_rescoring(self, vina_output_file):
+    def run_rescoring(self, vina_output_file: str) -> str:
         """
         This is not applicable but is kept because the other rescoring
         functions require this function.
@@ -75,7 +78,7 @@ class VINA(ParentScoring):
 
         return "Not Applicable"
 
-    def run_scoring(self, file_path):
+    def run_scoring(self, file_path: str) -> Optional[List[str]]:
         """
         Get all relevant scoring info and return as a list
 
@@ -91,11 +94,9 @@ class VINA(ParentScoring):
             fitness_score_to_use] )
         """
 
-        lig_info = self.get_score_from_a_file(file_path)
+        return self.get_score_from_a_file(file_path)
 
-        return lig_info
-
-    def get_score_from_a_file(self, file_path):
+    def get_score_from_a_file(self, file_path: str) -> Optional[List[str]]:
         """
         Make a list of a ligands information including its docking score.
 
@@ -117,18 +118,16 @@ class VINA(ParentScoring):
         affinity = None
 
         with open(file_path, "r") as f:
-            for line in f.readlines():
+            for line in f:
                 if "REMARK VINA" in line:
                     line_stripped = line.replace("REMARK VINA RESULT:", "").replace(
                         "\n", ""
                     )
                     line_split = line_stripped.split()
 
-                    if affinity is None:
+                    if affinity is None or affinity > float(line_split[0]):
                         affinity = float(line_split[0])
-                    else:
-                        if affinity > float(line_split[0]):
-                            affinity = float(line_split[0])
+
         if affinity is None:
             # This file lacks a pose to use
             return None
@@ -145,7 +144,9 @@ class VINA(ParentScoring):
 
         return lig_info
 
-    def merge_smile_info_w_affinity_info(self, lig_info):
+    def merge_smile_info_w_affinity_info(
+        self, lig_info: List[str]
+    ) -> Optional[List[str]]:
         """
         From the info in self.smiles_dict get that info and merge that with
         the affinity info
@@ -168,32 +169,30 @@ class VINA(ParentScoring):
 
         # Get SMILES String of PDB
         pdb_path = self.file_path + lig_info[1] + ".pdb"
-        if os.path.exists(pdb_path):
-            new_smiles_string = None
-            with open(pdb_path, "r") as f:
-                for line in f.readlines():
-                    if "REMARK Final SMILES string: " in line:
-                        new_smiles_string = line.replace(
-                            "REMARK Final SMILES string: ", ""
-                        ).replace("\n", "")
-                        break
-            if new_smiles_string is None:
-                # If the REMARK SECTION IS NOT THERE raise except. Avoid this
-                # if possible as rdkit can missinterpret bonds because pdbs
-                # dont specify bond types
-                raise Exception(
-                    "Could not get SMILES string from PDB file: " + pdb_path
-                )
-        else:
+        if not os.path.exists(pdb_path):
             return None
 
+        new_smiles_string = None
+        with open(pdb_path, "r") as f:
+            for line in f:
+                if "REMARK Final SMILES string: " in line:
+                    new_smiles_string = line.replace(
+                        "REMARK Final SMILES string: ", ""
+                    ).replace("\n", "")
+                    break
+        if new_smiles_string is None:
+            # If the REMARK SECTION IS NOT THERE raise except. Avoid this
+            # if possible as rdkit can missinterpret bonds because pdbs
+            # dont specify bond types
+            raise Exception(f"Could not get SMILES string from PDB file: {pdb_path}")
+
+        assert self.smiles_dict is not None, "smiles_dict is None"
         if ligand_short_name in list(self.smiles_dict.keys()):
             ligand_full_info = [
                 new_smiles_string,
                 self.smiles_dict[ligand_short_name][1],
+                *lig_info,
             ]
-            ligand_full_info.extend(lig_info)
-
             # Convert all to strings
             ligand_full_info = [str(x) for x in ligand_full_info]
 

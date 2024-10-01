@@ -5,8 +5,8 @@ import __future__
 
 import copy
 
-import rdkit
-from rdkit import Chem
+import rdkit  # type: ignore
+from rdkit import Chem  # type: ignore
 
 # Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog("rdApp.*")
@@ -79,9 +79,7 @@ def handle_dicts_and_select_b_groups(mol_1, mol_2, mcs_mol):
 
     # Get the smiles strings for the the R groups which correspond to the
     # chosen B's
-    rs_chosen_smiles = get_rs_chosen_smiles(rs_chosen, r_smiles_dict_1, r_smiles_dict_2)
-
-    return rs_chosen_smiles
+    return get_rs_chosen_smiles(rs_chosen, r_smiles_dict_1, r_smiles_dict_2)
 
 
 def mol_handling_of_fragmenting_labeling_and_indexing(mol, mcs_mol, lig_number):
@@ -150,7 +148,7 @@ def mol_handling_of_fragmenting_labeling_and_indexing(mol, mcs_mol, lig_number):
     while i < len(mol_frags):
         val = Chem.MolToSmiles(mol_frags[i], isomericSmiles=True)
         list_r_groups.append(val)
-        i = i + 1
+        i += 1
 
     # Generate all the R-libraries with full R-groups using the index of its
     # respective Lig r_chain_dictionary is the master dictionary for R-groups
@@ -218,9 +216,7 @@ def check_replace_mol(mol_1, mol_2, mcs_mol):
     if temp is None:
         return False
     temp = r_group_list(mol_2, mcs_mol)
-    if temp is None:
-        return False
-    return True
+    return temp is not None
 
 
 ###########################################################
@@ -300,9 +296,7 @@ def replace_core_mol_dummy_atoms(mol, mcs, replace_core_mol):
         if atom.GetAtomicNum() == 0:
             anchor_iso = atom.GetIsotope() + 10000
             neighbors = atom.GetNeighbors()
-            tmp = []
-            for n_atom in neighbors:
-                tmp.append(n_atom.GetIsotope())
+            tmp = [n_atom.GetIsotope() for n_atom in neighbors]
             anchor_dict[anchor_iso] = tmp
 
             anchor_to_set_dict[atom.GetIdx()] = anchor_iso
@@ -338,27 +332,24 @@ def r_groups_dict(mol_frags, lig_number_for_multiplier):
     """
 
     num_frags = len(mol_frags)
-    i = 0
     r_chain_dictionary = {}
     r_smiles_dictionary = {}
     k = int(lig_number_for_multiplier)
-    while i < num_frags:
+    for i in range(num_frags):
         frag = mol_frags[i]
         r_list_temp = []
         r_list_smiles = Chem.MolToSmiles(frag, isomericSmiles=True)
+        lig_num_r_r_num = f"{k}R{i + 1}"
         for atoms in frag.GetAtoms():
             iso = atoms.GetIsotope()
             if 3000 > iso > 100:
                 r_list_temp.append(iso - (1000 * k))
                 atoms.SetIsotope(0)
             if iso > 3000:
-                name = "I{}".format(iso - 10000)
+                name = f"I{iso - 10000}"
                 r_list_temp.append(iso)
-            lig_num_r_r_num = "{}R{}".format(k, i + 1)
             r_chain_dictionary[lig_num_r_r_num] = r_list_temp
             r_smiles_dictionary[lig_num_r_r_num] = r_list_smiles
-        i = i + 1
-
     return r_chain_dictionary, r_smiles_dictionary
 
 
@@ -386,11 +377,10 @@ def get_r_dict(r_chain_dict, lig_r_atom_touch_mcs):
     for key in list(r_chain_dict.keys()):
         temp_r_list = r_chain_dict[key]
         node_list = []
-        for atom in r_chain_dict[key]:
+        for atom in temp_r_list:
             for key_id in list(lig_r_atom_touch_mcs.keys()):
                 if atom == key_id:
-                    for x in lig_r_atom_touch_mcs[key_id]:
-                        node_list.append(x)
+                    node_list.extend(iter(lig_r_atom_touch_mcs[key_id]))
                     r_s_dict[key] = node_list
 
     return r_s_dict
@@ -415,11 +405,10 @@ def get_idx_using_unique_iso(mol, iso_val):
         is the same as iso_val. Returns None if iso_val not in mol.
     """
 
-    for atom in mol.GetAtoms():
-        if atom.GetIsotope() == iso_val:
-            idx = atom.GetIdx()
-            return idx
-    return None
+    return next(
+        (atom.GetIdx() for atom in mol.GetAtoms() if atom.GetIsotope() == iso_val),
+        None,
+    )
 
 
 def make_b_dic(i_dictionary, r_dict_num, lig_number):
@@ -453,9 +442,9 @@ def make_b_dic(i_dictionary, r_dict_num, lig_number):
     anchor_list = list(i_dictionary.keys())
     # anchor_list = [10008, 10000, 10006, 10007]
 
-    while len(anchor_list) > 0:
+    while anchor_list:
         anchor = anchor_list[0]
-        B_key = "{}B{}".format(k, counter)
+        B_key = f"{k}B{counter}"
         temp_r_list = []
         temp_anchor_list = []
 
@@ -508,14 +497,12 @@ def invert_dictionary(old_dic):
     # for k, v in old_dic.iteritems():
     # keys = inverted_dic.setdefault(v, [])
     # keys.append(k)
-    values = set([a for b in list(old_dic.values()) for a in b])
+    values = {a for b in list(old_dic.values()) for a in b}
     values = list(values)
-    inverted_dic = dict(
-        (new_key, [key for key, value in list(old_dic.items()) if new_key in value])
+    return {
+        new_key: [key for key, value in list(old_dic.items()) if new_key in value]
         for new_key in values
-    )
-
-    return inverted_dic
+    }
 
 
 def get_atoms_touch_mcs(mol):
@@ -599,15 +586,10 @@ def get_rs_chosen_from_bs(bs_chosen, b_to_r_master_dict_1, b_to_r_master_dict_2)
         lig_number = B[0]
         B_number = B[2]
         if lig_number == str(1):
-            for i in b_to_r_master_dict_1[B]:
-                Rs_for_the_B.append(i)
-
+            Rs_for_the_B.extend(iter(b_to_r_master_dict_1[B]))
         elif lig_number == str(2):
-            for i in b_to_r_master_dict_2[B]:
-                Rs_for_the_B.append(i)
-        for i in Rs_for_the_B:
-            rs_chosen.append(i)
-
+            Rs_for_the_B.extend(iter(b_to_r_master_dict_2[B]))
+        rs_chosen.extend(iter(Rs_for_the_B))
     # rs_chosen looks like ['1R1', '1R5', '2R2']
     return rs_chosen
 

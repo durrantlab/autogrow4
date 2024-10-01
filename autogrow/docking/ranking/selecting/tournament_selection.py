@@ -6,11 +6,18 @@ import __future__
 import random
 import math
 import copy
+from typing import List, Tuple
+
+from autogrow.types import CompoundInfo
 
 
 def run_Tournament_Selector(
-    list_of_ligands, num_to_chose, tourn_size, idx_to_sel, favor_most_negative=True
-):
+    list_of_ligands: List[CompoundInfo],
+    num_to_chose: int,
+    tourn_size: float,
+    idx_to_sel: int,
+    favor_most_negative: bool = True,
+) -> List[CompoundInfo]:
     """
     This runs a tournament style selector given a list of ligands and
     specified metric. It will randomly select ligands for tournaments. The
@@ -53,17 +60,16 @@ def run_Tournament_Selector(
             "list_of_ligands is an empty list. There is nothing to chose from."
         )
 
-    if idx_to_sel != -1:
-        if len(list_of_ligands[0]) < idx_to_sel:
-            raise Exception(
-                "The idx to select by does not exist in the provided list_of_ligand."
-            )
+    if idx_to_sel != -1 and len(list_of_ligands[0].to_list()) < idx_to_sel:
+        raise Exception(
+            "The idx to select by does not exist in the provided list_of_ligand."
+        )
 
     num_per_tourn = int(math.ceil(num_ligands * tourn_size))
 
     chosen_ligands = []
     list_of_ligands_reduced = copy.deepcopy(list_of_ligands)
-    for i in range(0, num_to_chose):
+    for _ in range(num_to_chose):
         chosen_ligand = run_one_tournament(
             list_of_ligands, num_per_tourn, idx_to_sel, favor_most_negative
         )
@@ -76,8 +82,11 @@ def run_Tournament_Selector(
 
 
 def run_one_tournament(
-    list_of_ligands, num_per_tourn, idx_to_sel, favor_most_negative=True
-):
+    list_of_ligands: List[CompoundInfo],
+    num_per_tourn: int,
+    idx_to_sel: int,
+    favor_most_negative: bool = True,
+) -> CompoundInfo:
     """
     This runs a single tournament style selection given a list of ligands and
     specified metric. It will randomly select ligands for the tournament. The
@@ -113,23 +122,24 @@ def run_one_tournament(
 
     num_ligands = len(list_of_ligands)
 
-    chosen_option = []
+    chosen_option = CompoundInfo(smiles="", name="")  # init
     temp = []
-    for i in range(0, num_per_tourn):
+    for i in range(num_per_tourn):
         temp.append(i)
         if i == 0:
             chosen_option = list_of_ligands[random.randint(0, num_ligands - 1)]
         else:
             choice = list_of_ligands[random.randint(0, num_ligands - 1)]
-            if favor_most_negative is True:
-                if float(chosen_option[idx_to_sel]) > float(choice[idx_to_sel]):
+            if favor_most_negative:
+                if float(chosen_option.score_by_index_lookup(idx_to_sel)) > float(
+                    choice.score_by_index_lookup(idx_to_sel)
+                ):
                     chosen_option = choice
-                else:
-                    continue
-            elif favor_most_negative is False:
-                if float(chosen_option[idx_to_sel]) < float(choice[idx_to_sel]):
-                    chosen_option = choice
-                else:
-                    continue
+            elif float(chosen_option.score_by_index_lookup(idx_to_sel)) < float(
+                choice.score_by_index_lookup(idx_to_sel)
+            ):
+                chosen_option = choice
+            else:
+                continue
 
     return chosen_option

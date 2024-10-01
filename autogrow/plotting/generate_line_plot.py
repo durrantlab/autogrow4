@@ -3,12 +3,13 @@ import __future__
 
 import os
 import glob
+from typing import Any, Dict, List, Optional, Tuple, Union
 
-import matplotlib
-import matplotlib.pyplot as plt
+import matplotlib  # type: ignore
+import matplotlib.pyplot as plt  # type: ignore
 
 
-def get_usable_format(infile):
+def get_usable_format(infile: str) -> List[List[str]]:
     """
     This code takes a string for an file which is formatted as an .smi file. It
     opens the file and reads in the components into a usable list.
@@ -43,7 +44,7 @@ def get_usable_format(infile):
     usable_list_of_smiles = []
 
     if os.path.exists(infile) is False:
-        print("\nFile of Source compounds does not exist: {}\n".format(infile))
+        print(f"\nFile of Source compounds does not exist: {infile}\n")
         raise Exception("File of Source compounds does not exist")
 
     with open(infile) as smiles_file:
@@ -55,15 +56,15 @@ def get_usable_format(infile):
                     "    "
                 )  # split line into parts separated by 4-spaces
 
-            choice_list = []
-            for i in range(0, len(parts)):
-                choice_list.append(parts[i])
+            choice_list = [parts[i] for i in range(len(parts))]
             usable_list_of_smiles.append(choice_list)
 
     return usable_list_of_smiles
 
 
-def get_average_score_per_gen(infolder, folder_list):
+def get_average_score_per_gen(
+    infolder: str, folder_list: List[str]
+) -> Dict[str, float | str]:
     """
     This script will get the average docking score from the ranked .smi file
     from each generation.
@@ -82,37 +83,36 @@ def get_average_score_per_gen(infolder, folder_list):
     average_affinity_dict = {}
     for gen_folder in folder_list:
         gen_folder_name = infolder + gen_folder + os.sep
-        ranked_file = glob.glob(gen_folder_name + "*_ranked.smi")
+        ranked_file = glob.glob(f"{gen_folder_name}*_ranked.smi")
 
         for rank_file in ranked_file:
             # write as a tab delineated .smi file
             with open(rank_file, "r") as f:
-                gen_affinity_sum = float(0.0)
-                num_lines_counter = float(0.0)
+                gen_affinity_sum = 0.0
+                num_lines_counter = 0.0
                 for line in f:
                     line = line.replace("\n", "")
                     parts = line.split(
                         "\t"
                     )  # split line into parts separated by 4-spaces
 
-                    choice_list = []
-                    for i in range(0, len(parts)):
-                        choice_list.append(parts[i])
-
+                    choice_list = [parts[i] for i in range(len(parts))]
                     gen_affinity_sum = gen_affinity_sum + float(choice_list[-2])
-                    num_lines_counter = num_lines_counter + float(1.0)
+                    num_lines_counter = num_lines_counter + 1.0
 
             gen_affinity_average = gen_affinity_sum / num_lines_counter
 
             gen_num = os.path.basename(rank_file).split("_")[1]
-            gen_name = "generation_{}".format(gen_num)
+            gen_name = f"generation_{gen_num}"
             average_affinity_dict[gen_name] = gen_affinity_average
 
     print_gens(average_affinity_dict)
     return average_affinity_dict
 
 
-def get_average_top_score_per_gen(infolder, folder_list, top_score_per_gen):
+def get_average_top_score_per_gen(
+    infolder: str, folder_list: List[str], top_score_per_gen: int
+) -> Dict[str, Union[float, str]]:
     """
     This script will get the average docking score of the top N number of
     ligands ranked .smi file from each generation.
@@ -135,19 +135,19 @@ def get_average_top_score_per_gen(infolder, folder_list, top_score_per_gen):
 
     for gen_folder in folder_list:
         gen_folder_name = infolder + gen_folder + os.sep
-        ranked_file = glob.glob(gen_folder_name + "*_ranked.smi")
+        ranked_file = glob.glob(f"{gen_folder_name}*_ranked.smi")
 
         for rank_file in ranked_file:
             # Check number of lines
             num_lines = 0
             with open(rank_file, "r") as rf:
-                for line in rf:
+                for _ in rf:
                     num_lines = num_lines + 1
 
             if num_lines >= top_score_per_gen:
                 # read as a tab delineated .smi file
                 with open(rank_file, "r") as f:
-                    gen_affinity_sum = float(0.0)
+                    gen_affinity_sum = 0.0
 
                     for i, line in enumerate(f.readlines()):
                         if i >= top_score_per_gen:
@@ -157,28 +157,25 @@ def get_average_top_score_per_gen(infolder, folder_list, top_score_per_gen):
                             "\t"
                         )  # split line into parts separated by 4-spaces
 
-                        choice_list = []
-                        for j in range(0, len(parts)):
-                            choice_list.append(parts[j])
-
+                        choice_list = [parts[j] for j in range(len(parts))]
                         gen_affinity_sum = gen_affinity_sum + float(choice_list[-2])
 
                     gen_affinity_average = gen_affinity_sum / top_score_per_gen
 
                     gen_num = os.path.basename(rank_file).split("_")[1]
-                    gen_name = "generation_{}".format(gen_num)
+                    gen_name = f"generation_{gen_num}"
                     average_affinity_dict[gen_name] = gen_affinity_average
 
             else:
                 gen_num = os.path.basename(rank_file).split("_")[1]
-                gen_name = "generation_{}".format(gen_num)
+                gen_name = f"generation_{gen_num}"
                 average_affinity_dict[gen_name] = "N/A"
 
     print_gens(average_affinity_dict)
     return average_affinity_dict
 
 
-def print_gens(average_affinity_dict):
+def print_gens(average_affinity_dict: Dict[str, Union[float, str]]) -> None:
     """
     This prints out the average scores for each generation
 
@@ -194,7 +191,9 @@ def print_gens(average_affinity_dict):
         print(gen, "                  ", average_affinity_dict[gen])
 
 
-def make_graph(dictionary):
+def make_graph(
+    dictionary: Dict[str, Union[float, str]]
+) -> Tuple[Optional[List[int]], Optional[List[Union[float, str]]]]:
     """
     Because some generations may not have 50 ligands this basically checks to
     see if theres enough ligands and prepares lists to be plotted
@@ -215,10 +214,9 @@ def make_graph(dictionary):
     list_of_gen_names = []
     list_of_scores = []
 
-    for key in dictionary.keys():
+    for key, score in dictionary.items():
         list_of_gen_names.append(key)
 
-        score = dictionary[key]
         list_of_scores.append(score)
 
         gen = key.replace("generation_", "")
@@ -236,13 +234,17 @@ def make_graph(dictionary):
     return list_generations, list_of_scores
 
 
-def run_plotter(vars, dict_of_averages, outfile):
+def run_plotter(
+    params: Dict[str, Any],
+    dict_of_averages: Dict[str, Dict[str, Union[float, str]]],
+    outfile: str,
+) -> None:
     """
     This plots the averages into a matplotlib figure. It will require you to
     answer questions about titles and labels
 
     Inputs:
-    :param dict vars: dict of user variables which will govern how the
+    :param dict params: dict of user variables which will govern how the
         programs runs
     :param dict dict_of_averages: a dictionary of dictionaries containing the
         average of each generation for the top 50,20, 10, and 1 ligand(s) and the
@@ -258,25 +260,19 @@ def run_plotter(vars, dict_of_averages, outfile):
 
     # print("Graphing Overall Average")
     list_generations_average, list_of_scores_average = make_graph(average_affinity_dict)
-    # print("Graphing top_fifty_dict")
-    print_fifty = True
-    for key in top_fifty_dict.keys():
-        if top_fifty_dict[key] == "N/A":
-            print_fifty = False
-    if print_fifty is True:
+    print_fifty = all(top_fifty_dict[key] != "N/A" for key in top_fifty_dict.keys())
+    list_generations_fifty = []
+    list_of_scores_fifty = []
+    if print_fifty:
         list_generations_fifty, list_of_scores_fifty = make_graph(top_fifty_dict)
-    # print("Graphing top_fifty_dict")
-    print_twenty = True
-    for key in top_twenty_dict.keys():
-        if top_twenty_dict[key] == "N/A":
-            print_twenty = False
-    if print_twenty is True:
+
+    print_twenty = all(top_twenty_dict[key] != "N/A" for key in top_twenty_dict.keys())
+    list_generations_twenty = []
+    list_of_scores_twenty = []
+    if print_twenty:
         list_generations_twenty, list_of_scores_twenty = make_graph(top_twenty_dict)
 
-    print_ten = True
-    for key in top_ten_dict.keys():
-        if top_ten_dict[key] == "N/A":
-            print_ten = False
+    print_ten = all(top_ten_dict[key] != "N/A" for key in top_ten_dict.keys())
     list_generations_ten, list_of_scores_ten = make_graph(top_ten_dict)
     # print("Graphing top_one_dict")
     list_generations_one, list_of_scores_one = make_graph(top_one_dict)
@@ -287,35 +283,33 @@ def run_plotter(vars, dict_of_averages, outfile):
     ax.plot(
         list_generations_average, list_of_scores_average, color="b", label="Average"
     )
-    if print_fifty is True:
+    if print_fifty:
         ax.plot(list_generations_fifty, list_of_scores_fifty, color="c", label="Top 50")
 
-    if print_twenty is True:
+    if print_twenty:
         ax.plot(
             list_generations_twenty, list_of_scores_twenty, color="m", label="Top 20"
         )
 
-    if print_ten is True:
+    if print_ten:
         ax.plot(list_generations_ten, list_of_scores_ten, color="g", label="Top 10")
 
     ax.plot(list_generations_one, list_of_scores_one, color="r", label="Top 1")
 
     ax.set_ylim()
 
-    receptor_name = os.path.basename(vars["filename_of_receptor"])
-    scoring_type = vars["scoring_choice"]
-    docking_type = vars["scoring_choice"]
+    receptor_name = os.path.basename(params["filename_of_receptor"])
+    scoring_type = params["scoring_choice"]
+    docking_type = params["scoring_choice"]
     num_lig = (
-        int(vars["number_of_mutants"])
-        + int(vars["number_of_crossovers"])
-        + int(vars["number_elitism_advance_from_previous_gen"])
+        int(params["number_of_mutants"])
+        + int(params["number_of_crossovers"])
+        + int(params["number_elitism_advance_from_previous_gen"])
     )
-    number_of_conf_per_lig = str(vars["max_variants_per_compound"])
+    number_of_conf_per_lig = str(params["max_variants_per_compound"])
 
     # Get Customizations
-    title_of_figure = "{} Scores for {} using {}".format(
-        scoring_type, receptor_name, docking_type
-    )
+    title_of_figure = f"{scoring_type} Scores for {receptor_name} using {docking_type}"
     plt.title(title_of_figure, fontweight="semibold")
 
     # Put a legend to the right of the current axis
@@ -323,10 +317,9 @@ def run_plotter(vars, dict_of_averages, outfile):
     number_of_lig_per_gen = str(num_lig)
 
     output = (
-        str(number_of_lig_per_gen)
-        + " lig/gen"
+        f"{number_of_lig_per_gen} lig/gen"
         + "\n"
-        + str(number_of_conf_per_lig)
+        + number_of_conf_per_lig
         + " variants/lig"
     )
 
@@ -334,7 +327,7 @@ def run_plotter(vars, dict_of_averages, outfile):
         5.4, -8.5, output, bbox=dict(facecolor="white", alpha=0.5), fontsize="small"
     )
 
-    # legend1 = plt.legend([lines[i].get_label() for i in range(0, lines_leg)],
+    # legend1 = plt.legend([lines[i].get_label() for i in range(lines_leg)],
     #           loc='center left', bbox_to_anchor=(1, 0.274),fontsize='small')
     # legend2 = plt.legend([output],loc='center left',
     #           bbox_to_anchor=(1, 0.774),fontsize='small')
@@ -354,20 +347,24 @@ def run_plotter(vars, dict_of_averages, outfile):
     plt.xlabel("Generation Number", fontweight="semibold")
 
     try:
-        if print_ten is True:
+        if print_ten:
             plt.savefig(outfile, bbox_inches="tight", dpi=1000)
         else:
             # Remove the bbox_inches="tight" is necessary if
             # the plot is too small for
             plt.savefig(outfile, dpi=500)
-    except:
-        printout = "\nUNABLE TO CREATE PLOT: \n"
-        printout = printout + "Population size or number of generations was "
-        printout = printout + "too small to effectively plot. \n"
+    except Exception:
+        printout = (
+            "\nUNABLE TO CREATE PLOT: \n"
+            + "Population size or number of generations was "
+        )
+        printout += "too small to effectively plot. \n"
         print(printout)
 
 
-def print_data_table(infolder, folder_list):
+def print_data_table(
+    infolder: str, folder_list: List[str]
+) -> Dict[str, Dict[str, Union[float, str]]]:
     """
     This function takes a folder of an Autogrow Run and a list of all folders
     within the infolder, and finds the average of each generation, the average
@@ -408,41 +405,41 @@ def print_data_table(infolder, folder_list):
     top_one_dict = get_average_top_score_per_gen(infolder, folder_list, 1)
     print("")
     print("")
-    dict_of_averages = {}
-    dict_of_averages["average_affinity_dict"] = average_affinity_dict
-    dict_of_averages["top_fifty_dict"] = top_fifty_dict
-    dict_of_averages["top_twenty_dict"] = top_twenty_dict
-    dict_of_averages["top_ten_dict"] = top_ten_dict
-    dict_of_averages["top_one_dict"] = top_one_dict
-    return dict_of_averages
+    return {
+        "average_affinity_dict": average_affinity_dict,
+        "top_fifty_dict": top_fifty_dict,
+        "top_twenty_dict": top_twenty_dict,
+        "top_ten_dict": top_ten_dict,
+        "top_one_dict": top_one_dict,
+    }
 
 
 # Run Everything
-def generate_figures(vars):
+def generate_figures(params: Dict[str, Any]) -> None:
     """
     This runs everything to make a line plot of the results of an Autogrow
     simulation.
 
     Inputs:
-    :param dict vars: dict of user variables which will govern how the
+    :param dict params: dict of user variables which will govern how the
         programs runs
     """
 
-    for i in range(0, 10):
+    for _ in range(10):
         print("")
-    infolder = vars["output_directory"]
+    infolder = params["output_directory"]
 
-    outfile = infolder + "data_line_plot.png"
+    outfile = f"{infolder}data_line_plot.png"
 
     all_folders_list = [
         f for f in sorted(os.listdir(infolder)) if os.path.isdir(infolder + f)
     ]
-    folder_list = []
-    for folder in all_folders_list:
-        if folder != "Data" and len(folder.split("_")) == 2:
-            folder_list.append(folder)
-
+    folder_list = [
+        folder
+        for folder in all_folders_list
+        if folder != "Data" and len(folder.split("_")) == 2
+    ]
     folder_list.sort(key=lambda x: int(x.split("_")[1]))
 
     dict_of_averages = print_data_table(infolder, folder_list)
-    run_plotter(vars, dict_of_averages, outfile)
+    run_plotter(params, dict_of_averages, outfile)

@@ -14,12 +14,15 @@ This is done by removing a column of the PDB file.
 
 """
 
+
 import __future__
+import contextlib
 import os
 import argparse
+from typing import Dict
 
 
-def convert_pdbqt_to_pdb(pdbqt_file_in, pdb_file_out):
+def convert_pdbqt_to_pdb(pdbqt_file_in: str, pdb_file_out: str) -> None:
     """
     Converts a pdbqt file to a pdb file by removing the 3rd to last column.
     Inputs:
@@ -27,10 +30,10 @@ def convert_pdbqt_to_pdb(pdbqt_file_in, pdb_file_out):
     :param str pdb_file_out: the string of the output .pdb
     """
     printout = ""
-    line_index_range = [x for x in range(0, 61)] + [x for x in range(70, 80)]
+    line_index_range = list(range(61)) + list(range(70, 80))
 
     with open(pdbqt_file_in) as f:
-        for line in f.readlines():
+        for line in f:
             if "ATOM" in line:
                 short_line = ""
                 for i in line_index_range:
@@ -64,7 +67,7 @@ def convert_pdbqt_to_pdb(pdbqt_file_in, pdb_file_out):
         f.write(printout)
 
 
-def get_arguments_from_argparse(args_dict):
+def get_arguments_from_argparse(args_dict: Dict[str, str]) -> Dict[str, str]:
     """
     This function handles the arg parser arguments for the script.
 
@@ -78,30 +81,20 @@ def get_arguments_from_argparse(args_dict):
     if type(args_dict["pdbqt_file"]) != str:
         raise Exception("provided pdbqt_file must be a .pdbqt file.")
 
-    #  argument_handling
-    if os.path.exists(args_dict["pdbqt_file"]) is False:
+    if not os.path.exists(args_dict["pdbqt_file"]):
         raise Exception("provided pdbqt_file must be a .pdbqt file.")
-    else:
-        if (
-            args_dict["pdbqt_file"].split(".")[-1] != "pdbqt"
-            and args_dict["pdbqt_file"].split(".")[-1] != "PDBQT"
-        ):
+    if args_dict["pdbqt_file"].split(".")[-1] not in ["pdbqt", "PDBQT"]:
 
-            raise Exception("provided pdbqt_file must be a .pdbqt file.")
+        raise Exception("provided pdbqt_file must be a .pdbqt file.")
 
     if args_dict["output_file"] is not None:
-        if (
-            args_dict["output_file"].split(".")[-1] != "pdb"
-            and args_dict["output_file"].split(".")[-1] != "PDB"
-        ):
+        if args_dict["output_file"].split(".")[-1] not in ["pdb", "PDB"]:
             raise Exception("provided output_file must be a .pdb file.")
 
-        if os.path.exists(os.path.dirname(args_dict["output_file"])) is False:
-            try:
+        if not os.path.exists(os.path.dirname(args_dict["output_file"])):
+            with contextlib.suppress(Exception):
                 os.mkdir(os.path.dirname(args_dict["output_file"]))
-            except:
-                pass
-            if os.path.exists(os.path.dirname(args_dict["output_file"])) is False:
+            if not os.path.exists(os.path.dirname(args_dict["output_file"])):
                 raise Exception(
                     "directory to output the file could not be made or found."
                 )

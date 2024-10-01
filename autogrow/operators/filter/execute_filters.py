@@ -4,10 +4,12 @@ Top level for running filters.
 import __future__
 
 import copy
+from typing import Any, Dict, List, Tuple, Union
 
-import rdkit
-from rdkit import Chem
-from rdkit.Chem.MolStandardize import rdMolStandardize
+from autogrow.types import CompoundInfo
+import rdkit  # type: ignore
+from rdkit import Chem  # type: ignore
+from rdkit.Chem.MolStandardize import rdMolStandardize  # type: ignore
 
 # Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog("rdApp.*")
@@ -21,14 +23,16 @@ import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as
 from autogrow.operators.filter.filter_classes.filter_children_classes import *
 
 
-def make_run_class_dict(filters_to_use):
+def make_run_class_dict(
+    filters_to_use: Union[List[str], None]
+) -> Union[Dict[str, ParentFilter], None]:
     """
     This will retrieve all the names of every child class of the parent class
     ParentFilter
 
     Inputs:
     :param list filters_to_use: list of filters to be used.
-            defined in vars["chosen_ligand_filters"]
+            defined in params["chosen_ligand_filters"]
 
     Returns:
     :returns: dict child_dict: This dictionary contains all the names of the
@@ -53,7 +57,9 @@ def make_run_class_dict(filters_to_use):
     return child_dict
 
 
-def run_filter(vars, list_of_new_ligands):
+def run_filter(
+    params: Dict[str, Any], list_of_new_ligands: List[CompoundInfo]
+) -> List[CompoundInfo]:
     """
     This will run a filter of the Users chosing.
 
@@ -61,7 +67,7 @@ def run_filter(vars, list_of_new_ligands):
     [["CCC","Zinc123],["CCCC","Zinc1234]]
 
     Inputs:
-    :param dict vars: User variables which will govern how the programs runs
+    :param dict params: User variables which will govern how the programs runs
     :param list list_of_new_ligands: list of lists containing all the newly
         generated ligands and their names
 
@@ -71,24 +77,24 @@ def run_filter(vars, list_of_new_ligands):
     """
 
     # Get the already generated dictionary of filter objects
-    filter_object_dict = vars["filter_object_dict"]
+    filter_object_dict = params["filter_object_dict"]
 
     # make a list of tuples for multi-processing Filter
     job_input = []
     for smiles_info in list_of_new_ligands:
-        temp_tuple = tuple([smiles_info, filter_object_dict])
+        temp_tuple = smiles_info, filter_object_dict
         job_input.append(temp_tuple)
     job_input = tuple(job_input)
 
-    results = vars["parallelizer"].run(job_input, run_filter_mol)
+    results = params["parallelizer"].run(job_input, run_filter_mol)
 
     # remove mols which fail the filter
-    ligands_which_passed_filter = [x for x in results if x is not None]
-
-    return ligands_which_passed_filter
+    return [x for x in results if x is not None]
 
 
-def run_filter_mol(smiles_info, child_dict):
+def run_filter_mol(
+    smiles_info: List[str], child_dict: Dict[str, ParentFilter]
+) -> Union[List[str], None]:
     """
     This takes a smiles_string and the selected filter list (child_dict) and
     runs it through the selected filters.
@@ -135,17 +141,16 @@ def run_filter_mol(smiles_info, child_dict):
         # run through the filters
         filter_result = run_all_selected_filters(mol, child_dict)
 
-        # see if passed
-        if filter_result is False:
-            return None
-        # it passed return the smiles_info
-        return smiles_info
+        # see if passed. If it passed return the smiles_info
+        return smiles_info if filter_result else None
 
     # This will return None
     return smiles_info
 
 
-def run_filter_on_just_smiles(smile_string, child_dict):
+def run_filter_on_just_smiles(
+    smile_string: str, child_dict: Dict[str, ParentFilter]
+) -> Union[str, bool]:
     """
     This takes a smiles_string and the selected filter list (child_dict) and
     runs it through the selected filters.
@@ -176,16 +181,15 @@ def run_filter_on_just_smiles(smile_string, child_dict):
         # run through the filters
         filter_result = run_all_selected_filters(mol, child_dict)
 
-        # see if passed
-        if filter_result is False:
-            return False
-        # it passed return the smiles_info
-        return smile_string
+        # see if passed. If it passed return the smiles_info
+        return smile_string if filter_result else False
     # return the smile string
     return smile_string
 
 
-def run_all_selected_filters(mol, child_dict):
+def run_all_selected_filters(
+    mol: rdkit.Chem.rdchem.Mol, child_dict: Dict[str, ParentFilter]
+) -> bool:
     """
     Iterate through all of the filters specified by the user for a single
     molecule. returns True if the mol passes all the chosen filters. returns

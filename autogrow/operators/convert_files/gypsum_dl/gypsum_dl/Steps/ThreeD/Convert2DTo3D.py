@@ -27,7 +27,7 @@ import gypsum_dl.ChemUtils as ChemUtils
 try:
     from rdkit import Chem
     from rdkit.Chem import AllChem
-except:
+except Exception:
     Utils.exception("You need to install rdkit and its dependencies.")
 
 

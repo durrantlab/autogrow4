@@ -25,7 +25,7 @@ import gypsum_dl.ChemUtils as ChemUtils
 
 try:
     from rdkit import Chem
-except:
+except Exception:
     Utils.exception("You need to install rdkit and its dependencies.")
 
 # Get the substructures you won't permit (per substructure matching, not

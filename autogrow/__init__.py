@@ -1,7 +1,7 @@
 __version__ = "4.0.3"
 
 
-def program_info():
+def program_info() -> str:
     """
     Get the program version number, etc.
 
@@ -19,4 +19,3 @@ def program_info():
         + "[doi: 10.1186/s13321-020-00429-4]\n"
         + " ================== \n\n"
     )
-

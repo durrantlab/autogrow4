@@ -59,9 +59,10 @@ import shutil
 import json
 import argparse
 import sys
+from typing import Any, Dict, List, Optional
 
 
-def change_permissions(file_path):
+def change_permissions(file_path: str) -> None:
     """
     This will open the permissions for a given file.
 
@@ -71,7 +72,7 @@ def change_permissions(file_path):
     os.chmod(file_path, 0o777)
 
 
-def change_permissions_recursively(file_or_folder_path):
+def change_permissions_recursively(file_or_folder_path: str) -> None:
     """
     This will open the permissions for a given file/folder.
 
@@ -80,41 +81,38 @@ def change_permissions_recursively(file_or_folder_path):
     Inputs:
     :param str file_or_folder_path: Path to a file/folder to open permissions to.
     """
-    if os.name == "nt" or os.name == "ce":
-        # chmod and os.chmod do not apply to Windows OS so lets skip this.
-        pass
-    elif sys.platform.lower() in ["linux", "linux2"]:
+    if os.name in {"nt", "ce"}:
+        return
+    if sys.platform.lower() in ["linux", "linux2"]:
         # chmod -R recursively open the permissions
-        os.system("chmod -R a+rwx {}".format(file_or_folder_path))
+        os.system(f"chmod -R a+rwx {file_or_folder_path}")
     elif sys.platform.lower() == "darwin":
         # chmod -R recursively open the permissions
-        os.system("chmod -R a+rwx {}".format(file_or_folder_path))
+        os.system(f"chmod -R a+rwx {file_or_folder_path}")
+    elif os.path.isdir(file_or_folder_path):
+        # chmod may not be a valid command on other OS systems. So let's do this
+        #  the manual way.
+        _apply_permissions_recursively(file_or_folder_path)
     else:
-        # chmod may not be a valid command on other OS systems.
-        #  So let's do this the manual way.
-        if os.path.isdir(file_or_folder_path):
-            directory_path_list = []
-            file_list = []
-            for top_dir, dir_list, list_of_files in os.walk(
-                file_or_folder_path, topdown=False
-            ):
-                for directory in [os.path.join(top_dir, d) for d in dir_list]:
-                    directory_path_list.append(directory)
-                for file_path in [os.path.join(top_dir, fil) for fil in list_of_files]:
-                    file_list.append(file_path)
-
-            # Convert mods on all files within a directory
-            file_list = list(set(file_list))
-            directory_path_list = list(set(directory_path_list))
-            for file_path in file_list:
-                change_permissions(file_path)
-            for dir_path in directory_path_list:
-                change_permissions(dir_path)
-        else:
-            change_permissions(file_or_folder_path)
+        change_permissions(file_or_folder_path)
 
 
-def adjust_dockerfile():
+def _apply_permissions_recursively(file_or_folder_path: str) -> None:
+    directory_path_list = []
+    file_list = []
+    for top_dir, dir_list, list_of_files in os.walk(file_or_folder_path, topdown=False):
+        directory_path_list.extend(iter([os.path.join(top_dir, d) for d in dir_list]))
+        file_list.extend(iter([os.path.join(top_dir, fil) for fil in list_of_files]))
+    # Convert mods on all files within a directory
+    file_list = list(set(file_list))
+    directory_path_list = list(set(directory_path_list))
+    for file_path in file_list:
+        change_permissions(file_path)
+    for dir_path in directory_path_list:
+        change_permissions(dir_path)
+
+
+def adjust_dockerfile() -> None:
     """
     This will open Dockerfile and check if the entrypoint has been switched
     to the windows version (run_autogrow_in_container.bash) if not it will
@@ -136,10 +134,10 @@ def adjust_dockerfile():
     )
     print("Modifying the Dockerfile to run for Windows. Changing Entrypoint.")
     with open(os.path.abspath("Dockerfile"), "r") as f:
-        for line in f.readlines():
+        for line in f:
             if "ENTRYPOINT" in line and normal_entry in line:
                 if "#" not in line:
-                    line = "# " + line + "\n"
+                    line = f"# {line}" + "\n"
                 printout = printout + line
                 printout = printout + replacement_line
                 continue
@@ -150,30 +148,30 @@ def adjust_dockerfile():
         f.write(printout)
 
 
-def make_docker():
+def make_docker() -> None:
     """
     This will create the docker to run AutoGrow4.
     This is also where all of the files are copied into the image.
 
     If docker image can not be created it will raise an exception.
     """
-    if os.name == "nt" or os.name == "ce":
+    if os.name in {"nt", "ce"}:
         # so it's running under windows. multiprocessing disabled
         adjust_dockerfile()
 
     print("Creating new docker image for AutoGrow4")
     output_and_log_dir = os.path.abspath("output_and_log_dir") + os.sep
-    log_file = "{}log.txt".format(output_and_log_dir)
+    log_file = f"{output_and_log_dir}log.txt"
     printout = (
         "\nAttempting to create the docker container. If 1st time running "
         + "this script it may take a few minutes. Output details are piped to: "
-        + "{}\n".format(log_file)
+        + f"{log_file}\n"
     )
 
     print(printout)
     try:
-        os.system("docker build -t autogrow4 . > {}".format(log_file))
-    except:
+        os.system(f"docker build -t autogrow4 . > {log_file}")
+    except Exception as e:
         printout = (
             "\nCan not create a docker file. Please make sure to run the "
             + "script with sudo/administrative privileges.\nIf Linux/MacOS:\n"
@@ -183,13 +181,13 @@ def make_docker():
             + "Please also make sure docker is installed on the system."
         )
         print(printout)
-        raise Exception(printout)
+        raise Exception(printout) from e
 
     # Remove the temporary autogrow4 directory
     shutil.rmtree("autogrow4")
 
 
-def check_for_required_params(json_vars):
+def check_for_required_params(json_vars: Dict[str, Any]) -> Dict[str, Any]:
     """
     Confirm all the required inputs were provided.
 
@@ -218,28 +216,18 @@ def check_for_required_params(json_vars):
         "source_compound_file",
     ]
 
-    missing_variables = []
-    for variable in list_of_required_inputs:
-        if variable in keys_from_input:
-            continue
-        missing_variables.append(variable)
-
-    if len(missing_variables) != 0:
-        printout = "\nRequired variables are missing from the input. A description \
-            of each of these can be found by running python ./RunAutogrow -h"
-        printout = printout + "\nThe following required variables are missing: "
-        for variable in missing_variables:
-            printout = printout + "\n\t" + variable
-        print("")
-        print(printout)
-        print("")
-        raise NotImplementedError("\n" + printout + "\n")
-
+    missing_variables = [
+        variable
+        for variable in list_of_required_inputs
+        if variable not in keys_from_input
+    ]
+    if missing_variables:
+        _handle_missing_required_params(missing_variables)
     # Make sure the dimmensions are in floats. If in int convert to float.
     for x in ["center_x", "center_y", "center_z", "size_x", "size_y", "size_z"]:
         if type(json_vars[x]) in [float, int]:
             continue
-        printout = "\n{} must be a float value.\n".format(x)
+        printout = f"\n{x} must be a float value.\n"
         print(printout)
         raise Exception(printout)
 
@@ -271,11 +259,11 @@ def check_for_required_params(json_vars):
             os.makedirs(json_vars["root_output_folder"])
             os.makedirs(json_vars["root_output_folder"] + os.sep + "inputs")
             change_permissions_recursively(json_vars["root_output_folder"])
-        except:
+        except Exception as e:
             raise NotImplementedError(
                 "root_output_folder could not be found and could not be created. \
                 Please manual create desired directory or check input parameters"
-            )
+            ) from e
 
         if os.path.exists(json_vars["root_output_folder"]) is False:
             raise NotImplementedError(
@@ -332,7 +320,19 @@ def check_for_required_params(json_vars):
     return json_vars
 
 
-def find_previous_runs(folder_name_path):
+def _handle_missing_required_params(missing_variables: List[str]) -> None:
+    printout = "\nRequired variables are missing from the input. A description \
+            of each of these can be found by running python ./RunAutogrow -h"
+    printout += "\nThe following required variables are missing: "
+    for variable in missing_variables:
+        printout = printout + "\n\t" + variable
+    print("")
+    print(printout)
+    print("")
+    raise NotImplementedError("\n" + printout + "\n")
+
+
+def find_previous_runs(folder_name_path: str) -> Optional[int]:
     """
     This will check if there are any previous runs in the output directory.
         - If there are it will return the interger of the number label of the last Run folder path.
@@ -349,8 +349,8 @@ def find_previous_runs(folder_name_path):
 
     path_exists = True
     i = 0
-    while path_exists is True:
-        folder_path = "{}{}{}".format(folder_name_path, i, os.sep)
+    while path_exists:
+        folder_path = f"{folder_name_path}{i}{os.sep}"
         if os.path.exists(folder_path):
             i = i + 1
         else:
@@ -362,11 +362,10 @@ def find_previous_runs(folder_name_path):
         return None
 
     # A previous run exists. The number of the last run.
-    last_run_number = i - 1
-    return last_run_number
+    return i - 1
 
 
-def get_run_number(root_folder_path, start_a_new_run):
+def get_run_number(root_folder_path: str, start_a_new_run: bool) -> str:
     """
     Determine run number for the new directory.
         If start_a_new_run is True    Start a fresh new run.
@@ -382,13 +381,13 @@ def get_run_number(root_folder_path, start_a_new_run):
         make a directory within this folder to store our output files
     :param bol start_a_new_run: True or False to determine if we continue from
         the last run or start a new run
-        - This is set as a vars["start_a_new_run"]
-        - The default is vars["start_a_new_run"] = True
+        - This is set as a params["start_a_new_run"]
+        - The default is params["start_a_new_run"] = True
     Returns:
     :returns: str run_num: the string of the run number "Run_*"
     """
 
-    folder_name_path = root_folder_path + "Run_"
+    folder_name_path = f"{root_folder_path}Run_"
     print(folder_name_path)
 
     last_run_number = find_previous_runs(folder_name_path)
@@ -401,24 +400,23 @@ def get_run_number(root_folder_path, start_a_new_run):
         # make a folder for the new generation
         run_number = 0
 
-    else:
-        if start_a_new_run is False:
-            # Continue from the last simulation run
-            run_number = last_run_number
-        else:  # start_a_new_run is True
-            # Start a new fresh simulation
-            # Make a directory for the new run by increasing run number by +1
-            # from last_run_number
-            run_number = last_run_number + 1
+    elif not start_a_new_run:
+        # Continue from the last simulation run
+        run_number = last_run_number
+    else:  # start_a_new_run is True
+        # Start a new fresh simulation
+        # Make a directory for the new run by increasing run number by +1
+        # from last_run_number
+        run_number = last_run_number + 1
 
-    folder_name_path = root_folder_path + "Run_" + str(run_number) + os.sep
+    folder_name_path = f"{root_folder_path}Run_{str(run_number)}{os.sep}"
     print("The Run number is: ", run_number)
     print("The Run folder path is: ", folder_name_path)
     print("")
-    return "Run_{}".format(run_number)
+    return f"Run_{run_number}"
 
 
-def get_output_folder(json_vars):
+def get_output_folder(json_vars: Dict[str, Any]) -> tuple:
     """
     Find the folder for where to place output runs on host system.
 
@@ -429,11 +427,7 @@ def get_output_folder(json_vars):
         puting output folders
     :returns: str run_num: the string of the run number "Run_*"
     """
-    if "start_a_new_run" in json_vars.keys():
-        start_a_new_run = json_vars["start_a_new_run"]
-    else:
-        start_a_new_run = False
-
+    start_a_new_run = json_vars.get("start_a_new_run", False)
     root_output_folder = os.path.abspath(json_vars["root_output_folder"]) + os.sep
     change_permissions_recursively(root_output_folder)
     run_num = get_run_number(root_output_folder, start_a_new_run)
@@ -441,7 +435,7 @@ def get_output_folder(json_vars):
     return root_output_folder, run_num
 
 
-def move_files_to_temp_dir(json_vars):
+def move_files_to_temp_dir(json_vars: Dict[str, Any]) -> None:
     """
     This will move all files needed to a temp_user_files directory and will created a modified
     json_vars dict called docker_json_vars which will be used for pathing within
@@ -452,24 +446,11 @@ def move_files_to_temp_dir(json_vars):
     """
 
     docker_json_vars = {}
-    # make or remove and make the temp_user_files dir
-    temp_dir_path = os.path.abspath("temp_user_files") + os.sep
-    if os.path.exists(temp_dir_path):
-        shutil.rmtree(temp_dir_path)
-    os.mkdir(temp_dir_path)
-    change_permissions_recursively(temp_dir_path)
-
-    # make or remove and make an output_and_log_dir
-    output_and_log_dir = os.path.abspath("output_and_log_dir") + os.sep
-    if os.path.exists(output_and_log_dir):
-        shutil.rmtree(output_and_log_dir)
-    os.mkdir(output_and_log_dir)
-    change_permissions_recursively(output_and_log_dir)
-
+    temp_dir_path = _setup_temp_directory("temp_user_files")
+    output_and_log_dir = _setup_temp_directory("output_and_log_dir")
     print("copying files into temp directory: temp_user_files")
     # get files from json_vars
-    for var_name in json_vars.keys():
-        var_item = json_vars[var_name]
+    for var_name, var_item in json_vars.items():
         if str(type(var_item)) not in ["<type 'unicode'>", "<type 'unicode'>"]:
             continue
         var_item = str(var_item)
@@ -489,14 +470,14 @@ def move_files_to_temp_dir(json_vars):
         temp_path = temp_dir_path + basename
         if os.path.isdir(var_item):
             shutil.copytree(var_item, temp_path)
-            docker_json_vars[var_name] = "/UserFiles/" + basename + "/"
+            docker_json_vars[var_name] = f"/UserFiles/{basename}/"
             continue
 
         if os.path.isfile(var_item):
             shutil.copyfile(var_item, temp_path)
-            docker_json_vars[var_name] = "/UserFiles/" + basename
+            docker_json_vars[var_name] = f"/UserFiles/{basename}"
 
-    for var_name in json_vars.keys():
+    for var_name in json_vars:
         if var_name not in docker_json_vars.keys():
             docker_json_vars[var_name] = json_vars[var_name]
 
@@ -507,7 +488,7 @@ def move_files_to_temp_dir(json_vars):
     # Set output folder
     docker_json_vars["root_output_folder"] = "/Outputfolder/"
 
-    with open(temp_dir_path + "docker_json_vars.json", "w") as file_item:
+    with open(f"{temp_dir_path}docker_json_vars.json", "w") as file_item:
         json.dump(docker_json_vars, file_item, indent=4)
 
     # update permissions so files can be manipulated without sudo/admin
@@ -522,7 +503,7 @@ def move_files_to_temp_dir(json_vars):
     if os.path.exists(temp_autogrow4_path):
         shutil.rmtree(temp_autogrow4_path)
     os.mkdir(temp_autogrow4_path)
-    autogrow4_top_dir = autogrow4_top_dir + os.sep
+    autogrow4_top_dir += os.sep
     change_permissions_recursively(temp_autogrow4_path)
 
     # Copy all files in autogrow4 directory into a temp except the Docker folder
@@ -536,13 +517,24 @@ def move_files_to_temp_dir(json_vars):
             autogrow4_top_dir + fol_to_copy, temp_autogrow4_path + fol_to_copy
         )
     shutil.copyfile(
-        autogrow4_top_dir + "run_autogrow.py", temp_autogrow4_path + "run_autogrow.py"
+        f"{autogrow4_top_dir}run_autogrow.py", f"{temp_autogrow4_path}run_autogrow.py",
     )
     # Open permissions
     change_permissions_recursively(temp_autogrow4_path)
 
 
-def handle_json_info(vars):
+def _setup_temp_directory(arg0: str) -> str:
+    # make or remove and make the temp_user_files dir
+    result = os.path.abspath(arg0) + os.sep
+    if os.path.exists(result):
+        shutil.rmtree(result)
+    os.mkdir(result)
+    change_permissions_recursively(result)
+
+    return result
+
+
+def handle_json_info(params: Dict[str, Any]) -> tuple:
     """
     This will open the json file.
         1) check that JSON file has basic info
@@ -551,7 +543,7 @@ def handle_json_info(vars):
             -receptor, .smi files ...
         3) make a JSON file with modified information for within docker
     Inputs:
-    :param dict vars: Dictionary of User specified variables
+    :param dict params: Dictionary of User specified variables
 
     Returns:
     :param dict json_vars: Dictionary of User specified variables
@@ -561,11 +553,9 @@ def handle_json_info(vars):
     """
     print("Handling files")
 
-    json_file = vars["json_file"]
+    json_file = params["json_file"]
     if os.path.exists(json_file) is False:
-        printout = "\njson_file is required. Can not find json_file: {}.\n".format(
-            json_file
-        )
+        printout = f"\njson_file is required. Can not find json_file: {json_file}.\n"
         print(printout)
         raise Exception(printout)
     json_vars = json.load(open(json_file))
@@ -578,7 +568,7 @@ def handle_json_info(vars):
     return json_vars, outfolder_path, run_num
 
 
-def run_autogrow_docker_main(vars):
+def run_autogrow_docker_main(params: Dict[str, Any]) -> None:
     """
     This function runs the processing to:
         1) check that JSON file has basic info
@@ -593,7 +583,7 @@ def run_autogrow_docker_main(vars):
         6) export the files back to the final end dir
 
     Inputs:
-    :param dict vars: Dictionary of User specified variables
+    :param dict params: Dictionary of User specified variables
     """
     printout = (
         "\n\nThis script builds a docker for AutoGrow4 and runs AutoGrow4 "
@@ -605,10 +595,10 @@ def run_autogrow_docker_main(vars):
     # Check that we are in the correct directory if not raise exception
     script_dir = str(os.path.dirname(os.path.realpath(__file__))) + os.sep
     if os.path.abspath(os.getcwd()) != os.path.abspath(script_dir):
-        printout = "\nMust execute this script from this directory: {}\n".format(
-            script_dir
+        printout = (
+            f"\nMust execute this script from this directory: {script_dir}\n"
+            + f"Before running please 'cd {script_dir}'\n"
         )
-        printout = printout + "Before running please 'cd {}'\n".format(script_dir)
         print(printout)
         raise Exception(printout)
 
@@ -618,7 +608,7 @@ def run_autogrow_docker_main(vars):
     # 2) copy files to a temp directory
     #     -receptor, .smi files ...
     # 3) make a JSON file with modified information for within docker
-    json_vars, outfolder_path, run_num = handle_json_info(vars)
+    json_vars, outfolder_path, run_num = handle_json_info(params)
 
     # Run build docker image
     make_docker()
@@ -626,13 +616,15 @@ def run_autogrow_docker_main(vars):
     # Run part 5) run AutoGrow in the container
     print("\nRunning AutoGrow4 in Docker")
 
-    command = "docker run --rm -it -v {}:/Outputfolder/".format(outfolder_path)
-    command = command + " autogrow4  --name autogrow4  --{}".format(run_num)
+    command = (
+        f"docker run --rm -it -v {outfolder_path}:/Outputfolder/"
+        + f" autogrow4  --name autogrow4  --{run_num}"
+    )
     # Execute AutoGrow4
     print(command)
     os.system(command)
     change_permissions_recursively(outfolder_path)
-    print("AutoGrow Results placed in: {}".format(outfolder_path))
+    print(f"AutoGrow Results placed in: {outfolder_path}")
 
 
 PARSER = argparse.ArgumentParser()
@@ -670,17 +662,19 @@ print("")
 if ARGS_DICT["override_sudo_admin_privileges"] == False:
     if sys.platform.lower() in ["darwin", "linux", "linux2"]:
         if os.getuid() != 0:
-            printout = "\n\nMust run this script with `sudo` privileges.\n\t"
-            printout = printout + "Please retry running with `sudo` privileges.\n\n"
+            printout = (
+                "\n\nMust run this script with `sudo` privileges.\n\t"
+                + "Please retry running with `sudo` privileges.\n\n"
+            )
             print(printout)
             raise Exception(printout)
-    elif sys.platform.lower() == "win32" or sys.platform.lower() == "cygwin":
+    elif sys.platform.lower() in ["win32", "cygwin"]:
         import ctypes
 
-        if ctypes.windll.shell32.IsUserAnAdmin() != 1:
-            printout = "\n\nMust run this script from a terminal with `Administrator` privileges.\n\t"
+        if ctypes.windll.shell32.IsUserAnAdmin() != 1:  # type: ignore
             printout = (
-                printout + "Please retry running with `Administrator` privileges.\n\n"
+                "\n\nMust run this script from a terminal with `Administrator` privileges.\n\t"
+                + "Please retry running with `Administrator` privileges.\n\n"
             )
             print(printout)
             raise Exception(printout)

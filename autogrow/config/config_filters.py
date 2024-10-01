@@ -1,9 +1,15 @@
 import sys
+from typing import Any, Dict, List, Tuple
 
-from autogrow.config.config_utils import copy_new_custom_py_file, get_path_to_custom_script, make_complete_children_dict
+from autogrow.config.config_utils import (
+    copy_new_custom_py_file,
+    get_path_to_custom_script,
+    make_complete_children_dict,
+)
 from autogrow.validation.validate_custom_classes import validate_custom_param_type
 
-def setup_filters(params):
+
+def setup_filters(params: Dict[str, Any]) -> Dict[str, Any]:
     """
     This function handles selecting the user defined Ligand filters.
 
@@ -30,94 +36,95 @@ def setup_filters(params):
     return params
 
 
-
-def _picked_filters(vars):
+def _picked_filters(params: Dict[str, Any]) -> Tuple[List[str], Dict[str, Any]]:
     """
-    This will take the user vars and return a list of the filters
+    This will take the user params and return a list of the filters
     which a molecule must pass to move into the next generation.
 
     Inputs:
-    :param dict vars: Dictionary of User variables
+    :param dict params: Dictionary of User variables
     Returns:
     :returns: list filter_list: a list of the class of filter which will be used
         later to check for drug likeliness for a generation.
         If a User adds their own filter they just need to follow
         the same nomenclature and enter that filter in the user
-        vars["alternative_filters"] as the name of that class and place
+        params["alternative_filters"] as the name of that class and place
         that file in the same folder as the other filter classes.
     """
     filter_list = []
-    vars_keys = list(vars.keys())
+    vars_keys = list(params.keys())
 
     if "LipinskiStrictFilter" in vars_keys:
-        if vars["LipinskiStrictFilter"] is True:
+        if params["LipinskiStrictFilter"] is True:
             filter_list.append("LipinskiStrictFilter")
     else:
-        vars["LipinskiStrictFilter"] = False
+        params["LipinskiStrictFilter"] = False
 
     if "LipinskiLenientFilter" in vars_keys:
-        if vars["LipinskiLenientFilter"] is True:
+        if params["LipinskiLenientFilter"] is True:
             filter_list.append("LipinskiLenientFilter")
     else:
-        vars["LipinskiLenientFilter"] = False
+        params["LipinskiLenientFilter"] = False
 
     if "GhoseFilter" in vars_keys:
-        if vars["GhoseFilter"] is True:
+        if params["GhoseFilter"] is True:
             filter_list.append("GhoseFilter")
     else:
-        vars["GhoseFilter"] = False
+        params["GhoseFilter"] = False
 
     if "GhoseModifiedFilter" in vars_keys:
-        if vars["GhoseModifiedFilter"] is True:
+        if params["GhoseModifiedFilter"] is True:
             filter_list.append("GhoseModifiedFilter")
     else:
-        vars["GhoseModifiedFilter"] = False
+        params["GhoseModifiedFilter"] = False
 
     if "MozziconacciFilter" in vars_keys:
-        if vars["MozziconacciFilter"] is True:
+        if params["MozziconacciFilter"] is True:
             filter_list.append("MozziconacciFilter")
     else:
-        vars["MozziconacciFilter"] = False
+        params["MozziconacciFilter"] = False
 
     if "VandeWaterbeemdFilter" in vars_keys:
-        if vars["VandeWaterbeemdFilter"] is True:
+        if params["VandeWaterbeemdFilter"] is True:
             filter_list.append("VandeWaterbeemdFilter")
     else:
-        vars["VandeWaterbeemdFilter"] = False
+        params["VandeWaterbeemdFilter"] = False
 
     if "PAINSFilter" in vars_keys:
-        if vars["PAINSFilter"] is True:
+        if params["PAINSFilter"] is True:
             filter_list.append("PAINSFilter")
     else:
-        vars["PAINSFilter"] = False
+        params["PAINSFilter"] = False
 
     if "NIHFilter" in vars_keys:
-        if vars["NIHFilter"] is True:
+        if params["NIHFilter"] is True:
             filter_list.append("NIHFilter")
     else:
-        vars["NIHFilter"] = False
+        params["NIHFilter"] = False
 
     if "BRENKFilter" in vars_keys:
-        if vars["BRENKFilter"] is True:
+        if params["BRENKFilter"] is True:
             filter_list.append("BRENKFilter")
     else:
-        vars["BRENKFilter"] = False
+        params["BRENKFilter"] = False
 
     if "alternative_filter" in vars_keys:
-        filter_list = _handle_alternative_filters(vars, filter_list)
+        filter_list = _handle_alternative_filters(params, filter_list)
     else:
-        vars["alternative_filter"] = None
+        params["alternative_filter"] = None
 
     # if there is no user specified ligand filters but they haven't set
     # filters to None ---> set filter to default of LipinskiLenientFilter.
     if len(filter_list) == 0:
-        vars["LipinskiLenientFilter"] = True
+        params["LipinskiLenientFilter"] = True
         filter_list.append("LipinskiLenientFilter")
 
-    return filter_list, vars
+    return filter_list, params
 
 
-def _handle_alternative_filters(params, filter_list):
+def _handle_alternative_filters(
+    params: Dict[str, Any], filter_list: List[str]
+) -> List[str]:
     """
     This will handle Custom Filters
 

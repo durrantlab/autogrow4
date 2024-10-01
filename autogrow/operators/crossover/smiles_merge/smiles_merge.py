@@ -2,10 +2,11 @@
 Run a single crossover event.
 """
 import __future__
+from typing import Any, Dict, Optional
 
-import rdkit
-from rdkit import Chem
-from rdkit.Chem import rdFMCS
+import rdkit  # type: ignore
+from rdkit import Chem  # type: ignore
+from rdkit.Chem import rdFMCS  # type: ignore
 
 # Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog("rdApp.*")
@@ -16,7 +17,7 @@ import autogrow.operators.crossover.smiles_merge.merge_functions.alignment_and_b
 import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
 
 
-def process_ligand_new_mol(ligand_new_mol):
+def process_ligand_new_mol(ligand_new_mol: rdkit.Chem.rdchem.Mol) -> Optional[str]:
     """
     This function processes the ligand_new_mol.
     It either returns the SMILES string of ligand_new_mol (ligand_new_smiles)
@@ -52,17 +53,17 @@ def process_ligand_new_mol(ligand_new_mol):
     if ligand_new_mol is None:
         return None
 
-    ligand_new_smiles = Chem.MolToSmiles(ligand_new_mol, isomericSmiles=True)
-
-    return ligand_new_smiles
+    return Chem.MolToSmiles(ligand_new_mol, isomericSmiles=True)
 
 
-def run_main_smiles_merge(vars, lig_string_1, lig_string_2):
+def run_main_smiles_merge(
+    params: Dict[str, Any], lig_string_1: str, lig_string_2: str
+) -> Optional[str]:
     """
     This runs the main script for SmileMerge.
 
     Inputs:
-    :param dict vars: User variables which will govern how the programs runs
+    :param dict params: User variables which will govern how the programs runs
 
     :param str lig_string_1: smile string for lig 1
     :param str lig_string_2: smile string for lig 2. example: lig_string_1 =
@@ -71,7 +72,7 @@ def run_main_smiles_merge(vars, lig_string_1, lig_string_2):
 
     Returns:
     :returns: str ligand_new_smiles: smile string for the child ligand derived
-        from lig_1 and lig_2. Returns None if it failed at any point.
+        from mol1 and mol2. Returns None if it failed at any point.
     """
 
     # lig_string_1 = "[N-] = [N+] = NCC(O)COc1cccc2ccccc12"
@@ -82,22 +83,22 @@ def run_main_smiles_merge(vars, lig_string_1, lig_string_2):
     lig_smile_2 = Chem.MolFromSmiles(lig_string_2, sanitize=False)
 
     # Sanitize, deprotanate, and reprotanate both molecules
-    mol_1 = MOH.check_sanitization(lig_smile_1)
-    mol_2 = MOH.check_sanitization(lig_smile_2)
-    if mol_1 is None or mol_2 is None:
-        return False
+    mol1 = MOH.check_sanitization(lig_smile_1)
+    mol2 = MOH.check_sanitization(lig_smile_2)
+    if mol1 is None or mol2 is None:
+        return None  # NOTE: JDD: Was False
 
-    protanate_step = vars["protanate_step"]
-    mol_1 = MOH.handleHs(lig_smile_1, protanate_step)
-    mol_2 = MOH.handleHs(lig_smile_2, protanate_step)
+    protanate_step = params["protanate_step"]
+    mol1 = MOH.handleHs(lig_smile_1, protanate_step)
+    mol2 = MOH.handleHs(lig_smile_2, protanate_step)
 
     # check that handleHs() worked for both molecules if fail move on to next
     # pair of molecules
-    if mol_1 is None or mol_2 is None:
+    if mol1 is None or mol2 is None:
         return None
 
     # make a list of the two rdkit.Chem.rdchem.Mol objects
-    mols = [mol_1, mol_2]
+    mols = [mol1, mol2]
 
     # Use the below mcs_H function for Most Common Substructure searching.
     # This will prevent broken rings.
@@ -106,26 +107,26 @@ def run_main_smiles_merge(vars, lig_string_1, lig_string_2):
         matchValences=False,
         ringMatchesRingOnly=True,
         completeRingsOnly=False,
-        timeout=vars["max_time_mcs_thorough"],
+        timeout=params["max_time_mcs_thorough"],
     )
 
     if mcs_results.canceled is True:
         return None
 
     # confirm that this meets the minimum number of matching atoms
-    if mcs_results.numAtoms < vars["min_atom_match_mcs"]:
+    if mcs_results.numAtoms < params["min_atom_match_mcs"]:
         return None
 
     ### Convert mcs_res from into usable and referable forms
     mcs_mol = Chem.MolFromSmarts(mcs_results.smartsString)
 
     # handle_mcs_align_labeling_and_cyclicbreaks
-    mol_1, mol_2, mcs_mol = AnB.handle_mcs_align_labeling_and_cyclicbreaks(
-        mol_1, mol_2, mcs_mol
+    mol1, mol2, mcs_mol = AnB.handle_mcs_align_labeling_and_cyclicbreaks(
+        mol1, mol2, mcs_mol
     )
 
     # confirm that this meets the minimum number of matching atoms
-    if mol_1 is None or mol_2 is None or mcs_mol is None:
+    if mol1 is None or mol2 is None or mcs_mol is None:
         return None
     # This is a very big step. This is where all of the atoms are fragmented
     # to determine what are the R-groups options. R-groups are consolidated
@@ -136,7 +137,7 @@ def run_main_smiles_merge(vars, lig_string_1, lig_string_2):
     # (anchors are atoms in the common core). It returns a list of
     # smilestrings for the chosen R-groups. It returns None if a step failed.
 
-    rs_chosen_smiles = DnR.handle_dicts_and_select_b_groups(mol_1, mol_2, mcs_mol)
+    rs_chosen_smiles = DnR.handle_dicts_and_select_b_groups(mol1, mol2, mcs_mol)
     if rs_chosen_smiles is None:
         return None
 
@@ -147,6 +148,4 @@ def run_main_smiles_merge(vars, lig_string_1, lig_string_2):
 
     # ligand_new_smiles is either a SMILES string if processing works
     # or None if processing fails
-    ligand_new_smiles = process_ligand_new_mol(ligand_new_mol)
-
-    return ligand_new_smiles
+    return process_ligand_new_mol(ligand_new_mol)

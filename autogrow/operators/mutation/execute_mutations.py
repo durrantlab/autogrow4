@@ -6,30 +6,32 @@ import __future__
 
 import random
 import copy
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 
 import autogrow.operators.mutation.smiles_click_chem.smiles_click_chem as SmileClickClass
+from autogrow.types import CompoundInfo
 
 
 #######################################
 # Functions for creating molecular models
 ##########################################
 def make_mutants(
-    vars,
-    generation_num,
-    number_of_processors,
-    num_mutants_to_make,
-    ligands_list,
-    new_mutation_smiles_list,
-    rxn_library_variables,
-):
+    params: Dict[str, Any],
+    generation_num: int,
+    number_of_processors: int,
+    num_mutants_to_make: int,
+    ligands_list: List[CompoundInfo],
+    new_mutation_smiles_list: List[List[str]],
+    rxn_library_variables: List[str],
+) -> Optional[List[List[str]]]:
     """
     Make mutant compounds in a list to be returned
 
     This runs SmileClick and returns a list of new molecules
 
     Inputs:
-    :param dict vars: a dictionary of all user variables
+    :param dict params: a dictionary of all user variables
     :param int generation_num: generation number
     :param int number_of_processors: number of processors as specified by the
         user
@@ -40,33 +42,29 @@ def make_mutants(
         iteration of the loop in Operations
     :param list rxn_library_variables: a list of user variables which define
         the rxn_library, rxn_library_file, and function_group_library. ie.
-        rxn_library_variables = [vars['rxn_library'], vars['rxn_library_file'],
-        vars['function_group_library']]
+        rxn_library_variables = [params['rxn_library'], params['rxn_library_file'],
+        params['function_group_library']]
 
     Returns:
     :returns: list new_ligands_list: ligand/name pairs OR returns None if
         sufficient number was not generated. None: bol if mutations failed
     """
 
-    if len(new_mutation_smiles_list) == 0:
-        new_ligands_list = []
-    else:
-        new_ligands_list = new_mutation_smiles_list
-
+    new_ligands_list = new_mutation_smiles_list or []
     loop_counter = 0
 
-    number_of_processors = int(vars["parallelizer"].return_node())
+    number_of_processors = int(params["parallelizer"].return_node())
 
     # initialize the smileclickclass
     a_smiles_click_chem_object = SmileClickClass.SmilesClickChem(
-        rxn_library_variables, new_mutation_smiles_list, vars["filter_object_dict"]
+        rxn_library_variables, new_mutation_smiles_list, params["filter_object_dict"]
     )
 
     while loop_counter < 2000 and len(new_ligands_list) < num_mutants_to_make:
 
         react_list = copy.deepcopy(ligands_list)
 
-        while len(new_ligands_list) < num_mutants_to_make and len(react_list) > 0:
+        while len(new_ligands_list) < num_mutants_to_make and react_list:
 
             a_smiles_click_chem_object.update_list_of_already_made_smiles(
                 new_ligands_list
@@ -77,21 +75,19 @@ def make_mutants(
             # to minimize a big loop of running a single mutation at a time we
             # will make 1 new lig/processor. This will help to prevent wasting
             # reasources and time.
-            if num_to_make < number_of_processors:
-                num_to_make = number_of_processors
-
+            num_to_make = max(num_to_make, number_of_processors)
             smile_pairs = [
-                react_list.pop() for x in range(num_to_make) if len(react_list) > 0
+                react_list.pop() for _ in range(num_to_make) if len(react_list) > 0
             ]
 
-            smile_inputs = [x[0] for x in smile_pairs]
-            smile_names = [x[1] for x in smile_pairs]
+            smile_inputs = [x.smiles for x in smile_pairs]
+            smile_names = [x.name for x in smile_pairs]
 
             job_input = tuple(
-                [tuple([smile, a_smiles_click_chem_object]) for smile in smile_inputs]
+                (smile, a_smiles_click_chem_object) for smile in smile_inputs
             )
 
-            results = vars["parallelizer"].run(
+            results = params["parallelizer"].run(
                 job_input, run_smiles_click_for_multithread
             )
 
@@ -101,15 +97,10 @@ def make_mutants(
                     # Get the new molecule's (aka the Child lig) Smile string
                     child_lig_smile = i[0]
 
-                    # get the reaction id number
-                    reaction_id_number = i[1]
-
                     # get the ID for the parent of a child mol and the
                     # complementary parent mol. comp mol could be None or a
                     # zinc database ID
                     parent_lig_id = smile_names[index]
-                    zinc_id_comp_mol = i[2]
-
                     # Make a list of all smiles and smile_id's of all
                     # previously made smiles in this generation
                     list_of_already_made_smiles = []
@@ -128,7 +119,14 @@ def make_mutants(
                         # ligands we append it with a unique ID, which also
                         # tracks the progress of the reactant
                         is_name_unique = False
-                        while is_name_unique is False:
+                        new_lig_id = ""
+
+                        # get the reaction id number
+                        reaction_id_number = i[1]
+
+                        zinc_id_comp_mol = i[2]
+
+                        while not is_name_unique:
                             # make unique ID with the 1st number being the
                             # parent_lig_id for the derived mol, Followed by
                             # Mutant, folowed by the generationnumber,
@@ -140,20 +138,9 @@ def make_mutants(
 
                             random_id_num = random.randint(100, 1000000)
                             if zinc_id_comp_mol is None:
-                                new_lig_id = "({})Gen_{}_Mutant_{}_{}".format(
-                                    parent_lig_id,
-                                    generation_num,
-                                    reaction_id_number,
-                                    random_id_num,
-                                )
+                                new_lig_id = f"({parent_lig_id})Gen_{generation_num}_Mutant_{reaction_id_number}_{random_id_num}"
                             else:
-                                new_lig_id = "({}+{})Gen_{}_Mutant_{}_{}".format(
-                                    parent_lig_id,
-                                    zinc_id_comp_mol,
-                                    generation_num,
-                                    reaction_id_number,
-                                    random_id_num,
-                                )
+                                new_lig_id = f"({parent_lig_id}+{zinc_id_comp_mol})Gen_{generation_num}_Mutant_{reaction_id_number}_{random_id_num}"
 
                             # check name is unique
                             if new_lig_id not in list_of_already_made_id:
@@ -167,7 +154,7 @@ def make_mutants(
                         # all newly made ligands
                         new_ligands_list.append(ligand_info)
 
-        loop_counter = loop_counter + 1
+        loop_counter += 1
 
     if len(new_ligands_list) < num_mutants_to_make:
         return None
@@ -176,7 +163,9 @@ def make_mutants(
     return new_ligands_list
 
 
-def run_smiles_click_for_multithread(smile, a_smiles_click_chem_object):
+def run_smiles_click_for_multithread(
+    smile: str, a_smiles_click_chem_object: SmileClickClass.SmilesClickChem
+) -> Optional[List[Union[str, int, None]]]:
     """
     This function takes a single smilestring and performs SmileClick on it.
 
@@ -192,6 +181,4 @@ def run_smiles_click_for_multithread(smile, a_smiles_click_chem_object):
         if the reactions failed
     """
 
-    result_of_run = a_smiles_click_chem_object.run_smiles_click(smile)
-
-    return result_of_run
+    return a_smiles_click_chem_object.run_smiles_click(smile)

@@ -27,7 +27,7 @@ try:
     from rdkit.Chem.Draw import rdMolDraw2D
     from rdkit.Chem.Draw import PrepareMolForDrawing
     from rdkit import Chem
-except:
+except Exception:
     Utils.exception("You need to install rdkit and its dependencies.")
 
 

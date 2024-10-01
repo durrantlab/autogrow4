@@ -4,7 +4,8 @@ This is used as the basis for all file conversion classes.
 """
 import __future__
 from abc import ABC, abstractmethod
-from typing import Dict, Optional, Tuple
+import os
+from typing import Any, Dict, Optional, Tuple
 
 
 class ParentPDBQTConverter(ABC):
@@ -16,17 +17,13 @@ class ParentPDBQTConverter(ABC):
     """
 
     def __init__(
-        self,
-        vars: Optional[Dict] = None,
-        receptor_file: Optional[str] = None,
-        test_boot: bool = True,
+        self, params: Optional[Dict[str, Any]] = None, test_boot: bool = True,
     ):
         """
         Require to initialize any pdbqt conversion class.
 
         Inputs:
-        :param dict vars: Dictionary of User variables
-        :param str receptor_file: the path for the receptor pdb
+        :param dict params: Dictionary of User variables
         :param bool test_boot: used to initialize class without objects for
             testing purpose
         """
@@ -47,8 +44,8 @@ class ParentPDBQTConverter(ABC):
     def convert_receptor_pdb_files_to_pdbqt(
         self,
         receptor_file: str,
-        mgl_python: str,
-        receptor_template: str,
+        run_path: str,
+        aux_script_path: Optional[str],
         number_of_processors: int,
     ) -> None:
         """
@@ -56,9 +53,9 @@ class ParentPDBQTConverter(ABC):
 
         Inputs:
         :param str receptor_file:  the file path of the receptor
-        :param str mgl_python: file path of the pythonsh file of mgl tools
-        :param str receptor_template: the receptor4.py file path from mgl
-            tools.
+        :param str run_path: file path of the script or executable used for
+            conversion.
+        :param str aux_script_path: the receptor4.py file path from mgl tools.
         :param int number_of_processors: number of processors to multithread
         """
 
@@ -86,3 +83,30 @@ class ParentPDBQTConverter(ABC):
 
         # raise NotImplementedError("rank_and_save_output_smi() not implemented")
         pass
+
+    #######################################
+    # Handle Failed PDBS                  #
+    #######################################
+    def get_smile_name_from_pdb(self, pdb_file: str) -> str:
+        """
+        This will return the unique identifier name for the compound
+
+        Inputs:
+        :param str pdb_file: pdb file path
+        Returns:
+        :returns: str line_stripped: the name of the SMILES string
+                                with the new lines and COMPND removed
+        """
+        line_stripped = "unknown"
+        if os.path.exists(pdb_file):
+            with open(pdb_file, "r") as f:
+                for line in f:
+                    if "COMPND" in line:
+                        # Need to remove whitespaces on both ends
+                        line_stripped = line.replace("COMPND", "").strip()
+                        # Need to remove whitespaces on both ends
+                        line_stripped = line_stripped.replace("\n", "").strip()
+
+            # line_stripped is now the name of the smile for this compound
+
+        return line_stripped

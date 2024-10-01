@@ -15,10 +15,10 @@ and Shape, and H-Bonding Descriptors. Journal of Drug Targeting (1998), 6(2),
 
 import __future__
 
-import rdkit
-import rdkit.Chem as Chem
-import rdkit.Chem.MolSurf as MolSurf
-import rdkit.Chem.Descriptors as Descriptors
+import rdkit  # type: ignore
+import rdkit.Chem as Chem  # type: ignore
+import rdkit.Chem.MolSurf as MolSurf  # type: ignore
+import rdkit.Chem.Descriptors as Descriptors  # type: ignore
 
 # Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog("rdApp.*")

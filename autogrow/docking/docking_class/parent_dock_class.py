@@ -6,6 +6,8 @@ import __future__
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Union
 
+from autogrow.docking.docking_class.parent_pdbqt_converter import ParentPDBQTConverter
+
 
 class ParentDocking(ABC):
     """
@@ -17,16 +19,16 @@ class ParentDocking(ABC):
 
     def __init__(
         self,
-        vars: Optional[Dict[str, Any]] = None,
+        params: Optional[Dict[str, Any]] = None,
         receptor_file: Optional[str] = None,
-        file_conversion_class_object: Optional[Any] = None,
+        file_conversion_class_object: Optional[ParentPDBQTConverter] = None,
         test_boot: bool = True,
     ) -> None:
         """
         Require to initialize any pdbqt conversion class.
 
         Inputs:
-        :param dict vars: Dictionary of User variables
+        :param dict params: Dictionary of User variables
         :param str receptor_file: the path for the receptor pdb
         :param obj file_conversion_class_object: object which is used to
             convert files from pdb to pdbqt
@@ -46,22 +48,41 @@ class ParentDocking(ABC):
         return self.__class__.__name__
 
     @abstractmethod
-    def run_dock(self, pdbqt_filename: str) -> None:
+    def run_dock(self, pdbqt_filename: str) -> Union[str, None]:
         """
         run_dock is needs to be implemented in each class.
 
         Inputs:
         :param str pdbqt_filename: a string for docking process raise exception
             if missing
+
+        Returns:
+        :returns: str smile_name: name of smiles if it failed to dock returns
+            None if it docked properly
         """
 
         # raise NotImplementedError("run_dock() not implemented")
         pass
 
     @abstractmethod
+    def get_docking_executable_file(self, params: Dict[str, Any]) -> str:
+        """
+        This retrieves the docking executable files Path.
+
+        Inputs:
+        :param dict params: Dictionary of User variables
+
+        Returns:
+        :returns: str docking_executable: String for the docking executable
+            file path
+        """
+
+        pass
+
+    @abstractmethod
     def rank_and_save_output_smi(
         self,
-        vars: Dict[str, Any],
+        params: Dict[str, Any],
         current_generation_dir: str,
         current_gen_int: int,
         smile_file: str,
@@ -76,7 +97,7 @@ class ParentDocking(ABC):
         file.
 
         Inputs:
-        :param dict vars: vars needs to be threaded here because it has the
+        :param dict params: params needs to be threaded here because it has the
             paralizer object which is needed within Scoring.run_scoring_common
         :param str current_generation_dir: path of directory of current
             generation
