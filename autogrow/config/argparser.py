@@ -403,7 +403,7 @@ def get_argparse_vars() -> Dict[str, Any]:
         help="Determines how .pdb files will be converted \
         to the final format for docking. For Autodock Vina and QuickVina style docking software, \
         files must be in .pdbqt format. MGLToolsConversion: uses MGLTools and is the \
-        recommended converter. MGLTools conversion is required for NNScore1/2 rescoring. \
+        recommended converter. \
         ObabelConversion: uses commandline obabel. Easier to install but Vina docking has \
         been optimized with MGLTools conversion.",
     )
@@ -505,11 +505,10 @@ def get_argparse_vars() -> Dict[str, Any]:
     parser.add_argument(
         "--scoring_choice",
         metavar="scoring_choice",
-        choices=["VINA", "NN1", "NN2", "Custom"],
+        choices=["VINA", "Custom"],
         default="VINA",
         help="The scoring_choice to use to assess the ligands docking fitness. \
-        Default is using Vina/QuickVina2 ligand affinity while NN1/NN2 use a Neural Network \
-        to assess the docking pose. Custom requires providing a file path for a Custom \
+        Default is using Vina/QuickVina2 ligand affinity. Custom requires providing a file path for a Custom \
         scoring function. If Custom scoring function, confirm it selects properly, \
         Autogrow is largely set to select for a more negative score.",
     )

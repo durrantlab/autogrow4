@@ -30,8 +30,6 @@ def config_params_under_windows(params: Dict[str, Any], printout: str) -> str:
     params_that_are_paths = [
         "filename_of_receptor",
         "root_output_folder",
-        "nn1_script",
-        "nn2_script",
         "mgltools_directory",
         "prepare_ligand4.py",
         "prepare_receptor4.py",

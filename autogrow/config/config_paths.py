@@ -42,8 +42,6 @@ def _make_paths_abs(params: Dict[str, Any]) -> None:
         "filename_of_receptor",
         "root_output_folder",
         "source_compound_file",
-        "nn1_script",
-        "nn2_script",
         "mgltools_directory",
     ]:
         if pname not in list(params.keys()):

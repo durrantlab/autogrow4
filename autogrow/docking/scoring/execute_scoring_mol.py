@@ -217,13 +217,11 @@ def rescore_single_file(
 
     Inputs:
     :param str file_path: Path to a vina output file to be rescored
-    :param object scoring_object: object that rescores such as an NN1 or NN2
-        class object
+    :param object scoring_object: object that rescores
 
     Returns:
     :returns: list results of a rescoring function: [file_path, it_rescored]
-        [PATH, True] means it passed [PATH, False] means it failed a results of
-        all NN1 files
+        [PATH, True] means it passed [PATH, False] means it failed
     """
 
     return scoring_object.run_rescoring(file_path)

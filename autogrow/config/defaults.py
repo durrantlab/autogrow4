@@ -13,31 +13,6 @@ def define_defaults() -> Dict[str, Any]:
 
     default_params: Dict[str, Any] = {}
 
-    # where we are currently (absolute filepath from route)
-    # used for relative pathings
-    script_dir = os.path.dirname(os.path.realpath(__file__))
-
-    # Some variables which can be manually replaced but defaults
-    # point to prepackaged locations.
-    ## Neural Network executable for scoring binding
-    default_params["nn1_script"] = os.path.join(
-        script_dir, "..", "docking", "scoring", "nn_score_exe", "nnscore1", "NNScore.py"
-    )
-    # Example: default_params['nn1_script'] =
-    #    "/PATH/autogrow4/autogrow/docking/scoring/nn_score_exe/nnscore1/NNScore.py"
-
-    default_params["nn2_script"] = os.path.join(
-        script_dir,
-        "..",
-        "docking",
-        "scoring",
-        "nn_score_exe",
-        "nnscore2",
-        "NNScore2.py",
-    )
-    # Example: default_params['nn2_script'] =
-    #    "/PATH/autogrow4/autogrow/docking/scoring/nnscore2/NNScore2.py"
-
     #### OPTIONAL FILE-LOCATION VARIABLES ####
     # (RECOMMEND SETTING TO "" SO AUTOGROW CAN AUTOLOCATE THESE FILES)#
 

@@ -647,24 +647,7 @@ def define_defaults() -> Dict[str, Any]:
     # used for relative pathings
     script_dir = os.path.dirname(os.path.realpath(__file__))
 
-    params: Dict[str, Any] = {
-        "nn1_script": os.path.join(
-            script_dir,
-            "docking",
-            "scoring",
-            "nn_score_exe",
-            "nnscore1",
-            "NNScore.py",
-        )
-    }
-    # Example: params['nn1_script'] =
-    #    "/PATH/autogrow4/autogrow/docking/scoring/nn_score_exe/nnscore1/NNScore.py"
-
-    params["nn2_script"] = os.path.join(
-        script_dir, "docking", "scoring", "nn_score_exe", "nnscore2", "NNScore2.py"
-    )
-    # Example: params['nn2_script'] =
-    #    "/PATH/autogrow4/autogrow/docking/scoring/nnscore2/NNScore2.py"
+    params: Dict[str, Any] = {}
 
     #### OPTIONAL FILE-LOCATION VARIABLES ####
     # (RECOMMEND SETTING TO "" SO AUTOGROW CAN AUTOLOCATE THESE FILES)#
@@ -1069,10 +1052,6 @@ def load_in_commandline_parameters(argv: Dict[str, Any]) -> Tuple[Dict[str, Any]
             windows machines.\n"
         )
 
-    # convert paths to abspath, in case necessary
-    params["nn1_script"] = os.path.abspath(params["nn1_script"])
-    params["nn2_script"] = os.path.abspath(params["nn2_script"])
-
     # make sure directories end in os.sep
     if params["root_output_folder"][-1] != os.sep:
         params["root_output_folder"] = params["root_output_folder"] + os.sep
@@ -1136,10 +1115,6 @@ def load_in_commandline_parameters(argv: Dict[str, Any]) -> Tuple[Dict[str, Any]
             params["filename_of_receptor"] = '"' + params["filename_of_receptor"] + '"'
         if " " in params["root_output_folder"]:
             params["root_output_folder"] = '"' + params["root_output_folder"] + '"'
-        if " " in params["nn1_script"]:
-            params["nn1_script"] = '"' + params["nn1_script"] + '"'
-        if " " in params["nn2_script"]:
-            params["nn2_script"] = '"' + params["nn2_script"] + '"'
         # If MGLTools is being used handle its paths
         if params["conversion_choice"] == "MGLToolsConversion":
             if " " in params["mgltools_directory"]:
@@ -1192,32 +1167,6 @@ def load_in_commandline_parameters(argv: Dict[str, Any]) -> Tuple[Dict[str, Any]
             print(printout)
             raise NotImplementedError(printout)
 
-    if not os.path.exists(params["nn1_script"]) and not os.path.exists(
-            params["nn1_script"].replace('"', "")
-    ):
-        printout = (
-            printout
-            + "\nERROR: Could not find "
-            + os.path.basename(params["nn1_script"])
-            + " at "
-            + params["nn1_script"]
-            + "\n"
-        )
-        print(printout)
-        raise NotImplementedError(printout)
-    if not os.path.exists(params["nn2_script"]) and not os.path.exists(
-            params["nn2_script"].replace('"', "")
-    ):
-        printout = (
-            printout
-            + "\nERROR: Could not find "
-            + os.path.basename(params["nn2_script"])
-            + " at "
-            + params["nn2_script"]
-            + "\n"
-        )
-        print(printout)
-        raise NotImplementedError(printout)
     if not os.path.exists(params["filename_of_receptor"]):
         printout = (
             printout
@@ -1229,17 +1178,6 @@ def load_in_commandline_parameters(argv: Dict[str, Any]) -> Tuple[Dict[str, Any]
         print(printout)
         raise NotImplementedError(printout)
 
-    # CHECK THAT NN1/NN2 are using only traditional Vina Docking
-    if params["scoring_choice"] in ["NN1", "NN2"]:
-        if params["dock_choice"] != "VinaDocking":
-            printout = _validate_neural_network_compatibility(
-                "\nPlease switch dock_choice option to VinaDocking"
-            )
-        # IF ALTERNATIVE CONVERSION OF PDB2PDBQT CHECK THAT NN1/NN2 are using only MGLTOOLS
-        if params["conversion_choice"] != "MGLToolsConversion":
-            printout = _validate_neural_network_compatibility(
-                "Please switch conversion_choice option to MGLToolsConversion"
-            )
     # Check if the user wants to continue a run or start a new run.
     # Make new run directory if necessary. return the Run folder path
     # The run folder path will be where we place our generations and output files
@@ -1256,23 +1194,6 @@ def load_in_commandline_parameters(argv: Dict[str, Any]) -> Tuple[Dict[str, Any]
     save_vars_as_json(params)
 
     return params, printout
-
-
-def _validate_neural_network_compatibility(arg0):
-    result = (
-        "\n\nNeural Networks 1 and 2 (NN1/NN2) are trained on data "
-        + "using PDBQT files converted by MGLTools \n"
-    )
-    result += "and docked using Autodock Vina 1.1.2.\n"
-    result = (
-        result
-        + "\nUsing conversion or docking software besides"
-        + " these will not work. \n"
-    )
-    result = result + arg0 + " or deselect NN1/NN2 as the scoring_choice.\n"
-    print(result)
-    raise Exception(result)
-
 
 ############################################
 ######### File Handlining Settings #########
