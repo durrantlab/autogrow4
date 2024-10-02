@@ -162,67 +162,6 @@ def test_docking_executables(params: Dict[str, Any], vina_exe: str, qvina2_exe: 
             return False
     return True
 
-def run_macos_notarization(params: Dict[str, Any]) -> None:
-    """
-    This function runs notarization on vina and qvina2 docking.
-    This is important for MacOS newer than 10.15 and newer than
-
-    For MacOS newer than 10.15, this will require an internet connection.
-
-    Inputs:
-    :param dict params: dict of user variables which will govern how the programs runs
-    """
-    current_dir = os.path.dirname(os.path.realpath(__file__)) + os.sep
-    vina_exe = current_dir + os.sep.join(["docking", "docking_executables", "vina", \
-                                          "autodock_vina_1_1_2_mac", "bin", "vina"])
-    qvina2_exe = current_dir + os.sep.join(["docking", "docking_executables", \
-                                            "q_vina_2", "q_vina_2_1_mac", "qvina2.1"])
-
-    # Check executables exist. raise exception if not
-    if os.path.exists(vina_exe) is False or os.path.exists(qvina2_exe) is False:
-        printout = "Docking executables could not be found."
-        raise Exception(printout)
-
-    both_docking_exe_work = test_docking_executables(params, vina_exe, qvina2_exe)
-
-    if both_docking_exe_work is False:
-        # Ensure permissions are unrestricted
-        try:
-            _process_mac_execs(
-                'chmod -R a+rwx ', vina_exe, qvina2_exe
-            )
-        except Exception as e:
-            printout = "Permissions could not be adjusted on docking files."
-            print(printout)
-            raise Exception(printout) from e
-
-        # Check Platform information
-        mac_version = platform.mac_ver()[0].split(".")
-        if int(mac_version[0]) < 10:
-            _notify_docker_requirement(
-                "We do not provide support for MacOS less than 10.7.\n"
-            )
-        if int(mac_version[0]) == 10:
-            if int(mac_version[1]) < 7:
-                _notify_docker_requirement(
-                    "We do not support for MacOS less than 10.7.\n"
-                )
-            if int(mac_version[1]) > 15:
-                _notify_docker_requirement(
-                    "We have not tested MacOS higher than 10.15.\n"
-                )
-            try:
-                _process_mac_execs(
-                    'xattr -w com.apple.quarantine ', vina_exe, qvina2_exe
-                )
-            except Exception as e:
-                printout = (
-                    "Please install xattr. Can be installed using the command:"
-                    + "\n\tpip install xattr"
-                )
-                print(printout)
-                raise Exception(printout) from e
-
 
 def _process_mac_execs(arg0, vina_exe, qvina2_exe):
     command = f"{arg0}{vina_exe}"
@@ -704,7 +643,6 @@ def define_defaults() -> Dict[str, Any]:
 
     # Other params
     params["debug_mode"] = False
-    params["reduce_files_sizes"] = False
     params["generate_plot"] = True
     # Check Bash Timeout function (There's a difference between MacOS and linux)
     # Linux uses timeout while MacOS uses gtimeout
@@ -928,11 +866,6 @@ def load_in_commandline_parameters(argv: Dict[str, Any]) -> Tuple[Dict[str, Any]
                 "TO USE Custom DOCKING OPTION, MUST SPECIFY THE \
                 PATH TO THE Custom DOCKING SCRIPT"
             )
-
-    # Some MacOS require docking software to be notarized. This will require an
-    # internet signal
-    if params["dock_choice"] in ["VinaDocking", "QuickVina2Docking"] and sys.platform.lower() == "darwin":
-        run_macos_notarization(params)
 
     if params["conversion_choice"] == "Custom" and (
         type(params["custom_conversion_script"]) != list

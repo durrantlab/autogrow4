@@ -584,19 +584,6 @@ def get_argparse_vars() -> Dict[str, Any]:
         the gypsum_timeout_limit. Default gypsum_timeout_limit is 15 seconds",
     )
 
-    # Reduce files down. This compiles and compresses the files in the PDBs folder
-    # (contains docking outputs, pdb, pdbqt...). This reduces the data size and
-    # makes data transfer quicker, but requires running the
-    # file_concatenation_and_compression.py in the Utility script folder to
-    # separate these files out for readability.
-    parser.add_argument(
-        "--reduce_files_sizes",
-        choices=[True, False, "True", "False", "true", "false"],
-        default=True,
-        help="Run this combines all files in the PDBs folder into a \
-        single text file. Useful when data needs to be transferred.",
-    )
-
     # Make a line plot of the simulation at the end of the run.
     parser.add_argument(
         "--generate_plot",

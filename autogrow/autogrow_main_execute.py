@@ -39,14 +39,14 @@ def main_execute(params: Dict[str, Any]) -> None:
         if params["use_docked_source_compounds"] is True:
             # This will assess and rank the source compounds prior to
             # generation 1. Thus using the source compounds as a generation 0
-            starting_generation_num = 0
+            start_gen_num = 0
         else:
-            starting_generation_num = 1
+            start_gen_num = 1
 
     else:
-        starting_generation_num = last_generation + 1
+        start_gen_num = last_generation + 1
 
-    if starting_generation_num > num_gens_to_make:
+    if start_gen_num > num_gens_to_make:
         print(
             "This simulation has already been completed to the user defined number \
                 of generations. Please check your user variables."
@@ -64,35 +64,22 @@ def main_execute(params: Dict[str, Any]) -> None:
     # 2)  Docking which handles converting from PDBs to Docking specific
     #     formats and running the actual Docking simulations
     # 3)  Ranking the generation based on the Docking scores
-    for current_generation_number in range(
-        starting_generation_num, num_gens_to_make + 1
-    ):
+    for gen_num in range(start_gen_num, num_gens_to_make + 1):
         sys.stdout.flush()
 
         # Get directory for smi to go
-        current_generation_dir = (
-            params["output_directory"]
-            + f"generation_{current_generation_number}{os.sep}"
-        )
-        print(current_generation_dir)
+        cur_gen_dir = f"{params['output_directory']}generation_{gen_num}{os.sep}"
+        print(cur_gen_dir)
         sys.stdout.flush()
 
-        if (
-            current_generation_number == 0
-            and params["use_docked_source_compounds"] is True
-        ):
-            if (
-                os.path.exists(
-                    current_generation_dir + os.sep + "generation_0_ranked.smi"
-                )
-                is True
-            ):
+        if gen_num == 0 and params["use_docked_source_compounds"] is True:
+            if os.path.exists(f"{cur_gen_dir}{os.sep}generation_0_ranked.smi") is True:
                 continue
 
             (
                 already_docked,
                 smile_file_new_gen,
-                new_gen_ligands_list,
+                new_gen_ligs_list,
             ) = operations.populate_generation_zero(params, generation_num=0)
             sys.stdout.flush()
 
@@ -101,19 +88,16 @@ def main_execute(params: Dict[str, Any]) -> None:
                 # and Begin Docking unweighted_ranked_smile_file is the file
                 # name where the unweighted ranked but score .smi file resides
                 unweighted_ranked_smile_file = DockingClass.run_docking_common(
-                    params,
-                    current_generation_number,
-                    current_generation_dir,
-                    smile_file_new_gen,
+                    params, gen_num, cur_gen_dir, smile_file_new_gen,
                 )
 
         else:
-            smile_file_new_gen, new_gen_ligands_list = operations.populate_generation(
-                params, current_generation_number
+            smile_file_new_gen, new_gen_ligs_list = operations.populate_generation(
+                params, gen_num
             )
             sys.stdout.flush()
 
-            if new_gen_ligands_list is None:
+            if new_gen_ligs_list is None:
                 raise ValueError(
                     "Population failed to make enough mutants or crossovers... \
                                     Errors could include not enough diversity, too few seeds to the generation, \
@@ -125,10 +109,7 @@ def main_execute(params: Dict[str, Any]) -> None:
             # Begin Docking unweighted_ranked_smile_file is the file name
             # where the unweighted ranked but score .smi file resides
             unweighted_ranked_smile_file = DockingClass.run_docking_common(
-                params,
-                current_generation_number,
-                current_generation_dir,
-                smile_file_new_gen,
+                params, gen_num, cur_gen_dir, smile_file_new_gen,
             )
 
         # Delete all temporary files; Skip if in Debugging Mode
@@ -136,9 +117,9 @@ def main_execute(params: Dict[str, Any]) -> None:
             print("Deleting temporary files and directories")
             files_to_del = []
             folders_to_del = [
-                f"{current_generation_dir}{os.sep}3D_SDFs{os.sep}",
-                f"{current_generation_dir}{os.sep}3D_SDFs{os.sep}log{os.sep}",
-                f"{current_generation_dir}{os.sep}gypsum_submission_files{os.sep}",
+                f"{cur_gen_dir}{os.sep}3D_SDFs{os.sep}",
+                f"{cur_gen_dir}{os.sep}3D_SDFs{os.sep}log{os.sep}",
+                f"{cur_gen_dir}{os.sep}gypsum_submission_files{os.sep}",
             ]
             for folder in folders_to_del:
                 if os.path.exists(folder) is False:
@@ -156,7 +137,7 @@ def main_execute(params: Dict[str, Any]) -> None:
             # Reduce the files in the PDBs folder to a single compiled file.
             # This reduces the data size And makes it easier to transfer the
             # data
-            pdbs_folder = f"{current_generation_dir}{os.sep}PDBs{os.sep}"
+            pdbs_folder = f"{cur_gen_dir}{os.sep}PDBs{os.sep}"
             if os.path.exists(pdbs_folder) is True:
                 concatenate_files.run_concatenation(params["parallelizer"], pdbs_folder)
             else:
@@ -164,7 +145,7 @@ def main_execute(params: Dict[str, Any]) -> None:
                     "\nNo PDB folder to concatenate and compress. This is likely generation 0 seeded with a Ranked .smi file.\n"
                 )
         print("")
-        print("Finished generation ", current_generation_number)
+        print("Finished generation ", gen_num)
 
         sys.stdout.flush()
 

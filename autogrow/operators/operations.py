@@ -393,6 +393,10 @@ def populate_generation_zero(
     """
     number_of_processors = int(params["number_of_processors"])
 
+    import pdb
+
+    pdb.set_trace()
+
     num_crossovers = 0
     num_mutations = 0
 
@@ -515,7 +519,7 @@ def populate_generation_zero(
 #############
 # Get seeds
 #############
-def test_source_smiles_convert(smile_info: List[str]) -> Union[List[str], str]:
+def test_source_smiles_convert(smile_info: CompoundInfo) -> Union[CompoundInfo, str]:
     """
     This attempts to convert a SMILES string to an rdkit.Chem.rdchem.Mol
     object
@@ -540,17 +544,19 @@ def test_source_smiles_convert(smile_info: List[str]) -> Union[List[str], str]:
             + "entry in source compound list.\n"
         )
         return f"{printout}\tRemoving: {smile_info}"
-    if len(smile_info) == 1:
-        printout = (
-            "REMOVING SMILES FROM SOURCE LIST: Unformatted or blank "
-            + "entry in source compound list.\n"
-        )
-        printout += f"\tRemoving: {smile_info}"
-        return printout
+
+    # TODO: JDD: What was this? Never understood, so commented out
+    # if len(smile_info) == 1:
+    #     printout = (
+    #         "REMOVING SMILES FROM SOURCE LIST: Unformatted or blank "
+    #         + "entry in source compound list.\n"
+    #     )
+    #     printout += f"\tRemoving: {smile_info}"
+    #     return printout
 
     # separate out SMILES str and ID
-    smile_str = smile_info[0]
-    smile_id = str(smile_info[1])
+    smile_str = smile_info.smiles
+    smile_id = smile_info.name
 
     if type(smile_str) is not type(""):
         printout = (
@@ -657,7 +663,7 @@ def get_complete_list_prev_gen_or_source_compounds(
         source compound list
     """
     source_file_gen_0 = (
-        params["output_directory"] + f"generation_0{os.sep}generation_0_ranked.smi"
+        f"{params['output_directory']}generation_0{os.sep}generation_0_ranked.smi"
     )
     if generation_num == 0:
         usable_list_of_smiles = _get_source_compounds_or_raise(params)

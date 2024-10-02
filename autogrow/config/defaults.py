@@ -105,7 +105,6 @@ def define_defaults() -> Dict[str, Any]:
 
     # Other vars
     default_params["debug_mode"] = False
-    default_params["reduce_files_sizes"] = False
     default_params["generate_plot"] = True
     # Check Bash Timeout function (There's a difference between MacOS and linux)
     # Linux uses timeout while MacOS uses gtimeout

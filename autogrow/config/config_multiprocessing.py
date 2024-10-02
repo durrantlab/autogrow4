@@ -27,7 +27,6 @@ def config_multiprocessing(params: Dict[str, Any]) -> Dict[str, Any]:
         Parallelizer,
     )
 
-
     params["parallelizer"] = Parallelizer(
         params["multithread_mode"], params["number_of_processors"], True
     )

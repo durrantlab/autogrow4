@@ -178,7 +178,9 @@ def get_chosen_mol_full_data_list(
         the associated information in a random order
     """
 
-    import pdb; pdb.set_trace()
+    import pdb
+
+    pdb.set_trace()
     sorted_list = sorted(usable_list_of_smiles, key=lambda x: float(x[-2]))
     weighted_order_list = []
     for smile in chosen_mol_list:
@@ -275,9 +277,7 @@ def convert_usable_list_to_lig_dict(
         key = item.smiles + item.name
         if key in usable_dict_of_smiles and usable_dict_of_smiles[
             key
-        ].score_by_index_lookup(-1) < item.score_by_index_lookup(
-            -2
-        ):  
+        ].score_by_index_lookup(-1) < item.score_by_index_lookup(-2):
             # TODO: Why -1 vs. -2?
             continue
         usable_dict_of_smiles[key] = item
