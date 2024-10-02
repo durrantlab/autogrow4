@@ -295,7 +295,6 @@ def make_smi_and_gyspum_params(
                 "skip_enumerate_double_bonds": False,
                 "let_tautomers_change_chirality": False,
                 "2d_output_only": False,
-                "cache_prerun": False,
                 "test": False,
             }
 

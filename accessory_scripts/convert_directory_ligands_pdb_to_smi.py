@@ -165,7 +165,7 @@ PARSER.add_argument(
     metavar="N",
     default=1,
     help="Number of processors to use for parallel calculations. \
-    This script is not MPI enable but is able to multithread using SMP architecture. \
+    This script is able to multithread using SMP architecture. \
     Set to -1 for all available CPUs.",
 )
 

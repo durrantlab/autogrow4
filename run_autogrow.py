@@ -16,8 +16,11 @@ import __future__
 import multiprocessing
 import datetime
 import sys
+from autogrow.config.argparser import get_argparse_vars
+from autogrow import program_info
+import autogrow.autogrow_main_execute as AutogrowMainExecute
+from autogrow.config import load_commandline_parameters
 
-# NOTE: imports of files are burried below to prevent EOF issues in MPI mode
 
 ################
 # Run AutoGrow #
@@ -25,16 +28,10 @@ import sys
 
 
 def main():
-    from autogrow.config.argparser import get_argparse_vars
 
     args_dict = get_argparse_vars()
 
-    if not args_dict["cache_prerun"]:
-        _run_autogrow_with_params(args_dict)
-    else:  # cache prerun. This is necessary to prevent race conditions in mpi mode.
-        import autogrow.user_vars
-        import autogrow.autogrow_main_execute as AutogrowMainExecute
-        import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.Parallelizer
+    _run_autogrow_with_params(args_dict)
 
 
 # TODO Rename this here and in `main`
@@ -43,8 +40,6 @@ def _run_autogrow_with_params(args_dict):
     # load the commandline parameters
 
     printout = f"(RE)STARTING AUTOGROW 4.0: {str(datetime.datetime.now())}"
-
-    from autogrow import program_info
 
     printout += program_info()
 
@@ -55,8 +50,6 @@ def _run_autogrow_with_params(args_dict):
     # output the paramters used
     printout += "\nPARAMETERS" + "\n"
     printout += " ========== " + "\n"
-
-    from autogrow.config import load_commandline_parameters
 
     params, printout = load_commandline_parameters(args_dict)
 
@@ -71,11 +64,6 @@ def _run_autogrow_with_params(args_dict):
     print("=====================================================")
     print("=====================================================\n\n")
 
-    # Run AUTOGROW. Import move here to prevent EOF in MPI mode. importing
-    # files before the Parallelizer class is established in MPI mode can
-    # produce errors
-    import autogrow.autogrow_main_execute as AutogrowMainExecute
-
     AutogrowMainExecute.main_execute(params)
 
     # Print completion message
@@ -85,10 +73,6 @@ def _run_autogrow_with_params(args_dict):
     print(printout)
 
     print("AUTOGROW FINISHED")
-
-    # # kill mpi workers
-    params["parallelizer"].end(params["multithread_mode"])
-
 
 if __name__ == "__main__":
     multiprocessing.freeze_support()

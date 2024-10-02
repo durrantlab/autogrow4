@@ -194,9 +194,9 @@ def get_argparse_vars() -> Dict[str, Any]:
     parser.add_argument(
         "--multithread_mode",
         default="multithreading",
-        choices=["mpi", "multithreading", "serial"],
+        choices=["multithreading", "serial"],
         help="Determine what style \
-        multithreading: mpi, multithreading, or serial. serial will override \
+        multithreading: multithreading or serial. serial will override \
         number_of_processors and force it to be on a single processor.",
     )
 
@@ -603,14 +603,6 @@ def get_argparse_vars() -> Dict[str, Any]:
         choices=[True, False, "True", "False", "true", "false"],
         default=True,
         help="Make a line plot of the simulation at the end of the run.",
-    )
-
-    # mpi mode pre-Run so there are python cache files without EOF Errors
-    parser.add_argument(
-        "--cache_prerun",
-        "-c",
-        action="store_true",
-        help="Run this before running gypsum in mpi-mode.",
     )
 
     args_dict = vars(parser.parse_args())
