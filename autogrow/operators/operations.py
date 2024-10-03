@@ -10,6 +10,7 @@ import copy
 import sys
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+from autogrow.plugins.plugin_manager_base import get_plugin_manager
 from autogrow.types import PreDockedCompoundInfo
 import rdkit  # type: ignore
 import rdkit.Chem as Chem  # type: ignore
@@ -74,9 +75,7 @@ def populate_generation(
     # entire User specified Source compound list If either has a SMILES that
     # does not sanitize in RDKit it will be excluded and a printout of its
     # Name and SMILES string will be printed.
-    source_compounds_list = get_complete_list_prev_gen_or_source_compounds(
-        params, generation_num
-    )
+    src_cmpds = get_complete_list_prev_gen_or_source_compounds(params, generation_num)
 
     num_seed_diversity, num_seed_dock_fitness = determine_seed_population_sizes(
         params, generation_num
@@ -89,11 +88,7 @@ def populate_generation(
 
     # Get starting compounds for Mutations
     seed_list_mutations = make_seed_list(
-        params,
-        source_compounds_list,
-        generation_num,
-        num_seed_diversity,
-        num_seed_dock_fitness,
+        params, src_cmpds, generation_num, num_seed_diversity, num_seed_dock_fitness,
     )
 
     # Save seed list for Mutations
@@ -181,11 +176,7 @@ def populate_generation(
 
     # Get starting compounds to seed Crossovers
     seed_list_crossovers = make_seed_list(
-        params,
-        source_compounds_list,
-        generation_num,
-        num_seed_diversity,
-        num_seed_dock_fitness,
+        params, src_cmpds, generation_num, num_seed_diversity, num_seed_dock_fitness,
     )
 
     # Save seed list for Crossovers
@@ -268,10 +259,7 @@ def populate_generation(
     # to next generation final selection
 
     chosen_mol_to_pass_through_list = make_pass_through_list(
-        params,
-        source_compounds_list,
-        num_elite_to_advance_from_previous_gen,
-        generation_num,
+        params, src_cmpds, num_elite_to_advance_from_previous_gen, generation_num,
     )
 
     if type(chosen_mol_to_pass_through_list) == str:
@@ -358,7 +346,7 @@ def populate_generation(
     return full_generation_smiles_file, full_gen_smis
 
 
-# TODO Rename this here and in `populate_generation`
+# TODO: Rename this here and in `populate_generation`
 def _extracted_from_populate_generation_142(arg0, arg1, arg2, arg3):
     print("")
     print("")
@@ -698,7 +686,10 @@ def get_complete_list_prev_gen_or_source_compounds(
         prefilter_list = copy.deepcopy(usable_list_of_smiles)
         print("")
         print("Running Filter on the Compounds from last generation/Source")
-        usable_list_of_smiles = Filter.run_filter(params, usable_list_of_smiles)
+        # usable_list_of_smiles = Filter.run_filter(params, usable_list_of_smiles)
+        usable_list_of_smiles = get_plugin_manager("SmilesFilterPluginManager").run(
+            predocked_compounds=usable_list_of_smiles
+        )
 
         # Remove Nones:
         usable_list_of_smiles = [x for x in usable_list_of_smiles if x is not None]
@@ -956,7 +947,11 @@ def make_pass_through_list(
 
     if gen_num == 0 and params["filter_source_compounds"] is True:
         # Run Filters on ligand list
-        ligs_that_passed_filters = Filter.run_filter(params, smis_from_prev_gen)
+        # ligs_that_passed_filters = Filter.run_filter(params, smis_from_prev_gen)
+        ligs_that_passed_filters = get_plugin_manager("SmilesFilterPluginManager").run(
+            predocked_compounds=smis_from_prev_gen
+        )
+
         # Remove Nones:
         ligs_that_passed_filters = [
             x for x in ligs_that_passed_filters if x is not None

@@ -86,13 +86,13 @@ def run_filter(
         job_input.append(temp_tuple)
     job_input = tuple(job_input)
 
-    results = params["parallelizer"].run(job_input, run_filter_mol)
+    results = params["parallelizer"].run(job_input, _run_filter_mol)
 
     # remove mols which fail the filter
     return [x for x in results if x is not None]
 
 
-def run_filter_mol(
+def _run_filter_mol(
     smiles_info: PreDockedCompoundInfo, child_dict: Dict[str, ParentFilter]
 ) -> Union[PreDockedCompoundInfo, None]:
     """
@@ -139,7 +139,7 @@ def run_filter_mol(
 
     if child_dict is not None:
         # run through the filters
-        filter_result = run_all_selected_filters(mol, child_dict)
+        filter_result = _run_all_selected_filters(mol, child_dict)
 
         # see if passed. If it passed return the smiles_info
         return smiles_info if filter_result else None
@@ -179,7 +179,7 @@ def run_filter_on_just_smiles(
 
     if child_dict is not None:
         # run through the filters
-        filter_result = run_all_selected_filters(mol, child_dict)
+        filter_result = _run_all_selected_filters(mol, child_dict)
 
         # see if passed. If it passed return the smiles_info
         return smile_string if filter_result else False
@@ -187,7 +187,7 @@ def run_filter_on_just_smiles(
     return smile_string
 
 
-def run_all_selected_filters(
+def _run_all_selected_filters(
     mol: rdkit.Chem.rdchem.Mol, child_dict: Dict[str, ParentFilter]
 ) -> bool:
     """
@@ -210,7 +210,7 @@ def run_all_selected_filters(
     mol = MOH.check_sanitization(mol)
     if mol is None:
         return False
-    for child in list(child_dict.keys()):
+    for child in child_dict:
         mol_copy = copy.deepcopy(mol)
         filter_function = child_dict[child].run_filter
         if filter_function(mol_copy) is False:

@@ -568,20 +568,24 @@ class VinaDocking(ParentDocking):
         pass_through_data: List[PostDockedCompoundInfo] = []
         for lig in pass_through_list:
             # CHECKED: lig is of type PreDockedCompoundInfo here.
-            import pdb
 
-            pdb.set_trace()
             lig_data = prev_gen_data_dict[str(lig.smiles + lig.name)]
             # CHECKED: lig_data is of type PreDockedCompoundInfo here.
 
-
             # NOTE: Here it must be converted to a PostDockedCompoundInfo
+            assert (
+                lig_data.previous_docking_score is not None
+            ), "lig_data.previous_docking_score is None"
 
-            lig_data = lig_data.copy()
-            lig_data.
-            # lig_info_remove_diversity_info = PostDockedCompoundInfo(
-            #     smiles=lig.smiles, id=lig.name, short_id=lig.name, additional_info = "", score=lig_data.previous_docking_score, diversity_score=None
-            # )
+            # TODO: Nervous that additional_info = "". Not sure what to put there.
+            lig_info_remove_diversity_info = PostDockedCompoundInfo(
+                smiles=lig.smiles,
+                id=lig.name,
+                short_id=lig.name,
+                additional_info="",
+                score=lig_data.previous_docking_score,
+                diversity_score=None,
+            )
             pass_through_data.append(lig_info_remove_diversity_info)
 
         smiles_list.extend(pass_through_data)

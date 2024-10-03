@@ -54,7 +54,7 @@ def run_rank_selector(
     # Sort by chosen idx property
     sorted_list = sorted(
         usable_list_of_smiles,
-        key=lambda x: x.get_score(score_type),
+        key=lambda x: x.get_previous_score(score_type),
         reverse=reverse_sort,
     )
 
@@ -89,7 +89,9 @@ def run_rank_selector(
         )
 
     new_sorted_list = sorted(
-        new_sorted_list, key=lambda x: x.get_score(score_type), reverse=reverse_sort,
+        new_sorted_list,
+        key=lambda x: x.get_previous_score(score_type),
+        reverse=reverse_sort,
     )
 
     if len(list({x.smiles for x in new_sorted_list})) >= number_to_chose:

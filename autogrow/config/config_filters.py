@@ -28,11 +28,6 @@ def setup_filters(params: Dict[str, Any]) -> Dict[str, Any]:
         chosen_ligand_filters, params = _picked_filters(params)
     params["chosen_ligand_filters"] = chosen_ligand_filters
 
-    import autogrow.operators.filter.execute_filters as Filter
-
-    # get child filter class object function dictionary
-    params["filter_object_dict"] = Filter.make_run_class_dict(chosen_ligand_filters)
-
     return params
 
 

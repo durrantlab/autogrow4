@@ -71,7 +71,7 @@ def save_vars_as_json(params: Dict[str, Any]) -> None:
     temp_vars = {
         k: copy.deepcopy(params[k])
         for k in params
-        if "parallelizer" not in k and k != "filter_object_dict"
+        if "parallelizer" not in k
     }
     with open(vars_file, "w") as fp:
         json.dump(temp_vars, fp, indent=4)
@@ -1818,12 +1818,6 @@ def filter_choice_handling(params: Dict[str, Any]) -> Dict[str, Any]:
         chosen_ligand_filters, params = picked_filters(params)
     params["chosen_ligand_filters"] = chosen_ligand_filters
 
-    import autogrow.operators.filter.execute_filters as Filter
-
-
-    # get child filter class object function dictionary
-    params["filter_object_dict"] = Filter.make_run_class_dict(chosen_ligand_filters)
-
     return params
 
 
@@ -1843,6 +1837,7 @@ def picked_filters(params: Dict[str, Any]) -> Tuple[List[str], Dict[str, Any]]:
         params["alternative_filters"] as the name of that class and place
         that file in the same folder as the other filter classes.
     """
+    import pdb; pdb.set_trace()
     filter_list = []
     vars_keys = list(params.keys())
 
@@ -1907,6 +1902,7 @@ def picked_filters(params: Dict[str, Any]) -> Tuple[List[str], Dict[str, Any]]:
 
     # if there is no user specified ligand filters but they haven't set
     # filters to None ---> set filter to default of LipinskiLenientFilter.
+    # TODO: I want the default to be none. Revisit this.
     if len(filter_list) == 0:
         params["LipinskiLenientFilter"] = True
         filter_list.append("LipinskiLenientFilter")

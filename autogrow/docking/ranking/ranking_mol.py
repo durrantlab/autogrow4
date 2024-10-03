@@ -188,7 +188,7 @@ def get_chosen_mol_full_data_list(
     """
 
     sorted_list = sorted(
-        usable_list_of_smiles, key=lambda x: x.get_score(ScoreType.DOCKING)
+        usable_list_of_smiles, key=lambda x: x.get_previous_score(ScoreType.DOCKING)
     )
     weighted_order_list: List[PreDockedCompoundInfo] = []
     for smile in chosen_mol_list:
@@ -265,7 +265,7 @@ def get_usable_format(infile: str) -> List[PreDockedCompoundInfo]:
 
 def convert_usable_list_to_lig_dict(
     usable_list_of_smiles: List[PreDockedCompoundInfo],
-) -> Optional[Dict[str, PostDockedCompoundInfo]]:
+) -> Optional[Dict[str, PreDockedCompoundInfo]]:
     """
     This will convert a list created by get_usable_format() to a dictionary
     using the ligand smile+lig_id as the key. This makes for faster searching
@@ -283,16 +283,15 @@ def convert_usable_list_to_lig_dict(
     if type(usable_list_of_smiles) is not type([]):
         return None
 
-    print(usable_list_of_smiles)
-    import pdb; pdb.set_trace()
-
-    usable_dict_of_smiles: Dict[str, PostDockedCompoundInfo] = {}
+    usable_dict_of_smiles: Dict[str, PreDockedCompoundInfo] = {}
     for item in usable_list_of_smiles:
         key = item.smiles + item.name
         if key in usable_dict_of_smiles and usable_dict_of_smiles[
             key
-        ].score_by_index_lookup(-1) < item.score_by_index_lookup(-2):
-            # TODO: Why -1 vs. -2?
+        ].get_previous_score(ScoreType.DIVERSITY) < item.get_previous_score(
+            ScoreType.DOCKING
+        ):
+            # TODO: Why DIVERSITY vs. DOCKING? Not understanding the comparison here.
             continue
         usable_dict_of_smiles[key] = item
     return usable_dict_of_smiles

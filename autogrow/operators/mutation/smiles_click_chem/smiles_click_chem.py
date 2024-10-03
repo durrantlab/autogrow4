@@ -8,6 +8,7 @@ import copy
 from typing import Any, Dict, List, Optional, Union
 
 from autogrow.operators.filter.filter_classes.parent_filter_class import ParentFilter
+from autogrow.plugins.plugin_manager_base import get_plugin_manager
 from autogrow.types import PreDockedCompoundInfo
 import rdkit  # type: ignore
 from rdkit import Chem  # type: ignore
@@ -982,17 +983,22 @@ class SmilesClickChem(object):
             return None
 
         # Check if product SMILE has been made before
-        reaction_product_smilestring = Chem.MolToSmiles(
+        reaction_product_smilestring: str = Chem.MolToSmiles(
             reaction_product, isomericSmiles=True
         )
         if reaction_product_smilestring in self.list_of_already_made_smiles:
             return None
 
         # Run through filters
-        passed_filter = Filter.run_filter_on_just_smiles(
-            reaction_product_smilestring, self.filter_object_dict
-        )
-        if passed_filter == False:  # NOTE: Keep as "== False"
+        # passed_filter = Filter.run_filter_on_just_smiles(
+        #     reaction_product_smilestring, self.filter_object_dict
+        # )
+        passed_filter = len(get_plugin_manager("SmilesFilterPluginManager").run(
+            smiles=reaction_product_smilestring
+        )) > 0
+
+        if not passed_filter:
             return None
+
         # passes
         return reaction_product_smilestring

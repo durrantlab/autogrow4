@@ -20,6 +20,8 @@ from autogrow.config.argparser import get_argparse_vars
 from autogrow import program_info
 import autogrow.autogrow_main_execute as AutogrowMainExecute
 from autogrow.config import load_commandline_parameters
+from autogrow.plugins.plugin_manager_base import get_all_plugin_managers
+from autogrow.plugins.smiles_filters import SmilesFilterBase, SmilesFilterPluginManager
 
 
 ################
@@ -27,9 +29,30 @@ from autogrow.config import load_commandline_parameters
 ################
 
 
+def _load_plugin_managers() -> None:
+    # Note that this just loads the plugins (and sets up args). It doesn't
+    # actually create the plugin objects yet.
+
+    # Set up filters
+    SmilesFilterPluginManager(SmilesFilterBase)
+
+
+def _setup_plugin_managers(params) -> None:
+    # This sets up the plugin managers, after the params have been loaded.
+
+    plugin_managers = get_all_plugin_managers()
+
+    for name, plugin_managers in plugin_managers.items():
+        plugin_managers.setup(params)
+
+
 def main():
+    _load_plugin_managers()
 
     args_dict = get_argparse_vars()
+
+    # Setup all plugin managers
+    _setup_plugin_managers(args_dict)
 
     _run_autogrow_with_params(args_dict)
 

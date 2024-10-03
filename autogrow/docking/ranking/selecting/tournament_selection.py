@@ -131,12 +131,12 @@ def run_one_tournament(
         else:
             choice = list_of_ligands[random.randint(0, num_ligands - 1)]
             if favor_most_negative:
-                if float(chosen_option.get_score(score_type)) > float(
-                    choice.get_score(score_type)
+                if float(chosen_option.get_previous_score(score_type)) > float(
+                    choice.get_previous_score(score_type)
                 ):
                     chosen_option = choice
-            elif float(chosen_option.get_score(score_type)) < float(
-                choice.get_score(score_type)
+            elif float(chosen_option.get_previous_score(score_type)) < float(
+                choice.get_previous_score(score_type)
             ):
                 chosen_option = choice
             else:

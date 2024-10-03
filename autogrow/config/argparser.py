@@ -1,11 +1,153 @@
 import argparse
 import copy
-from typing import Any, Dict
+from dataclasses import dataclass
+from typing import Any, Dict, List
+
+parser = argparse.ArgumentParser(
+    description="AutoGrow: An automated drug optimization and generation tool."
+)
+
+plugin_arg_groups_to_add = []
+
+
+@dataclass
+class ArgumentVars:
+    name: str
+    action: str
+    default: Any
+    help: str
+
+
+def register_argparse_group(title: str, arg_vars: List[ArgumentVars]):
+    global plugin_arg_groups_to_add
+    plugin_arg_groups_to_add.append((title, arg_vars))
 
 
 def get_argparse_vars() -> Dict[str, Any]:
-    parser = argparse.ArgumentParser()
+    global parser
+    global plugin_arg_groups_to_add
 
+    # TODO: These settings grouped by ChatGPT. Good to review and regroup in
+    # some places.
+
+    # General Settings
+    general = parser.add_argument_group(
+        "General Settings (basic configuration for the program)"
+    )
+    _add_general_params(general)
+
+    # Input/Output Settings
+    io = parser.add_argument_group(
+        "Input/Output Settings (directories and files for input and output)"
+    )
+    _add_io_params(io)
+
+    # Receptor Information
+    receptor = parser.add_argument_group(
+        "Receptor Information (details about the receptor for docking)"
+    )
+    _add_receptor_params(receptor)
+
+    # Genetic Algorithm Options
+    ga = parser.add_argument_group(
+        "General Genetic Algorithm Options (settings for the genetic algorithm)"
+    )
+    _add_ga_params(ga)
+
+    ga_first_gen = parser.add_argument_group(
+        "Genetic Algorithm Options Applied to the First Generation (settings for the first generation)"
+    )
+    _add_ga_first_gen_params(ga_first_gen)
+
+    ga_subsequent_gen = parser.add_argument_group(
+        "Genetic Algorithm Options Applied to Subsequent Generations (settings for all generations after the first)"
+    )
+    _add_ga_subsequent_gen_params(ga_subsequent_gen)
+
+    # SmilesMerge Settings
+    smilesmerge = parser.add_argument_group(
+        "SmilesMerge Settings (options for the SmilesMerge operation)"
+    )
+    _add_smilesmerge_params(smilesmerge)
+
+    # Mutation Settings
+    mutation = parser.add_argument_group(
+        "Mutation Settings (options for the mutation operation)"
+    )
+    _add_mutation_params(mutation)
+
+    # Filter Settings
+    # filters = parser.add_argument_group(
+    #     "Filter Settings (options for filtering compounds)"
+    # )
+    # _add_filter_params(filters)
+
+    # Conversion Settings
+    conversion = parser.add_argument_group(
+        "Conversion Settings (options for file conversion)"
+    )
+    _add_conversion_params(conversion)
+
+    # Docking Settings
+    docking = parser.add_argument_group(
+        "Docking Settings (options for molecular docking)"
+    )
+    _add_docking_params(docking)
+
+    # Scoring Settings
+    scoring = parser.add_argument_group(
+        "Scoring Settings (options for scoring docked compounds)"
+    )
+    _add_scoring_params(scoring)
+
+    # Gypsum Settings
+    gypsum = parser.add_argument_group("Gypsum Settings (options for Gypsum-DL)")
+    _add_gypsum_params(gypsum)
+
+    # Miscellaneous
+    misc = parser.add_argument_group("Miscellaneous (other settings)")
+    _add_misc_params(misc)
+
+    # Now add in plugin arg groups
+    titles = []
+    titles_to_arg_vars = {}
+    for title, arg_vars in plugin_arg_groups_to_add:
+        if title not in titles:
+            titles.append(title)
+        
+        if title not in titles_to_arg_vars:
+            titles_to_arg_vars[title] = []
+
+        titles_to_arg_vars[title].extend(arg_vars)
+    
+    for title in titles:
+        arg_vars = titles_to_arg_vars[title]
+        group = parser.add_argument_group(title)
+        for arg_var in arg_vars:
+            if arg_var.name[:2] != "--":
+                arg_var.name = f"--{arg_var.name}"
+
+            group.add_argument(
+                arg_var.name,
+                action=arg_var.action,
+                default=arg_var.default,
+                help=arg_var.help,
+            )
+
+    args_dict = vars(parser.parse_args())
+
+    # copying args_dict so we can delete out of while iterating through the
+    # original args_dict
+    inputs = copy.deepcopy(args_dict)
+
+    for k, v in args_dict.items():
+        if v is None:
+            del inputs[k]
+
+    return inputs
+
+
+def _add_general_params(parser: argparse._ArgumentGroup):
     # Allows the run commands to be submitted via a .json file.
     parser.add_argument(
         "--json",
@@ -25,6 +167,60 @@ def get_argparse_vars() -> Dict[str, Any]:
         temporary files and adds extra print statements.",
     )
 
+    # processors and multithread mode
+    parser.add_argument(
+        "--number_of_processors",
+        "-p",
+        type=int,
+        metavar="N",
+        default=1,
+        help="Number of processors to use for parallel calculations. Set to -1 for all available CPUs.",
+    )
+    parser.add_argument(
+        "--multithread_mode",
+        default="multithreading",
+        choices=["multithreading", "serial"],
+        help="Determine what style \
+        multithreading: multithreading or serial. serial will override \
+        number_of_processors and force it to be on a single processor.",
+    )
+
+
+def _add_io_params(parser: argparse._ArgumentGroup):
+    # Input/Output directories
+    parser.add_argument(
+        "--root_output_folder",
+        "-o",
+        type=str,
+        help="The Path to the folder which all output files will be placed.",
+    )
+    parser.add_argument(
+        "--source_compound_file",
+        "-s",
+        type=str,
+        help="PATH to the file containing the source compounds. It must be \
+        tab-delineated .smi file. These ligands will seed the first generation.",
+    )
+    parser.add_argument(
+        "--filter_source_compounds",
+        choices=[True, False, "True", "False", "true", "false"],
+        default=True,
+        help="If True source ligands from source_compound_file will be \
+        filter using the user defined filter choices prior to the 1st generation being \
+        created. If False, ligands which would fail the ligand filters could seed \
+        the 1st generation. Default is True.",
+    )
+    parser.add_argument(
+        "--start_a_new_run",
+        action="store_true",
+        default=False,
+        help="If False make a new folder and start a fresh simulation with Generation 0.  \
+        If True find the last generation in the root_output_folder and continue to fill.\
+        Default is False.",
+    )
+
+
+def _add_receptor_params(parser: argparse._ArgumentGroup):
     # receptor information
     parser.add_argument(
         "--filename_of_receptor",
@@ -67,28 +263,43 @@ def get_argparse_vars() -> Dict[str, Any]:
         help="dimension of box to dock into in the z-axis (Angstrom)",
     )
 
-    # Input/Output directories
+
+def _add_ga_first_gen_params(parser: argparse._ArgumentGroup):
+    # Seeding next gen and diversity
     parser.add_argument(
-        "--root_output_folder",
-        "-o",
-        type=str,
-        help="The Path to the folder which all output files will be placed.",
+        "--top_mols_to_seed_next_generation_first_generation",
+        type=int,
+        help="Number of mols that seed next generation, for the first generation.\
+        Should be less than number_of_crossovers_first_generation + number_of_mutations_first_generation\
+        If not defined it will default to top_mols_to_seed_next_generation",
     )
     parser.add_argument(
-        "--source_compound_file",
-        "-s",
-        type=str,
-        help="PATH to the file containing the source compounds. It must be \
-        tab-delineated .smi file. These ligands will seed the first generation.",
+        "--diversity_mols_to_seed_first_generation",
+        type=int,
+        default=10,
+        help="Should be less than number_of_crossovers_first_generation \
+        + number_of_mutations_first_generation",
     )
     parser.add_argument(
-        "--filter_source_compounds",
-        choices=[True, False, "True", "False", "true", "false"],
-        default=True,
-        help="If True source ligands from source_compound_file will be \
-        filter using the user defined filter choices prior to the 1st generation being \
-        created. If False, ligands which would fail the ligand filters could seed \
-        the 1st generation. Default is True.",
+        "--number_of_crossovers_first_generation",
+        type=int,
+        help="The number of ligands which will be created via crossovers in the \
+        first generation. If not defined it will default to number_of_crossovers",
+    )
+    parser.add_argument(
+        "--number_of_mutants_first_generation",
+        type=int,
+        help="The number of ligands which will be created via mutation in \
+        the first generation. If not defined it will default to number_of_mutants",
+    )
+    parser.add_argument(
+        "--number_elitism_advance_from_previous_gen_first_generation",
+        type=int,
+        help="The number of ligands chosen for elitism for the first generation \
+        These will advance from the previous generation directly into the next \
+        generation.  This is purely advancing based on Docking/Rescore fitness. \
+        This does not select for diversity. If not defined it will default to \
+        number_elitism_advance_from_previous_gen",
     )
     parser.add_argument(
         "--dock_source_compounds_first",
@@ -107,15 +318,89 @@ def get_argparse_vars() -> Dict[str, Any]:
         source_compound_file for future simulations. \
         Default is True.",
     )
+
+
+def _add_ga_subsequent_gen_params(parser: argparse._ArgumentGroup):
     parser.add_argument(
-        "--start_a_new_run",
-        action="store_true",
-        default=False,
-        help="If False make a new folder and start a fresh simulation with Generation 0.  \
-        If True find the last generation in the root_output_folder and continue to fill.\
-        Default is False.",
+        "--top_mols_to_seed_next_generation",
+        type=int,
+        default=10,
+        help="Number of mols that seed next generation, for all generations after the first.\
+        Should be less than number_of_crossovers_first_generation \
+        + number_of_mutations_first_generation",
+    )
+    parser.add_argument(
+        "--number_of_crossovers",
+        type=int,
+        default=10,
+        help="The number of ligands which will be created via crossover in each \
+        generation besides the first",
+    )
+    parser.add_argument(
+        "--number_of_mutants",
+        type=int,
+        default=10,
+        help="The number of ligands which will be created via mutation in each \
+        generation besides the first.",
     )
 
+
+def _add_ga_params(parser: argparse._ArgumentGroup):
+    # Genetic Algorithm Options
+    parser.add_argument(
+        "--selector_choice",
+        choices=["Roulette_Selector", "Rank_Selector", "Tournament_Selector"],
+        default="Roulette_Selector",
+        help="This determines whether the fitness criteria are chosen by a Weighted Roulette, \
+        Ranked, or Tournament style Selector. The Rank option is a non-redundant selector.\
+        Roulette and Tournament chose without replacement and are stoichastic options. \
+        Warning do not use Rank_Selector for small runs as there is potential that \
+        the number of desired ligands exceed the number of ligands to chose from.",
+    )
+    parser.add_argument(
+        "--tourn_size",
+        type=float,
+        default=0.1,
+        help="If using the Tournament_Selector this determines the size of each \
+        tournament. The number of ligands used for each tournament will the \
+        tourn_size * the number of considered ligands.",
+    )
+
+    # Populations settings
+    parser.add_argument(
+        "--num_generations",
+        type=int,
+        default=10,
+        help="The number of generations to be created.",
+    )
+    parser.add_argument(
+        "--number_elitism_advance_from_previous_gen",
+        type=int,
+        default=10,
+        help="The number of ligands chosen for elitism. These will advance from \
+        the previous generation directly into the next generation. \
+        This is purely advancing based on Docking/Rescore \
+        fitness. This does not select for diversity.",
+    )
+    parser.add_argument(
+        "--redock_elite_from_previous_gen",
+        choices=[True, False, "True", "False", "true", "false"],
+        default=False,
+        help="If True than ligands chosen via Elitism (ie advanced from last generation) \
+        will be passed through Gypsum and docked again. This provides a better exploration of conformer space \
+        but also requires more computation time. If False, advancing ligands are simply carried forward by \
+        copying the PDBQT files.",
+    )
+
+    parser.add_argument(
+        "--diversity_seed_depreciation_per_gen",
+        type=int,
+        default=2,
+        help="Each gen diversity_mols_to_seed_first_generation will decrease this amount",
+    )
+
+
+def _add_smilesmerge_params(parser: argparse._ArgumentGroup):
     # SmilesMerge Settings
     parser.add_argument(
         "--max_time_MCS_prescreen",
@@ -146,6 +431,8 @@ def get_argparse_vars() -> Dict[str, Any]:
         (if False) SmilesMerge is 10x faster when deprotanated",
     )
 
+
+def _add_mutation_params(parser: argparse._ArgumentGroup):
     # Mutation Settings
     parser.add_argument(
         "--rxn_library",
@@ -182,210 +469,87 @@ def get_argparse_vars() -> Dict[str, Any]:
         for the Drug-likeliness and size filters you will Run Autogrow with.",
     )
 
-    # processors and multithread mode
-    parser.add_argument(
-        "--number_of_processors",
-        "-p",
-        type=int,
-        metavar="N",
-        default=1,
-        help="Number of processors to use for parallel calculations. Set to -1 for all available CPUs.",
-    )
-    parser.add_argument(
-        "--multithread_mode",
-        default="multithreading",
-        choices=["multithreading", "serial"],
-        help="Determine what style \
-        multithreading: multithreading or serial. serial will override \
-        number_of_processors and force it to be on a single processor.",
-    )
 
-    # Genetic Algorithm Options
-    parser.add_argument(
-        "--selector_choice",
-        choices=["Roulette_Selector", "Rank_Selector", "Tournament_Selector"],
-        default="Roulette_Selector",
-        help="This determines whether the fitness criteria are chosen by a Weighted Roulette, \
-        Ranked, or Tournament style Selector. The Rank option is a non-redundant selector.\
-        Roulette and Tournament chose without replacement and are stoichastic options. \
-        Warning do not use Rank_Selector for small runs as there is potential that \
-        the number of desired ligands exceed the number of ligands to chose from.",
-    )
-    parser.add_argument(
-        "--tourn_size",
-        type=float,
-        default=0.1,
-        help="If using the Tournament_Selector this determines the size of each \
-        tournament. The number of ligands used for each tournament will the \
-        tourn_size * the number of considered ligands.",
-    )
-
-    # Seeding next gen and diversity
-    parser.add_argument(
-        "--top_mols_to_seed_next_generation_first_generation",
-        type=int,
-        help="Number of mols that seed next generation, for the first generation.\
-        Should be less than number_of_crossovers_first_generation + number_of_mutations_first_generation\
-        If not defined it will default to top_mols_to_seed_next_generation",
-    )
-    parser.add_argument(
-        "--top_mols_to_seed_next_generation",
-        type=int,
-        default=10,
-        help="Number of mols that seed next generation, for all generations after the first.\
-        Should be less than number_of_crossovers_first_generation \
-        + number_of_mutations_first_generation",
-    )
-    parser.add_argument(
-        "--diversity_mols_to_seed_first_generation",
-        type=int,
-        default=10,
-        help="Should be less than number_of_crossovers_first_generation \
-        + number_of_mutations_first_generation",
-    )
-    parser.add_argument(
-        "--diversity_seed_depreciation_per_gen",
-        type=int,
-        default=2,
-        help="Each gen diversity_mols_to_seed_first_generation will decrease this amount",
-    )
-
-    # Populations settings
-    parser.add_argument(
-        "--num_generations",
-        type=int,
-        default=10,
-        help="The number of generations to be created.",
-    )
-    parser.add_argument(
-        "--number_of_crossovers_first_generation",
-        type=int,
-        help="The number of ligands which will be created via crossovers in the \
-        first generation. If not defined it will default to number_of_crossovers",
-    )
-    parser.add_argument(
-        "--number_of_mutants_first_generation",
-        type=int,
-        help="The number of ligands which will be created via mutation in \
-        the first generation. If not defined it will default to number_of_mutants",
-    )
-    parser.add_argument(
-        "--number_elitism_advance_from_previous_gen_first_generation",
-        type=int,
-        help="The number of ligands chosen for elitism for the first generation \
-        These will advance from the previous generation directly into the next \
-        generation.  This is purely advancing based on Docking/Rescore fitness. \
-        This does not select for diversity. If not defined it will default to \
-        number_elitism_advance_from_previous_gen",
-    )
-    parser.add_argument(
-        "--number_of_crossovers",
-        type=int,
-        default=10,
-        help="The number of ligands which will be created via crossover in each \
-        generation besides the first",
-    )
-    parser.add_argument(
-        "--number_of_mutants",
-        type=int,
-        default=10,
-        help="The number of ligands which will be created via mutation in each \
-        generation besides the first.",
-    )
-    parser.add_argument(
-        "--number_elitism_advance_from_previous_gen",
-        type=int,
-        default=10,
-        help="The number of ligands chosen for elitism. These will advance from \
-        the previous generation directly into the next generation. \
-        This is purely advancing based on Docking/Rescore \
-        fitness. This does not select for diversity.",
-    )
-    parser.add_argument(
-        "--redock_elite_from_previous_gen",
-        choices=[True, False, "True", "False", "true", "false"],
-        default=False,
-        help="If True than ligands chosen via Elitism (ie advanced from last generation) \
-        will be passed through Gypsum and docked again. This provides a better exploration of conformer space \
-        but also requires more computation time. If False, advancing ligands are simply carried forward by \
-        copying the PDBQT files.",
-    )
-
+def _add_filter_params(parser: argparse._ArgumentGroup):
     ####### FILTER VARIABLES
-    parser.add_argument(
-        "--LipinskiStrictFilter",
-        action="store_true",
-        default=False,
-        help="Lipinski filters for orally available drugs following Lipinski rule of fives. \
-        Filters by molecular weight, logP and number of hydrogen bond donors and acceptors. \
-        Strict implementation means a ligand must pass all requirements.",
-    )
-    parser.add_argument(
-        "--LipinskiLenientFilter",
-        action="store_true",
-        default=False,
-        help="Lipinski filters for orally available drugs following Lipinski rule of fives. \
-        Filters by molecular weight, logP and number of hydrogen bond donors and acceptors. \
-        Lenient implementation means a ligand may fail all but one requirement and still passes.",
-    )
-    parser.add_argument(
-        "--GhoseFilter",
-        action="store_true",
-        default=False,
-        help="Ghose filters for drug-likeliness; filters by molecular weight,\
-        logP and number of atoms.",
-    )
-    parser.add_argument(
-        "--GhoseModifiedFilter",
-        action="store_true",
-        default=False,
-        help="Ghose filters for drug-likeliness; filters by molecular weight,\
-        logP and number of atoms. This is the same as the GhoseFilter, but \
-        the upper-bound of the molecular weight restrict is loosened from \
-        480Da to 500Da. This is intended to be run with Lipinski Filter and \
-        to match AutoGrow 3's Ghose Filter.",
-    )
-    parser.add_argument(
-        "--MozziconacciFilter",
-        action="store_true",
-        default=False,
-        help="Mozziconacci filters for drug-likeliness; filters by the number of \
-        rotatable bonds, rings, oxygens, and halogens.",
-    )
-    parser.add_argument(
-        "--VandeWaterbeemdFilter",
-        action="store_true",
-        default=False,
-        help="VandeWaterbeemd filters for drug likely to be blood brain barrier permeable. \
-        Filters by the number of molecular weight and Polar Sureface Area (PSA).",
-    )
-    parser.add_argument(
-        "--PAINSFilter",
-        action="store_true",
-        default=False,
-        help="PAINS filters against Pan Assay Interference Compounds using \
-        substructure a search.",
-    )
-    parser.add_argument(
-        "--NIHFilter",
-        action="store_true",
-        default=False,
-        help="NIH filters against molecules with undersirable functional groups \
-        using substructure a search.",
-    )
-    parser.add_argument(
-        "--BRENKFilter",
-        action="store_true",
-        default=False,
-        help="BRENK filter for lead-likeliness, by matching common false positive \
-        molecules to the current mol.",
-    )
+    # parser.add_argument(
+    #     "--LipinskiStrictFilter",
+    #     action="store_true",
+    #     default=False,
+    #     help="Lipinski filters for orally available drugs following Lipinski rule of fives. \
+    #     Filters by molecular weight, logP and number of hydrogen bond donors and acceptors. \
+    #     Strict implementation means a ligand must pass all requirements.",
+    # )
+    # parser.add_argument(
+    #     "--LipinskiLenientFilter",
+    #     action="store_true",
+    #     default=False,
+    #     help="Lipinski filters for orally available drugs following Lipinski rule of fives. \
+    #     Filters by molecular weight, logP and number of hydrogen bond donors and acceptors. \
+    #     Lenient implementation means a ligand may fail all but one requirement and still passes.",
+    # )
+    # parser.add_argument(
+    #     "--GhoseFilter",
+    #     action="store_true",
+    #     default=False,
+    #     help="Ghose filters for drug-likeliness; filters by molecular weight,\
+    #     logP and number of atoms.",
+    # )
+    # parser.add_argument(
+    #     "--GhoseModifiedFilter",
+    #     action="store_true",
+    #     default=False,
+    #     help="Ghose filters for drug-likeliness; filters by molecular weight,\
+    #     logP and number of atoms. This is the same as the GhoseFilter, but \
+    #     the upper-bound of the molecular weight restrict is loosened from \
+    #     480Da to 500Da. This is intended to be run with Lipinski Filter and \
+    #     to match AutoGrow 3's Ghose Filter.",
+    # )
+    # parser.add_argument(
+    #     "--MozziconacciFilter",
+    #     action="store_true",
+    #     default=False,
+    #     help="Mozziconacci filters for drug-likeliness; filters by the number of \
+    #     rotatable bonds, rings, oxygens, and halogens.",
+    # )
+    # parser.add_argument(
+    #     "--VandeWaterbeemdFilter",
+    #     action="store_true",
+    #     default=False,
+    #     help="VandeWaterbeemd filters for drug likely to be blood brain barrier permeable. \
+    #     Filters by the number of molecular weight and Polar Sureface Area (PSA).",
+    # )
+    # parser.add_argument(
+    #     "--PAINSFilter",
+    #     action="store_true",
+    #     default=False,
+    #     help="PAINS filters against Pan Assay Interference Compounds using \
+    #     substructure a search.",
+    # )
+    # parser.add_argument(
+    #     "--NIHFilter",
+    #     action="store_true",
+    #     default=False,
+    #     help="NIH filters against molecules with undersirable functional groups \
+    #     using substructure a search.",
+    # )
+    # parser.add_argument(
+    #     "--BRENKFilter",
+    #     action="store_true",
+    #     default=False,
+    #     help="BRENK filter for lead-likeliness, by matching common false positive \
+    #     molecules to the current mol.",
+    # )
+
+    # TODO: Make sure this is just default
     parser.add_argument(
         "--No_Filters",
         action="store_true",
         default=False,
         help="No filters will be applied to compounds.",
     )
+
+    # TODO: Depreciate this.
     parser.add_argument(
         "--alternative_filter",
         action="append",
@@ -394,7 +558,8 @@ def get_argparse_vars() -> Dict[str, Any]:
         [[name_filter1, Path/to/name_filter1.py],[name_filter2, Path/to/name_filter2.py]]",
     )
 
-    # dependency variables
+
+def _add_conversion_params(parser: argparse._ArgumentGroup):
     # DOCUMENT THE file conversion for docking inputs
     parser.add_argument(
         "--conversion_choice",
@@ -449,12 +614,19 @@ def get_argparse_vars() -> Dict[str, Any]:
         may be found on Linux by running: which obabel",
     )
 
+
+def _add_docking_params(parser: argparse._ArgumentGroup):
     # docking
     parser.add_argument(
         "--dock_choice",
         metavar="dock_choice",
         default="QuickVina2Docking",
-        choices=["VinaDocking", "QuickVina2Docking", "FakeDocking", "Custom"],  # TODO: Should not hardcode
+        choices=[
+            "VinaDocking",
+            "QuickVina2Docking",
+            "FakeDocking",
+            "Custom",
+        ],  # TODO: Should not hardcode
         help="dock_choice assigns which docking software module to use.",
     )
     parser.add_argument(
@@ -501,6 +673,8 @@ def get_argparse_vars() -> Dict[str, Any]:
         strings [name_custom_conversion_class, Path/to/name_custom_conversion_class.py]",
     )
 
+
+def _add_scoring_params(parser: argparse._ArgumentGroup):
     # scoring
     parser.add_argument(
         "--scoring_choice",
@@ -531,6 +705,8 @@ def get_argparse_vars() -> Dict[str, Any]:
         strings [name_custom_conversion_class, Path/to/name_custom_conversion_class.py]",
     )
 
+
+def _add_gypsum_params(parser: argparse._ArgumentGroup):
     # gypsum # max variance is the number of conformers made per ligand
     parser.add_argument(
         "--max_variants_per_compound",
@@ -584,6 +760,8 @@ def get_argparse_vars() -> Dict[str, Any]:
         the gypsum_timeout_limit. Default gypsum_timeout_limit is 15 seconds",
     )
 
+
+def _add_misc_params(parser: argparse._ArgumentGroup):
     # Make a line plot of the simulation at the end of the run.
     parser.add_argument(
         "--generate_plot",
@@ -591,15 +769,3 @@ def get_argparse_vars() -> Dict[str, Any]:
         default=True,
         help="Make a line plot of the simulation at the end of the run.",
     )
-
-    args_dict = vars(parser.parse_args())
-
-    # copying args_dict so we can delete out of while iterating through the
-    # original args_dict
-    inputs = copy.deepcopy(args_dict)
-
-    for k, v in args_dict.items():
-        if v is None:
-            del inputs[k]
-
-    return inputs

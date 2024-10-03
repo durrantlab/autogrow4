@@ -17,6 +17,7 @@ import random
 import copy
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+from autogrow.plugins.plugin_manager_base import get_plugin_manager
 from autogrow.types import PreDockedCompoundInfo
 import rdkit  # type: ignore
 from rdkit import Chem  # type: ignore
@@ -430,11 +431,14 @@ def do_crossovers_smiles_merge(
             counter += 1
         else:
             # Filter Here
-            pass_or_not = Filter.run_filter_on_just_smiles(
-                ligand_new_smiles, params["filter_object_dict"]
-            )
-            if pass_or_not is False:
+            # pass_or_not = Filter.run_filter_on_just_smiles(
+            #     ligand_new_smiles, params["filter_object_dict"]
+            # )
+            pass_or_not = len(get_plugin_manager("SmilesFilterPluginManager").run(
+                smiles=ligand_new_smiles
+            )) > 0
 
+            if not pass_or_not:
                 counter += 1
             else:
                 return (ligand_new_smiles, lig1_smile_pair, lig2_pair)

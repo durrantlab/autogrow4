@@ -63,12 +63,14 @@ class PreDockedCompoundInfo:
             resp.append(str(self.previous_diversity_score))
         return resp
 
-    def get_score(self, score_type: ScoreType) -> float:
+    def get_previous_score(self, score_type: ScoreType) -> float:
         if score_type == ScoreType.DOCKING:
+            # NOTE: Used to be associated with index -2
             if self.previous_docking_score is not None:
                 return self.previous_docking_score
             raise ValueError("No docking score available")
         if score_type == ScoreType.DIVERSITY:
+            # NOTE: Used to be associated with index -1
             if self.previous_diversity_score is not None:
                 return self.previous_diversity_score
             raise ValueError("No diversity score available")
