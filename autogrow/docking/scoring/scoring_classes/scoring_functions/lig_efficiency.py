@@ -5,6 +5,7 @@ This is used to rescore a fitness metric by the number of non-hydrogen atoms.
 import __future__
 from typing import Any, Dict, List, Optional
 
+from autogrow.types import PostDockedCompoundInfo
 import rdkit  # type: ignore
 import rdkit.Chem as Chem  # type: ignore
 
@@ -52,9 +53,9 @@ class LigEfficiency(VINA):
 
             self.smiles_dict = smiles_dict
 
-    def get_lig_efficiency_rescore_from_a_file(
-        self, file_path: str, lig_info: List[str]
-    ) -> Optional[List[str]]:
+    def set_lig_eff_rescore_from_a_file(
+        self, file_path: str, lig_info: PostDockedCompoundInfo
+    ) -> Optional[PostDockedCompoundInfo]:
         """
         This function will simply add a ligand efficiency score to the end of
         the lig_info list and return said list.
@@ -74,17 +75,13 @@ class LigEfficiency(VINA):
             the docking score from the best pose.
         """
         # For saftey remove Nones and empty lists
-        if type(lig_info) is not list:
+        if type(lig_info) is not PostDockedCompoundInfo:
             return None
         if not lig_info:
             return None
 
-        lig_info_with_score = append_lig_effeciency(lig_info)
-        if lig_info_with_score is None:
-            return None
-        lig_info_with_score = [str(x) for x in lig_info_with_score]
-
-        return lig_info_with_score
+        return score_as_lig_efficiency(lig_info)
+        # lig_info_with_score = [str(x) for x in lig_info_with_score]
 
 
 # These Functions are placed outside the class for multithreading reasons.
@@ -123,10 +120,11 @@ def get_number_heavy_atoms(smiles_str: Optional[str]) -> Optional[int]:
     return num_heavy_atoms
 
 
-def append_lig_effeciency(list_of_lig_info: List[str]) -> Optional[List[str]]:
+def score_as_lig_efficiency(
+    list_of_lig_info: PostDockedCompoundInfo,
+) -> Optional[PostDockedCompoundInfo]:
     """
-    Determine the ligand efficiency and append it to the end of a list which
-    has the ligand information.
+    Determine the ligand efficiency and set it to be the code.
 
     Inputs:
     :param list list_of_lig_info: a list containing ligand informations with
@@ -138,15 +136,18 @@ def append_lig_effeciency(list_of_lig_info: List[str]) -> Optional[List[str]]:
         end.
     """
 
-    if type(list_of_lig_info) is None:
+    if list_of_lig_info is None:
         return None
-    elif type(list_of_lig_info) == list:
-        if None in list_of_lig_info:
-            return None
+
+    # if type(list_of_lig_info) is None:
+    #     return None
+    # elif type(list_of_lig_info) == CompoundInfo2:
+    #     if None in list_of_lig_info:
+    #         return None
 
     # Unpack ligand info
-    lig_smiles_str = str(list_of_lig_info[0])
-    affinity = float(list_of_lig_info[-1])
+    lig_smiles_str = list_of_lig_info.smiles
+    affinity = list_of_lig_info.score
 
     # Get num of heavy atoms
     heavy_atom_count = get_number_heavy_atoms(lig_smiles_str)
@@ -158,6 +159,6 @@ def append_lig_effeciency(list_of_lig_info: List[str]) -> Optional[List[str]]:
     lig_efficieny = affinity / float(heavy_atom_count)
 
     # Append lig_efficiency to list_of_lig_info
-    list_of_lig_info.append(str(lig_efficieny))
+    list_of_lig_info.score = lig_efficieny
 
     return list_of_lig_info

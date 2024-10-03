@@ -597,7 +597,7 @@ def define_defaults() -> Dict[str, Any]:
 
     # Populations settings
     params["filter_source_compounds"] = True
-    params["use_docked_source_compounds"] = True
+    params["dock_source_compounds_first"] = True
     params["num_generations"] = 10
     params["number_of_crossovers_first_generation"] = 10
     params["number_of_mutants_first_generation"] = 10

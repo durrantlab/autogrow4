@@ -17,7 +17,7 @@ import random
 import copy
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from autogrow.types import CompoundInfo
+from autogrow.types import PreDockedCompoundInfo
 import rdkit  # type: ignore
 from rdkit import Chem  # type: ignore
 from rdkit.Chem import rdFMCS  # type: ignore
@@ -87,8 +87,10 @@ def test_for_mcs(
 
 
 def find_random_lig2(
-    params: Dict[str, Any], ligands_list: List[List[str]], ligand1_pair: List[str]
-) -> Union[List[str], None]:
+    params: Dict[str, Any],
+    ligands_list: List[PreDockedCompoundInfo],
+    ligand1_pair: PreDockedCompoundInfo,
+) -> Union[PreDockedCompoundInfo, None]:
     """
     Pick a random molecule from the list and check that it can be converted
     into a rdkit mol object and then test for a satistifactory Most common
@@ -115,19 +117,19 @@ def find_random_lig2(
     random.shuffle(shuffled_num_list)
 
     # Convert lig1 into an RDkit mol
-    lig1_string = ligand1_pair[0]
+    lig1_string = ligand1_pair.smiles
     lig1_mol = convert_mol_from_smiles(lig1_string)
 
     while count < len(ligands_list) - 1:
         rand_num = shuffled_num_list[count]
         mol2_pair = ligands_list[rand_num]
 
-        if mol2_pair[0] == lig1_string:
+        if mol2_pair.smiles == lig1_string:
             count += 1
             continue
 
         # Convert lig1 into an RDkit mol
-        lig_2_string = mol2_pair[0]
+        lig_2_string = mol2_pair.smiles
         lig2_mol = convert_mol_from_smiles(lig_2_string)
 
         if lig2_mol is None:
@@ -182,9 +184,9 @@ def make_crossovers(
     generation_num: int,
     number_of_processors: int,
     num_crossovers_to_make: int,
-    list_previous_gen_smiles: List[CompoundInfo],
-    new_crossover_smiles_list: List[List[str]],
-) -> Optional[List[List[str]]]:
+    list_previous_gen_smiles: List[PreDockedCompoundInfo],
+    new_crossover_smiles_list: List[PreDockedCompoundInfo],
+) -> Optional[List[PreDockedCompoundInfo]]:
     """
     Make crossover compounds in a list to be returned.
 
@@ -210,27 +212,29 @@ def make_crossovers(
         new mol gets generated
     """
 
+    # TODO: This gets defined again below, so what's the point of defining it
+    # here?
     if not new_crossover_smiles_list:
-        new_ligands_list = []
+        new_ligands: List[PreDockedCompoundInfo] = []
     else:
-        new_ligands_list = copy.deepcopy(new_crossover_smiles_list)
+        new_ligands = copy.deepcopy(new_crossover_smiles_list)
 
     # Use a temp params dict so you don't put mpi multiprocess info through
     # itself...
     temp_params = {
         key: params[key] for key in list(params.keys()) if key != "parallelizer"
     }
-    new_ligands_list = []
+    new_ligands: List[PreDockedCompoundInfo] = []
     number_of_processors = int(params["parallelizer"].return_node())
 
     loop_counter = 0
-    while loop_counter < 2000 and len(new_ligands_list) < num_crossovers_to_make:
+    while loop_counter < 2000 and len(new_ligands) < num_crossovers_to_make:
 
         react_list = copy.deepcopy(list_previous_gen_smiles)
 
-        while len(new_ligands_list) < num_crossovers_to_make and react_list:
+        while len(new_ligands) < num_crossovers_to_make and react_list:
 
-            num_to_grab = num_crossovers_to_make - len(new_ligands_list)
+            num_to_grab = num_crossovers_to_make - len(new_ligands)
             num_to_make = num_to_grab
 
             # to minimize a big loop of running a single crossover at a time
@@ -245,11 +249,14 @@ def make_crossovers(
             # smile_names = [x[1] for x in smile_pairs]
 
             # make a list of tuples for multi-processing Crossover
-            job_input = []
+            job_input: List[
+                Tuple[
+                    Dict[str, Any], PreDockedCompoundInfo, List[PreDockedCompoundInfo]
+                ]
+            ] = []
             for i in smile_pairs:
                 temp = temp_params, i, list_previous_gen_smiles
                 job_input.append(temp)
-            job_input = tuple(job_input)
 
             # Example information:
             # result is a list of lists
@@ -259,10 +266,12 @@ def make_crossovers(
             # Lig2_smile_pair = ["NCCCO","zinc456"]
             # Lig1 and lig 2 were used to generate the ligand_new_smiles
 
-            results = params["parallelizer"].run(job_input, do_crossovers_smiles_merge)
+            results: List[
+                Tuple[str, PreDockedCompoundInfo, PreDockedCompoundInfo]
+            ] = params["parallelizer"].run(tuple(job_input), do_crossovers_smiles_merge)
             results = [x for x in results if x is not None]
 
-            for index, i in enumerate(results):
+            for i in results:
                 if i is None:
                     continue
 
@@ -270,8 +279,8 @@ def make_crossovers(
                 child_lig_smile = i[0]
 
                 # get the ID for the parent of a child mol
-                parent_lig1_id = i[1][1]
-                parent_lig_2_id = i[2][1]
+                parent_lig1_id = i[1].name
+                parent_lig_2_id = i[2].name
 
                 # get the unique ID (last few diget ID of the parent mol)
                 parent_lig1_id = parent_lig1_id.split(")")[-1]
@@ -284,9 +293,9 @@ def make_crossovers(
 
                 # fill lists of all smiles and smile_id's of all previously
                 # made smiles in this generation
-                for x in new_ligands_list:
-                    list_of_already_made_smiles.append(x[0])
-                    list_of_already_made_id.append(x[1])
+                for x in new_ligands:
+                    list_of_already_made_smiles.append(x.smiles)
+                    list_of_already_made_id.append(x.name)
 
                 if child_lig_smile not in list_of_already_made_smiles:
                     # if the smiles string is unique to the list of previous
@@ -313,24 +322,28 @@ def make_crossovers(
                     # make a temporary list containing the smiles string of
                     # the new product and the unique ID
                     assert new_lig_id is not None, "new_lig_id is None"
-                    ligand_info = [child_lig_smile, new_lig_id]
+                    ligand_info = PreDockedCompoundInfo(
+                        smiles=child_lig_smile, name=new_lig_id
+                    )
 
                     # append the new ligand smile and ID to the list of all
                     # newly made ligands
-                    new_ligands_list.append(ligand_info)
+                    new_ligands.append(ligand_info)
 
         loop_counter += 1
 
-    if len(new_ligands_list) < num_crossovers_to_make:
+    if len(new_ligands) < num_crossovers_to_make:
         return None
 
     # once the number of mutants we need is generated return the list
-    return new_ligands_list
+    return new_ligands
 
 
 def run_smiles_merge_prescreen(
-    params: Dict[str, Any], ligands_list: List[List[str]], ligand1_pair: List[str]
-) -> Optional[List[str]]:
+    params: Dict[str, Any],
+    ligands_list: List[PreDockedCompoundInfo],
+    ligand1_pair: PreDockedCompoundInfo,
+) -> Optional[PreDockedCompoundInfo]:
     """
     This function runs a series of functions to find two molecules with a
     sufficient amount of shared common structure (most common structure = MCS)
@@ -351,7 +364,7 @@ def run_smiles_merge_prescreen(
         found return None.
     """
 
-    ligand_1_string = ligand1_pair[0]
+    ligand_1_string = ligand1_pair.smiles
 
     # check if ligand_1 can be converted to an rdkit mol
     lig1 = convert_mol_from_smiles(ligand_1_string)
@@ -364,8 +377,10 @@ def run_smiles_merge_prescreen(
 
 
 def do_crossovers_smiles_merge(
-    params: Dict[str, Any], lig1_smile_pair: List[str], ligands_list: List[List[str]]
-) -> Optional[List[Union[str, List[str]]]]:
+    params: Dict[str, Any],
+    lig1_smile_pair: PreDockedCompoundInfo,
+    ligands_list: List[PreDockedCompoundInfo],
+) -> Optional[Tuple[str, PreDockedCompoundInfo, PreDockedCompoundInfo]]:
     """
     This function will take the list of ligands to work on and the number in
     that list for the Ligand 1.
@@ -401,8 +416,8 @@ def do_crossovers_smiles_merge(
     if lig2_pair is None:
         return None
 
-    ligand_1_string = lig1_smile_pair[0]
-    ligand_2_string = lig2_pair[0]
+    ligand_1_string = lig1_smile_pair.smiles
+    ligand_2_string = lig2_pair.smiles
 
     counter = 0
     while counter < 3:
@@ -422,5 +437,5 @@ def do_crossovers_smiles_merge(
 
                 counter += 1
             else:
-                return [ligand_new_smiles, lig1_smile_pair, lig2_pair]
+                return (ligand_new_smiles, lig1_smile_pair, lig2_pair)
     return None

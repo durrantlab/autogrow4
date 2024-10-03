@@ -91,7 +91,7 @@ def get_argparse_vars() -> Dict[str, Any]:
         the 1st generation. Default is True.",
     )
     parser.add_argument(
-        "--use_docked_source_compounds",
+        "--dock_source_compounds_first",
         choices=[True, False, "True", "False", "true", "false"],
         default=False,
         help="If True source ligands will be docked prior to seeding generation 1. \
@@ -454,7 +454,7 @@ def get_argparse_vars() -> Dict[str, Any]:
         "--dock_choice",
         metavar="dock_choice",
         default="QuickVina2Docking",
-        choices=["VinaDocking", "QuickVina2Docking", "Custom"],
+        choices=["VinaDocking", "QuickVina2Docking", "FakeDocking", "Custom"],  # TODO: Should not hardcode
         help="dock_choice assigns which docking software module to use.",
     )
     parser.add_argument(

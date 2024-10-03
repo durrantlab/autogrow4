@@ -6,7 +6,7 @@ import __future__
 import copy
 from typing import Any, Dict, List, Tuple, Union
 
-from autogrow.types import CompoundInfo
+from autogrow.types import PreDockedCompoundInfo
 import rdkit  # type: ignore
 from rdkit import Chem  # type: ignore
 from rdkit.Chem.MolStandardize import rdMolStandardize  # type: ignore
@@ -58,8 +58,8 @@ def make_run_class_dict(
 
 
 def run_filter(
-    params: Dict[str, Any], list_of_new_ligands: List[CompoundInfo]
-) -> List[CompoundInfo]:
+    params: Dict[str, Any], list_of_new_ligands: List[PreDockedCompoundInfo]
+) -> List[PreDockedCompoundInfo]:
     """
     This will run a filter of the Users chosing.
 
@@ -93,8 +93,8 @@ def run_filter(
 
 
 def run_filter_mol(
-    smiles_info: List[str], child_dict: Dict[str, ParentFilter]
-) -> Union[List[str], None]:
+    smiles_info: PreDockedCompoundInfo, child_dict: Dict[str, ParentFilter]
+) -> Union[PreDockedCompoundInfo, None]:
     """
     This takes a smiles_string and the selected filter list (child_dict) and
     runs it through the selected filters.
@@ -112,7 +112,7 @@ def run_filter_mol(
         returns None If the mol fails a filter.
     """
 
-    smiles_string = smiles_info[0]
+    smiles_string = smiles_info.smiles
 
     mol = Chem.MolFromSmiles(smiles_string, sanitize=False)
     # try sanitizing, which is necessary later

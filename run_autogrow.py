@@ -34,7 +34,7 @@ def main():
     _run_autogrow_with_params(args_dict)
 
 
-# TODO Rename this here and in `main`
+# TODO: Rename this here and in `main`
 def _run_autogrow_with_params(args_dict):
     start_time = str(datetime.datetime.now())
     # load the commandline parameters

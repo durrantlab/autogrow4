@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 
 import autogrow.operators.mutation.smiles_click_chem.smiles_click_chem as SmileClickClass
-from autogrow.types import CompoundInfo
+from autogrow.types import PreDockedCompoundInfo
 
 
 #######################################
@@ -21,10 +21,10 @@ def make_mutants(
     generation_num: int,
     number_of_processors: int,
     num_mutants_to_make: int,
-    ligands_list: List[CompoundInfo],
-    new_mutation_smiles_list: List[List[str]],
+    ligands_list: List[PreDockedCompoundInfo],
+    new_mutation_smiles_list: List[PreDockedCompoundInfo],
     rxn_library_variables: List[str],
-) -> Optional[List[List[str]]]:
+) -> Optional[List[PreDockedCompoundInfo]]:
     """
     Make mutant compounds in a list to be returned
 
@@ -50,7 +50,7 @@ def make_mutants(
         sufficient number was not generated. None: bol if mutations failed
     """
 
-    new_ligands_list = new_mutation_smiles_list or []
+    new_ligands_list: List[PreDockedCompoundInfo] = new_mutation_smiles_list or []
     loop_counter = 0
 
     number_of_processors = int(params["parallelizer"].return_node())
@@ -109,8 +109,8 @@ def make_mutants(
                     # fill lists of all smiles and smile_id's of all
                     # previously made smiles in this generation
                     for x in new_ligands_list:
-                        list_of_already_made_smiles.append(x[0])
-                        list_of_already_made_id.append(x[1])
+                        list_of_already_made_smiles.append(x.smiles)
+                        list_of_already_made_id.append(x.name)
 
                     if child_lig_smile not in list_of_already_made_smiles:
                         # if the smiles string is unique to the list of
@@ -148,7 +148,9 @@ def make_mutants(
 
                         # make a temporary list containing the smiles string
                         # of the new product and the unique ID
-                        ligand_info = [child_lig_smile, new_lig_id]
+                        ligand_info = PreDockedCompoundInfo(
+                            smiles=child_lig_smile, name=new_lig_id
+                        )
 
                         # append the new ligand smile and ID to the list of
                         # all newly made ligands

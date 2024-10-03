@@ -14,7 +14,9 @@ rdkit.RDLogger.DisableLog("rdApp.*")
 import autogrow.operators.crossover.smiles_merge.merge_functions.mapping_class as mapping_class
 
 
-def handle_dicts_and_select_b_groups(mol_1, mol_2, mcs_mol):
+def handle_dicts_and_select_b_groups(
+    mol_1: Chem.rdchem.Mol, mol_2: Chem.rdchem.Mol, mcs_mol: Chem.rdchem.Mol
+):
     """
     this takes 3 rdkit.Chem.rdchem.Mol objects 1 for lig_1,lig_2, and the
     common core(mcs_mol). It creates all the necessary dictionaries, mapping,
@@ -42,8 +44,13 @@ def handle_dicts_and_select_b_groups(mol_1, mol_2, mcs_mol):
         b_to_r_master_dict_1,
         b_to_anchor_master_dict_1,
     ) = mol_handling_of_fragmenting_labeling_and_indexing(mol_1, mcs_mol, 1)
+
     # check that this worked (ie if it failed they will return None)
     if r_smiles_dict_1 is None:
+        return None
+    if b_to_r_master_dict_1 is None:
+        return None
+    if b_to_anchor_master_dict_1 is None:
         return None
 
     (
@@ -51,8 +58,13 @@ def handle_dicts_and_select_b_groups(mol_1, mol_2, mcs_mol):
         b_to_r_master_dict_2,
         b_to_anchor_master_dict_2,
     ) = mol_handling_of_fragmenting_labeling_and_indexing(mol_2, mcs_mol, 2)
+
     # check that this worked (ie if it failed they will return None)
     if r_smiles_dict_2 is None:
+        return None
+    if b_to_r_master_dict_2 is None:
+        return None
+    if b_to_anchor_master_dict_2 is None:
         return None
 
     # Merge b_to_anchor_master_dict into 1 master dictionary of B_to_anchors.

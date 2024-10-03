@@ -36,7 +36,7 @@ def main_execute(params: Dict[str, Any]) -> None:
     last_generation = determine_current_gen(output_directory)
     if last_generation is None:
         # Check to see if there's a Run 0 based on the seed.
-        if params["use_docked_source_compounds"] is True:
+        if params["dock_source_compounds_first"] is True:
             # This will assess and rank the source compounds prior to
             # generation 1. Thus using the source compounds as a generation 0
             start_gen_num = 0
@@ -72,15 +72,15 @@ def main_execute(params: Dict[str, Any]) -> None:
         print(cur_gen_dir)
         sys.stdout.flush()
 
-        if gen_num == 0 and params["use_docked_source_compounds"] is True:
+        if gen_num == 0 and params["dock_source_compounds_first"] is True:
             if os.path.exists(f"{cur_gen_dir}{os.sep}generation_0_ranked.smi") is True:
                 continue
 
             (
                 already_docked,
-                smile_file_new_gen,
-                new_gen_ligs_list,
-            ) = operations.populate_generation_zero(params, generation_num=0)
+                smiles_file_new_gen,
+                new_gen_ligs,
+            ) = operations.populate_generation_zero(params, gen_num=0)
             sys.stdout.flush()
 
             if already_docked is False:
@@ -88,16 +88,16 @@ def main_execute(params: Dict[str, Any]) -> None:
                 # and Begin Docking unweighted_ranked_smile_file is the file
                 # name where the unweighted ranked but score .smi file resides
                 unweighted_ranked_smile_file = DockingClass.run_docking_common(
-                    params, gen_num, cur_gen_dir, smile_file_new_gen,
+                    params, gen_num, cur_gen_dir, smiles_file_new_gen,
                 )
 
         else:
-            smile_file_new_gen, new_gen_ligs_list = operations.populate_generation(
+            smiles_file_new_gen, new_gen_ligs = operations.populate_generation(
                 params, gen_num
             )
             sys.stdout.flush()
 
-            if new_gen_ligs_list is None:
+            if new_gen_ligs is None:
                 raise ValueError(
                     "Population failed to make enough mutants or crossovers... \
                                     Errors could include not enough diversity, too few seeds to the generation, \
@@ -109,7 +109,7 @@ def main_execute(params: Dict[str, Any]) -> None:
             # Begin Docking unweighted_ranked_smile_file is the file name
             # where the unweighted ranked but score .smi file resides
             unweighted_ranked_smile_file = DockingClass.run_docking_common(
-                params, gen_num, cur_gen_dir, smile_file_new_gen,
+                params, gen_num, cur_gen_dir, smiles_file_new_gen,
             )
 
         # Delete all temporary files; Skip if in Debugging Mode
@@ -133,17 +133,7 @@ def main_execute(params: Dict[str, Any]) -> None:
                 delete_temporary_files_and_folders(item)
 
         sys.stdout.flush()
-        if params["reduce_files_sizes"] is True:
-            # Reduce the files in the PDBs folder to a single compiled file.
-            # This reduces the data size And makes it easier to transfer the
-            # data
-            pdbs_folder = f"{cur_gen_dir}{os.sep}PDBs{os.sep}"
-            if os.path.exists(pdbs_folder) is True:
-                concatenate_files.run_concatenation(params["parallelizer"], pdbs_folder)
-            else:
-                print(
-                    "\nNo PDB folder to concatenate and compress. This is likely generation 0 seeded with a Ranked .smi file.\n"
-                )
+
         print("")
         print("Finished generation ", gen_num)
 

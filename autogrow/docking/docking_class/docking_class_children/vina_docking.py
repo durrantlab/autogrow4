@@ -13,7 +13,7 @@ from autogrow.docking.docking_class.parent_pdbqt_converter import ParentPDBQTCon
 import autogrow.docking.ranking.ranking_mol as Ranking
 from autogrow.docking.docking_class.parent_dock_class import ParentDocking
 import autogrow.docking.scoring.execute_scoring_mol as Scoring
-from autogrow.types import CompoundInfo
+from autogrow.types import PreDockedCompoundInfo, PostDockedCompoundInfo
 
 
 class VinaDocking(ParentDocking):
@@ -428,9 +428,9 @@ class VinaDocking(ParentDocking):
         params: dict,
         current_generation_dir: str,
         current_gen_int: int,
-        smile_file: str,
+        smiles_file: str,
         deleted_smiles_names_list,
-    ):
+    ) -> str:
         """
         Given a folder with PDBQT's, rank all the SMILES based on docking
         score (High to low). Then format it into a .smi file. Then save the
@@ -443,7 +443,7 @@ class VinaDocking(ParentDocking):
             generation
         :param int current_gen_int: the interger of the current generation
             indexed to zero
-        :param str smile_file:  File path for the file with the ligands for
+        :param str smiles_file:  File path for the file with the ligands for
             the generation which will be a .smi file
         :param list deleted_smiles_names_list: list of SMILES which may have
             failed the conversion process
@@ -457,7 +457,9 @@ class VinaDocking(ParentDocking):
         folder_with_pdbqts = f"{current_generation_dir}PDBs{os.sep}"
 
         # Run any compatible Scoring Function
-        smiles_list = Scoring.run_scoring_common(params, smile_file, folder_with_pdbqts)
+        postDockedCompoundInfos = Scoring.run_scoring_common(
+            params, smiles_file, folder_with_pdbqts
+        )
 
         # Before ranking these we need to handle Pass-Through ligands from the
         # last generation If it's current_gen_int==1 or if
@@ -492,7 +494,7 @@ class VinaDocking(ParentDocking):
                     ranked_smi_file_prev_gen,
                     current_generation_dir,
                     current_gen_int,
-                    smiles_list,
+                    postDockedCompoundInfos,
                 )
         # Output format of the .smi file will be: SMILES    Full_lig_name
         # shorthandname   ...AnyCustominfo... Fitness_metric  diversity
@@ -502,22 +504,24 @@ class VinaDocking(ParentDocking):
 
         # sort list by the affinity of each sublist (which is the last index
         # of sublist)
-        smiles_list.sort(key=lambda x: x.score, reverse=False)
+        postDockedCompoundInfos.sort(key=lambda x: x.score, reverse=False)
 
         # score the diversity of each ligand compared to the rest of the
         # ligands in the group this adds on a float in the last column for the
         # sum of pairwise comparisons the lower the diversity score the more
         # unique a molecule is from the other mols in the same generation
-        smiles_list = Ranking.score_and_append_diversity_scores(smiles_list)
+        postDockedCompoundInfos = Ranking.score_and_calc_diversity_scores(
+            postDockedCompoundInfos
+        )
 
         # name for the output file
-        output_ranked_smile_file = smile_file.replace(".smi", "") + "_ranked.smi"
+        output_ranked_smile_file = smiles_file.replace(".smi", "") + "_ranked.smi"
 
         # save to a new output smiles file. ie. save to ranked_smiles_file
 
         with open(output_ranked_smile_file, "w") as output:
-            for ligand_info_list in smiles_list:
-                output_line = "\t".join(ligand_info_list.to_list()) + "\n"
+            for postDockedCompoundInfo in postDockedCompoundInfos:
+                output_line = "\t".join(postDockedCompoundInfo.to_list()) + "\n"
                 output.write(output_line)
 
         return output_ranked_smile_file
@@ -527,8 +531,12 @@ class VinaDocking(ParentDocking):
         ranked_smi_file_prev_gen: str,
         current_generation_dir: str,
         current_gen_int: int,
-        smiles_list: list[CompoundInfo],
+        smiles_list: list[PostDockedCompoundInfo],
     ):
+        # Note that this modifies the smiles_list in place
+
+        # CHECKED: smiles_list is of type List[PostDockedCompoundInfo] here.
+
         print("Getting ligand scores from the previous generation")
 
         # Shouldn't happen but to be safe.
@@ -541,6 +549,7 @@ class VinaDocking(ParentDocking):
         # Get the data for all ligands from previous generation ranked
         # file
         prev_gen_data_list = Ranking.get_usable_format(ranked_smi_file_prev_gen)
+        # CHECKED: prev_gen_data_list of type List[PreDockedCompoundInfo] here.
 
         # Get the list of pass through ligands
         current_gen_pass_through_smi = (
@@ -548,19 +557,31 @@ class VinaDocking(ParentDocking):
             + f"SeedFolder{os.sep}Chosen_Elite_To_advance_Gen_{current_gen_int}.smi"
         )
         pass_through_list = Ranking.get_usable_format(current_gen_pass_through_smi)
+        # CHECKED: pass_through_list is of type List[PreDockedCompoundInfo] here.
 
         # Convert lists to searchable Dictionaries.
         prev_gen_data_dict = Ranking.convert_usable_list_to_lig_dict(prev_gen_data_list)
+        # CHECKED: prev_gen_data_dict is of type Dict[str, PreDockedCompoundInfo] here.
 
         assert prev_gen_data_dict is not None, "prev_gen_data_dict is None"
 
-        pass_through_data: List[CompoundInfo] = []
+        pass_through_data: List[PostDockedCompoundInfo] = []
         for lig in pass_through_list:
+            # CHECKED: lig is of type PreDockedCompoundInfo here.
+            import pdb
+
+            pdb.set_trace()
             lig_data = prev_gen_data_dict[str(lig.smiles + lig.name)]
+            # CHECKED: lig_data is of type PreDockedCompoundInfo here.
+
+
+            # NOTE: Here it must be converted to a PostDockedCompoundInfo
+
             lig_data = lig_data.copy()
-            lig_info_remove_diversity_info = CompoundInfo(
-                smiles=lig.smiles, name=lig.name
-            )
+            lig_data.
+            # lig_info_remove_diversity_info = PostDockedCompoundInfo(
+            #     smiles=lig.smiles, id=lig.name, short_id=lig.name, additional_info = "", score=lig_data.previous_docking_score, diversity_score=None
+            # )
             pass_through_data.append(lig_info_remove_diversity_info)
 
         smiles_list.extend(pass_through_data)

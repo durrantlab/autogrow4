@@ -8,6 +8,7 @@ import copy
 from typing import Any, Dict, List, Optional, Union
 
 from autogrow.operators.filter.filter_classes.parent_filter_class import ParentFilter
+from autogrow.types import PreDockedCompoundInfo
 import rdkit  # type: ignore
 from rdkit import Chem  # type: ignore
 from rdkit.Chem import AllChem  # type: ignore
@@ -25,7 +26,7 @@ class SmilesClickChem(object):
     def __init__(
         self,
         rxn_library_variables: List[str],
-        list_of_already_made_smiles: List[List[str]],
+        list_of_already_made_smiles: List[PreDockedCompoundInfo],
         filter_object_dict: Dict[str, ParentFilter],
     ) -> None:
         """
@@ -54,6 +55,7 @@ class SmilesClickChem(object):
         function_group_library = rxn_library_variables[2]
         complementary_mol_dir = rxn_library_variables[3]
         self.reaction_dict = self.retrieve_reaction_dict(rxn_library, rxn_library_file)
+
         # Retrieve the dictionary containing
         # all the possible ClickChem Reactions
         self.list_of_reaction_names = list(self.reaction_dict.keys())
@@ -66,13 +68,15 @@ class SmilesClickChem(object):
         )
 
         # List of already predicted smiles
-        self.list_of_already_made_smiles = [x[0] for x in list_of_already_made_smiles]
+        self.list_of_already_made_smiles = [
+            x.smiles for x in list_of_already_made_smiles
+        ]
         # Dictionary containing all Filter class
         # objects to be impossed on the ligand
         self.filter_object_dict = filter_object_dict
 
     def update_list_of_already_made_smiles(
-        self, list_of_already_made_smiles_infos: List[List[str]]
+        self, list_of_already_made_smiles_infos: List[PreDockedCompoundInfo]
     ) -> None:
         """
         This updates the list of Smiles which have been made in this
@@ -84,7 +88,9 @@ class SmilesClickChem(object):
             ie. [['O=C([O-])',
             '(Gen_3_Mutant_37_747+ZINC51)Gen_4_Mutant_15_52']]
         """
-        list_of_already_made_smiles = [x[0] for x in list_of_already_made_smiles_infos]
+        list_of_already_made_smiles = [
+            x.smiles for x in list_of_already_made_smiles_infos
+        ]
         self.list_of_already_made_smiles.extend(list_of_already_made_smiles)
 
     def rxn_lib_format_json_dict_of_dict(

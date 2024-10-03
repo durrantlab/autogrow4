@@ -66,7 +66,7 @@ def run_docking_common(
     params: Dict[str, Any],
     current_gen_int: int,
     current_generation_dir: str,
-    smile_file_new_gen: str,
+    smiles_file_new_gen: str,
 ) -> str:
     """
     This section runs the functions common to all Docking programs.
@@ -100,26 +100,22 @@ def run_docking_common(
     temp_vars = {
         key: params[key] for key in list(params.keys()) if key != "parallelizer"
     }
-    file_conversion_class_object = pick_run_conversion_class_dict(conversion_choice)
+    file_conversion_cls = pick_run_conversion_class_dict(conversion_choice)
 
     # TODO: new file_conversion_class_object automatically converts receptor. To
     # convert ligand, must access object function. That's pretty awkward.
-    file_conversion_class_object = file_conversion_class_object(
-        temp_vars, test_boot=False
-    )
+    file_conversion_obj = file_conversion_cls(temp_vars, test_boot=False)
 
     dock_class = pick_docking_class_dict(dock_choice)
-    docking_object = dock_class(
-        temp_vars, receptor, file_conversion_class_object, test_boot=False
-    )
+    docking = dock_class(temp_vars, receptor, file_conversion_obj, test_boot=False)
 
     if params["docking_executable"] is None:
-        docking_executable = docking_object.get_docking_executable_file(temp_vars)
+        docking_executable = docking.get_docking_executable_file(temp_vars)
         params["docking_executable"] = docking_executable
 
     # Find PDB's
-    pdbs_in_folder = docking_object.find_pdb_ligands(current_generation_pdb_dir)
-    job_input_convert_lig = tuple((docking_object, pdb) for pdb in pdbs_in_folder)
+    pdbs_in_folder = docking.find_pdb_ligands(current_generation_pdb_dir)
+    job_input_convert_lig = tuple((docking, pdb) for pdb in pdbs_in_folder)
 
     print("####################")
     print("Convert Ligand to PDBQT format Begun")
@@ -139,9 +135,9 @@ def run_docking_common(
     print("####################")
 
     # Docking the ligands which converted to PDBQT Find PDBQT's
-    pdbqts_in_folder = docking_object.find_converted_ligands(current_generation_pdb_dir)
+    pdbqts_in_folder = docking.find_converted_ligands(current_generation_pdb_dir)
 
-    job_input_dock_lig = tuple((docking_object, pdbqt) for pdbqt in pdbqts_in_folder)
+    job_input_dock_lig = tuple((docking, pdbqt) for pdbqt in pdbqts_in_folder)
     print("####################")
     print("Docking Begun")
     smiles_names_failed_to_dock = params["parallelizer"].run(
@@ -170,11 +166,11 @@ def run_docking_common(
             deleted_smiles_names_list,
         )
     _print_three_vars("#################### ", "", "Begin Ranking and Saving results")
-    unweighted_ranked_smile_file = docking_object.rank_and_save_output_smi(
+    unweighted_ranked_smile_file = docking.rank_and_save_output_smi(
         params,
         current_generation_dir,
         current_gen_int,
-        smile_file_new_gen,
+        smiles_file_new_gen,
         deleted_smiles_names_list,
     )
     _print_three_vars("", "Completed Ranking and Saving results", "")

@@ -6,14 +6,14 @@ from typing import List, Tuple
 
 import numpy.random as rn
 
-from autogrow.types import CompoundInfo
+from autogrow.types import PreDockedCompoundInfo
 
 
 def spin_roulette_selector(
-    usable_list_of_smiles: List[CompoundInfo],
+    usable_list_of_smiles: List[PreDockedCompoundInfo],
     number_to_chose: int,
     docking_or_diversity: str,
-) -> List[CompoundInfo]:
+) -> List[PreDockedCompoundInfo]:
     """
     Make a list of ligands chosen by a random weighted roulette selection,
     without replacement, weighted by its docking score
@@ -55,7 +55,7 @@ def spin_roulette_selector(
 
 
 def adjust_scores(
-    usable_list_of_smiles: List[CompoundInfo], docking_or_diversity: str
+    usable_list_of_smiles: List[PreDockedCompoundInfo], docking_or_diversity: str
 ) -> List[float]:
     """
     This function adjusts the scores appropriately. This is where we weight
@@ -88,9 +88,9 @@ def adjust_scores(
 
     elif docking_or_diversity == "docking":
         weight_scores = [
-            x.docking_score
+            x.previous_docking_score
             for x in usable_list_of_smiles
-            if x.docking_score is not None
+            if x.previous_docking_score is not None
         ]
         # minimum is the most positive value from usable_list_of_smiles the
         # more negative the docking score the better the dock

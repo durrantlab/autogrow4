@@ -9,6 +9,7 @@ import os
 from typing import Dict, List, Optional, Union
 
 from autogrow.docking.scoring.scoring_classes.parent_scoring_class import ParentScoring
+from autogrow.types import PreDockedCompoundInfo, PostDockedCompoundInfo
 
 
 class VINA(ParentScoring):
@@ -23,7 +24,7 @@ class VINA(ParentScoring):
     def __init__(
         self,
         params: Optional[Dict[str, Union[str, int, float, bool]]] = None,
-        smiles_dict: Optional[Dict[str, List[str]]] = None,
+        smiles_dict: Optional[Dict[str, PreDockedCompoundInfo]] = None,
         test_boot: bool = True,
     ) -> None:
         """
@@ -78,7 +79,7 @@ class VINA(ParentScoring):
 
         return "Not Applicable"
 
-    def run_scoring(self, file_path: str) -> Optional[List[str]]:
+    def run_scoring(self, file_path: str) -> Optional[PostDockedCompoundInfo]:
         """
         Get all relevant scoring info and return as a list
 
@@ -96,7 +97,7 @@ class VINA(ParentScoring):
 
         return self.get_score_from_a_file(file_path)
 
-    def get_score_from_a_file(self, file_path: str) -> Optional[List[str]]:
+    def get_score_from_a_file(self, file_path: str) -> Optional[PostDockedCompoundInfo]:
         """
         Make a list of a ligands information including its docking score.
 
@@ -134,19 +135,13 @@ class VINA(ParentScoring):
 
         # Obtain additional file
 
-        lig_info = [ligand_short_name, basefile_strip, affinity]
+        lig_info_vals = [ligand_short_name, basefile_strip, affinity]
 
-        lig_info = self.merge_smile_info_w_affinity_info(lig_info)
-        if lig_info is None:
-            return None
-
-        lig_info = [str(x) for x in lig_info]
-
-        return lig_info
+        return self.merge_smile_info_w_affinity_info(lig_info_vals)
 
     def merge_smile_info_w_affinity_info(
-        self, lig_info: List[str]
-    ) -> Optional[List[str]]:
+        self, lig_info: List
+    ) -> Optional[PostDockedCompoundInfo]:
         """
         From the info in self.smiles_dict get that info and merge that with
         the affinity info
@@ -165,10 +160,10 @@ class VINA(ParentScoring):
             happen
         """
 
-        ligand_short_name = lig_info[0]
+        ligand_short_name, basefile_strip, affinity = lig_info
 
         # Get SMILES String of PDB
-        pdb_path = self.file_path + lig_info[1] + ".pdb"
+        pdb_path = self.file_path + basefile_strip + ".pdb"
         if not os.path.exists(pdb_path):
             return None
 
@@ -180,6 +175,7 @@ class VINA(ParentScoring):
                         "REMARK Final SMILES string: ", ""
                     ).replace("\n", "")
                     break
+
         if new_smiles_string is None:
             # If the REMARK SECTION IS NOT THERE raise except. Avoid this
             # if possible as rdkit can missinterpret bonds because pdbs
@@ -187,16 +183,26 @@ class VINA(ParentScoring):
             raise Exception(f"Could not get SMILES string from PDB file: {pdb_path}")
 
         assert self.smiles_dict is not None, "smiles_dict is None"
-        if ligand_short_name in list(self.smiles_dict.keys()):
-            ligand_full_info = [
-                new_smiles_string,
-                self.smiles_dict[ligand_short_name][1],
-                *lig_info,
-            ]
-            # Convert all to strings
-            ligand_full_info = [str(x) for x in ligand_full_info]
+        if ligand_short_name in self.smiles_dict:
+            return PostDockedCompoundInfo(
+                smiles=new_smiles_string,
+                id=ligand_short_name,
+                short_id=lig_info[0],
+                additional_info=lig_info[1],
+                score=lig_info[2],
+                # diversity_score=lig_info[3],
+            )
 
-            return ligand_full_info
+            # ligand_full_info = [
+            #     new_smiles_string,
+            #     self.smiles_dict[ligand_short_name].name,
+            #     *lig_info,
+            # ]
+
+            # Convert all to strings
+            # ligand_full_info = [str(x) for x in ligand_full_info]
+
+            # return ligand_full_info
         # Return None because lig name isn't in dictionary.
         # This is precautionary to prevent key errors later.
         # This should not occur

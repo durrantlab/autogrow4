@@ -85,7 +85,7 @@ class ParentDocking(ABC):
         params: Dict[str, Any],
         current_generation_dir: str,
         current_gen_int: int,
-        smile_file: str,
+        smiles_file: str,
         deleted_smiles_names_list: List[str],
     ) -> str:
         """
@@ -103,7 +103,7 @@ class ParentDocking(ABC):
             generation
         :param int current_gen_int: the interger of the current generation
             indexed to zero
-        :param str smile_file: File path for the file with the ligands for the
+        :param str smiles_file: File path for the file with the ligands for the
             generation which will be a .smi file
         :param list deleted_smiles_names_list: list of SMILES which may have
             failed the conversion process

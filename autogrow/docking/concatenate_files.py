@@ -144,4 +144,3 @@ def del_files(file_name: str) -> None:
             os.system(f"rm {file_name}")
         except Exception:
             print(f"couldn't delete file: {file_name}")
-

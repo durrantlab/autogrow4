@@ -423,7 +423,7 @@ python run_autogrow.py \
     --redock_elite_from_previous_gen False \
     --generate_plot True \
     --reduce_files_sizes True \
-    --use_docked_source_compounds True \
+    --dock_source_compounds_first True \
     >  /PATH_TO/OUTPUT/text_file.txt 2>  /PATH_TO/OUTPUT/text_errormessage_file.txt
 ```
 
@@ -477,7 +477,7 @@ any new evolving molecules. This will dock the source compounds prior to
 seeding the first generation. It creates a generation 0, consisting only of
 the compounds in the source compound file.
 
-To use this option, set `use_docked_source_compounds` as `True`.
+To use this option, set `dock_source_compounds_first` as `True`.
 
 If one is running multiple independent runs using the same source compounds,
 it may be worth it to test all source compounds first and seed all runs with
@@ -493,7 +493,7 @@ Please remember that docking scores are relative to a specific protein and
 pocket. Changing the coordinates, protein, docking software, or (re)scoring
 method will invalidate any information.
 
-More information is provided in the `use_docked_source_compounds` section of
+More information is provided in the `dock_source_compounds_first` section of
 the `run_autogrow.py` help menu, which can be displayed by running:
 
 ```bash python run_autogrow.py --help```

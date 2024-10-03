@@ -8,16 +8,16 @@ import math
 import copy
 from typing import List, Tuple
 
-from autogrow.types import CompoundInfo
+from autogrow.types import PreDockedCompoundInfo, ScoreType
 
 
 def run_Tournament_Selector(
-    list_of_ligands: List[CompoundInfo],
+    list_of_ligands: List[PreDockedCompoundInfo],
     num_to_chose: int,
     tourn_size: float,
-    idx_to_sel: int,
+    score_type: ScoreType,
     favor_most_negative: bool = True,
-) -> List[CompoundInfo]:
+) -> List[PreDockedCompoundInfo]:
     """
     This runs a tournament style selector given a list of ligands and
     specified metric. It will randomly select ligands for tournaments. The
@@ -60,10 +60,10 @@ def run_Tournament_Selector(
             "list_of_ligands is an empty list. There is nothing to chose from."
         )
 
-    if idx_to_sel != -1 and len(list_of_ligands[0].to_list()) < idx_to_sel:
-        raise Exception(
-            "The idx to select by does not exist in the provided list_of_ligand."
-        )
+    # if score_type != -1 and len(list_of_ligands[0].to_list()) < score_type:
+    #     raise Exception(
+    #         "The idx to select by does not exist in the provided list_of_ligand."
+    #     )
 
     num_per_tourn = int(math.ceil(num_ligands * tourn_size))
 
@@ -71,7 +71,7 @@ def run_Tournament_Selector(
     list_of_ligands_reduced = copy.deepcopy(list_of_ligands)
     for _ in range(num_to_chose):
         chosen_ligand = run_one_tournament(
-            list_of_ligands, num_per_tourn, idx_to_sel, favor_most_negative
+            list_of_ligands, num_per_tourn, score_type, favor_most_negative
         )
         list_of_ligands_reduced = [
             x for x in list_of_ligands_reduced if x != chosen_ligand
@@ -82,11 +82,11 @@ def run_Tournament_Selector(
 
 
 def run_one_tournament(
-    list_of_ligands: List[CompoundInfo],
+    list_of_ligands: List[PreDockedCompoundInfo],
     num_per_tourn: int,
-    idx_to_sel: int,
+    score_type: ScoreType,
     favor_most_negative: bool = True,
-) -> CompoundInfo:
+) -> PreDockedCompoundInfo:
     """
     This runs a single tournament style selection given a list of ligands and
     specified metric. It will randomly select ligands for the tournament. The
@@ -122,7 +122,7 @@ def run_one_tournament(
 
     num_ligands = len(list_of_ligands)
 
-    chosen_option = CompoundInfo(smiles="", name="")  # init
+    chosen_option = PreDockedCompoundInfo(smiles="", name="")  # init
     temp = []
     for i in range(num_per_tourn):
         temp.append(i)
@@ -131,12 +131,12 @@ def run_one_tournament(
         else:
             choice = list_of_ligands[random.randint(0, num_ligands - 1)]
             if favor_most_negative:
-                if float(chosen_option.score_by_index_lookup(idx_to_sel)) > float(
-                    choice.score_by_index_lookup(idx_to_sel)
+                if float(chosen_option.get_score(score_type)) > float(
+                    choice.get_score(score_type)
                 ):
                     chosen_option = choice
-            elif float(chosen_option.score_by_index_lookup(idx_to_sel)) < float(
-                choice.score_by_index_lookup(idx_to_sel)
+            elif float(chosen_option.get_score(score_type)) < float(
+                choice.get_score(score_type)
             ):
                 chosen_option = choice
             else:

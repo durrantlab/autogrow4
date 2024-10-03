@@ -7,7 +7,7 @@ import os
 import random
 from typing import Dict, List, Optional, Tuple, Union
 
-from autogrow.types import CompoundInfo
+from autogrow.types import PreDockedCompoundInfo, PostDockedCompoundInfo, ScoreType
 import rdkit  # type: ignore
 import rdkit.Chem as Chem  # type: ignore
 from rdkit.Chem.rdMolDescriptors import GetMorganFingerprint  # type: ignore
@@ -23,12 +23,12 @@ import autogrow.docking.ranking.selecting.tournament_selection as Tournament_Sel
 
 
 def create_seed_list(
-    usable_list_of_smiles: List[CompoundInfo],
+    usable_list_of_smiles: List[PreDockedCompoundInfo],
     num_seed_diversity: int,
     num_seed_dock_fitness: int,
     selector_choice: str,
     tourn_size: float,
-) -> List[CompoundInfo]:
+) -> List[PreDockedCompoundInfo]:
     """
     this function will take ausable_list_of_smiles which can be derived from
     either the previous generation or a source_compounds_file. Then it will
@@ -71,12 +71,12 @@ def create_seed_list(
 
         # Get seed molecules based on docking scores
         docking_fitness_smiles_list = Rank_Sel.run_rank_selector(
-            usable_list_of_smiles, num_seed_dock_fitness, -2, False
+            usable_list_of_smiles, num_seed_dock_fitness, ScoreType.DOCKING, False
         )
 
         # Get seed molecules based on diversity scores
         diversity_smile_list = Rank_Sel.run_rank_selector(
-            usable_list_of_smiles, num_seed_diversity, -1, False
+            usable_list_of_smiles, num_seed_diversity, ScoreType.DIVERSITY, False
         )
 
     elif selector_choice == "Roulette_Selector":
@@ -100,12 +100,20 @@ def create_seed_list(
 
         # Get seed molecules based on docking scores
         docking_fitness_smiles_list = Tournament_Sel.run_Tournament_Selector(
-            usable_list_of_smiles, num_seed_dock_fitness, tourn_size, -2, True
+            usable_list_of_smiles,
+            num_seed_dock_fitness,
+            tourn_size,
+            ScoreType.DOCKING,
+            True,
         )
 
         # Get seed molecules based on diversity scores
         diversity_smile_list = Tournament_Sel.run_Tournament_Selector(
-            usable_list_of_smiles, num_seed_diversity, tourn_size, -1, True
+            usable_list_of_smiles,
+            num_seed_diversity,
+            tourn_size,
+            ScoreType.DIVERSITY,
+            True,
         )
 
     else:
@@ -142,8 +150,9 @@ def create_seed_list(
 
 
 def get_chosen_mol_full_data_list(
-    chosen_mol_list: List[CompoundInfo], usable_list_of_smiles: List[CompoundInfo]
-) -> List[CompoundInfo]:
+    chosen_mol_list: List[PreDockedCompoundInfo],
+    usable_list_of_smiles: List[PreDockedCompoundInfo],
+) -> List[PreDockedCompoundInfo]:
     """
     This function will take a list of chosen molecules and a list of all the
     SMILES which could have been chosen and all of the information about those
@@ -178,11 +187,10 @@ def get_chosen_mol_full_data_list(
         the associated information in a random order
     """
 
-    import pdb
-
-    pdb.set_trace()
-    sorted_list = sorted(usable_list_of_smiles, key=lambda x: float(x[-2]))
-    weighted_order_list = []
+    sorted_list = sorted(
+        usable_list_of_smiles, key=lambda x: x.get_score(ScoreType.DOCKING)
+    )
+    weighted_order_list: List[PreDockedCompoundInfo] = []
     for smile in chosen_mol_list:
         for smile_pair in sorted_list:
             if smile == smile_pair.smiles:
@@ -199,7 +207,7 @@ def get_chosen_mol_full_data_list(
     return weighted_order_list
 
 
-def get_usable_format(infile: str) -> List[CompoundInfo]:
+def get_usable_format(infile: str) -> List[PreDockedCompoundInfo]:
     """
     This code takes a string for an file which is formatted as an .smi file. It
     opens the file and reads in the components into a usable list.
@@ -231,7 +239,7 @@ def get_usable_format(infile: str) -> List[CompoundInfo]:
     """
 
     # IMPORT SMILES FROM THE PREVIOUS GENERATION
-    usable_list_of_smiles: List[CompoundInfo] = []
+    usable_list_of_smiles: List[PreDockedCompoundInfo] = []
 
     if os.path.exists(infile) is False:
         print(f"\nFile of Source compounds does not exist: {infile}\n")
@@ -246,15 +254,18 @@ def get_usable_format(infile: str) -> List[CompoundInfo]:
                 parts = line.split("    ")
 
             # choice_list = [parts[i] for i in range(len(parts))]
-            compoundInfo = CompoundInfo(smiles=parts[0], name=parts[1])
+            compoundInfo = PreDockedCompoundInfo(smiles=parts[0], name=parts[1])
+            if len(parts) > 2:
+                compoundInfo.previous_diversity_score = float(parts[-1])
+                compoundInfo.previous_docking_score = float(parts[-2])
             usable_list_of_smiles.append(compoundInfo)
 
     return usable_list_of_smiles
 
 
 def convert_usable_list_to_lig_dict(
-    usable_list_of_smiles: List[CompoundInfo],
-) -> Optional[Dict[str, CompoundInfo]]:
+    usable_list_of_smiles: List[PreDockedCompoundInfo],
+) -> Optional[Dict[str, PostDockedCompoundInfo]]:
     """
     This will convert a list created by get_usable_format() to a dictionary
     using the ligand smile+lig_id as the key. This makes for faster searching
@@ -265,14 +276,17 @@ def convert_usable_list_to_lig_dict(
         information formatted into a list which is usable by the rest of Autogrow
 
     Returns:
-    :returns: list usable_dict_of_smiles: djct of all the ligand info with a
-        key containing both the SMILE string and the unique lig ID
+    :returns: list usable_dict_of_smiles: dict of all the ligand info with a
+        key containing both the SMILES string and the unique lig ID
     """
 
     if type(usable_list_of_smiles) is not type([]):
         return None
 
-    usable_dict_of_smiles: Dict[str, CompoundInfo] = {}
+    print(usable_list_of_smiles)
+    import pdb; pdb.set_trace()
+
+    usable_dict_of_smiles: Dict[str, PostDockedCompoundInfo] = {}
     for item in usable_list_of_smiles:
         key = item.smiles + item.name
         if key in usable_dict_of_smiles and usable_dict_of_smiles[
@@ -285,9 +299,9 @@ def convert_usable_list_to_lig_dict(
 
 
 ##### Called in the docking class ######
-def score_and_append_diversity_scores(
-    molecules_list: List[CompoundInfo],
-) -> List[CompoundInfo]:
+def score_and_calc_diversity_scores(
+    postDockedCompoundInfos: List[PostDockedCompoundInfo],
+) -> List[PostDockedCompoundInfo]:
     """
     This function will take list of molecules which makes up a population. It
     will then create a diversity score for each molecules:
@@ -329,11 +343,11 @@ def score_and_append_diversity_scores(
         with the respective info and append diversity score
     """
 
-    mol_list = []
+    postDockedCompoundInfosToKeep: List[PostDockedCompoundInfo] = []
 
-    for pair in molecules_list:
-        if pair is not None:
-            smile = pair.smiles
+    for postDockedCompoundInfo in postDockedCompoundInfos:
+        if postDockedCompoundInfo is not None:
+            smile = postDockedCompoundInfo.smiles
             # name = pair[1]
             try:
                 mol = Chem.MolFromSmiles(smile, sanitize=False)
@@ -343,62 +357,50 @@ def score_and_append_diversity_scores(
             if mol is None:
                 raise AssertionError(
                     "mol in list failed to sanitize. Issue in Ranking.py \
-                                    def score_and_append_diversity_scores"
+                                    def score_and_calc_diversity_scores"
                 )
 
             mol = MOH.check_sanitization(mol)
             if mol is None:
                 raise AssertionError(
                     "mol in list failed to sanitize. Issue in Ranking.py \
-                                        def score_and_append_diversity_scores"
+                                        def score_and_calc_diversity_scores"
                 )
 
             mol = MOH.try_deprotanation(mol)
             if mol is None:
                 raise AssertionError(
                     "mol in list failed to sanitize. Issue in Ranking.py \
-                                        def score_and_append_diversity_scores"
+                                        def score_and_calc_diversity_scores"
                 )
 
-            temp = pair.to_list()
-            temp.append(mol)
-            if temp[-1] is None:
-                print(temp)
+            postDockedCompoundInfo.mol = mol
+            if mol is None:
+                print(postDockedCompoundInfo)
                 print("None in temp list, skip this one")
                 continue
-            mol_list.append(temp)
+            # mol_list.append(temp)
+
+            postDockedCompoundInfosToKeep.append(postDockedCompoundInfo)
         else:
-            print("noneitem in molecules_list in score_and_append_diversity_scores")
+            print("noneitem in molecules_list in score_and_calc_diversity_scores")
 
-    fps_list = []
-    for molecule in mol_list:
-        fp = GetMorganFingerprint(molecule[-1], 10, useFeatures=True)
-        temp = list(molecule)
-        temp.append(fp)
-        fps_list.append(temp)
+    for postDockedCompoundInfo in postDockedCompoundInfosToKeep:
+        fp = GetMorganFingerprint(postDockedCompoundInfo.mol, 10, useFeatures=True)
+        postDockedCompoundInfo.fp = fp
 
-    fps_list_w_div_score = []
-    for i in range(len(fps_list)):
+    for i in range(len(postDockedCompoundInfosToKeep)):
         diversity_score = 0
-        for j in range(len(fps_list)):
+        for j in range(len(postDockedCompoundInfosToKeep)):
             if i != j:
                 # if DiceSimilarity=1.0 its a perfect match, the smaller the
                 # number the more diverse it is. The sum of all of these gives
                 # the distance from the normal. The smaller the number means
                 # the more distant
                 diversity_score = diversity_score + DataStructs.DiceSimilarity(
-                    fps_list[i][-1], fps_list[j][-1]
+                    postDockedCompoundInfosToKeep[i].fp,
+                    postDockedCompoundInfosToKeep[j].fp,
                 )
-        temp = list(fps_list[i])
-        temp.append(str(diversity_score))
-        fps_list_w_div_score.append(temp)
+        postDockedCompoundInfosToKeep[i].diversity_score = diversity_score
 
-    # take the diversity score and append to the last column in the original
-    # list
-
-    for i in range(len(molecules_list)):
-        if molecules_list[i][0] == fps_list_w_div_score[i][0]:
-
-            molecules_list[i].append(fps_list_w_div_score[i][-1])
-
-    return molecules_list
+    return postDockedCompoundInfos
