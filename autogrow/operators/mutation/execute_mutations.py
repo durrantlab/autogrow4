@@ -57,7 +57,7 @@ def make_mutants(
 
     # initialize the smileclickclass
     a_smiles_click_chem_object = SmileClickClass.SmilesClickChem(
-        rxn_library_variables, new_mutation_smiles_list, params["filter_object_dict"]
+        rxn_library_variables, new_mutation_smiles_list
     )
 
     while loop_counter < 2000 and len(new_ligands_list) < num_mutants_to_make:

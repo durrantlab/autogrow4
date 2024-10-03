@@ -18,7 +18,6 @@ import rdkit.Chem as Chem  # type: ignore
 # Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog("rdApp.*")
 
-import autogrow.operators.filter.execute_filters as Filter
 import autogrow.docking.ranking.ranking_mol as Ranking
 import autogrow.operators.mutation.execute_mutations as Mutation
 import autogrow.operators.crossover.execute_crossover as execute_crossover

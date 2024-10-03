@@ -27,7 +27,6 @@ from rdkit.Chem import rdFMCS  # type: ignore
 rdkit.RDLogger.DisableLog("rdApp.*")
 
 
-import autogrow.operators.filter.execute_filters as Filter
 import autogrow.operators.crossover.smiles_merge.smiles_merge as smiles_merge
 import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
 

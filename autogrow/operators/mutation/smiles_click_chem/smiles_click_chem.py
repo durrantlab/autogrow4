@@ -18,7 +18,6 @@ from rdkit.Chem import AllChem  # type: ignore
 rdkit.RDLogger.DisableLog("rdApp.*")
 
 import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
-import autogrow.operators.filter.execute_filters as Filter
 
 
 class SmilesClickChem(object):
@@ -28,7 +27,6 @@ class SmilesClickChem(object):
         self,
         rxn_library_variables: List[str],
         list_of_already_made_smiles: List[PreDockedCompoundInfo],
-        filter_object_dict: Dict[str, ParentFilter],
     ) -> None:
         """
         init for SmilesClickChem. This will set up all the reaction and
@@ -45,8 +43,6 @@ class SmilesClickChem(object):
             sublist contains info about a smiles made in this generation via
             mutation ie.[['O=C([O-])',
             '(Gen_3_Mutant_37_747+ZINC51)Gen_4_Mutant_15_52']]
-        :param dict filter_object_dict: a dictionary of all filter objects
-            which are to be applied to the newly created ligands.
         """
 
         # Unpackage the rxn_library_variables
@@ -72,9 +68,6 @@ class SmilesClickChem(object):
         self.list_of_already_made_smiles = [
             x.smiles for x in list_of_already_made_smiles
         ]
-        # Dictionary containing all Filter class
-        # objects to be impossed on the ligand
-        self.filter_object_dict = filter_object_dict
 
     def update_list_of_already_made_smiles(
         self, list_of_already_made_smiles_infos: List[PreDockedCompoundInfo]

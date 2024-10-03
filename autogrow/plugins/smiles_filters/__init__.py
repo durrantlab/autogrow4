@@ -123,14 +123,11 @@ class SmilesFilterPluginManager(PluginManagerBase):
             which passed the filter. Excludes all molecules which failed.
         """
 
-        # Get the already generated dictionary of filter objects
-        filter_object_dict = self.params["filter_object_dict"]
-
         # make a list of tuples for multi-processing Filter
         job_input = []
         for smiles_info in list_of_new_ligands:
-            temp_tuple = smiles_info, filter_object_dict
-            job_input.append(temp_tuple)
+            # TODO: I don't thiknk you need to wrap this in a tuple.
+            job_input.append((smiles_info, ))
         job_input = tuple(job_input)
 
         results = self.params["parallelizer"].run(job_input, self._run_filters_mol)
@@ -139,7 +136,7 @@ class SmilesFilterPluginManager(PluginManagerBase):
         return [x for x in results if x is not None]
 
     def _run_filters_mol(
-        self, smiles_info: PreDockedCompoundInfo, child_dict: Dict[str, ParentFilter]
+        self, smiles_info: PreDockedCompoundInfo
     ) -> Optional[PreDockedCompoundInfo]:
         """
         This takes a smiles_string and the selected filter list (child_dict) and
@@ -183,15 +180,12 @@ class SmilesFilterPluginManager(PluginManagerBase):
         if mol is None:
             return None
 
-        if child_dict is not None:
-            # run through the filters
-            filter_result = self._run_all_selected_filters(mol)
+        # run through the filters
+        filter_result = self._run_all_selected_filters(mol)
 
-            # see if passed. If it passed return the smiles_info
-            return smiles_info if filter_result else None
+        # see if passed. If it passed return the smiles_info
+        return smiles_info if filter_result else None
 
-        # This will return None
-        return smiles_info
 
     def _run_filter_on_just_smiles(self, smiles: str) -> List[str]:
         """
