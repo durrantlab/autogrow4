@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from argparse import ArgumentParser
 from typing import Dict, List, Optional, Tuple, Union
 from autogrow.config.argparser import ArgumentVars, register_argparse_group
-from autogrow.operators.filter.filter_classes.parent_filter_class import ParentFilter
+
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
 from autogrow.types import PreDockedCompoundInfo
 from rdkit import Chem  # type: ignore

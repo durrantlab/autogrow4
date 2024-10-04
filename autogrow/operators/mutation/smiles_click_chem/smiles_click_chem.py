@@ -7,7 +7,6 @@ import json
 import copy
 from typing import Any, Dict, List, Optional, Union
 
-from autogrow.operators.filter.filter_classes.parent_filter_class import ParentFilter
 from autogrow.plugins.plugin_manager_base import get_plugin_manager
 from autogrow.types import PreDockedCompoundInfo
 import rdkit  # type: ignore

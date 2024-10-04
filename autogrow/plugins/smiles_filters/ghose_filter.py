@@ -33,7 +33,7 @@ from autogrow.config.argparser import ArgumentVars
 # Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog("rdApp.*")
 
-from autogrow.operators.filter.filter_classes.parent_filter_class import ParentFilter
+
 
 
 class GhoseFilter(SmilesFilterBase):

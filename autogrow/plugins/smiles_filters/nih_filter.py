@@ -17,7 +17,7 @@ import rdkit  # type: ignore
 from rdkit.Chem import FilterCatalog  # type: ignore
 from rdkit.Chem.FilterCatalog import FilterCatalogParams  # type: ignore
 
-from autogrow.operators.filter.filter_classes.parent_filter_class import ParentFilter
+
 from typing import List, Tuple
 from autogrow.config.argparser import ArgumentVars
 

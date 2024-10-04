@@ -19,7 +19,7 @@ from rdkit.Chem.FilterCatalog import FilterCatalogParams  # type: ignore
 from typing import List, Tuple
 from autogrow.config.argparser import ArgumentVars
 
-from autogrow.operators.filter.filter_classes.parent_filter_class import ParentFilter
+
 
 
 class BRENKFilter(SmilesFilterBase):

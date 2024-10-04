@@ -1404,7 +1404,7 @@ def make_complete_children_dict(purpose_of_object: str) -> Dict[str, Any]:
     get_all_subclasses = None
     if purpose_of_object == "filter":
         import autogrow.operators.filter.filter_classes.filter_children_classes
-        from autogrow.operators.filter.filter_classes.parent_filter_class import ParentFilter as parent_object
+         as parent_object
         from autogrow.operators.filter.filter_classes.get_child_filter_class import get_all_subclasses
     elif purpose_of_object == "parent_pdbqt_converter":
         import autogrow.docking.docking_class.docking_file_conversion
