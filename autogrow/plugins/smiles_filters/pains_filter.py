@@ -22,8 +22,6 @@ from rdkit.Chem import FilterCatalog  # type: ignore
 from rdkit.Chem.FilterCatalog import FilterCatalogParams  # type: ignore
 
 
-
-
 class PAINSFilter(SmilesFilterBase):
     """
     This will filter a ligand using a PAINS filter. PAINS eliminates of Pan

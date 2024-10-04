@@ -30,8 +30,6 @@ from autogrow.config.argparser import ArgumentVars
 rdkit.RDLogger.DisableLog("rdApp.*")
 
 
-
-
 class MozziconacciFilter(SmilesFilterBase):
     """
     This runs a Mozziconacci filter. Mozziconacci filter is a filter for

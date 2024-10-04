@@ -1,7 +1,7 @@
 import argparse
 import copy
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, Type
 
 parser = argparse.ArgumentParser(
     description="AutoGrow: An automated drug optimization and generation tool."
@@ -13,9 +13,10 @@ plugin_arg_groups_to_add = []
 @dataclass
 class ArgumentVars:
     name: str
-    action: str
     default: Any
     help: str
+    type: Optional[Type] = None
+    action: Optional[str] = None
 
 
 def register_argparse_group(title: str, arg_vars: List[ArgumentVars]):
@@ -114,12 +115,12 @@ def get_argparse_vars() -> Dict[str, Any]:
     for title, arg_vars in plugin_arg_groups_to_add:
         if title not in titles:
             titles.append(title)
-        
+
         if title not in titles_to_arg_vars:
             titles_to_arg_vars[title] = []
 
         titles_to_arg_vars[title].extend(arg_vars)
-    
+
     for title in titles:
         arg_vars = titles_to_arg_vars[title]
         group = parser.add_argument_group(title)
@@ -127,12 +128,20 @@ def get_argparse_vars() -> Dict[str, Any]:
             if arg_var.name[:2] != "--":
                 arg_var.name = f"--{arg_var.name}"
 
-            group.add_argument(
-                arg_var.name,
-                action=arg_var.action,
-                default=arg_var.default,
-                help=arg_var.help,
-            )
+            if arg_var.action is None:
+                group.add_argument(
+                    arg_var.name,
+                    type=arg_var.type,
+                    default=arg_var.default,
+                    help=arg_var.help,
+                )
+            else:
+                group.add_argument(
+                    arg_var.name,
+                    action=arg_var.action,
+                    default=arg_var.default,
+                    help=arg_var.help,
+                )
 
     args_dict = vars(parser.parse_args())
 
@@ -347,24 +356,24 @@ def _add_ga_subsequent_gen_params(parser: argparse._ArgumentGroup):
 
 def _add_ga_params(parser: argparse._ArgumentGroup):
     # Genetic Algorithm Options
-    parser.add_argument(
-        "--selector_choice",
-        choices=["Roulette_Selector", "Rank_Selector", "Tournament_Selector"],
-        default="Roulette_Selector",
-        help="This determines whether the fitness criteria are chosen by a Weighted Roulette, \
-        Ranked, or Tournament style Selector. The Rank option is a non-redundant selector.\
-        Roulette and Tournament chose without replacement and are stoichastic options. \
-        Warning do not use Rank_Selector for small runs as there is potential that \
-        the number of desired ligands exceed the number of ligands to chose from.",
-    )
-    parser.add_argument(
-        "--tourn_size",
-        type=float,
-        default=0.1,
-        help="If using the Tournament_Selector this determines the size of each \
-        tournament. The number of ligands used for each tournament will the \
-        tourn_size * the number of considered ligands.",
-    )
+    # parser.add_argument( TODO: Add description to plugins
+    #     "--selector_choice",
+    #     choices=["Roulette_Selector", "Rank_Selector", "Tournament_Selector"],
+    #     default="Roulette_Selector",
+    #     help="This determines whether the fitness criteria are chosen by a Weighted Roulette, \
+    #     Ranked, or Tournament style Selector. The Rank option is a non-redundant selector.\
+    #     Roulette and Tournament chose without replacement and are stoichastic options. \
+    #     Warning do not use Rank_Selector for small runs as there is potential that \
+    #     the number of desired ligands exceed the number of ligands to chose from.",
+    # )
+    # parser.add_argument(
+    #     "--tourn_size",
+    #     type=float,
+    #     default=0.1,
+    #     help="If using the Tournament_Selector this determines the size of each \
+    #     tournament. The number of ligands used for each tournament will the \
+    #     tourn_size * the number of considered ligands.",
+    # )
 
     # Populations settings
     parser.add_argument(

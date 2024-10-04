@@ -21,6 +21,7 @@ from autogrow import program_info
 import autogrow.autogrow_main_execute as AutogrowMainExecute
 from autogrow.config import load_commandline_parameters
 from autogrow.plugins.plugin_manager_base import get_all_plugin_managers
+from autogrow.plugins.selectors import SelectorBase, SelectorPluginManager
 from autogrow.plugins.smiles_filters import SmilesFilterBase, SmilesFilterPluginManager
 
 
@@ -35,6 +36,7 @@ def _load_plugin_managers() -> None:
 
     # Set up filters
     SmilesFilterPluginManager(SmilesFilterBase)
+    SelectorPluginManager(SelectorBase)
 
 
 def _setup_plugin_managers(params) -> None:

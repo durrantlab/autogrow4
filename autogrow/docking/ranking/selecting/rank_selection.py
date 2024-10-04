@@ -12,10 +12,10 @@ from autogrow.types import PreDockedCompoundInfo, ScoreType
 
 
 def run_rank_selector(
-    usable_list_of_smiles: List[PreDockedCompoundInfo],
-    number_to_chose: int,
+    usable_smiles: List[PreDockedCompoundInfo],
+    num_to_chose: int,
     score_type: ScoreType,
-    reverse_sort: bool = False,
+    favor_most_negative: bool = True,
 ) -> List[PreDockedCompoundInfo]:
     """
     Given a data set and an idx number to select based on it will select the
@@ -25,12 +25,12 @@ def run_rank_selector(
     This is an alternative to the weight roulette style selectors.
 
     Inputs:
-    :param list usable_list_of_smiles: a list with all the information of all
+    :param list usable_smiles: a list with all the information of all
         the mols in the previous generation
     :param int number_to_chose: the number of molecules to chose based on
         diversity score
     :param int score_type: Whether to consider docking or diversity scores.
-    :param bol reverse_sort:    Set to True if you want to select the most
+    :param bol favor_most_negative:    Set to False if you want to select the most
         positive number is the best choice Set to False if you want to select the
         most negative number
 
@@ -39,27 +39,27 @@ def run_rank_selector(
         selection, without replacement,
     """
 
-    if type(usable_list_of_smiles) is not type([]):
-        raise Exception("usable_list_of_smiles Must be a list, wrong data type")
+    if type(usable_smiles) is not type([]):
+        raise Exception("usable_smiles Must be a list, wrong data type")
 
-    num_ligands = len(usable_list_of_smiles)
+    num_ligands = len(usable_smiles)
     if num_ligands == 0:
         raise Exception(
-            "usable_list_of_smiles is an empty list. There is nothing to chose from."
+            "usable_smiles is an empty list. There is nothing to chose from."
         )
 
-    if number_to_chose <= 0:
+    if num_to_chose <= 0:
         return []
 
     # Sort by chosen idx property
     sorted_list = sorted(
-        usable_list_of_smiles,
+        usable_smiles,
         key=lambda x: x.get_previous_score(score_type),
-        reverse=reverse_sort,
+        reverse=not favor_most_negative,
     )
 
     # sorted_list = sorted(
-    #     usable_list_of_smiles,
+    #     usable_smiles,
     #     key=lambda x: x.score_by_index_lookup(column_idx_to_select),
     #     reverse=reverse_sort,
     # )
@@ -77,24 +77,24 @@ def run_rank_selector(
 
     del sorted_list
     del temp_list_info
-    if len(new_sorted_list) < number_to_chose:
+    if len(new_sorted_list) < num_to_chose:
 
         raise Exception(
             "Asked for {} but only {} availabe to chose from \
             There are more ligands to chose to seed the list than ligands to select from. \
             Please lower the top_mols_to_seed_next_generation and/or \
             diversity_mols_to_seed_first_generation".format(
-                number_to_chose, len(new_sorted_list)
+                num_to_chose, len(new_sorted_list)
             )
         )
 
     new_sorted_list = sorted(
         new_sorted_list,
         key=lambda x: x.get_previous_score(score_type),
-        reverse=reverse_sort,
+        reverse=not favor_most_negative,
     )
 
-    if len(list({x.smiles for x in new_sorted_list})) >= number_to_chose:
+    if len(list({x.smiles for x in new_sorted_list})) >= num_to_chose:
         sorted_list = []
         smiles_list = []
         for mol_info in new_sorted_list:
@@ -107,7 +107,7 @@ def run_rank_selector(
         sorted_list = new_sorted_list
 
     top_choice_smile_order = []
-    for i in range(number_to_chose):
+    for i in range(num_to_chose):
         smiles = sorted_list[i]
         top_choice_smile_order.append(smiles.smiles)
 

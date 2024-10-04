@@ -34,8 +34,6 @@ from autogrow.config.argparser import ArgumentVars
 rdkit.RDLogger.DisableLog("rdApp.*")
 
 
-
-
 class GhoseFilter(SmilesFilterBase):
     """
     This runs a Ghose filter for drug-likeliness. Ghose filter filters

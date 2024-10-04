@@ -985,9 +985,14 @@ class SmilesClickChem(object):
         # passed_filter = Filter.run_filter_on_just_smiles(
         #     reaction_product_smilestring, self.filter_object_dict
         # )
-        passed_filter = len(get_plugin_manager("SmilesFilterPluginManager").run(
-            smiles=reaction_product_smilestring
-        )) > 0
+        passed_filter = (
+            len(
+                get_plugin_manager("SmilesFilterPluginManager").run(
+                    smiles=reaction_product_smilestring
+                )
+            )
+            > 0
+        )
 
         if not passed_filter:
             return None

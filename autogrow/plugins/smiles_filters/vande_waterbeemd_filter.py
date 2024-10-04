@@ -26,8 +26,6 @@ import rdkit.Chem.Descriptors as Descriptors  # type: ignore
 rdkit.RDLogger.DisableLog("rdApp.*")
 
 
-
-
 class VandeWaterbeemdFilter(SmilesFilterBase):
     """
     This runs a VandeWaterbeemd filter for drugs which are likely to be blood

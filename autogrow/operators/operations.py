@@ -636,7 +636,7 @@ def get_complete_list_prev_gen_or_source_compounds(
     :param int generation_num: the interger of the current generation
 
     Returns:
-    :returns: list usable_list_of_smiles: a list with SMILES strings, names,
+    :returns: list usable_smiles: a list with SMILES strings, names,
         and information about the smiles from the previous generation or the
         source compound list
     """
@@ -644,9 +644,9 @@ def get_complete_list_prev_gen_or_source_compounds(
         f"{params['output_directory']}generation_0{os.sep}generation_0_ranked.smi"
     )
     if generation_num == 0:
-        usable_list_of_smiles = _get_source_compounds_or_raise(params)
+        usable_smiles = _get_source_compounds_or_raise(params)
     elif generation_num == 1 and os.path.exists(source_file_gen_0) is False:
-        usable_list_of_smiles = _get_source_compounds_or_raise(params)
+        usable_smiles = _get_source_compounds_or_raise(params)
     else:
         source_file = (
             params["output_directory"]
@@ -654,53 +654,51 @@ def get_complete_list_prev_gen_or_source_compounds(
         )
         if os.path.exists(source_file) is False:
             _handle_no_ligands_found("\tCheck formatting or if file has been moved.\n")
-        usable_list_of_smiles = Ranking.get_usable_format(source_file)
+        usable_smiles = Ranking.get_usable_format(source_file)
 
-        if len(usable_list_of_smiles) == 0:
+        if len(usable_smiles) == 0:
             _handle_no_ligands_found("\tCheck formatting or if file has been moved. \n")
-    # Test that every SMILES in the usable_list_of_smiles is a valid SMILES
+    # Test that every SMILES in the usable_smiles is a valid SMILES
     # which will import and Sanitize in RDKit. SMILES will be excluded if they
     # are fragmented, contain atoms with no atomic number (*), or do not
     # sanitize
-    job_input = tuple((i,) for i in usable_list_of_smiles)
+    job_input = tuple((i,) for i in usable_smiles)
 
-    usable_list_of_smiles: List[PreDockedCompoundInfo] = params["parallelizer"].run(
+    usable_smiles: List[PreDockedCompoundInfo] = params["parallelizer"].run(
         job_input, test_source_smiles_convert
     )
-    usable_list_of_smiles = [x for x in usable_list_of_smiles if x is not None]
-    print_errors = [x for x in usable_list_of_smiles if type(x) is str]
-    usable_list_of_smiles = [
-        x for x in usable_list_of_smiles if type(x) is PreDockedCompoundInfo
-    ]
+    usable_smiles = [x for x in usable_smiles if x is not None]
+    print_errors = [x for x in usable_smiles if type(x) is str]
+    usable_smiles = [x for x in usable_smiles if type(x) is PreDockedCompoundInfo]
     for x in print_errors:
         print(x)
 
-    if not usable_list_of_smiles:
+    if not usable_smiles:
         _raise_exception_with_message(
             "\nThere were no ligands in source compound or previous \
             generation which could sanitize.\n"
         )
     if params["filter_source_compounds"] is True:
 
-        prefilter_list = copy.deepcopy(usable_list_of_smiles)
+        prefilter_list = copy.deepcopy(usable_smiles)
         print("")
         print("Running Filter on the Compounds from last generation/Source")
-        # usable_list_of_smiles = Filter.run_filter(params, usable_list_of_smiles)
-        usable_list_of_smiles = get_plugin_manager("SmilesFilterPluginManager").run(
-            predocked_compounds=usable_list_of_smiles
+        # usable_smiles = Filter.run_filter(params, usable_smiles)
+        usable_smiles = get_plugin_manager("SmilesFilterPluginManager").run(
+            predocked_compounds=usable_smiles
         )
 
         # Remove Nones:
-        usable_list_of_smiles = [x for x in usable_list_of_smiles if x is not None]
+        usable_smiles = [x for x in usable_smiles if x is not None]
 
-        if not usable_list_of_smiles:
+        if not usable_smiles:
             _raise_exception_with_message(
                 "\nThere were no ligands in source compound which \
                         passed the User-selected Filters.\n"
             )
 
         failed_filter_list = []
-        for lig in usable_list_of_smiles:
+        for lig in usable_smiles:
             failed_filter_list = []
             if lig not in prefilter_list:
                 failed_filter_list.append(lig.name)
@@ -711,9 +709,9 @@ def get_complete_list_prev_gen_or_source_compounds(
             printout += f"\t{failed_filter_list}"
             print(printout)
 
-    random.shuffle(usable_list_of_smiles)
+    random.shuffle(usable_smiles)
 
-    return usable_list_of_smiles
+    return usable_smiles
 
 
 def _raise_exception_with_message(arg0):
@@ -775,11 +773,11 @@ def make_seed_list(
         from eite selection by docking score
 
     Returns:
-    :returns: list usable_list_of_smiles: a list with SMILES strings, names,
+    :returns: list usable_smiles: a list with SMILES strings, names,
         and information about the smiles which will be used to seed the next
         generation
     """
-    usable_list_of_smiles = copy.deepcopy(source_compounds_list)
+    usable_smiles = copy.deepcopy(source_compounds_list)
 
     full_length = False
     if generation_num == 0:
@@ -809,8 +807,8 @@ def make_seed_list(
                 # generation 1 if the number to seed is greater than exists
                 # but will provide a warning message.
                 if (
-                    len(usable_list_of_smiles) < num_seed_diversity
-                    or len(usable_list_of_smiles) < num_seed_diversity
+                    len(usable_smiles) < num_seed_diversity
+                    or len(usable_smiles) < num_seed_diversity
                 ):
                     # This is problematic so just use what is available
                     printout = "\n\nNot enough ligands in source compound \
@@ -827,28 +825,28 @@ def make_seed_list(
 
     if full_length is True or generation_num == 0:
         # This will be the full length list of starting molecules as the seed
-        random.shuffle(usable_list_of_smiles)
+        random.shuffle(usable_smiles)
 
     else:
         selector_choice = params["selector_choice"]
         tourn_size = params["tourn_size"]
         # Get subset of the source_file based on diversity scores and docking
         # scores
-        usable_list_of_smiles = Ranking.create_seed_list(
-            usable_list_of_smiles,
+        usable_smiles = Ranking.create_seed_list(
+            usable_smiles,
             num_seed_diversity,
             num_seed_dock_fitness,
             selector_choice,
             tourn_size,
         )
 
-    random.shuffle(usable_list_of_smiles)
+    random.shuffle(usable_smiles)
 
-    return usable_list_of_smiles
+    return usable_smiles
 
 
 def determine_seed_population_sizes(
-    params: Dict[str, Any], generation_num: int
+    params: Dict[str, Any], gen_num: int
 ) -> Tuple[int, int]:
     """
     This function determines how many molecules will be chosen to seed a
@@ -869,16 +867,16 @@ def determine_seed_population_sizes(
     # How many fewer seed mols are chosen from diversity compared to the 1st
     # generation This is also how many more get chosen from elitist selection
     diversity_depreciation = (
-        int(generation_num - 1) * params["diversity_seed_depreciation_per_gen"]
+        int(gen_num - 1) * params["diversity_seed_depreciation_per_gen"]
     )
 
-    if generation_num == 1:
-        top_mols_to_seed_next_generation = params[
+    if gen_num == 1:
+        top_mols_to_seed_next_gen = params[
             "top_mols_to_seed_next_generation_first_generation"
         ]
 
     else:
-        top_mols_to_seed_next_generation = params["top_mols_to_seed_next_generation"]
+        top_mols_to_seed_next_gen = params["top_mols_to_seed_next_generation"]
 
     # Number of mols chosen because of their diversity score
     num_seed_diversity = (
@@ -890,14 +888,12 @@ def determine_seed_population_sizes(
     # on.
     if num_seed_diversity <= 0:
         num_seed_dock_fitness = (
-            top_mols_to_seed_next_generation
+            top_mols_to_seed_next_gen
             + params["diversity_mols_to_seed_first_generation"]
         )
         num_seed_diversity = 0
     else:
-        num_seed_dock_fitness = (
-            top_mols_to_seed_next_generation + diversity_depreciation
-        )
+        num_seed_dock_fitness = top_mols_to_seed_next_gen + diversity_depreciation
 
     return num_seed_diversity, num_seed_dock_fitness
 

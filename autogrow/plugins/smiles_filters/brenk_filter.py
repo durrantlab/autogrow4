@@ -20,8 +20,6 @@ from typing import List, Tuple
 from autogrow.config.argparser import ArgumentVars
 
 
-
-
 class BRENKFilter(SmilesFilterBase):
     """
     This will filter a ligand using a BRENK screening filter for

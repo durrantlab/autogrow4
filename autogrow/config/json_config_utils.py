@@ -62,10 +62,6 @@ def save_vars_as_json(params: Dict[str, Union[str, int]]) -> None:
             else:
                 path_exists = False
 
-    temp_vars = {
-        k: copy.deepcopy(params[k])
-        for k in params
-        if "parallelizer" not in k
-    }
+    temp_vars = {k: copy.deepcopy(params[k]) for k in params if "parallelizer" not in k}
     with open(vars_file, "w") as fp:
         json.dump(temp_vars, fp, indent=4)

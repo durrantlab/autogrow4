@@ -12,7 +12,7 @@ from autogrow.types import PreDockedCompoundInfo, ScoreType
 
 
 def run_Tournament_Selector(
-    list_of_ligands: List[PreDockedCompoundInfo],
+    usable_smiles: List[PreDockedCompoundInfo],
     num_to_chose: int,
     tourn_size: float,
     score_type: ScoreType,
@@ -51,10 +51,10 @@ def run_Tournament_Selector(
         info for each ligand with potential for redundancy
     """
 
-    if type(list_of_ligands) is not type([]):
+    if type(usable_smiles) is not type([]):
         raise Exception("list_of_ligands Must be a list, wrong data type")
 
-    num_ligands = len(list_of_ligands)
+    num_ligands = len(usable_smiles)
     if num_ligands == 0:
         raise Exception(
             "list_of_ligands is an empty list. There is nothing to chose from."
@@ -68,10 +68,10 @@ def run_Tournament_Selector(
     num_per_tourn = int(math.ceil(num_ligands * tourn_size))
 
     chosen_ligands = []
-    list_of_ligands_reduced = copy.deepcopy(list_of_ligands)
+    list_of_ligands_reduced = copy.deepcopy(usable_smiles)
     for _ in range(num_to_chose):
         chosen_ligand = run_one_tournament(
-            list_of_ligands, num_per_tourn, score_type, favor_most_negative
+            usable_smiles, num_per_tourn, score_type, favor_most_negative
         )
         list_of_ligands_reduced = [
             x for x in list_of_ligands_reduced if x != chosen_ligand

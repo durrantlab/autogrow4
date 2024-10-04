@@ -48,8 +48,8 @@ def define_defaults() -> Dict[str, Any]:
     default_params["multithread_mode"] = "multithreading"
 
     # Genetic Algorithm Components
-    default_params["selector_choice"] = "Roulette_Selector"
-    default_params["tourn_size"] = 0.1
+    # default_params["selector_choice"] = "Roulette_Selector"
+    # default_params["tourn_size"] = 0.1
 
     # Seeding next gen and diversity
     default_params["top_mols_to_seed_next_generation_first_generation"] = 10

@@ -3,6 +3,7 @@ import importlib
 import inspect
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Type, TypeVar
+from autogrow.config.argparser import register_argparse_group
 from autogrow.plugins.plugin_base import PluginBase
 
 
@@ -20,7 +21,7 @@ class PluginManagerBase(ABC):
         self.params = params
 
         names_of_plugins_to_load: Optional[List[str]] = None
-        plugins_to_load = self.extract_plugins_to_setup_from_params()
+        plugins_to_load = self.get_selected_plugins_from_params()
         if plugins_to_load is not None:
             names_of_plugins_to_load = [os.path.basename(p) for p in plugins_to_load]
 
@@ -31,7 +32,7 @@ class PluginManagerBase(ABC):
             if names_of_plugins_to_load is None or name in names_of_plugins_to_load
         }
 
-    def extract_plugins_to_setup_from_params(self) -> Optional[List[str]]:
+    def get_selected_plugins_from_params(self) -> Optional[List[str]]:
         """
         Extract the list of plugins to load from the provided parameters
         (self.params). Children classes should override this method.
@@ -40,7 +41,9 @@ class PluginManagerBase(ABC):
         :returns: list of str: the list of plugins to load, or None if the
             program should load all plugins.
         """
-        return None
+        # Get the keys taht self.plugins and self.params have in common.
+        keys_in_common = set(self.plugins.keys()) & set(self.params.keys())
+        return [key for key in keys_in_common if self.params[key]]
 
     def load_plugins(self) -> Dict[str, PluginBase]:
         plugins: Dict[str, PluginBase] = {}
@@ -70,6 +73,10 @@ class PluginManagerBase(ABC):
                             ):
                                 plugins[name] = obj()
                                 plugins[name].onInit()
+
+                                title, args = plugins[name].add_arguments()
+                                register_argparse_group(title, args)
+
                     except ImportError as e:
                         print(f"Failed to import {module_name}: {e}")
 

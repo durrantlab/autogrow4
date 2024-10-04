@@ -55,25 +55,8 @@ class SmilesFilterBase(PluginBase):
         """Validate the provided arguments."""
         pass
 
-    def onInit(self):
-        title, args = self.add_arguments()
-        register_argparse_group(title, args)
-
 
 class SmilesFilterPluginManager(PluginManagerBase):
-    def extract_plugins_to_setup_from_params(self) -> Optional[List[str]]:
-        """
-        Extract the list of plugins to load from the provided parameters
-        (self.params). Children classes should override this method.
-
-        Returns:
-        :returns: list of str: the list of plugins to load, or None if the
-            program should load all plugins.
-        """
-        # Get the keys taht self.plugins and self.params have in common.
-        keys_in_common = set(self.plugins.keys()) & set(self.params.keys())
-        return [key for key in keys_in_common if self.params[key]]
-
     def run(self, **kwargs) -> List:
         """
         Run the plugin with provided arguments.
@@ -127,7 +110,7 @@ class SmilesFilterPluginManager(PluginManagerBase):
         job_input = []
         for smiles_info in list_of_new_ligands:
             # TODO: I don't thiknk you need to wrap this in a tuple.
-            job_input.append((smiles_info, ))
+            job_input.append((smiles_info,))
         job_input = tuple(job_input)
 
         results = self.params["parallelizer"].run(job_input, self._run_filters_mol)
@@ -185,7 +168,6 @@ class SmilesFilterPluginManager(PluginManagerBase):
 
         # see if passed. If it passed return the smiles_info
         return smiles_info if filter_result else None
-
 
     def _run_filter_on_just_smiles(self, smiles: str) -> List[str]:
         """

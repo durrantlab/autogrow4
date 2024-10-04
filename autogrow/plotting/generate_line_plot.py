@@ -36,12 +36,12 @@ def get_usable_format(infile: str) -> List[List[str]]:
         be read into the program
 
     Returns:
-    :returns: list usable_list_of_smiles: list of SMILES and their associated
+    :returns: list usable_smiles: list of SMILES and their associated
         information formatted into a list which is usable by the rest of Autogrow
     """
 
     # IMPORT SMILES FROM THE PREVIOUS GENERATION
-    usable_list_of_smiles = []
+    usable_smiles = []
 
     if os.path.exists(infile) is False:
         print(f"\nFile of Source compounds does not exist: {infile}\n")
@@ -57,9 +57,9 @@ def get_usable_format(infile: str) -> List[List[str]]:
                 )  # split line into parts separated by 4-spaces
 
             choice_list = [parts[i] for i in range(len(parts))]
-            usable_list_of_smiles.append(choice_list)
+            usable_smiles.append(choice_list)
 
-    return usable_list_of_smiles
+    return usable_smiles
 
 
 def get_average_score_per_gen(
@@ -76,7 +76,7 @@ def get_average_score_per_gen(
         within infolder
 
     Returns:
-    :returns: list usable_list_of_smiles: list of SMILES and their associated
+    :returns: list usable_smiles: list of SMILES and their associated
         information formatted into a list which is usable by the rest of Autogrow
     """
 

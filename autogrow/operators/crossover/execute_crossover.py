@@ -433,9 +433,14 @@ def do_crossovers_smiles_merge(
             # pass_or_not = Filter.run_filter_on_just_smiles(
             #     ligand_new_smiles, params["filter_object_dict"]
             # )
-            pass_or_not = len(get_plugin_manager("SmilesFilterPluginManager").run(
-                smiles=ligand_new_smiles
-            )) > 0
+            pass_or_not = (
+                len(
+                    get_plugin_manager("SmilesFilterPluginManager").run(
+                        smiles=ligand_new_smiles
+                    )
+                )
+                > 0
+            )
 
             if not pass_or_not:
                 counter += 1

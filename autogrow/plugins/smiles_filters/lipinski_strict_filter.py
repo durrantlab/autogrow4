@@ -29,8 +29,6 @@ from autogrow.config.argparser import ArgumentVars
 rdkit.RDLogger.DisableLog("rdApp.*")
 
 
-
-
 class LipinskiStrictFilter(SmilesFilterBase):
     """
     This runs a Strict Lipinski filter. Lipinski filter refines for orally

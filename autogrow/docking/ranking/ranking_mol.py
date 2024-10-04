@@ -23,7 +23,7 @@ import autogrow.docking.ranking.selecting.tournament_selection as Tournament_Sel
 
 
 def create_seed_list(
-    usable_list_of_smiles: List[PreDockedCompoundInfo],
+    usable_smiles: List[PreDockedCompoundInfo],
     num_seed_diversity: int,
     num_seed_dock_fitness: int,
     selector_choice: str,
@@ -39,13 +39,13 @@ def create_seed_list(
 
     Using the merged list it will make a list of all the smiles in the
     merged-list (chosen_mol_list) with all the other information about each of
-    the chosen mols from the usable_list_of_smiles
+    the chosen mols from the usable_smiles
 
     It will return this list with the complete information of each chosen mol
     (weighted_order_list)
 
     Inputs:
-    :param list usable_list_of_smiles: a list with SMILES strings, names, and
+    :param list usable_smiles: a list with SMILES strings, names, and
         information about the smiles from either the previous generation or the
         source compound list
     :param int num_seed_diversity: the number of seed molecules which come
@@ -71,24 +71,30 @@ def create_seed_list(
 
         # Get seed molecules based on docking scores
         docking_fitness_smiles_list = Rank_Sel.run_rank_selector(
-            usable_list_of_smiles, num_seed_dock_fitness, ScoreType.DOCKING, False
+            usable_smiles,
+            num_seed_dock_fitness,
+            ScoreType.DOCKING,
+            True,  # TODO: True is hardcoded? Why?
         )
 
         # Get seed molecules based on diversity scores
         diversity_smile_list = Rank_Sel.run_rank_selector(
-            usable_list_of_smiles, num_seed_diversity, ScoreType.DIVERSITY, False
+            usable_smiles,
+            num_seed_diversity,
+            ScoreType.DIVERSITY,
+            True,  # TODO: True is hardcoded? Why?
         )
 
     elif selector_choice == "Roulette_Selector":
         print("Roulette_Selector")
         # Get seed molecules based on docking scores
         docking_fitness_smiles_list = Roulette_Sel.spin_roulette_selector(
-            usable_list_of_smiles, num_seed_dock_fitness, "docking"
+            usable_smiles, num_seed_dock_fitness, ScoreType.DOCKING
         )
 
         # Get seed molecules based on diversity scores
         diversity_smile_list = Roulette_Sel.spin_roulette_selector(
-            usable_list_of_smiles, num_seed_diversity, "diversity"
+            usable_smiles, num_seed_diversity, ScoreType.DIVERSITY
         )
 
     elif selector_choice == "Tournament_Selector":
@@ -100,20 +106,20 @@ def create_seed_list(
 
         # Get seed molecules based on docking scores
         docking_fitness_smiles_list = Tournament_Sel.run_Tournament_Selector(
-            usable_list_of_smiles,
+            usable_smiles,
             num_seed_dock_fitness,
             tourn_size,
             ScoreType.DOCKING,
-            True,
+            True,  # TODO: True is hardcoded? Why?
         )
 
         # Get seed molecules based on diversity scores
         diversity_smile_list = Tournament_Sel.run_Tournament_Selector(
-            usable_list_of_smiles,
+            usable_smiles,
             num_seed_diversity,
             tourn_size,
             ScoreType.DIVERSITY,
-            True,
+            True,  # TODO: True is hardcoded? Why?
         )
 
     else:
@@ -132,7 +138,7 @@ def create_seed_list(
         # information such as the ligand name/id, the smiles string, the
         # diversity and docking score...
         chosen_mol_full_data_list = get_chosen_mol_full_data_list(
-            chosen_mol_list, usable_list_of_smiles
+            chosen_mol_list, usable_smiles
         )
 
     elif selector_choice == "Tournament_Selector":
@@ -151,7 +157,7 @@ def create_seed_list(
 
 def get_chosen_mol_full_data_list(
     chosen_mol_list: List[PreDockedCompoundInfo],
-    usable_list_of_smiles: List[PreDockedCompoundInfo],
+    usable_smiles: List[PreDockedCompoundInfo],
 ) -> List[PreDockedCompoundInfo]:
     """
     This function will take a list of chosen molecules and a list of all the
@@ -159,12 +165,12 @@ def get_chosen_mol_full_data_list(
     SMILES (ie. ligand name, SMILES string, docking score, diversity score...)
 
     It will iterated through the list of chosen mols (chosen_mol_list), get
-    all the information from the usable_list_of_smiles Then it appends the
-    corresponding item in usable_list_of_smiles to a new list
+    all the information from the usable_smiles Then it appends the
+    corresponding item in usable_smiles to a new list
     weighted_order_list
 
     --- an issue to be aware of is that there may be redundancies in both
-        chosen_mol_list and usable_list_of_smiles this causes a many-to-many
+        chosen_mol_list and usable_smiles this causes a many-to-many
         problem so if manipulating this section you need to solve for
         one-to-many
     ---for this reason if this gets altered it will raise an
@@ -178,7 +184,7 @@ def get_chosen_mol_full_data_list(
 
     Inputs:
     :param list chosen_mol_list: a list of chosen molecules
-    :param list usable_list_of_smiles: List of all the possibly chosen ligs
+    :param list usable_smiles: List of all the possibly chosen ligs
         and all the of the info about it (ie. ligand name, SMILES string, docking
         score, diversity score...) ["CCCC"  "zinc123"   1    -0.1  -0.1]
 
@@ -188,7 +194,7 @@ def get_chosen_mol_full_data_list(
     """
 
     sorted_list = sorted(
-        usable_list_of_smiles, key=lambda x: x.get_previous_score(ScoreType.DOCKING)
+        usable_smiles, key=lambda x: x.get_previous_score(ScoreType.DOCKING)
     )
     weighted_order_list: List[PreDockedCompoundInfo] = []
     for smile in chosen_mol_list:
@@ -234,12 +240,12 @@ def get_usable_format(infile: str) -> List[PreDockedCompoundInfo]:
         be read into the program
 
     Returns:
-    :returns: list usable_list_of_smiles: list of SMILES and their associated
+    :returns: list usable_smiles: list of SMILES and their associated
         information formatted into a list which is usable by the rest of Autogrow
     """
 
     # IMPORT SMILES FROM THE PREVIOUS GENERATION
-    usable_list_of_smiles: List[PreDockedCompoundInfo] = []
+    usable_smiles: List[PreDockedCompoundInfo] = []
 
     if os.path.exists(infile) is False:
         print(f"\nFile of Source compounds does not exist: {infile}\n")
@@ -258,13 +264,13 @@ def get_usable_format(infile: str) -> List[PreDockedCompoundInfo]:
             if len(parts) > 2:
                 compoundInfo.previous_diversity_score = float(parts[-1])
                 compoundInfo.previous_docking_score = float(parts[-2])
-            usable_list_of_smiles.append(compoundInfo)
+            usable_smiles.append(compoundInfo)
 
-    return usable_list_of_smiles
+    return usable_smiles
 
 
 def convert_usable_list_to_lig_dict(
-    usable_list_of_smiles: List[PreDockedCompoundInfo],
+    usable_smiles: List[PreDockedCompoundInfo],
 ) -> Optional[Dict[str, PreDockedCompoundInfo]]:
     """
     This will convert a list created by get_usable_format() to a dictionary
@@ -272,7 +278,7 @@ def convert_usable_list_to_lig_dict(
     in larger Autogrow runs.
 
     Inputs:
-    :param list usable_list_of_smiles: list of SMILES and their associated
+    :param list usable_smiles: list of SMILES and their associated
         information formatted into a list which is usable by the rest of Autogrow
 
     Returns:
@@ -280,11 +286,11 @@ def convert_usable_list_to_lig_dict(
         key containing both the SMILES string and the unique lig ID
     """
 
-    if type(usable_list_of_smiles) is not type([]):
+    if type(usable_smiles) is not type([]):
         return None
 
     usable_dict_of_smiles: Dict[str, PreDockedCompoundInfo] = {}
-    for item in usable_list_of_smiles:
+    for item in usable_smiles:
         key = item.smiles + item.name
         if key in usable_dict_of_smiles and usable_dict_of_smiles[
             key
