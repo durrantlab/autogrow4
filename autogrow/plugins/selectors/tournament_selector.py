@@ -171,3 +171,12 @@ class TournamentSelector(SelectorBase):
                     continue
 
         return chosen_option
+
+    def finalize_composite_docking_diversity_list(
+        self,
+        docking_diversity_list: List[PreDockedCompoundInfo],
+        usable_smiles: List[PreDockedCompoundInfo],
+    ) -> List[PreDockedCompoundInfo]:
+        # Tournament_Selector returns an already full list of ligands so you can
+        # skip the get_chosen_mol_full_data_list step
+        return docking_diversity_list

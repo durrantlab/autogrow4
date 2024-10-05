@@ -23,7 +23,7 @@ class RankSelector(SelectorBase):
 
     def validate(self, params: dict):
         """Validate the provided arguments."""
-        self.throw_exception_if_tourn_size_defined()
+        pass
 
     def run_selector(
         self,
@@ -127,3 +127,15 @@ class RankSelector(SelectorBase):
             top_choice_smile_order.append(smiles.smiles)
 
         return top_choice_smile_order
+
+    def finalize_composite_docking_diversity_list(
+        self,
+        docking_diversity_list: List[PreDockedCompoundInfo],
+        usable_smiles: List[PreDockedCompoundInfo],
+    ) -> List[PreDockedCompoundInfo]:
+        # Get all the information about the chosen molecules. chosen_mol_list is
+        # 1D list of all chosen ligands chosen_mol_full_data_list is a 1D list
+        # with each item of the list having multiple pieces of information such
+        # as the ligand name/id, the smiles string, the diversity and docking
+        # score...
+        return self.get_chosen_mol_full_data_list(docking_diversity_list, usable_smiles)

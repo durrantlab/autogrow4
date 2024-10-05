@@ -14,8 +14,11 @@ class PluginManagerBase(ABC):
         # Initially loads all plugins
         self.plugins = self.load_plugins()
 
-        plugin_manager_name = self.__class__.__name__
-        _pluginManagers[plugin_manager_name] = self
+        _pluginManagers[self.name] = self
+
+    @property
+    def name(self) -> str:
+        return self.__class__.__name__
 
     def setup(self, params: dict):
         self.params = params
@@ -31,6 +34,9 @@ class PluginManagerBase(ABC):
             for name, plugin in self.plugins.items()
             if names_of_plugins_to_load is None or name in names_of_plugins_to_load
         }
+
+        for plugin in self.plugins.values():
+            plugin.validate(params)
 
     def get_selected_plugins_from_params(self) -> Optional[List[str]]:
         """

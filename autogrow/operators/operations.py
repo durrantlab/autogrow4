@@ -828,16 +828,12 @@ def make_seed_list(
         random.shuffle(usable_smiles)
 
     else:
-        selector_choice = params["selector_choice"]
-        tourn_size = params["tourn_size"]
+        # selector_choice = params["selector_choice"]
+        # tourn_size = params["tourn_size"]
         # Get subset of the source_file based on diversity scores and docking
         # scores
         usable_smiles = Ranking.create_seed_list(
-            usable_smiles,
-            num_seed_diversity,
-            num_seed_dock_fitness,
-            selector_choice,
-            tourn_size,
+            usable_smiles, num_seed_diversity, num_seed_dock_fitness,
         )
 
     random.shuffle(usable_smiles)

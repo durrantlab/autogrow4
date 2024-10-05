@@ -7,6 +7,8 @@ import os
 import random
 from typing import Dict, List, Optional, Tuple, Union
 
+from autogrow.plugins.plugin_manager_base import get_plugin_manager
+from autogrow.plugins.selectors import SelectorPluginManager
 from autogrow.types import PreDockedCompoundInfo, PostDockedCompoundInfo, ScoreType
 import rdkit  # type: ignore
 import rdkit.Chem as Chem  # type: ignore
@@ -26,8 +28,6 @@ def create_seed_list(
     usable_smiles: List[PreDockedCompoundInfo],
     num_seed_diversity: int,
     num_seed_dock_fitness: int,
-    selector_choice: str,
-    tourn_size: float,
 ) -> List[PreDockedCompoundInfo]:
     """
     this function will take ausable_list_of_smiles which can be derived from
@@ -52,165 +52,23 @@ def create_seed_list(
         from diversity selection
     :param int num_seed_dock_fitness: the number of seed molecules which come
         from eite selection by docking score
-    :param int selector_choice: the choice of selector method. Choices are
-        Roulette_Selector, Rank_Selector, or Tournament_Selector
-    :param float tourn_size: percentage of the total pool of ligands to be
-        tested in each tournament.
 
     Returns:
     :returns: list chosen_mol_full_data_list: a list of all the smiles in a
         weighted ranking ie ["CCCC"  "zinc123"   1    -0.1]
     """
+    selector_plugin_manager = get_plugin_manager("SelectorPluginManager")
 
-    if selector_choice == "Rank_Selector":
-        print("Rank_Selector")
-        # This assumes the most negative number is the best option which is
-        # true for both This is true for both the diversity score and the
-        # docking score. This may need to be adjusted for different scoring
-        # functions.
-
-        # Get seed molecules based on docking scores
-        docking_fitness_smiles_list = Rank_Sel.run_rank_selector(
-            usable_smiles,
-            num_seed_dock_fitness,
-            ScoreType.DOCKING,
-            True,  # TODO: True is hardcoded? Why?
-        )
-
-        # Get seed molecules based on diversity scores
-        diversity_smile_list = Rank_Sel.run_rank_selector(
-            usable_smiles,
-            num_seed_diversity,
-            ScoreType.DIVERSITY,
-            True,  # TODO: True is hardcoded? Why?
-        )
-
-    elif selector_choice == "Roulette_Selector":
-        print("Roulette_Selector")
-        # Get seed molecules based on docking scores
-        docking_fitness_smiles_list = Roulette_Sel.spin_roulette_selector(
-            usable_smiles, num_seed_dock_fitness, ScoreType.DOCKING
-        )
-
-        # Get seed molecules based on diversity scores
-        diversity_smile_list = Roulette_Sel.spin_roulette_selector(
-            usable_smiles, num_seed_diversity, ScoreType.DIVERSITY
-        )
-
-    elif selector_choice == "Tournament_Selector":
-        print("Tournament_Selector")
-        # This assumes the most negative number is the best option which is
-        # true for both This is true for both the diversity score and the
-        # docking score. This may need to be adjusted for different scoring
-        # functions.
-
-        # Get seed molecules based on docking scores
-        docking_fitness_smiles_list = Tournament_Sel.run_Tournament_Selector(
-            usable_smiles,
-            num_seed_dock_fitness,
-            tourn_size,
-            ScoreType.DOCKING,
-            True,  # TODO: True is hardcoded? Why?
-        )
-
-        # Get seed molecules based on diversity scores
-        diversity_smile_list = Tournament_Sel.run_Tournament_Selector(
-            usable_smiles,
-            num_seed_diversity,
-            tourn_size,
-            ScoreType.DIVERSITY,
-            True,  # TODO: True is hardcoded? Why?
-        )
-
-    else:
-        print(selector_choice)
-        raise Exception(
-            "selector_choice value is not Roulette_Selector, Rank_Selector, nor Tournament_Selector"
-        )
-
-    chosen_mol_list = list(docking_fitness_smiles_list)
-    chosen_mol_list.extend(diversity_smile_list)
-
-    if selector_choice in {"Rank_Selector", "Roulette_Selector"}:
-        # Get all the information about the chosen molecules. chosen_mol_list
-        # is 1D list of all chosen ligands chosen_mol_full_data_list is a 1D
-        # list with each item of the list having multiple pieces of
-        # information such as the ligand name/id, the smiles string, the
-        # diversity and docking score...
-        chosen_mol_full_data_list = get_chosen_mol_full_data_list(
-            chosen_mol_list, usable_smiles
-        )
-
-    elif selector_choice == "Tournament_Selector":
-        # Tournament_Selector returns an already full list of ligands so you
-        # can skip the get_chosen_mol_full_data_list step
-        chosen_mol_full_data_list = chosen_mol_list
-
-    else:
-        print(selector_choice)
-        raise Exception(
-            "selector_choice value is not Roulette_Selector, Rank_Selector, nor Tournament_Selector"
-        )
-
-    return chosen_mol_full_data_list
-
-
-def get_chosen_mol_full_data_list(
-    chosen_mol_list: List[PreDockedCompoundInfo],
-    usable_smiles: List[PreDockedCompoundInfo],
-) -> List[PreDockedCompoundInfo]:
-    """
-    This function will take a list of chosen molecules and a list of all the
-    SMILES which could have been chosen and all of the information about those
-    SMILES (ie. ligand name, SMILES string, docking score, diversity score...)
-
-    It will iterated through the list of chosen mols (chosen_mol_list), get
-    all the information from the usable_smiles Then it appends the
-    corresponding item in usable_smiles to a new list
-    weighted_order_list
-
-    --- an issue to be aware of is that there may be redundancies in both
-        chosen_mol_list and usable_smiles this causes a many-to-many
-        problem so if manipulating this section you need to solve for
-        one-to-many
-    ---for this reason if this gets altered it will raise an
-        AssertionError if the one-to-many is violated.
-
-    It then shuffles the order of the list which to prevent biasing by the
-    order of the ligands.
-
-    It will return that list of the chosen molecules in a randomly shuffled
-    order.
-
-    Inputs:
-    :param list chosen_mol_list: a list of chosen molecules
-    :param list usable_smiles: List of all the possibly chosen ligs
-        and all the of the info about it (ie. ligand name, SMILES string, docking
-        score, diversity score...) ["CCCC"  "zinc123"   1    -0.1  -0.1]
-
-    Returns:
-    :returns: list weighted_order_list: a list of all the SMILES with all of
-        the associated information in a random order
-    """
-
-    sorted_list = sorted(
-        usable_smiles, key=lambda x: x.get_previous_score(ScoreType.DOCKING)
+    # This assumes the most negative number is the best option which is
+    # true for both. This is true for both the diversity score and the
+    # docking score. This may need to be adjusted for different scoring
+    # functions. (favor_most_negative=True). TODO: Need to fix this!
+    return selector_plugin_manager.run(
+        usable_smiles=usable_smiles,
+        num_seed_dock_fitness=num_seed_dock_fitness,
+        num_seed_diversity=num_seed_diversity,
+        favor_most_negative=True,  # TODO: Shouldn't be hardcoded
     )
-    weighted_order_list: List[PreDockedCompoundInfo] = []
-    for smile in chosen_mol_list:
-        for smile_pair in sorted_list:
-            if smile == smile_pair.smiles:
-                weighted_order_list.append(smile_pair)
-                break
-
-    if len(weighted_order_list) != len(chosen_mol_list):
-        raise AssertionError(
-            "weighted_order_list not the same length as the chosen_mol_list"
-        )
-
-    random.shuffle(weighted_order_list)
-
-    return weighted_order_list
 
 
 def get_usable_format(infile: str) -> List[PreDockedCompoundInfo]:
