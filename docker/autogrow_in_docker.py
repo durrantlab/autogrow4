@@ -458,9 +458,6 @@ def move_files_to_temp_dir(json_vars: Dict[str, Any]) -> None:
         # ie) dock_choice: QuickVina2 would be a string that is not a path
         if os.path.exists(var_item) is False:
             continue
-        if "mgl" in var_name.lower():
-            print("MGLTools from within the docker will be used")
-            continue
         if "babel" in var_name.lower():
             print("obabel from within the docker will be used")
             continue
@@ -482,7 +479,6 @@ def move_files_to_temp_dir(json_vars: Dict[str, Any]) -> None:
             docker_json_vars[var_name] = json_vars[var_name]
 
     # Add docker babel and MGL paths
-    docker_json_vars["mgltools_directory"] = "/mgltools_x86_64Linux2_1.5.6"
     docker_json_vars["obabel_path"] = "/usr/bin/obabel"
 
     # Set output folder

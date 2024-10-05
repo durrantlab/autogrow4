@@ -591,31 +591,6 @@ def _add_conversion_params(parser: argparse._ArgumentGroup):
         [name_custom_conversion_class, Path/to/name_custom_conversion_class.py]",
     )
     parser.add_argument(
-        "--mgltools_directory",
-        metavar="mgltools_directory",
-        help="Required if using MGLTools conversion option \
-        (conversion_choice=MGLToolsConversion) \
-        Path may look like: /home/user/MGLTools-1.5.6/",
-    )
-    parser.add_argument(
-        "--mgl_python",
-        metavar="mgl_python",
-        required=False,
-        help="/home/user/MGLTools-1.5.4/bin/pythonsh",
-    )
-    parser.add_argument(
-        "--prepare_ligand4.py",
-        metavar="prepare_ligand4.py",
-        required=False,
-        help="/home/user/MGLTools-1.5.4/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_ligand4.py",
-    )
-    parser.add_argument(
-        "--prepare_receptor4.py",
-        metavar="prepare_receptor4.py",
-        required=False,
-        help="/home/userMGLTools-1.5.4/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_receptor4.py",
-    )
-    parser.add_argument(
         "--obabel_path",
         help="required if using obabel conversion \
         option (conversion_choice=ObabelConversion).\

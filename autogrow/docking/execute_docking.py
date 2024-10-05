@@ -16,9 +16,6 @@ from autogrow.docking.docking_class.parent_pdbqt_converter import ParentPDBQTCon
 from autogrow.plugins.docking import DockingPluginManager
 from autogrow.plugins.plugin_manager_base import get_plugin_manager
 
-# from autogrow.docking.docking_class.docking_file_conversion \
-#                           import convert_with_obabel, convert_with_mgltools
-
 
 def pick_run_conversion_class_dict(
     conversion_choice: str,

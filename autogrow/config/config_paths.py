@@ -41,8 +41,7 @@ def _make_paths_abs(params: Dict[str, Any]) -> None:
     for pname in [
         "filename_of_receptor",
         "root_output_folder",
-        "source_compound_file",
-        "mgltools_directory",
+        "source_compound_file"
     ]:
         if pname not in list(params.keys()):
             continue
@@ -64,8 +63,7 @@ def _make_dirs_end_in_sep(params: Dict[str, Any]) -> None:
     :returns: None. The function modifies the `params` dictionary in place.
     """
     dir_params = [
-        "root_output_folder",
-        "mgltools_directory",
+        "root_output_folder"
     ]
 
     for dir_param in dir_params:

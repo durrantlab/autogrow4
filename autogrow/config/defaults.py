@@ -18,17 +18,9 @@ def define_defaults() -> Dict[str, Any]:
 
     # PARSER.add_argument('--conversion_choice', choices
     #    = ["MGLTools","obabel"], default="MGLTools",
-    default_params["conversion_choice"] = "MGLToolsConversion"
+    default_params["conversion_choice"] = "obabel"
     default_params["obabel_path"] = "obabel"
     default_params["custom_conversion_script"] = ""
-    # default_params['prepare_ligand4.py'] =
-    #   "/PATH/MGLTools-1.5.4/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_ligand4.py"
-    default_params["prepare_ligand4.py"] = ""
-    # default_params['prepare_receptor4.py'] =
-    #   "/PATH/MGLTools-1.5.4/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_receptor4.py"
-    default_params["prepare_receptor4.py"] = ""
-    # default_params['mgl_python'] = "/PATH/MGLTools-1.5.4/bin/pythonsh"
-    default_params["mgl_python"] = ""
 
     # Crossover function
     default_params["start_a_new_run"] = False

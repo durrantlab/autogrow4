@@ -540,17 +540,9 @@ def define_defaults() -> Dict[str, Any]:
 
     # PARSER.add_argument('--conversion_choice', choices
     #    = ["MGLTools","obabel"], default="MGLTools",
-    params["conversion_choice"] = "MGLToolsConversion"
+    params["conversion_choice"] = "obabel"
     params["obabel_path"] = "obabel"
     params["custom_conversion_script"] = ""
-    # params['prepare_ligand4.py'] =
-    #   "/PATH/MGLTools-1.5.4/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_ligand4.py"
-    params["prepare_ligand4.py"] = ""
-    # params['prepare_receptor4.py'] =
-    #   "/PATH/MGLTools-1.5.4/MGLToolsPckgs/AutoDockTools/Utilities24/prepare_receptor4.py"
-    params["prepare_receptor4.py"] = ""
-    # params['mgl_python'] = "/PATH/MGLTools-1.5.4/bin/pythonsh"
-    params["mgl_python"] = ""
 
     # Crossover function
     params["start_a_new_run"] = False
@@ -914,56 +906,6 @@ def load_in_commandline_parameters(argv: Dict[str, Any]) -> Tuple[Dict[str, Any]
     if params["root_output_folder"][-1] != os.sep:
         params["root_output_folder"] = params["root_output_folder"] + os.sep
 
-    # If MGLTools is being used handle its paths
-    if params["conversion_choice"] == "MGLToolsConversion":
-        if "mgltools_directory" not in params.keys():
-            printout = (
-                "\nmgltools_directory was not provide but conversion_choice"
-                + " is set to MGLToolsConversion. Please "
-            )
-            printout += " provide the path to the mgltools_directory\n"
-            print(printout)
-            raise NotImplementedError(printout)
-
-        params["mgltools_directory"] = os.path.abspath(
-            params["mgltools_directory"]
-        )
-        if os.path.exists(params["mgltools_directory"]) is False:
-            raise NotImplementedError("mgltools_directory does not exist")
-        if os.path.isdir(params["mgltools_directory"]) is False:
-            raise NotImplementedError(
-                "mgltools_directory is not a directory. \
-            Check your input parameters."
-            )
-        if params["mgltools_directory"][-1] != os.sep:
-            params["mgltools_directory"] = params["mgltools_directory"] + os.sep
-
-        # find other mgltools-related scripts
-        if params["prepare_ligand4.py"] == "":
-            params["prepare_ligand4.py"] = (
-                params["mgltools_directory"]
-                + "MGLToolsPckgs"
-                + os.sep
-                + "AutoDockTools"
-                + os.sep
-                + "Utilities24"
-                + os.sep
-                + "prepare_ligand4.py"
-            )
-        if params["prepare_receptor4.py"] == "":
-            params["prepare_receptor4.py"] = (
-                params["mgltools_directory"]
-                + "MGLToolsPckgs"
-                + os.sep
-                + "AutoDockTools"
-                + os.sep
-                + "Utilities24"
-                + os.sep
-                + "prepare_receptor4.py"
-            )
-        if params["mgl_python"] == "":
-            params["mgl_python"] = params["mgltools_directory"] + "bin" + os.sep + "pythonsh"
-
     # More Handling for Windows OS
     # convert path names with spaces if this is windows
     if os.name in {"nt", "ce"}:
@@ -973,16 +915,6 @@ def load_in_commandline_parameters(argv: Dict[str, Any]) -> Tuple[Dict[str, Any]
             params["filename_of_receptor"] = '"' + params["filename_of_receptor"] + '"'
         if " " in params["root_output_folder"]:
             params["root_output_folder"] = '"' + params["root_output_folder"] + '"'
-        # If MGLTools is being used handle its paths
-        if params["conversion_choice"] == "MGLToolsConversion":
-            if " " in params["mgltools_directory"]:
-                params["mgltools_directory"] = '"' + params["mgltools_directory"] + '"'
-            if " " in params["prepare_ligand4.py"]:
-                params["prepare_ligand4.py"] = '"' + params["prepare_ligand4.py"] + '"'
-            if " " in params["prepare_receptor4.py"]:
-                params["prepare_receptor4.py"] = '"' + params["prepare_receptor4.py"] + '"'
-            if " " in params["mgl_python"]:
-                params["mgl_python"] = '"' + params["mgl_python"] + '"'
 
     # output the paramters used
     printout = printout + "\nPARAMETERS" + "\n"
@@ -1009,17 +941,6 @@ def load_in_commandline_parameters(argv: Dict[str, Any]) -> Tuple[Dict[str, Any]
                 printout
                 + "\nERROR: Could not find prepare_receptor4.py at "
                 + params["prepare_receptor4.py"]
-                + "\n"
-            )
-            print(printout)
-            raise NotImplementedError(printout)
-        if not os.path.exists(params["mgl_python"]) and not os.path.exists(
-                params["mgl_python"].replace('"', "")
-        ):
-            printout = (
-                printout
-                + "\nERROR: Could not find pythonsh at "
-                + params["mgl_python"]
                 + "\n"
             )
             print(printout)

@@ -11,7 +11,6 @@ from autogrow.config.config_custom_dock_conversion_scoring import (
     setup_custom_dock_and_conversion_scoring_options,
 )
 from autogrow.config.config_filters import setup_filters
-from autogrow.config.config_mgltools import config_mgltools
 from autogrow.config.config_multiprocessing import config_multiprocessing
 from autogrow.config.config_paths import config_paths
 from autogrow.config.config_run_directory import set_run_directory
@@ -80,7 +79,6 @@ def _setup_params(orig_params: Dict[str, Any], is_argparsed: bool) -> Dict[str, 
     _cast_some_params(orig_params)
     _set_missing_first_generation_params(orig_params)
     config_paths(orig_params)
-    config_mgltools(orig_params)
     config_multiprocessing(orig_params)
 
     # Start with getting the default values
