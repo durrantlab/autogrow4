@@ -73,7 +73,7 @@ class ParentDocking(ABC):
         :param dict params: Dictionary of User variables
 
         Returns:
-        :returns: str docking_executable: String for the docking executable
+        :returns: str vina_like_executable: String for the docking executable
             file path
         """
 
@@ -114,4 +114,3 @@ class ParentDocking(ABC):
         """
 
         pass
-        # raise NotImplementedError("rank_and_save_output_smi() not implemented")

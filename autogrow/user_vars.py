@@ -622,7 +622,7 @@ def define_defaults() -> Dict[str, Any]:
 
     # docking
     params["dock_choice"] = "QuickVina2Docking"
-    params["docking_executable"] = None
+    params["vina_like_executable"] = None
     params["docking_exhaustiveness"] = None
     params["docking_num_modes"] = None
     params["docking_timeout_limit"] = 120
@@ -846,16 +846,16 @@ def load_in_commandline_parameters(argv: Dict[str, Any]) -> Tuple[Dict[str, Any]
     # need to also be specified
     # if not lets flag the error
     if params["dock_choice"] == "Custom":
-        if params["docking_executable"] is None:
+        if params["vina_like_executable"] is None:
             raise ValueError(
                 "TO USE Custom DOCKING OPTION, MUST SPECIFY THE \
-                PATH TO THE docking_executable AND THE DOCKING_CLASS"
+                PATH TO THE vina_like_executable AND THE DOCKING_CLASS"
             )
-        if os.path.exists(params["docking_executable"]) is False:
+        if os.path.exists(params["vina_like_executable"]) is False:
             raise ValueError(
-                "Custom docking_executable could not be found at:\
+                "Custom vina_like_executable could not be found at:\
                 {}".format(
-                    params["docking_executable"]
+                    params["vina_like_executable"]
                 )
             )
         if (

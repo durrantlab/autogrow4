@@ -109,9 +109,9 @@ def run_docking_common(
     dock_class = pick_docking_class_dict(dock_choice)
     docking = dock_class(temp_vars, receptor, file_conversion_obj, test_boot=False)
 
-    if params["docking_executable"] is None:
-        docking_executable = docking.get_docking_executable_file(temp_vars)
-        params["docking_executable"] = docking_executable
+    if params["vina_like_executable"] is None:
+        vina_like_executable = docking.get_docking_executable_file(temp_vars)
+        params["vina_like_executable"] = vina_like_executable
 
     # Find PDB's
     pdbs_in_folder = docking.find_pdb_ligands(current_generation_pdb_dir)

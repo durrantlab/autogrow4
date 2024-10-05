@@ -55,7 +55,7 @@ class MGLToolsConversion(ParentPDBQTConverter):
             mgl_python = params["mgl_python"]
             receptor_template = params["prepare_receptor4.py"]
             number_of_processors = params["number_of_processors"]
-            docking_executable = params["docking_executable"]
+            vina_like_executable = params["vina_like_executable"]
 
             ###########################
 

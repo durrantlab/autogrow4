@@ -84,7 +84,7 @@ def define_defaults() -> Dict[str, Any]:
 
     # docking
     default_params["dock_choice"] = "QuickVina2Docking"
-    default_params["docking_executable"] = None
+    default_params["vina_like_executable"] = None
     default_params["docking_exhaustiveness"] = None
     default_params["docking_num_modes"] = None
     default_params["docking_timeout_limit"] = 120

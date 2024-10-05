@@ -237,40 +237,40 @@ def _add_receptor_params(parser: argparse._ArgumentGroup):
         metavar="receptor.pdb",
         help="The path to the receptor file. Should be .pdb file.",
     )
-    parser.add_argument(
-        "--center_x",
-        "-x",
-        type=float,
-        help="x-coordinate for the center of the pocket to be tested by docking. (Angstrom)",
-    )
-    parser.add_argument(
-        "--center_y",
-        "-y",
-        type=float,
-        help="y-coordinate for the center of the pocket to be tested by docking. (Angstrom)",
-    )
-    parser.add_argument(
-        "--center_z",
-        "-z",
-        type=float,
-        help="z-coordinate for the center of the pocket to be tested by docking. (Angstrom)",
-    )
+    # parser.add_argument(
+    #     "--center_x",
+    #     "-x",
+    #     type=float,
+    #     help="x-coordinate for the center of the pocket to be tested by docking. (Angstrom)",
+    # )
+    # parser.add_argument(
+    #     "--center_y",
+    #     "-y",
+    #     type=float,
+    #     help="y-coordinate for the center of the pocket to be tested by docking. (Angstrom)",
+    # )
+    # parser.add_argument(
+    #     "--center_z",
+    #     "-z",
+    #     type=float,
+    #     help="z-coordinate for the center of the pocket to be tested by docking. (Angstrom)",
+    # )
 
-    parser.add_argument(
-        "--size_x",
-        type=float,
-        help="dimension of box to dock into in the x-axis (Angstrom)",
-    )
-    parser.add_argument(
-        "--size_y",
-        type=float,
-        help="dimension of box to dock into in the y-axis (Angstrom)",
-    )
-    parser.add_argument(
-        "--size_z",
-        type=float,
-        help="dimension of box to dock into in the z-axis (Angstrom)",
-    )
+    # parser.add_argument(
+    #     "--size_x",
+    #     type=float,
+    #     help="dimension of box to dock into in the x-axis (Angstrom)",
+    # )
+    # parser.add_argument(
+    #     "--size_y",
+    #     type=float,
+    #     help="dimension of box to dock into in the y-axis (Angstrom)",
+    # )
+    # parser.add_argument(
+    #     "--size_z",
+    #     type=float,
+    #     help="dimension of box to dock into in the z-axis (Angstrom)",
+    # )
 
 
 def _add_ga_first_gen_params(parser: argparse._ArgumentGroup):
@@ -626,53 +626,53 @@ def _add_conversion_params(parser: argparse._ArgumentGroup):
 
 def _add_docking_params(parser: argparse._ArgumentGroup):
     # docking
-    parser.add_argument(
-        "--dock_choice",
-        metavar="dock_choice",
-        default="QuickVina2Docking",
-        choices=[
-            "VinaDocking",
-            "QuickVina2Docking",
-            "FakeDocking",
-            "Custom",
-        ],  # TODO: Should not hardcode
-        help="dock_choice assigns which docking software module to use.",
-    )
-    parser.add_argument(
-        "--docking_executable",
-        metavar="docking_executable",
-        default=None,
-        help="path to the docking_executable",
-    )
-    parser.add_argument(
-        "--docking_exhaustiveness",
-        metavar="docking_exhaustiveness",
-        default=None,
-        help="exhaustiveness of the global search (roughly proportional to time. \
-        see docking software for settings. Unless specified Autogrow uses the \
-        docking softwares default setting. For AutoDock Vina 1.1.2 that is 8",
-    )
-    parser.add_argument(
-        "--docking_num_modes",
-        metavar="docking_num_modes",
-        default=None,
-        help=" maximum number of binding modes to generate in docking. \
-        See docking software for settings. Unless specified Autogrow uses the \
-        docking softwares default setting. For AutoDock Vina 1.1.2 that is 9",
-    )
-    parser.add_argument(
-        "--docking_timeout_limit",
-        type=float,
-        default=120,
-        help="The maximum amount of time allowed to dock a single ligand into a \
-        pocket in seconds. Many factors influence the time required to dock, such as: \
-        processor speed, the docking software, rotatable bonds, exhaustiveness docking,\
-        and number of docking modes... \
-        The default docking_timeout_limit is 120 seconds, which is excess for most \
-        docking events using QuickVina2Docking under default settings. If run with \
-        more exhaustive settings or with highly flexible ligands, consider increasing \
-        docking_timeout_limit to accommodate. Default docking_timeout_limit is 120 seconds",
-    )
+    # parser.add_argument(
+    #     "--dock_choice",
+    #     metavar="dock_choice",
+    #     default="QuickVina2Docking",
+    #     choices=[
+    #         "VinaDocking",
+    #         "QuickVina2Docking",
+    #         "FakeDocking",
+    #         "Custom",
+    #     ],  # TODO: Should not hardcode
+    #     help="dock_choice assigns which docking software module to use.",
+    # )
+    # parser.add_argument(
+    #     "--vina_like_executable",
+    #     metavar="vina_like_executable",
+    #     default=None,
+    #     help="path to the vina_like_executable (vina, qvina2, smina, etc.)",
+    # )
+    # parser.add_argument(
+    #     "--docking_exhaustiveness",
+    #     metavar="docking_exhaustiveness",
+    #     default=None,
+    #     help="exhaustiveness of the global search (roughly proportional to time. \
+    #     see docking software for settings. Unless specified Autogrow uses the \
+    #     docking softwares default setting. For AutoDock Vina 1.1.2 that is 8",
+    # )
+    # parser.add_argument(
+    #     "--docking_num_modes",
+    #     metavar="docking_num_modes",
+    #     default=None,
+    #     help=" maximum number of binding modes to generate in docking. \
+    #     See docking software for settings. Unless specified Autogrow uses the \
+    #     docking softwares default setting. For AutoDock Vina 1.1.2 that is 9",
+    # )
+    # parser.add_argument(
+    #     "--docking_timeout_limit",
+    #     type=float,
+    #     default=120,
+    #     help="The maximum amount of time allowed to dock a single ligand into a \
+    #     pocket in seconds. Many factors influence the time required to dock, such as: \
+    #     processor speed, the docking software, rotatable bonds, exhaustiveness docking,\
+    #     and number of docking modes... \
+    #     The default docking_timeout_limit is 120 seconds, which is excess for most \
+    #     docking events using QuickVina2Docking under default settings. If run with \
+    #     more exhaustive settings or with highly flexible ligands, consider increasing \
+    #     docking_timeout_limit to accommodate. Default docking_timeout_limit is 120 seconds",
+    # )
     parser.add_argument(
         "--custom_docking_script",
         metavar="custom_docking_script",

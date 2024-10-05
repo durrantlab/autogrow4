@@ -1,72 +1,259 @@
-"""
-The child classes from ParentExample
-"""
 import __future__
-
+import glob
 import os
 import sys
-import glob
-from typing import Any, Dict, List, Optional, Union
 
-import autogrow.docking.delete_failed_mol as Delete
 from autogrow.docking.docking_class.parent_pdbqt_converter import ParentPDBQTConverter
-import autogrow.docking.ranking.ranking_mol as Ranking
-from autogrow.docking.docking_class.parent_dock_class import ParentDocking
+from autogrow.plugins.docking import DockingBase
+from typing import Any, Dict, List, Optional, Tuple
+from autogrow.config.argparser import ArgumentVars
+from autogrow.types import PostDockedCompoundInfo, PreDockedCompoundInfo, ScoreType
+import autogrow.docking.delete_failed_mol as Delete
 import autogrow.docking.scoring.execute_scoring_mol as Scoring
-from autogrow.types import PreDockedCompoundInfo, PostDockedCompoundInfo
+import autogrow.docking.ranking.ranking_mol as Ranking
 
 
-class VinaDocking(ParentDocking):
-    """
-    RUN VINA DOCKING
+class VinaLikeDocking(DockingBase):
+    # TODO: I feel like file conversion should not be external to this class...
+    file_conversion_class_object: Optional[ParentPDBQTConverter] = None
 
-    Inputs:
-    :param class ParentDocking: Parent docking class to inherit from
-    """
+    # def __init__(
+    #     self,
+    #     params: Optional[Dict[str, Any]] = None,
+    #     receptor_file: Optional[str] = None,
+    #     file_conversion_class_object: Optional[ParentPDBQTConverter] = None,
+    #     test_boot: bool = True,
+    # ) -> None:
+    #     """
+    #     get the specifications for Vina/QuickVina2 from params load them into
+    #     the self variables we will need and convert the receptor to the proper
+    #     file format (ie pdb-> pdbqt)
 
-    def __init__(
-        self,
-        params: Optional[Dict[str, Any]] = None,
-        receptor_file: Optional[str] = None,
-        file_conversion_class_object: Optional[ParentPDBQTConverter] = None,
-        test_boot: bool = True,
-    ) -> None:
+    #     Inputs:
+    #     :param dict params: Dictionary of User variables
+    #     :param str receptor_file: the path for the receptor pdb
+    #     :param obj file_conversion_class_object: object which is used to
+    #         convert files from pdb to pdbqt
+    #     :param bool test_boot: used to initialize class without objects for
+    #         testing purpose
+    #     """
+
+    #     if not test_boot:
+
+    #         assert params is not None, "params must be passed to VinaDocking"
+
+    #         self.params = params
+    #         self.debug_mode = params["debug_mode"]
+    #         self.file_conversion_class_object = file_conversion_class_object
+
+    #         # VINA SPECIFIC VARS
+    #         receptor_file = params["filename_of_receptor"]
+    #         # mgl_python = params["mgl_python"]
+    #         # receptor_template = params["prepare_receptor4.py"]
+    #         # number_of_processors = params["number_of_processors"]
+    #         # vina_like_executable = params["vina_like_executable"]
+
+    #         ###########################
+
+    #         self.receptor_pdbqt_file = f"{receptor_file}qt"
+
+    #         self.params["vina_like_executable"] = self.get_docking_executable_file(
+    #             self.params
+    #         )
+
+    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+        """Add command-line arguments required by the plugin."""
+        return (
+            "Vina-Like Docking Options",
+            [
+                ArgumentVars(
+                    name=self.name,
+                    action="store_true",
+                    default=False,
+                    help="Use docking software from the vina family (vina, qvina2, smina, etc.)",
+                ),
+                ArgumentVars(
+                    name="vina_like_executable",
+                    default=None,
+                    help="path to the vina_like_executable (vina, qvina2, smina, etc.)"
+                ),
+                ArgumentVars(
+                    name="center_x",
+                    type=float,
+                    default=None,
+                    help="x-coordinate for the center of the pocket to be tested by docking. (Angstrom)",
+                ),
+                ArgumentVars(
+                    name="center_y",
+                    type=float,
+                    default=None,
+                    help="y-coordinate for the center of the pocket to be tested by docking. (Angstrom)",
+                ),
+                ArgumentVars(
+                    name="center_z",
+                    type=float,
+                    default=None,
+                    help="z-coordinate for the center of the pocket to be tested by docking. (Angstrom)",
+                ),
+                ArgumentVars(
+                    name="size_x",
+                    type=float,
+                    default=None,
+                    help="dimension of box to dock into in the x-axis (Angstrom)",
+                ),
+                ArgumentVars(
+                    name="size_y",
+                    type=float,
+                    default=None,
+                    help="dimension of box to dock into in the y-axis (Angstrom)",
+                ),
+                ArgumentVars(
+                    name="size_z",
+                    type=float,
+                    default=None,
+                    help="dimension of box to dock into in the z-axis (Angstrom)",
+                ),
+                ArgumentVars(
+                    name="docking_exhaustiveness",
+                    default=None,
+                    help="exhaustiveness of the global search (roughly proportional to time. \
+                    see docking software for settings. Unless specified Autogrow uses the \
+                    docking softwares default setting. For AutoDock Vina 1.1.2 that is 8",
+                ),
+                ArgumentVars(
+                    name="docking_num_modes",
+                    default=None,
+                    help=" maximum number of binding modes to generate in docking. \
+                    See docking software for settings. Unless specified Autogrow uses the \
+                    docking softwares default setting. For AutoDock Vina 1.1.2 that is 9",
+                ),
+                ArgumentVars(
+                    name="docking_timeout_limit",
+                    type=float,
+                    default=120,
+                    help="The maximum amount of time allowed to dock a single ligand into a \
+                    pocket in seconds. Many factors influence the time required to dock, such as: \
+                    processor speed, the docking software, rotatable bonds, exhaustiveness docking,\
+                    and number of docking modes... \
+                    The default docking_timeout_limit is 120 seconds, which is excess for most \
+                    docking events using QuickVina2Docking under default settings. If run with \
+                    more exhaustive settings or with highly flexible ligands, consider increasing \
+                    docking_timeout_limit to accommodate. Default docking_timeout_limit is 120 seconds",
+                ),
+
+            ],
+        )
+    
+        # parser.add_argument(
+        #     "--center_x",
+        #     "-x",
+        #     type=float,
+        #     help="x-coordinate for the center of the pocket to be tested by docking. (Angstrom)",
+        # )
+        # parser.add_argument(
+        #     "--center_y",
+        #     "-y",
+        #     type=float,
+        #     help="y-coordinate for the center of the pocket to be tested by docking. (Angstrom)",
+        # )
+        # parser.add_argument(
+        #     "--center_z",
+        #     "-z",
+        #     type=float,
+        #     help="z-coordinate for the center of the pocket to be tested by docking. (Angstrom)",
+        # )
+
+        # parser.add_argument(
+        #     "--size_x",
+        #     type=float,
+        #     help="dimension of box to dock into in the x-axis (Angstrom)",
+        # )
+        # parser.add_argument(
+        #     "--size_y",
+        #     type=float,
+        #     help="dimension of box to dock into in the y-axis (Angstrom)",
+        # )
+        # parser.add_argument(
+        #     "--size_z",
+        #     type=float,
+        #     help="dimension of box to dock into in the z-axis (Angstrom)",
+        # )
+        
+        # parser.add_argument(
+        #     "--vina_like_executable",
+        #     metavar="vina_like_executable",
+        #     default=None,
+        #     help="path to the vina_like_executable (vina, qvina2, smina, etc.)",
+        # )
+        # parser.add_argument(
+        #     "--docking_exhaustiveness",
+        #     metavar="docking_exhaustiveness",
+        #     default=None,
+        #     help="exhaustiveness of the global search (roughly proportional to time. \
+        #     see docking software for settings. Unless specified Autogrow uses the \
+        #     docking softwares default setting. For AutoDock Vina 1.1.2 that is 8",
+        # )
+        # parser.add_argument(
+        #     "--docking_num_modes",
+        #     metavar="docking_num_modes",
+        #     default=None,
+        #     help=" maximum number of binding modes to generate in docking. \
+        #     See docking software for settings. Unless specified Autogrow uses the \
+        #     docking softwares default setting. For AutoDock Vina 1.1.2 that is 9",
+        # )
+        # parser.add_argument(
+        #     "--docking_timeout_limit",
+        #     type=float,
+        #     default=120,
+        #     help="The maximum amount of time allowed to dock a single ligand into a \
+        #     pocket in seconds. Many factors influence the time required to dock, such as: \
+        #     processor speed, the docking software, rotatable bonds, exhaustiveness docking,\
+        #     and number of docking modes... \
+        #     The default docking_timeout_limit is 120 seconds, which is excess for most \
+        #     docking events using QuickVina2Docking under default settings. If run with \
+        #     more exhaustive settings or with highly flexible ligands, consider increasing \
+        #     docking_timeout_limit to accommodate. Default docking_timeout_limit is 120 seconds",
+        # )
+
+    def validate(self, params: dict):
+        """Validate the provided arguments."""
+        # TODO: Implement this function
+        pass
+
+    def run_docking(self, lig_pdbqt_filename, file_conversion_class_object: ParentPDBQTConverter) -> Optional[str]:
         """
-        get the specifications for Vina/QuickVina2 from params load them into
-        the self variables we will need and convert the receptor to the proper
-        file format (ie pdb-> pdbqt)
+        this function runs the docking. Returns None if it worked and the name
+        if it failed to dock.
 
         Inputs:
-        :param dict params: Dictionary of User variables
-        :param str receptor_file: the path for the receptor pdb
-        :param obj file_conversion_class_object: object which is used to
-            convert files from pdb to pdbqt
-        :param bool test_boot: used to initialize class without objects for
-            testing purpose
+        :param str pdbqt_filename: the pdbqt file of a ligand to dock and
+            score
+
+        Returns:
+        :returns: str smile_name: name of smiles if it failed to dock returns
+            None if it docked properly
         """
 
-        if not test_boot:
+        self.file_conversion_class_object = file_conversion_class_object
 
-            assert params is not None, "params must be passed to VinaDocking"
+        # log("Docking compounds using AutoDock Vina...")
+        self.dock_ligand(lig_pdbqt_filename)
 
-            self.params = params
-            self.debug_mode = params["debug_mode"]
-            self.file_conversion_class_object = file_conversion_class_object
+        # check that it docked
+        pdb_filename = lig_pdbqt_filename.replace("qt", "")
 
-            # VINA SPECIFIC VARS
-            receptor_file = params["filename_of_receptor"]
-            # mgl_python = params["mgl_python"]
-            # receptor_template = params["prepare_receptor4.py"]
-            # number_of_processors = params["number_of_processors"]
-            # vina_like_executable = params["vina_like_executable"]
+        did_it_dock, smile_name = self.check_docked(pdb_filename)
 
-            ###########################
+        if did_it_dock is False:
+            # Docking failed
 
-            self.receptor_pdbqt_file = f"{receptor_file}qt"
+            if smile_name is None:
+                print("Missing pdb and pdbqt files for : ", lig_pdbqt_filename)
 
-            self.params["vina_like_executable"] = self.get_docking_executable_file(
-                self.params
-            )
+            return smile_name
+
+        return None
+
 
     def run_ligand_handling_for_docking(self, pdb_file):
         """
@@ -100,104 +287,6 @@ class VinaDocking(ParentDocking):
         # Conversion pass. Return None
         # only return failed smile_names which will be handled later
         return None
-
-    def run_dock(self, pdbqt_filename) -> Union[str, None]:
-        """
-        this function runs the docking. Returns None if it worked and the name
-        if it failed to dock.
-
-        Inputs:
-        :param str pdbqt_filename: the pdbqt file of a ligand to dock and
-            score
-
-        Returns:
-        :returns: str smile_name: name of smiles if it failed to dock returns
-            None if it docked properly
-        """
-
-        # log("Docking compounds using AutoDock Vina...")
-        self.dock_ligand(pdbqt_filename)
-
-        # check that it docked
-        pdb_filename = pdbqt_filename.replace("qt", "")
-
-        did_it_dock, smile_name = self.check_docked(pdb_filename)
-
-        if did_it_dock is False:
-            # Docking failed
-
-            if smile_name is None:
-                print("Missing pdb and pdbqt files for : ", pdbqt_filename)
-
-            return smile_name
-
-        return None
-
-    #######################################
-    # STUFF DONE BY THE INIT
-    ##########################################
-    def get_docking_executable_file(self, params: Dict[str, Any]) -> str:
-        """
-        This retrieves the docking executable files Path.
-
-        Inputs:
-        :param dict params: Dictionary of User variables
-
-        Returns:
-        :returns: str vina_like_executable: String for the docking executable
-            file path
-        """
-
-        if params["vina_like_executable"] is None:
-            # get default vina_like_executable for vina
-            script_dir = str(os.path.dirname(os.path.realpath(__file__)))
-            docking_executable_directory = (
-                (script_dir.split(f"{os.sep}docking_class")[0] + os.sep)
-                + "docking_executables"
-            ) + os.sep
-
-            if sys.platform in ["linux", "linux2"]:
-                # Use linux version of Autodock Vina
-                vina_like_executable = (
-                    docking_executable_directory
-                    + "vina"
-                    + os.sep
-                    + "autodock_vina_1_1_2_linux_x86"
-                    + os.sep
-                    + "bin"
-                    + os.sep
-                    + "vina"
-                )
-
-            elif sys.platform == "darwin":
-                # Use OS X version of Autodock Vina
-                vina_like_executable = (
-                    docking_executable_directory
-                    + "vina"
-                    + os.sep
-                    + "autodock_vina_1_1_2_mac"
-                    + os.sep
-                    + "bin"
-                    + os.sep
-                    + "vina"
-                )
-
-            elif sys.platform == "win32":
-                # Windows...
-                raise Exception("Windows is currently not supported")
-            else:
-                raise Exception("This OS is currently not supported")
-
-        else:
-            # if user specifies a different vina executable
-            vina_like_executable = params["vina_like_executable"]
-
-        if os.path.exists(vina_like_executable) is False:
-            printout = f"Docking executable could not be found at: {vina_like_executable}"
-            print(printout)
-            raise Exception(printout)
-
-        return vina_like_executable
 
     # Finding PDBs for ligands in a folder
     def find_pdb_ligands(self, current_generation_pdb_dir):
@@ -242,16 +331,18 @@ class VinaDocking(ParentDocking):
         :param str lig_pdbqt_filename: the ligand pdbqt filename
         """
         params = self.params
+
         timeout_option = params["timeout_vs_gtimeout"]
         docking_timeout_limit = params["docking_timeout_limit"]
         # do the docking of the ligand Run with a timeout_option limit.
         # Default setting is 5 minutes. This is excessive as most things run
         # within 30seconds This will prevent stalling out. timeout or gtimeout
+        receptor_pdbqt_file = f'{params["filename_of_receptor"]}qt'
         torun = (
             f'{timeout_option} {docking_timeout_limit} {params["vina_like_executable"]} '
             f'--center_x {params["center_x"]} --center_y {params["center_y"]} --center_z {params["center_z"]} '
             f'--size_x {params["size_x"]} --size_y {params["size_y"]} --size_z {params["size_z"]} '
-            f"--receptor {self.receptor_pdbqt_file} "
+            f"--receptor {receptor_pdbqt_file} "
             f"--ligand {lig_pdbqt_filename} "
             f"--out {lig_pdbqt_filename}.vina --cpu 1"
         )
@@ -394,7 +485,7 @@ class VinaDocking(ParentDocking):
         smile_name = self.file_conversion_class_object.get_smile_name_from_pdb(pdb_file)
         if not os.path.exists(f"{pdb_file}qt.vina"):
             # so this pdbqt.vina file didn't exist
-            if self.debug_mode is False:
+            if self.params["debug_mode"] is False:
                 print(
                     "Docking unsuccessful: Deleting "
                     + os.path.basename(pdb_file)

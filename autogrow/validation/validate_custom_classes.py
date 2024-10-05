@@ -33,15 +33,15 @@ def validate_custom_params(params: Dict[str, Any]) -> None:
     # Check if Custom docking option if so there's a few things which need to
     # also be specified. if not lets flag the error.
     if params["dock_choice"] == "Custom":
-        if params["docking_executable"] is None:
+        if params["vina_like_executable"] is None:
             raise ValueError(
                 "TO USE Custom DOCKING OPTION, MUST SPECIFY THE \
-                PATH TO THE docking_executable AND THE DOCKING_CLASS"
+                PATH TO THE vina_like_executable AND THE DOCKING_CLASS"
             )
-        if not os.path.exists(params["docking_executable"]):
+        if not os.path.exists(params["vina_like_executable"]):
             raise ValueError(
-                f"Custom docking_executable could not be found at:\
-                {params['docking_executable']}"
+                f"Custom vina_like_executable could not be found at:\
+                {params['vina_like_executable']}"
             )
         if type(params["custom_docking_script"]) != list or not os.path.exists(
             params["custom_docking_script"][1]

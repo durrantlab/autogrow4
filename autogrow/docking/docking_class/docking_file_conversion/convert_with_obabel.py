@@ -60,7 +60,7 @@ class ObabelConversion(ParentPDBQTConverter):
             receptor_file = params["filename_of_receptor"]
             obabel_path = self.params["obabel_path"]
             number_of_processors = params["number_of_processors"]
-            # docking_executable = params["docking_executable"]
+            # vina_like_executable = params["vina_like_executable"]
 
             ###########################
 

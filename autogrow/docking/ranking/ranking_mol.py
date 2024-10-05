@@ -19,9 +19,6 @@ from rdkit import DataStructs  # type: ignore
 rdkit.RDLogger.DisableLog("rdApp.*")
 
 import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
-import autogrow.docking.ranking.selecting.rank_selection as Rank_Sel
-import autogrow.docking.ranking.selecting.roulette_selection as Roulette_Sel
-import autogrow.docking.ranking.selecting.tournament_selection as Tournament_Sel
 
 
 def create_seed_list(

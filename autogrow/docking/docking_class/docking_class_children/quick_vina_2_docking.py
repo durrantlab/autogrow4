@@ -54,13 +54,13 @@ class QuickVina2Docking(VinaDocking):
             # mgl_python = params["mgl_python"]
             # receptor_template = params["prepare_receptor4.py"]
             # number_of_processors = params["number_of_processors"]
-            # docking_executable = params["docking_executable"]
+            # vina_like_executable = params["vina_like_executable"]
 
             ###########################
 
             self.receptor_pdbqt_file = f"{receptor_file}qt"
 
-            self.params["docking_executable"] = self.get_docking_executable_file(
+            self.params["vina_like_executable"] = self.get_docking_executable_file(
                 self.params
             )
 
@@ -72,15 +72,15 @@ class QuickVina2Docking(VinaDocking):
         :param dict params: Dictionary of User variables
 
         Returns:
-        :returns: str docking_executable: String for the docking executable
+        :returns: str vina_like_executable: String for the docking executable
             file path
         """
 
         # This must already be true if we are here params["dock_choice"] ==
         # "QuickVina2Docking"
 
-        if params["docking_executable"] is None:
-            # get default docking_executable for QuickVina2
+        if params["vina_like_executable"] is None:
+            # get default vina_like_executable for QuickVina2
             script_dir = str(os.path.dirname(os.path.realpath(__file__)))
             docking_executable_directory = (
                 (script_dir.split(f"{os.sep}docking_class")[0] + os.sep)
@@ -89,7 +89,7 @@ class QuickVina2Docking(VinaDocking):
 
             if sys.platform in ["linux", "linux2"]:
                 # Use linux version of Autodock Vina
-                docking_executable = (
+                vina_like_executable = (
                     docking_executable_directory
                     + "q_vina_2"
                     + os.sep
@@ -100,7 +100,7 @@ class QuickVina2Docking(VinaDocking):
 
             elif sys.platform == "darwin":
                 # Use OS X version of Autodock Vina
-                docking_executable = (
+                vina_like_executable = (
                     docking_executable_directory
                     + "q_vina_2"
                     + os.sep
@@ -117,11 +117,11 @@ class QuickVina2Docking(VinaDocking):
 
         else:
             # if user specifies a different QuickVina executable
-            docking_executable = params["docking_executable"]
+            vina_like_executable = params["vina_like_executable"]
 
-        if os.path.exists(docking_executable) is False:
-            printout = f"Docking executable could not be found at: {docking_executable}"
+        if os.path.exists(vina_like_executable) is False:
+            printout = f"Docking executable could not be found at: {vina_like_executable}"
             print(printout)
             raise Exception(printout)
 
-        return docking_executable
+        return vina_like_executable
