@@ -16,25 +16,10 @@ def make_complete_children_dict(purpose_of_object: str) -> Dict[str, Any]:
     :returns: dict child_dict: Dictionary of all the class objects for either
         Filtering, docking, Dockingfile conversion or scoring
     """
-    if purpose_of_object == "filter":
-        import autogrow.operators.filter.filter_classes.filter_children_classes
-        from autogrow.operators.filter.filter_classes.parent_filter_class import (
-            ParentFilter as parent_object,
-        )
-        from autogrow.operators.filter.filter_classes.get_child_filter_class import (
-            get_all_subclasses,
-        )
-
-    elif purpose_of_object == "parent_pdbqt_converter":
+    if purpose_of_object == "parent_pdbqt_converter":
         import autogrow.docking.docking_class.docking_file_conversion
         from autogrow.docking.docking_class.parent_pdbqt_converter import (
             ParentPDBQTConverter as parent_object,
-        )
-        from autogrow.docking.docking_class.get_child_class import get_all_subclasses
-    elif purpose_of_object == "ParentDocking":
-        import autogrow.docking.docking_class.docking_class_children
-        from autogrow.docking.docking_class.parent_dock_class import (
-            ParentDocking as parent_object,
         )
         from autogrow.docking.docking_class.get_child_class import get_all_subclasses
     elif purpose_of_object == "ParentScoring":

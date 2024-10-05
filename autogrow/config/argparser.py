@@ -110,7 +110,6 @@ def get_argparse_vars() -> Dict[str, Any]:
     _add_misc_params(misc)
 
     # Now add in plugin arg groups
-    import pdb; pdb.set_trace()
     titles = []
     titles_to_arg_vars = {}
     for title, arg_vars in plugin_arg_groups_to_add:

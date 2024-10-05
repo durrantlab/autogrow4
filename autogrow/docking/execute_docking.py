@@ -6,15 +6,12 @@ import __future__
 import os
 from typing import Any, Dict, Type, Union, cast
 
-from autogrow.docking.docking_class.get_child_class import get_all_subclasses
-
-from autogrow.docking.docking_class.docking_class_children import *
-from autogrow.docking.docking_class.parent_dock_class import ParentDocking
 
 # from autogrow.docking.docking_class.docking_class_children \
 #                           import VinaDocking, QuickVina2Docking
 
 from autogrow.docking.docking_class.docking_file_conversion import *
+from autogrow.docking.docking_class.get_child_class import get_all_subclasses
 from autogrow.docking.docking_class.parent_pdbqt_converter import ParentPDBQTConverter
 from autogrow.plugins.docking import DockingPluginManager
 from autogrow.plugins.plugin_manager_base import get_plugin_manager
@@ -77,7 +74,6 @@ def run_docking_common(
     current_generation_pdb_dir = f"{current_generation_dir}PDBs{os.sep}"
 
     conversion_choice = params["conversion_choice"]
-    receptor = params["filename_of_receptor"]
 
     temp_vars = {
         key: params[key] for key in list(params.keys()) if key != "parallelizer"
