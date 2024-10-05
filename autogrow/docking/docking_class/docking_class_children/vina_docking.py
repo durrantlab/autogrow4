@@ -193,7 +193,9 @@ class VinaDocking(ParentDocking):
             vina_like_executable = params["vina_like_executable"]
 
         if os.path.exists(vina_like_executable) is False:
-            printout = f"Docking executable could not be found at: {vina_like_executable}"
+            printout = (
+                f"Docking executable could not be found at: {vina_like_executable}"
+            )
             print(printout)
             raise Exception(printout)
 

@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from argparse import ArgumentParser
 from typing import Dict, List, Optional, Tuple, Union
-from autogrow.config.argparser import ArgumentVars, register_argparse_group
 
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
 from autogrow.types import PreDockedCompoundInfo

@@ -143,23 +143,7 @@ def test_docking_executables(params: Dict[str, Any], vina_exe: str, qvina2_exe: 
 
     with open(test_vina_outfile, "r") as test_file:
         lines = test_file.readlines()
-    if "AutoDock Vina 1.1.2" not in lines[0]:
-        printout = (
-            "Vina docking is not compatible on this OS. \nPlease use docker or "
-            + "try provide a Vina executable compatible with the OS.\n"
-        )
-        print(printout)
-        if params["dock_choice"] == "VinaDocking":
-            return False
 
-    if "QuickVina 2.1" not in lines[1]:
-        printout = (
-            "QuickVina 2.1 docking is not compatible on this OS. \nPlease use docker"
-            + " or try provide a Vina executable compatible with the OS.\n"
-        )
-        print(printout)
-        if params["dock_choice"] == "QuickVina2Docking":
-            return False
     return True
 
 
@@ -621,12 +605,12 @@ def define_defaults() -> Dict[str, Any]:
     params["alternative_filter"] = None
 
     # docking
-    params["dock_choice"] = "QuickVina2Docking"
-    params["vina_like_executable"] = None
-    params["docking_exhaustiveness"] = None
-    params["docking_num_modes"] = None
-    params["docking_timeout_limit"] = 120
-    params["custom_docking_script"] = ""
+    # params["dock_choice"] = "QuickVina2Docking"
+    # params["vina_like_executable"] = None
+    # params["docking_exhaustiveness"] = None
+    # params["docking_num_modes"] = None
+    # params["docking_timeout_limit"] = 120
+    # params["custom_docking_script"] = ""
 
     # scoring
     params["scoring_choice"] = "VINA"
@@ -845,27 +829,6 @@ def load_in_commandline_parameters(argv: Dict[str, Any]) -> Tuple[Dict[str, Any]
     # Check if Custom docking option if so there's a few things which
     # need to also be specified
     # if not lets flag the error
-    if params["dock_choice"] == "Custom":
-        if params["vina_like_executable"] is None:
-            raise ValueError(
-                "TO USE Custom DOCKING OPTION, MUST SPECIFY THE \
-                PATH TO THE vina_like_executable AND THE DOCKING_CLASS"
-            )
-        if os.path.exists(params["vina_like_executable"]) is False:
-            raise ValueError(
-                "Custom vina_like_executable could not be found at:\
-                {}".format(
-                    params["vina_like_executable"]
-                )
-            )
-        if (
-                type(params["custom_docking_script"]) != list
-                or os.path.exists(params["custom_docking_script"][1]) is not True
-        ):
-            raise ValueError(
-                "TO USE Custom DOCKING OPTION, MUST SPECIFY THE \
-                PATH TO THE Custom DOCKING SCRIPT"
-            )
 
     if params["conversion_choice"] == "Custom" and (
         type(params["custom_conversion_script"]) != list
@@ -887,7 +850,6 @@ def load_in_commandline_parameters(argv: Dict[str, Any]) -> Tuple[Dict[str, Any]
 
     if (
             params["conversion_choice"] == "Custom"
-            or params["dock_choice"] == "Custom"
             or params["scoring_choice"] == "Custom"
     ):
         params = handle_custom_dock_and_conversion_scoring_options(params)
@@ -1545,119 +1507,6 @@ def handle_custom_conversion_script(params: Dict[str, Any]) -> Tuple[Dict[str, A
         params["conversion_choice"] = custom_class[0]
     return params, need_restart, printout
 
-
-#
-def handle_custom_docking_script(params: Dict[str, Any]) -> Tuple[Dict[str, Any], bool, str]:
-    """
-    This will handle Custom Docking_scripts
-
-    Inputs:
-    :param dict params: Dictionary of User variables
-    Returns:
-    :returns: dict params: Dictionary of User variables modified with the
-        params["dock_choice"] set to the new custom dock_choice
-    :returns: bool need_restart: If True AutoGrow will need to be estarted
-         after all other files are incorporated
-    :returns: str printout: "" or a message to be print prior to being
-        restarted if needed
-    """
-    printout = ""
-    need_restart = False
-    if params["custom_docking_script"] is not None:
-        if type(params["custom_docking_script"]) != list:
-            print(params["custom_docking_script"])
-            raise Exception(
-                "If you want to add Custom Docking_script to the \
-                Docking_script child classes Must be a list of \
-                [name_Docking_script1, Path/to/name_Docking_script1.py]"
-            )
-        if type(params["custom_docking_script"][0]) != str:
-            print("")
-            print(params["custom_docking_script"])
-            print("")
-            raise Exception(
-                "If you want to add Custom Docking_script to the \
-                Docking_script child classes Must be a list of \
-                [name_Docking_script1, Path/to/name_Docking_script1.py]"
-            )
-
-        full_children_dict = make_complete_children_dict("ParentDocking")
-        custom_class = params["custom_docking_script"]
-        if custom_class[0] not in full_children_dict.keys():
-            if os.path.exists(custom_class[1]) is False:
-                print(custom_class)
-                raise Exception(
-                    "File can not be found for custom_docking_script \
-                    {}\n If you want to add Custom Docking_scripts to the \
-                    Docking_script child classes Must be a list of \
-                    [name_Docking_script1, Path/to/name_Docking_script1.py]".format(
-                        custom_class[1]
-                    )
-                )
-
-            new_file = os.sep.join(
-                [
-                    os.path.abspath(os.path.dirname(__file__)),
-                    "docking",
-                    "docking_class",
-                    "docking_class_children",
-                    f"{os.path.basename(custom_class[0])}.py",
-                ]
-            )
-
-            if os.path.exists(new_file) is True:
-                printout = (
-                    "A copy of the custom script {} has been moved \
-                    to {}\n".format(
-                        custom_class[1], new_file
-                    )
-                    + "Unfortunately this could not be imported \
-                    by the docking module."
-                )
-                printout += "Please check the file naming corresponding \
-                    to: {}\n\n".format(
-                    custom_class
-                )
-                print(printout)
-                raise Exception(printout)
-
-            # Add copy the script to the children folder
-            print("copying Custom class file into the children folder:")
-            print(f"\t Copying : {custom_class[1]}\n\t New file: {new_file}\n")
-            print(
-                "AutoGrow will need to be restarted once the custom \
-                script has been copied to their required location."
-            )
-            print(
-                "This is done once so if the script needs to be changed \
-                please either remove or replace the script within the \
-                children folder."
-            )
-            print(
-                "Please ensure you unit test this code properly before incorporating."
-            )
-            copyfile(custom_class[1], new_file)
-
-            printout = (
-                printout
-                + "\n############################################"
-                + "#################################"
-            )
-            printout += "AutoGrow has incorporated the custom files into the children Module."
-            printout += "AutoGrow needs to be restarted and should now be able to run custom scripts."
-            printout += "Please ensure you unit test this code properly before incorporating."
-            printout = (
-                f"{printout}##############################################"
-                + "###############################\n"
-            )
-
-            need_restart = True
-
-        params["dock_choice"] = custom_class[0]
-    return params, need_restart, printout
-
-
-#
 def handle_custom_scoring_script(params: Dict[str, Any]) -> Tuple[Dict[str, Any], bool, str]:
     """
     This will handle Custom scoring_scripts
@@ -1776,11 +1625,6 @@ def handle_custom_dock_and_conversion_scoring_options(params: Dict[str, Any]) ->
         if need_restart is True:
             master_need_restart = True
             master_printout += printout
-    if params["dock_choice"] == "Custom":
-        params, need_restart, printout = handle_custom_docking_script(params)
-        if need_restart is True:
-            master_need_restart = True
-            master_printout = master_printout + printout
     if params["scoring_choice"] == "Custom":
         params, need_restart, printout = handle_custom_scoring_script(params)
         if need_restart is True:

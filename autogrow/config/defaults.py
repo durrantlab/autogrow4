@@ -83,12 +83,12 @@ def define_defaults() -> Dict[str, Any]:
     default_params["alternative_filter"] = None
 
     # docking
-    default_params["dock_choice"] = "QuickVina2Docking"
-    default_params["vina_like_executable"] = None
-    default_params["docking_exhaustiveness"] = None
-    default_params["docking_num_modes"] = None
-    default_params["docking_timeout_limit"] = 120
-    default_params["custom_docking_script"] = ""
+    # default_params["dock_choice"] = "QuickVina2Docking"
+    # default_params["vina_like_executable"] = None
+    # default_params["docking_exhaustiveness"] = None
+    # default_params["docking_num_modes"] = None
+    # default_params["docking_timeout_limit"] = 120
+    # default_params["custom_docking_script"] = ""
 
     # scoring
     default_params["scoring_choice"] = "VINA"

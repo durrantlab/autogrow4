@@ -4,7 +4,7 @@ This script handles the docking and file conversion for docking.
 import __future__
 
 import os
-from typing import Any, Dict, Type, Union
+from typing import Any, Dict, Type, Union, cast
 
 from autogrow.docking.docking_class.get_child_class import get_all_subclasses
 
@@ -16,28 +16,11 @@ from autogrow.docking.docking_class.parent_dock_class import ParentDocking
 
 from autogrow.docking.docking_class.docking_file_conversion import *
 from autogrow.docking.docking_class.parent_pdbqt_converter import ParentPDBQTConverter
+from autogrow.plugins.docking import DockingPluginManager
+from autogrow.plugins.plugin_manager_base import get_plugin_manager
 
 # from autogrow.docking.docking_class.docking_file_conversion \
 #                           import convert_with_obabel, convert_with_mgltools
-
-
-def pick_docking_class_dict(dock_choice: str) -> Type[ParentDocking]:
-    """
-    This will retrieve all the names of every child class of the parent class
-    ParentDocking
-
-    Inputs:
-    :param list dock_choice: List with the User specified docking choices
-
-    Returns:
-    :returns: object child_dict[dock_choice]: the class for running the chosen
-        docking method
-    """
-
-    children = get_all_subclasses(ParentDocking)
-
-    child_dict = {child.__name__: child for child in children}
-    return child_dict[dock_choice]
 
 
 def pick_run_conversion_class_dict(
@@ -93,7 +76,6 @@ def run_docking_common(
     # Get directory string of PDB files for Ligands
     current_generation_pdb_dir = f"{current_generation_dir}PDBs{os.sep}"
 
-    dock_choice = params["dock_choice"]
     conversion_choice = params["conversion_choice"]
     receptor = params["filename_of_receptor"]
 
@@ -106,16 +88,16 @@ def run_docking_common(
     # convert ligand, must access object function. That's pretty awkward.
     file_conversion_obj = file_conversion_cls(temp_vars, test_boot=False)
 
-    dock_class = pick_docking_class_dict(dock_choice)
-    docking = dock_class(temp_vars, receptor, file_conversion_obj, test_boot=False)
+    docking = cast(DockingPluginManager, get_plugin_manager("DockingPluginManager"))
 
-    if params["vina_like_executable"] is None:
-        vina_like_executable = docking.get_docking_executable_file(temp_vars)
-        params["vina_like_executable"] = vina_like_executable
+    # dock_class = pick_docking_class_dict(dock_choice)
+    # docking = dock_class(temp_vars, receptor, file_conversion_obj, test_boot=False)
 
     # Find PDB's
     pdbs_in_folder = docking.find_pdb_ligands(current_generation_pdb_dir)
-    job_input_convert_lig = tuple((docking, pdb) for pdb in pdbs_in_folder)
+    job_input_convert_lig = tuple(
+        (docking, pdb, file_conversion_obj) for pdb in pdbs_in_folder
+    )
 
     print("####################")
     print("Convert Ligand to PDBQT format Begun")
@@ -130,18 +112,20 @@ def run_docking_common(
     deleted_smiles_names_list_convert = list(set(deleted_smiles_names_list_convert))
 
     if deleted_smiles_names_list_convert:
-        print("THE FOLLOWING LIGANDS WHICH FAILED TO CONVERT:")
+        print("THE FOLLOWING LIGANDS FAILED TO CONVERT:")
         print(deleted_smiles_names_list_convert)
     print("####################")
 
     # Docking the ligands which converted to PDBQT Find PDBQT's
     pdbqts_in_folder = docking.find_converted_ligands(current_generation_pdb_dir)
 
-    job_input_dock_lig = tuple((docking, pdbqt) for pdbqt in pdbqts_in_folder)
+    job_input_dock_lig = tuple(
+        (docking, pdbqt, file_conversion_obj) for pdbqt in pdbqts_in_folder
+    )
     print("####################")
     print("Docking Begun")
     smiles_names_failed_to_dock = params["parallelizer"].run(
-        job_input_dock_lig, run_dock_multithread
+        job_input_dock_lig, run_dock_multithread_wrapper
     )
 
     _print_three_vars("", "Docking Completed", "####################")
@@ -192,7 +176,9 @@ def _print_three_vars(arg0: Any, arg1: Any, arg2: Any) -> None:
 
 
 def lig_convert_multithread(
-    docking_object: ParentDocking, pdb: str
+    docking: DockingPluginManager,
+    pdb: str,
+    file_conversion_class_object: ParentPDBQTConverter,
 ) -> Union[str, None]:
     """
     Run the ligand conversion of a single molecule. If it failed
@@ -209,10 +195,14 @@ def lig_convert_multithread(
         final format. (ie. pdbqt conversion fail)
     """
 
-    return docking_object.run_ligand_handling_for_docking(pdb)
+    return docking.run_ligand_handling_for_docking(pdb, file_conversion_class_object)
 
 
-def run_dock_multithread(docking_object: ParentDocking, pdb: str) -> Union[str, None]:
+def run_dock_multithread_wrapper(
+    docking: DockingPluginManager,
+    lig_pdb: str,
+    file_conversion_obj: ParentPDBQTConverter,
+) -> Union[str, None]:
     """
     Run the docking of a single molecule.
 
@@ -226,5 +216,7 @@ def run_dock_multithread(docking_object: ParentDocking, pdb: str) -> Union[str, 
         docking failed)
     """
 
-    print("Attempt to Dock complete: ", pdb)
-    return docking_object.run_dock(pdb)
+    print("Attempt to Dock complete: ", lig_pdb)
+    return docking.run(
+        lig_pdbqt_filename=lig_pdb, file_conversion_class_object=file_conversion_obj
+    )

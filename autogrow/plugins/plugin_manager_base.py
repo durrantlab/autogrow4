@@ -36,7 +36,8 @@ class PluginManagerBase(ABC):
         }
 
         for plugin in self.plugins.values():
-            plugin.validate(params)
+            # This also sets params on the plugin.
+            plugin._validate(params)
 
     def get_selected_plugins_from_params(self) -> Optional[List[str]]:
         """
@@ -70,7 +71,6 @@ class PluginManagerBase(ABC):
 
                     try:
                         module = importlib.import_module(module_name)
-
                         for name, obj in inspect.getmembers(module):
                             if (
                                 inspect.isclass(obj)
