@@ -291,18 +291,17 @@ def make_crossovers(
                 list_of_already_made_smiles = []
                 list_of_already_made_id = []
 
-                # fill lists of all smiles and smile_id's of all previously
-                # made smiles in this generation
+                # fill lists of all smiles and smile_id's of all previously made
+                # smiles in this generation
                 for x in new_ligands:
                     list_of_already_made_smiles.append(x.smiles)
                     list_of_already_made_id.append(x.name)
 
                 if child_lig_smile not in list_of_already_made_smiles:
                     # if the smiles string is unique to the list of previous
-                    # smile strings in this round of reactions then we append
-                    # it to the list of newly created ligands we append it
-                    # with a unique ID, which also tracks the progress of the
-                    # reactant
+                    # smile strings in this round of reactions then we append it
+                    # to the list of newly created ligands we append it with a
+                    # unique ID, which also tracks the progress of the reactant
                     is_name_unique = False
                     new_lig_id = None
                     while not is_name_unique:

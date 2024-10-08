@@ -38,11 +38,7 @@ def _make_paths_abs(params: Dict[str, Any]) -> None:
     :returns: None. The function modifies the `params` dictionary in place.
     """
     # convert paths to abspath, in case necessary
-    for pname in [
-        "filename_of_receptor",
-        "root_output_folder",
-        "source_compound_file"
-    ]:
+    for pname in ["filename_of_receptor", "root_output_folder", "source_compound_file"]:
         if pname not in list(params.keys()):
             continue
         params[pname] = os.path.abspath(params[pname])
@@ -62,9 +58,7 @@ def _make_dirs_end_in_sep(params: Dict[str, Any]) -> None:
     Returns:
     :returns: None. The function modifies the `params` dictionary in place.
     """
-    dir_params = [
-        "root_output_folder"
-    ]
+    dir_params = ["root_output_folder"]
 
     for dir_param in dir_params:
         if dir_param not in params:

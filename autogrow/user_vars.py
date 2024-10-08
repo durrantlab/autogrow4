@@ -17,6 +17,7 @@ import platform
 from shutil import copyfile
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+
 def program_info() -> str:
     """
     Get the program version number, etc.
@@ -68,11 +69,7 @@ def save_vars_as_json(params: Dict[str, Any]) -> None:
             else:
                 path_exists = False
 
-    temp_vars = {
-        k: copy.deepcopy(params[k])
-        for k in params
-        if "parallelizer" not in k
-    }
+    temp_vars = {k: copy.deepcopy(params[k]) for k in params if "parallelizer" not in k}
     with open(vars_file, "w") as fp:
         json.dump(temp_vars, fp, indent=4)
 
@@ -109,7 +106,10 @@ def multiprocess_handling(params: Dict[str, Any]) -> Dict[str, Any]:
 
     return params
 
-def test_docking_executables(params: Dict[str, Any], vina_exe: str, qvina2_exe: str) -> bool:
+
+def test_docking_executables(
+    params: Dict[str, Any], vina_exe: str, qvina2_exe: str
+) -> bool:
     """
     This will test if docking executables are compatible with OS.
     This is only required for MacOS.
@@ -130,11 +130,17 @@ def test_docking_executables(params: Dict[str, Any], vina_exe: str, qvina2_exe: 
     Returns:
     :returns: bool bool: returns True if both docking executables work; False if either fails
     """
-    test_vina_outfile = params["root_output_folder"] + os.sep + "docking_exe_MACOS_test.txt"
+    test_vina_outfile = (
+        params["root_output_folder"] + os.sep + "docking_exe_MACOS_test.txt"
+    )
     try:
-        command = "{} --version > {arg_2} 2>> {arg_2}".format(vina_exe, arg_2=test_vina_outfile)
+        command = "{} --version > {arg_2} 2>> {arg_2}".format(
+            vina_exe, arg_2=test_vina_outfile
+        )
         os.system(command)
-        command = "{} --version >> {arg_2} 2>> {arg_2}".format(qvina2_exe, arg_2=test_vina_outfile)
+        command = "{} --version >> {arg_2} 2>> {arg_2}".format(
+            qvina2_exe, arg_2=test_vina_outfile
+        )
         os.system(command)
     except Exception:
         printout = "Docking executables could not be found."
@@ -159,6 +165,7 @@ def _notify_docker_requirement(arg0):
     print(printout)
     raise Exception(printout)
 
+
 ############################################
 ###### Variables Handlining Settings #######
 ############################################
@@ -182,7 +189,7 @@ def check_for_required_inputs(input_params):
         "size_y",
         "size_z",
         "root_output_folder",
-        "source_compound_file"
+        "source_compound_file",
     ]
 
     missing_variables = []
@@ -240,7 +247,7 @@ def check_for_required_inputs(input_params):
 
     # Check numbers which may be defined by first generation
     if "top_mols_to_seed_next_generation_first_generation" not in list(
-            input_params.keys()
+        input_params.keys()
     ):
         if "top_mols_to_seed_next_generation" not in list(input_params.keys()):
             # Use defined default of 10
@@ -272,7 +279,7 @@ def check_for_required_inputs(input_params):
             ]
 
     if "number_elitism_advance_from_previous_gen_first_generation" not in list(
-            input_params.keys()
+        input_params.keys()
     ):
         if "number_elitism_advance_from_previous_gen" not in list(input_params.keys()):
             # Use defined default of 10
@@ -356,7 +363,6 @@ def _extracted_from_check_for_required_inputs_31(missing_variables):
     print(printout)
     print("")
     raise NotImplementedError("\n" + printout + "\n")
-
 
 
 def determine_bash_timeout_vs_gtimeout() -> str:
@@ -623,7 +629,7 @@ def define_defaults() -> Dict[str, Any]:
     # Check Bash Timeout function (There's a difference between MacOS and linux)
     # Linux uses timeout while MacOS uses gtimeout
     timeout_option = determine_bash_timeout_vs_gtimeout()
-    if timeout_option in  ["timeout", "gtimeout"]:
+    if timeout_option in ["timeout", "gtimeout"]:
         params["timeout_vs_gtimeout"] = timeout_option
     else:
         raise Exception(
@@ -666,7 +672,9 @@ def convert_json_params_from_unicode(params_unicode: Dict[str, Any]) -> Dict[str
     return params
 
 
-def check_value_types(params: Dict[str, Any], argv: Dict[str, Any]) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+def check_value_types(
+    params: Dict[str, Any], argv: Dict[str, Any]
+) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     """
     This checks that all the user variables loaded in use that same or comparable
     datatypes as the defaults in params. This prevents type issues later in the
@@ -770,6 +778,8 @@ def check_value_types(params: Dict[str, Any], argv: Dict[str, Any]) -> Tuple[Dic
                     printout += "Please check Autogrow documentation using -h"
                     raise IOError(printout)
     return params, argv
+
+
 def load_in_commandline_parameters(argv: Dict[str, Any]) -> Tuple[Dict[str, Any], str]:
     """
     Load in the command-line parameters
@@ -840,10 +850,7 @@ def load_in_commandline_parameters(argv: Dict[str, Any]) -> Tuple[Dict[str, Any]
             MUST SPECIFY THE PATH TO THE Custom SCORING SCRIPT"
         )
 
-    if (
-            params["conversion_choice"] == "Custom"
-            or params["scoring_choice"] == "Custom"
-    ):
+    if params["conversion_choice"] == "Custom" or params["scoring_choice"] == "Custom":
         params = handle_custom_dock_and_conversion_scoring_options(params)
 
     # Mutation Settings
@@ -924,7 +931,7 @@ def load_in_commandline_parameters(argv: Dict[str, Any]) -> Tuple[Dict[str, Any]
     # If MGLTools is being used handle its paths
     if params["conversion_choice"] == "MGLToolsConversion":
         if not os.path.exists(params["prepare_ligand4.py"]) and not os.path.exists(
-                params["prepare_ligand4.py"].replace('"', "")
+            params["prepare_ligand4.py"].replace('"', "")
         ):
             printout = (
                 printout
@@ -935,7 +942,7 @@ def load_in_commandline_parameters(argv: Dict[str, Any]) -> Tuple[Dict[str, Any]
             print(printout)
             raise NotImplementedError(printout)
         if not os.path.exists(params["prepare_receptor4.py"]) and not os.path.exists(
-                params["prepare_receptor4.py"].replace('"', "")
+            params["prepare_receptor4.py"].replace('"', "")
         ):
             printout = (
                 printout
@@ -973,6 +980,7 @@ def load_in_commandline_parameters(argv: Dict[str, Any]) -> Tuple[Dict[str, Any]
     save_vars_as_json(params)
 
     return params, printout
+
 
 ############################################
 ######### File Handlining Settings #########
@@ -1094,33 +1102,25 @@ def handle_custom_inputs_if_argparsed(input_params: Dict[str, Any]) -> Dict[str,
     if "alternative_filter" not in input_params.keys():
         input_params["alternative_filter"] = None
     if (
-            input_params["alternative_filter"] is not None
-            and input_params["alternative_filter"] != []
+        input_params["alternative_filter"] is not None
+        and input_params["alternative_filter"] != []
     ):
-        _parse_custom_filter_input(
-            input_params, "alternative_filter"
-        )
+        _parse_custom_filter_input(input_params, "alternative_filter")
     # custom_conversion_script
     if "custom_conversion_script" not in input_params.keys():
         input_params["custom_conversion_script"] = None
     if input_params["custom_conversion_script"] not in [None, [], "", "[]"]:
-        _parse_custom_filter_input(
-            input_params, "custom_conversion_script"
-        )
+        _parse_custom_filter_input(input_params, "custom_conversion_script")
     # custom_docking_script
     if "custom_docking_script" not in input_params.keys():
         input_params["custom_docking_script"] = None
     if input_params["custom_docking_script"] not in [None, [], "", "[]"]:
-        _parse_custom_filter_input(
-            input_params, "custom_docking_script"
-        )
+        _parse_custom_filter_input(input_params, "custom_docking_script")
     # Custom_Scoring script
     if "custom_scoring_script" not in input_params.keys():
         input_params["custom_scoring_script"] = None
     if input_params["custom_scoring_script"] not in [None, [], "", "[]"]:
-        _parse_custom_filter_input(
-            input_params, "custom_scoring_script"
-        )
+        _parse_custom_filter_input(input_params, "custom_scoring_script")
     return input_params
 
 
@@ -1137,7 +1137,9 @@ def _parse_custom_filter_input(input_params, arg1):
 
 
 #
-def handle_alternative_filters(params: Dict[str, Any], filter_list: List[str]) -> List[str]:
+def handle_alternative_filters(
+    params: Dict[str, Any], filter_list: List[str]
+) -> List[str]:
     """
     This will handle Custom Filters
 
@@ -1186,7 +1188,9 @@ def handle_alternative_filters(params: Dict[str, Any], filter_list: List[str]) -
                         {}\n If you want to add Custom filters to the filter child \
                         classes Must be a list of lists \
                         [[name_filter1, Path/to/name_filter1.py],\
-                        [name_filter2, Path/to/name_filter2.py]]".format(custom_class[1])
+                        [name_filter2, Path/to/name_filter2.py]]".format(
+                            custom_class[1]
+                        )
                     )
 
                 new_file = os.sep.join(
@@ -1221,23 +1225,18 @@ def handle_alternative_filters(params: Dict[str, Any], filter_list: List[str]) -
 
             filter_list.append(custom_class[0])
         if scripts_to_copy:
-            _copy_custom_filter_scripts(
-                scripts_to_copy, custom_class, new_file
-            )
+            _copy_custom_filter_scripts(scripts_to_copy, custom_class, new_file)
     return filter_list
 
 
 def _copy_custom_filter_scripts(scripts_to_copy, custom_class, new_file):
     for filter_info in scripts_to_copy:
-        _copy_custom_filter_to_folder(
-            custom_class, new_file, filter_info
-        )
+        _copy_custom_filter_to_folder(custom_class, new_file, filter_info)
     print(
         "\n########################################"
         + "#####################################"
     )
-    print("AutoGrow has incorporated the custom files into"
-          + " the filter Module.")
+    print("AutoGrow has incorporated the custom files into" + " the filter Module.")
     print(
         " AutoGrow needs to be restarted and should now "
         + "be able to run custom scripts."
@@ -1269,6 +1268,7 @@ def _copy_custom_filter_to_folder(custom_class, new_file, filter_info):
     )
     copyfile(filter_info[0], filter_info[1])
 
+
 #
 def make_complete_children_dict(purpose_of_object: str) -> Dict[str, Any]:
     """
@@ -1287,11 +1287,15 @@ def make_complete_children_dict(purpose_of_object: str) -> Dict[str, Any]:
     get_all_subclasses = None
     if purpose_of_object == "parent_pdbqt_converter":
         import autogrow.docking.docking_class.docking_file_conversion
-        from autogrow.docking.docking_class.parent_pdbqt_converter import ParentPDBQTConverter as parent_object
+        from autogrow.docking.docking_class.parent_pdbqt_converter import (
+            ParentPDBQTConverter as parent_object,
+        )
         from autogrow.docking.docking_class.get_child_class import get_all_subclasses
     elif purpose_of_object == "ParentScoring":
         import autogrow.docking.scoring.scoring_classes.scoring_functions
-        from autogrow.docking.scoring.scoring_classes.parent_scoring_class import ParentScoring as parent_object
+        from autogrow.docking.scoring.scoring_classes.parent_scoring_class import (
+            ParentScoring as parent_object,
+        )
         from autogrow.docking.docking_class.get_child_class import get_all_subclasses
 
     assert parent_object is not None, "parent_object is not recognized"
@@ -1308,7 +1312,9 @@ def make_complete_children_dict(purpose_of_object: str) -> Dict[str, Any]:
 
 
 #
-def handle_custom_conversion_script(params: Dict[str, Any]) -> Tuple[Dict[str, Any], bool, str]:
+def handle_custom_conversion_script(
+    params: Dict[str, Any]
+) -> Tuple[Dict[str, Any], bool, str]:
     """
     This will handle Custom Conversion_scripts
 
@@ -1420,7 +1426,10 @@ def handle_custom_conversion_script(params: Dict[str, Any]) -> Tuple[Dict[str, A
         params["conversion_choice"] = custom_class[0]
     return params, need_restart, printout
 
-def handle_custom_scoring_script(params: Dict[str, Any]) -> Tuple[Dict[str, Any], bool, str]:
+
+def handle_custom_scoring_script(
+    params: Dict[str, Any]
+) -> Tuple[Dict[str, Any], bool, str]:
     """
     This will handle Custom scoring_scripts
 
@@ -1481,7 +1490,9 @@ def handle_custom_scoring_script(params: Dict[str, Any]) -> Tuple[Dict[str, Any]
 
             if os.path.exists(new_file) is True:
                 printout = f"A copy of the custom script {custom_class[1]} has been moved to {new_file}\nUnfortunately this could not be imported by the scoring module."
-                printout += f"Please check the file naming corresponding to: {custom_class}\n\n"
+                printout += (
+                    f"Please check the file naming corresponding to: {custom_class}\n\n"
+                )
                 print(printout)
                 raise Exception(printout)
 
@@ -1506,9 +1517,13 @@ def handle_custom_scoring_script(params: Dict[str, Any]) -> Tuple[Dict[str, Any]
                 "\n#######################################"
                 + "######################################"
             )
-            printout += "AutoGrow has incorporated the custom files into the scoring Module."
+            printout += (
+                "AutoGrow has incorporated the custom files into the scoring Module."
+            )
             printout += "AutoGrow needs to be restarted and should now be able to run custom scripts."
-            printout += "Please ensure you unit test this code properly before incorporating."
+            printout += (
+                "Please ensure you unit test this code properly before incorporating."
+            )
             printout = (
                 f"{printout}##############################################"
                 + "###############################\n"
@@ -1521,7 +1536,9 @@ def handle_custom_scoring_script(params: Dict[str, Any]) -> Tuple[Dict[str, Any]
 
 
 #
-def handle_custom_dock_and_conversion_scoring_options(params: Dict[str, Any]) -> Dict[str, Any]:
+def handle_custom_dock_and_conversion_scoring_options(
+    params: Dict[str, Any]
+) -> Dict[str, Any]:
     """
     This function handles selecting the user defined Custom options
     for Custom docking Conversion, and scoring scripts.
@@ -1594,7 +1611,9 @@ def picked_filters(params: Dict[str, Any]) -> Tuple[List[str], Dict[str, Any]]:
         params["alternative_filters"] as the name of that class and place
         that file in the same folder as the other filter classes.
     """
-    import pdb; pdb.set_trace()
+    import pdb
+
+    pdb.set_trace()
     filter_list = []
     vars_keys = list(params.keys())
 

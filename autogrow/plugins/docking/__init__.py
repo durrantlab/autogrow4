@@ -46,6 +46,7 @@ class DockingBase(PluginBase):
         # raise NotImplementedError("run_dock() not implemented")
         pass
 
+
 class DockingPluginManager(PluginManagerBase):
     def run(self, **kwargs) -> Any:
         """

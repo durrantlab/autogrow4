@@ -25,75 +25,75 @@ class FakeDocking(DockingBase):
                     default=False,
                     help="Use fake docking (for testing)",
                 ),
-            #     ArgumentVars(
-            #         name="vina_like_executable",
-            #         default=None,
-            #         help="path to the vina_like_executable (vina, qvina2, smina, etc.)",
-            #     ),
-            #     ArgumentVars(
-            #         name="center_x",
-            #         type=float,
-            #         default=None,
-            #         help="x-coordinate for the center of the pocket to be tested by docking. (Angstrom)",
-            #     ),
-            #     ArgumentVars(
-            #         name="center_y",
-            #         type=float,
-            #         default=None,
-            #         help="y-coordinate for the center of the pocket to be tested by docking. (Angstrom)",
-            #     ),
-            #     ArgumentVars(
-            #         name="center_z",
-            #         type=float,
-            #         default=None,
-            #         help="z-coordinate for the center of the pocket to be tested by docking. (Angstrom)",
-            #     ),
-            #     ArgumentVars(
-            #         name="size_x",
-            #         type=float,
-            #         default=None,
-            #         help="dimension of box to dock into in the x-axis (Angstrom)",
-            #     ),
-            #     ArgumentVars(
-            #         name="size_y",
-            #         type=float,
-            #         default=None,
-            #         help="dimension of box to dock into in the y-axis (Angstrom)",
-            #     ),
-            #     ArgumentVars(
-            #         name="size_z",
-            #         type=float,
-            #         default=None,
-            #         help="dimension of box to dock into in the z-axis (Angstrom)",
-            #     ),
-            #     ArgumentVars(
-            #         name="docking_exhaustiveness",
-            #         default=8,
-            #         help="exhaustiveness of the global search (roughly proportional to time. \
-            #         see docking software for settings.",
-            #     ),
-            #     ArgumentVars(
-            #         name="docking_num_modes",
-            #         default=9,
-            #         help=" maximum number of binding modes to generate in docking. \
-            #         See docking software for settings. ",
-            #     ),
-            #     ArgumentVars(
-            #         name="docking_timeout_limit",
-            #         type=float,
-            #         default=120,
-            #         help="The maximum amount of time allowed to dock a single ligand into a \
-            #         pocket in seconds. Many factors influence the time required to dock, such as: \
-            #         processor speed, the docking software, rotatable bonds, exhaustiveness docking,\
-            #         and number of docking modes... \
-            #         The default docking_timeout_limit is 120 seconds, which is excess for most \
-            #         docking events using QuickVina2Docking under default settings. If run with \
-            #         more exhaustive settings or with highly flexible ligands, consider increasing \
-            #         docking_timeout_limit to accommodate. Default docking_timeout_limit is 120 seconds",
-            #     ),
+                #     ArgumentVars(
+                #         name="vina_like_executable",
+                #         default=None,
+                #         help="path to the vina_like_executable (vina, qvina2, smina, etc.)",
+                #     ),
+                #     ArgumentVars(
+                #         name="center_x",
+                #         type=float,
+                #         default=None,
+                #         help="x-coordinate for the center of the pocket to be tested by docking. (Angstrom)",
+                #     ),
+                #     ArgumentVars(
+                #         name="center_y",
+                #         type=float,
+                #         default=None,
+                #         help="y-coordinate for the center of the pocket to be tested by docking. (Angstrom)",
+                #     ),
+                #     ArgumentVars(
+                #         name="center_z",
+                #         type=float,
+                #         default=None,
+                #         help="z-coordinate for the center of the pocket to be tested by docking. (Angstrom)",
+                #     ),
+                #     ArgumentVars(
+                #         name="size_x",
+                #         type=float,
+                #         default=None,
+                #         help="dimension of box to dock into in the x-axis (Angstrom)",
+                #     ),
+                #     ArgumentVars(
+                #         name="size_y",
+                #         type=float,
+                #         default=None,
+                #         help="dimension of box to dock into in the y-axis (Angstrom)",
+                #     ),
+                #     ArgumentVars(
+                #         name="size_z",
+                #         type=float,
+                #         default=None,
+                #         help="dimension of box to dock into in the z-axis (Angstrom)",
+                #     ),
+                #     ArgumentVars(
+                #         name="docking_exhaustiveness",
+                #         default=8,
+                #         help="exhaustiveness of the global search (roughly proportional to time. \
+                #         see docking software for settings.",
+                #     ),
+                #     ArgumentVars(
+                #         name="docking_num_modes",
+                #         default=9,
+                #         help=" maximum number of binding modes to generate in docking. \
+                #         See docking software for settings. ",
+                #     ),
+                #     ArgumentVars(
+                #         name="docking_timeout_limit",
+                #         type=float,
+                #         default=120,
+                #         help="The maximum amount of time allowed to dock a single ligand into a \
+                #         pocket in seconds. Many factors influence the time required to dock, such as: \
+                #         processor speed, the docking software, rotatable bonds, exhaustiveness docking,\
+                #         and number of docking modes... \
+                #         The default docking_timeout_limit is 120 seconds, which is excess for most \
+                #         docking events using QuickVina2Docking under default settings. If run with \
+                #         more exhaustive settings or with highly flexible ligands, consider increasing \
+                #         docking_timeout_limit to accommodate. Default docking_timeout_limit is 120 seconds",
+                #     ),
             ],
         )
-    
+
     def validate(self, params: dict):
         """Validate the provided arguments."""
         # TODO: Implement this function
@@ -134,7 +134,7 @@ class FakeDocking(DockingBase):
             return smile_name
 
         return None
-    
+
     def check_docked(self, pdb_file):
         """
         given a pdb_file name, test if a pdbqt.vina was created. If it failed

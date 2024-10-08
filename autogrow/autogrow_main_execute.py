@@ -15,7 +15,6 @@ from typing import Any, Dict, Optional
 
 import autogrow.docking.execute_docking as DockingClass
 import autogrow.operators.operations as operations
-import autogrow.docking.concatenate_files as concatenate_files
 from autogrow.plugins.smiles_filters import SmilesFilterBase, SmilesFilterPluginManager
 
 
