@@ -152,7 +152,9 @@ def populate_generation(
         )
 
         # Convert SMILES to .sdf using Gypsum and convert .sdf to .pdb with RDKit
-        conversion_to_3d.convert_to_3d(params, smiles_to_convert_file, new_gen_folder_path)
+        conversion_to_3d.convert_to_3d(
+            params, smiles_to_convert_file, new_gen_folder_path
+        )
 
     return full_generation_smiles_file, full_gen_smis
 

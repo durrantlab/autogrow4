@@ -50,16 +50,16 @@ class SmilesClickChem(object):
         rxn_library_file = rxn_library_variables[1]
         function_group_library = rxn_library_variables[2]
         complementary_mol_dir = rxn_library_variables[3]
-        self.reaction_dict = self.retrieve_reaction_dict(rxn_library, rxn_library_file)
+        self.reaction_dict = self._load_rxn_lib(rxn_library, rxn_library_file)
 
         # Retrieve the dictionary containing
         # all the possible ClickChem Reactions
         self.list_of_reaction_names = list(self.reaction_dict.keys())
 
-        self.functional_group_dict = self.retrieve_functional_group_dict(
+        self.functional_group_dict = self._load_functional_grps(
             rxn_library, function_group_library
         )
-        self.complementary_mol_dict = self.retrieve_complementary_dictionary(
+        self.complementary_mol_dict = self._load_complementary_mols(
             rxn_library, complementary_mol_dir
         )
 
@@ -68,7 +68,7 @@ class SmilesClickChem(object):
             x.smiles for x in list_of_already_made_smiles
         ]
 
-    def update_list_of_already_made_smiles(
+    def add_mutant_smiles(
         self, list_of_already_made_smiles_infos: List[PreDockedCompoundInfo]
     ) -> None:
         """
@@ -86,9 +86,7 @@ class SmilesClickChem(object):
         ]
         self.list_of_already_made_smiles.extend(list_of_already_made_smiles)
 
-    def rxn_lib_format_json_dict_of_dict(
-        self, old_dict: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _reformat_rxn_dict(self, old_dict: Dict[str, Any]) -> Dict[str, Any]:
         """
         json dictionaries  import as type unicode. This script converts all
         the keys and items to strings, with a few specific exceptions. It
@@ -143,7 +141,7 @@ class SmilesClickChem(object):
 
         return new_dict
 
-    def retrieve_reaction_dict(
+    def _load_rxn_lib(
         self, rxn_library: str, rxn_library_file: str
     ) -> Dict[str, Dict[str, Any]]:
         """
@@ -251,9 +249,9 @@ class SmilesClickChem(object):
             )
 
         # Convert the reaction_dict_raw from unicode to the proper
-        return self.rxn_lib_format_json_dict_of_dict(reaction_dict_raw)
+        return self._reformat_rxn_dict(reaction_dict_raw)
 
-    def retrieve_functional_group_dict(
+    def _load_functional_grps(
         self, rxn_library: str, function_group_library: str
     ) -> Dict[str, str]:
         """
@@ -371,9 +369,9 @@ class SmilesClickChem(object):
             )
 
         # Convert the reaction_dict_raw from unicode to the proper
-        return self.rxn_lib_format_json_dict_of_dict(functional_group_dict_raw)
+        return self._reformat_rxn_dict(functional_group_dict_raw)
 
-    def rand_key_list(self, dictionary: Dict[Any, Any]) -> List[Any]:
+    def _shuffle_dict_keys(self, dictionary: Dict[Any, Any]) -> List[Any]:
         """
         Get a random ordered list of all the keys from  a dictionary.
 
@@ -388,7 +386,7 @@ class SmilesClickChem(object):
         random.shuffle(keys)
         return keys
 
-    def retrieve_complementary_dictionary(
+    def _load_complementary_mols(
         self, rxn_library: str, complementary_mol_dir: str
     ) -> Dict[str, str]:
         """
@@ -472,7 +470,7 @@ class SmilesClickChem(object):
 
         return complementary_mols_dict
 
-    def make_reactant_order_list(
+    def _make_reactant_order_list(
         self,
         substructure_search_results: List[int],
         has_substructure_matches_count: int,
@@ -491,6 +489,8 @@ class SmilesClickChem(object):
         :returns: list reactant_order_list: an ordered list of reactants which
             composed of 0 and 1.
         """
+        # TODO: Is this used anywhere?
+
         # create a list to be used to determine which reactants need
         # complementary mol and which will use the Ligand
         reactant_order_list = []
@@ -520,7 +520,7 @@ class SmilesClickChem(object):
                     reactant_order_list.append(0)
         return reactant_order_list
 
-    def get_random_complementary_mol(self, functional_group: str) -> List[str]:
+    def _get_random_complementary_mol(self, functional_group: str) -> List[str]:
         """
         This function will get a dictionary of complementary mols
 
@@ -555,7 +555,7 @@ class SmilesClickChem(object):
 
         return random_comp_mol
 
-    def determine_functional_groups_in_mol(
+    def _identify_functional_grps(
         self, mol_deprotanated: Chem.Mol, mol_reprotanated: Chem.Mol
     ) -> List[str]:
         """
@@ -633,14 +633,14 @@ class SmilesClickChem(object):
             return None
 
         # Determine which functional groups are within a ligand
-        list_subs_within_mol = self.determine_functional_groups_in_mol(
+        list_subs_within_mol = self._identify_functional_grps(
             mol_deprotanated, mol_reprotanated
         )
         if len(list_subs_within_mol) == 0:
             print(f"{ligand_smiles_string} had no functional groups to react with.")
             return None
 
-        shuffled_reaction_list = self.rand_key_list(
+        shuffled_reaction_list = self._shuffle_dict_keys(
             self.reaction_dict
         )  # Randomize the order of the list of reactions
 
@@ -660,6 +660,7 @@ class SmilesClickChem(object):
 
             fun_groups_in_rxn = a_reaction_dict["functional_groups"]
             contains_group = None
+            i = 0
             for i in range(len(fun_groups_in_rxn)):
                 if fun_groups_in_rxn[i] in list_subs_within_mol:
                     contains_group = i
@@ -668,7 +669,7 @@ class SmilesClickChem(object):
                     # in the reaction.
                     break
 
-                continue
+                continue  # TODO: Why this?
 
             if contains_group is None:
                 # Reaction doesn't contain a functional group found in the
@@ -717,7 +718,7 @@ class SmilesClickChem(object):
                         is_rxn_complete = False
                         for reaction_product in reaction_products_list:
                             # Filter and check the product is valid
-                            reaction_product_smilestring = self.check_if_product_is_good(
+                            reaction_product_smilestring = self._validate_product(
                                 reaction_product
                             )
                             if reaction_product_smilestring is None:
@@ -770,7 +771,7 @@ class SmilesClickChem(object):
                         for _ in range(100):
                             # find that group in the complementary dictionary.
                             # comp_molecule = ["cccc", "ZINC123"]
-                            comp_molecule = self.get_random_complementary_mol(
+                            comp_molecule = self._get_random_complementary_mol(
                                 functional_group_name
                             )
 
@@ -855,7 +856,7 @@ class SmilesClickChem(object):
                     is_rxn_complete = False
                     for reaction_product in reaction_products_list:
                         # Filter and check the product is valid
-                        reaction_product_smilestring = self.check_if_product_is_good(
+                        reaction_product_smilestring = self._validate_product(
                             reaction_product
                         )
                         if reaction_product_smilestring is None:
@@ -906,7 +907,7 @@ class SmilesClickChem(object):
         # reaction failed
         return None
 
-    def check_if_product_is_good(self, reaction_product):
+    def _validate_product(self, reaction_product):
         """
         This function will test whether the product passes all of the
             requirements:

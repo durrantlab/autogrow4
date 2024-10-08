@@ -66,9 +66,7 @@ def make_mutants(
 
         while len(new_ligands_list) < num_mutants_to_make and react_list:
 
-            a_smiles_click_chem_object.update_list_of_already_made_smiles(
-                new_ligands_list
-            )
+            a_smiles_click_chem_object.add_mutant_smiles(new_ligands_list)
             num_to_grab = num_mutants_to_make - len(new_ligands_list)
             num_to_make = num_to_grab
 
@@ -88,73 +86,74 @@ def make_mutants(
             )
 
             results = params["parallelizer"].run(
-                job_input, run_smiles_click_for_multithread
+                job_input, _run_smiles_click_for_multithread
             )
 
             for index, i in enumerate(results):
-                if i is not None:
+                if i is None:
+                    continue
 
-                    # Get the new molecule's (aka the Child lig) Smile string
-                    child_lig_smile = i[0]
+                # Get the new molecule's (aka the Child lig) Smile string
+                child_lig_smile = i[0]
 
-                    # get the ID for the parent of a child mol and the
-                    # complementary parent mol. comp mol could be None or a
-                    # zinc database ID
-                    parent_lig_id = smile_names[index]
-                    # Make a list of all smiles and smile_id's of all
-                    # previously made smiles in this generation
-                    list_of_already_made_smiles = []
-                    list_of_already_made_id = []
+                # get the ID for the parent of a child mol and the
+                # complementary parent mol. comp mol could be None or a
+                # zinc database ID
+                parent_lig_id = smile_names[index]
+                # Make a list of all smiles and smile_id's of all
+                # previously made smiles in this generation
+                list_of_already_made_smiles = []
+                list_of_already_made_id = []
 
-                    # fill lists of all smiles and smile_id's of all
-                    # previously made smiles in this generation
-                    for x in new_ligands_list:
-                        list_of_already_made_smiles.append(x.smiles)
-                        list_of_already_made_id.append(x.name)
+                # fill lists of all smiles and smile_id's of all
+                # previously made smiles in this generation
+                for x in new_ligands_list:
+                    list_of_already_made_smiles.append(x.smiles)
+                    list_of_already_made_id.append(x.name)
 
-                    if child_lig_smile not in list_of_already_made_smiles:
-                        # if the smiles string is unique to the list of
-                        # previous smile strings in this round of reactions
-                        # then we append it to the list of newly created
-                        # ligands we append it with a unique ID, which also
-                        # tracks the progress of the reactant
-                        is_name_unique = False
-                        new_lig_id = ""
+                if child_lig_smile not in list_of_already_made_smiles:
+                    # if the smiles string is unique to the list of
+                    # previous smile strings in this round of reactions
+                    # then we append it to the list of newly created
+                    # ligands we append it with a unique ID, which also
+                    # tracks the progress of the reactant
+                    is_name_unique = False
+                    new_lig_id = ""
 
-                        # get the reaction id number
-                        reaction_id_number = i[1]
+                    # get the reaction id number
+                    reaction_id_number = i[1]
 
-                        zinc_id_comp_mol = i[2]
+                    zinc_id_comp_mol = i[2]
 
-                        while not is_name_unique:
-                            # make unique ID with the 1st number being the
-                            # parent_lig_id for the derived mol, Followed by
-                            # Mutant, folowed by the generationnumber,
-                            # followed by a unique.
+                    while not is_name_unique:
+                        # make unique ID with the 1st number being the
+                        # parent_lig_id for the derived mol, Followed by
+                        # Mutant, folowed by the generationnumber,
+                        # followed by a unique.
 
-                            # get the unique ID (last few diget ID of the
-                            # parent mol
-                            parent_lig_id = parent_lig_id.split(")")[-1]
+                        # get the unique ID (last few diget ID of the
+                        # parent mol
+                        parent_lig_id = parent_lig_id.split(")")[-1]
 
-                            random_id_num = random.randint(100, 1000000)
-                            if zinc_id_comp_mol is None:
-                                new_lig_id = f"({parent_lig_id})Gen_{generation_num}_Mutant_{reaction_id_number}_{random_id_num}"
-                            else:
-                                new_lig_id = f"({parent_lig_id}+{zinc_id_comp_mol})Gen_{generation_num}_Mutant_{reaction_id_number}_{random_id_num}"
+                        random_id_num = random.randint(100, 1000000)
+                        if zinc_id_comp_mol is None:
+                            new_lig_id = f"({parent_lig_id})Gen_{generation_num}_Mutant_{reaction_id_number}_{random_id_num}"
+                        else:
+                            new_lig_id = f"({parent_lig_id}+{zinc_id_comp_mol})Gen_{generation_num}_Mutant_{reaction_id_number}_{random_id_num}"
 
-                            # check name is unique
-                            if new_lig_id not in list_of_already_made_id:
-                                is_name_unique = True
+                        # check name is unique
+                        if new_lig_id not in list_of_already_made_id:
+                            is_name_unique = True
 
-                        # make a temporary list containing the smiles string
-                        # of the new product and the unique ID
-                        ligand_info = PreDockedCompoundInfo(
-                            smiles=child_lig_smile, name=new_lig_id
-                        )
+                    # make a temporary list containing the smiles string
+                    # of the new product and the unique ID
+                    ligand_info = PreDockedCompoundInfo(
+                        smiles=child_lig_smile, name=new_lig_id
+                    )
 
-                        # append the new ligand smile and ID to the list of
-                        # all newly made ligands
-                        new_ligands_list.append(ligand_info)
+                    # append the new ligand smile and ID to the list of
+                    # all newly made ligands
+                    new_ligands_list.append(ligand_info)
 
         loop_counter += 1
 
@@ -165,7 +164,7 @@ def make_mutants(
     return new_ligands_list
 
 
-def run_smiles_click_for_multithread(
+def _run_smiles_click_for_multithread(
     smile: str, a_smiles_click_chem_object: SmileClickClass.SmilesClickChem
 ) -> Optional[List[Union[str, int, None]]]:
     """
