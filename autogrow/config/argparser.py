@@ -89,12 +89,6 @@ def get_argparse_vars() -> Dict[str, Any]:
     )
     _add_conversion_params(conversion)
 
-    # Docking Settings
-    docking = parser.add_argument_group(
-        "Docking Settings (options for molecular docking)"
-    )
-    _add_docking_params(docking)
-
     # Scoring Settings
     scoring = parser.add_argument_group(
         "Scoring Settings (options for scoring docked compounds)"
@@ -445,24 +439,9 @@ def _add_mutation_params(parser: argparse._ArgumentGroup):
     # Mutation Settings
     parser.add_argument(
         "--rxn_library",
-        choices=["click_chem_rxns", "robust_rxns", "all_rxns", "Custom"],
+        choices=["click_chem_rxns", "robust_rxns", "all_rxns"],
         default="all_rxns",
-        help="This set of reactions to be used in Mutation. \
-        If Custom, one must also provide rxn_file Path and function_group_library path",
-    )
-    parser.add_argument(
-        "--rxn_library_file",
-        type=str,
-        default="",
-        help="This PATH to a Custom json file of SMARTS reactions to use for Mutation. \
-        Only provide if using the Custom option for rxn_library.",
-    )
-    parser.add_argument(
-        "--function_group_library",
-        type=str,
-        default="",
-        help="This PATH for a dictionary of functional groups to be used for Mutation. \
-        Only provide if using the Custom option for rxn_library.",
+        help="This set of reactions to be used in Mutation.",
     )
     parser.add_argument(
         "--complementary_mol_directory",
@@ -558,37 +537,16 @@ def _add_filter_params(parser: argparse._ArgumentGroup):
         help="No filters will be applied to compounds.",
     )
 
-    # TODO: Depreciate this.
-    parser.add_argument(
-        "--alternative_filter",
-        action="append",
-        help="If you want to add Custom filters to the filter child classes \
-        Must be a list of lists \
-        [[name_filter1, Path/to/name_filter1.py],[name_filter2, Path/to/name_filter2.py]]",
-    )
-
 
 def _add_conversion_params(parser: argparse._ArgumentGroup):
     # DOCUMENT THE file conversion for docking inputs
     parser.add_argument(
         "--conversion_choice",
-        choices=["MGLToolsConversion", "ObabelConversion", "Custom"],
-        default="MGLToolsConversion",
+        choices=["ObabelConversion"],
+        default="ObabelConversion",
         help="Determines how .pdb files will be converted \
         to the final format for docking. For Autodock Vina and QuickVina style docking software, \
-        files must be in .pdbqt format. MGLToolsConversion: uses MGLTools and is the \
-        recommended converter. \
-        ObabelConversion: uses commandline obabel. Easier to install but Vina docking has \
-        been optimized with MGLTools conversion.",
-    )
-    parser.add_argument(
-        "--custom_conversion_script",
-        metavar="custom_conversion_script",
-        default="",
-        help="The path to a python script for which is used to convert \
-        ligands. This is required for custom conversion_choice choices. \
-        Must be a list of strings \
-        [name_custom_conversion_class, Path/to/name_custom_conversion_class.py]",
+        files must be in .pdbqt format.",
     )
     parser.add_argument(
         "--obabel_path",
@@ -599,76 +557,15 @@ def _add_conversion_params(parser: argparse._ArgumentGroup):
     )
 
 
-def _add_docking_params(parser: argparse._ArgumentGroup):
-    # docking
-    # parser.add_argument(
-    #     "--dock_choice",
-    #     metavar="dock_choice",
-    #     default="QuickVina2Docking",
-    #     choices=[
-    #         "VinaDocking",
-    #         "QuickVina2Docking",
-    #         "FakeDocking",
-    #         "Custom",
-    #     ],  # TODO: Should not hardcode
-    #     help="dock_choice assigns which docking software module to use.",
-    # )
-    # parser.add_argument(
-    #     "--vina_like_executable",
-    #     metavar="vina_like_executable",
-    #     default=None,
-    #     help="path to the vina_like_executable (vina, qvina2, smina, etc.)",
-    # )
-    # parser.add_argument(
-    #     "--docking_exhaustiveness",
-    #     metavar="docking_exhaustiveness",
-    #     default=None,
-    #     help="exhaustiveness of the global search (roughly proportional to time. \
-    #     see docking software for settings. Unless specified Autogrow uses the \
-    #     docking softwares default setting. For AutoDock Vina 1.1.2 that is 8",
-    # )
-    # parser.add_argument(
-    #     "--docking_num_modes",
-    #     metavar="docking_num_modes",
-    #     default=None,
-    #     help=" maximum number of binding modes to generate in docking. \
-    #     See docking software for settings. Unless specified Autogrow uses the \
-    #     docking softwares default setting. For AutoDock Vina 1.1.2 that is 9",
-    # )
-    # parser.add_argument(
-    #     "--docking_timeout_limit",
-    #     type=float,
-    #     default=120,
-    #     help="The maximum amount of time allowed to dock a single ligand into a \
-    #     pocket in seconds. Many factors influence the time required to dock, such as: \
-    #     processor speed, the docking software, rotatable bonds, exhaustiveness docking,\
-    #     and number of docking modes... \
-    #     The default docking_timeout_limit is 120 seconds, which is excess for most \
-    #     docking events using QuickVina2Docking under default settings. If run with \
-    #     more exhaustive settings or with highly flexible ligands, consider increasing \
-    #     docking_timeout_limit to accommodate. Default docking_timeout_limit is 120 seconds",
-    # )
-    parser.add_argument(
-        "--custom_docking_script",
-        metavar="custom_docking_script",
-        default="",
-        help="The name and path to a python script for which is used to \
-        dock ligands. This is required for Custom docking choices Must be a list of \
-        strings [name_custom_conversion_class, Path/to/name_custom_conversion_class.py]",
-    )
-
-
 def _add_scoring_params(parser: argparse._ArgumentGroup):
     # scoring
     parser.add_argument(
         "--scoring_choice",
         metavar="scoring_choice",
-        choices=["VINA", "Custom"],
+        choices=["VINA"],
         default="VINA",
         help="The scoring_choice to use to assess the ligands docking fitness. \
-        Default is using Vina/QuickVina2 ligand affinity. Custom requires providing a file path for a Custom \
-        scoring function. If Custom scoring function, confirm it selects properly, \
-        Autogrow is largely set to select for a more negative score.",
+        Default is using Vina/QuickVina2 ligand affinity.",
     )
     parser.add_argument(
         "--rescore_lig_efficiency",
@@ -677,16 +574,6 @@ def _add_scoring_params(parser: argparse._ArgumentGroup):
         help="This will divide the final scoring_choice output by the number of \
         non-Hydrogen atoms in the ligand. This adjusted ligand efficiency score will \
         override the scoring_choice value. This is compatible with all scoring_choice options.",
-    )
-    parser.add_argument(
-        "--custom_scoring_script",
-        metavar="custom_scoring_script",
-        type=str,
-        default="",
-        help="The path to a python script for which is used to \
-        assess the ligands docking fitness. Autogrow is largely set to select for a most \
-        negative scores (ie binding affinity the more negative is best). Must be a list of \
-        strings [name_custom_conversion_class, Path/to/name_custom_conversion_class.py]",
     )
 
 

@@ -196,13 +196,6 @@ class SmilesClickChem(object):
                 rxn_library_file = os.path.join(
                     pwd, "reaction_libraries", "all_rxns", "All_Rxns_rxn_library.json"
                 )
-            elif rxn_library == "Custom":
-                if os.path.exists(rxn_library_file) is False:
-                    raise Exception(
-                        "Custom rxn_library_file cannot be found. "
-                        + "Please check the path: ",
-                        rxn_library_file,
-                    )
             else:
                 raise Exception(
                     "rxn_library is not incorporated into smiles_click_chem.py"
@@ -325,13 +318,6 @@ class SmilesClickChem(object):
                     "all_rxns",
                     "All_Rxns_functional_groups.json",
                 )
-            elif rxn_library == "Custom":
-                if os.path.exists(function_group_library) is False:
-                    raise Exception(
-                        "Custom function_group_library cannot be found. "
-                        + "Please check the path: ",
-                        function_group_library,
-                    )
             else:
                 raise Exception(
                     "rxn_library is not incorporated into smiles_click_chem.py"
@@ -414,8 +400,6 @@ class SmilesClickChem(object):
         Inputs:
         :param str rxn_library: A string defining the choice of the reaction
             library. ClickChem uses the set of reactions from Autogrow 3.1.2.
-            Custom means you've defined a path to a Custom library in
-            params['complementary_mol_dir']
         :param dict complementary_mol_dir: the path to the
             complementary_mol_dir directory. It may be an empty string in which
             case the complementary_mol_dir directory will default to those of the
@@ -448,13 +432,6 @@ class SmilesClickChem(object):
                     "all_rxns",
                     "complementary_mol_dir",
                 )
-            elif rxn_library == "Custom":
-                if os.path.isdir(complementary_mol_dir) is False:
-                    raise Exception(
-                        "Custom complementary_mol_dir cannot be found. "
-                        + "Please check the path: ",
-                        complementary_mol_dir,
-                    )
             else:
                 raise Exception(
                     "rxn_library is not incorporated into smiles_click_chem.py"

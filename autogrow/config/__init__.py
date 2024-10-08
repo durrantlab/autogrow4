@@ -5,11 +5,6 @@ import sys
 import json
 from typing import Any, Dict, Tuple
 
-from autogrow import program_info
-from autogrow.config.config_custom_classes import handle_custom_params_if_argparsed
-from autogrow.config.config_custom_dock_conversion_scoring import (
-    setup_custom_dock_and_conversion_scoring_options,
-)
 from autogrow.config.config_filters import setup_filters
 from autogrow.config.config_multiprocessing import config_multiprocessing
 from autogrow.config.config_paths import config_paths
@@ -86,13 +81,7 @@ def _setup_params(orig_params: Dict[str, Any], is_argparsed: bool) -> Dict[str, 
     # Start with getting the default values
     default_params = define_defaults()
 
-    if is_argparsed:
-        # If parameters entered via the argparser, need to handle a few custom
-        # ones. If through json file, they are already handled.
-        orig_params = handle_custom_params_if_argparsed(orig_params)
-
     orig_params = setup_filters(orig_params)
-    orig_params = setup_custom_dock_and_conversion_scoring_options(orig_params)
 
     # Check if the user wants to continue a run or start a new run. Make new run
     # directory if necessary. return the Run folder path The run folder path

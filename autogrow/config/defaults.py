@@ -20,7 +20,6 @@ def define_defaults() -> Dict[str, Any]:
     #    = ["MGLTools","obabel"], default="MGLTools",
     default_params["conversion_choice"] = "obabel"
     default_params["obabel_path"] = "obabel"
-    default_params["custom_conversion_script"] = ""
 
     # Crossover function
     default_params["start_a_new_run"] = False
@@ -80,12 +79,10 @@ def define_defaults() -> Dict[str, Any]:
     # default_params["docking_exhaustiveness"] = None
     # default_params["docking_num_modes"] = None
     # default_params["docking_timeout_limit"] = 120
-    # default_params["custom_docking_script"] = ""
 
     # scoring
     default_params["scoring_choice"] = "VINA"
     default_params["rescore_lig_efficiency"] = False
-    default_params["custom_scoring_script"] = ""
 
     # gypsum # max variance is the number of conformers made per ligand
     default_params["max_variants_per_compound"] = 3
