@@ -10,9 +10,7 @@ import copy
 import sys
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from autogrow.plugins.plugin_manager_base import get_plugin_manager
 from autogrow.types import PreDockedCompoundInfo
-from autogrow.utils.logging import log_info
 import rdkit  # type: ignore
 import rdkit.Chem as Chem  # type: ignore
 
@@ -29,12 +27,14 @@ import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as
 #############
 # Main run Autogrow operators to make a generation
 #############
+
+
 def populate_generation(
     params: Dict[str, Any], generation_num: int
-) -> Tuple[str, List[List[str]]]:
+) -> Tuple[str, List[PreDockedCompoundInfo]]:
     """
     This will run all of the mutations, crossovers, and filters for a single
-        generation. Populates a new generation of ligands.
+    generation. Populates a new generation of ligands.
 
     Inputs:
     :param dict params: a dictionary of all user variables
@@ -43,22 +43,18 @@ def populate_generation(
     Returns:
     :returns: str full_generation_smiles_file: the name of the .smi file
         containing the new population
-    :returns: list full_gen_smis: list with the new population
-        of ligands
-    :returns: bool None: returns None twice if any step failed. This will
-        result in the program ending
+    :returns: list full_gen_smis: list with the new population of ligands
     """
     number_of_processors = int(params["number_of_processors"])
 
-    # Determine which generation it is and how many mutations and crossovers
-    # to make
+    # Determine which generation it is and how many mutations and crossovers to make
     if generation_num == 1:
         # If 1st generation
         num_crossovers = params["number_of_crossovers_first_generation"]
         num_mutations = params["number_of_mutants_first_generation"]
 
-        # How many advance from previous generation to the next generation
-        # directly This will be done later but we are unpacking params here
+        # How many advance from previous generation to the next generation directly
+        # This will be done later but we are unpacking params here
         num_elite_to_advance_from_previous_gen = params[
             "number_elitism_advance_from_previous_gen_first_generation"
         ]
@@ -70,18 +66,14 @@ def populate_generation(
             "number_elitism_advance_from_previous_gen"
         ]
 
-    # Get the Source compound list. This list is the full population from
-    # either the previous generations or if its Generation 1 than the its the
-    # entire User specified Source compound list If either has a SMILES that
-    # does not sanitize in RDKit it will be excluded and a printout of its
-    # Name and SMILES string will be printed.
+    # Get the source compound list
     src_cmpds = get_complete_list_prev_gen_or_source_compounds(params, generation_num)
 
     num_seed_diversity, num_seed_dock_fitness = determine_seed_population_sizes(
         params, generation_num
     )
 
-    # Total Population size of this generation
+    # Total population size of this generation
     total_num_desired_new_ligands = (
         num_crossovers + num_mutations + num_elite_to_advance_from_previous_gen
     )
@@ -98,7 +90,6 @@ def populate_generation(
         seed_list_mutations,
         "Mutation_Seed_List",
     )
-    sys.stdout.flush()
 
     print("MAKE MUTATIONS")
     # Making Mutations
@@ -116,8 +107,6 @@ def populate_generation(
 
     # Make all the required ligands by mutations
     while len(new_mutation_smiles_list) < num_mutations:
-        sys.stdout.flush()
-
         num_mutants_to_make = num_mutations - len(new_mutation_smiles_list)
 
         # Make all mutants
@@ -131,7 +120,7 @@ def populate_generation(
             rxn_library_variables,
         )
         if new_mutants is None:
-            # try once more
+            # Try once more
             new_mutants = Mutation.make_mutants(
                 params,
                 generation_num,
@@ -145,16 +134,15 @@ def populate_generation(
         if new_mutants is None:
             break
 
-        # Remove Nones:
+        # Remove Nones
         new_mutants = [x for x in new_mutants if x is not None]
 
         for i in new_mutants:
             new_mutation_smiles_list.append(i)
             if len(new_mutation_smiles_list) == num_mutations:
                 break
-    sys.stdout.flush()
 
-    # save new_mutation_smiles_list
+    # Save new_mutation_smiles_list
     save_ligand_list(
         params["output_directory"],
         generation_num,
@@ -166,7 +154,7 @@ def populate_generation(
         new_mutation_smiles_list is None
         or len(new_mutation_smiles_list) < num_mutations
     ):
-        _extracted_from_populate_generation_142(
+        _throw_error_not_enough_compounds_made(
             num_mutations,
             " ligands through Mutation",
             new_mutation_smiles_list,
@@ -188,7 +176,6 @@ def populate_generation(
     )
 
     print("MAKE CROSSOVERS")
-    sys.stdout.flush()
 
     # Making Crossovers
     # List of smiles from crossover
@@ -196,7 +183,6 @@ def populate_generation(
 
     # Make all the required ligands by Crossover
     while len(new_crossover_smiles_list) < num_crossovers:
-        sys.stdout.flush()
         num_crossovers_to_make = num_crossovers - len(new_crossover_smiles_list)
 
         # Make all crossovers
@@ -209,7 +195,7 @@ def populate_generation(
             new_crossover_smiles_list,
         )
         if new_crossovers is None:
-            # try once more
+            # Try once more
             new_crossovers = execute_crossover.make_crossovers(
                 params,
                 generation_num,
@@ -221,16 +207,16 @@ def populate_generation(
         if new_crossovers is None:
             break
 
-        # Remove Nones:
+        # Remove Nones
         new_crossovers = [x for x in new_crossovers if x is not None]
 
-        # append those which passed the filter
+        # Append those which passed the filter
         for i in new_crossovers:
             new_crossover_smiles_list.append(i)
             if len(new_crossover_smiles_list) == num_crossovers:
                 break
 
-    # save new_crossover_smiles_list
+    # Save new_crossover_smiles_list
     save_ligand_list(
         params["output_directory"],
         generation_num,
@@ -242,7 +228,7 @@ def populate_generation(
         new_crossover_smiles_list is None
         or len(new_crossover_smiles_list) < num_crossovers
     ):
-        _extracted_from_populate_generation_142(
+        _throw_error_not_enough_compounds_made(
             num_crossovers,
             " ligands through Crossover",
             new_crossover_smiles_list,
@@ -252,45 +238,15 @@ def populate_generation(
 
     # Get unaltered samples from the previous generation
     print("GET SOME LIGANDS FROM THE LAST GENERATION")
-    sys.stdout.flush()
 
-    # Make a list of the ligands chosen to pass through to the next generation
-    # via Elitism This handles creating a seed list and defining the advance
-    # to next generation final selection
-
-    chosen_mol_to_pass_through_list = make_pass_through_list(
-        params, src_cmpds, num_elite_to_advance_from_previous_gen, generation_num,
+    chosen_mol_to_pass_through_list = _make_and_save_pass_through_list(
+        params, src_cmpds, num_elite_to_advance_from_previous_gen, generation_num
     )
 
-    if type(chosen_mol_to_pass_through_list) == str:
-        printout = (
-            chosen_mol_to_pass_through_list
-            + "\nIf this is the 1st generation, it may be due to the starting "
-            + "library has SMILES which could not be converted to sanitizable "
-            + "RDKit Molecules"
-        )
+    # Build new_gen_smis and full_gen_smis
+    new_gen_smis: List[PreDockedCompoundInfo] = []
+    full_gen_smis: List[PreDockedCompoundInfo] = []
 
-        raise Exception(printout)
-    sys.stdout.flush()
-
-    assert (
-        type(chosen_mol_to_pass_through_list) is list
-    ), "Chosen mol to pass through list is not a list"
-
-    # save chosen_mol_to_pass_through_list
-    save_ligand_list(
-        params["output_directory"],
-        generation_num,
-        chosen_mol_to_pass_through_list,
-        "Chosen_Elite_To_advance",
-    )
-
-    print("GOT LIGANDS FROM THE LAST GENERATION")
-
-    # make a list of all the ligands from mutations, crossovers, and from the
-    # last generation
-    new_gen_smis = []
-    full_gen_smis = []
     for i in new_mutation_smiles_list:
         new_gen_smis.append(i)
         full_gen_smis.append(i)
@@ -303,10 +259,6 @@ def populate_generation(
         for i in chosen_mol_to_pass_through_list:
             # Doesn't append to the new_generation_smiles_list
             full_gen_smis.append(i)
-
-    # Generation 0 pass through gets added to the convert and dock list
-    # because it has no docking score to compare with This is independent of
-    # the params['redock_elite_from_previous_gen']
     else:
         for i in chosen_mol_to_pass_through_list:
             new_gen_smis.append(i)
@@ -316,78 +268,47 @@ def populate_generation(
         print("We needed ", total_num_desired_new_ligands)
         print("We made ", len(full_gen_smis))
         print(
-            "population failed to make enough mutants or crossovers... \
-            Errors could include not enough diversity, too few seeds to \
-            the generation, the seed mols are unable to cross-over due \
-            to lack of similariy, or all of the seed lack functional groups \
-            for performing reactions"
+            "Population failed to make enough mutants or crossovers... "
+            "Errors could include not enough diversity, too few seeds to "
+            "the generation, the seed mols are unable to cross-over due "
+            "to lack of similarity, or all of the seed lack functional groups "
+            "for performing reactions"
         )
         assert False
 
-    # Save the Full Generation
-    full_generation_smiles_file, new_gen_folder_path = save_generation_smi(
-        params["output_directory"], generation_num, full_gen_smis, None
+    # Save the full generation and the SMILES to convert
+    full_generation_smiles_file, smiles_to_convert_file, new_gen_folder_path = _save_smiles_files(
+        params, generation_num, full_gen_smis, new_gen_smis, "_to_convert"
     )
 
-    # Save the File to convert to 3d
-    smiles_to_convert_file, new_gen_folder_path = save_generation_smi(
-        params["output_directory"], generation_num, new_gen_smis, "_to_convert",
-    )
-
-    sys.stdout.flush()
-    # CONVERT SMILES TO .sdf USING GYPSUM and convert .sdf to .pdb with rdkit
-    # This will output sdf files into a folder. The .smi.0.sdf file is not a
-    # valid mol, but all the others will be valid the 1st Smiles in the
-    # original .smi file is saved as .smi.1.sdf and 2nd file is saved as
-    # .smi.2.sdf
+    # Convert SMILES to .sdf using Gypsum and convert .sdf to .pdb with RDKit
     conversion_to_3d.convert_to_3d(params, smiles_to_convert_file, new_gen_folder_path)
-    sys.stdout.flush()
 
     return full_generation_smiles_file, full_gen_smis
 
 
-# TODO: Rename this here and in `populate_generation`
-def _extracted_from_populate_generation_142(arg0, arg1, arg2, arg3):
-    print("")
-    print("")
-    print(f"We needed to make {arg0}{arg1}")
-    print(f"We only made {len(arg2)}{arg1}")
-    print("")
-    print("")
-    raise Exception(arg3)
-
-
-# TODO: There's a lot of overlap between populate_generation_zero() and
-# populate_generation()
 def populate_generation_zero(
     params: Dict[str, Any], gen_num: int = 0
 ) -> Tuple[bool, str, List[PreDockedCompoundInfo]]:
     """
-    This will handle all that is required for generation 0redock and handle
-    the generation 0
+    This will handle all that is required for generation 0 redock and handle the generation 0.
 
     Inputs:
     :param dict params: a dictionary of all user variables
-    :param int generation_num: the generation number
+    :param int gen_num: the generation number
 
     Returns:
-    :returns: str full_generation_smiles_file: the name of the .smi file
-        containing the new population
-    :returns: list full_gen_smis: list with the new population
-        of ligands.
     :returns: bool already_docked: if true we won't redock the source ligands.
         If False we will dock the source ligands.
+    :returns: str full_generation_smiles_file: the name of the .smi file containing the new population
+    :returns: list full_gen_smis: list with the new population of ligands.
     """
     number_of_processors = int(params["number_of_processors"])
 
     num_crossovers = 0
     num_mutations = 0
 
-    # Get the Source compound list. This list is the full population from
-    # either the previous generations or if its Generation 1 than the its the
-    # entire User specified Source compound list If either has a SMILES that
-    # does not sanitize in RDKit it will be excluded and a printout of its
-    # Name and SMILES string will be printed.
+    # Get the source compound list
     src_cmpds = get_complete_list_prev_gen_or_source_compounds(params, gen_num)
     num_elite_to_advance_from_previous_gen = len(src_cmpds)
 
@@ -395,75 +316,125 @@ def populate_generation_zero(
         params, gen_num
     )
 
-    # Total Population size of this generation
+    # Total population size of this generation
     total_num_desired_new_ligands = num_crossovers + num_mutations + 1
 
     # Get unaltered samples from the previous generation
     print("GET SOME LIGANDS FROM THE LAST GENERATION")
 
-    # Make a list of the ligands chosen to pass through to the next generation
-    # This handles creating a seed list and defining the advance to next
-    # generation final selection
-    mols_to_pass_through = make_pass_through_list(params, src_cmpds, 1, 0)
-
-    if type(mols_to_pass_through) == str:
-        printout = (
-            mols_to_pass_through
-            + "\nIf this is the 1st generation, it may be due to the starting "
-            + "library has SMILES which could not be converted to "
-            + "sanitizable RDKit Molecules"
-        )
-
-        raise Exception(printout)
-
-    assert (
-        type(mols_to_pass_through) is list
-    ), "Chosen mol to pass through list is not a list"
-
-    # save chosen_mol_to_pass_through_list
-    save_ligand_list(
-        params["output_directory"],
-        gen_num,
-        mols_to_pass_through,
-        "Chosen_Elite_To_advance",
+    mols_to_pass_through = _make_and_save_pass_through_list(
+        params, src_cmpds, 1, gen_num
     )
 
-    print("GOT LIGANDS FROM THE LAST GENERATION")
-
-    # make a list of all the ligands from mutations, crossovers, and from the
-    # last generation
+    # Build new_gen_smis and full_gen_smis
     new_gen_smis: List[PreDockedCompoundInfo] = []
     full_gen_smis: List[PreDockedCompoundInfo] = []
 
-    # These will be docked and scored for generation 0
     for i in mols_to_pass_through:
         new_gen_smis.append(i)
         full_gen_smis.append(i)
 
     assert (
         full_gen_smis
-    ), "population failed to import any molecules from the source_compounds_list."
+    ), "Population failed to import any molecules from the source_compounds_list."
 
-    # Save the Full Generation
-    full_gen_smis_file, new_gen_folder_path = save_generation_smi(
-        params["output_directory"], gen_num, full_gen_smis, None
+    # Save the full generation and the SMILES to convert
+    full_gen_smis_file, smis_to_convert_file, new_gen_folder_path = _save_smiles_files(
+        params, gen_num, full_gen_smis, new_gen_smis, "_to_convert"
     )
 
-    # Save the File to convert to 3d
-    smis_to_convert_file, new_gen_folder_path = save_generation_smi(
-        params["output_directory"], gen_num, new_gen_smis, "_to_convert",
+    # Check if ligands are already docked and write ranked file
+    already_docked = _check_if_already_docked_and_write_ranked_file_gen_0(
+        full_gen_smis, new_gen_folder_path
     )
 
-    # order files by -2 (docking score) of each lig
-    full_gen_smis_printout = []
+    if already_docked:
+        return already_docked, full_gen_smis_file, full_gen_smis
+
+    # If not already docked, convert to 3D
+    conversion_to_3d.convert_to_3d(params, smis_to_convert_file, new_gen_folder_path)
+
+    return already_docked, full_gen_smis_file, full_gen_smis
+
+def _make_and_save_pass_through_list(
+    params: Dict[str, Any],
+    src_cmpds: List[PreDockedCompoundInfo],
+    num_elite_to_advance_from_previous_gen: int,
+    generation_num: int,
+) -> List[PreDockedCompoundInfo]:
+    """
+    Make a list of the ligands chosen to pass through to the next generation via elitism.
+    This handles creating a seed list and defining the advance to the next generation final selection.
+    """
+    chosen_mol_to_pass_through_list = make_pass_through_list(
+        params, src_cmpds, num_elite_to_advance_from_previous_gen, generation_num
+    )
+
+    if isinstance(chosen_mol_to_pass_through_list, str):
+        printout = (
+            chosen_mol_to_pass_through_list
+            + "\nIf this is the 1st generation, it may be due to the starting "
+            + "library having SMILES which could not be converted to sanitizable "
+            + "RDKit Molecules"
+        )
+        raise Exception(printout)
+
+    assert (
+        isinstance(chosen_mol_to_pass_through_list, list)
+    ), "Chosen mol to pass through list is not a list"
+
+    # Save chosen_mol_to_pass_through_list
+    save_ligand_list(
+        params["output_directory"],
+        generation_num,
+        chosen_mol_to_pass_through_list,
+        "Chosen_Elite_To_advance",
+    )
+
+    return chosen_mol_to_pass_through_list
+
+
+def _save_smiles_files(
+    params: Dict[str, Any],
+    generation_num: int,
+    full_gen_smis: List[PreDockedCompoundInfo],
+    new_gen_smis: List[PreDockedCompoundInfo],
+    suffix: Optional[str],
+) -> Tuple[str, str, str]:
+    """
+    Save the full generation and the SMILES file to convert to 3D.
+    """
+    # Save the full generation
+    full_generation_smiles_file, new_gen_folder_path = save_generation_smi(
+        params["output_directory"], generation_num, full_gen_smis, None
+    )
+
+    # Save the file to convert to 3D
+    smiles_to_convert_file, _ = save_generation_smi(
+        params["output_directory"], generation_num, new_gen_smis, suffix,
+    )
+
+    return full_generation_smiles_file, smiles_to_convert_file, new_gen_folder_path
+
+
+def _check_if_already_docked_and_write_ranked_file_gen_0(
+    full_gen_smis: List[PreDockedCompoundInfo], new_gen_folder_path: str
+) -> bool:
+    """
+    Order files by docking score and write ranked file. Returns True if already docked.
+    """
+    already_docked = False
     try:
-
         def _get_score(x: PreDockedCompoundInfo) -> float:
             assert x.previous_docking_score is not None, "Docking score is None"
             return float(x.previous_docking_score)
 
         full_gen_smis.sort(key=lambda x: _get_score(x), reverse=False)
         full_gen_smis_printout = ["\t".join(x.smiles) for x in full_gen_smis]
+        full_gen_smis_printout = "\n".join(full_gen_smis_printout)
+        ranked_file = f"{new_gen_folder_path}{os.sep}generation_0_ranked.smi"
+        with open(ranked_file, "w") as f:
+            f.write(full_gen_smis_printout)
         already_docked = True
     except Exception:
         print(
@@ -472,26 +443,17 @@ def populate_generation_zero(
         )
         already_docked = False
 
-    if already_docked:
-        # Write all the ligands to a ranked file
-        full_gen_smis_printout = "\n".join(full_gen_smis_printout)
-        ranked_file = f"{new_gen_folder_path}{os.sep}generation_0_ranked.smi"
-        with open(ranked_file, "w") as f:
-            f.write(full_gen_smis_printout)
-        return already_docked, full_gen_smis_file, full_gen_smis
+    return already_docked
 
-    # If you are to redock and convert the generation zero you will also need
-    # to do the following:
 
-    # CONVERT SMILES TO .sdf USING GYPSUM and convert .sdf to .pdb with
-    # rdkit This will output sdf files into a folder. The .smi.0.sdf file
-    # is not a valid mol, but all the others will be valid the 1st Smiles
-    # in the original .smi file is saved as .smi.1.sdf and 2nd file is
-    # saved as .smi.2.sdf
-    conversion_to_3d.convert_to_3d(params, smis_to_convert_file, new_gen_folder_path)
-
-    return already_docked, full_gen_smis_file, full_gen_smis
-
+def _throw_error_not_enough_compounds_made(arg0, arg1, arg2, arg3):
+    print("")
+    print("")
+    print(f"We needed to make {arg0}{arg1}")
+    print(f"We only made {len(arg2)}{arg1}")
+    print("")
+    print("")
+    raise Exception(arg3)
 
 #############
 # Get seeds
@@ -794,7 +756,7 @@ def make_seed_list(
     else:
         full_length = False
 
-    if full_length is True or generation_num == 0:
+    if full_length or generation_num == 0:
         # This will be the full length list of starting molecules as the seed
         random.shuffle(usable_smiles)
 
@@ -908,7 +870,7 @@ def make_pass_through_list(
     ]
 
     ligs_that_passed_filters = [x for x in smis_from_prev_gen if x is not None]
-    
+
     # If not enough of your previous generation sanitize to make the list
     # Return None and trigger an Error
     if gen_num != 0 and len(ligs_that_passed_filters) < num_elite_from_prev_gen:
