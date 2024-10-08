@@ -92,7 +92,6 @@ def run_docking_common(
         (docking, pdb, file_conversion_obj) for pdb in pdbs_in_folder
     )
 
-    print("####################")
     print("Convert Ligand to PDBQT format Begun")
     smiles_names_failed_to_convert = params["parallelizer"].run(
         job_input_convert_lig, lig_convert_multithread
@@ -107,7 +106,6 @@ def run_docking_common(
     if deleted_smiles_names_list_convert:
         print("THE FOLLOWING LIGANDS FAILED TO CONVERT:")
         print(deleted_smiles_names_list_convert)
-    print("####################")
 
     # Docking the ligands which converted to PDBQT Find PDBQT's
     pdbqts_in_folder = docking.find_converted_ligands(current_generation_pdb_dir)
@@ -115,7 +113,6 @@ def run_docking_common(
     job_input_dock_lig = tuple(
         (docking, pdbqt, file_conversion_obj) for pdbqt in pdbqts_in_folder
     )
-    print("####################")
     print("Docking Begun")
     smiles_names_failed_to_dock = params["parallelizer"].run(
         job_input_dock_lig, run_dock_multithread_wrapper
@@ -131,7 +128,6 @@ def run_docking_common(
         print("THE FOLLOWING LIGANDS WHICH FAILED TO DOCK:")
         print(deleted_smiles_names_list_dock)
 
-    print("####################")
     deleted_smiles_names_list = (
         deleted_smiles_names_list_convert + deleted_smiles_names_list_dock
     )

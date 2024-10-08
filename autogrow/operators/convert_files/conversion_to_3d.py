@@ -9,6 +9,7 @@ import os
 from os.path import basename
 from typing import Any, Dict, List, Union
 
+from autogrow.utils.logging import LogLevel, log_info
 import rdkit  # type: ignore
 import rdkit.Chem as Chem  # type: ignore
 from func_timeout import func_timeout  # type: ignore
@@ -90,17 +91,20 @@ def convert_to_3d(
         .smi file
     """
 
-    print("CONVERTING SMILES TO SDF")
-    # convert smiles in an .SMI file to sdfs using gypsum
-    gypsum_output_folder_path = convert_smi_to_sdfs_with_gypsum(
-        params, smi_file, smile_file_directory
-    )
-    print("CONVERTING SMILES TO SDF COMPLETED")
+    log_info("Converting SMILES to 3D structures")
+    with LogLevel():
+        log_info("Converting SMILES to 3D SDF")
+        # convert smiles in an .SMI file to sdfs using gypsum
+        gypsum_output_folder_path = convert_smi_to_sdfs_with_gypsum(
+            params, smi_file, smile_file_directory
+        )
+        # print("CONVERTING SMILES TO SDF COMPLETED")
 
-    print("CONVERTING SDF TO PDB")
-    # convert sdf files to PDBs using rdkit
-    convert_sdf_to_pdbs(params, smile_file_directory, gypsum_output_folder_path)
-    print("CONVERTING SDF TO PDB COMPLETED")
+        log_info("Converting 3D SDF to PDB")
+        # print("CONVERTING SDF TO PDB")
+        # convert sdf files to PDBs using rdkit
+        convert_sdf_to_pdbs(params, smile_file_directory, gypsum_output_folder_path)
+        # print("CONVERTING SDF TO PDB COMPLETED")
 
 
 def convert_smi_to_sdfs_with_gypsum(
