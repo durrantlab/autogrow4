@@ -121,7 +121,7 @@ class SmilesFilterPluginManager(PluginManagerBase):
         self, smiles_info: PreDockedCompoundInfo
     ) -> Optional[PreDockedCompoundInfo]:
         """
-        This takes a smiles_string and the selected filter list (child_dict) and
+        This takes a smiles and the selected filter list (child_dict) and
         runs it through the selected filters.
 
         Inputs:
@@ -137,9 +137,9 @@ class SmilesFilterPluginManager(PluginManagerBase):
             returns None If the mol fails a filter.
         """
 
-        smiles_string = smiles_info.smiles
+        smiles = smiles_info.smiles
 
-        mol = Chem.MolFromSmiles(smiles_string, sanitize=False)
+        mol = Chem.MolFromSmiles(smiles, sanitize=False)
         # try sanitizing, which is necessary later
         mol = MOH.check_sanitization(mol)
         if mol is None:
@@ -170,11 +170,11 @@ class SmilesFilterPluginManager(PluginManagerBase):
 
     def _run_filter_on_just_smiles(self, smiles: str) -> List[str]:
         """
-        This takes a smiles_string and the selected filter list (child_dict) and
+        This takes a smiles and the selected filter list (child_dict) and
         runs it through the selected filters.
 
         Inputs:
-        :param str smile_string: A smiles_string. example: smiles_info
+        :param str smile_string: A smiles. example: smiles_info
             ["CCCCCCC","zinc123"]
         :param dict child_dict: This dictionary contains all the names of the
             chosen filters as keys and the the filter objects as the items Or None if

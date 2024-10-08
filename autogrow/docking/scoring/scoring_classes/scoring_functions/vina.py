@@ -167,16 +167,16 @@ class VINA(ParentScoring):
         if not os.path.exists(pdb_path):
             return None
 
-        new_smiles_string = None
+        new_smiles = None
         with open(pdb_path, "r") as f:
             for line in f:
                 if "REMARK Final SMILES string: " in line:
-                    new_smiles_string = line.replace(
+                    new_smiles = line.replace(
                         "REMARK Final SMILES string: ", ""
                     ).replace("\n", "")
                     break
 
-        if new_smiles_string is None:
+        if new_smiles is None:
             # If the REMARK SECTION IS NOT THERE raise except. Avoid this
             # if possible as rdkit can missinterpret bonds because pdbs
             # dont specify bond types
@@ -185,7 +185,7 @@ class VINA(ParentScoring):
         assert self.smiles_dict is not None, "smiles_dict is None"
         if ligand_short_name in self.smiles_dict:
             return PostDockedCompoundInfo(
-                smiles=new_smiles_string,
+                smiles=new_smiles,
                 id=ligand_short_name,
                 short_id=lig_info[0],
                 additional_info=lig_info[1],
@@ -194,7 +194,7 @@ class VINA(ParentScoring):
             )
 
             # ligand_full_info = [
-            #     new_smiles_string,
+            #     new_smiles,
             #     self.smiles_dict[ligand_short_name].name,
             #     *lig_info,
             # ]

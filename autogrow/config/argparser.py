@@ -72,10 +72,10 @@ def get_argparse_vars() -> Dict[str, Any]:
     _add_smilesmerge_params(smilesmerge)
 
     # Mutation Settings
-    mutation = parser.add_argument_group(
-        "Mutation Settings (options for the mutation operation)"
-    )
-    _add_mutation_params(mutation)
+    # mutation = parser.add_argument_group(
+    #     "Mutation Settings (options for the mutation operation)"
+    # )
+    # _add_mutation_params(mutation)
 
     # Filter Settings
     # filters = parser.add_argument_group(
@@ -426,27 +426,27 @@ def _add_smilesmerge_params(parser: argparse._ArgumentGroup):
     )
 
 
-def _add_mutation_params(parser: argparse._ArgumentGroup):
-    # Mutation Settings
-    parser.add_argument(
-        "--rxn_library",
-        choices=["click_chem_rxns", "robust_rxns", "all_rxns"],
-        default="all_rxns",
-        help="This set of reactions to be used in Mutation.",
-    )
-    parser.add_argument(
-        "--complementary_mol_directory",
-        type=str,
-        default="",
-        help="This PATH to the directory containing all the molecules being used \
-        to react with. The directory should contain .smi files contain SMILES of \
-        molecules containing the functional group represented by that file. Each file \
-        should be named with the same title as the functional groups described in \
-        rxn_library_file & function_group_library +.smi \
-        All Functional groups specified function_group_library must have its \
-        own .smi file. We recommend you filter these dictionaries prior to Autogrow \
-        for the Drug-likeliness and size filters you will Run Autogrow with.",
-    )
+# def _add_mutation_params(parser: argparse._ArgumentGroup):
+#     # Mutation Settings
+#     parser.add_argument(
+#         "--rxn_library",
+#         choices=["click_chem_rxns", "robust_rxns", "all_rxns"],
+#         default="all_rxns",
+#         help="This set of reactions to be used in Mutation.",
+#     )
+#     parser.add_argument(
+#         "--complementary_mol_directory",
+#         type=str,
+#         default="",
+#         help="This PATH to the directory containing all the molecules being used \
+#         to react with. The directory should contain .smi files contain SMILES of \
+#         molecules containing the functional group represented by that file. Each file \
+#         should be named with the same title as the functional groups described in \
+#         rxn_library_file & function_group_library +.smi \
+#         All Functional groups specified function_group_library must have its \
+#         own .smi file. We recommend you filter these dictionaries prior to Autogrow \
+#         for the Drug-likeliness and size filters you will Run Autogrow with.",
+#     )
 
 
 def _add_filter_params(parser: argparse._ArgumentGroup):

@@ -168,7 +168,7 @@ def _run_smiles_click_for_multithread(
     smile: str, a_smiles_click_chem_object: SmileClickClass.SmilesClickChem
 ) -> Optional[List[Union[str, int, None]]]:
     """
-    This function takes a single smilestring and performs SmileClick on it.
+    This function takes a single smiles and performs SmileClick on it.
 
     This is necessary for Multithreading as it is unable to execute
     multithread on a class function, but can thread a class run within a

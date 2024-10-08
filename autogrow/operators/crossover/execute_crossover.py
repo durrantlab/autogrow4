@@ -148,13 +148,13 @@ def find_random_lig2(
     return None
 
 
-def convert_mol_from_smiles(smiles_string: str) -> Union[rdkit.Chem.rdchem.Mol, bool]:
+def convert_mol_from_smiles(smiles: str) -> Union[rdkit.Chem.rdchem.Mol, bool]:
     """
     Test a SMILES string can be converted into an rdkit molecule
     (rdkit.Chem.rdchem.Mol) and be sanitize. This also deprotanates them
 
     Inputs:
-    :param str smiles_string: a single SMILES String
+    :param str smiles: a single SMILES String
 
     Returns:
     :returns: rdkit.Chem.rdchem.Mol mol: an rdkit molecule object if it
@@ -162,7 +162,7 @@ def convert_mol_from_smiles(smiles_string: str) -> Union[rdkit.Chem.rdchem.Mol, 
     """
 
     try:
-        mol = Chem.MolFromSmiles(smiles_string, sanitize=False)
+        mol = Chem.MolFromSmiles(smiles, sanitize=False)
     except Exception:
         return None
 

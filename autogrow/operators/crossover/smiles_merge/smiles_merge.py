@@ -135,7 +135,7 @@ def run_main_smiles_merge(
     # Mapping class which will randomly select a set of non-clashing B-groups,
     # such that no 2 chosen B's will have connections to the same anchors
     # (anchors are atoms in the common core). It returns a list of
-    # smilestrings for the chosen R-groups. It returns None if a step failed.
+    # smiless for the chosen R-groups. It returns None if a step failed.
 
     rs_chosen_smiles = DnR.handle_dicts_and_select_b_groups(mol1, mol2, mcs_mol)
     if rs_chosen_smiles is None:
