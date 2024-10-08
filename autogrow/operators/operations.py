@@ -12,6 +12,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from autogrow.plugins.plugin_manager_base import get_plugin_manager
 from autogrow.types import PreDockedCompoundInfo
+from autogrow.utils.logging import log_info
 import rdkit  # type: ignore
 import rdkit.Chem as Chem  # type: ignore
 
@@ -678,36 +679,6 @@ def get_complete_list_prev_gen_or_source_compounds(
             "\nThere were no ligands in source compound or previous \
             generation which could sanitize.\n"
         )
-    if params["filter_source_compounds"] is True:
-
-        prefilter_list = copy.deepcopy(usable_smiles)
-        print("")
-        print("Running Filter on the Compounds from last generation/Source")
-        # usable_smiles = Filter.run_filter(params, usable_smiles)
-        usable_smiles = get_plugin_manager("SmilesFilterPluginManager").run(
-            predocked_compounds=usable_smiles
-        )
-
-        # Remove Nones:
-        usable_smiles = [x for x in usable_smiles if x is not None]
-
-        if not usable_smiles:
-            _raise_exception_with_message(
-                "\nThere were no ligands in source compound which \
-                        passed the User-selected Filters.\n"
-            )
-
-        failed_filter_list = []
-        for lig in usable_smiles:
-            failed_filter_list = []
-            if lig not in prefilter_list:
-                failed_filter_list.append(lig.name)
-
-        if len(failed_filter_list) != 0:
-            printout = "\n THE FOLLOWING LIGANDS WERE REMOVED FROM THE\
-                        SOURCE LIST: Failed the User-selected Filters\n"
-            printout += f"\t{failed_filter_list}"
-            print(printout)
 
     random.shuffle(usable_smiles)
 
@@ -936,19 +907,8 @@ def make_pass_through_list(
         x for x in smis_from_prev_gen if type(x) == PreDockedCompoundInfo
     ]
 
-    if gen_num == 0 and params["filter_source_compounds"] is True:
-        # Run Filters on ligand list
-        # ligs_that_passed_filters = Filter.run_filter(params, smis_from_prev_gen)
-        ligs_that_passed_filters = get_plugin_manager("SmilesFilterPluginManager").run(
-            predocked_compounds=smis_from_prev_gen
-        )
-
-        # Remove Nones:
-        ligs_that_passed_filters = [
-            x for x in ligs_that_passed_filters if x is not None
-        ]
-    else:
-        ligs_that_passed_filters = [x for x in smis_from_prev_gen if x is not None]
+    ligs_that_passed_filters = [x for x in smis_from_prev_gen if x is not None]
+    
     # If not enough of your previous generation sanitize to make the list
     # Return None and trigger an Error
     if gen_num != 0 and len(ligs_that_passed_filters) < num_elite_from_prev_gen:

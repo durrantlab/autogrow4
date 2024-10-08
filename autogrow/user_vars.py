@@ -579,7 +579,6 @@ def define_defaults() -> Dict[str, Any]:
     params["diversity_seed_depreciation_per_gen"] = 2
 
     # Populations settings
-    params["filter_source_compounds"] = True
     params["dock_source_compounds_first"] = True
     params["num_generations"] = 10
     params["number_of_crossovers_first_generation"] = 10

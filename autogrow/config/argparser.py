@@ -205,15 +205,6 @@ def _add_io_params(parser: argparse._ArgumentGroup):
         tab-delineated .smi file. These ligands will seed the first generation.",
     )
     parser.add_argument(
-        "--filter_source_compounds",
-        choices=[True, False, "True", "False", "true", "false"],
-        default=True,
-        help="If True source ligands from source_compound_file will be \
-        filter using the user defined filter choices prior to the 1st generation being \
-        created. If False, ligands which would fail the ligand filters could seed \
-        the 1st generation. Default is True.",
-    )
-    parser.add_argument(
         "--start_a_new_run",
         action="store_true",
         default=False,
