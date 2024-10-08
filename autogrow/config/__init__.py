@@ -34,11 +34,13 @@ def load_commandline_parameters(argv: Dict[str, Any]) -> Tuple[Dict[str, Any], s
     :returns: str printout: a string to be printed to screen and saved to output file
     """
 
-    printout = f"(RE)STARTING AUTOGROW 4.0: {str(datetime.datetime.now())}"
-    printout += program_info()
-    printout += "\nUse the -h tag to get detailed help regarding program usage.\n"
-    print(printout)
-    sys.stdout.flush()
+    printout = ""
+
+    # printout = f"(RE)STARTING AUTOGROW 4.0: {str(datetime.datetime.now())}"
+    # printout += program_info()
+    # printout += "\nUse the -h tag to get detailed help regarding program usage.\n"
+    # print(printout)
+    # sys.stdout.flush()
 
     # output the paramters used
     printout += "\nPARAMETERS" + "\n"

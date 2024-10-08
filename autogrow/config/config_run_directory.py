@@ -1,6 +1,8 @@
 import os
 from typing import Optional
 
+from autogrow.utils.logging import LogLevel, log_info
+
 
 def set_run_directory(root_folder_path: str, start_a_new_run: bool) -> str:
     """
@@ -28,35 +30,38 @@ def set_run_directory(root_folder_path: str, start_a_new_run: bool) -> str:
     """
 
     folder_name_path = f"{root_folder_path}Run_"
-    print(folder_name_path)
+    # print(folder_name_path)
 
     last_run_number = _find_previous_runs(folder_name_path)
 
-    if last_run_number is None:
-        # There are no previous simulation runs in this directory
-        print("There are no previous runs in this directory.")
-        print("Starting a new run named Run_0.")
+    log_info("(Re)starting AutoGrow")
 
-        # make a folder for the new generation
-        run_number = 0
-        folder_path = f"{folder_name_path}{run_number}{os.sep}"
-        os.makedirs(folder_path)
+    with LogLevel():
 
-    elif not start_a_new_run:
-        # Continue from the last simulation run
-        run_number = last_run_number
-        folder_path = f"{folder_name_path}{last_run_number}{os.sep}"
-    else:  # start_a_new_run is True
-        # Start a new fresh simulation
-        # Make a directory for the new run by increasing run number by +1
-        # from last_run_number
-        run_number = last_run_number + 1
-        folder_path = f"{folder_name_path}{run_number}{os.sep}"
-        os.makedirs(folder_path)
+        if last_run_number is None:
+            # There are no previous simulation runs in this directory
+            log_info("There are no previous runs in this directory.")
+            log_info("Starting a new run named Run_0.")
 
-    print("The Run number is: ", run_number)
-    print("The Run folder path is: ", folder_path)
-    print("")
+            # make a folder for the new generation
+            run_number = 0
+            folder_path = f"{folder_name_path}{run_number}{os.sep}"
+            os.makedirs(folder_path)
+
+        elif not start_a_new_run:
+            # Continue from the last simulation run
+            run_number = last_run_number
+            folder_path = f"{folder_name_path}{last_run_number}{os.sep}"
+        else:  # start_a_new_run is True
+            # Start a new fresh simulation
+            # Make a directory for the new run by increasing run number by +1
+            # from last_run_number
+            run_number = last_run_number + 1
+            folder_path = f"{folder_name_path}{run_number}{os.sep}"
+            os.makedirs(folder_path)
+
+        log_info(f"The Run number is: {run_number}")
+        log_info(f"The Run folder path is: {folder_path}")
     return folder_path
 
 
@@ -86,7 +91,6 @@ def _find_previous_runs(folder_name_path: str) -> Optional[int]:
 
     if i == 0:
         # There are no previous runs in this directory
-        last_run_number = None
         return None
 
     # A previous run exists. The number of the last run.

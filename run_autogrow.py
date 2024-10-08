@@ -13,6 +13,7 @@ for de novo drug design and lead optimization. J Cheminform 12, 25 (2020).
 
 
 import __future__
+import logging
 import multiprocessing
 import datetime
 import sys
@@ -24,6 +25,7 @@ from autogrow.plugins.docking import DockingBase, DockingPluginManager
 from autogrow.plugins.plugin_manager_base import get_all_plugin_managers
 from autogrow.plugins.selectors import SelectorBase, SelectorPluginManager
 from autogrow.plugins.smiles_filters import SmilesFilterBase, SmilesFilterPluginManager
+from autogrow.utils.logging import LogLevel, create_logger, log_info
 
 
 ################
@@ -51,6 +53,8 @@ def _setup_plugin_managers(params) -> None:
 
 
 def main():
+    create_logger(logging.DEBUG)
+
     _load_plugin_managers()
 
     args_dict = get_argparse_vars()
@@ -75,21 +79,21 @@ def _run_autogrow_with_params(args_dict):
     sys.stdout.flush()
 
     # output the paramters used
-    printout += "\nPARAMETERS" + "\n"
-    printout += " ========== " + "\n"
-
     params, printout = load_commandline_parameters(args_dict)
 
     # print out the UserVars for the record
-    print("\n=====================================================")
-    print("==============   Parameters as list:  ===============")
-    for key in list(params.keys()):
-        print(key, params[key])
-    print("\n=====================================================")
-    print("===========   Parameters as dictionary:  ============")
-    print(params)
-    print("=====================================================")
-    print("=====================================================\n\n")
+    # print("\n=====================================================")
+    # print("==============   Parameters as list:  ===============")
+    log_info("Parameters")
+    with LogLevel():
+        for key in list(params.keys()):
+            log_info(f"{key}: {str(params[key])}")
+
+    # print("\n=====================================================")
+    # print("===========   Parameters as dictionary:  ============")
+    # print(params)
+    # print("=====================================================")
+    # print("=====================================================\n\n")
 
     AutogrowMainExecute.main_execute(params)
 
