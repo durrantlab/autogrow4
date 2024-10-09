@@ -68,8 +68,8 @@ def main_execute(params: Dict[str, Any]) -> None:
 
         # Get directory for smi to go
         cur_gen_dir = f"{params['output_directory']}generation_{gen_num}{os.sep}"
-        print(cur_gen_dir)
-        sys.stdout.flush()
+        # print(cur_gen_dir)
+        # sys.stdout.flush()
 
         if gen_num == 0 and params["dock_source_compounds_first"] is True:
             if os.path.exists(f"{cur_gen_dir}{os.sep}generation_0_ranked.smi") is True:
@@ -133,8 +133,8 @@ def main_execute(params: Dict[str, Any]) -> None:
 
         sys.stdout.flush()
 
-        print("")
-        print("Finished generation ", gen_num)
+        # print("")
+        # print("Finished generation ", gen_num)
 
         sys.stdout.flush()
 

@@ -11,7 +11,7 @@ import sys
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from autogrow.types import PreDockedCompoundInfo
-from autogrow.utils.logging import LogLevel, log_info
+from autogrow.utils.logging import LogLevel, log_info, log_warning
 import rdkit  # type: ignore
 import rdkit.Chem as Chem  # type: ignore
 
@@ -19,8 +19,8 @@ import rdkit.Chem as Chem  # type: ignore
 rdkit.RDLogger.DisableLog("rdApp.*")
 
 import autogrow.docking.ranking.ranking_mol as Ranking
-import autogrow.operators.mutation.execute_mutations as Mutation
-import autogrow.operators.crossover.execute_crossover as execute_crossover
+import autogrow.operators.execute_mutations as Mutation
+import autogrow.operators.execute_crossover as execute_crossover
 import autogrow.operators.convert_files.conversion_to_3d as conversion_to_3d
 import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
 
@@ -529,7 +529,7 @@ def _check_if_already_docked_and_write_ranked_file_gen_0(
             f.write(full_gen_smis_printout)
         already_docked = True
     except Exception:
-        print(
+        log_warning(
             "Not all ligands in source compound list are scored. "
             + "We will convert and redock them all."
         )
