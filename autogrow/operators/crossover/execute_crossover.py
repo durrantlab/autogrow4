@@ -84,7 +84,7 @@ def _test_for_mcs(
     # finding mergable ligands number of atoms in common found
     if result.numAtoms < min_number_atoms_matched:
         return None
-    
+
     return None if result.canceled else result
 
 
@@ -257,7 +257,9 @@ def make_crossovers(
                 # make a list of tuples for multi-processing Crossover
                 job_input: List[
                     Tuple[
-                        Dict[str, Any], PreDockedCompoundInfo, List[PreDockedCompoundInfo]
+                        Dict[str, Any],
+                        PreDockedCompoundInfo,
+                        List[PreDockedCompoundInfo],
                     ]
                 ] = []
                 for i in smile_pairs:
@@ -274,7 +276,9 @@ def make_crossovers(
 
                 results: List[
                     Tuple[str, PreDockedCompoundInfo, PreDockedCompoundInfo]
-                ] = params["parallelizer"].run(tuple(job_input), _do_crossovers_smiles_merge)
+                ] = params["parallelizer"].run(
+                    tuple(job_input), _do_crossovers_smiles_merge
+                )
                 results = [x for x in results if x is not None]
 
                 for i in results:

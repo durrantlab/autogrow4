@@ -126,31 +126,34 @@ class SelectorPluginManager(PluginManagerBase):
         # Get the selector plugin to use
         selector = cast(SelectorBase, self.plugins[selectors[0]])
 
+        docking_fitness_smiles_list: List[PreDockedCompoundInfo] = []
+        diversity_smile_list: List[PreDockedCompoundInfo] = []
+
         # Select the molecules based on the docking score
         if kwargs["num_seed_dock_fitness"] > 0:
-            log_info(f"{selector.name}: Selecting compounds by docking scrore")
-        with LogLevel():
-            docking_fitness_smiles_list: List[PreDockedCompoundInfo] = selector.run(
-                **{
-                    "usable_smiles": kwargs["usable_smiles"],
-                    "num_to_choose": kwargs["num_seed_dock_fitness"],
-                    "score_type": ScoreType.DOCKING,
-                    "favor_most_negative": kwargs["favor_most_negative"],
-                }
-            )
+            log_info(f"{selector.name}: Selecting compounds by docking score")
+            with LogLevel():
+                docking_fitness_smiles_list = selector.run(
+                    **{
+                        "usable_smiles": kwargs["usable_smiles"],
+                        "num_to_choose": kwargs["num_seed_dock_fitness"],
+                        "score_type": ScoreType.DOCKING,
+                        "favor_most_negative": kwargs["favor_most_negative"],
+                    }
+                )
 
         # Select the molecules based on the diversity score
         if kwargs["num_seed_diversity"] > 0:
             log_info(f"{selector.name}: Selecting compounds by diversity score")
-        with LogLevel():
-            diversity_smile_list: List[PreDockedCompoundInfo] = selector.run(
-                **{
-                    "usable_smiles": kwargs["usable_smiles"],
-                    "num_to_choose": kwargs["num_seed_diversity"],
-                    "score_type": ScoreType.DIVERSITY,
-                    "favor_most_negative": kwargs["favor_most_negative"],
-                }
-            )
+            with LogLevel():
+                diversity_smile_list = selector.run(
+                    **{
+                        "usable_smiles": kwargs["usable_smiles"],
+                        "num_to_choose": kwargs["num_seed_diversity"],
+                        "score_type": ScoreType.DIVERSITY,
+                        "favor_most_negative": kwargs["favor_most_negative"],
+                    }
+                )
 
         # Combine the two lists
         docking_diversity_list = list(docking_fitness_smiles_list)

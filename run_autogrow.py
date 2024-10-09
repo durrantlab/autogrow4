@@ -74,7 +74,7 @@ def _run_autogrow_with_params(args_dict):
     start_time = str(datetime.datetime.now())
     # load the commandline parameters
 
-    printout = f"(RE)STARTING AUTOGROW 4.0: {str(datetime.datetime.now())}"
+    printout = f"\n(RE)STARTING AUTOGROW 4.0: {str(datetime.datetime.now())}\n"
 
     printout += program_info()
 

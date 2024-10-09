@@ -810,7 +810,7 @@ def load_in_commandline_parameters(argv: Dict[str, Any]) -> Tuple[Dict[str, Any]
 
     params = multiprocess_handling(params)
 
-    printout = f"(RE)STARTING AUTOGROW 4.0: {str(datetime.datetime.now())}"
+    printout = f"\n(RE)STARTING AUTOGROW 4.0: {str(datetime.datetime.now())}\n"
     printout = printout + program_info()
     printout = (
         printout + "\nUse the -h tag to get detailed help regarding program usage.\n"

@@ -606,7 +606,6 @@ class FragmentAddition(MutationBase):
                 rxn, mol_to_use, a_reaction_dict, contains_group,
             )
 
-
     def _try_single_reactant_reaction(
         self,
         rxn: AllChem.ChemicalReaction,

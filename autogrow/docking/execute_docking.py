@@ -81,7 +81,9 @@ def run_docking_common(
     # convert ligand, must access object function. That's pretty awkward.
     file_conversion_obj = file_conversion_cls(temp_vars, test_boot=False)
 
-    docking_plugin_manager = cast(DockingPluginManager, get_plugin_manager("DockingPluginManager"))
+    docking_plugin_manager = cast(
+        DockingPluginManager, get_plugin_manager("DockingPluginManager")
+    )
 
     # dock_class = pick_docking_class_dict(dock_choice)
     # docking = dock_class(temp_vars, receptor, file_conversion_obj, test_boot=False)
@@ -108,17 +110,20 @@ def run_docking_common(
         print(deleted_smiles_names_list_convert)
 
     # Docking the ligands which converted to PDBQT Find PDBQT's
-    pdbqts_in_folder = docking_plugin_manager.find_converted_ligands(current_generation_pdb_dir)
+    pdbqts_in_folder = docking_plugin_manager.find_converted_ligands(
+        current_generation_pdb_dir
+    )
 
     job_input_dock_lig = tuple(
-        (docking_plugin_manager, pdbqt, file_conversion_obj) for pdbqt in pdbqts_in_folder
+        (docking_plugin_manager, pdbqt, file_conversion_obj)
+        for pdbqt in pdbqts_in_folder
     )
     print("Docking Begun")
     smiles_names_failed_to_dock = params["parallelizer"].run(
         job_input_dock_lig, run_dock_multithread_wrapper
     )
 
-    _print_three_vars("", "Docking Completed", "####################")
+    print("\nDocking Completed\n")
     deleted_smiles_names_list_dock = [
         x for x in smiles_names_failed_to_dock if x is not None
     ]
@@ -133,12 +138,9 @@ def run_docking_common(
     )
 
     if len(deleted_smiles_names_list) != 0:
-        _print_three_vars(
-            "",
-            "THE FOLLOWING LIGANDS WHERE DELETED FOR FAILURE TO CONVERT OR DOCK:",
-            deleted_smiles_names_list,
-        )
-    _print_three_vars("#################### ", "", "Begin Ranking and Saving results")
+        print("\nTHE FOLLOWING LIGANDS WHERE DELETED FOR FAILURE TO CONVERT OR DOCK:")
+        print(deleted_smiles_names_list)
+    print("\nBegin Ranking and Saving results")
     unweighted_ranked_smile_file = docking_plugin_manager.rank_and_save_output_smi(
         params,
         current_generation_dir,
@@ -146,22 +148,8 @@ def run_docking_common(
         smiles_file_new_gen,
         deleted_smiles_names_list,
     )
-    _print_three_vars("", "Completed Ranking and Saving results", "")
+    print("\nCompleted Ranking and Saving results\n")
     return unweighted_ranked_smile_file
-
-
-def _print_three_vars(arg0: Any, arg1: Any, arg2: Any) -> None:
-    """
-    Print three variables.
-
-    Inputs:
-    :param any arg0: the first variable to print
-    :param any arg1: the second variable to print
-    :param any arg2: the third variable to print    
-    """
-    print(arg0)
-    print(arg1)
-    print(arg2)
 
 
 def lig_convert_multithread(

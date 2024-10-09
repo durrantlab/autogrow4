@@ -127,9 +127,7 @@ class RankSelector(SelectorBase):
             smiles = sorted_list[i]
             top_choice_smiles_in_order.append(smiles.smiles)
             scre = smiles.get_previous_score(score_type)
-            log_debug(
-                f"{smiles.smiles} ({smiles.name}): score {scre:.2f}"
-            )
+            log_debug(f"{smiles.smiles} ({smiles.name}): score {scre:.2f}")
 
         return top_choice_smiles_in_order
 

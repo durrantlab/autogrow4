@@ -7,6 +7,7 @@ from autogrow.plugins.selectors import SelectorBase
 from typing import List, Tuple
 from autogrow.config.argparser import ArgumentVars
 from autogrow.types import PreDockedCompoundInfo, ScoreType
+from autogrow.utils.logging import log_debug
 
 
 class TournamentSelector(SelectorBase):
@@ -105,6 +106,11 @@ class TournamentSelector(SelectorBase):
                 x for x in list_of_ligands_reduced if x != chosen_ligand
             ]
             chosen_ligands.append(chosen_ligand)
+
+            scre = chosen_ligand.get_previous_score(score_type)
+            log_debug(
+                f"{chosen_ligand.smiles} ({chosen_ligand.name}): score {scre:.2f}"
+            )
 
         return chosen_ligands
 

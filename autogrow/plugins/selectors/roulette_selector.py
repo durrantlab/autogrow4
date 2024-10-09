@@ -6,6 +6,8 @@ from autogrow.config.argparser import ArgumentVars
 from autogrow.types import PreDockedCompoundInfo, ScoreType
 import numpy.random as rn
 
+from autogrow.utils.logging import log_debug
+
 
 class RouletteSelector(SelectorBase):
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
@@ -68,9 +70,14 @@ class RouletteSelector(SelectorBase):
         probability = [x / total for x in adjusted]
         smiles_list = [x.smiles for x in usable_smiles]
 
-        return rn.choice(
+        chosen_smis = rn.choice(
             smiles_list, size=num_to_choose, replace=False, p=probability
         ).tolist()
+
+        for chosen_smi in chosen_smis:
+            log_debug(chosen_smi)
+
+        return chosen_smis
 
     def _adjust_scores(
         self,

@@ -152,13 +152,15 @@ class MergeMCS(CrossoverBase):
         ligand_new_mol = MWC.merge_smiles_with_core(rs_chosen_smiles, mcs_mol)
         if ligand_new_mol is None:
             return None
-        
+
         # Log the merge
         ligand_new_mol_copy = Chem.RWMol(ligand_new_mol)
         for atom in ligand_new_mol_copy.GetAtoms():
             atom.SetAtomMapNum(0)
         ligand_new_mol_copy = Chem.Mol(ligand_new_mol_copy)
-        clean_smiles = AllChem.MolToSmiles(ligand_new_mol_copy, canonical=True, isomericSmiles=False)
+        clean_smiles = AllChem.MolToSmiles(
+            ligand_new_mol_copy, canonical=True, isomericSmiles=False
+        )
         log_debug(f"Merge by MCS: {lig_string_1} + {lig_string_2} => {clean_smiles}")
 
         # ligand_new_smiles is either a SMILES string if processing works

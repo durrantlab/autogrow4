@@ -60,7 +60,6 @@ def make_mutants(
     mutation_plugin_manager = get_plugin_manager("MutationPluginManager")
     mutation_plugin_manager.setup_plugins()
 
-
     log_debug("Creating new compounds from selected compounds via mutation")
 
     with LogLevel():
