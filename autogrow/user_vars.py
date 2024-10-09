@@ -537,6 +537,9 @@ def define_defaults() -> Dict[str, Any]:
     :returns: dict params: a dictionary of all default variables
     """
 
+    # TODO: Need to give more thought about how to handle defaults for plugin
+    # parameters. This is not self contained.
+
     # where we are currently (absolute filepath from route)
     # used for relative pathings
     script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -560,8 +563,6 @@ def define_defaults() -> Dict[str, Any]:
 
     # Mutation Settings
     params["rxn_library"] = "click_chem_rxns"
-    params["rxn_library_file"] = ""
-    params["function_group_library"] = ""
     params["complementary_mol_directory"] = ""
 
     # processors
@@ -1049,11 +1050,6 @@ def picked_filters(params: Dict[str, Any]) -> Tuple[List[str], Dict[str, Any]]:
             filter_list.append("BRENKFilter")
     else:
         params["BRENKFilter"] = False
-
-    if "alternative_filter" in vars_keys:
-        filter_list = handle_alternative_filters(params, filter_list)
-    else:
-        params["alternative_filter"] = None
 
     # if there is no user specified ligand filters but they haven't set
     # filters to None ---> set filter to default of LipinskiLenientFilter.

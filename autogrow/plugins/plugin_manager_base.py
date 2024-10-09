@@ -20,7 +20,14 @@ class PluginManagerBase(ABC):
     def name(self) -> str:
         return self.__class__.__name__
 
-    def setup(self, params: dict):
+    def setup_plugin_manager(self, params: dict):
+        """
+        Sets up the plugin manager with the provided parameters. NOTE: This
+        sets up the plugin manager, not individual plugins.
+        
+        Inputs:
+        :param dict params: a dictionary of parameters to set up the plugin manager.
+        """
         self.params = params
 
         names_of_plugins_to_load: Optional[List[str]] = None
@@ -38,6 +45,21 @@ class PluginManagerBase(ABC):
         for plugin in self.plugins.values():
             # This also sets params on the plugin.
             plugin._validate(params)
+
+    def setup_plugins(self, **kwargs):
+        """
+        Sets up the plugins with the provided arguments. This is required because
+        one can imagine a scenario where you want to setup a plugin only once,
+        then execute the run function multiple times.
+        
+        NOTE: This sets up the plugins, not the plugin manager.
+
+        Inputs:
+        :param dict kwargs: a dictionary of arguments to pass to the plugin
+            setup functions.
+        """
+        for plugin in self.plugins.values():
+            plugin.setup(**kwargs)
 
     def get_selected_plugins_from_params(self) -> Optional[List[str]]:
         """

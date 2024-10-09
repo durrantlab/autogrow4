@@ -81,15 +81,15 @@ def run_docking_common(
     # convert ligand, must access object function. That's pretty awkward.
     file_conversion_obj = file_conversion_cls(temp_vars, test_boot=False)
 
-    docking = cast(DockingPluginManager, get_plugin_manager("DockingPluginManager"))
+    docking_plugin_manager = cast(DockingPluginManager, get_plugin_manager("DockingPluginManager"))
 
     # dock_class = pick_docking_class_dict(dock_choice)
     # docking = dock_class(temp_vars, receptor, file_conversion_obj, test_boot=False)
 
     # Find PDB's
-    pdbs_in_folder = docking.find_pdb_ligands(current_generation_pdb_dir)
+    pdbs_in_folder = docking_plugin_manager.find_pdb_ligands(current_generation_pdb_dir)
     job_input_convert_lig = tuple(
-        (docking, pdb, file_conversion_obj) for pdb in pdbs_in_folder
+        (docking_plugin_manager, pdb, file_conversion_obj) for pdb in pdbs_in_folder
     )
 
     print("Convert Ligand to PDBQT format Begun")
@@ -108,10 +108,10 @@ def run_docking_common(
         print(deleted_smiles_names_list_convert)
 
     # Docking the ligands which converted to PDBQT Find PDBQT's
-    pdbqts_in_folder = docking.find_converted_ligands(current_generation_pdb_dir)
+    pdbqts_in_folder = docking_plugin_manager.find_converted_ligands(current_generation_pdb_dir)
 
     job_input_dock_lig = tuple(
-        (docking, pdbqt, file_conversion_obj) for pdbqt in pdbqts_in_folder
+        (docking_plugin_manager, pdbqt, file_conversion_obj) for pdbqt in pdbqts_in_folder
     )
     print("Docking Begun")
     smiles_names_failed_to_dock = params["parallelizer"].run(
@@ -139,7 +139,7 @@ def run_docking_common(
             deleted_smiles_names_list,
         )
     _print_three_vars("#################### ", "", "Begin Ranking and Saving results")
-    unweighted_ranked_smile_file = docking.rank_and_save_output_smi(
+    unweighted_ranked_smile_file = docking_plugin_manager.rank_and_save_output_smi(
         params,
         current_generation_dir,
         current_gen_int,

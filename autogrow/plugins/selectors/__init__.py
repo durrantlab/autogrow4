@@ -5,6 +5,7 @@ from autogrow.config.argparser import ArgumentVars
 from autogrow.plugins.plugin_base import PluginBase
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
 from autogrow.types import PreDockedCompoundInfo, ScoreType
+from autogrow.utils.logging import LogLevel, log_info
 
 
 class SelectorBase(PluginBase):
@@ -12,12 +13,12 @@ class SelectorBase(PluginBase):
         """Run the plugin with provided arguments."""
         usable_smiles: List[PreDockedCompoundInfo] = kwargs["usable_smiles"]
         score_type: ScoreType = kwargs["score_type"]
-        num_to_chose: int = kwargs["num_to_chose"]
+        num_to_choose: int = kwargs["num_to_choose"]
         favor_most_negative: bool = kwargs["favor_most_negative"]
 
         return self.run_selector(
             usable_smiles=usable_smiles,
-            num_to_chose=num_to_chose,
+            num_to_choose=num_to_choose,
             score_type=score_type,
             favor_most_negative=favor_most_negative,
         )
@@ -26,7 +27,7 @@ class SelectorBase(PluginBase):
     def run_selector(
         self,
         usable_smiles: List[PreDockedCompoundInfo],
-        num_to_chose: int,
+        num_to_choose: int,
         score_type: ScoreType,
         favor_most_negative: bool = True,
     ) -> List[PreDockedCompoundInfo]:
@@ -126,24 +127,30 @@ class SelectorPluginManager(PluginManagerBase):
         selector = cast(SelectorBase, self.plugins[selectors[0]])
 
         # Select the molecules based on the docking score
-        docking_fitness_smiles_list: List[PreDockedCompoundInfo] = selector.run(
-            **{
-                "usable_smiles": kwargs["usable_smiles"],
-                "num_to_chose": kwargs["num_seed_dock_fitness"],
-                "score_type": ScoreType.DOCKING,
-                "favor_most_negative": kwargs["favor_most_negative"],
-            }
-        )
+        if kwargs["num_seed_dock_fitness"] > 0:
+            log_info(f"{selector.name}: Selecting compounds by docking scrore")
+        with LogLevel():
+            docking_fitness_smiles_list: List[PreDockedCompoundInfo] = selector.run(
+                **{
+                    "usable_smiles": kwargs["usable_smiles"],
+                    "num_to_choose": kwargs["num_seed_dock_fitness"],
+                    "score_type": ScoreType.DOCKING,
+                    "favor_most_negative": kwargs["favor_most_negative"],
+                }
+            )
 
         # Select the molecules based on the diversity score
-        diversity_smile_list: List[PreDockedCompoundInfo] = selector.run(
-            **{
-                "usable_smiles": kwargs["usable_smiles"],
-                "num_to_chose": kwargs["num_seed_diversity"],
-                "score_type": ScoreType.DIVERSITY,
-                "favor_most_negative": kwargs["favor_most_negative"],
-            }
-        )
+        if kwargs["num_seed_diversity"] > 0:
+            log_info(f"{selector.name}: Selecting compounds by diversity score")
+        with LogLevel():
+            diversity_smile_list: List[PreDockedCompoundInfo] = selector.run(
+                **{
+                    "usable_smiles": kwargs["usable_smiles"],
+                    "num_to_choose": kwargs["num_seed_diversity"],
+                    "score_type": ScoreType.DIVERSITY,
+                    "favor_most_negative": kwargs["favor_most_negative"],
+                }
+            )
 
         # Combine the two lists
         docking_diversity_list = list(docking_fitness_smiles_list)

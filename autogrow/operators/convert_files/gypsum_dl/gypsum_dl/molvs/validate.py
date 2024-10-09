@@ -77,6 +77,7 @@ class Validator(object):
         :param bool raw: Whether to return raw :class:`~logging.LogRecord` objects instead of formatted log strings.
         """
         self.raw = raw
+
         # Set up logger and add default LogHandler
         self.log = logging.getLogger(type(self).__name__)
         self.log.setLevel(level)
@@ -88,6 +89,7 @@ class Validator(object):
             strhdlr = logging.StreamHandler(sys.stdout)
             strhdlr.setFormatter(logging.Formatter(log_format))
             self.log.addHandler(strhdlr)
+
         # Instantiate the validations
         self.validations = [validation(self.log) for validation in validations]
 

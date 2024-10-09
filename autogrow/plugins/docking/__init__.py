@@ -73,7 +73,7 @@ class DockingPluginManager(PluginManagerBase):
         # Get the selector plugin to use
         docking = cast(DockingBase, self.plugins[dockings[0]])
 
-        docking.run(**kwargs)
+        return docking.run(**kwargs)
 
     # Finding PDBs for ligands in a folder
     def find_pdb_ligands(self, current_generation_pdb_dir):

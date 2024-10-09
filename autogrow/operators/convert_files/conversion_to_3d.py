@@ -9,7 +9,7 @@ import os
 from os.path import basename
 from typing import Any, Dict, List, Union
 
-from autogrow.utils.logging import LogLevel, log_info
+from autogrow.utils.logging import LogLevel, WithoutLogging, log_info
 import rdkit  # type: ignore
 import rdkit.Chem as Chem  # type: ignore
 from func_timeout import func_timeout  # type: ignore
@@ -95,9 +95,10 @@ def convert_to_3d(
     with LogLevel():
         log_info("Converting SMILES to 3D SDF")
         # convert smiles in an .SMI file to sdfs using gypsum
-        gypsum_output_folder_path = convert_smi_to_sdfs_with_gypsum(
-            params, smi_file, smile_file_directory
-        )
+        with WithoutLogging():
+            gypsum_output_folder_path = convert_smi_to_sdfs_with_gypsum(
+                params, smi_file, smile_file_directory
+            )
         # print("CONVERTING SMILES TO SDF COMPLETED")
 
         log_info("Converting 3D SDF to PDB")

@@ -11,7 +11,7 @@ from rdkit import Chem  # type: ignore
 # Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog("rdApp.*")
 
-import autogrow.operators.crossover.smiles_merge.merge_functions.mapping_class as mapping_class
+import autogrow.plugins.crossover.merge_functions.mapping_class as mapping_class
 
 
 def handle_dicts_and_select_b_groups(

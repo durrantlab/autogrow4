@@ -21,6 +21,7 @@ from autogrow.config.argparser import get_argparse_vars
 from autogrow import program_info
 import autogrow.autogrow_main_execute as AutogrowMainExecute
 from autogrow.config import load_commandline_parameters
+from autogrow.plugins.crossover import CrossoverBase, CrossoverPluginManager
 from autogrow.plugins.docking import DockingBase, DockingPluginManager
 from autogrow.plugins.mutation import MutationBase, MutationPluginManager
 from autogrow.plugins.plugin_manager_base import get_all_plugin_managers
@@ -43,6 +44,7 @@ def _load_plugin_managers() -> None:
     SelectorPluginManager(SelectorBase)
     DockingPluginManager(DockingBase)
     MutationPluginManager(MutationBase)
+    CrossoverPluginManager(CrossoverBase)
 
 
 def _setup_plugin_managers(params) -> None:
@@ -51,7 +53,7 @@ def _setup_plugin_managers(params) -> None:
     plugin_managers = get_all_plugin_managers()
 
     for name, plugin_managers in plugin_managers.items():
-        plugin_managers.setup(params)
+        plugin_managers.setup_plugin_manager(params)
 
 
 def main():

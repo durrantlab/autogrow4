@@ -20,6 +20,15 @@ class PluginBase(ABC):
         self.params = params
         self.validate(params)
 
+    def setup(self, **kwargs):
+        """
+        Setup the plugin with provided arguments. This is required because one
+        can imagine a scenario where you want to setup a plugin only once, then
+        execute the run function multiple times. Children should implement this
+        function if needed.
+        """
+        return
+
     @abstractmethod
     def validate(self, params: dict):
         """Validate the provided arguments."""

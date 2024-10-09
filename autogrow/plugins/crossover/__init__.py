@@ -1,12 +1,8 @@
 from abc import ABC, abstractmethod
-from argparse import ArgumentParser
 from typing import Dict, List, Optional, Tuple, Union, cast
 
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
-from autogrow.types import PreDockedCompoundInfo
-from autogrow.utils.logging import LogLevel, log_debug, log_warning
-from rdkit import Chem  # type: ignore
-from rdkit.Chem.MolStandardize import rdMolStandardize  # type: ignore
+from autogrow.utils.logging import log_warning
 import copy
 import random
 
@@ -14,13 +10,13 @@ from autogrow.plugins.plugin_base import PluginBase
 import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
 
 
-class MutationBase(PluginBase):
-    def run(self, **kwargs) -> Optional[List[Union[str, int, None]]]:
+class CrossoverBase(PluginBase):
+    def run(self, **kwargs) -> Optional[str]:
         """Run the plugin(s) with provided arguments."""
-        return self.run_mutation(kwargs["parent_smiles"])
+        return self.run_crossover(kwargs["lig_string_1"], kwargs["lig_string_2"])
 
     @abstractmethod
-    def run_mutation(self, parent_smiles: str) -> Optional[List[Union[str, int, None]]]:
+    def run_crossover(self, lig_string_1: str, lig_string_2: str) -> Optional[str]:
         """
         run_mutation is needs to be implemented in each class.
 
@@ -40,8 +36,8 @@ class MutationBase(PluginBase):
         pass
 
 
-class MutationPluginManager(PluginManagerBase):
-    def run(self, **kwargs) -> Optional[List[Union[str, int, None]]]:
+class CrossoverPluginManager(PluginManagerBase):
+    def run(self, **kwargs) -> Optional[str]:
         """
         Run the plugin with provided arguments.
 
@@ -52,22 +48,16 @@ class MutationPluginManager(PluginManagerBase):
         :returns: bool: True if the molecule passes the filter, False if it fails
         """
 
-        mutation_names = self.get_selected_plugins_from_params()
+        crossover_names = self.get_selected_plugins_from_params()
 
-        if mutation_names is None or len(mutation_names) == 0:
-            # TODO: Throw warning? No mutations selected.
-            log_warning("No mutations selected.")
+        if crossover_names is None or len(crossover_names) == 0:
+            log_warning("No crossovers selected.")
             return None
 
         # Randomly select a mutation to run. If only one is specified, it will
         # always be picked.
-        mutation_name = random.choice(mutation_names)
+        crossover_name = random.choice(crossover_names)
 
-        mutation = cast(MutationBase, self.plugins[mutation_name])
+        crossover = cast(CrossoverBase, self.plugins[crossover_name])
 
-        resp = mutation.run(**kwargs)
-
-        if resp is not None:
-            log_debug(f'{mutation.name}: {kwargs["parent_smiles"]} => {resp[0]}')
-
-        return resp
+        return crossover.run(**kwargs)

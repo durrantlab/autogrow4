@@ -4,6 +4,7 @@ from autogrow.plugins.selectors import SelectorBase
 from typing import List, Tuple
 from autogrow.config.argparser import ArgumentVars
 from autogrow.types import PreDockedCompoundInfo, ScoreType
+from autogrow.utils.logging import log_debug
 
 
 class RankSelector(SelectorBase):
@@ -28,7 +29,7 @@ class RankSelector(SelectorBase):
     def run_selector(
         self,
         usable_smiles: List[PreDockedCompoundInfo],
-        num_to_chose: int,
+        num_to_choose: int,
         score_type: ScoreType,
         favor_most_negative: bool = True,
     ) -> List[PreDockedCompoundInfo]:
@@ -63,7 +64,7 @@ class RankSelector(SelectorBase):
                 "usable_smiles is an empty list. There is nothing to chose from."
             )
 
-        if num_to_chose <= 0:
+        if num_to_choose <= 0:
             return []
 
         # Sort by chosen idx property
@@ -92,14 +93,14 @@ class RankSelector(SelectorBase):
 
         del sorted_list
         del temp_list_info
-        if len(new_sorted_list) < num_to_chose:
+        if len(new_sorted_list) < num_to_choose:
 
             raise Exception(
                 "Asked for {} but only {} availabe to chose from \
                 There are more ligands to chose to seed the list than ligands to select from. \
                 Please lower the top_mols_to_seed_next_generation and/or \
                 diversity_mols_to_seed_first_generation".format(
-                    num_to_chose, len(new_sorted_list)
+                    num_to_choose, len(new_sorted_list)
                 )
             )
 
@@ -109,7 +110,7 @@ class RankSelector(SelectorBase):
             reverse=not favor_most_negative,
         )
 
-        if len(list({x.smiles for x in new_sorted_list})) >= num_to_chose:
+        if len(list({x.smiles for x in new_sorted_list})) >= num_to_choose:
             sorted_list = []
             smiles_list = []
             for mol_info in new_sorted_list:
@@ -121,12 +122,16 @@ class RankSelector(SelectorBase):
         else:
             sorted_list = new_sorted_list
 
-        top_choice_smile_order = []
-        for i in range(num_to_chose):
+        top_choice_smiles_in_order = []
+        for i in range(num_to_choose):
             smiles = sorted_list[i]
-            top_choice_smile_order.append(smiles.smiles)
+            top_choice_smiles_in_order.append(smiles.smiles)
+            scre = smiles.get_previous_score(score_type)
+            log_debug(
+                f"{smiles.smiles} ({smiles.name}): score {scre:.2f}"
+            )
 
-        return top_choice_smile_order
+        return top_choice_smiles_in_order
 
     def finalize_composite_docking_diversity_list(
         self,

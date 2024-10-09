@@ -30,8 +30,6 @@ def define_defaults() -> Dict[str, Any]:
 
     # Mutation Settings
     default_params["rxn_library"] = "click_chem_rxns"
-    default_params["rxn_library_file"] = ""
-    default_params["function_group_library"] = ""
     default_params["complementary_mol_directory"] = ""
 
     # processors

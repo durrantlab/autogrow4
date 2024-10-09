@@ -202,8 +202,6 @@ def _generate_mutations(
         # Package user params specifying the Reaction library to use for mutation
         rxn_library_variables = [
             params["rxn_library"],
-            params["rxn_library_file"],
-            params["function_group_library"],
             params["complementary_mol_directory"],
         ]
 

@@ -29,7 +29,7 @@ class RouletteSelector(SelectorBase):
     def run_selector(
         self,
         usable_smiles: List[PreDockedCompoundInfo],
-        num_to_chose: int,
+        num_to_choose: int,
         score_type: ScoreType,
         favor_most_negative: bool = True,
     ) -> List[PreDockedCompoundInfo]:
@@ -59,7 +59,7 @@ class RouletteSelector(SelectorBase):
                 "usable_smiles is an empty list. There is nothing to chose from."
             )
 
-        if num_to_chose <= 0:
+        if num_to_choose <= 0:
             return []
 
         adjusted = self._adjust_scores(usable_smiles, score_type, favor_most_negative)
@@ -69,7 +69,7 @@ class RouletteSelector(SelectorBase):
         smiles_list = [x.smiles for x in usable_smiles]
 
         return rn.choice(
-            smiles_list, size=num_to_chose, replace=False, p=probability
+            smiles_list, size=num_to_choose, replace=False, p=probability
         ).tolist()
 
     def _adjust_scores(

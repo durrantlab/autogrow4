@@ -154,9 +154,11 @@ class FakeDocking(DockingBase):
         if not os.path.exists(pdb_file):
             # PDB file doesn't exist
             return False, None
+
         assert (
             self.file_conversion_class_object is not None
         ), "file_conversion_class_object must be passed to VinaDocking"
+        
         smile_name = self.file_conversion_class_object.get_smile_name_from_pdb(pdb_file)
 
         # Successfully docked

@@ -40,7 +40,7 @@ class TournamentSelector(SelectorBase):
     def run_selector(
         self,
         usable_smiles: List[PreDockedCompoundInfo],
-        num_to_chose: int,
+        num_to_choose: int,
         score_type: ScoreType,
         favor_most_negative: bool = True,
     ) -> List[PreDockedCompoundInfo]:
@@ -62,7 +62,7 @@ class TournamentSelector(SelectorBase):
         Inputs:
         :param list list_of_ligands: The list of lists containing info about
             ligands with scores to select from.
-        :param int num_to_chose: the number of ligands to be chosen total this
+        :param int num_to_choose: the number of ligands to be chosen total this
             also is the number of tournaments that will be conducted.
         :param float tourn_size: percentage of the total pool of ligands to be
             tested in each tournament.
@@ -97,7 +97,7 @@ class TournamentSelector(SelectorBase):
 
         chosen_ligands = []
         list_of_ligands_reduced = copy.deepcopy(usable_smiles)
-        for _ in range(num_to_chose):
+        for _ in range(num_to_choose):
             chosen_ligand = self._run_one_tournament(
                 usable_smiles, num_per_tourn, score_type, favor_most_negative
             )
