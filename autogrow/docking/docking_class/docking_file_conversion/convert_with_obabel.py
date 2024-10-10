@@ -62,8 +62,6 @@ class ObabelConversion(ParentPDBQTConverter):
             number_of_processors = params["number_of_processors"]
             # vina_like_executable = params["vina_like_executable"]
 
-            ###########################
-
             # convert Receptor from PDB to PDBQT
             self.convert_receptor_pdb_files_to_pdbqt(
                 receptor_file, obabel_path, None, number_of_processors

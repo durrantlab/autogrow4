@@ -36,6 +36,7 @@ class FragmentAddition(MutationBase):
                     name="rxn_library",
                     # TODO: Good to implement this (choices).
                     # choices=["click_chem_rxns", "robust_rxns", "all_rxns"],
+                    type=str,
                     default="all_rxns",
                     help="This set of reactions to be used in Mutation.",
                 ),

@@ -28,6 +28,7 @@ class VinaLikeDocking(DockingBase):
                 ),
                 ArgumentVars(
                     name="vina_like_executable",
+                    type=str,
                     default=None,
                     help="path to the vina_like_executable (vina, qvina2, smina, etc.)",
                 ),
@@ -70,12 +71,14 @@ class VinaLikeDocking(DockingBase):
                 ArgumentVars(
                     name="docking_exhaustiveness",
                     default=8,
+                    type=int,
                     help="exhaustiveness of the global search (roughly proportional to time. \
                     see docking software for settings.",
                 ),
                 ArgumentVars(
                     name="docking_num_modes",
                     default=9,
+                    type=int,
                     help=" maximum number of binding modes to generate in docking. \
                     See docking software for settings. ",
                 ),

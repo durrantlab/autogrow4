@@ -33,18 +33,7 @@ def main_execute(params: Dict[str, Any]) -> None:
 
     # Determine what was the last completed generation in the Run directory
     last_generation = determine_current_gen(output_directory)
-    if last_generation is None:
-        # Check to see if there's a Run 0 based on the seed.
-        if params["dock_source_compounds_first"] is True:
-            # This will assess and rank the source compounds prior to
-            # generation 1. Thus using the source compounds as a generation 0
-            start_gen_num = 0
-        else:
-            start_gen_num = 1
-
-    else:
-        start_gen_num = last_generation + 1
-
+    start_gen_num = 1 if last_generation is None else last_generation + 1
     if start_gen_num > num_gens_to_make:
         print(
             "This simulation has already been completed to the user defined number \
@@ -71,45 +60,25 @@ def main_execute(params: Dict[str, Any]) -> None:
         # print(cur_gen_dir)
         # sys.stdout.flush()
 
-        if gen_num == 0 and params["dock_source_compounds_first"] is True:
-            if os.path.exists(f"{cur_gen_dir}{os.sep}generation_0_ranked.smi") is True:
-                continue
+        smiles_file_new_gen, new_gen_ligs = operations.populate_generation(
+            params, gen_num
+        )
+        sys.stdout.flush()
 
-            (
-                already_docked,
-                smiles_file_new_gen,
-                new_gen_ligs,
-            ) = operations.populate_generation_zero(params, gen_num=0)
-            sys.stdout.flush()
-
-            if already_docked is False:
-                # Run file conversions of PDB to docking specific file type
-                # and Begin Docking unweighted_ranked_smile_file is the file
-                # name where the unweighted ranked but score .smi file resides
-                unweighted_ranked_smile_file = DockingClass.run_docking_common(
-                    params, gen_num, cur_gen_dir, smiles_file_new_gen,
-                )
-
-        else:
-            smiles_file_new_gen, new_gen_ligs = operations.populate_generation(
-                params, gen_num
+        if new_gen_ligs is None:
+            raise ValueError(
+                "Population failed to make enough mutants or crossovers... \
+                                Errors could include not enough diversity, too few seeds to the generation, \
+                                the seed mols are unable to cross-over due to lack of similarity,\
+                                or all of the seed lack functional groups for performing reactions."
             )
-            sys.stdout.flush()
 
-            if new_gen_ligs is None:
-                raise ValueError(
-                    "Population failed to make enough mutants or crossovers... \
-                                    Errors could include not enough diversity, too few seeds to the generation, \
-                                    the seed mols are unable to cross-over due to lack of similarity,\
-                                    or all of the seed lack functional groups for performing reactions."
-                )
-
-            # Run file conversions of PDB to docking specific file type and
-            # Begin Docking unweighted_ranked_smile_file is the file name
-            # where the unweighted ranked but score .smi file resides
-            unweighted_ranked_smile_file = DockingClass.run_docking_common(
-                params, gen_num, cur_gen_dir, smiles_file_new_gen,
-            )
+        # Run file conversions of PDB to docking specific file type and
+        # Begin Docking unweighted_ranked_smile_file is the file name
+        # where the unweighted ranked but score .smi file resides
+        unweighted_ranked_smile_file = DockingClass.run_docking_common(
+            params, gen_num, cur_gen_dir, smiles_file_new_gen,
+        )
 
         # Delete all temporary files; Skip if in Debugging Mode
         if params["debug_mode"] is False:

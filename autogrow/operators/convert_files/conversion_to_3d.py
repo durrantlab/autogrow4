@@ -94,9 +94,11 @@ def convert_to_3d(
     log_info("Converting SMILES to 3D structures")
     with LogLevel():
         log_info("Converting SMILES to 3D SDF")
+
+        
         # convert smiles in an .SMI file to sdfs using gypsum
         with WithoutLogging():
-            gypsum_output_folder_path = convert_smi_to_sdfs_with_gypsum(
+            gypsum_output_folder_path = _convert_smi_to_sdfs_with_gypsum(
                 params, smi_file, smile_file_directory
             )
         # print("CONVERTING SMILES TO SDF COMPLETED")
@@ -104,11 +106,11 @@ def convert_to_3d(
         log_info("Converting 3D SDF to PDB")
         # print("CONVERTING SDF TO PDB")
         # convert sdf files to PDBs using rdkit
-        convert_sdf_to_pdbs(params, smile_file_directory, gypsum_output_folder_path)
+        _convert_sdf_to_pdbs(params, smile_file_directory, gypsum_output_folder_path)
         # print("CONVERTING SDF TO PDB COMPLETED")
 
 
-def convert_smi_to_sdfs_with_gypsum(
+def _convert_smi_to_sdfs_with_gypsum(
     params: Dict[str, Any], gen_smiles_file: str, smile_file_directory: str
 ) -> str:
     """
@@ -154,7 +156,7 @@ def convert_smi_to_sdfs_with_gypsum(
         os.makedirs(gypsum_log_path)
 
     # Make All of the json files to submit to gypsum
-    list_of_gypsum_params = make_smi_and_gyspum_params(
+    list_of_gypsum_params = _make_smi_and_gyspum_params(
         gen_smiles_file,
         folder_path,
         gypsum_output_folder_path,
@@ -173,7 +175,7 @@ def convert_smi_to_sdfs_with_gypsum(
 
     sys.stdout.flush()
     failed_to_convert = params["parallelizer"].run(
-        job_input, run_gypsum_multiprocessing
+        job_input, _run_gypsum_multiprocessing
     )
     sys.stdout.flush()
 
@@ -187,7 +189,7 @@ def convert_smi_to_sdfs_with_gypsum(
     return gypsum_output_folder_path
 
 
-def make_smi_and_gyspum_params(
+def _make_smi_and_gyspum_params(
     gen_smiles_file: str,
     folder_path: str,
     gypsum_output_folder_path: str,
@@ -308,7 +310,7 @@ def make_smi_and_gyspum_params(
     return list_of_gypsum_params
 
 
-def run_gypsum_multiprocessing(
+def _run_gypsum_multiprocessing(
     gypsum_log_path: str, gypsum_params: Dict[str, Any], gypsum_timeout_limit: int
 ) -> Union[str, None]:
     """
@@ -351,7 +353,7 @@ def run_gypsum_multiprocessing(
         return lig_id
 
     # Check if it worked if it failed return lig_id if it works return None
-    did_gypsum_complete = check_gypsum_log_did_complete(log_file)
+    did_gypsum_complete = _check_gypsum_log_did_complete(log_file)
     if did_gypsum_complete in [None, False]:
         # Failed to convert
         return lig_id
@@ -359,7 +361,7 @@ def run_gypsum_multiprocessing(
     return None
 
 
-def check_gypsum_log_did_complete(log_file_path: str) -> Union[bool, None]:
+def _check_gypsum_log_did_complete(log_file_path: str) -> Union[bool, None]:
     """
     This function checks a log_file_path to see if the last line reads
     "TIMEOUT". If it does then gypsum timed out before converting a .smi. If
@@ -405,7 +407,7 @@ def check_gypsum_log_did_complete(log_file_path: str) -> Union[bool, None]:
     return True
 
 
-def convert_sdf_to_pdbs(
+def _convert_sdf_to_pdbs(
     params: Dict[str, Any], gen_folder_path: str, sdfs_folder_path: str
 ) -> None:
     """
@@ -462,10 +464,10 @@ def convert_sdf_to_pdbs(
         raise Exception(printout)
 
     # Convert sdf files to pdbs in multithread
-    params["parallelizer"].run(job_inputs, convert_single_sdf_to_pdb)
+    params["parallelizer"].run(job_inputs, _convert_single_sdf_to_pdb)
 
 
-def convert_single_sdf_to_pdb(pdb_subfolder_path: str, sdf_file_path: str) -> None:
+def _convert_single_sdf_to_pdb(pdb_subfolder_path: str, sdf_file_path: str) -> None:
     """
     This will convert a given .sdf into separate .pdb files.
 

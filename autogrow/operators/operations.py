@@ -10,6 +10,7 @@ import copy
 import sys
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+from autogrow.plugins.plugin_manager_base import get_plugin_manager
 from autogrow.types import PreDockedCompoundInfo
 from autogrow.utils.logging import LogLevel, log_info, log_warning
 import rdkit  # type: ignore
@@ -152,9 +153,13 @@ def populate_generation(
         )
 
         # Convert SMILES to .sdf using Gypsum and convert .sdf to .pdb with RDKit
-        conversion_to_3d.convert_to_3d(
-            params, smiles_to_convert_file, new_gen_folder_path
-        )
+
+        # Note that smiles_to_convert_file is a single with with many smi files
+        # in it.
+        get_plugin_manager("SmiToSdfPluginManager").run(smi_file=smiles_to_convert_file)
+        # conversion_to_3d.convert_to_3d(
+        #     params, smiles_to_convert_file, new_gen_folder_path
+        # )
 
     return full_generation_smiles_file, full_gen_smis
 
@@ -431,21 +436,9 @@ def populate_generation_zero(
     :returns: str full_generation_smiles_file: the name of the .smi file containing the new population
     :returns: list full_gen_smis: list with the new population of ligands.
     """
-    number_of_processors = int(params["number_of_processors"])
-
-    num_crossovers = 0
-    num_mutations = 0
-
+    import pdb; pdb.set_trace()
     # Get the source compound list
     src_cmpds = _get_complete_list_prev_gen_or_source_compounds(params, gen_num)
-    num_elite_to_advance_from_previous_gen = len(src_cmpds)
-
-    num_seed_diversity, num_seed_dock_fitness = _determine_seed_population_sizes(
-        params, gen_num
-    )
-
-    # Total population size of this generation
-    total_num_desired_new_ligands = num_crossovers + num_mutations + 1
 
     # Get unaltered samples from the previous generation
     # print("GET SOME LIGANDS FROM THE LAST GENERATION")
@@ -479,8 +472,10 @@ def populate_generation_zero(
     if already_docked:
         return already_docked, full_gen_smis_file, full_gen_smis
 
-    # If not already docked, convert to 3D
-    conversion_to_3d.convert_to_3d(params, smis_to_convert_file, new_gen_folder_path)
+    # If not already docked, convert to 3D. Note that smiles_to_convert_file is
+    # a single with with many smi files in it.
+    get_plugin_manager("SmiToSdfPluginManager").run(smi_file=smis_to_convert_file)
+    # conversion_to_3d.convert_to_3d(params, smis_to_convert_file, new_gen_folder_path)
 
     return already_docked, full_gen_smis_file, full_gen_smis
 
@@ -803,42 +798,8 @@ def _make_seed_list(
         # Get starting compounds for Mutations
         full_length = True
     elif generation_num == 1:
-        if params["dock_source_compounds_first"] is False:
-            # Get starting compounds for Mutations
-            full_length = True
-        else:
-            source_file_gen_0 = params[
-                "output_directory"
-            ] + "generation_{}{}generation_{}_ranked.smi".format(0, os.sep, 0)
-            if not os.path.exists(source_file_gen_0):
-                full_length = True
-
-            else:
-                # generation_num 1 may run into problems if the source
-                # compounds are smaller than the seed pool required to seed
-                # generation 1. Because the seeding options are connected to
-                # the generation number (due to the depreciation of diversity
-                # option) Because of this we may need to ignore the ranking
-                # for the seeds of generation 1 to accomidate the smaller
-                # source size. This is especially important with
-                # lead-optimization in which the source pool may be much
-                # smaller For this reason we will override the seeding of
-                # generation 1 if the number to seed is greater than exists
-                # but will provide a warning message.
-                if (
-                    len(usable_smiles) < num_seed_diversity
-                    or len(usable_smiles) < num_seed_diversity
-                ):
-                    # This is problematic so just use what is available
-                    printout = "\n\nNot enough ligands in source compound \
-                        list to seed generation 1. We will use the entire \
-                        list of every ligand in the source compound list \
-                        to seed generation 1. This means there is no \
-                        selection in generation 1's seeding process.\n\n"
-                    print(printout)
-                    full_length = True
-                else:
-                    full_length = False
+        # Get starting compounds for Mutations
+        full_length = True
     else:
         full_length = False
 

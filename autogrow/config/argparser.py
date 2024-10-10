@@ -295,23 +295,23 @@ def _add_ga_first_gen_params(parser: argparse._ArgumentGroup):
         This does not select for diversity. If not defined it will default to \
         number_elitism_advance_from_previous_gen",
     )
-    parser.add_argument(
-        "--dock_source_compounds_first",
-        choices=[True, False, "True", "False", "true", "false"],
-        default=False,
-        help="If True source ligands will be docked prior to seeding generation 1. \
-        If True and the source_compound file already has docking/fitness metric score \
-        in -2 column of .smi file, it will not redock but reuse the scores from \
-        the source_compound_file.\
-        If True and no fitness metric score in -2 column of .smi file, it will \
-        dock each ligand from the source_compound_file and displayed as generation 0.\
-        If False, generation 1 will be randomly seeded by the source compounds with \
-        no preference and there will be no generation 0. \
-        If performing multiple simulations using same source compounds and protein, \
-        we recommend running once this and using the generation 0 ranked file as the \
-        source_compound_file for future simulations. \
-        Default is True.",
-    )
+    # parser.add_argument(
+    #     "--dock_source_compounds_first",
+    #     choices=[True, False, "True", "False", "true", "false"],
+    #     default=False,
+    #     help="If True source ligands will be docked prior to seeding generation 1. \
+    #     If True and the source_compound file already has docking/fitness metric score \
+    #     in -2 column of .smi file, it will not redock but reuse the scores from \
+    #     the source_compound_file.\
+    #     If True and no fitness metric score in -2 column of .smi file, it will \
+    #     dock each ligand from the source_compound_file and displayed as generation 0.\
+    #     If False, generation 1 will be randomly seeded by the source compounds with \
+    #     no preference and there will be no generation 0. \
+    #     If performing multiple simulations using same source compounds and protein, \
+    #     we recommend running once this and using the generation 0 ranked file as the \
+    #     source_compound_file for future simulations. \
+    #     Default is True.",
+    # )
 
 
 def _add_ga_subsequent_gen_params(parser: argparse._ArgumentGroup):
