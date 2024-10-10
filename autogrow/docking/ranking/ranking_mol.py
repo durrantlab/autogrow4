@@ -4,11 +4,9 @@ This script runs the ranking and selection of ligands.
 import __future__
 
 import os
-import random
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional
 
 from autogrow.plugins.plugin_manager_base import get_plugin_manager
-from autogrow.plugins.selectors import SelectorPluginManager
 from autogrow.types import PreDockedCompound, PostDockedCompound, ScoreType
 import rdkit  # type: ignore
 import rdkit.Chem as Chem  # type: ignore

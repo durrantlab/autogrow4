@@ -13,9 +13,7 @@ import copy
 import datetime
 import json
 import sys
-import platform
-from shutil import copyfile
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Tuple
 
 from autogrow.config.config_run_directory import set_run_directory
 
@@ -107,66 +105,6 @@ def multiprocess_handling(params: Dict[str, Any]) -> Dict[str, Any]:
     )
 
     return params
-
-
-def test_docking_executables(
-    params: Dict[str, Any], vina_exe: str, qvina2_exe: str
-) -> bool:
-    """
-    This will test if docking executables are compatible with OS.
-    This is only required for MacOS.
-
-    Test will output the version of Vina and QVina2.1 executables to txt file
-    in the root_output_folder (docking_exe_MACOS_test.txt)
-    If both executables are compatible with this MacOS there should be the following
-    2 lines in the txt file:
-        AutoDock Vina 1.1.2 (May 11, 2011)
-        QuickVina 2.1 (24 Dec, 2017)
-
-    Returns True if both work and returns False.
-
-    Inputs:
-    :param dict params: dict of user variables which will govern how the programs runs
-    :param str vina_exe: path to vina executable
-    :param str qvina2_exe: path to quick vina 2 executable
-    Returns:
-    :returns: bool bool: returns True if both docking executables work; False if either fails
-    """
-    test_vina_outfile = (
-        params["root_output_folder"] + os.sep + "docking_exe_MACOS_test.txt"
-    )
-    try:
-        command = "{} --version > {arg_2} 2>> {arg_2}".format(
-            vina_exe, arg_2=test_vina_outfile
-        )
-        os.system(command)
-        command = "{} --version >> {arg_2} 2>> {arg_2}".format(
-            qvina2_exe, arg_2=test_vina_outfile
-        )
-        os.system(command)
-    except Exception:
-        printout = "Docking executables could not be found."
-        # is not compatible on this OS. \nPlease use docker "
-        return False
-
-    with open(test_vina_outfile, "r") as test_file:
-        lines = test_file.readlines()
-
-    return True
-
-
-def _process_mac_execs(arg0, vina_exe, qvina2_exe):
-    command = f"{arg0}{vina_exe}"
-    os.system(command)
-    command = f"{arg0}{qvina2_exe}"
-    os.system(command)
-
-
-def _notify_docker_requirement(arg0):
-    printout = f"{arg0}Please run using docker version of AutoGrow."
-    print(printout)
-    raise Exception(printout)
-
 
 ############################################
 ###### Variables Handlining Settings #######
@@ -785,7 +723,7 @@ def load_in_commandline_parameters(argv: Dict[str, Any]) -> Tuple[Dict[str, Any]
     :returns: dict params: Dictionary of User variables
     :returns: str printout: a string to be printed to screen and saved to output file
     """
-
+    # TODO: Why is this never called? I think it should be.
     params = define_defaults()
 
     # Load the parameters from the json
@@ -876,48 +814,6 @@ def load_in_commandline_parameters(argv: Dict[str, Any]) -> Tuple[Dict[str, Any]
     save_vars_as_json(params)
 
     return params, printout
-
-
-def make_complete_children_dict(purpose_of_object: str) -> Dict[str, Any]:
-    """
-    This will retrieve all the names of every child class of the parent class
-    This can be either filter, parent_pdbqt_converter, ParentDocking,
-    or ParentScoring
-
-    Inputs:
-    :param str purpose_of_object: either filter, parent_pdbqt_converter,
-        ParentDocking, or ParentScoring
-    Returns:
-    :returns: dict child_dict: Dictionary of all the class objects for either
-        Filtering, docking, Dockingfile conversion or scoring
-    """
-    parent_object = None
-    get_all_subclasses = None
-    if purpose_of_object == "parent_pdbqt_converter":
-        import autogrow.docking.docking_class.docking_file_conversion
-        from autogrow.docking.docking_class.parent_pdbqt_converter import (
-            ParentPDBQTConverter as parent_object,
-        )
-        from autogrow.docking.docking_class.get_child_class import get_all_subclasses
-    elif purpose_of_object == "ParentScoring":
-        import autogrow.docking.scoring.scoring_classes.scoring_functions
-        from autogrow.docking.scoring.scoring_classes.parent_scoring_class import (
-            ParentScoring as parent_object,
-        )
-        from autogrow.docking.docking_class.get_child_class import get_all_subclasses
-
-    assert parent_object is not None, "parent_object is not recognized"
-    assert get_all_subclasses is not None, "get_all_subclasses is not recognized"
-
-    children = get_all_subclasses(parent_object)
-    child_dict = {}
-    for child in children:
-        child_object = child()
-        child_name = child_object.get_name()
-        child_dict[child_name] = child_object
-
-    return child_dict
-
 
 ############################################
 ######## Filter Handlining Settings ########

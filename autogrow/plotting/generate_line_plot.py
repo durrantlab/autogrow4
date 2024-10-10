@@ -5,7 +5,6 @@ import os
 import glob
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import matplotlib  # type: ignore
 import matplotlib.pyplot as plt  # type: ignore
 
 

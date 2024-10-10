@@ -43,7 +43,7 @@ from typing import Any, Dict
 import support_scripts.Multiprocess as mp
 
 
-def compress_file(file_name: str) -> None:
+def _compress_file(file_name: str) -> None:
     """
     Compress the concatenated file
 
@@ -59,7 +59,7 @@ def compress_file(file_name: str) -> None:
 
 
 #######
-def decompress_file(decompressed_file: str) -> str:
+def _decompress_file(decompressed_file: str) -> str:
     """
     Decompress a file. Not used in running the program but is the counter of
     def compress_file(file_name)
@@ -79,7 +79,7 @@ def decompress_file(decompressed_file: str) -> str:
 
 
 #######
-def separate_files(compressed_file: str) -> None:
+def _separate_files(compressed_file: str) -> None:
     """
     Separate a concatenated file. Not used in running the program but is the
     counter of def compress_file(file_name)
@@ -94,7 +94,7 @@ def separate_files(compressed_file: str) -> None:
     )
     compressed_file = os.path.abspath(compressed_file)
 
-    decompressed_file = decompress_file(compressed_file)
+    decompressed_file = _decompress_file(compressed_file)
     if os.path.exists(decompressed_file) is False:
         raise Exception("Failed to decompress the file")
 
@@ -141,7 +141,7 @@ def separate_files(compressed_file: str) -> None:
 
 
 #######
-def get_file_info(file_name: str) -> str:
+def _get_file_info(file_name: str) -> str:
     """
     Used for concatenating files together. This function appends a seperator
     and the filename of a file before and after the text of the file
@@ -202,14 +202,14 @@ def run_concatenation(directory: str) -> None:
 
     with open(concat_file, "a+") as f:
         for file_name in file_list:
-            f.write(get_file_info(file_name))
+            f.write(_get_file_info(file_name))
 
     job_list = list(tuple((file_path,) for file_path in file_list))
     print("\tFinish Concatenation")
     print("\tRemoving files that were concatenated")
     mp.multi_threading(job_list, -1, del_files)
     print("\tCompressing file")
-    compress_file(concat_file)
+    _compress_file(concat_file)
     if os.path.exists(f"{concat_file}.gz"):
         del_files(concat_file)
     print("Finished Compression")
@@ -239,7 +239,7 @@ def run_main(params: Dict[str, Any]) -> None:
         print("BEFORE")
         print(os.path.getsize(input_folder))
 
-        separate_files(compressed_file)
+        _separate_files(compressed_file)
         print("After deconcatenate")
         print(os.path.getsize(input_folder))
 

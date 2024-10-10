@@ -64,24 +64,6 @@ class DockingPluginManager(PluginManagerBase):
 
         return docking.run(**kwargs)
 
-    # Finding PDBs for ligands in a folder
-    def find_pdb_ligands(self, current_generation_pdb_dir):
-        """
-        This finds all the pdb files of ligands in a directory
-
-        Inputs:
-        :param str current_generation_pdb_dir: the dir path which contains the
-            pdb files of ligands to be converted
-
-        Returns:
-        :returns: list pdbs_in_folder: a list of all PDB's in the dir
-        """
-
-        # TODO: Doesn't seem like the right place for this function.
-
-        # make list of every pdb in the current generations pdb folder
-        return list(glob.glob(f"{current_generation_pdb_dir}*.pdb"))
-
     def run_ligand_handling_for_docking(
         self, pdb_file, file_conversion_class_object: ParentPDBQTConverter
     ) -> Optional[str]:
@@ -118,25 +100,6 @@ class DockingPluginManager(PluginManagerBase):
         # Conversion pass. Return None
         # only return failed smile_names which will be handled later
         return None
-
-    # Find ligands which converted to PDBQT
-    def find_converted_ligands(self, current_generation_pdb_dir):
-        """
-        This finds all the pdbqt files of ligands in a directory
-
-        Inputs:
-        :param str current_generation_pdb_dir: the dir path which contains the
-            pdbqt files of ligands to be docked
-
-        Returns:
-        :returns: list pdbqts_in_folder: a list of all PDBqt's in the dir
-        """
-
-        # TODO: Not the right place for this, and also specific to vina-like
-        # ones.
-
-        # make list of every pdbqt in the current generations pdb folder
-        return list(glob.glob(f"{current_generation_pdb_dir}*.pdbqt"))
 
     def rank_and_save_output_smi(
         self,

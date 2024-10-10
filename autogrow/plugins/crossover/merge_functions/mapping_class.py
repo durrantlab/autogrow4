@@ -296,27 +296,6 @@ class Mapping(object):
             self.delete_i(x)
         return b_x
 
-    #
-    def testing_function_return_self_dicts(
-        self,
-    ) -> Tuple[Dict[str, List[int]], Dict[int, List[str]]]:
-        """
-        Return the properties: self.b_to_is and self.i_to_bs
-
-        Returns:
-        :returns: dict b_to_is: Dictionary converting B-groups to
-            anchor/node/I atoms. This contains groups from both parent molecules.
-            This is the inverse of i_to_bs. keys are B-groups; items are the
-            anchor atoms isotope label. ie) {'1B1': [10003], '2B3': [10005],
-            '2B2': [10003], '2B1': [10002]}
-        :returns: dict i_to_bs: Dictionary converting Anchor/node/I atoms to
-            corresponding B-groups. This contains groups from both parent
-            molecules. This is the inverse of b_to_is. keys are the anchor atoms
-            isotope labels; items are B-groups. ie) {10002: ['2B1'], 10003:
-            ['1B1', '2B2'], 10005: ['2B3']}
-        """
-        return self.b_to_is, self.i_to_bs
-
 
 # i_dict = {10000: ['1B1', '2B1'], 10004: ['2B2'], 10005: ['2B3'], 10006: \
 #       ['2B4'], 10007: ['1B3'], 10008: ['1B2']}

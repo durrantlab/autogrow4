@@ -8,7 +8,6 @@ import __future__
 
 import contextlib
 import os
-import glob
 import sys
 import shutil
 from typing import Any, Dict, Optional
@@ -253,24 +252,3 @@ def determine_if_gen_completed(gen_dir_path: str, gen_number: int) -> bool:
 
     return os.path.isfile(file_path)
 
-
-def delete_temporary_files_and_folders(file_or_folder: str) -> None:
-    """
-    This deletes all temporary files.
-
-    Inputs:
-    :param str file_or_folder: the file or folder to delete
-
-    """
-    if os.path.exists(file_or_folder) is not True:
-        return
-    with contextlib.suppress(Exception):
-        if os.path.isdir(file_or_folder) is True:
-            shutil.rmtree(file_or_folder)
-        else:
-            os.remove(file_or_folder)
-        # If it failed to delete try via bash command
-    if os.path.exists(file_or_folder) is True:
-        command = f"rm -rf {file_or_folder}"
-        with contextlib.suppress(Exception):
-            os.system(command)

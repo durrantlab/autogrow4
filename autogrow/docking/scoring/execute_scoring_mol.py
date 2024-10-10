@@ -8,7 +8,6 @@ from typing import Any, Dict, List, Optional, Tuple
 from autogrow.docking.docking_class.get_child_class import get_all_subclasses
 
 # importing scoring_functions is necessary to find rescoring modules
-import autogrow.docking.scoring.scoring_classes.scoring_functions
 from autogrow.docking.scoring.scoring_classes.parent_scoring_class import ParentScoring
 from autogrow.docking.scoring.scoring_classes.scoring_functions.lig_efficiency import (
     LigEfficiency,
@@ -197,7 +196,7 @@ def run_rescoring(
     return completed_rescore
 
 
-# TODO Rename this here and in `run_rescoring`
+# TODO: Rename this here and in `run_rescoring`
 def _extracted_from_run_rescoring_42(arg0: Any, arg1: Any) -> None:
     print(arg0)
     print(arg1)

@@ -89,35 +89,6 @@ def run_docking_common(
         DockingPluginManager, get_plugin_manager("DockingPluginManager")
     )
 
-    # dock_class = pick_docking_class_dict(dock_choice)
-    # docking = dock_class(temp_vars, receptor, file_conversion_obj, test_boot=False)
-
-    # # Find PDB's
-    # pdbs_in_folder = docking_plugin_manager.find_pdb_ligands(current_generation_pdb_dir)
-    # job_input_convert_lig = tuple(
-    #     (docking_plugin_manager, pdb, file_conversion_obj) for pdb in pdbs_in_folder
-    # )
-
-    # print("Convert Ligand to PDBQT format Begun")
-    # smiles_names_failed_to_convert = params["parallelizer"].run(
-    #     job_input_convert_lig, lig_convert_multithread
-    # )
-
-    # print("Convert Ligand to PDBQT format Completed")
-    # deleted_smiles_names_list_convert = [
-    #     x for x in smiles_names_failed_to_convert if x is not None
-    # ]
-    # deleted_smiles_names_list_convert = list(set(deleted_smiles_names_list_convert))
-
-    # if deleted_smiles_names_list_convert:
-    #     print("THE FOLLOWING LIGANDS FAILED TO CONVERT:")
-    #     print(deleted_smiles_names_list_convert)
-
-    # # Docking the ligands which converted to PDBQT Find PDBQT's
-    # pdbqts_in_folder = docking_plugin_manager.find_converted_ligands(
-    #     current_generation_pdb_dir
-    # )
-
     job_input_dock_lig = [
         (docking_plugin_manager, new_gen_predock_cmpd)
         for new_gen_predock_cmpd in new_gen_predock_cmpds
@@ -144,30 +115,6 @@ def run_docking_common(
     )
     print("\nCompleted Ranking and Saving results\n")
     return unweighted_ranked_smile_file
-
-
-def lig_convert_multithread(
-    docking: DockingPluginManager,
-    pdb: str,
-    file_conversion_class_object: ParentPDBQTConverter,
-) -> Union[str, None]:
-    """
-    Run the ligand conversion of a single molecule. If it failed
-    failed_smiles_name will be a string of the SMILE which failed to convert
-    If it converts failed_smiles_name will be a None.
-
-    Inputs:
-    :param object docking_object: the class for running the chosen docking
-        method
-    :param str pdb: the path to the pdb of a molecule
-
-    Returns:
-    :returns: list failed_smiles_name: if the molecule failed to convert to
-        final format. (ie. pdbqt conversion fail)
-    """
-
-    return docking.run_ligand_handling_for_docking(pdb, file_conversion_class_object)
-
 
 def _run_dock_multithread_wrapper(
     docking: DockingPluginManager, new_gen_predock_cmpd: PreDockedCompound,

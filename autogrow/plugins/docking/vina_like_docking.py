@@ -8,7 +8,6 @@ from autogrow.plugins.docking import DockingBase
 from typing import Any, Dict, List, Optional, Tuple
 from autogrow.config.argparser import ArgumentVars
 from autogrow.types import PostDockedCompound, PreDockedCompound, ScoreType
-import autogrow.docking.delete_failed_mol as Delete
 from autogrow.utils.logging import log_warning
 from autogrow.utils.obabel import obabel_convert
 
@@ -345,13 +344,6 @@ class VinaLikeDocking(DockingBase):
                     + os.path.basename(pdb_file)
                     + "..."
                 )
-
-                # REMOVE Failed molecules. Delete ones that were not docked
-                # successfully
-                Delete.delete_all_associated_files(pdb_file)
-                # # delete pdbqt_file
-                pdbqt_file = f"{pdb_file}qt"
-                Delete.delete_all_associated_files(pdbqt_file)
 
                 return False, smile_name
 

@@ -12,7 +12,6 @@ from typing import Any, Dict, Optional, Union
 
 import rdkit.Chem as Chem  # type: ignore
 
-import autogrow.docking.delete_failed_mol as Delete
 import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
 
 from autogrow.docking.docking_class.parent_pdbqt_converter import ParentPDBQTConverter
@@ -34,6 +33,8 @@ class ObabelConversion(ParentPDBQTConverter):
     :param class ParentPDBQTConverter: Parent PDBQTConverter class to inherit
       from
     """
+
+    # TODO: Class not used, but might be some good stuff here to incorporate elsewhere.
 
     def __init__(
         self, params: Optional[Dict[str, Any]] = None, test_boot: bool = True,
@@ -197,15 +198,6 @@ class ObabelConversion(ParentPDBQTConverter):
             self.prepare_ligand_processing(obabel_path, pdb_file)
             if not os.path.exists(f"{pdb_file}qt"):
                 # FILE FAILED TO CONVERT TO PDBQT DELETE PDB AND RETURN FALSE
-                if self.debug_mode is False:
-                    print(
-                        f"PDBQT not generated: Deleting {os.path.basename(pdb_file)}..."
-                    )
-
-                    # REMOVED FOR LIGANDS WHICH FAILED TO CONVERT TO PDBQT
-                    Delete.delete_all_associated_files(pdb_file)
-                    return False, smile_name
-                # In debug mode but pdbqt file does not exist
                 print(f"PDBQT not generated: {os.path.basename(pdb_file)}...")
                 return False, smile_name
 

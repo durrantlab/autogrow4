@@ -65,24 +65,6 @@ def get_argparse_vars() -> Dict[str, Any]:
     )
     _add_ga_subsequent_gen_params(ga_subsequent_gen)
 
-    # SmilesMerge Settings
-    # smilesmerge = parser.add_argument_group(
-    #     "SmilesMerge Settings (options for the SmilesMerge operation)"
-    # )
-    # _add_smilesmerge_params(smilesmerge)
-
-    # Mutation Settings
-    # mutation = parser.add_argument_group(
-    #     "Mutation Settings (options for the mutation operation)"
-    # )
-    # _add_mutation_params(mutation)
-
-    # Filter Settings
-    # filters = parser.add_argument_group(
-    #     "Filter Settings (options for filtering compounds)"
-    # )
-    # _add_filter_params(filters)
-
     # Conversion Settings
     conversion = parser.add_argument_group(
         "Conversion Settings (options for file conversion)"
@@ -393,49 +375,6 @@ def _add_ga_params(parser: argparse._ArgumentGroup):
         help="Each gen diversity_mols_to_seed_first_generation will decrease this amount",
     )
 
-
-# def _add_smilesmerge_params(parser: argparse._ArgumentGroup):
-#     # SmilesMerge Settings
-#     parser.add_argument(
-#         "--max_time_MCS_prescreen",
-#         type=int,
-#         default=1,
-#         help="amount time the pre-screen MCS times out. Time out doesnt prevent \
-#         mcs matching just takes what it has up to that point",
-#     )
-#     parser.add_argument(
-#         "--max_time_MCS_thorough",
-#         type=int,
-#         default=1,
-#         help="amount time the thorough MCS times out. Time out doesnt prevent \
-#         mcs matching just takes what it has up to that point",
-#     )
-#     parser.add_argument(
-#         "--min_atom_match_MCS",
-#         type=int,
-#         default=4,
-#         help="Determines the minimum number of atoms in common for a substructurematch. \
-#         The higher the more restrictive, but the more likely for two ligands not to match",
-#     )
-#     parser.add_argument(
-#         "--protanate_step",
-#         action="store_true",
-#         default=False,
-#         help="Indicates if Smilesmerge uses protanated mols (if true) or deprot \
-#         (if False) SmilesMerge is 10x faster when deprotanated",
-#     )
-
-
-# def _add_mutation_params(parser: argparse._ArgumentGroup):
-#     # Mutation Settings
-#     parser.add_argument(
-#         "--rxn_library_path",
-#         choices=["click_chem_rxns", "robust_rxns", "all_rxns"],
-#         default="all_rxns",
-#         help="This set of reactions to be used in Mutation.",
-#     )
-
-
 def _add_filter_params(parser: argparse._ArgumentGroup):
     ####### FILTER VARIABLES
     # parser.add_argument(
@@ -518,14 +457,6 @@ def _add_filter_params(parser: argparse._ArgumentGroup):
 
 def _add_conversion_params(parser: argparse._ArgumentGroup):
     # DOCUMENT THE file conversion for docking inputs
-    # parser.add_argument(
-    #     "--conversion_choice",
-    #     choices=["ObabelConversion"],
-    #     default="ObabelConversion",
-    #     help="Determines how .pdb files will be converted \
-    #     to the final format for docking. For Autodock Vina and QuickVina style docking software, \
-    #     files must be in .pdbqt format.",
-    # )
     parser.add_argument(
         "--obabel_path",
         help="The path to the open babel executable. \
