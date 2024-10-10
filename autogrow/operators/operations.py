@@ -80,111 +80,108 @@ def populate_generation(
         num_crossovers + num_mutations + num_elite_to_advance_from_previous_gen
     )
 
-    log_info(f"Creating Generation {generation_num}")
+    # Generate mutations
+    mut_predock_cmpds = _generate_mutations(
+        params,
+        generation_num,
+        num_mutations,
+        num_seed_diversity,
+        num_seed_dock_fitness,
+        src_cmpds,
+        number_of_processors,
+    )
 
-    with LogLevel():
-        # Generate mutations
-        mut_predock_cmpds = _generate_mutations(
-            params,
-            generation_num,
-            num_mutations,
-            num_seed_diversity,
-            num_seed_dock_fitness,
-            src_cmpds,
-            number_of_processors,
+    # Generate crossovers
+    cross_predock_cmpds = _generate_crossovers(
+        params,
+        generation_num,
+        num_crossovers,
+        num_seed_diversity,
+        num_seed_dock_fitness,
+        src_cmpds,
+        number_of_processors,
+    )
+
+    # Get ligands from previous generation
+    elite_predock_cmpds = _get_elitism_cmpds_from_prev_gen(
+        params, src_cmpds, num_elite_to_advance_from_previous_gen, generation_num,
+    )
+
+    # Build new_gen_smis and full_gen_smis
+    # TODO: Need to understand why these two are separate.
+    new_gen_predock_cmpds: List[
+        PreDockedCompound
+    ] = mut_predock_cmpds + cross_predock_cmpds
+    full_gen_predock_cmpds: List[
+        PreDockedCompound
+    ] = mut_predock_cmpds + cross_predock_cmpds
+
+    # TODO: Consider depreciating redock_elite_from_previous_gen
+    if params["redock_elite_from_previous_gen"] is False and generation_num != 1:
+        # Doesn't append to the new_generation_smiles_list
+        full_gen_predock_cmpds.extend(iter(elite_predock_cmpds))
+    else:
+        for i in elite_predock_cmpds:
+            new_gen_predock_cmpds.append(i)
+            full_gen_predock_cmpds.append(i)
+
+    if len(full_gen_predock_cmpds) < total_num_desired_new_ligands:
+        print("We needed ", total_num_desired_new_ligands)
+        print("We made ", len(full_gen_predock_cmpds))
+        print(
+            "Population failed to make enough mutants or crossovers... "
+            "Errors could include not enough diversity, too few seeds to "
+            "the generation, the seed mols are unable to cross-over due "
+            "to lack of similarity, or all of the seed lack functional groups "
+            "for performing reactions"
         )
+        assert False
 
-        # Generate crossovers
-        cross_predock_cmpds = _generate_crossovers(
-            params,
-            generation_num,
-            num_crossovers,
-            num_seed_diversity,
-            num_seed_dock_fitness,
-            src_cmpds,
-            number_of_processors,
-        )
+    # Save the full generation and the SMILES to convert
+    (
+        full_generation_smiles_file,
+        smiles_to_convert_file,
+        new_gen_folder_path,
+    ) = _save_smiles_files(
+        params,
+        generation_num,
+        full_gen_predock_cmpds,
+        new_gen_predock_cmpds,
+        "_to_convert",
+    )
 
-        # Get ligands from previous generation
-        elite_predock_cmpds = _get_elitism_cmpds_from_prev_gen(
-            params, src_cmpds, num_elite_to_advance_from_previous_gen, generation_num,
-        )
+    # Convert SMILES to .sdf using Gypsum and convert .sdf to .pdb with RDKit
 
-        # Build new_gen_smis and full_gen_smis
-        # TODO: Need to understand why these two are separate.
-        new_gen_predock_cmpds: List[
-            PreDockedCompound
-        ] = mut_predock_cmpds + cross_predock_cmpds
-        full_gen_predock_cmpds: List[
-            PreDockedCompound
-        ] = mut_predock_cmpds + cross_predock_cmpds
-
-        # TODO: Consider depreciating redock_elite_from_previous_gen
-        if params["redock_elite_from_previous_gen"] is False and generation_num != 1:
-            # Doesn't append to the new_generation_smiles_list
-            full_gen_predock_cmpds.extend(iter(elite_predock_cmpds))
-        else:
-            for i in elite_predock_cmpds:
-                new_gen_predock_cmpds.append(i)
-                full_gen_predock_cmpds.append(i)
-
-        if len(full_gen_predock_cmpds) < total_num_desired_new_ligands:
-            print("We needed ", total_num_desired_new_ligands)
-            print("We made ", len(full_gen_predock_cmpds))
-            print(
-                "Population failed to make enough mutants or crossovers... "
-                "Errors could include not enough diversity, too few seeds to "
-                "the generation, the seed mols are unable to cross-over due "
-                "to lack of similarity, or all of the seed lack functional groups "
-                "for performing reactions"
-            )
-            assert False
-
-        # Save the full generation and the SMILES to convert
+    # Note that smiles_to_convert_file is a single with with many smi files
+    # in it.
+    smi_to_3d_sdf_plugin_manager = get_plugin_manager("SmiTo3DSdfPluginManager")
+    job_input_convert_cmpds = tuple(
         (
-            full_generation_smiles_file,
-            smiles_to_convert_file,
+            smi_to_3d_sdf_plugin_manager,
+            full_gen_predock_cmpd,
             new_gen_folder_path,
-        ) = _save_smiles_files(
-            params,
-            generation_num,
-            full_gen_predock_cmpds,
-            new_gen_predock_cmpds,
-            "_to_convert",
+            idx,
         )
+        for idx, full_gen_predock_cmpd in enumerate(full_gen_predock_cmpds)
+    )
 
-        # Convert SMILES to .sdf using Gypsum and convert .sdf to .pdb with RDKit
+    full_gen_predock_cmpds = params["parallelizer"].run(
+        job_input_convert_cmpds, _cmpd_convert_to_3d_sdf_multithread
+    )
 
-        # Note that smiles_to_convert_file is a single with with many smi files
-        # in it.
-        smi_to_3d_sdf_plugin_manager = get_plugin_manager("SmiTo3DSdfPluginManager")
-        job_input_convert_cmpds = tuple(
-            (
-                smi_to_3d_sdf_plugin_manager,
-                full_gen_predock_cmpd,
-                new_gen_folder_path,
-                idx,
-            )
-            for idx, full_gen_predock_cmpd in enumerate(full_gen_predock_cmpds)
-        )
+    # Remove those that failed to convert
+    full_gen_predock_cmpds = [
+        x for x in full_gen_predock_cmpds if x.sdf_3d_path is not None
+    ]
 
-        full_gen_predock_cmpds = params["parallelizer"].run(
-            job_input_convert_cmpds, _cmpd_convert_to_3d_sdf_multithread
-        )
+    # import pdb; pdb.set_trace()
 
-        # Remove those that failed to convert
-        full_gen_predock_cmpds = [
-            x for x in full_gen_predock_cmpds if x.sdf_3d_path is not None
-        ]
-
-        # import pdb; pdb.set_trace()
-
-        # full_gen_predock_cmpds = get_plugin_manager("SmiTo3DSdfPluginManager").run(
-        #     predock_cmpds=full_gen_predock_cmpds, pwd=new_gen_folder_path, cmpd_idx=0
-        # )
-        # conversion_to_3d.convert_to_3d(
-        #     params, smiles_to_convert_file, new_gen_folder_path
-        # )
+    # full_gen_predock_cmpds = get_plugin_manager("SmiTo3DSdfPluginManager").run(
+    #     predock_cmpds=full_gen_predock_cmpds, pwd=new_gen_folder_path, cmpd_idx=0
+    # )
+    # conversion_to_3d.convert_to_3d(
+    #     params, smiles_to_convert_file, new_gen_folder_path
+    # )
     return full_generation_smiles_file, full_gen_predock_cmpds
 
 

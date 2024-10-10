@@ -16,6 +16,7 @@ from autogrow.docking.docking_class.parent_pdbqt_converter import ParentPDBQTCon
 from autogrow.plugins.docking import DockingPluginManager
 from autogrow.plugins.plugin_manager_base import get_plugin_manager
 from autogrow.types import PostDockedCompound, PreDockedCompound
+from autogrow.utils.logging import LogLevel, log_info
 
 
 # def pick_run_conversion_class_dict(
@@ -93,10 +94,12 @@ def run_docking_common(
         (docking_plugin_manager, new_gen_predock_cmpd)
         for new_gen_predock_cmpd in new_gen_predock_cmpds
     ]
-    print("Docking Begun")
-    post_docked_compounds: List[PostDockedCompound] = params["parallelizer"].run(
-        job_input_dock_lig, _run_dock_multithread_wrapper
-    )
+    
+    log_info("Starting docking")
+    with LogLevel():
+        post_docked_compounds: List[PostDockedCompound] = params["parallelizer"].run(
+            job_input_dock_lig, _run_dock_multithread_wrapper
+        )
 
     # Remove those that failed to convert
     post_docked_compounds = [x for x in post_docked_compounds if x is not None]

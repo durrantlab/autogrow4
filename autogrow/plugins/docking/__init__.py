@@ -10,6 +10,7 @@ from autogrow.plugins.plugin_manager_base import PluginManagerBase
 from autogrow.types import PostDockedCompound, PreDockedCompound, ScoreType
 import autogrow.docking.scoring.execute_scoring_mol as Scoring
 import autogrow.docking.ranking.ranking_mol as Ranking
+from autogrow.utils.logging import log_debug
 
 
 class DockingBase(PluginBase):
@@ -62,7 +63,12 @@ class DockingPluginManager(PluginManagerBase):
         # Get the selector plugin to use
         docking = cast(DockingBase, self.plugins[dockings[0]])
 
-        return docking.run(**kwargs)
+        resp = docking.run(**kwargs)
+
+        if resp is not None:
+            log_debug(f"Docked molecule {resp.smiles}. Score: {resp.docking_score:.2f}")
+
+        return resp
 
     def run_ligand_handling_for_docking(
         self, pdb_file, file_conversion_class_object: ParentPDBQTConverter

@@ -164,7 +164,7 @@ def _get_file_info(file_name: str) -> str:
 
 
 #######
-def del_files(file_name: str) -> None:
+def _del_files(file_name: str) -> None:
     """
     This function deletes a given file file_name.
 
@@ -180,7 +180,7 @@ def del_files(file_name: str) -> None:
 
 
 #######
-def run_concatenation(directory: str) -> None:
+def _run_concatenation(directory: str) -> None:
     """
     This function concatenates and compresses every file in a directory. This
     makes data transfer easier later on.
@@ -207,11 +207,11 @@ def run_concatenation(directory: str) -> None:
     job_list = list(tuple((file_path,) for file_path in file_list))
     print("\tFinish Concatenation")
     print("\tRemoving files that were concatenated")
-    mp.multi_threading(job_list, -1, del_files)
+    mp.multi_threading(job_list, -1, _del_files)
     print("\tCompressing file")
     _compress_file(concat_file)
     if os.path.exists(f"{concat_file}.gz"):
-        del_files(concat_file)
+        _del_files(concat_file)
     print("Finished Compression")
 
 
@@ -243,7 +243,7 @@ def run_main(params: Dict[str, Any]) -> None:
         print("After deconcatenate")
         print(os.path.getsize(input_folder))
 
-        del_files(compressed_file)
+        _del_files(compressed_file)
         print("After deconcatenate")
         print(os.path.getsize(input_folder))
 
@@ -253,7 +253,7 @@ def _concatenate_and_compress_folder(params: Dict[str, Any]) -> None:
     input_folder = params["input_folder_or_file"]
     print(os.path.getsize(input_folder))
 
-    run_concatenation(input_folder)
+    _run_concatenation(input_folder)
     print("FINISH CONCATENATE")
     print("After concatenate")
     print(os.path.getsize(input_folder))

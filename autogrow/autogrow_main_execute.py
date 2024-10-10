@@ -14,6 +14,7 @@ from typing import Any, Dict, Optional
 
 import autogrow.docking.execute_docking as DockingClass
 import autogrow.operators.operations as operations
+from autogrow.utils.logging import LogLevel, log_info
 
 
 def main_execute(params: Dict[str, Any]) -> None:
@@ -59,28 +60,31 @@ def main_execute(params: Dict[str, Any]) -> None:
         # print(cur_gen_dir)
         # sys.stdout.flush()
 
-        smiles_new_gen_path, new_gen_predock_cmpnds = operations.populate_generation(
-            params, gen_num
-        )
-        sys.stdout.flush()
+        log_info(f"Creating Generation {gen_num}")
 
-        if new_gen_predock_cmpnds is None:
-            raise ValueError(
-                "Population failed to make enough mutants or crossovers... \
-                                Errors could include not enough diversity, too few seeds to the generation, \
-                                the seed mols are unable to cross-over due to lack of similarity,\
-                                or all of the seed lack functional groups for performing reactions."
+        with LogLevel():
+            smiles_new_gen_path, new_gen_predock_cmpnds = operations.populate_generation(
+                params, gen_num
+            )
+            sys.stdout.flush()
+
+            if new_gen_predock_cmpnds is None:
+                raise ValueError(
+                    "Population failed to make enough mutants or crossovers... \
+                                    Errors could include not enough diversity, too few seeds to the generation, \
+                                    the seed mols are unable to cross-over due to lack of similarity,\
+                                    or all of the seed lack functional groups for performing reactions."
+                )
+
+            # Run file conversions of PDB to docking specific file type and
+            # Begin Docking unweighted_ranked_smile_file is the file name
+            # where the unweighted ranked but score .smi file resides
+            unweighted_ranked_smile_file = DockingClass.run_docking_common(
+                params, gen_num, cur_gen_dir, smiles_new_gen_path, new_gen_predock_cmpnds
             )
 
-        # Run file conversions of PDB to docking specific file type and
-        # Begin Docking unweighted_ranked_smile_file is the file name
-        # where the unweighted ranked but score .smi file resides
-        unweighted_ranked_smile_file = DockingClass.run_docking_common(
-            params, gen_num, cur_gen_dir, smiles_new_gen_path, new_gen_predock_cmpnds
-        )
-
-        # print("")
-        # print("Finished generation ", gen_num)
+            # print("")
+            # print("Finished generation ", gen_num)
 
         sys.stdout.flush()
 
