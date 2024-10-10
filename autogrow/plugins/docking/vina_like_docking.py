@@ -7,8 +7,10 @@ from autogrow.docking.docking_class.parent_pdbqt_converter import ParentPDBQTCon
 from autogrow.plugins.docking import DockingBase
 from typing import Any, Dict, List, Optional, Tuple
 from autogrow.config.argparser import ArgumentVars
-from autogrow.types import PostDockedCompoundInfo, PreDockedCompoundInfo, ScoreType
+from autogrow.types import PostDockedCompound, PreDockedCompound, ScoreType
 import autogrow.docking.delete_failed_mol as Delete
+from autogrow.utils.logging import log_warning
+from autogrow.utils.obabel import obabel_convert
 
 
 class VinaLikeDocking(DockingBase):
@@ -98,116 +100,78 @@ class VinaLikeDocking(DockingBase):
             ],
         )
 
-        # parser.add_argument(
-        #     "--center_x",
-        #     "-x",
-        #     type=float,
-        #     help="x-coordinate for the center of the pocket to be tested by docking. (Angstrom)",
-        # )
-        # parser.add_argument(
-        #     "--center_y",
-        #     "-y",
-        #     type=float,
-        #     help="y-coordinate for the center of the pocket to be tested by docking. (Angstrom)",
-        # )
-        # parser.add_argument(
-        #     "--center_z",
-        #     "-z",
-        #     type=float,
-        #     help="z-coordinate for the center of the pocket to be tested by docking. (Angstrom)",
-        # )
-
-        # parser.add_argument(
-        #     "--size_x",
-        #     type=float,
-        #     help="dimension of box to dock into in the x-axis (Angstrom)",
-        # )
-        # parser.add_argument(
-        #     "--size_y",
-        #     type=float,
-        #     help="dimension of box to dock into in the y-axis (Angstrom)",
-        # )
-        # parser.add_argument(
-        #     "--size_z",
-        #     type=float,
-        #     help="dimension of box to dock into in the z-axis (Angstrom)",
-        # )
-
-        # parser.add_argument(
-        #     "--vina_like_executable",
-        #     metavar="vina_like_executable",
-        #     default=None,
-        #     help="path to the vina_like_executable (vina, qvina2, smina, etc.)",
-        # )
-        # parser.add_argument(
-        #     "--docking_exhaustiveness",
-        #     metavar="docking_exhaustiveness",
-        #     default=None,
-        #     help="exhaustiveness of the global search (roughly proportional to time. \
-        #     see docking software for settings. Unless specified Autogrow uses the \
-        #     docking softwares default setting. For AutoDock Vina 1.1.2 that is 8",
-        # )
-        # parser.add_argument(
-        #     "--docking_num_modes",
-        #     metavar="docking_num_modes",
-        #     default=None,
-        #     help=" maximum number of binding modes to generate in docking. \
-        #     See docking software for settings. Unless specified Autogrow uses the \
-        #     docking softwares default setting. For AutoDock Vina 1.1.2 that is 9",
-        # )
-        # parser.add_argument(
-        #     "--docking_timeout_limit",
-        #     type=float,
-        #     default=120,
-        #     help="The maximum amount of time allowed to dock a single ligand into a \
-        #     pocket in seconds. Many factors influence the time required to dock, such as: \
-        #     processor speed, the docking software, rotatable bonds, exhaustiveness docking,\
-        #     and number of docking modes... \
-        #     The default docking_timeout_limit is 120 seconds, which is excess for most \
-        #     docking events using QuickVina2Docking under default settings. If run with \
-        #     more exhaustive settings or with highly flexible ligands, consider increasing \
-        #     docking_timeout_limit to accommodate. Default docking_timeout_limit is 120 seconds",
-        # )
-
     def validate(self, params: dict):
         """Validate the provided arguments."""
-        # TODO: Implement this function
-        pass
+        if "obabel_path" not in params:
+            raise ValueError(
+                f"obabel_path must be defined in the params to use {self.name}"
+            )
 
     def run_docking(
-        self, lig_pdbqt_filename, file_conversion_class_object: ParentPDBQTConverter
-    ) -> Optional[str]:
+        self, predocked_cmpd: PreDockedCompound
+    ) -> Optional[PostDockedCompound]:
         """
-        this function runs the docking. Returns None if it worked and the name
-        if it failed to dock.
+        run_docking is needs to be implemented in each class.
 
         Inputs:
-        :param str pdbqt_filename: the pdbqt file of a ligand to dock and
-            score
+        :param PreDockedCompound predocked_cmpd: A PreDockedCompound object.
 
         Returns:
-        :returns: str smile_name: name of smiles if it failed to dock returns
-            None if it docked properly
+        :returns: PostDockedCompound: A PostDockedCompound object, containing
+            the score and a docked (posed) SDF file.
         """
+        # You must convert the sdf file to pdbqt file
+        assert predocked_cmpd.sdf_3d_path is not None, "sdf_3d_path must be defined"
+        lig_pdbqt_filename = f"{predocked_cmpd.sdf_3d_path}.pdbqt"
 
-        self.file_conversion_class_object = file_conversion_class_object
+        conversion_success = obabel_convert(
+            predocked_cmpd.sdf_3d_path, lig_pdbqt_filename, self.params["obabel_path"],
+        )
+
+        if not conversion_success:
+            return None
 
         # log("Docking compounds using AutoDock Vina...")
         self.dock_ligand(lig_pdbqt_filename)
 
-        # check that it docked
-        pdb_filename = lig_pdbqt_filename.replace("qt", "")
+        vina_out_file = f"{lig_pdbqt_filename}.vina"
+        if not os.path.exists(vina_out_file):
+            log_warning(f"Failed to dock: {lig_pdbqt_filename}")
+            return None
 
-        did_it_dock, smile_name = self.check_docked(pdb_filename)
+        # # check that it docked
+        # pdb_filename = lig_pdbqt_filename.replace("qt", "")
 
-        if did_it_dock is False:
-            # Docking failed
+        # docked_successfully, smile_name = self.check_docked(pdb_filename)
 
-            if smile_name is None:
-                print("Missing pdb and pdbqt files for : ", lig_pdbqt_filename)
+        # if not docked_successfully:
+        #     if smile_name is None:
+        #         print("Missing pdb and pdbqt files for : ", lig_pdbqt_filename)
 
-            return smile_name
+        #     return None
 
+        # TODO: Does this work for qvina2, smina, etc.?
+        with open(vina_out_file, "r") as f:
+            # MODEL 1
+            # REMARK VINA RESULT:    -9.279      0.000      0.000
+            # REMARK INTER + INTRA:         -13.559
+
+            lines = f.readlines()
+            for line in lines:
+                if "REMARK VINA RESULT:" in line:
+                    score = float(line.split()[3])
+
+                    # Also get the docked compound as an SDF file
+                    docked_sdf = f"{lig_pdbqt_filename}.vina.sdf"
+                    obabel_convert(
+                        f"{lig_pdbqt_filename}.vina",
+                        docked_sdf,
+                        self.params["obabel_path"],
+                    )
+
+                    return predocked_cmpd.to_post_docked_compound(score, docked_sdf)
+
+        log_warning(f"Failed to parse docking score from {vina_out_file}")
         return None
 
     #######################################

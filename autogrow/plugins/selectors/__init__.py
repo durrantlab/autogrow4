@@ -4,14 +4,14 @@ from typing import Any, List, Optional, Tuple, cast
 from autogrow.config.argparser import ArgumentVars
 from autogrow.plugins.plugin_base import PluginBase
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
-from autogrow.types import PreDockedCompoundInfo, ScoreType
+from autogrow.types import PreDockedCompound, ScoreType
 from autogrow.utils.logging import LogLevel, log_info
 
 
 class SelectorBase(PluginBase):
     def run(self, **kwargs) -> Any:
         """Run the plugin with provided arguments."""
-        usable_smiles: List[PreDockedCompoundInfo] = kwargs["usable_smiles"]
+        usable_smiles: List[PreDockedCompound] = kwargs["usable_smiles"]
         score_type: ScoreType = kwargs["score_type"]
         num_to_choose: int = kwargs["num_to_choose"]
         favor_most_negative: bool = kwargs["favor_most_negative"]
@@ -26,26 +26,26 @@ class SelectorBase(PluginBase):
     @abstractmethod
     def run_selector(
         self,
-        usable_smiles: List[PreDockedCompoundInfo],
+        usable_smiles: List[PreDockedCompound],
         num_to_choose: int,
         score_type: ScoreType,
         favor_most_negative: bool = True,
-    ) -> List[PreDockedCompoundInfo]:
+    ) -> List[PreDockedCompound]:
         pass
 
     @abstractmethod
     def finalize_composite_docking_diversity_list(
         self,
-        docking_diversity_list: List[PreDockedCompoundInfo],
-        usable_smiles: List[PreDockedCompoundInfo],
-    ) -> List[PreDockedCompoundInfo]:
+        docking_diversity_list: List[PreDockedCompound],
+        usable_smiles: List[PreDockedCompound],
+    ) -> List[PreDockedCompound]:
         pass
 
     def get_chosen_mol_full_data_list(
         self,
-        chosen_mol_list: List[PreDockedCompoundInfo],
-        usable_smiles: List[PreDockedCompoundInfo],
-    ) -> List[PreDockedCompoundInfo]:
+        chosen_mol_list: List[PreDockedCompound],
+        usable_smiles: List[PreDockedCompound],
+    ) -> List[PreDockedCompound]:
         """
         This function will take a list of chosen molecules and a list of all the
         SMILES which could have been chosen and all of the information about those
@@ -83,7 +83,7 @@ class SelectorBase(PluginBase):
         sorted_list = sorted(
             usable_smiles, key=lambda x: x.get_previous_score(ScoreType.DOCKING)
         )
-        weighted_order_list: List[PreDockedCompoundInfo] = []
+        weighted_order_list: List[PreDockedCompound] = []
         for smile in chosen_mol_list:
             for smile_pair in sorted_list:
                 if smile == smile_pair.smiles:
@@ -101,7 +101,7 @@ class SelectorBase(PluginBase):
 
 
 class SelectorPluginManager(PluginManagerBase):
-    def run(self, **kwargs) -> List[PreDockedCompoundInfo]:
+    def run(self, **kwargs) -> List[PreDockedCompound]:
         """
         Run the plugin with provided arguments.
 
@@ -126,8 +126,8 @@ class SelectorPluginManager(PluginManagerBase):
         # Get the selector plugin to use
         selector = cast(SelectorBase, self.plugins[selectors[0]])
 
-        docking_fitness_smiles_list: List[PreDockedCompoundInfo] = []
-        diversity_smile_list: List[PreDockedCompoundInfo] = []
+        docking_fitness_smiles_list: List[PreDockedCompound] = []
+        diversity_smile_list: List[PreDockedCompound] = []
 
         # Select the molecules based on the docking score
         if kwargs["num_seed_dock_fitness"] > 0:

@@ -11,8 +11,9 @@ import sys
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from autogrow.plugins.plugin_manager_base import get_plugin_manager
-from autogrow.types import PreDockedCompoundInfo
-from autogrow.utils.logging import LogLevel, log_info, log_warning
+from autogrow.plugins.smi_to_3d_sdf import SmiTo3DSdfPluginManager
+from autogrow.types import PreDockedCompound
+from autogrow.utils.logging import LogLevel, log_info
 import rdkit  # type: ignore
 import rdkit.Chem as Chem  # type: ignore
 
@@ -22,7 +23,6 @@ rdkit.RDLogger.DisableLog("rdApp.*")
 import autogrow.docking.ranking.ranking_mol as Ranking
 import autogrow.operators.execute_mutations as Mutation
 import autogrow.operators.execute_crossover as execute_crossover
-import autogrow.operators.convert_files.conversion_to_3d as conversion_to_3d
 import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
 
 
@@ -33,7 +33,7 @@ import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as
 
 def populate_generation(
     params: Dict[str, Any], generation_num: int
-) -> Tuple[str, List[PreDockedCompoundInfo]]:
+) -> Tuple[str, List[PreDockedCompound]]:
     """
     This will run all of the mutations, crossovers, and filters for a single
     generation. Populates a new generation of ligands.
@@ -83,9 +83,8 @@ def populate_generation(
     log_info(f"Creating Generation {generation_num}")
 
     with LogLevel():
-
         # Generate mutations
-        new_mutation_smiles_list = _generate_mutations(
+        mut_predock_cmpds = _generate_mutations(
             params,
             generation_num,
             num_mutations,
@@ -96,7 +95,7 @@ def populate_generation(
         )
 
         # Generate crossovers
-        new_crossover_smiles_list = _generate_crossovers(
+        cross_predock_cmpds = _generate_crossovers(
             params,
             generation_num,
             num_crossovers,
@@ -107,33 +106,31 @@ def populate_generation(
         )
 
         # Get ligands from previous generation
-        chosen_mol_to_pass_through_list = _get_elitism_cmpds_from_prev_gen(
+        elite_predock_cmpds = _get_elitism_cmpds_from_prev_gen(
             params, src_cmpds, num_elite_to_advance_from_previous_gen, generation_num,
         )
 
         # Build new_gen_smis and full_gen_smis
-        new_gen_smis: List[PreDockedCompoundInfo] = []
-        full_gen_smis: List[PreDockedCompoundInfo] = []
+        # TODO: Need to understand why these two are separate.
+        new_gen_predock_cmpds: List[
+            PreDockedCompound
+        ] = mut_predock_cmpds + cross_predock_cmpds
+        full_gen_predock_cmpds: List[
+            PreDockedCompound
+        ] = mut_predock_cmpds + cross_predock_cmpds
 
-        for i in new_mutation_smiles_list:
-            new_gen_smis.append(i)
-            full_gen_smis.append(i)
-
-        for i in new_crossover_smiles_list:
-            new_gen_smis.append(i)
-            full_gen_smis.append(i)
-
+        # TODO: Consider depreciating redock_elite_from_previous_gen
         if params["redock_elite_from_previous_gen"] is False and generation_num != 1:
             # Doesn't append to the new_generation_smiles_list
-            full_gen_smis.extend(iter(chosen_mol_to_pass_through_list))
+            full_gen_predock_cmpds.extend(iter(elite_predock_cmpds))
         else:
-            for i in chosen_mol_to_pass_through_list:
-                new_gen_smis.append(i)
-                full_gen_smis.append(i)
+            for i in elite_predock_cmpds:
+                new_gen_predock_cmpds.append(i)
+                full_gen_predock_cmpds.append(i)
 
-        if len(full_gen_smis) < total_num_desired_new_ligands:
+        if len(full_gen_predock_cmpds) < total_num_desired_new_ligands:
             print("We needed ", total_num_desired_new_ligands)
-            print("We made ", len(full_gen_smis))
+            print("We made ", len(full_gen_predock_cmpds))
             print(
                 "Population failed to make enough mutants or crossovers... "
                 "Errors could include not enough diversity, too few seeds to "
@@ -149,19 +146,73 @@ def populate_generation(
             smiles_to_convert_file,
             new_gen_folder_path,
         ) = _save_smiles_files(
-            params, generation_num, full_gen_smis, new_gen_smis, "_to_convert"
+            params,
+            generation_num,
+            full_gen_predock_cmpds,
+            new_gen_predock_cmpds,
+            "_to_convert",
         )
 
         # Convert SMILES to .sdf using Gypsum and convert .sdf to .pdb with RDKit
 
         # Note that smiles_to_convert_file is a single with with many smi files
         # in it.
-        get_plugin_manager("SmiToSdfPluginManager").run(smi_file=smiles_to_convert_file)
+        smi_to_3d_sdf_plugin_manager = get_plugin_manager("SmiTo3DSdfPluginManager")
+        job_input_convert_cmpds = tuple(
+            (
+                smi_to_3d_sdf_plugin_manager,
+                full_gen_predock_cmpd,
+                new_gen_folder_path,
+                idx,
+            )
+            for idx, full_gen_predock_cmpd in enumerate(full_gen_predock_cmpds)
+        )
+
+        full_gen_predock_cmpds = params["parallelizer"].run(
+            job_input_convert_cmpds, _cmpd_convert_to_3d_sdf_multithread
+        )
+
+        # Remove those that failed to convert
+        full_gen_predock_cmpds = [
+            x for x in full_gen_predock_cmpds if x.sdf_3d_path is not None
+        ]
+
+        # import pdb; pdb.set_trace()
+
+        # full_gen_predock_cmpds = get_plugin_manager("SmiTo3DSdfPluginManager").run(
+        #     predock_cmpds=full_gen_predock_cmpds, pwd=new_gen_folder_path, cmpd_idx=0
+        # )
         # conversion_to_3d.convert_to_3d(
         #     params, smiles_to_convert_file, new_gen_folder_path
         # )
+    return full_generation_smiles_file, full_gen_predock_cmpds
 
-    return full_generation_smiles_file, full_gen_smis
+
+def _cmpd_convert_to_3d_sdf_multithread(
+    smi_to_3d_sdf_plugin_manager: SmiTo3DSdfPluginManager,
+    full_gen_predock_cmpd: PreDockedCompound,
+    pwd: str,
+    cmpd_idx: int,
+) -> PreDockedCompound:
+    """
+    Run the ligand conversion of a single molecule. If it failed
+    failed_smiles_name will be a string of the SMILE which failed to convert
+    If it converts failed_smiles_name will be a None.
+
+    Inputs:
+    :param object docking_object: the class for running the chosen docking
+        method
+    :param str pdb: the path to the pdb of a molecule
+
+    Returns:
+    :returns: list failed_smiles_name: if the molecule failed to convert to
+        final format. (ie. pdbqt conversion fail)
+    """
+    # TODO: Thsi docstring is old
+
+    return smi_to_3d_sdf_plugin_manager.run(
+        predock_cmpd=full_gen_predock_cmpd, pwd=pwd, cmpd_idx=cmpd_idx
+    )
 
 
 def _generate_mutations(
@@ -170,14 +221,14 @@ def _generate_mutations(
     num_mutations: int,
     num_seed_diversity: int,
     num_seed_dock_fitness: int,
-    src_cmpds: List[PreDockedCompoundInfo],
+    src_cmpds: List[PreDockedCompound],
     number_of_processors: int,
-) -> List[PreDockedCompoundInfo]:
+) -> List[PreDockedCompound]:
     """
     Generate mutations for the current generation.
 
     Returns:
-    List[PreDockedCompoundInfo]: List of mutation smiles.
+    List[PreDockedCompound]: List of mutation smiles.
     """
 
     log_info("Creating mutant compounds")
@@ -207,11 +258,10 @@ def _generate_mutations(
         # Package user params specifying the Reaction library to use for mutation
         rxn_library_variables = [
             params["rxn_library"],
-            params["complementary_mol_directory"],
         ]
 
         # List of SMILES from mutation
-        new_mutation_smiles_list: List[PreDockedCompoundInfo] = []
+        new_mutation_smiles_list: List[PreDockedCompound] = []
 
         # Make all the required ligands by mutations
         while len(new_mutation_smiles_list) < num_mutations:
@@ -280,14 +330,14 @@ def _generate_crossovers(
     num_crossovers: int,
     num_seed_diversity: int,
     num_seed_dock_fitness: int,
-    src_cmpds: List[PreDockedCompoundInfo],
+    src_cmpds: List[PreDockedCompound],
     number_of_processors: int,
-) -> List[PreDockedCompoundInfo]:
+) -> List[PreDockedCompound]:
     """
     Generate crossovers for the current generation.
 
     Returns:
-    List[PreDockedCompoundInfo]: List of crossover smiles.
+    List[PreDockedCompound]: List of crossover smiles.
     """
     log_info("Creating crossover compounds")
 
@@ -314,7 +364,7 @@ def _generate_crossovers(
 
         # Making Crossovers
         # List of smiles from crossover
-        new_crossover_smiles_list: List[PreDockedCompoundInfo] = []
+        new_crossover_smiles_list: List[PreDockedCompound] = []
 
         # Make all the required ligands by Crossover
         while len(new_crossover_smiles_list) < num_crossovers:
@@ -377,10 +427,10 @@ def _generate_crossovers(
 
 def _get_elitism_cmpds_from_prev_gen(
     params: Dict[str, Any],
-    src_cmpds: List[PreDockedCompoundInfo],
+    src_cmpds: List[PreDockedCompound],
     num_elite_to_advance_from_previous_gen: int,
     generation_num: int,
-) -> List[PreDockedCompoundInfo]:
+) -> List[PreDockedCompound]:
     """
     Make a list of the ligands chosen to pass through to the next generation via elitism.
     This handles creating a seed list and defining the advance to the next generation final selection.
@@ -419,11 +469,12 @@ def _get_elitism_cmpds_from_prev_gen(
 
     return chosen_mol_to_pass_through_list
 
+
 def _save_smiles_files(
     params: Dict[str, Any],
     generation_num: int,
-    full_gen_smis: List[PreDockedCompoundInfo],
-    new_gen_smis: List[PreDockedCompoundInfo],
+    full_gen_smis: List[PreDockedCompound],
+    new_gen_smis: List[PreDockedCompound],
     suffix: Optional[str],
 ) -> Tuple[str, str, str]:
     """
@@ -456,8 +507,8 @@ def _throw_error_not_enough_compounds_made(arg0, arg1, arg2, arg3):
 # Get seeds
 #############
 def _test_source_smiles_convert(
-    smile_info: PreDockedCompoundInfo,
-) -> Union[PreDockedCompoundInfo, str]:
+    smile_info: PreDockedCompound,
+) -> Union[PreDockedCompound, str]:
     """
     This attempts to convert a SMILES string to an rdkit.Chem.rdchem.Mol
     object
@@ -572,7 +623,7 @@ def _report_removed_compound_info(smile_str, printout, smile_id):
 
 def _get_complete_list_prev_gen_or_source_compounds(
     params: Dict[str, Any], generation_num: int
-) -> List[PreDockedCompoundInfo]:
+) -> List[PreDockedCompound]:
     """
     Get the source compounds list from the previous generation of the source
     compound list
@@ -617,12 +668,12 @@ def _get_complete_list_prev_gen_or_source_compounds(
     # sanitize
     job_input = tuple((i,) for i in usable_smiles)
 
-    usable_smiles: List[PreDockedCompoundInfo] = params["parallelizer"].run(
+    usable_smiles: List[PreDockedCompound] = params["parallelizer"].run(
         job_input, _test_source_smiles_convert
     )
     usable_smiles = [x for x in usable_smiles if x is not None]
     print_errors = [x for x in usable_smiles if type(x) is str]
-    usable_smiles = [x for x in usable_smiles if type(x) is PreDockedCompoundInfo]
+    usable_smiles = [x for x in usable_smiles if type(x) is PreDockedCompound]
     for x in print_errors:
         print(x)
 
@@ -643,7 +694,7 @@ def _raise_exception_with_message(arg0):
     raise Exception(printout)
 
 
-def _get_source_compounds_or_raise(params) -> List[PreDockedCompoundInfo]:
+def _get_source_compounds_or_raise(params) -> List[PreDockedCompound]:
     # This will be the full length list of starting molecules as the seed
     source_file = str(params["source_compound_file"])
     result = Ranking.get_usable_format(source_file)
@@ -672,11 +723,11 @@ def _handle_no_ligands_found(arg0):
 
 def _make_seed_list(
     params: Dict[str, Any],
-    source_compounds_list: List[PreDockedCompoundInfo],
+    source_compounds_list: List[PreDockedCompound],
     generation_num: int,
     num_seed_diversity: int,
     num_seed_dock_fitness: int,
-) -> List[PreDockedCompoundInfo]:
+) -> List[PreDockedCompound]:
     """
     Get the starting compound list for running the Mutation and Crossovers
 
@@ -785,10 +836,10 @@ def _determine_seed_population_sizes(
 
 def _make_pass_through_list(
     params: Dict[str, Any],
-    smis_from_prev_gen: List[PreDockedCompoundInfo],
+    smis_from_prev_gen: List[PreDockedCompound],
     num_elite_from_prev_gen: int,
     gen_num: int,
-) -> Union[List[PreDockedCompoundInfo], str]:
+) -> Union[List[PreDockedCompound], str]:
     """
     This function determines the molecules which elite ligands will advance
     from the previous generation without being altered into the next
@@ -821,9 +872,7 @@ def _make_pass_through_list(
                 len(smis_from_prev_gen), num_elite_from_prev_gen,
             )
         )
-    smis_from_prev_gen = [
-        x for x in smis_from_prev_gen if type(x) == PreDockedCompoundInfo
-    ]
+    smis_from_prev_gen = [x for x in smis_from_prev_gen if type(x) == PreDockedCompound]
 
     ligs_that_passed_filters = [x for x in smis_from_prev_gen if x is not None]
 
@@ -893,7 +942,7 @@ def _make_pass_through_list(
 def _save_generation_smi(
     output_directory: str,
     generation_num: int,
-    formatted_smile_list: List[PreDockedCompoundInfo],
+    formatted_smile_list: List[PreDockedCompound],
     nomenclature_tag: Optional[str],
 ) -> Tuple[str, str]:
     """"
@@ -942,7 +991,7 @@ def _save_generation_smi(
 def _save_ligand_list(
     output_directory: str,
     generation_num: int,
-    chosen_ligands: List[PreDockedCompoundInfo],
+    chosen_ligands: List[PreDockedCompound],
     nomenclature_tag: str,
 ) -> None:
     """

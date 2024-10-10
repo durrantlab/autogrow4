@@ -5,7 +5,7 @@ This is used to rescore a fitness metric by the number of non-hydrogen atoms.
 import __future__
 from typing import Any, Dict, List, Optional
 
-from autogrow.types import PostDockedCompoundInfo
+from autogrow.types import PostDockedCompound
 import rdkit  # type: ignore
 import rdkit.Chem as Chem  # type: ignore
 
@@ -54,8 +54,8 @@ class LigEfficiency(VINA):
             self.smiles_dict = smiles_dict
 
     def set_lig_eff_rescore_from_a_file(
-        self, file_path: str, lig_info: PostDockedCompoundInfo
-    ) -> Optional[PostDockedCompoundInfo]:
+        self, file_path: str, lig_info: PostDockedCompound
+    ) -> Optional[PostDockedCompound]:
         """
         This function will simply add a ligand efficiency score to the end of
         the lig_info list and return said list.
@@ -75,7 +75,7 @@ class LigEfficiency(VINA):
             the docking score from the best pose.
         """
         # For saftey remove Nones and empty lists
-        if type(lig_info) is not PostDockedCompoundInfo:
+        if type(lig_info) is not PostDockedCompound:
             return None
         if not lig_info:
             return None
@@ -121,8 +121,8 @@ def get_number_heavy_atoms(smiles_str: Optional[str]) -> Optional[int]:
 
 
 def score_as_lig_efficiency(
-    list_of_lig_info: PostDockedCompoundInfo,
-) -> Optional[PostDockedCompoundInfo]:
+    list_of_lig_info: PostDockedCompound,
+) -> Optional[PostDockedCompound]:
     """
     Determine the ligand efficiency and set it to be the code.
 
@@ -147,7 +147,7 @@ def score_as_lig_efficiency(
 
     # Unpack ligand info
     lig_smiles_str = list_of_lig_info.smiles
-    affinity = list_of_lig_info.score
+    affinity = list_of_lig_info.docking_score
 
     # Get num of heavy atoms
     heavy_atom_count = get_number_heavy_atoms(lig_smiles_str)
@@ -159,6 +159,6 @@ def score_as_lig_efficiency(
     lig_efficieny = affinity / float(heavy_atom_count)
 
     # Append lig_efficiency to list_of_lig_info
-    list_of_lig_info.score = lig_efficieny
+    list_of_lig_info.docking_score = lig_efficieny
 
     return list_of_lig_info

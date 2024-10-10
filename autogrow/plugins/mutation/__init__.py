@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 from typing import Dict, List, Optional, Tuple, Union, cast
 
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
-from autogrow.types import PreDockedCompoundInfo
+from autogrow.types import PreDockedCompound
 from autogrow.utils.logging import LogLevel, log_debug, log_warning
 from rdkit import Chem  # type: ignore
 from rdkit.Chem.MolStandardize import rdMolStandardize  # type: ignore

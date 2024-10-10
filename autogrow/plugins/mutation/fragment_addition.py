@@ -5,8 +5,8 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from autogrow.config.argparser import ArgumentVars
 from autogrow.plugins.mutation import MutationBase
 from autogrow.plugins.plugin_manager_base import get_plugin_manager
-from autogrow.types import PreDockedCompoundInfo
-from autogrow.utils.logging import log_debug
+from autogrow.types import PreDockedCompound
+from autogrow.utils.logging import log_debug, log_warning
 import rdkit  # type: ignore
 from rdkit import Chem  # type: ignore
 from rdkit.Chem import AllChem  # type: ignore
@@ -39,15 +39,7 @@ class FragmentAddition(MutationBase):
                     type=str,
                     default="all_rxns",
                     help="This set of reactions to be used in Mutation.",
-                ),
-                ArgumentVars(
-                    name="complementary_mol_directory",
-                    type=str,
-                    default="",
-                    help="This PATH to the directory containing all the molecules being used \
-                    to react with. The directory should contain .smi files contain SMILES of \
-                    molecules containing the functional group represented by that file.",
-                ),
+                )
             ],
         )
 
@@ -118,9 +110,6 @@ class FragmentAddition(MutationBase):
 
         rxn_library = self.params["rxn_library"]
 
-        # TODO: Is this present? Might have removed it...
-        complementary_mol_dir = self.params["complementary_mol_directory"]
-
         if not hasattr(self, "reaction_dict"):
             # Only load if not already loaded
             self.reaction_dict = self._load_rxn_lib(rxn_library)
@@ -137,12 +126,12 @@ class FragmentAddition(MutationBase):
         if not hasattr(self, "complementary_mol_dict"):
             # Only load if not already loaded
             self.complementary_mol_dict = self._load_complementary_mols(
-                rxn_library, complementary_mol_dir
+                rxn_library # , complementary_mol_dir
             )
 
         # List of already predicted smiles (to make sure no duplicates)
         # TODO: Think more about this. Needs to be only once, but if here, it will be with every reaction.
-        # existing_smiles: List[PreDockedCompoundInfo],
+        # existing_smiles: List[PreDockedCompound],
         # self.existing_smiles = [
         #     x.smiles for x in existing_smiles
         # ]
@@ -282,7 +271,7 @@ class FragmentAddition(MutationBase):
         return self._reformat_rxn_dict(functional_group_dict_raw)
 
     def _load_complementary_mols(
-        self, rxn_library: str, complementary_mol_dir: str
+        self, rxn_library: str # , complementary_mol_dir: str
     ) -> Dict[str, str]:
         """
         Based on user controlled variables, this definition will retrieve a
@@ -303,40 +292,40 @@ class FragmentAddition(MutationBase):
         """
         script_dir = os.path.dirname(os.path.realpath(__file__))
 
-        if complementary_mol_dir == "":
-            if rxn_library == "click_chem_rxns":
-                complementary_mol_dir = os.path.join(
-                    script_dir,
-                    "reaction_libraries",
-                    "click_chem_rxns",
-                    "complementary_mol_dir",
-                )
-            elif rxn_library == "robust_rxns":
-                complementary_mol_dir = os.path.join(
-                    script_dir,
-                    "reaction_libraries",
-                    "robust_rxns",
-                    "complementary_mol_dir",
-                )
-            elif rxn_library == "all_rxns":
-                complementary_mol_dir = os.path.join(
-                    script_dir,
-                    "reaction_libraries",
-                    "all_rxns",
-                    "complementary_mol_dir",
-                )
-            else:
-                raise Exception(
-                    "rxn_library is not incorporated into smiles_click_chem.py"
-                )
-
-        elif os.path.isdir(complementary_mol_dir) is False:
-            raise Exception(
-                "complementary_mol_dir is not a directory. It must be a \
-                    directory with .smi files containing SMILES specified by \
-                    functional groups.These .smi files must be named the same \
-                    as the files in the complementary_mol_dir."
+        # if complementary_mol_dir == "":
+        if rxn_library == "click_chem_rxns":
+            complementary_mol_dir = os.path.join(
+                script_dir,
+                "reaction_libraries",
+                "click_chem_rxns",
+                "complementary_mol_dir",
             )
+        elif rxn_library == "robust_rxns":
+            complementary_mol_dir = os.path.join(
+                script_dir,
+                "reaction_libraries",
+                "robust_rxns",
+                "complementary_mol_dir",
+            )
+        elif rxn_library == "all_rxns":
+            complementary_mol_dir = os.path.join(
+                script_dir,
+                "reaction_libraries",
+                "all_rxns",
+                "complementary_mol_dir",
+            )
+        else:
+            raise Exception(
+                "rxn_library is not incorporated into smiles_click_chem.py"
+            )
+
+        # elif os.path.isdir(complementary_mol_dir) is False:
+        #     raise Exception(
+        #         "complementary_mol_dir is not a directory. It must be a \
+        #             directory with .smi files containing SMILES specified by \
+        #             functional groups.These .smi files must be named the same \
+        #             as the files in the complementary_mol_dir."
+        #     )
 
         # Make a list of all the functional groups. These will be the name of
         # the .smi folders already separated by group.
@@ -463,7 +452,7 @@ class FragmentAddition(MutationBase):
             mol_deprotanated, mol_reprotanated
         )
         if len(list_subs_within_mol) == 0:
-            print(f"{ligand_smiles} had no functional groups to react with.")
+            log_warning(f"Detected no reactive functional groups: {ligand_smiles}")
             return None
 
         return mol, mol_reprotanated, mol_deprotanated, list_subs_within_mol

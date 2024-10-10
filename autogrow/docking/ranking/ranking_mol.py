@@ -9,7 +9,7 @@ from typing import Dict, List, Optional, Tuple, Union
 
 from autogrow.plugins.plugin_manager_base import get_plugin_manager
 from autogrow.plugins.selectors import SelectorPluginManager
-from autogrow.types import PreDockedCompoundInfo, PostDockedCompoundInfo, ScoreType
+from autogrow.types import PreDockedCompound, PostDockedCompound, ScoreType
 import rdkit  # type: ignore
 import rdkit.Chem as Chem  # type: ignore
 from rdkit.Chem.rdMolDescriptors import GetMorganFingerprint  # type: ignore
@@ -22,10 +22,10 @@ import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as
 
 
 def create_seed_list(
-    usable_smiles: List[PreDockedCompoundInfo],
+    usable_smiles: List[PreDockedCompound],
     num_seed_diversity: int,
     num_seed_dock_fitness: int,
-) -> List[PreDockedCompoundInfo]:
+) -> List[PreDockedCompound]:
     """
     this function will take ausable_list_of_smiles which can be derived from
     either the previous generation or a source_compounds_file. Then it will
@@ -68,7 +68,7 @@ def create_seed_list(
     )
 
 
-def get_usable_format(infile: str) -> List[PreDockedCompoundInfo]:
+def get_usable_format(infile: str) -> List[PreDockedCompound]:
     """
     This code takes a string for an file which is formatted as an .smi file. It
     opens the file and reads in the components into a usable list.
@@ -100,7 +100,7 @@ def get_usable_format(infile: str) -> List[PreDockedCompoundInfo]:
     """
 
     # IMPORT SMILES FROM THE PREVIOUS GENERATION
-    usable_smiles: List[PreDockedCompoundInfo] = []
+    usable_smiles: List[PreDockedCompound] = []
 
     if os.path.exists(infile) is False:
         print(f"\nFile of Source compounds does not exist: {infile}\n")
@@ -115,18 +115,19 @@ def get_usable_format(infile: str) -> List[PreDockedCompoundInfo]:
                 parts = line.split("    ")
 
             # choice_list = [parts[i] for i in range(len(parts))]
-            compoundInfo = PreDockedCompoundInfo(smiles=parts[0], name=parts[1])
+            postDockedCompound = PostDockedCompound.from_list(parts)
+            compoundInfo = PreDockedCompound(smiles=postDockedCompound.smiles, name=postDockedCompound.id)
             if len(parts) > 2:
-                compoundInfo.previous_diversity_score = float(parts[-1])
-                compoundInfo.previous_docking_score = float(parts[-2])
+                compoundInfo.previous_docking_score = postDockedCompound.docking_score
+                compoundInfo.previous_diversity_score = postDockedCompound.diversity_score
             usable_smiles.append(compoundInfo)
 
     return usable_smiles
 
 
 def convert_usable_list_to_lig_dict(
-    usable_smiles: List[PreDockedCompoundInfo],
-) -> Optional[Dict[str, PreDockedCompoundInfo]]:
+    usable_smiles: List[PreDockedCompound],
+) -> Optional[Dict[str, PreDockedCompound]]:
     """
     This will convert a list created by get_usable_format() to a dictionary
     using the ligand smile+lig_id as the key. This makes for faster searching
@@ -144,7 +145,7 @@ def convert_usable_list_to_lig_dict(
     if type(usable_smiles) is not type([]):
         return None
 
-    usable_dict_of_smiles: Dict[str, PreDockedCompoundInfo] = {}
+    usable_dict_of_smiles: Dict[str, PreDockedCompound] = {}
     for item in usable_smiles:
         key = item.smiles + item.name
         if key in usable_dict_of_smiles and usable_dict_of_smiles[
@@ -160,8 +161,8 @@ def convert_usable_list_to_lig_dict(
 
 ##### Called in the docking class ######
 def score_and_calc_diversity_scores(
-    postDockedCompoundInfos: List[PostDockedCompoundInfo],
-) -> List[PostDockedCompoundInfo]:
+    postDockedCompoundInfos: List[PostDockedCompound],
+) -> List[PostDockedCompound]:
     """
     This function will take list of molecules which makes up a population. It
     will then create a diversity score for each molecules:
@@ -203,7 +204,7 @@ def score_and_calc_diversity_scores(
         with the respective info and append diversity score
     """
 
-    postDockedCompoundInfosToKeep: List[PostDockedCompoundInfo] = []
+    postDockedCompoundInfosToKeep: List[PostDockedCompound] = []
 
     for postDockedCompoundInfo in postDockedCompoundInfos:
         if postDockedCompoundInfo is not None:

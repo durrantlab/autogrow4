@@ -3,7 +3,7 @@ import __future__
 from autogrow.plugins.selectors import SelectorBase
 from typing import List, Tuple
 from autogrow.config.argparser import ArgumentVars
-from autogrow.types import PreDockedCompoundInfo, ScoreType
+from autogrow.types import PreDockedCompound, ScoreType
 from autogrow.utils.logging import log_debug
 
 
@@ -28,11 +28,11 @@ class RankSelector(SelectorBase):
 
     def run_selector(
         self,
-        usable_smiles: List[PreDockedCompoundInfo],
+        usable_smiles: List[PreDockedCompound],
         num_to_choose: int,
         score_type: ScoreType,
         favor_most_negative: bool = True,
-    ) -> List[PreDockedCompoundInfo]:
+    ) -> List[PreDockedCompound]:
         """
         Given a data set and an idx number to select based on it will select the
         top rank scores for that critera. The number is choses is defined by
@@ -81,7 +81,7 @@ class RankSelector(SelectorBase):
         # )
 
         # remove any redundants
-        new_sorted_list: List[PreDockedCompoundInfo] = []
+        new_sorted_list: List[PreDockedCompound] = []
         temp_list_info: List[str] = []
         for i in range(len(sorted_list)):
             info = sorted_list[i]
@@ -133,9 +133,9 @@ class RankSelector(SelectorBase):
 
     def finalize_composite_docking_diversity_list(
         self,
-        docking_diversity_list: List[PreDockedCompoundInfo],
-        usable_smiles: List[PreDockedCompoundInfo],
-    ) -> List[PreDockedCompoundInfo]:
+        docking_diversity_list: List[PreDockedCompound],
+        usable_smiles: List[PreDockedCompound],
+    ) -> List[PreDockedCompound]:
         # Get all the information about the chosen molecules. chosen_mol_list is
         # 1D list of all chosen ligands chosen_mol_full_data_list is a 1D list
         # with each item of the list having multiple pieces of information such

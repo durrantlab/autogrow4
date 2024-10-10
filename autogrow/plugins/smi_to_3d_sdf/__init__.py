@@ -4,7 +4,7 @@ import os
 from typing import Dict, List, Optional, Tuple, Union, cast
 
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
-from autogrow.types import PreDockedCompoundInfo
+from autogrow.types import PreDockedCompound
 from rdkit import Chem  # type: ignore
 from rdkit.Chem.MolStandardize import rdMolStandardize  # type: ignore
 import copy
@@ -14,23 +14,32 @@ from autogrow.plugins.plugin_base import PluginBase
 import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
 
 
-class SmiToSdfBase(PluginBase):
-    def run(self, **kwargs) -> None:
+class SmiTo3DSdfBase(PluginBase):
+    def run(self, **kwargs) -> PreDockedCompound:
         """Run the plugin(s) with provided arguments."""
-        self.run_smi_to_sdf_convertor(kwargs["smi_file"])
+        pwd = kwargs["pwd"]
+        if pwd[-1] != os.sep:
+            pwd += os.sep
+        return self.run_smi_to_3d_sdf_convertor(
+            kwargs["predock_cmpd"], pwd, kwargs["cmpd_idx"]
+        )
 
     @abstractmethod
-    def run_smi_to_sdf_convertor(self, smi_file: str) -> None:
+    def run_smi_to_3d_sdf_convertor(
+        self, predock_cmpd: PreDockedCompound, pwd: str, cmpd_idx: int
+    ) -> PreDockedCompound:
         """
         run_smi_to_sdf_convertor is needs to be implemented in each class.
 
         Inputs:
-        :param str smi_file: The file path to the SMILES file. Note that it is
-            a single with with many smi files in it.
+        :param str predock_cmpd: A PreDockedCompound object. Conains a
+            SMILES string, a name, etc.
+        :param str pwd: The path to the working directory.
+        :param int cmpd_idx: The index of the compound in the generation.
 
         Returns:
-        :returns: str: The file path to the 3D SDF file. This one file contains
-            multiple molecules (all those that could be successfully converted).
+        :returns: PreDockedCompound: A PreDockedCompound,
+            the same as the input, but with the sdf_3d_path field filled in.
         """
         pass
 
@@ -39,8 +48,8 @@ class SmiToSdfBase(PluginBase):
         pass
 
 
-class SmiToSdfPluginManager(PluginManagerBase):
-    def run(self, **kwargs) -> None:
+class SmiTo3DSdfPluginManager(PluginManagerBase):
+    def run(self, **kwargs) -> PreDockedCompound:
         """
         Run the plugin with provided arguments.
 
@@ -61,11 +70,12 @@ class SmiToSdfPluginManager(PluginManagerBase):
 
         # Get the selector plugin to use
         smi_to_sdf_convertor = cast(
-            SmiToSdfBase, self.plugins[smi_to_sdf_convertors[0]]
+            SmiTo3DSdfBase, self.plugins[smi_to_sdf_convertors[0]]
         )
 
-        smi_to_sdf_convertor.run(**kwargs)
+        # if not glob.glob(kwargs["smi_file"] + "*.sdf"):
+        #     raise Exception(
+        #         f"Could not find 3D SDF files associated with input file {kwargs['smi_file']}. Conversion error?"
+        #     )
 
-        if not glob.glob(kwargs["smi_file"] + "*.sdf"):
-            raise Exception(f"Could not find 3D SDF files associated with input file {kwargs['smi_file']}. Conversion error?")
-
+        return smi_to_sdf_convertor.run(**kwargs)

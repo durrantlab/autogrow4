@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 from typing import Dict, List, Optional, Tuple, Union
 
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
-from autogrow.types import PreDockedCompoundInfo
+from autogrow.types import PreDockedCompound
 from rdkit import Chem  # type: ignore
 from rdkit.Chem.MolStandardize import rdMolStandardize  # type: ignore
 import copy
@@ -87,8 +87,8 @@ class SmilesFilterPluginManager(PluginManagerBase):
             )
 
     def _run_filter_on_predocked_compounds(
-        self, list_of_new_ligands: List[PreDockedCompoundInfo]
-    ) -> List[PreDockedCompoundInfo]:
+        self, list_of_new_ligands: List[PreDockedCompound]
+    ) -> List[PreDockedCompound]:
         """
         This will run a filter of the Users chosing.
 
@@ -118,8 +118,8 @@ class SmilesFilterPluginManager(PluginManagerBase):
         return [x for x in results if x is not None]
 
     def _run_filters_mol(
-        self, smiles_info: PreDockedCompoundInfo
-    ) -> Optional[PreDockedCompoundInfo]:
+        self, smiles_info: PreDockedCompound
+    ) -> Optional[PreDockedCompound]:
         """
         This takes a smiles and the selected filter list (child_dict) and
         runs it through the selected filters.

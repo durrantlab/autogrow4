@@ -9,7 +9,7 @@ import os
 from typing import Dict, List, Optional, Union
 
 from autogrow.docking.scoring.scoring_classes.parent_scoring_class import ParentScoring
-from autogrow.types import PreDockedCompoundInfo, PostDockedCompoundInfo
+from autogrow.types import PreDockedCompound, PostDockedCompound
 
 
 class VINA(ParentScoring):
@@ -24,7 +24,7 @@ class VINA(ParentScoring):
     def __init__(
         self,
         params: Optional[Dict[str, Union[str, int, float, bool]]] = None,
-        smiles_dict: Optional[Dict[str, PreDockedCompoundInfo]] = None,
+        smiles_dict: Optional[Dict[str, PreDockedCompound]] = None,
         test_boot: bool = True,
     ) -> None:
         """
@@ -79,7 +79,7 @@ class VINA(ParentScoring):
 
         return "Not Applicable"
 
-    def run_scoring(self, file_path: str) -> Optional[PostDockedCompoundInfo]:
+    def run_scoring(self, file_path: str) -> Optional[PostDockedCompound]:
         """
         Get all relevant scoring info and return as a list
 
@@ -97,7 +97,7 @@ class VINA(ParentScoring):
 
         return self.get_score_from_a_file(file_path)
 
-    def get_score_from_a_file(self, file_path: str) -> Optional[PostDockedCompoundInfo]:
+    def get_score_from_a_file(self, file_path: str) -> Optional[PostDockedCompound]:
         """
         Make a list of a ligands information including its docking score.
 
@@ -141,7 +141,7 @@ class VINA(ParentScoring):
 
     def merge_smile_info_w_affinity_info(
         self, lig_info: List
-    ) -> Optional[PostDockedCompoundInfo]:
+    ) -> Optional[PostDockedCompound]:
         """
         From the info in self.smiles_dict get that info and merge that with
         the affinity info
@@ -184,12 +184,12 @@ class VINA(ParentScoring):
 
         assert self.smiles_dict is not None, "smiles_dict is None"
         if ligand_short_name in self.smiles_dict:
-            return PostDockedCompoundInfo(
+            return PostDockedCompound(
                 smiles=new_smiles,
                 id=ligand_short_name,
                 short_id=lig_info[0],
                 additional_info=lig_info[1],
-                score=lig_info[2],
+                docking_score=lig_info[2],
                 # diversity_score=lig_info[3],
             )
 

@@ -6,7 +6,7 @@ import random
 from autogrow.plugins.selectors import SelectorBase
 from typing import List, Tuple
 from autogrow.config.argparser import ArgumentVars
-from autogrow.types import PreDockedCompoundInfo, ScoreType
+from autogrow.types import PreDockedCompound, ScoreType
 from autogrow.utils.logging import log_debug
 
 
@@ -40,11 +40,11 @@ class TournamentSelector(SelectorBase):
 
     def run_selector(
         self,
-        usable_smiles: List[PreDockedCompoundInfo],
+        usable_smiles: List[PreDockedCompound],
         num_to_choose: int,
         score_type: ScoreType,
         favor_most_negative: bool = True,
-    ) -> List[PreDockedCompoundInfo]:
+    ) -> List[PreDockedCompound]:
         """
         This runs a tournament style selector given a list of ligands and
         specified metric. It will randomly select ligands for tournaments. The
@@ -116,11 +116,11 @@ class TournamentSelector(SelectorBase):
 
     def _run_one_tournament(
         self,
-        list_of_ligands: List[PreDockedCompoundInfo],
+        list_of_ligands: List[PreDockedCompound],
         num_per_tourn: int,
         score_type: ScoreType,
         favor_most_negative: bool = True,
-    ) -> PreDockedCompoundInfo:
+    ) -> PreDockedCompound:
         """
         This runs a single tournament style selection given a list of ligands and
         specified metric. It will randomly select ligands for the tournament. The
@@ -156,7 +156,7 @@ class TournamentSelector(SelectorBase):
 
         num_ligands = len(list_of_ligands)
 
-        chosen_option = PreDockedCompoundInfo(smiles="", name="")  # init
+        chosen_option = PreDockedCompound(smiles="", name="")  # init
         temp = []
         for i in range(num_per_tourn):
             temp.append(i)
@@ -180,9 +180,9 @@ class TournamentSelector(SelectorBase):
 
     def finalize_composite_docking_diversity_list(
         self,
-        docking_diversity_list: List[PreDockedCompoundInfo],
-        usable_smiles: List[PreDockedCompoundInfo],
-    ) -> List[PreDockedCompoundInfo]:
+        docking_diversity_list: List[PreDockedCompound],
+        usable_smiles: List[PreDockedCompound],
+    ) -> List[PreDockedCompound]:
         # Tournament_Selector returns an already full list of ligands so you can
         # skip the get_chosen_mol_full_data_list step
         return docking_diversity_list

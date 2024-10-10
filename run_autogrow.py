@@ -26,7 +26,7 @@ from autogrow.plugins.docking import DockingBase, DockingPluginManager
 from autogrow.plugins.mutation import MutationBase, MutationPluginManager
 from autogrow.plugins.plugin_manager_base import get_all_plugin_managers
 from autogrow.plugins.selectors import SelectorBase, SelectorPluginManager
-from autogrow.plugins.smi_to_sdf import SmiToSdfBase, SmiToSdfPluginManager
+from autogrow.plugins.smi_to_3d_sdf import SmiTo3DSdfBase, SmiTo3DSdfPluginManager
 from autogrow.plugins.smiles_filters import SmilesFilterBase, SmilesFilterPluginManager
 from autogrow.utils.logging import LogLevel, create_logger, log_info
 
@@ -46,7 +46,7 @@ def _load_plugin_managers() -> None:
     DockingPluginManager(DockingBase)
     MutationPluginManager(MutationBase)
     CrossoverPluginManager(CrossoverBase)
-    SmiToSdfPluginManager(SmiToSdfBase)
+    SmiTo3DSdfPluginManager(SmiTo3DSdfBase)
 
 
 def _setup_plugin_managers(params) -> None:

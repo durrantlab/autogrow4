@@ -11,7 +11,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from autogrow.plugins.mutation import MutationBase
 from autogrow.plugins.plugin_manager_base import get_plugin_manager
-from autogrow.types import PreDockedCompoundInfo
+from autogrow.types import PreDockedCompound
 from autogrow.utils.logging import LogLevel, log_debug
 
 
@@ -23,10 +23,10 @@ def make_mutants(
     generation_num: int,
     number_of_processors: int,
     num_mutants_to_make: int,
-    ligands_list: List[PreDockedCompoundInfo],
-    new_mutation_smiles_list: List[PreDockedCompoundInfo],
+    ligands_list: List[PreDockedCompound],
+    new_mutation_smiles_list: List[PreDockedCompound],
     rxn_library_variables: List[str],
-) -> Optional[List[PreDockedCompoundInfo]]:
+) -> Optional[List[PreDockedCompound]]:
     """
     Make mutant compounds in a list to be returned
 
@@ -51,7 +51,7 @@ def make_mutants(
         sufficient number was not generated. None: bol if mutations failed
     """
 
-    new_ligands_list: List[PreDockedCompoundInfo] = new_mutation_smiles_list or []
+    new_ligands_list: List[PreDockedCompound] = new_mutation_smiles_list or []
     loop_counter = 0
 
     number_of_processors = int(params["parallelizer"].return_node())
@@ -156,7 +156,7 @@ def make_mutants(
 
                         # make a temporary list containing the smiles string
                         # of the new product and the unique ID
-                        ligand_info = PreDockedCompoundInfo(
+                        ligand_info = PreDockedCompound(
                             smiles=child_lig_smile, name=new_lig_id
                         )
 

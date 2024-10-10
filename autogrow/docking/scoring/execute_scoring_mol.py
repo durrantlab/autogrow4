@@ -13,7 +13,7 @@ from autogrow.docking.scoring.scoring_classes.parent_scoring_class import Parent
 from autogrow.docking.scoring.scoring_classes.scoring_functions.lig_efficiency import (
     LigEfficiency,
 )
-from autogrow.types import PreDockedCompoundInfo, PostDockedCompoundInfo
+from autogrow.types import PreDockedCompound, PostDockedCompound
 
 
 def pick_run_class_dict(scoring_choice: str) -> type:
@@ -39,7 +39,8 @@ def pick_run_class_dict(scoring_choice: str) -> type:
 ############
 def run_scoring_common(
     params: Dict[str, Any], smiles_file: str, folder_to_search: str
-) -> List[PostDockedCompoundInfo]:
+) -> List[PostDockedCompound]:
+    # TODO: Not currently used, but good stuff in here to consider.
     """
     This section runs the functions common to all scoring functions.
 
@@ -115,7 +116,7 @@ def run_scoring_common(
 
     # Format for list_of_raw_data must be [lig_id_shortname, any_details,
     # fitness_score_to_use]
-    lig_data: List[PostDockedCompoundInfo] = params["parallelizer"].run(
+    lig_data: List[PostDockedCompound] = params["parallelizer"].run(
         job_input_files_to_score, score_files_multithread
     )
 
@@ -125,7 +126,7 @@ def run_scoring_common(
     lig_dict = make_lig_score_dict(lig_data)
 
     # Convert Dictionary to the final list form
-    list_of_smiles_with_scores: List[PostDockedCompoundInfo] = []
+    list_of_smiles_with_scores: List[PostDockedCompound] = []
     for key in lig_dict:
 
         lig_info = lig_dict[key]
@@ -223,8 +224,8 @@ def rescore_single_file(
 
 
 def make_lig_score_dict(
-    list_of_list_of_lig_data: List[PostDockedCompoundInfo],
-) -> Dict[str, PostDockedCompoundInfo]:
+    list_of_list_of_lig_data: List[PostDockedCompound],
+) -> Dict[str, PostDockedCompound]:
     """
     Given a list of ligands with the scoring data make a dictionary.
 
@@ -246,7 +247,7 @@ def make_lig_score_dict(
         ligand with the most negative fitness score.
     """
 
-    lig_dict: Dict[str, PostDockedCompoundInfo] = {}
+    lig_dict: Dict[str, PostDockedCompound] = {}
     for lig in list_of_list_of_lig_data:
         if lig is None:
             continue
@@ -256,8 +257,8 @@ def make_lig_score_dict(
 
         # Handle if Multiple Conformers and Poses
         if lig_short_id in lig_dict:
-            score = lig.score
-            lig_short_id_score = lig_dict[lig_short_id].score
+            score = lig.docking_score
+            lig_short_id_score = lig_dict[lig_short_id].docking_score
 
             assert score is not None, "fitness_score is None"
             assert lig_short_id_score is not None, "lig_fitness_score is None"
@@ -277,7 +278,7 @@ def score_files_multithread(
     file_path: str,
     rescore_lig_efficiency: bool,
     lig_eff_scoring: Optional[LigEfficiency],
-) -> Optional[PostDockedCompoundInfo]:
+) -> Optional[PostDockedCompound]:
     """
     Run the scoring of a single molecule.
 
@@ -310,7 +311,7 @@ def score_files_multithread(
 ############
 
 
-def make_dict_of_smiles(smiles_file: str) -> Dict[str, PreDockedCompoundInfo]:
+def make_dict_of_smiles(smiles_file: str) -> Dict[str, PreDockedCompound]:
     """
     This will take a .smi file and make a dictionary with all of the info
     about the smiles. This list won't have scores yet but will have all of the
@@ -325,7 +326,7 @@ def make_dict_of_smiles(smiles_file: str) -> Dict[str, PreDockedCompoundInfo]:
     :return dict smiles_dict: a list of ligand info before docking
     """
 
-    smiles_dict: Dict[str, PreDockedCompoundInfo] = {}
+    smiles_dict: Dict[str, PreDockedCompound] = {}
     # load smile file and convert to list with index
     with open(smiles_file, "r") as smi:
 
@@ -347,7 +348,7 @@ def make_dict_of_smiles(smiles_file: str) -> Dict[str, PreDockedCompoundInfo]:
 
             assert lig_name_short is not None, "lig_name_short is None"
 
-            smiles_dict[lig_name_short] = PreDockedCompoundInfo(
+            smiles_dict[lig_name_short] = PreDockedCompound(
                 smiles=split_line[0], name=split_line[1]
             )
 

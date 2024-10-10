@@ -7,40 +7,29 @@ from autogrow.config.argparser import ArgumentVars
 from autogrow.docking.docking_class.parent_pdbqt_converter import ParentPDBQTConverter
 from autogrow.plugins.plugin_base import PluginBase
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
-from autogrow.types import PostDockedCompoundInfo, PreDockedCompoundInfo, ScoreType
+from autogrow.types import PostDockedCompound, PreDockedCompound, ScoreType
 import autogrow.docking.scoring.execute_scoring_mol as Scoring
 import autogrow.docking.ranking.ranking_mol as Ranking
 
 
 class DockingBase(PluginBase):
-    def run(self, **kwargs) -> Any:
+    def run(self, **kwargs) -> Optional[PostDockedCompound]:
         """Run the plugin with provided arguments."""
-        lig_pdbqt_filename: str = kwargs["lig_pdbqt_filename"]
-        file_conversion_class_object: ParentPDBQTConverter = kwargs[
-            "file_conversion_class_object"
-        ]
-
-        return self.run_docking(
-            lig_pdbqt_filename=lig_pdbqt_filename,
-            file_conversion_class_object=file_conversion_class_object,
-        )
+        return self.run_docking(predocked_cmpd=kwargs["predocked_cmpd"])
 
     @abstractmethod
     def run_docking(
-        self,
-        lig_pdbqt_filename: str,
-        file_conversion_class_object: ParentPDBQTConverter,
-    ) -> Optional[str]:
+        self, predocked_cmpd: PreDockedCompound
+    ) -> Optional[PostDockedCompound]:
         """
         run_docking is needs to be implemented in each class.
 
         Inputs:
-        :param str pdbqt_filename: a string for docking process raise exception
-            if missing
+        :param PreDockedCompound predocked_cmpd: A PreDockedCompound object.
 
         Returns:
-        :returns: str smile_name: name of smiles if it failed to dock returns
-            None if it docked properly
+        :returns: PostDockedCompound: A PostDockedCompound object, containing
+            the score and a docked (posed) SDF file.
         """
 
         # raise NotImplementedError("run_dock() not implemented")
@@ -48,7 +37,7 @@ class DockingBase(PluginBase):
 
 
 class DockingPluginManager(PluginManagerBase):
-    def run(self, **kwargs) -> Any:
+    def run(self, **kwargs) -> Optional[PostDockedCompound]:
         """
         Run the plugin with provided arguments.
 
@@ -56,7 +45,7 @@ class DockingPluginManager(PluginManagerBase):
         :param dict kwargs: a dictionary of arguments to pass to the plugin
 
         Returns:
-        :returns: bool: True if the molecule passes the filter, False if it fails
+        :returns: float score: The score of the docking.
         """
 
         dockings = self.get_selected_plugins_from_params()
@@ -151,11 +140,10 @@ class DockingPluginManager(PluginManagerBase):
 
     def rank_and_save_output_smi(
         self,
-        params: dict,
         current_generation_dir: str,
         current_gen_int: int,
         smiles_file: str,
-        deleted_smiles_names_list,
+        postDockedCompoundInfos: List[PostDockedCompound],
     ) -> str:
         """
         Given a folder with PDBQT's, rank all the SMILES based on docking
@@ -171,8 +159,6 @@ class DockingPluginManager(PluginManagerBase):
             indexed to zero
         :param str smiles_file:  File path for the file with the ligands for
             the generation which will be a .smi file
-        :param list deleted_smiles_names_list: list of SMILES which may have
-            failed the conversion process
 
         Returns:
         :returns: str output_ranked_smile_file: the path of the output ranked
@@ -182,12 +168,12 @@ class DockingPluginManager(PluginManagerBase):
         # TODO: Not the right place for this.
 
         # Get directory string of PDB files for Ligands
-        folder_with_pdbqts = f"{current_generation_dir}PDBs{os.sep}"
+        # folder_with_pdbqts = f"{current_generation_dir}PDBs{os.sep}"
 
         # Run any compatible Scoring Function
-        postDockedCompoundInfos = Scoring.run_scoring_common(
-            params, smiles_file, folder_with_pdbqts
-        )
+        # postDockedCompoundInfos = Scoring.run_scoring_common(
+        #     params, smiles_file, folder_with_pdbqts
+        # )
 
         # Before ranking these we need to handle Pass-Through ligands from the
         # last generation If it's current_gen_int==1 or if
@@ -232,7 +218,7 @@ class DockingPluginManager(PluginManagerBase):
 
         # sort list by the affinity of each sublist (which is the last index
         # of sublist)
-        postDockedCompoundInfos.sort(key=lambda x: x.score, reverse=False)
+        postDockedCompoundInfos.sort(key=lambda x: x.docking_score, reverse=False)
 
         # score the diversity of each ligand compared to the rest of the
         # ligands in the group this adds on a float in the last column for the
@@ -249,7 +235,9 @@ class DockingPluginManager(PluginManagerBase):
 
         with open(output_ranked_smile_file, "w") as output:
             for postDockedCompoundInfo in postDockedCompoundInfos:
-                output_line = "\t".join(postDockedCompoundInfo.to_list()) + "\n"
+                lst = postDockedCompoundInfo.to_list()
+                lst[-1] = os.path.basename(lst[-1])
+                output_line = "\t".join(lst) + "\n"
                 output.write(output_line)
 
         return output_ranked_smile_file
@@ -259,13 +247,13 @@ class DockingPluginManager(PluginManagerBase):
         ranked_smi_file_prev_gen: str,
         current_generation_dir: str,
         current_gen_int: int,
-        smiles_list: list[PostDockedCompoundInfo],
+        smiles_list: list[PostDockedCompound],
     ):
         # Note that this modifies the smiles_list in place
 
         # TODO: Not the right place for this...
 
-        # CHECKED: smiles_list is of type List[PostDockedCompoundInfo] here.
+        # CHECKED: smiles_list is of type List[PostDockedCompound] here.
 
         print("Getting ligand scores from the previous generation")
 
@@ -279,7 +267,7 @@ class DockingPluginManager(PluginManagerBase):
         # Get the data for all ligands from previous generation ranked
         # file
         prev_gen_data_list = Ranking.get_usable_format(ranked_smi_file_prev_gen)
-        # CHECKED: prev_gen_data_list of type List[PreDockedCompoundInfo] here.
+        # CHECKED: prev_gen_data_list of type List[PreDockedCompound] here.
 
         # Get the list of pass through ligands
         current_gen_pass_through_smi = (
@@ -287,33 +275,33 @@ class DockingPluginManager(PluginManagerBase):
             + f"SeedFolder{os.sep}Chosen_Elite_To_advance_Gen_{current_gen_int}.smi"
         )
         pass_through_list = Ranking.get_usable_format(current_gen_pass_through_smi)
-        # CHECKED: pass_through_list is of type List[PreDockedCompoundInfo] here.
+        # CHECKED: pass_through_list is of type List[PreDockedCompound] here.
 
         # Convert lists to searchable Dictionaries.
         prev_gen_data_dict = Ranking.convert_usable_list_to_lig_dict(prev_gen_data_list)
-        # CHECKED: prev_gen_data_dict is of type Dict[str, PreDockedCompoundInfo] here.
+        # CHECKED: prev_gen_data_dict is of type Dict[str, PreDockedCompound] here.
 
         assert prev_gen_data_dict is not None, "prev_gen_data_dict is None"
 
-        pass_through_data: List[PostDockedCompoundInfo] = []
+        pass_through_data: List[PostDockedCompound] = []
         for lig in pass_through_list:
-            # CHECKED: lig is of type PreDockedCompoundInfo here.
+            # CHECKED: lig is of type PreDockedCompound here.
 
             lig_data = prev_gen_data_dict[str(lig.smiles + lig.name)]
-            # CHECKED: lig_data is of type PreDockedCompoundInfo here.
+            # CHECKED: lig_data is of type PreDockedCompound here.
 
-            # NOTE: Here it must be converted to a PostDockedCompoundInfo
+            # NOTE: Here it must be converted to a PostDockedCompound
             assert (
                 lig_data.previous_docking_score is not None
             ), "lig_data.previous_docking_score is None"
 
             # TODO: Nervous that additional_info = "". Not sure what to put there.
-            lig_info_remove_diversity_info = PostDockedCompoundInfo(
+            lig_info_remove_diversity_info = PostDockedCompound(
                 smiles=lig.smiles,
                 id=lig.name,
                 short_id=lig.name,
                 additional_info="",
-                score=lig_data.previous_docking_score,
+                docking_score=lig_data.previous_docking_score,
                 diversity_score=None,
             )
             pass_through_data.append(lig_info_remove_diversity_info)

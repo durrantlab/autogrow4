@@ -60,12 +60,12 @@ def main_execute(params: Dict[str, Any]) -> None:
         # print(cur_gen_dir)
         # sys.stdout.flush()
 
-        smiles_file_new_gen, new_gen_ligs = operations.populate_generation(
+        smiles_new_gen_path, new_gen_predock_cmpnds = operations.populate_generation(
             params, gen_num
         )
         sys.stdout.flush()
 
-        if new_gen_ligs is None:
+        if new_gen_predock_cmpnds is None:
             raise ValueError(
                 "Population failed to make enough mutants or crossovers... \
                                 Errors could include not enough diversity, too few seeds to the generation, \
@@ -77,30 +77,8 @@ def main_execute(params: Dict[str, Any]) -> None:
         # Begin Docking unweighted_ranked_smile_file is the file name
         # where the unweighted ranked but score .smi file resides
         unweighted_ranked_smile_file = DockingClass.run_docking_common(
-            params, gen_num, cur_gen_dir, smiles_file_new_gen,
+            params, gen_num, cur_gen_dir, smiles_new_gen_path, new_gen_predock_cmpnds
         )
-
-        # Delete all temporary files; Skip if in Debugging Mode
-        if params["debug_mode"] is False:
-            print("Deleting temporary files and directories")
-            files_to_del = []
-            folders_to_del = [
-                f"{cur_gen_dir}{os.sep}3D_SDFs{os.sep}",
-                f"{cur_gen_dir}{os.sep}3D_SDFs{os.sep}log{os.sep}",
-                f"{cur_gen_dir}{os.sep}gypsum_submission_files{os.sep}",
-            ]
-            for folder in folders_to_del:
-                if os.path.exists(folder) is False:
-                    continue
-                files_to_del.extend(glob.glob(f"{folder}*"))
-
-            job_input = tuple((x,) for x in files_to_del if os.path.isfile(x) is True)
-            params["parallelizer"].run(job_input, delete_temporary_files_and_folders)
-            # Delete Folders in an ordered manor incase folders are nested
-            for item in folders_to_del:
-                delete_temporary_files_and_folders(item)
-
-        sys.stdout.flush()
 
         # print("")
         # print("Finished generation ", gen_num)

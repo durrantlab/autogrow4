@@ -4,6 +4,7 @@ from typing import List, Optional, Tuple
 from autogrow.config.argparser import ArgumentVars
 from autogrow.docking.docking_class.parent_pdbqt_converter import ParentPDBQTConverter
 from autogrow.plugins.docking import DockingBase
+from autogrow.types import PreDockedCompound
 
 
 class FakeDocking(DockingBase):
@@ -99,20 +100,15 @@ class FakeDocking(DockingBase):
         # TODO: Implement this function
         pass
 
-    def run_docking(
-        self, lig_pdbqt_filename, file_conversion_class_object: ParentPDBQTConverter
-    ) -> Optional[str]:
+    def run_docking(self, predocked_cmpd: PreDockedCompound) -> Optional[float]:
         """
-        this function runs the docking. Returns None if it worked and the name
-        if it failed to dock.
+        run_docking is needs to be implemented in each class.
 
         Inputs:
-        :param str pdbqt_filename: the pdbqt file of a ligand to dock and
-            score
+        :param PreDockedCompound predocked_cmpd: A PreDockedCompound object.
 
         Returns:
-        :returns: str smile_name: name of smiles if it failed to dock returns
-            None if it docked properly
+        :returns: float score: The score of the docking.
         """
 
         self.file_conversion_class_object = file_conversion_class_object

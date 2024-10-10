@@ -95,7 +95,6 @@ def convert_to_3d(
     with LogLevel():
         log_info("Converting SMILES to 3D SDF")
 
-        
         # convert smiles in an .SMI file to sdfs using gypsum
         with WithoutLogging():
             gypsum_output_folder_path = _convert_smi_to_sdfs_with_gypsum(

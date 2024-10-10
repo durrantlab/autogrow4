@@ -4,7 +4,7 @@ This script handles the docking and file conversion for docking.
 import __future__
 
 import os
-from typing import Any, Dict, Type, Union, cast
+from typing import Any, Dict, List, Optional, Type, Union, cast
 
 
 # from autogrow.docking.docking_class.docking_class_children \
@@ -15,6 +15,7 @@ from autogrow.docking.docking_class.get_child_class import get_all_subclasses
 from autogrow.docking.docking_class.parent_pdbqt_converter import ParentPDBQTConverter
 from autogrow.plugins.docking import DockingPluginManager
 from autogrow.plugins.plugin_manager_base import get_plugin_manager
+from autogrow.types import PostDockedCompound, PreDockedCompound
 
 
 def pick_run_conversion_class_dict(
@@ -44,6 +45,7 @@ def run_docking_common(
     current_gen_int: int,
     current_generation_dir: str,
     smiles_file_new_gen: str,
+    new_gen_predock_cmpds: List[PreDockedCompound],
 ) -> str:
     """
     This section runs the functions common to all Docking programs.
@@ -61,6 +63,8 @@ def run_docking_common(
         find the subfolder with pdb files
     :param str smile_file_new_gen: the name of the file containing the
         molecules in the new population
+    :param list new_gen_predock_cmpnds: a list of PreDockedCompound
+        objects for the new generation
 
     Returns:
     :returns: str unweighted_ranked_smile_file: the name of the
@@ -68,18 +72,18 @@ def run_docking_common(
     """
 
     # Get directory string of PDB files for Ligands
-    current_generation_pdb_dir = f"{current_generation_dir}PDBs{os.sep}"
+    # current_generation_pdb_dir = f"{current_generation_dir}PDBs{os.sep}"
 
-    conversion_choice = params["conversion_choice"]
+    # conversion_choice = params["conversion_choice"]
 
-    temp_vars = {
-        key: params[key] for key in list(params.keys()) if key != "parallelizer"
-    }
-    file_conversion_cls = pick_run_conversion_class_dict(conversion_choice)
+    # temp_vars = {
+    #     key: params[key] for key in list(params.keys()) if key != "parallelizer"
+    # }
+    # file_conversion_cls = pick_run_conversion_class_dict(conversion_choice)
 
-    # TODO: new file_conversion_class_object automatically converts receptor. To
-    # convert ligand, must access object function. That's pretty awkward.
-    file_conversion_obj = file_conversion_cls(temp_vars, test_boot=False)
+    # # TODO: new file_conversion_class_object automatically converts receptor. To
+    # # convert ligand, must access object function. That's pretty awkward.
+    # file_conversion_obj = file_conversion_cls(temp_vars, test_boot=False)
 
     docking_plugin_manager = cast(
         DockingPluginManager, get_plugin_manager("DockingPluginManager")
@@ -88,65 +92,53 @@ def run_docking_common(
     # dock_class = pick_docking_class_dict(dock_choice)
     # docking = dock_class(temp_vars, receptor, file_conversion_obj, test_boot=False)
 
-    # Find PDB's
-    pdbs_in_folder = docking_plugin_manager.find_pdb_ligands(current_generation_pdb_dir)
-    job_input_convert_lig = tuple(
-        (docking_plugin_manager, pdb, file_conversion_obj) for pdb in pdbs_in_folder
-    )
+    # # Find PDB's
+    # pdbs_in_folder = docking_plugin_manager.find_pdb_ligands(current_generation_pdb_dir)
+    # job_input_convert_lig = tuple(
+    #     (docking_plugin_manager, pdb, file_conversion_obj) for pdb in pdbs_in_folder
+    # )
 
-    print("Convert Ligand to PDBQT format Begun")
-    smiles_names_failed_to_convert = params["parallelizer"].run(
-        job_input_convert_lig, lig_convert_multithread
-    )
+    # print("Convert Ligand to PDBQT format Begun")
+    # smiles_names_failed_to_convert = params["parallelizer"].run(
+    #     job_input_convert_lig, lig_convert_multithread
+    # )
 
-    print("Convert Ligand to PDBQT format Completed")
-    deleted_smiles_names_list_convert = [
-        x for x in smiles_names_failed_to_convert if x is not None
+    # print("Convert Ligand to PDBQT format Completed")
+    # deleted_smiles_names_list_convert = [
+    #     x for x in smiles_names_failed_to_convert if x is not None
+    # ]
+    # deleted_smiles_names_list_convert = list(set(deleted_smiles_names_list_convert))
+
+    # if deleted_smiles_names_list_convert:
+    #     print("THE FOLLOWING LIGANDS FAILED TO CONVERT:")
+    #     print(deleted_smiles_names_list_convert)
+
+    # # Docking the ligands which converted to PDBQT Find PDBQT's
+    # pdbqts_in_folder = docking_plugin_manager.find_converted_ligands(
+    #     current_generation_pdb_dir
+    # )
+
+    job_input_dock_lig = [
+        (docking_plugin_manager, new_gen_predock_cmpd)
+        for new_gen_predock_cmpd in new_gen_predock_cmpds
     ]
-    deleted_smiles_names_list_convert = list(set(deleted_smiles_names_list_convert))
-
-    if deleted_smiles_names_list_convert:
-        print("THE FOLLOWING LIGANDS FAILED TO CONVERT:")
-        print(deleted_smiles_names_list_convert)
-
-    # Docking the ligands which converted to PDBQT Find PDBQT's
-    pdbqts_in_folder = docking_plugin_manager.find_converted_ligands(
-        current_generation_pdb_dir
-    )
-
-    job_input_dock_lig = tuple(
-        (docking_plugin_manager, pdbqt, file_conversion_obj)
-        for pdbqt in pdbqts_in_folder
-    )
     print("Docking Begun")
-    smiles_names_failed_to_dock = params["parallelizer"].run(
-        job_input_dock_lig, run_dock_multithread_wrapper
+    post_docked_compounds: List[PostDockedCompound] = params["parallelizer"].run(
+        job_input_dock_lig, _run_dock_multithread_wrapper
     )
 
-    print("\nDocking Completed\n")
-    deleted_smiles_names_list_dock = [
-        x for x in smiles_names_failed_to_dock if x is not None
+    # Remove those that failed to convert
+    post_docked_compounds = [x for x in post_docked_compounds if x is not None]
+
+    # Remove those not associated with a docked sdf file
+    post_docked_compounds = [
+        x for x in post_docked_compounds if x.docked_sdf_path is not None
     ]
-    deleted_smiles_names_list_dock = list(set(deleted_smiles_names_list_dock))
 
-    if deleted_smiles_names_list_dock:
-        print("THE FOLLOWING LIGANDS WHICH FAILED TO DOCK:")
-        print(deleted_smiles_names_list_dock)
-
-    deleted_smiles_names_list = (
-        deleted_smiles_names_list_convert + deleted_smiles_names_list_dock
-    )
-
-    if len(deleted_smiles_names_list) != 0:
-        print("\nTHE FOLLOWING LIGANDS WHERE DELETED FOR FAILURE TO CONVERT OR DOCK:")
-        print(deleted_smiles_names_list)
     print("\nBegin Ranking and Saving results")
     unweighted_ranked_smile_file = docking_plugin_manager.rank_and_save_output_smi(
-        params,
-        current_generation_dir,
-        current_gen_int,
-        smiles_file_new_gen,
-        deleted_smiles_names_list,
+        current_generation_dir, current_gen_int, smiles_file_new_gen,
+        post_docked_compounds
     )
     print("\nCompleted Ranking and Saving results\n")
     return unweighted_ranked_smile_file
@@ -175,11 +167,9 @@ def lig_convert_multithread(
     return docking.run_ligand_handling_for_docking(pdb, file_conversion_class_object)
 
 
-def run_dock_multithread_wrapper(
-    docking: DockingPluginManager,
-    lig_pdb: str,
-    file_conversion_obj: ParentPDBQTConverter,
-) -> Union[str, None]:
+def _run_dock_multithread_wrapper(
+    docking: DockingPluginManager, new_gen_predock_cmpd: PreDockedCompound,
+) -> Optional[float]:
     """
     Run the docking of a single molecule.
 
@@ -193,7 +183,5 @@ def run_dock_multithread_wrapper(
         docking failed)
     """
 
-    print("Attempt to Dock complete: ", lig_pdb)
-    return docking.run(
-        lig_pdbqt_filename=lig_pdb, file_conversion_class_object=file_conversion_obj
-    )
+    # print("Attempt to Dock complete: ", lig_pdb)
+    return docking.run(predocked_cmpd=new_gen_predock_cmpd)
