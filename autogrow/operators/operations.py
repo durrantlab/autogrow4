@@ -419,67 +419,6 @@ def _get_elitism_cmpds_from_prev_gen(
 
     return chosen_mol_to_pass_through_list
 
-
-def populate_generation_zero(
-    params: Dict[str, Any], gen_num: int = 0
-) -> Tuple[bool, str, List[PreDockedCompoundInfo]]:
-    """
-    This will handle all that is required for generation 0 redock and handle the generation 0.
-
-    Inputs:
-    :param dict params: a dictionary of all user variables
-    :param int gen_num: the generation number
-
-    Returns:
-    :returns: bool already_docked: if true we won't redock the source ligands.
-        If False we will dock the source ligands.
-    :returns: str full_generation_smiles_file: the name of the .smi file containing the new population
-    :returns: list full_gen_smis: list with the new population of ligands.
-    """
-    import pdb; pdb.set_trace()
-    # Get the source compound list
-    src_cmpds = _get_complete_list_prev_gen_or_source_compounds(params, gen_num)
-
-    # Get unaltered samples from the previous generation
-    # print("GET SOME LIGANDS FROM THE LAST GENERATION")
-
-    mols_to_pass_through = _get_elitism_cmpds_from_prev_gen(
-        params, src_cmpds, 1, gen_num
-    )
-
-    # Build new_gen_smis and full_gen_smis
-    new_gen_smis: List[PreDockedCompoundInfo] = []
-    full_gen_smis: List[PreDockedCompoundInfo] = []
-
-    for i in mols_to_pass_through:
-        new_gen_smis.append(i)
-        full_gen_smis.append(i)
-
-    assert (
-        full_gen_smis
-    ), "Population failed to import any molecules from the source_compounds_list."
-
-    # Save the full generation and the SMILES to convert
-    full_gen_smis_file, smis_to_convert_file, new_gen_folder_path = _save_smiles_files(
-        params, gen_num, full_gen_smis, new_gen_smis, "_to_convert"
-    )
-
-    # Check if ligands are already docked and write ranked file
-    already_docked = _check_if_already_docked_and_write_ranked_file_gen_0(
-        full_gen_smis, new_gen_folder_path
-    )
-
-    if already_docked:
-        return already_docked, full_gen_smis_file, full_gen_smis
-
-    # If not already docked, convert to 3D. Note that smiles_to_convert_file is
-    # a single with with many smi files in it.
-    get_plugin_manager("SmiToSdfPluginManager").run(smi_file=smis_to_convert_file)
-    # conversion_to_3d.convert_to_3d(params, smis_to_convert_file, new_gen_folder_path)
-
-    return already_docked, full_gen_smis_file, full_gen_smis
-
-
 def _save_smiles_files(
     params: Dict[str, Any],
     generation_num: int,
@@ -501,36 +440,6 @@ def _save_smiles_files(
     )
 
     return full_generation_smiles_file, smiles_to_convert_file, new_gen_folder_path
-
-
-def _check_if_already_docked_and_write_ranked_file_gen_0(
-    full_gen_smis: List[PreDockedCompoundInfo], new_gen_folder_path: str
-) -> bool:
-    """
-    Order files by docking score and write ranked file. Returns True if already docked.
-    """
-    already_docked = False
-    try:
-
-        def _get_score(x: PreDockedCompoundInfo) -> float:
-            assert x.previous_docking_score is not None, "Docking score is None"
-            return float(x.previous_docking_score)
-
-        full_gen_smis.sort(key=lambda x: _get_score(x), reverse=False)
-        full_gen_smis_printout = ["\t".join(x.smiles) for x in full_gen_smis]
-        full_gen_smis_printout = "\n".join(full_gen_smis_printout)
-        ranked_file = f"{new_gen_folder_path}{os.sep}generation_0_ranked.smi"
-        with open(ranked_file, "w") as f:
-            f.write(full_gen_smis_printout)
-        already_docked = True
-    except Exception:
-        log_warning(
-            "Not all ligands in source compound list are scored. "
-            + "We will convert and redock them all."
-        )
-        already_docked = False
-
-    return already_docked
 
 
 def _throw_error_not_enough_compounds_made(arg0, arg1, arg2, arg3):
