@@ -14,7 +14,7 @@ from autogrow.config.argparser import ArgumentVars
 import os
 
 
-class ObabelSmiToSDF(SmiTo3DSdfBase):
+class ObabelSmiTo3DSDF(SmiTo3DSdfBase):
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
         """Add command-line arguments required by the plugin."""
         return (

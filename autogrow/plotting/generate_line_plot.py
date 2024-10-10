@@ -64,7 +64,7 @@ def get_usable_format(infile: str) -> List[List[str]]:
 
 def get_average_score_per_gen(
     infolder: str, folder_list: List[str]
-) -> Dict[str, float | str]:
+) -> Dict[str, Union[float, str]]:
     """
     This script will get the average docking score from the ranked .smi file
     from each generation.

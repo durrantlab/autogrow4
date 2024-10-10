@@ -15,10 +15,6 @@ def define_defaults() -> Dict[str, Any]:
 
     #### OPTIONAL FILE-LOCATION VARIABLES ####
     # (RECOMMEND SETTING TO "" SO AUTOGROW CAN AUTOLOCATE THESE FILES)#
-
-    # PARSER.add_argument('--conversion_choice', choices
-    #    = ["MGLTools","obabel"], default="MGLTools",
-    default_params["conversion_choice"] = "obabel"
     default_params["obabel_path"] = "obabel"
 
     # Crossover function

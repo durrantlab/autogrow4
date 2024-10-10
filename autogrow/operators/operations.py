@@ -237,11 +237,7 @@ def _generate_mutations(
 
         # Get starting compounds for Mutations
         seed_list_mutations = _make_seed_list(
-            params,
-            src_cmpds,
-            generation_num,
-            num_seed_diversity,
-            num_seed_dock_fitness,
+            src_cmpds, generation_num, num_seed_diversity, num_seed_dock_fitness,
         )
 
         # Save seed list for Mutations
@@ -345,11 +341,7 @@ def _generate_crossovers(
 
         # Get starting compounds to seed Crossovers
         seed_list_crossovers = _make_seed_list(
-            params,
-            src_cmpds,
-            generation_num,
-            num_seed_diversity,
-            num_seed_dock_fitness,
+            src_cmpds, generation_num, num_seed_diversity, num_seed_dock_fitness,
         )
 
         # Save seed list for Crossovers
@@ -722,7 +714,6 @@ def _handle_no_ligands_found(arg0):
 
 
 def _make_seed_list(
-    params: Dict[str, Any],
     source_compounds_list: List[PreDockedCompound],
     generation_num: int,
     num_seed_diversity: int,
@@ -910,7 +901,6 @@ def _make_pass_through_list(
         # Use the make_seed_list function to select the list to advance.
         # This list will be chosen strictly by
         ligs_to_advance = _make_seed_list(
-            params,
             ligs_that_passed_filters,
             gen_num,
             len(ligs_that_passed_filters),
@@ -928,7 +918,7 @@ def _make_pass_through_list(
         # Use the make_seed_list function to select the list to advance. This
         # list will be chosen strictly by
         ligs_to_advance = _make_seed_list(
-            params, ligs_that_passed_filters, gen_num, 0, num_elite_from_prev_gen,
+            ligs_that_passed_filters, gen_num, 0, num_elite_from_prev_gen,
         )
 
     if gen_num == 0 or len(ligs_to_advance) >= num_elite_from_prev_gen:
