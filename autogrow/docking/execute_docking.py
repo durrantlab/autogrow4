@@ -18,26 +18,26 @@ from autogrow.plugins.plugin_manager_base import get_plugin_manager
 from autogrow.types import PostDockedCompound, PreDockedCompound
 
 
-def pick_run_conversion_class_dict(
-    conversion_choice: str,
-) -> Type[ParentPDBQTConverter]:
-    """
-    This will retrieve all the names of every child class of the parent class
-    ParentDocking
+# def pick_run_conversion_class_dict(
+#     conversion_choice: str,
+# ) -> Type[ParentPDBQTConverter]:
+#     """
+#     This will retrieve all the names of every child class of the parent class
+#     ParentDocking
 
-    Inputs:
-    :param list conversion_choice: List with the User specified docking
-        choices
+#     Inputs:
+#     :param list conversion_choice: List with the User specified docking
+#         choices
 
-    Returns:
-    :returns: object child_dict[conversion_choice]: the class for running the
-        chosen docking method
-    """
+#     Returns:
+#     :returns: object child_dict[conversion_choice]: the class for running the
+#         chosen docking method
+#     """
 
-    children = get_all_subclasses(ParentPDBQTConverter)
+#     children = get_all_subclasses(ParentPDBQTConverter)
 
-    child_dict = {child.__name__: child for child in children}
-    return child_dict[conversion_choice]
+#     child_dict = {child.__name__: child for child in children}
+#     return child_dict[conversion_choice]
 
 
 def run_docking_common(

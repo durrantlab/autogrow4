@@ -518,18 +518,17 @@ def _add_filter_params(parser: argparse._ArgumentGroup):
 
 def _add_conversion_params(parser: argparse._ArgumentGroup):
     # DOCUMENT THE file conversion for docking inputs
-    parser.add_argument(
-        "--conversion_choice",
-        choices=["ObabelConversion"],
-        default="ObabelConversion",
-        help="Determines how .pdb files will be converted \
-        to the final format for docking. For Autodock Vina and QuickVina style docking software, \
-        files must be in .pdbqt format.",
-    )
+    # parser.add_argument(
+    #     "--conversion_choice",
+    #     choices=["ObabelConversion"],
+    #     default="ObabelConversion",
+    #     help="Determines how .pdb files will be converted \
+    #     to the final format for docking. For Autodock Vina and QuickVina style docking software, \
+    #     files must be in .pdbqt format.",
+    # )
     parser.add_argument(
         "--obabel_path",
-        help="required if using obabel conversion \
-        option (conversion_choice=ObabelConversion).\
+        help="The path to the open babel executable. \
         Path may look like PATH/envs/py37/bin/obabel; \
         may be found on Linux by running: which obabel",
     )

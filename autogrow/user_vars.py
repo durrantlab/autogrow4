@@ -549,9 +549,6 @@ def define_defaults() -> Dict[str, Any]:
     #### OPTIONAL FILE-LOCATION VARIABLES ####
     # (RECOMMEND SETTING TO "" SO AUTOGROW CAN AUTOLOCATE THESE FILES)#
 
-    # PARSER.add_argument('--conversion_choice', choices
-    #    = ["MGLTools","obabel"], default="MGLTools",
-    params["conversion_choice"] = "obabel"
     params["obabel_path"] = "obabel"
 
     # Crossover function
@@ -851,32 +848,6 @@ def load_in_commandline_parameters(argv: Dict[str, Any]) -> Tuple[Dict[str, Any]
     # output the paramters used
     printout = printout + "\nPARAMETERS" + "\n"
     printout = f"{printout} ========== " + "\n"
-
-    # Make sure scripts and executables exist
-    # If MGLTools is being used handle its paths
-    if params["conversion_choice"] == "MGLToolsConversion":
-        if not os.path.exists(params["prepare_ligand4.py"]) and not os.path.exists(
-            params["prepare_ligand4.py"].replace('"', "")
-        ):
-            printout = (
-                printout
-                + "\nERROR: Could not find prepare_ligand4.py at "
-                + params["prepare_ligand4.py"]
-                + "\n"
-            )
-            print(printout)
-            raise NotImplementedError(printout)
-        if not os.path.exists(params["prepare_receptor4.py"]) and not os.path.exists(
-            params["prepare_receptor4.py"].replace('"', "")
-        ):
-            printout = (
-                printout
-                + "\nERROR: Could not find prepare_receptor4.py at "
-                + params["prepare_receptor4.py"]
-                + "\n"
-            )
-            print(printout)
-            raise NotImplementedError(printout)
 
     if not os.path.exists(params["filename_of_receptor"]):
         printout = (
