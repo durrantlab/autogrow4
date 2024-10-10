@@ -29,7 +29,7 @@ def define_defaults() -> Dict[str, Any]:
     default_params["protanate_step"] = False
 
     # Mutation Settings
-    default_params["rxn_library"] = "click_chem_rxns"
+    default_params["rxn_library_path"] = "click_chem_rxns"
 
     # processors
     default_params["number_of_processors"] = 1

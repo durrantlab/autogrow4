@@ -43,8 +43,8 @@ def make_mutants(
         mutants made for the current generation being populated but in a previous
         iteration of the loop in Operations
     :param list rxn_library_variables: a list of user variables which define
-        the rxn_library. ie.
-        rxn_library_variables = [params['rxn_library']]
+        the rxn_library_path. ie.
+        rxn_library_variables = [params['rxn_library_path']]
 
     Returns:
     :returns: list new_ligands_list: ligand/name pairs OR returns None if

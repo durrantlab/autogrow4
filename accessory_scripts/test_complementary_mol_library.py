@@ -10,7 +10,7 @@ autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click
 --function_group_library \
 autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/ClickChem_functional_groups.json \
 --complementary_mol_directory \
-autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/complementary_mol_dir \
+autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/complementary_mols \
 --output_folder autogrow4/accessory_scripts/output/
 """
 
@@ -51,9 +51,9 @@ class SmilesClickChem:
 
         Inputs:
         :param list rxn_library_variables: a list of user variables which
-            define the rxn_library, rxn_library_file,
+            define the rxn_library_path, rxn_library_file,
             complementary_mol_directory, and function_group_library. ie.
-            rxn_library_variables = [params['rxn_library'],
+            rxn_library_variables = [params['rxn_library_path'],
             params['rxn_library_file'],
             params['function_group_library'],params['complementary_mol_directory']]
         :param list list_of_already_made_smiles: a list of lists. Each
@@ -64,20 +64,22 @@ class SmilesClickChem:
 
         # Unpackage the rxn_library_variables
 
-        rxn_library = rxn_library_variables[0]
+        rxn_library_path = rxn_library_variables[0]
         rxn_library_file = rxn_library_variables[1]
         function_group_library = rxn_library_variables[2]
-        complementary_mol_dir = rxn_library_variables[3]
-        self.reaction_dict = self.retrieve_reaction_dict(rxn_library, rxn_library_file)
+        complementary_mols = rxn_library_variables[3]
+        self.reaction_dict = self.retrieve_reaction_dict(
+            rxn_library_path, rxn_library_file
+        )
         # Retrieve the dictionary containing
         # all the possible ClickChem Reactions
         self.list_of_reaction_names = list(self.reaction_dict.keys())
 
         self.functional_group_dict = self.retrieve_functional_group_dict(
-            rxn_library, function_group_library
+            rxn_library_path, function_group_library
         )
         self.complementary_mol_dict = self.retrieve_complementary_dictionary(
-            rxn_library, complementary_mol_dir
+            rxn_library_path, complementary_mols
         )
 
         # List of already predicted smiles
@@ -140,7 +142,7 @@ class SmilesClickChem:
 
         return new_dict
 
-    def retrieve_reaction_dict(self, rxn_library, rxn_library_file):
+    def retrieve_reaction_dict(self, rxn_library_path, rxn_library_file):
         """
         This is where all the chemical reactions for SmartClickChem are
         retrieved. If you want to add more just add a Custom set of reactions
@@ -157,13 +159,13 @@ class SmilesClickChem:
         Smarts as the value.
 
         Inputs:
-        :param str rxn_library: A string defining the choice of the reaction
+        :param str rxn_library_path: A string defining the choice of the reaction
             library. ClickChem uses the set of reactions from Autogrow 3.1.2.
             Custom means you've defined a path to a Custom library in
             params['rxn_library_file']
         :param str rxn_library_file: a PATH to a Custom reaction library file
             formatted in a dictionary of dictionaries. in a .json file. This will
-            be a blank string if one choses a predefined rxn_library option.
+            be a blank string if one choses a predefined rxn_library_path option.
 
         Returns:
         :returns: dict reaction_dict: A dictionary containing all the
@@ -174,25 +176,25 @@ class SmilesClickChem:
         pwd = os.path.dirname(__file__)
         if rxn_library_file == "":
 
-            if rxn_library == "click_chem_rxns":
+            if rxn_library_path == "click_chem_rxns":
                 rxn_library_file = os.path.join(
                     pwd,
                     "reaction_libraries",
                     "click_chem_rxns",
                     "ClickChem_rxn_library.json",
                 )
-            elif rxn_library == "robust_rxns":
+            elif rxn_library_path == "robust_rxns":
                 rxn_library_file = os.path.join(
                     pwd,
                     "reaction_libraries",
                     "robust_rxns",
                     "Robust_Rxns_rxn_library.json",
                 )
-            elif rxn_library == "all_rxns":
+            elif rxn_library_path == "all_rxns":
                 rxn_library_file = os.path.join(
                     pwd, "reaction_libraries", "all_rxns", "All_Rxns_rxn_library.json"
                 )
-            elif rxn_library == "Custom":
+            elif rxn_library_path == "Custom":
                 if os.path.exists(rxn_library_file) is False:
                     raise Exception(
                         "Custom rxn_library_file cannot be found. "
@@ -201,7 +203,7 @@ class SmilesClickChem:
                     )
             else:
                 raise Exception(
-                    "rxn_library is not incorporated into smiles_click_chem.py"
+                    "rxn_library_path is not incorporated into smiles_click_chem.py"
                 )
 
             # Import the proper reaction library JSON file
@@ -211,7 +213,7 @@ class SmilesClickChem:
             except Exception as e:
                 raise Exception(
                     "rxn_library_file json file not able to be imported."
-                    + " Check that the rxn_library is formatted correctly"
+                    + " Check that the rxn_library_path is formatted correctly"
                 ) from e
 
         elif type(rxn_library_file) == str:
@@ -244,7 +246,7 @@ class SmilesClickChem:
             except Exception as exc:
                 raise Exception(
                     "Custom specified rxn_library_file json file not able to "
-                    + "be imported. Check that the rxn_library is "
+                    + "be imported. Check that the rxn_library_path is "
                     + "formatted correctly"
                 ) from exc
 
@@ -256,7 +258,7 @@ class SmilesClickChem:
         # Convert the reaction_dict_raw from unicode to the proper
         return self.rxn_lib_format_json_dict_of_dict(reaction_dict_raw)
 
-    def retrieve_functional_group_dict(self, rxn_library, function_group_library):
+    def retrieve_functional_group_dict(self, rxn_library_path, function_group_library):
         """
         This retrieves a dictionary of all functional groups required for the
         respective reactions. This dictionary will be used to identify
@@ -281,7 +283,7 @@ class SmilesClickChem:
             groups should be formatted as SMARTS)
 
         Inputs:
-        :param str rxn_library: A string defining the choice of the reaction
+        :param str rxn_library_path: A string defining the choice of the reaction
             library. ClickChem uses the set of reactions from Autogrow 3.1.2.
             Custom means you've defined a path to a Custom library in
             params['function_group_library']
@@ -299,28 +301,28 @@ class SmilesClickChem:
 
         if function_group_library == "":
 
-            if rxn_library == "click_chem_rxns":
+            if rxn_library_path == "click_chem_rxns":
                 function_group_library = os.path.join(
                     pwd,
                     "reaction_libraries",
                     "click_chem_rxns",
                     "ClickChem_functional_groups.json",
                 )
-            elif rxn_library == "robust_rxns":
+            elif rxn_library_path == "robust_rxns":
                 function_group_library = os.path.join(
                     pwd,
                     "reaction_libraries",
                     "robust_rxns",
                     "Robust_Rxns_functional_groups.json",
                 )
-            elif rxn_library == "all_rxns":
+            elif rxn_library_path == "all_rxns":
                 function_group_library = os.path.join(
                     pwd,
                     "reaction_libraries",
                     "all_rxns",
                     "All_Rxns_functional_groups.json",
                 )
-            elif rxn_library == "Custom":
+            elif rxn_library_path == "Custom":
                 if os.path.exists(function_group_library) is False:
                     raise Exception(
                         "Custom function_group_library cannot be found. "
@@ -329,7 +331,7 @@ class SmilesClickChem:
                     )
             else:
                 raise Exception(
-                    "rxn_library is not incorporated into smiles_click_chem.py"
+                    "rxn_library_path is not incorporated into smiles_click_chem.py"
                 )
 
             # Import the proper function_group_library JSON file
@@ -339,7 +341,7 @@ class SmilesClickChem:
             except Exception as e:
                 raise Exception(
                     "function_group_library json file not able to be imported. "
-                    + "Check that the rxn_library is formatted correctly"
+                    + "Check that the rxn_library_path is formatted correctly"
                 ) from e
 
         elif type(function_group_library) == str:
@@ -372,7 +374,7 @@ class SmilesClickChem:
             except Exception as exc:
                 raise Exception(
                     "function_group_library json file not able to be imported."
-                    + " Check that the rxn_library is formatted correctly"
+                    + " Check that the rxn_library_path is formatted correctly"
                 ) from exc
         else:
             raise Exception(
@@ -382,7 +384,7 @@ class SmilesClickChem:
         # Convert the reaction_dict_raw from unicode to the proper
         return self.rxn_lib_format_json_dict_of_dict(functional_group_dict_raw)
 
-    def retrieve_complementary_dictionary(self, rxn_library, complementary_mol_dir):
+    def retrieve_complementary_dictionary(self, rxn_library_path, complementary_mols):
         """
         Based on user controlled variables, this definition will retrieve a
         dictionary of molecules separated into classes by their functional
@@ -390,60 +392,57 @@ class SmilesClickChem:
         user parameter testing when autogrow is initially started.
 
         Inputs:
-        :param str rxn_library: A string defining the choice of the reaction
+        :param str rxn_library_path: A string defining the choice of the reaction
             library. ClickChem uses the set of reactions from Autogrow 3.1.2.
             Custom means you've defined a path to a Custom library in
-            params['complementary_mol_dir']
-        :param dict complementary_mol_dir: the path to the
-            complementary_mol_dir directory. It may be an empty string in which
-            case the complementary_mol_dir directory will default to those of the
-            rxn_library
+            params['complementary_mols']
+        :param dict complementary_mols: the path to the
+            complementary_mols directory. It may be an empty string in which
+            case the complementary_mols directory will default to those of the
+            rxn_library_path
 
         Returns:
         :returns: dict complementary_mols_dict: a dictionary of complementary molecules
         """
         script_dir = os.path.dirname(os.path.realpath(__file__))
 
-        if complementary_mol_dir == "":
-            if rxn_library == "click_chem_rxns":
-                complementary_mol_dir = os.path.join(
+        if complementary_mols == "":
+            if rxn_library_path == "click_chem_rxns":
+                complementary_mols = os.path.join(
                     script_dir,
                     "reaction_libraries",
                     "click_chem_rxns",
-                    "complementary_mol_dir",
+                    "complementary_mols",
                 )
-            elif rxn_library == "robust_rxns":
-                complementary_mol_dir = os.path.join(
+            elif rxn_library_path == "robust_rxns":
+                complementary_mols = os.path.join(
                     script_dir,
                     "reaction_libraries",
                     "robust_rxns",
-                    "complementary_mol_dir",
+                    "complementary_mols",
                 )
-            elif rxn_library == "all_rxns":
-                complementary_mol_dir = os.path.join(
-                    script_dir,
-                    "reaction_libraries",
-                    "all_rxns",
-                    "complementary_mol_dir",
+            elif rxn_library_path == "all_rxns":
+                complementary_mols = os.path.join(
+                    script_dir, "reaction_libraries", "all_rxns", "complementary_mols",
                 )
-            elif rxn_library == "Custom":
-                if os.path.isdir(complementary_mol_dir) is False:
+            elif rxn_library_path == "Custom":
+                if os.path.isdir(complementary_mols) is False:
                     raise Exception(
-                        "Custom complementary_mol_dir cannot be found. "
+                        "Custom complementary_mols cannot be found. "
                         + "Please check the path: ",
-                        complementary_mol_dir,
+                        complementary_mols,
                     )
             else:
                 raise Exception(
-                    "rxn_library is not incorporated into smiles_click_chem.py"
+                    "rxn_library_path is not incorporated into smiles_click_chem.py"
                 )
 
-        elif os.path.isdir(complementary_mol_dir) is False:
+        elif os.path.isdir(complementary_mols) is False:
             raise Exception(
-                "complementary_mol_dir is not a directory. It must be a \
+                "complementary_mols is not a directory. It must be a \
                     directory with .smi files containing SMILES specified by \
                     functional groups.These .smi files must be named the same \
-                    as the files in the complementary_mol_dir."
+                    as the files in the complementary_mols."
             )
 
         # Make a list of all the functional groups. These will be the name of
@@ -453,7 +452,7 @@ class SmilesClickChem:
         missing_smi_files = []
         complementary_mols_dict = {}
         for group in functional_groups:
-            filepath = f"{complementary_mol_dir}{os.sep}{group}.smi"
+            filepath = f"{complementary_mols}{os.sep}{group}.smi"
 
             if os.path.isfile(filepath) is True:
                 complementary_mols_dict[group] = filepath
@@ -764,19 +763,19 @@ def run_main(params: Dict[str, Any]):
     :param dict params: Dictionary of User variables
     """
 
-    # Force rxn_library to be custom because why else run this
-    rxn_library = "Custom"
+    # Force rxn_library_path to be custom because why else run this
+    rxn_library_path = "Custom"
 
     output_folder = params["output_folder"]
     rxn_library_file = params["rxn_library_file"]
     function_group_library = params["function_group_library"]
-    complementary_mol_dir = params["complementary_mol_directory"]
+    complementary_mols = params["complementary_mol_directory"]
 
     rxn_library_variables = [
-        rxn_library,
+        rxn_library_path,
         rxn_library_file,
         function_group_library,
-        complementary_mol_dir,
+        complementary_mols,
     ]
     new_mutation_smiles_list = []
 
@@ -838,12 +837,12 @@ def get_arguments_from_argparse(args_dict):
     if args_dict["rxn_library_file"] == "" or args_dict["function_group_library"] == "":
         raise ValueError(
             "TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY \
-                THE PATH TO THE REACTION LIBRARY USING INPUT PARAMETER rxn_library"
+                THE PATH TO THE REACTION LIBRARY USING INPUT PARAMETER rxn_library_path"
         )
     if os.path.exists(args_dict["rxn_library_file"]) is False:
         raise ValueError(
             "TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY \
-            THE PATH TO THE REACTION LIBRARY USING INPUT PARAMETER rxn_library"
+            THE PATH TO THE REACTION LIBRARY USING INPUT PARAMETER rxn_library_path"
         )
 
     if args_dict["complementary_mol_directory"] == "":

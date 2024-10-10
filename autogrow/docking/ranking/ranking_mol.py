@@ -116,10 +116,14 @@ def get_usable_format(infile: str) -> List[PreDockedCompound]:
 
             # choice_list = [parts[i] for i in range(len(parts))]
             postDockedCompound = PostDockedCompound.from_list(parts)
-            compoundInfo = PreDockedCompound(smiles=postDockedCompound.smiles, name=postDockedCompound.id)
+            compoundInfo = PreDockedCompound(
+                smiles=postDockedCompound.smiles, name=postDockedCompound.id
+            )
             if len(parts) > 2:
                 compoundInfo.previous_docking_score = postDockedCompound.docking_score
-                compoundInfo.previous_diversity_score = postDockedCompound.diversity_score
+                compoundInfo.previous_diversity_score = (
+                    postDockedCompound.diversity_score
+                )
             usable_smiles.append(compoundInfo)
 
     return usable_smiles

@@ -37,7 +37,7 @@ class PostDockedCompound:  # Get new name when you figure out what context this 
             # str(self.mol) if self.mol is not None else "",
             # str(self.fp) if self.fp is not None else "",
         ]
-    
+
     @staticmethod
     def from_list(lst: List[str]) -> "PostDockedCompound":
         return PostDockedCompound(
@@ -94,7 +94,9 @@ class PreDockedCompound:
             raise ValueError("No diversity score available")
         raise ValueError("Invalid score type")
 
-    def to_post_docked_compound(self, score: float, docked_sdf: str) -> PostDockedCompound:
+    def to_post_docked_compound(
+        self, score: float, docked_sdf: str
+    ) -> PostDockedCompound:
         return PostDockedCompound(
             smiles=self.smiles,
             id=self.name,  # Like naphthalene_22

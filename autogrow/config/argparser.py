@@ -429,21 +429,10 @@ def _add_ga_params(parser: argparse._ArgumentGroup):
 # def _add_mutation_params(parser: argparse._ArgumentGroup):
 #     # Mutation Settings
 #     parser.add_argument(
-#         "--rxn_library",
+#         "--rxn_library_path",
 #         choices=["click_chem_rxns", "robust_rxns", "all_rxns"],
 #         default="all_rxns",
 #         help="This set of reactions to be used in Mutation.",
-#     )
-#     parser.add_argument(
-#         "--complementary_mol_directory",
-#         type=str,
-#         default="",
-#         help="This PATH to the directory containing all the molecules being used \
-#         to react with. The directory should contain .smi files contain SMILES of \
-#         molecules containing the functional group represented by that file.
-#         All Functional groups specified function_group_library must have its \
-#         own .smi file. We recommend you filter these dictionaries prior to Autogrow \
-#         for the Drug-likeliness and size filters you will Run Autogrow with.",
 #     )
 
 

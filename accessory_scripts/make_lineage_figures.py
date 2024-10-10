@@ -941,7 +941,7 @@ def process_inputs(inputs: Dict[str, Any]) -> Dict[str, Any]:
                 )
 
         # Get complementary_mol_directory from vars.json
-        elif vars_dict["rxn_library"].lower() in [
+        elif vars_dict["rxn_library_path"].lower() in [
             "click_chem_rxns",
             "robust_rxns",
             "all_rxns",
@@ -958,8 +958,8 @@ def process_inputs(inputs: Dict[str, Any]) -> Dict[str, Any]:
                     "mutation",
                     "smiles_click_chem",
                     "reaction_libraries",
-                    vars_dict["rxn_library"].lower(),
-                    "complementary_mol_dir",
+                    vars_dict["rxn_library_path"].lower(),
+                    "complementary_mols",
                 ]
             )
 
@@ -993,7 +993,7 @@ def process_inputs(inputs: Dict[str, Any]) -> Dict[str, Any]:
             sub_dir = (
                 inputs["complementary_mol_directory"]
                 + os.sep
-                + "complementary_mol_dir"
+                + "complementary_mols"
                 + os.sep
             )
             if len(glob.glob(sub_dir + "*.smi")) == 0:

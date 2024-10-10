@@ -137,8 +137,10 @@ def run_docking_common(
 
     print("\nBegin Ranking and Saving results")
     unweighted_ranked_smile_file = docking_plugin_manager.rank_and_save_output_smi(
-        current_generation_dir, current_gen_int, smiles_file_new_gen,
-        post_docked_compounds
+        current_generation_dir,
+        current_gen_int,
+        smiles_file_new_gen,
+        post_docked_compounds,
     )
     print("\nCompleted Ranking and Saving results\n")
     return unweighted_ranked_smile_file

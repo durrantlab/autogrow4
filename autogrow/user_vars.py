@@ -562,7 +562,7 @@ def define_defaults() -> Dict[str, Any]:
     params["protanate_step"] = False
 
     # Mutation Settings
-    params["rxn_library"] = "click_chem_rxns"
+    params["rxn_library_path"] = "click_chem_rxns"
 
     # processors
     params["number_of_processors"] = 1
