@@ -123,12 +123,21 @@ class VinaLikeDocking(DockingBase):
         assert predocked_cmpd.sdf_3d_path is not None, "sdf_3d_path must be defined"
         lig_pdbqt_filename = f"{predocked_cmpd.sdf_3d_path}.pdbqt"
 
-        conversion_success = obabel_convert(
+        lig_conversion_success = obabel_convert(
             predocked_cmpd.sdf_3d_path, lig_pdbqt_filename, self.params["obabel_path"],
         )
 
-        if not conversion_success:
+        if not lig_conversion_success:
             return None
+        
+        # Convert receptor (PDB format) to PDBQT format
+        receptor_pdbqt = self.params["receptor_path"] + "qt"
+        if not os.path.exists(receptor_pdbqt):
+            recep_conversion_success = obabel_convert(
+                self.params["receptor_path"], receptor_pdbqt, self.params["obabel_path"], extra_params="-xrp"
+            )
+
+            assert recep_conversion_success, f"Failed to convert receptor to PDBQT: {self.params['receptor_path']}"
 
         # log("Docking compounds using AutoDock Vina...")
         self.dock_ligand(lig_pdbqt_filename)
@@ -190,7 +199,7 @@ class VinaLikeDocking(DockingBase):
         # do the docking of the ligand Run with a timeout_option limit.
         # Default setting is 5 minutes. This is excessive as most things run
         # within 30seconds This will prevent stalling out. timeout or gtimeout
-        receptor_pdbqt_file = f'{params["filename_of_receptor"]}qt'
+        receptor_pdbqt_file = f'{params["receptor_path"]}qt'
         torun = (
             f'{timeout_option} {docking_timeout_limit} {params["vina_like_executable"]} '
             f'--center_x {params["center_x"]} --center_y {params["center_y"]} --center_z {params["center_z"]} '

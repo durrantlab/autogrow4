@@ -67,7 +67,7 @@ class ObabelSmiTo3DSDF(SmiTo3DSdfBase):
             f.write(predock_cmpd.smiles)
 
         convert_success = obabel_convert(
-            in_file, out_file, obabel_path, prot_and_3d=True
+            in_file, out_file, obabel_path, extra_params="--gen3d --p 7.4"
         )
 
         if not convert_success:

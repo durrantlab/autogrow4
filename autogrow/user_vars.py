@@ -121,7 +121,7 @@ def check_for_required_inputs(input_params):
     keys_from_input = list(input_params.keys())
 
     list_of_required_inputs = [
-        "filename_of_receptor",
+        "receptor_path",
         "center_x",
         "center_y",
         "center_z",
@@ -237,8 +237,8 @@ def check_for_required_inputs(input_params):
     #######################################
 
     # convert paths to abspath, in case necessary
-    input_params["filename_of_receptor"] = os.path.abspath(
-        input_params["filename_of_receptor"]
+    input_params["receptor_path"] = os.path.abspath(
+        input_params["receptor_path"]
     )
     input_params["root_output_folder"] = os.path.abspath(
         input_params["root_output_folder"]
@@ -247,13 +247,13 @@ def check_for_required_inputs(input_params):
         input_params["source_compound_file"]
     )
 
-    # Check filename_of_receptor exists
-    if os.path.isfile(input_params["filename_of_receptor"]) is False:
+    # Check receptor_path exists
+    if os.path.isfile(input_params["receptor_path"]) is False:
         raise NotImplementedError(
             "Receptor file can not be found. File must be a .PDB file."
         )
-    if ".pdb" not in input_params["filename_of_receptor"]:
-        raise NotImplementedError("filename_of_receptor must be a .PDB file.")
+    if ".pdb" not in input_params["receptor_path"]:
+        raise NotImplementedError("receptor_path must be a .PDB file.")
 
     # Check root_output_folder exists
     if os.path.exists(input_params["root_output_folder"]) is False:
@@ -635,7 +635,7 @@ def check_value_types(
     """
     for key in list(argv.keys()):
         if key not in list(params.keys()):
-            # Examples may be things like filename_of_receptor or
+            # Examples may be things like receptor_path or
             # dimensions of the docking box
             #   Just skip these
             continue
@@ -778,8 +778,8 @@ def load_in_commandline_parameters(argv: Dict[str, Any]) -> Tuple[Dict[str, Any]
     if os.name in {"nt", "ce"}:
         # so it's running under windows. multiprocessing disabled
 
-        if " " in params["filename_of_receptor"]:
-            params["filename_of_receptor"] = '"' + params["filename_of_receptor"] + '"'
+        if " " in params["receptor_path"]:
+            params["receptor_path"] = '"' + params["receptor_path"] + '"'
         if " " in params["root_output_folder"]:
             params["root_output_folder"] = '"' + params["root_output_folder"] + '"'
 
@@ -787,11 +787,11 @@ def load_in_commandline_parameters(argv: Dict[str, Any]) -> Tuple[Dict[str, Any]
     printout = printout + "\nPARAMETERS" + "\n"
     printout = f"{printout} ========== " + "\n"
 
-    if not os.path.exists(params["filename_of_receptor"]):
+    if not os.path.exists(params["receptor_path"]):
         printout = (
             printout
             + '\nERROR: There receptor file does not exist: "'
-            + params["filename_of_receptor"]
+            + params["receptor_path"]
             + '".'
             + "\n"
         )

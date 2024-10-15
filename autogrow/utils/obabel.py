@@ -4,8 +4,9 @@ from autogrow.utils.logging import log_warning
 
 
 def obabel_convert(
-    in_file: str, out_file: str, obabel_path: str, prot_and_3d: bool = False
+    in_file: str, out_file: str, obabel_path: str, extra_params: str = ""
 ) -> bool:
+    # prot_and_3d: bool = False
     in_ext = in_file.split(".")[-1]
     out_ext = out_file.split(".")[-1]
 
@@ -13,8 +14,9 @@ def obabel_convert(
         in_ext = "pdbqt"
 
     cmd = f'{obabel_path} -i{in_ext} "{in_file}" -o{out_ext}'
-    if prot_and_3d:
-        cmd += " --gen3d --p 7.4"
+    if extra_params != "":
+        # cmd += " --gen3d --p 7.4"
+        cmd += f" {extra_params}"
     cmd += f' -e -O "{out_file}"'
 
     try:

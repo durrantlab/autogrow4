@@ -199,7 +199,7 @@ def _add_io_params(parser: argparse._ArgumentGroup):
 def _add_receptor_params(parser: argparse._ArgumentGroup):
     # receptor information
     parser.add_argument(
-        "--filename_of_receptor",
+        "--receptor_path",
         "-r",
         metavar="receptor.pdb",
         help="The path to the receptor file. Should be .pdb file.",

@@ -12,7 +12,7 @@ def validate_params(params: Dict[str, Any]) -> None:
     keys_from_input = list(params.keys())
 
     list_of_required_params = [
-        "filename_of_receptor",
+        "receptor_path",
         "center_x",
         "center_y",
         "center_z",
@@ -30,8 +30,8 @@ def validate_params(params: Dict[str, Any]) -> None:
     if missing_params:
         _throw_missing_params_error(missing_params)
 
-    # Check filename_of_receptor and source_compound_file exist
-    _check_file_exists("filename_of_receptor", "pdb", ".PDB file", params)
+    # Check receptor_path and source_compound_file exist
+    _check_file_exists("receptor_path", "pdb", ".PDB file", params)
     _check_file_exists(
         "source_compound_file", "smi", "tab delineated .smi file", params
     )

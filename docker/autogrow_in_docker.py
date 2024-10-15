@@ -19,7 +19,7 @@ To run AutoGrow from within docker. Launches docker
     - `-root_output_folder`: folder path on host system that results will be copied to.
     - `-source_compound_file`: Path on host system to the tab-delineate .smi
         file that will seed generation 1.
-    - `-filename_of_receptor`: Path on host system of the receptor to be tested.
+    - `-receptor_path`: Path on host system of the receptor to be tested.
     - `-center_x`, `-center_y`, `-center_z`: x,y,z coordinates of center of pocket to be tested.
     - `-size_x`, `-size_y`, `-size_z`: dimensions of the pocket in x,y,z coordinates.
     Variable that will be ignored:
@@ -205,7 +205,7 @@ def check_for_required_params(json_vars: Dict[str, Any]) -> Dict[str, Any]:
     keys_from_input = list(json_vars.keys())
 
     list_of_required_inputs = [
-        "filename_of_receptor",
+        "receptor_path",
         "center_x",
         "center_y",
         "center_z",
@@ -236,20 +236,20 @@ def check_for_required_params(json_vars: Dict[str, Any]) -> Dict[str, Any]:
     #######################################
 
     # convert paths to abspath, in case necessary
-    json_vars["filename_of_receptor"] = os.path.abspath(
-        json_vars["filename_of_receptor"]
+    json_vars["receptor_path"] = os.path.abspath(
+        json_vars["receptor_path"]
     )
     json_vars["root_output_folder"] = os.path.abspath(json_vars["root_output_folder"])
     json_vars["source_compound_file"] = os.path.abspath(
         json_vars["source_compound_file"]
     )
-    # Check filename_of_receptor exists
-    if os.path.isfile(json_vars["filename_of_receptor"]) is False:
+    # Check receptor_path exists
+    if os.path.isfile(json_vars["receptor_path"]) is False:
         raise NotImplementedError(
             "Receptor file can not be found. File must be a .PDB file."
         )
-    if ".pdb" not in json_vars["filename_of_receptor"]:
-        raise NotImplementedError("filename_of_receptor must be a .PDB file.")
+    if ".pdb" not in json_vars["receptor_path"]:
+        raise NotImplementedError("receptor_path must be a .PDB file.")
 
     # Check root_output_folder exists
     if os.path.exists(json_vars["root_output_folder"]) is False:
@@ -306,15 +306,15 @@ def check_for_required_params(json_vars: Dict[str, Any]) -> Dict[str, Any]:
         json_vars["source_compound_file"]
     )
     shutil.copy2(
-        json_vars["filename_of_receptor"],
+        json_vars["receptor_path"],
         json_vars["root_output_folder"]
         + os.sep
         + "inputs"
         + os.sep
-        + os.path.basename(json_vars["filename_of_receptor"]),
+        + os.path.basename(json_vars["receptor_path"]),
     )
-    json_vars["filename_of_receptor"] = "/Outputfolder/inputs/" + os.path.basename(
-        json_vars["filename_of_receptor"]
+    json_vars["receptor_path"] = "/Outputfolder/inputs/" + os.path.basename(
+        json_vars["receptor_path"]
     )
 
     return json_vars

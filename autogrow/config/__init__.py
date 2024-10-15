@@ -130,7 +130,7 @@ def _correct_param_to_default_types(
     """
     for key in list(params.keys()):
         if key not in list(default_params_for_ref.keys()):
-            # Examples may be things like filename_of_receptor or dimensions of
+            # Examples may be things like receptor_path or dimensions of
             # the docking box. Just skip these
             continue
 

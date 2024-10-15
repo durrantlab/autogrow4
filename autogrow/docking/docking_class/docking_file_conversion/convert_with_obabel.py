@@ -58,7 +58,7 @@ class ObabelConversion(ParentPDBQTConverter):
             self.debug_mode = params["debug_mode"]
 
             # VINA SPECIFIC VARS
-            receptor_file = params["filename_of_receptor"]
+            receptor_file = params["receptor_path"]
             obabel_path = self.params["obabel_path"]
             number_of_processors = params["number_of_processors"]
             # vina_like_executable = params["vina_like_executable"]

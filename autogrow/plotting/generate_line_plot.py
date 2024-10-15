@@ -297,7 +297,7 @@ def run_plotter(
 
     ax.set_ylim()
 
-    receptor_name = os.path.basename(params["filename_of_receptor"])
+    receptor_name = os.path.basename(params["receptor_path"])
     scoring_type = params["scoring_choice"]
     docking_type = params["scoring_choice"]
     num_lig = (
