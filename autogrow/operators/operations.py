@@ -155,18 +155,8 @@ def populate_generation(
     # Note that smiles_to_convert_file is a single with with many smi files
     # in it.
     smi_to_3d_sdf_plugin_manager = get_plugin_manager("SmiTo3DSdfPluginManager")
-    job_input_convert_cmpds = tuple(
-        (
-            smi_to_3d_sdf_plugin_manager,
-            full_gen_predock_cmpd,
-            new_gen_folder_path,
-            idx,
-        )
-        for idx, full_gen_predock_cmpd in enumerate(full_gen_predock_cmpds)
-    )
-
-    full_gen_predock_cmpds = params["parallelizer"].run(
-        job_input_convert_cmpds, _cmpd_convert_to_3d_sdf_multithread
+    full_gen_predock_cmpds = smi_to_3d_sdf_plugin_manager.run(
+        predock_cmpds=full_gen_predock_cmpds, pwd=new_gen_folder_path
     )
 
     # Remove those that failed to convert
@@ -183,33 +173,6 @@ def populate_generation(
     #     params, smiles_to_convert_file, new_gen_folder_path
     # )
     return full_generation_smiles_file, full_gen_predock_cmpds
-
-
-def _cmpd_convert_to_3d_sdf_multithread(
-    smi_to_3d_sdf_plugin_manager: SmiTo3DSdfPluginManager,
-    full_gen_predock_cmpd: PreDockedCompound,
-    pwd: str,
-    cmpd_idx: int,
-) -> PreDockedCompound:
-    """
-    Run the ligand conversion of a single molecule. If it failed
-    failed_smiles_name will be a string of the SMILE which failed to convert
-    If it converts failed_smiles_name will be a None.
-
-    Inputs:
-    :param object docking_object: the class for running the chosen docking
-        method
-    :param str pdb: the path to the pdb of a molecule
-
-    Returns:
-    :returns: list failed_smiles_name: if the molecule failed to convert to
-        final format. (ie. pdbqt conversion fail)
-    """
-    # TODO: Thsi docstring is old
-
-    return smi_to_3d_sdf_plugin_manager.run(
-        predock_cmpd=full_gen_predock_cmpd, pwd=pwd, cmpd_idx=cmpd_idx
-    )
 
 
 def _generate_mutations(

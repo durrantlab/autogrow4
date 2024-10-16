@@ -5,7 +5,7 @@ This function handles the scoring/rescoring of docked molecules.
 import __future__
 from typing import Any, Dict, List, Optional, Tuple
 
-from autogrow.docking.docking_class.get_child_class import get_all_subclasses
+# from autogrow.docking.docking_class.get_child_class import get_all_subclasses
 
 # importing scoring_functions is necessary to find rescoring modules
 from autogrow.docking.scoring.scoring_classes.parent_scoring_class import ParentScoring

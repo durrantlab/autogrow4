@@ -15,30 +15,27 @@ import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as
 
 
 class SmiTo3DSdfBase(PluginBase):
-    def run(self, **kwargs) -> PreDockedCompound:
+    def run(self, **kwargs) -> List[PreDockedCompound]:
         """Run the plugin(s) with provided arguments."""
         pwd = kwargs["pwd"]
         if pwd[-1] != os.sep:
             pwd += os.sep
-        return self.run_smi_to_3d_sdf_convertor(
-            kwargs["predock_cmpd"], pwd, kwargs["cmpd_idx"]
-        )
+        return self.run_smi_to_3d_sdf_convertor(kwargs["predock_cmpds"], pwd)
 
     @abstractmethod
     def run_smi_to_3d_sdf_convertor(
-        self, predock_cmpd: PreDockedCompound, pwd: str, cmpd_idx: int
-    ) -> PreDockedCompound:
+        self, predock_cmpds: List[PreDockedCompound], pwd: str
+    ) -> List[PreDockedCompound]:
         """
         run_smi_to_sdf_convertor is needs to be implemented in each class.
 
         Inputs:
-        :param str predock_cmpd: A PreDockedCompound object. Conains a
-            SMILES string, a name, etc.
+        :param str predock_cmpds: A list of PreDockedCompound objects. Each
+            conains a SMILES string, a name, etc.
         :param str pwd: The path to the working directory.
-        :param int cmpd_idx: The index of the compound in the generation.
 
         Returns:
-        :returns: PreDockedCompound: A PreDockedCompound,
+        :returns: List[PreDockedCompound]: A list of PreDockedCompound,
             the same as the input, but with the sdf_3d_path field filled in.
         """
         pass
@@ -49,7 +46,7 @@ class SmiTo3DSdfBase(PluginBase):
 
 
 class SmiTo3DSdfPluginManager(PluginManagerBase):
-    def run(self, **kwargs) -> PreDockedCompound:
+    def run(self, **kwargs) -> List[PreDockedCompound]:
         """
         Run the plugin with provided arguments.
 

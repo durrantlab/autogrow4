@@ -106,6 +106,7 @@ def multiprocess_handling(params: Dict[str, Any]) -> Dict[str, Any]:
 
     return params
 
+
 ############################################
 ###### Variables Handlining Settings #######
 ############################################
@@ -237,9 +238,7 @@ def check_for_required_inputs(input_params):
     #######################################
 
     # convert paths to abspath, in case necessary
-    input_params["receptor_path"] = os.path.abspath(
-        input_params["receptor_path"]
-    )
+    input_params["receptor_path"] = os.path.abspath(input_params["receptor_path"])
     input_params["root_output_folder"] = os.path.abspath(
         input_params["root_output_folder"]
     )
@@ -814,6 +813,7 @@ def load_in_commandline_parameters(argv: Dict[str, Any]) -> Tuple[Dict[str, Any]
     save_vars_as_json(params)
 
     return params, printout
+
 
 ############################################
 ######## Filter Handlining Settings ########

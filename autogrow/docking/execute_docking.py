@@ -10,9 +10,9 @@ from typing import Any, Dict, List, Optional, Type, Union, cast
 # from autogrow.docking.docking_class.docking_class_children \
 #                           import VinaDocking, QuickVina2Docking
 
-from autogrow.docking.docking_class.docking_file_conversion import *
-from autogrow.docking.docking_class.get_child_class import get_all_subclasses
-from autogrow.docking.docking_class.parent_pdbqt_converter import ParentPDBQTConverter
+# from autogrow.docking.docking_class.docking_file_conversion import *
+# from autogrow.docking.docking_class.get_child_class import get_all_subclasses
+# from autogrow.docking.docking_class.parent_pdbqt_converter import ParentPDBQTConverter
 from autogrow.plugins.docking import DockingPluginManager
 from autogrow.plugins.plugin_manager_base import get_plugin_manager
 from autogrow.types import PostDockedCompound, PreDockedCompound
@@ -72,33 +72,14 @@ def run_docking_common(
         unweighted-ranked SMILES with their docking score
     """
 
-    # Get directory string of PDB files for Ligands
-    # current_generation_pdb_dir = f"{current_generation_dir}PDBs{os.sep}"
-
-    # conversion_choice = params["conversion_choice"]
-
-    # temp_vars = {
-    #     key: params[key] for key in list(params.keys()) if key != "parallelizer"
-    # }
-    # file_conversion_cls = pick_run_conversion_class_dict(conversion_choice)
-
-    # # TODO: new file_conversion_class_object automatically converts receptor. To
-    # # convert ligand, must access object function. That's pretty awkward.
-    # file_conversion_obj = file_conversion_cls(temp_vars, test_boot=False)
-
     docking_plugin_manager = cast(
         DockingPluginManager, get_plugin_manager("DockingPluginManager")
     )
 
-    job_input_dock_lig = [
-        (docking_plugin_manager, new_gen_predock_cmpd)
-        for new_gen_predock_cmpd in new_gen_predock_cmpds
-    ]
-    
     log_info("Starting docking")
     with LogLevel():
-        post_docked_compounds: List[PostDockedCompound] = params["parallelizer"].run(
-            job_input_dock_lig, _run_dock_multithread_wrapper
+        post_docked_compounds = docking_plugin_manager.run(
+            predocked_cmpds=new_gen_predock_cmpds
         )
 
     # Remove those that failed to convert
@@ -119,21 +100,3 @@ def run_docking_common(
     print("\nCompleted Ranking and Saving results\n")
     return unweighted_ranked_smile_file
 
-def _run_dock_multithread_wrapper(
-    docking: DockingPluginManager, new_gen_predock_cmpd: PreDockedCompound,
-) -> Optional[float]:
-    """
-    Run the docking of a single molecule.
-
-    Inputs:
-    :param object docking_object: the class for running the chosen docking
-        method
-    :param str pdb: the path to the pdb of a molecule
-
-    Returns:
-    :returns: list failed_smiles_names: any smiles which were deleted (ie.
-        docking failed)
-    """
-
-    # print("Attempt to Dock complete: ", lig_pdb)
-    return docking.run(predocked_cmpd=new_gen_predock_cmpd)

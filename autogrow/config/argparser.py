@@ -375,6 +375,7 @@ def _add_ga_params(parser: argparse._ArgumentGroup):
         help="Each gen diversity_mols_to_seed_first_generation will decrease this amount",
     )
 
+
 def _add_filter_params(parser: argparse._ArgumentGroup):
     ####### FILTER VARIABLES
     # parser.add_argument(

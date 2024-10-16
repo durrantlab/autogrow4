@@ -3,9 +3,9 @@ import os
 from autogrow.utils.logging import log_warning
 
 
-def obabel_convert(
+def obabel_convert_cmd(
     in_file: str, out_file: str, obabel_path: str, extra_params: str = ""
-) -> bool:
+) -> str:
     # prot_and_3d: bool = False
     in_ext = in_file.split(".")[-1]
     out_ext = out_file.split(".")[-1]
@@ -18,7 +18,15 @@ def obabel_convert(
         # cmd += " --gen3d --p 7.4"
         cmd += f" {extra_params}"
     cmd += f' -e -O "{out_file}"'
+    cmd += "  > /dev/null 2>&1"
 
+    return cmd
+
+
+def obabel_convert(
+    in_file: str, out_file: str, obabel_path: str, extra_params: str = ""
+) -> bool:
+    cmd = obabel_convert_cmd(in_file, out_file, obabel_path, extra_params)
     try:
         os.system(cmd)
     except Exception as e:

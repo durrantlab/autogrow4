@@ -37,26 +37,26 @@ class FakeSmiTo3DSDF(SmiTo3DSdfBase):
             )
 
     def run_smi_to_3d_sdf_convertor(
-        self, predock_cmpd: PreDockedCompound, pwd: str, cmpd_idx: int
-    ) -> PreDockedCompound:
+        self, predock_cmpds: List[PreDockedCompound], pwd: str
+    ) -> List[PreDockedCompound]:
         """
         run_smi_to_sdf_convertor is needs to be implemented in each class.
 
         Inputs:
-        :param str predock_cmpd: A PreDockedCompound object. Conains a
-            SMILES string, a name, etc.
+        :param str predock_cmpds: A list of PreDockedCompound objects. Each
+            conains a SMILES string, a name, etc.
         :param str pwd: The path to the working directory.
-        :param int cmpd_idx: The index of the compound in the generation.
 
         Returns:
-        :returns: PreDockedCompound: A PreDockedCompound,
+        :returns: List[PreDockedCompound]: A list of PreDockedCompound,
             the same as the input, but with the sdf_3d_path field filled in.
         """
-        out_file = f"{pwd}compound{cmpd_idx}.sdf"
 
-        with open(out_file, "w") as f:
-            f.write("fake 3D SDF file")
+        for cmpd_idx, predock_cmpd in enumerate(predock_cmpds):
+            out_file = f"{pwd}compound{cmpd_idx}.sdf"
+            predock_cmpd.sdf_3d_path = out_file
 
-        predock_cmpd.sdf_3d_path = out_file
+            with open(out_file, "w") as f:
+                f.write("fake 3D SDF file")
 
-        return predock_cmpd
+        return predock_cmpds

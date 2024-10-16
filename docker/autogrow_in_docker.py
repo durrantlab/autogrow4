@@ -236,9 +236,7 @@ def check_for_required_params(json_vars: Dict[str, Any]) -> Dict[str, Any]:
     #######################################
 
     # convert paths to abspath, in case necessary
-    json_vars["receptor_path"] = os.path.abspath(
-        json_vars["receptor_path"]
-    )
+    json_vars["receptor_path"] = os.path.abspath(json_vars["receptor_path"])
     json_vars["root_output_folder"] = os.path.abspath(json_vars["root_output_folder"])
     json_vars["source_compound_file"] = os.path.abspath(
         json_vars["source_compound_file"]

@@ -4,7 +4,6 @@ import os
 import random
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
 from autogrow.config.argparser import ArgumentVars
-from autogrow.docking.docking_class.parent_pdbqt_converter import ParentPDBQTConverter
 from autogrow.plugins.plugin_base import PluginBase
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
 from autogrow.types import PostDockedCompound, PreDockedCompound, ScoreType
@@ -14,23 +13,24 @@ from autogrow.utils.logging import log_debug
 
 
 class DockingBase(PluginBase):
-    def run(self, **kwargs) -> Optional[PostDockedCompound]:
+    def run(self, **kwargs) -> List[PostDockedCompound]:
         """Run the plugin with provided arguments."""
-        return self.run_docking(predocked_cmpd=kwargs["predocked_cmpd"])
+        return self.run_docking(predocked_cmpds=kwargs["predocked_cmpds"])
 
     @abstractmethod
     def run_docking(
-        self, predocked_cmpd: PreDockedCompound
-    ) -> Optional[PostDockedCompound]:
+        self, predocked_cmpds: List[PreDockedCompound]
+    ) -> List[PostDockedCompound]:
         """
         run_docking is needs to be implemented in each class.
 
         Inputs:
-        :param PreDockedCompound predocked_cmpd: A PreDockedCompound object.
+        :param PreDockedCompound predocked_cmpds: A List of PreDockedCompound
+            objects.
 
         Returns:
-        :returns: PostDockedCompound: A PostDockedCompound object, containing
-            the score and a docked (posed) SDF file.
+        :returns: List[PostDockedCompound]: A list of PostDockedCompound
+            objects, each containing the score and a docked (posed) SDF file.
         """
 
         # raise NotImplementedError("run_dock() not implemented")
@@ -38,7 +38,7 @@ class DockingBase(PluginBase):
 
 
 class DockingPluginManager(PluginManagerBase):
-    def run(self, **kwargs) -> Optional[PostDockedCompound]:
+    def run(self, **kwargs) -> List[PostDockedCompound]:
         """
         Run the plugin with provided arguments.
 
@@ -46,7 +46,8 @@ class DockingPluginManager(PluginManagerBase):
         :param dict kwargs: a dictionary of arguments to pass to the plugin
 
         Returns:
-        :returns: float score: The score of the docking.
+        :returns: List[PostDockedCompound]: A list of PostDockedCompound
+            objects, each containing the score and a docked (posed) SDF file.
         """
 
         dockings = self.get_selected_plugins_from_params()
@@ -63,49 +64,12 @@ class DockingPluginManager(PluginManagerBase):
         # Get the selector plugin to use
         docking = cast(DockingBase, self.plugins[dockings[0]])
 
-        resp = docking.run(**kwargs)
+        post_docked_cmpds = docking.run(**kwargs)
 
-        if resp is not None:
-            log_debug(f"Docked molecule {resp.smiles}. Score: {resp.docking_score:.2f}")
+        for post_docked_cmpd in post_docked_cmpds:
+            log_debug(f"Docked molecule {post_docked_cmpd.smiles}. Score: {post_docked_cmpd.docking_score:.2f}")
 
-        return resp
-
-    def run_ligand_handling_for_docking(
-        self, pdb_file, file_conversion_class_object: ParentPDBQTConverter
-    ) -> Optional[str]:
-        """
-        this function converts the ligands from PDB to PDBQT format. Returns
-        NONE if it worked and the name if it failed to convert.
-
-        Inputs:
-        :param str pdb_file: the pdb file of a ligand to format, dock and
-            score
-
-        Returns:
-        :returns: str smile_name: name of smiles if it failed to dock returns
-            None if it docked properly
-        """
-
-        # TODO: Doesn't seem like the right place for this.
-
-        assert (
-            file_conversion_class_object is not None
-        ), "file_conversion_class_object must be passed to VinaDocking"
-
-        # convert ligands to pdbqt format
-        # log("\nConverting ligand PDB files to PDBQT format...")
-        (
-            did_it_convert,
-            smile_name,
-        ) = file_conversion_class_object.convert_ligand_pdb_file_to_pdbqt(pdb_file)
-
-        if not did_it_convert:
-            # conversion failed
-            return smile_name
-
-        # Conversion pass. Return None
-        # only return failed smile_names which will be handled later
-        return None
+        return post_docked_cmpds
 
     def rank_and_save_output_smi(
         self,

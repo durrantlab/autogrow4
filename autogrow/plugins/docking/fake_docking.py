@@ -2,7 +2,6 @@ import os
 import random
 from typing import List, Optional, Tuple
 from autogrow.config.argparser import ArgumentVars
-from autogrow.docking.docking_class.parent_pdbqt_converter import ParentPDBQTConverter
 from autogrow.plugins.docking import DockingBase
 from autogrow.types import PostDockedCompound, PreDockedCompound
 

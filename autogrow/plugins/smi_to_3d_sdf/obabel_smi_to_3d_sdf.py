@@ -1,10 +1,11 @@
 import __future__
 
+from autogrow.plugins.plugin_manager_base import get_plugin_manager
 from autogrow.plugins.smi_to_3d_sdf import SmiTo3DSdfBase
 from autogrow.plugins.smiles_filters import SmilesFilterBase
 from autogrow.types import PreDockedCompound
 from autogrow.utils.logging import log_warning
-from autogrow.utils.obabel import obabel_convert
+from autogrow.utils.obabel import obabel_convert, obabel_convert_cmd
 import rdkit  # type: ignore
 from rdkit import Chem  # type: ignore
 from rdkit.Chem import FilterCatalog  # type: ignore
@@ -37,66 +38,67 @@ class ObabelSmiTo3DSDF(SmiTo3DSdfBase):
             )
 
     def run_smi_to_3d_sdf_convertor(
-        self, predock_cmpd: PreDockedCompound, pwd: str, cmpd_idx: int
-    ) -> PreDockedCompound:
+        self, predock_cmpds: List[PreDockedCompound], pwd: str
+    ) -> List[PreDockedCompound]:
         """
         run_smi_to_sdf_convertor is needs to be implemented in each class.
 
         Inputs:
-        :param str predock_cmpd: A PreDockedCompound object. Conains a
-            SMILES string, a name, etc.
+        :param str predock_cmpds: A list of PreDockedCompound objects. Each
+            conains a SMILES string, a name, etc.
         :param str pwd: The path to the working directory.
-        :param int cmpd_idx: The index of the compound in the generation.
 
         Returns:
-        :returns: PreDockedCompound: A PreDockedCompound,
+        :returns: List[PreDockedCompound]: A list of PreDockedCompound,
             the same as the input, but with the sdf_3d_path field filled in.
         """
         # If the mol matches a mol in the filter list. we return a False (as it
         # failed the filter). If No matches are found to filter list this will
         # return a True as it Passed the filter.
 
-        # TODO: Can run on multiple processors
+        cmds = []
+        out_files = []
+        for cmpd_idx, predock_cmpd in enumerate(predock_cmpds):
+            base_file = f"{pwd}compound{cmpd_idx}"
+            in_file = f"{base_file}.smi"
+            out_file = f"{base_file}.sdf"
+            obabel_path = self.params["obabel_path"]
 
-        base_file = f"{pwd}compound{cmpd_idx}"
-        in_file = f"{base_file}.smi"
-        out_file = f"{base_file}.sdf"
-        obabel_path = self.params["obabel_path"]
+            with open(in_file, "w") as f:
+                f.write(predock_cmpd.smiles)
 
-        with open(in_file, "w") as f:
-            f.write(predock_cmpd.smiles)
+            cmd = obabel_convert_cmd(
+                in_file, out_file, obabel_path, extra_params="--gen3d --p 7.4"
+            )
 
-        convert_success = obabel_convert(
-            in_file, out_file, obabel_path, extra_params="--gen3d --p 7.4"
+            cmds.append(cmd)
+            out_files.append(out_file)
+
+        # Get parallelizer plugin to use
+        shell_parallelizer_plugin_manager = get_plugin_manager(
+            "ShellParallelizerPluginManager"
         )
+        shell_parallelizer_plugin_manager.run(
+            cmds=cmds
+        )  # TODO: Need to specify nprocs?
 
-        if not convert_success:
-            return predock_cmpd
+        for cmpd_idx, predock_cmpd in enumerate(predock_cmpds):
+            out_file = out_files[cmpd_idx]
 
-        # cmd = f'{obabel_path} -:"{predock_cmpd.smiles}" -osdf --gen3d --p 7.4 -e -O "{out_file}"'
+            if not os.path.exists(out_file):
+                log_warning(
+                    f"Could not convert smiles to 3D SDF with obabel: {predock_cmpd.smiles}"
+                )
+                continue
 
-        # try:
-        #     os.system(cmd)
-        # except Exception as e:
-        #     log_warning(
-        #         f"Could not convert smiles to 3D SDF with obabel: {predock_cmpd.smiles}"
-        #     )
-        #     return predock_cmpd
+            with open(out_file, "r") as f:
+                content = f.read().strip()
+                if content == "":
+                    log_warning(
+                        f"Could not convert smiles to 3D SDF with obabel: {predock_cmpd.smiles}"
+                    )
+                    continue
 
-        # if not os.path.exists(out_file):
-        #     log_warning(
-        #         f"Could not convert smiles to 3D SDF with obabel: {predock_cmpd.smiles}"
-        #     )
-        #     return predock_cmpd
+            predock_cmpd.sdf_3d_path = out_file
 
-        # with open(out_file, "r") as f:
-        #     content = f.read().strip()
-        #     if content == "":
-        #         log_warning(
-        #             f"Could not convert smiles to 3D SDF with obabel: {predock_cmpd.smiles}"
-        #         )
-        #         return predock_cmpd
-
-        predock_cmpd.sdf_3d_path = out_file
-
-        return predock_cmpd
+        return predock_cmpds

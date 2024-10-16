@@ -3,19 +3,16 @@ import glob
 import os
 import sys
 
-from autogrow.docking.docking_class.parent_pdbqt_converter import ParentPDBQTConverter
 from autogrow.plugins.docking import DockingBase
 from typing import Any, Dict, List, Optional, Tuple
 from autogrow.config.argparser import ArgumentVars
-from autogrow.types import PostDockedCompound, PreDockedCompound, ScoreType
-from autogrow.utils.logging import log_warning
-from autogrow.utils.obabel import obabel_convert
+from autogrow.plugins.plugin_manager_base import get_plugin_manager
+from autogrow.types import PostDockedCompound, PreDockedCompound
+from autogrow.utils.logging import LogLevel, log_info, log_warning
+from autogrow.utils.obabel import obabel_convert, obabel_convert_cmd
 
 
 class VinaLikeDocking(DockingBase):
-    # TODO: I feel like file conversion should not be external to this class...
-    file_conversion_class_object: Optional[ParentPDBQTConverter] = None
-
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
         """Add command-line arguments required by the plugin."""
         return (
@@ -107,90 +104,135 @@ class VinaLikeDocking(DockingBase):
             )
 
     def run_docking(
-        self, predocked_cmpd: PreDockedCompound
-    ) -> Optional[PostDockedCompound]:
+        self, predocked_cmpds: List[PreDockedCompound]
+    ) -> List[PostDockedCompound]:
         """
         run_docking is needs to be implemented in each class.
 
         Inputs:
-        :param PreDockedCompound predocked_cmpd: A PreDockedCompound object.
+        :param PreDockedCompound predocked_cmpds: A List of PreDockedCompound
+            objects.
 
         Returns:
-        :returns: PostDockedCompound: A PostDockedCompound object, containing
-            the score and a docked (posed) SDF file.
+        :returns: List[PostDockedCompound]: A list of PostDockedCompound
+            objects, each containing the score and a docked (posed) SDF file.
         """
-        # You must convert the sdf file to pdbqt file
-        assert predocked_cmpd.sdf_3d_path is not None, "sdf_3d_path must be defined"
-        lig_pdbqt_filename = f"{predocked_cmpd.sdf_3d_path}.pdbqt"
-
-        lig_conversion_success = obabel_convert(
-            predocked_cmpd.sdf_3d_path, lig_pdbqt_filename, self.params["obabel_path"],
-        )
-
-        if not lig_conversion_success:
-            return None
-        
-        # Convert receptor (PDB format) to PDBQT format
+        # Convert receptor (PDB format) to PDBQT format if necessary
         receptor_pdbqt = self.params["receptor_path"] + "qt"
         if not os.path.exists(receptor_pdbqt):
             recep_conversion_success = obabel_convert(
-                self.params["receptor_path"], receptor_pdbqt, self.params["obabel_path"], extra_params="-xrp"
+                self.params["receptor_path"],
+                receptor_pdbqt,
+                self.params["obabel_path"],
+                extra_params="-xrp",
             )
 
-            assert recep_conversion_success, f"Failed to convert receptor to PDBQT: {self.params['receptor_path']}"
+            assert (
+                recep_conversion_success
+            ), f"Failed to convert receptor to PDBQT: {self.params['receptor_path']}"
 
-        # log("Docking compounds using AutoDock Vina...")
-        self.dock_ligand(lig_pdbqt_filename)
+        # Convert the ligands to PDBQT format as well
+        lig_convert_cmds = []
+        lig_dock_cmds = []
+        vina_out_files = []
+        vina_out_convert_cmds = []
 
-        vina_out_file = f"{lig_pdbqt_filename}.vina"
-        if not os.path.exists(vina_out_file):
-            log_warning(f"Failed to dock: {lig_pdbqt_filename}")
-            return None
+        for predocked_cmpd in predocked_cmpds:
+            if predocked_cmpd.sdf_3d_path is None:
+                log_warning(
+                    f"Skipping {predocked_cmpd.name} because sdf_3d_path is None"
+                )
+                vina_out_files.append(None)
+                continue
 
-        # # check that it docked
-        # pdb_filename = lig_pdbqt_filename.replace("qt", "")
+            lig_pdbqt_filename = f"{predocked_cmpd.sdf_3d_path}.pdbqt"
 
-        # docked_successfully, smile_name = self.check_docked(pdb_filename)
+            # Get commands to convert ligand to pdbqt
+            cmd = obabel_convert_cmd(
+                predocked_cmpd.sdf_3d_path,
+                lig_pdbqt_filename,
+                self.params["obabel_path"],
+            )
+            lig_convert_cmds.append(cmd)
 
-        # if not docked_successfully:
-        #     if smile_name is None:
-        #         print("Missing pdb and pdbqt files for : ", lig_pdbqt_filename)
+            # Get commands to dock ligand
+            cmd = self.get_dock_cmd(lig_pdbqt_filename)
+            lig_dock_cmds.append(cmd)
 
-        #     return None
+            # Get vina output files
+            vina_out_file = f"{lig_pdbqt_filename}.vina"
+            vina_out_files.append(vina_out_file)
 
-        # TODO: Does this work for qvina2, smina, etc.?
-        with open(vina_out_file, "r") as f:
-            # MODEL 1
-            # REMARK VINA RESULT:    -9.279      0.000      0.000
-            # REMARK INTER + INTRA:         -13.559
+            # Also get the docked compound as an SDF file
+            docked_sdf = f"{vina_out_file}.sdf"
+            cmd = obabel_convert_cmd(
+                vina_out_file, docked_sdf, self.params["obabel_path"],
+            )
+            vina_out_convert_cmds.append(cmd)
 
-            lines = f.readlines()
-            for line in lines:
-                if "REMARK VINA RESULT:" in line:
-                    score = float(line.split()[3])
+        # Get parallelizer plugin to use
+        shell_parallelizer_plugin_manager = get_plugin_manager(
+            "ShellParallelizerPluginManager"
+        )
 
-                    # Also get the docked compound as an SDF file
-                    docked_sdf = f"{lig_pdbqt_filename}.vina.sdf"
-                    obabel_convert(
-                        f"{lig_pdbqt_filename}.vina",
-                        docked_sdf,
-                        self.params["obabel_path"],
-                    )
+        # Convert the ligands to PDBQT format
+        shell_parallelizer_plugin_manager.run(
+            cmds=lig_convert_cmds
+        )  # TODO: Need to specify nprocs?
 
-                    return predocked_cmpd.to_post_docked_compound(score, docked_sdf)
+        # Dock the ligands
+        shell_parallelizer_plugin_manager.run(
+            cmds=lig_dock_cmds
+        )  # TODO: Need to specify nprocs?
 
-        log_warning(f"Failed to parse docking score from {vina_out_file}")
-        return None
+        # Convert the docked ligands to SDF format
+        shell_parallelizer_plugin_manager.run(
+            cmds=vina_out_convert_cmds
+        )  # TODO: Need to specify nprocs?
+
+        post_docked_cmpds = []
+        for predocked_cmpd, vina_out_file in zip(predocked_cmpds, vina_out_files):
+            if vina_out_file is None or not os.path.exists(vina_out_file):
+                # Throw out ones that failed to dock
+                log_warning(f"Failed to dock {predocked_cmpd.name}")
+                continue
+
+            # TODO: Does this work for qvina2, smina, etc.?
+            with open(vina_out_file, "r") as f:
+                # MODEL 1
+                # REMARK VINA RESULT:    -9.279      0.000      0.000
+                # REMARK INTER + INTRA:         -13.559
+
+                lines = f.readlines()
+                score = 99999
+                for line in lines:
+                    if "REMARK VINA RESULT:" in line:
+                        score = float(line.split()[3])
+
+                        post_docked_cmpds.append(
+                            predocked_cmpd.to_post_docked_compound(
+                                score, f"{vina_out_file}.sdf"
+                            )
+                        )
+
+                        break
+                if score == 99999:
+                    log_warning(f"Failed to parse docking score from {vina_out_file}")
+        
+        return post_docked_cmpds
 
     #######################################
     # DOCK USING VINA                     #
     #######################################
-    def dock_ligand(self, lig_pdbqt_filename):
+    def get_dock_cmd(self, lig_pdbqt_filename) -> str:
         """
         Dock the ligand pdbqt files in a given directory using AutoDock Vina
 
         Inputs:
         :param str lig_pdbqt_filename: the ligand pdbqt filename
+
+        Returns:
+        :returns: str torun: the command to run
         """
         params = self.params
 
@@ -226,23 +268,27 @@ class VinaLikeDocking(DockingBase):
         # Add output line MUST ALWAYS INCLUDE THIS LINE
         torun = f"{torun} >>{lig_pdbqt_filename}_docking_output.txt  2>>{lig_pdbqt_filename}_docking_output.txt"
 
-        print(f"\tDocking: {lig_pdbqt_filename}")
-        results = self.execute_docking_vina(torun)
+        return torun
 
-        if results is None or results == 256:
-            made_changes = self.replace_atoms_not_handled_by_forcefield(
-                lig_pdbqt_filename
-            )
-            if made_changes is True:
-                results = self.execute_docking_vina(torun)
-                if results == 256 or results is None:
-                    print(
-                        f"\nLigand failed to dock after corrections: {lig_pdbqt_filename}\n"
-                    )
-            else:
-                print(f"\tFinished Docking: {lig_pdbqt_filename}")
-        else:
-            print(f"\tFinished Docking: {lig_pdbqt_filename}")
+        # log_info(f"Docking: {lig_pdbqt_filename}")
+
+        # with LogLevel():
+        #     results = self.execute_docking_vina(torun)
+
+        #     if results is None or results == 256:
+        #         made_changes = self.replace_atoms_not_handled_by_forcefield(
+        #             lig_pdbqt_filename
+        #         )
+        #         if made_changes is True:
+        #             results = self.execute_docking_vina(torun)
+        #             if results == 256 or results is None:
+        #                 log_warning(
+        #                     f"Ligand failed to dock after corrections: {lig_pdbqt_filename}"
+        #                 )
+        #     #     else:
+        #     #         print(f"\tFinished Docking: {lig_pdbqt_filename}")
+        #     # else:
+        #     #     print(f"\tFinished Docking: {lig_pdbqt_filename}")
 
     def replace_atoms_not_handled_by_forcefield(self, lig_pdbqt_filename):
         """
@@ -322,49 +368,65 @@ class VinaLikeDocking(DockingBase):
             print(f"Failed to execute: {command}")
         return result
 
-    def check_docked(self, pdb_file):
-        """
-        given a pdb_file name, test if a pdbqt.vina was created. If it failed
-        to dock delete the file pdb and pdbqt file for that ligand -then
-        return false
-
-        if it docked properly return True
-
-        Inputs:
-        :param str pdb_file: pdb file path
-
-        Returns:
-        :returns: bool bool: false if not vina was unsuccessful
-        :returns: str smile_name: name of the pdb file
-        """
-
-        if not os.path.exists(pdb_file):
-            # PDB file doesn't exist
-            return False, None
-        assert (
-            self.file_conversion_class_object is not None
-        ), "file_conversion_class_object must be passed to VinaDocking"
-        smile_name = self.file_conversion_class_object.get_smile_name_from_pdb(pdb_file)
-        if not os.path.exists(f"{pdb_file}qt.vina"):
-            # so this pdbqt.vina file didn't exist
-            if self.params["debug_mode"] is False:
-                print(
-                    "Docking unsuccessful: Deleting "
-                    + os.path.basename(pdb_file)
-                    + "..."
-                )
-
-                return False, smile_name
-
-            # Failed to dock but in debug mode
-            print(f"Docking unsuccessful: {os.path.basename(pdb_file)}...")
-            return False, smile_name
-
-        # Successfully docked
-        return True, smile_name
-
     ##########################################
     # Convert the dock outputs to a usable formatted .smi file
     # This is mandatory for all Docking classes but
     # implementation and approach varies by docking and scoring choice
     ##########################################
+
+    # TODO: Might be something here that could be useful.
+    # Convert PDB to acceptable PDBQT file format before converting
+    # def convert_pdb_to_pdbqt_acceptable_format(self, filename):
+    #     """
+    #     Make sure a PDB file is properly formatted for conversion to pdbqt
+
+    #     Inputs:
+    #     :param str filename: the file path of the pdb file to be converted
+    #     """
+    #     # read in the file
+    #     output_lines = []
+    #     with open(filename, "r") as f:
+    #         for line in f:
+    #             line = line.replace("\n", "")
+    #             if line[:5] == "ATOM " or line[:7] == "HETATM ":
+    #                 # fix things like atom names with two letters
+    #                 first = line[:11]
+    #                 middle = (
+    #                     line[11:17].upper().strip()
+    #                 )  # Need to remove whitespaces on both ends
+    #                 last = line[17:]
+
+    #                 middle_firstpart = ""
+    #                 middle_lastpart = middle
+
+    #                 for _ in range(len(middle_lastpart)):
+    #                     if middle_lastpart[:1].isupper() is not True:
+    #                         break  # you reached the first number
+
+    #                     middle_firstpart = middle_firstpart + middle_lastpart[:1]
+    #                     middle_lastpart = middle_lastpart[1:]
+    #                 # now if there are more than two letters in
+    #                 # middle_firstpart, keep just two
+    #                 if len(middle_firstpart) > 2:
+    #                     middle_lastpart = middle_firstpart[2:] + middle_lastpart
+    #                     middle_firstpart = middle_firstpart[:2]
+
+    #                 if middle_firstpart not in ["BR", "ZN", "FE", "MN", "CL", "MG"]:
+    #                     # so just keep the first letter for the element part
+    #                     # of the atom name
+    #                     middle_lastpart = middle_firstpart[1:] + middle_lastpart
+    #                     middle_firstpart = middle_firstpart[:1]
+
+    #                 middle = middle_firstpart.rjust(3) + middle_lastpart.ljust(3)
+
+    #                 line = first + middle + last
+
+    #                 # make sure all parts of the molecule belong to the same
+    #                 # chain and resid
+    #                 line = f"{line[:17]}LIG X 999{line[26:]}"
+
+    #             output_lines.append(line)
+    #     with open(filename, "w") as f:
+
+    #         for line in output_lines:
+    #             f.write(line + "\n")

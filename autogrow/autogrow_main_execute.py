@@ -57,15 +57,14 @@ def main_execute(params: Dict[str, Any]) -> None:
 
         # Get directory for smi to go
         cur_gen_dir = f"{params['output_directory']}generation_{gen_num}{os.sep}"
-        # print(cur_gen_dir)
-        # sys.stdout.flush()
 
         log_info(f"Creating Generation {gen_num}")
 
         with LogLevel():
-            smiles_new_gen_path, new_gen_predock_cmpnds = operations.populate_generation(
-                params, gen_num
-            )
+            (
+                smiles_new_gen_path,
+                new_gen_predock_cmpnds,
+            ) = operations.populate_generation(params, gen_num)
             sys.stdout.flush()
 
             if new_gen_predock_cmpnds is None:
@@ -80,7 +79,11 @@ def main_execute(params: Dict[str, Any]) -> None:
             # Begin Docking unweighted_ranked_smile_file is the file name
             # where the unweighted ranked but score .smi file resides
             unweighted_ranked_smile_file = DockingClass.run_docking_common(
-                params, gen_num, cur_gen_dir, smiles_new_gen_path, new_gen_predock_cmpnds
+                params,
+                gen_num,
+                cur_gen_dir,
+                smiles_new_gen_path,
+                new_gen_predock_cmpnds,
             )
 
             # print("")
@@ -255,4 +258,3 @@ def determine_if_gen_completed(gen_dir_path: str, gen_number: int) -> bool:
     file_path = f"{gen_dir_path}{os.sep}{ranked_file_name}"
 
     return os.path.isfile(file_path)
-
