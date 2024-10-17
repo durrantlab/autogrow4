@@ -8,6 +8,7 @@ import random
 
 from autogrow.plugins.plugin_base import PluginBase
 
+
 class CrossoverBase(PluginBase):
     def run(self, **kwargs) -> Optional[str]:
         """Run the plugin(s) with provided arguments."""

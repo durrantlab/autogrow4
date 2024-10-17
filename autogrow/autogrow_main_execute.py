@@ -6,14 +6,12 @@ Runs plotting at end.
 
 import __future__
 
-import contextlib
 import os
 import sys
-import shutil
 from typing import Any, Dict, Optional
 
 import autogrow.docking.execute_docking as DockingClass
-import autogrow.operators.operations as operations
+import autogrow.operators.populate_generation as populate_generation
 from autogrow.utils.logging import LogLevel, log_info
 
 
@@ -64,7 +62,7 @@ def main_execute(params: Dict[str, Any]) -> None:
             (
                 smiles_new_gen_path,
                 new_gen_predock_cmpnds,
-            ) = operations.populate_generation(params, gen_num)
+            ) = populate_generation.populate_generation(params, gen_num)
             sys.stdout.flush()
 
             if new_gen_predock_cmpnds is None:

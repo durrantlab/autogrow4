@@ -31,6 +31,7 @@ rdkit.RDLogger.DisableLog("rdApp.*")
 
 import autogrow.utils.mol_object_handling as MOH
 
+
 def _test_for_mcs(
     params: Dict[str, Any], mol_1: rdkit.Chem.rdchem.Mol, mol_2: rdkit.Chem.rdchem.Mol
 ) -> Optional[rdkit.Chem.rdFMCS.MCSResult]:

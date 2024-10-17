@@ -145,20 +145,6 @@ class Parallelizer(object):
             # serial is running the ParallelThreading with num_procs=1
             return MultiThreading(args, 1, func)
 
-    def return_mode(self):
-        """
-        Returns the mode chosen for the parallelization cababilities of the system and returns one
-        of the following modes depending on the configuration:
-        :param str mode: the multiprocess mode to be used, ie) serial, multiprocessing, or None:
-                    if None then we will try to pick a possible multiprocessing choice. This should only be used for
-                    top level coding. It is best practice to specify which multiprocessing choice to use.
-                    if you have smaller programs used by a larger program, with both mpi enabled there will be problems, so specify multiprocessing is important.
-                    BEST TO LEAVE THIS BLANK. NOTE: Mpi no longer supported anyway.
-        Returns:
-        :returns: str mode: the mode which is to be used 'multiprocessing', 'serial'
-        """
-        return self.mode
-
     def compute_nodes(self, mode=None):
         """
         Computes the number of "compute nodes" according to the selected mode.
@@ -183,21 +169,6 @@ class Parallelizer(object):
         :returns: int num_procs: the number of nodes/processors which is to be used
         """
         return self.num_procs
-
-
-class Empty_obj(object):
-    """
-    Create a unique Empty Object to hand to empty processors
-    """
-
-    pass
-
-
-"""
-Run commands on multiple processors in python.
-
-Adapted from examples on https://docs.python.org/2/library/multiprocessing.html
-"""
 
 
 def MultiThreading(inputs, num_procs, task_name):
@@ -325,37 +296,3 @@ def start_processes(inputs, num_procs):
     results.sort(key=lambda tup: tup[0])
 
     return [item[1] for item in map(list, results)]
-
-
-###
-# Helper functions
-###
-
-
-def flatten_list(tier_list):
-    """
-    Given a list of lists, this returns a flat list of all items.
-
-    :params list tier_list: A 2D list.
-
-    :returns: A flat list of all items.
-    """
-    if tier_list is None:
-        return []
-    already_flattened = any(type(item) != list for item in tier_list)
-    if already_flattened:
-        return tier_list
-
-    return [item for sublist in tier_list for item in sublist]
-
-
-def strip_none(none_list):
-    """
-    Given a list that might contain None items, this returns a list with no
-    None items.
-
-    :params list none_list: A list that may contain None items.
-
-    :returns: A list stripped of None items.
-    """
-    return [] if none_list is None else [x for x in none_list if x != None]

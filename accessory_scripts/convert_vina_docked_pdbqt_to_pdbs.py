@@ -229,9 +229,7 @@ def start_run_main(params: Dict[str, Any]) -> None:
             )
         )
         # run convert in multithread
-        mol_usable_list = mp.multi_threading(
-            job_input, -1, run_conversion_for_a_vina_file
-        )
+        mp.multi_threading(job_input, -1, run_conversion_for_a_vina_file)
 
 
 def get_arguments_from_argparse(args_dict):

@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from autogrow.plugins.plugin_managers import plugin_managers
 from autogrow.types import PreDockedCompound
-from autogrow.utils.logging import LogLevel, log_info
+from autogrow.utils.logging import LogLevel, log_info, log_warning
 import rdkit  # type: ignore
 import rdkit.Chem as Chem  # type: ignore
 
@@ -79,31 +79,43 @@ def populate_generation(
     )
 
     # Generate mutations
-    mut_predock_cmpds = _generate_mutations(
-        params,
-        generation_num,
-        num_mutations,
-        num_seed_diversity,
-        num_seed_dock_fitness,
-        src_cmpds,
-        number_of_processors,
-    )
+    if num_mutations > 0:
+        mut_predock_cmpds = _generate_mutations(
+            params,
+            generation_num,
+            num_mutations,
+            num_seed_diversity,
+            num_seed_dock_fitness,
+            src_cmpds,
+            number_of_processors,
+        )
+    else:
+        log_warning("No mutations made, per user settings")
+        mut_predock_cmpds: List[PreDockedCompound] = []
 
     # Generate crossovers
-    cross_predock_cmpds = _generate_crossovers(
-        params,
-        generation_num,
-        num_crossovers,
-        num_seed_diversity,
-        num_seed_dock_fitness,
-        src_cmpds,
-        number_of_processors,
-    )
+    if num_crossovers > 0:
+        cross_predock_cmpds = _generate_crossovers(
+            params,
+            generation_num,
+            num_crossovers,
+            num_seed_diversity,
+            num_seed_dock_fitness,
+            src_cmpds,
+            number_of_processors,
+        )
+    else:
+        log_warning("No crossovers made, per user settings")
+        cross_predock_cmpds: List[PreDockedCompound] = []
 
     # Get ligands from previous generation
-    elite_predock_cmpds = _get_elitism_cmpds_from_prev_gen(
-        params, src_cmpds, num_elite_to_advance_from_previous_gen, generation_num,
-    )
+    if num_elite_to_advance_from_previous_gen > 0:
+        elite_predock_cmpds = _get_elitism_cmpds_from_prev_gen(
+            params, src_cmpds, num_elite_to_advance_from_previous_gen, generation_num,
+        )
+    else:
+        log_warning("No elite ligands advanced, per user settings")
+        elite_predock_cmpds: List[PreDockedCompound] = []
 
     # Build new_gen_smis and full_gen_smis
     # TODO: Need to understand why these two are separate.
