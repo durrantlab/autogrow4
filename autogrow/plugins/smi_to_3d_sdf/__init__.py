@@ -75,6 +75,4 @@ class SmiTo3DSdfPluginManager(PluginManagerBase):
         #         f"Could not find 3D SDF files associated with input file {kwargs['smi_file']}. Conversion error?"
         #     )
 
-        log_info("Converting SMILES to 3D SDF files")
-        with LogLevel():
-            return smi_to_sdf_convertor.run(**kwargs)
+        return smi_to_sdf_convertor.run(**kwargs)

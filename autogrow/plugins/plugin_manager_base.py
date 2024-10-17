@@ -2,12 +2,12 @@ import os
 import importlib
 import inspect
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Type, TypeVar, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, Type, TYPE_CHECKING
 from autogrow.config.argparser import register_argparse_group
 from autogrow.plugins.plugin_base import PluginBase
 import pickle as pkl
 
-from autogrow.utils.logging import LogLevel, log_warning
+from autogrow.utils.caching import load_from_cache, save_to_cache
 
 if TYPE_CHECKING:
     from autogrow.plugins.plugin_managers import PluginManagers
@@ -124,18 +124,17 @@ class PluginManagerBase(ABC):
         # Selects which plugin(s) to run and runs them. If cache_dir is provided
         # (same as gen_dir), attempts to use caching.
 
-        cache_filename = ""
         if cache_dir is not None:
-            cache_filename = os.path.join(cache_dir, f"{self.name}_results_cache.pkl")
-
-        if cache_dir is not None and os.path.exists(cache_filename):
-            log_warning(f"Loading previous {self.name} results from cache: {cache_filename}")
-            return pkl.load(open(cache_filename, "rb"))
+            cached_data = load_from_cache(self.name, cache_dir)
+            if cached_data is not None:
+                # Cached data exists. Use that instead.
+                return cached_data
         
         resp = self.execute(**kwargs)
 
+        # Save to cache
         if cache_dir is not None:
-            pkl.dump(resp, open(cache_filename, "wb"))
+            save_to_cache(self.name, cache_dir, resp)
         
         return resp
 

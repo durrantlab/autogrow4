@@ -12,6 +12,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from autogrow.plugins.plugin_managers import plugin_managers
 from autogrow.types import PreDockedCompound
+from autogrow.utils.caching import load_from_cache, save_to_cache
 from autogrow.utils.logging import LogLevel, log_info, log_warning
 import rdkit  # type: ignore
 import rdkit.Chem as Chem  # type: ignore
@@ -111,13 +112,22 @@ def populate_generation(
         cross_predock_cmpds: List[PreDockedCompound] = []
 
     # Get ligands from previous generation
-    if num_elite_prev_gen > 0:
-        elite_predock_cmpds = _get_elite_cmpds_prev_gen(
-            params, src_cmpds, num_elite_prev_gen, generation_num,
-        )
-    else:
-        log_warning("No elite ligands advanced, per user settings")
-        elite_predock_cmpds: List[PreDockedCompound] = []
+    log_info("Identifying elite compounds to advance, without mutation or crossover")
+    with LogLevel():
+        elite_predock_cmpds = load_from_cache("EliteCompounds", cur_gen_dir)
+        if elite_predock_cmpds is None:
+            # No cache, so we need to generate the elite compounds
+            if num_elite_prev_gen > 0:
+                elite_predock_cmpds = _get_elite_cmpds_prev_gen(
+                    params, src_cmpds, num_elite_prev_gen, generation_num,
+                )
+            else:
+                log_warning("No elite ligands advanced, per user settings")
+                elite_predock_cmpds: List[PreDockedCompound] = []
+            
+            save_to_cache("EliteCompounds", cur_gen_dir, elite_predock_cmpds)
+        log_info(f"Identified {len(elite_predock_cmpds)} elite compounds")
+
 
     # Build new_gen_smis and full_gen_smis
     # TODO: Need to understand why these two are separate.
@@ -167,9 +177,11 @@ def populate_generation(
 
     # Note that smiles_to_convert_file is a single with with many smi files
     # in it.
-    full_gen_predock_cmpds = plugin_managers.SmiTo3DSdf.run(
-        predock_cmpds=full_gen_predock_cmpds, pwd=new_gen_folder_path, cache_dir=cur_gen_dir
-    )
+    log_info("Converting SMILES to 3D SDF files")
+    with LogLevel():
+        full_gen_predock_cmpds = plugin_managers.SmiTo3DSdf.run(
+            predock_cmpds=full_gen_predock_cmpds, pwd=new_gen_folder_path, cache_dir=cur_gen_dir
+        )
 
     # Remove those that failed to convert
     full_gen_predock_cmpds = [
@@ -394,35 +406,31 @@ def _get_elite_cmpds_prev_gen(
     Make a list of the ligands chosen to pass through to the next generation via elitism.
     This handles creating a seed list and defining the advance to the next generation final selection.
     """
-    log_info("Identifying elite compounds to advance, without mutation or crossover")
 
-    with LogLevel():
+    chosen_mol_to_pass_through_list = _make_pass_through_list(
+        params, src_cmpds, num_elite_prev_gen, generation_num
+    )
 
-        chosen_mol_to_pass_through_list = _make_pass_through_list(
-            params, src_cmpds, num_elite_prev_gen, generation_num
+    if isinstance(chosen_mol_to_pass_through_list, str):
+        printout = (
+            chosen_mol_to_pass_through_list
+            + "\nIf this is the 1st generation, it may be due to the starting "
+            + "library having SMILES which could not be converted to sanitizable "
+            + "RDKit Molecules"
         )
+        raise Exception(printout)
 
-        if isinstance(chosen_mol_to_pass_through_list, str):
-            printout = (
-                chosen_mol_to_pass_through_list
-                + "\nIf this is the 1st generation, it may be due to the starting "
-                + "library having SMILES which could not be converted to sanitizable "
-                + "RDKit Molecules"
-            )
-            raise Exception(printout)
+    assert isinstance(
+        chosen_mol_to_pass_through_list, list
+    ), "Chosen mol to pass through list is not a list"
 
-        assert isinstance(
-            chosen_mol_to_pass_through_list, list
-        ), "Chosen mol to pass through list is not a list"
-
-        # Save chosen_mol_to_pass_through_list
-        _save_ligand_list(
-            params["output_directory"],
-            generation_num,
-            chosen_mol_to_pass_through_list,
-            "Chosen_Elite_To_advance",
-        )
-        log_info(f"Identified {len(chosen_mol_to_pass_through_list)} elite compounds")
+    # Save chosen_mol_to_pass_through_list
+    _save_ligand_list(
+        params["output_directory"],
+        generation_num,
+        chosen_mol_to_pass_through_list,
+        "Chosen_Elite_To_advance",
+    )
 
     return chosen_mol_to_pass_through_list
 
