@@ -55,27 +55,27 @@ def populate_generation(
 
         # How many advance from previous generation to the next generation directly
         # This will be done later but we are unpacking params here
-        num_elite_to_advance_from_previous_gen = params[
+        num_elite_prev_gen = params[
             "number_elitism_advance_from_previous_gen_first_generation"
         ]
     else:
         # Later generations
         num_crossovers = params["number_of_crossovers"]
         num_mutations = params["number_of_mutants"]
-        num_elite_to_advance_from_previous_gen = params[
+        num_elite_prev_gen = params[
             "number_elitism_advance_from_previous_gen"
         ]
 
     # Get the source compound list
-    src_cmpds = _get_complete_list_prev_gen_or_source_compounds(params, generation_num)
+    src_cmpds = _get_cmpds_prev_gen(params, generation_num)
 
-    num_seed_diversity, num_seed_dock_fitness = _determine_seed_population_sizes(
+    num_seed_diversity, num_seed_dock_fitness = _get_seed_pop_sizes(
         params, generation_num
     )
 
     # Total population size of this generation
     total_num_desired_new_ligands = (
-        num_crossovers + num_mutations + num_elite_to_advance_from_previous_gen
+        num_crossovers + num_mutations + num_elite_prev_gen
     )
 
     # Generate mutations
@@ -109,9 +109,9 @@ def populate_generation(
         cross_predock_cmpds: List[PreDockedCompound] = []
 
     # Get ligands from previous generation
-    if num_elite_to_advance_from_previous_gen > 0:
-        elite_predock_cmpds = _get_elitism_cmpds_from_prev_gen(
-            params, src_cmpds, num_elite_to_advance_from_previous_gen, generation_num,
+    if num_elite_prev_gen > 0:
+        elite_predock_cmpds = _get_elite_cmpds_prev_gen(
+            params, src_cmpds, num_elite_prev_gen, generation_num,
         )
     else:
         log_warning("No elite ligands advanced, per user settings")
@@ -122,6 +122,7 @@ def populate_generation(
     new_gen_predock_cmpds: List[
         PreDockedCompound
     ] = mut_predock_cmpds + cross_predock_cmpds
+
     full_gen_predock_cmpds: List[
         PreDockedCompound
     ] = mut_predock_cmpds + cross_predock_cmpds
@@ -149,7 +150,7 @@ def populate_generation(
 
     # Save the full generation and the SMILES to convert
     (
-        full_generation_smiles_file,
+        full_gen_smi_file,
         smiles_to_convert_file,
         new_gen_folder_path,
     ) = _save_smiles_files(
@@ -173,7 +174,7 @@ def populate_generation(
         x for x in full_gen_predock_cmpds if x.sdf_3d_path is not None
     ]
 
-    return full_generation_smiles_file, full_gen_predock_cmpds
+    return full_gen_smi_file, full_gen_predock_cmpds
 
 
 def _generate_mutations(
@@ -208,9 +209,6 @@ def _generate_mutations(
             seed_list_mutations,
             "Mutation_Seed_List",
         )
-
-        # print("MAKE MUTATIONS")
-        # Making Mutations
 
         # Package user params specifying the Reaction library to use for mutation
         rxn_library_variables = [
@@ -378,10 +376,10 @@ def _generate_crossovers(
     return new_crossover_smiles_list
 
 
-def _get_elitism_cmpds_from_prev_gen(
+def _get_elite_cmpds_prev_gen(
     params: Dict[str, Any],
     src_cmpds: List[PreDockedCompound],
-    num_elite_to_advance_from_previous_gen: int,
+    num_elite_prev_gen: int,
     generation_num: int,
 ) -> List[PreDockedCompound]:
     """
@@ -393,7 +391,7 @@ def _get_elitism_cmpds_from_prev_gen(
     with LogLevel():
 
         chosen_mol_to_pass_through_list = _make_pass_through_list(
-            params, src_cmpds, num_elite_to_advance_from_previous_gen, generation_num
+            params, src_cmpds, num_elite_prev_gen, generation_num
         )
 
         if isinstance(chosen_mol_to_pass_through_list, str):
@@ -572,7 +570,7 @@ def _report_removed_compound_info(smile_str, printout, smile_id):
     return printout
 
 
-def _get_complete_list_prev_gen_or_source_compounds(
+def _get_cmpds_prev_gen(
     params: Dict[str, Any], generation_num: int
 ) -> List[PreDockedCompound]:
     """
@@ -732,7 +730,7 @@ def _make_seed_list(
     return usable_smiles
 
 
-def _determine_seed_population_sizes(
+def _get_seed_pop_sizes(
     params: Dict[str, Any], gen_num: int
 ) -> Tuple[int, int]:
     """
@@ -788,7 +786,7 @@ def _determine_seed_population_sizes(
 def _make_pass_through_list(
     params: Dict[str, Any],
     smis_from_prev_gen: List[PreDockedCompound],
-    num_elite_from_prev_gen: int,
+    num_elite_prev_gen: int,
     gen_num: int,
 ) -> Union[List[PreDockedCompound], str]:
     """
@@ -801,7 +799,7 @@ def _make_pass_through_list(
     :param list smis_from_prev_gen: List of SMILES from the last
         generation chosen to seed the list of molecules to advance to the next
         generation without modification via elitism.
-    :param int num_elite_from_prev_gen: the number of molecules
+    :param int num_elite_prev_gen: the number of molecules
         to advance from the last generation without modifications.
     :param int gen_num: the interger of the current generation
 
@@ -815,12 +813,12 @@ def _make_pass_through_list(
 
     # If not enough of your previous generation sanitize to make the list
     # Return None and trigger an Error
-    if len(smis_from_prev_gen) < num_elite_from_prev_gen:
+    if len(smis_from_prev_gen) < num_elite_prev_gen:
         return (
             "Not enough ligands in initial list the filter to progress"
             + "\n len(smiles_from_previous_gen_list): {} ; \
-                num_elite_to_advance_from_previous_gen: {}".format(
-                len(smis_from_prev_gen), num_elite_from_prev_gen,
+                num_elite_prev_gen: {}".format(
+                len(smis_from_prev_gen), num_elite_prev_gen,
             )
         )
     smis_from_prev_gen = [x for x in smis_from_prev_gen if type(x) == PreDockedCompound]
@@ -829,7 +827,7 @@ def _make_pass_through_list(
 
     # If not enough of your previous generation sanitize to make the list
     # Return None and trigger an Error
-    if len(ligs_that_passed_filters) < num_elite_from_prev_gen:
+    if len(ligs_that_passed_filters) < num_elite_prev_gen:
         return "Not enough ligands passed the filter to progress"
     # Save seed list of all ligands which passed which will serve as the seed
     # list.
@@ -855,15 +853,15 @@ def _make_pass_through_list(
     assert gen_num > 0, "Generation number must be greater than 0"
 
     if not has_dock_score:
-        # Take the 1st num_elite_to_advance_from_previous_gen number of
+        # Take the 1st num_elite_prev_gen number of
         # molecules from ligands_which_passed_filters
         log_info(
-            f"Randomly selecting {num_elite_from_prev_gen} compounds from the {len(ligs_that_passed_filters)} source compounds"
+            f"Randomly selecting {num_elite_prev_gen} compounds from the {len(ligs_that_passed_filters)} source compounds"
         )
 
         random.shuffle(ligs_that_passed_filters)
         ligs_to_advance = [
-            ligs_that_passed_filters[x] for x in range(num_elite_from_prev_gen)
+            ligs_that_passed_filters[x] for x in range(num_elite_prev_gen)
         ]
     else:
         # Use the make_seed_list function to select the list to advance. This
@@ -872,10 +870,10 @@ def _make_pass_through_list(
             ligs_that_passed_filters,
             gen_num,
             0,  # 0 means no diversity
-            num_elite_from_prev_gen,  # But yes based on docking score
+            num_elite_prev_gen,  # But yes based on docking score
         )
 
-    if len(ligs_to_advance) >= num_elite_from_prev_gen:
+    if len(ligs_to_advance) >= num_elite_prev_gen:
         return ligs_to_advance
 
     return "Not enough ligands were chosen to advance to the next generation."

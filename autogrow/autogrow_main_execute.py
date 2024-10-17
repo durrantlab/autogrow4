@@ -11,7 +11,7 @@ import sys
 from typing import Any, Dict, Optional
 
 import autogrow.docking.execute_docking as DockingClass
-import autogrow.operators.populate_generation as populate_generation
+from autogrow.operators.populate_generation import populate_generation
 from autogrow.utils.logging import LogLevel, log_info
 
 
@@ -32,6 +32,7 @@ def main_execute(params: Dict[str, Any]) -> None:
     # Determine what was the last completed generation in the Run directory
     last_generation = determine_current_gen(output_directory)
     start_gen_num = 1 if last_generation is None else last_generation + 1
+
     if start_gen_num > num_gens_to_make:
         print(
             "This simulation has already been completed to the user defined number \
@@ -59,13 +60,12 @@ def main_execute(params: Dict[str, Any]) -> None:
         log_info(f"Creating Generation {gen_num}")
 
         with LogLevel():
-            (
-                smiles_new_gen_path,
-                new_gen_predock_cmpnds,
-            ) = populate_generation.populate_generation(params, gen_num)
+            smi_new_gen_path, new_gen_predock_cmpds = populate_generation(
+                params, gen_num
+            )
             sys.stdout.flush()
 
-            if new_gen_predock_cmpnds is None:
+            if new_gen_predock_cmpds is None:
                 raise ValueError(
                     "Population failed to make enough mutants or crossovers... \
                                     Errors could include not enough diversity, too few seeds to the generation, \
@@ -77,15 +77,8 @@ def main_execute(params: Dict[str, Any]) -> None:
             # Begin Docking unweighted_ranked_smile_file is the file name
             # where the unweighted ranked but score .smi file resides
             unweighted_ranked_smile_file = DockingClass.run_docking_common(
-                params,
-                gen_num,
-                cur_gen_dir,
-                smiles_new_gen_path,
-                new_gen_predock_cmpnds,
+                params, gen_num, cur_gen_dir, smi_new_gen_path, new_gen_predock_cmpds,
             )
-
-            # print("")
-            # print("Finished generation ", gen_num)
 
         sys.stdout.flush()
 
