@@ -96,12 +96,10 @@ def multiprocess_handling(params: Dict[str, Any]) -> Dict[str, Any]:
         params["number_of_processors"] = 1
 
     # Avoid EOF error
-    from autogrow.operators.convert_files.gypsum_dl.gypsum_dl.Parallelizer import (
-        Parallelizer,
-    )
+    from autogrow.utils.parallelizer import Parallelizer
 
     params["parallelizer"] = Parallelizer(
-        params["multithread_mode"], params["number_of_processors"], True
+        params["multithread_mode"], params["number_of_processors"]
     )
 
     return params
@@ -390,13 +388,6 @@ def check_dependencies() -> None:
     except Exception as e:
         print("You need to install rdkit and its dependencies.")
         raise ImportError("You need to install rdkit and its dependencies.") from e
-
-    # molvs is prepackaged within gypsum_dl
-    # try:
-    #     from molvs import standardize_smiles as ssmiles
-    # except Exception:
-    #     print("You need to install molvs and its dependencies.")
-    #     raise ImportError("You need to install molvs and its dependencies.")
 
     try:
         import numpy

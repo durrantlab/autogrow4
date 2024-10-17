@@ -10,8 +10,7 @@ import copy
 import sys
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from autogrow.plugins.plugin_manager_base import get_plugin_manager
-from autogrow.plugins.smi_to_3d_sdf import SmiTo3DSdfPluginManager
+from autogrow.plugins.plugin_managers import plugin_managers
 from autogrow.types import PreDockedCompound
 from autogrow.utils.logging import LogLevel, log_info
 import rdkit  # type: ignore
@@ -23,8 +22,7 @@ rdkit.RDLogger.DisableLog("rdApp.*")
 import autogrow.docking.ranking.ranking_mol as Ranking
 import autogrow.operators.execute_mutations as Mutation
 import autogrow.operators.execute_crossover as execute_crossover
-import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
-
+import autogrow.utils.mol_object_handling as MOH
 
 #############
 # Main run Autogrow operators to make a generation
@@ -154,8 +152,7 @@ def populate_generation(
 
     # Note that smiles_to_convert_file is a single with with many smi files
     # in it.
-    smi_to_3d_sdf_plugin_manager = get_plugin_manager("SmiTo3DSdfPluginManager")
-    full_gen_predock_cmpds = smi_to_3d_sdf_plugin_manager.run(
+    full_gen_predock_cmpds = plugin_managers.SmiTo3DSdf.run(
         predock_cmpds=full_gen_predock_cmpds, pwd=new_gen_folder_path
     )
 
@@ -164,14 +161,6 @@ def populate_generation(
         x for x in full_gen_predock_cmpds if x.sdf_3d_path is not None
     ]
 
-    # import pdb; pdb.set_trace()
-
-    # full_gen_predock_cmpds = get_plugin_manager("SmiTo3DSdfPluginManager").run(
-    #     predock_cmpds=full_gen_predock_cmpds, pwd=new_gen_folder_path, cmpd_idx=0
-    # )
-    # conversion_to_3d.convert_to_3d(
-    #     params, smiles_to_convert_file, new_gen_folder_path
-    # )
     return full_generation_smiles_file, full_gen_predock_cmpds
 
 
@@ -387,9 +376,7 @@ def _get_elitism_cmpds_from_prev_gen(
     Make a list of the ligands chosen to pass through to the next generation via elitism.
     This handles creating a seed list and defining the advance to the next generation final selection.
     """
-    log_info(
-        "Identifying elite compounds from previous generation to advance to this one"
-    )
+    log_info("Identifying elite compounds to advance, without mutation or crossover")
 
     with LogLevel():
 
@@ -702,29 +689,30 @@ def _make_seed_list(
         and information about the smiles which will be used to seed the next
         generation
     """
-    usable_smiles = copy.deepcopy(source_compounds_list)
+    usable_smiles: List[PreDockedCompound] = copy.deepcopy(source_compounds_list)
 
-    full_length = False
-    if generation_num == 0:
-        # Get starting compounds for Mutations
-        full_length = True
-    elif generation_num == 1:
-        # Get starting compounds for Mutations
-        full_length = True
-    else:
-        full_length = False
+    # Code no longer uses generation_num == 0, but just to make sure...
+    assert generation_num >= 0, "Generation number must be greater than or equal to 0"
 
-    if full_length or generation_num == 0:
-        # This will be the full length list of starting molecules as the seed
-        random.shuffle(usable_smiles)
-
+    if generation_num == 1:
+        # If generation 1, then we don't need to do anything. All source compounds
+        # are available to participate in mutations and crossovers.
+        log_info(f"Selecting all {len(usable_smiles)} source compounds (generation 1)")
     else:
         # selector_choice = params["selector_choice"]
         # tourn_size = params["tourn_size"]
         # Get subset of the source_file based on diversity scores and docking
         # scores
-        usable_smiles = Ranking.create_seed_list(
-            usable_smiles, num_seed_diversity, num_seed_dock_fitness,
+
+        # This assumes the most negative number is the best option which is
+        # true for both. This is true for both the diversity score and the
+        # docking score. This may need to be adjusted for different scoring
+        # functions. (favor_most_negative=True). TODO: Need to fix this!
+        usable_smiles = plugin_managers.Selector.run(
+            usable_smiles=usable_smiles,
+            num_seed_dock_fitness=num_seed_dock_fitness,
+            num_seed_diversity=num_seed_diversity,
+            favor_most_negative=True,  # TODO: Shouldn't be hardcoded
         )
 
     random.shuffle(usable_smiles)
@@ -815,7 +803,7 @@ def _make_pass_through_list(
 
     # If not enough of your previous generation sanitize to make the list
     # Return None and trigger an Error
-    if gen_num != 0 and len(smis_from_prev_gen) < num_elite_from_prev_gen:
+    if len(smis_from_prev_gen) < num_elite_from_prev_gen:
         return (
             "Not enough ligands in initial list the filter to progress"
             + "\n len(smiles_from_previous_gen_list): {} ; \
@@ -829,7 +817,7 @@ def _make_pass_through_list(
 
     # If not enough of your previous generation sanitize to make the list
     # Return None and trigger an Error
-    if gen_num != 0 and len(ligs_that_passed_filters) < num_elite_from_prev_gen:
+    if len(ligs_that_passed_filters) < num_elite_from_prev_gen:
         return "Not enough ligands passed the filter to progress"
     # Save seed list of all ligands which passed which will serve as the seed
     # list.
@@ -850,26 +838,17 @@ def _make_pass_through_list(
     # except Exception:
     #     has_dock_score = False
 
-    if gen_num == 0 and not has_dock_score:
+    # In past, generation 0 was permitted. This is no longer the case, but
+    # sanity check here.
+    assert gen_num > 0, "Generation number must be greater than 0"
+
+    if not has_dock_score:
         # Take the 1st num_elite_to_advance_from_previous_gen number of
         # molecules from ligands_which_passed_filters
-        random.shuffle(ligs_that_passed_filters)
-        ligs_to_advance = [
-            ligs_that_passed_filters[x] for x in range(len(ligs_that_passed_filters))
-        ]
-    elif gen_num == 0:
-        # Use the make_seed_list function to select the list to advance.
-        # This list will be chosen strictly by
-        ligs_to_advance = _make_seed_list(
-            ligs_that_passed_filters,
-            gen_num,
-            len(ligs_that_passed_filters),
-            num_elite_from_prev_gen,
+        log_info(
+            f"Randomly selecting {num_elite_from_prev_gen} compounds from the {len(ligs_that_passed_filters)} source compounds"
         )
 
-    elif not has_dock_score:
-        # Take the 1st num_elite_to_advance_from_previous_gen number of
-        # molecules from ligands_which_passed_filters
         random.shuffle(ligs_that_passed_filters)
         ligs_to_advance = [
             ligs_that_passed_filters[x] for x in range(num_elite_from_prev_gen)
@@ -878,11 +857,15 @@ def _make_pass_through_list(
         # Use the make_seed_list function to select the list to advance. This
         # list will be chosen strictly by
         ligs_to_advance = _make_seed_list(
-            ligs_that_passed_filters, gen_num, 0, num_elite_from_prev_gen,
+            ligs_that_passed_filters,
+            gen_num,
+            0,  # 0 means no diversity
+            num_elite_from_prev_gen,  # But yes based on docking score
         )
 
-    if gen_num == 0 or len(ligs_to_advance) >= num_elite_from_prev_gen:
+    if len(ligs_to_advance) >= num_elite_from_prev_gen:
         return ligs_to_advance
+
     return "Not enough ligands were chosen to advance to the next generation."
 
 

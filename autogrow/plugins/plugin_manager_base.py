@@ -2,9 +2,12 @@ import os
 import importlib
 import inspect
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Type, TypeVar
+from typing import Any, Dict, List, Optional, Type, TypeVar, TYPE_CHECKING
 from autogrow.config.argparser import register_argparse_group
 from autogrow.plugins.plugin_base import PluginBase
+
+if TYPE_CHECKING:
+    from autogrow.plugins.plugin_managers import PluginManagers
 
 
 class PluginManagerBase(ABC):
@@ -14,19 +17,23 @@ class PluginManagerBase(ABC):
         # Initially loads all plugins
         self.plugins = self.load_plugins()
 
-        _pluginManagers[self.name] = self
-
     @property
     def name(self) -> str:
         return self.__class__.__name__
 
-    def setup_plugin_manager(self, params: dict):
+    def setup_plugin_manager(
+        self, params: dict, plugin_managers: Optional["PluginManagers"] = None,
+    ):
         """
         Sets up the plugin manager with the provided parameters. NOTE: This
         sets up the plugin manager, not individual plugins.
         
         Inputs:
-        :param dict params: a dictionary of parameters to set up the plugin manager.
+        :param dict params: a dictionary of parameters to set up the plugin
+            manager.
+        :param PluginManagers plugin_managers: a PluginManagers object that
+            contains all the plugin managers. This is used to access a plugin
+            from within another plugin. Simple import would be circular.
         """
         self.params = params
 
@@ -44,7 +51,7 @@ class PluginManagerBase(ABC):
 
         for plugin in self.plugins.values():
             # This also sets params on the plugin.
-            plugin._validate(params)
+            plugin._validate(params, plugin_managers)
 
     def setup_plugins(self, **kwargs):
         """
@@ -114,14 +121,3 @@ class PluginManagerBase(ABC):
     def run(self, **kwargs) -> Any:
         # Selects which plugin(s) to run and runs them.
         pass
-
-
-_pluginManagers: Dict[str, PluginManagerBase] = {}
-
-
-def get_plugin_manager(plugin_manager_name: str) -> PluginManagerBase:
-    return _pluginManagers[plugin_manager_name]
-
-
-def get_all_plugin_managers() -> Dict[str, PluginManagerBase]:
-    return _pluginManagers

@@ -3,9 +3,9 @@ import json
 import os
 from typing import Any, Dict, List, Optional, Tuple, Union
 from autogrow.config.argparser import ArgumentVars
+
+# from autogrow.plugins.plugin_managers import plugin_managers
 from autogrow.plugins.mutation import MutationBase
-from autogrow.plugins.plugin_manager_base import get_plugin_manager
-from autogrow.types import PreDockedCompound
 from autogrow.utils.logging import log_debug, log_warning
 import rdkit  # type: ignore
 from rdkit import Chem  # type: ignore
@@ -14,8 +14,7 @@ import copy
 import random
 import glob
 
-# TODO: Need to extract this so not dependenton gypsum_dl
-import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
+import autogrow.utils.mol_object_handling as MOH
 
 # Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog("rdApp.*")
@@ -854,12 +853,9 @@ class FragmentAddition(MutationBase):
         # passed_filter = Filter.run_filter_on_just_smiles(
         #     reaction_product_smiles, self.filter_object_dict
         # )
+        assert self.plugin_managers is not None, "Plugin managers not set"
         passed_filter = (
-            len(
-                get_plugin_manager("SmilesFilterPluginManager").run(
-                    smiles=reaction_product_smiles
-                )
-            )
+            len(self.plugin_managers.SmilesFilter.run(smiles=reaction_product_smiles))
             > 0
         )
 

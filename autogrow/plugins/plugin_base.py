@@ -1,8 +1,11 @@
 from abc import ABC, abstractmethod
 from argparse import ArgumentParser
-from typing import Any, List, Tuple
+from typing import TYPE_CHECKING, Any, List, Optional, Tuple
 
 from autogrow.config.argparser import ArgumentVars
+
+if TYPE_CHECKING:
+    from autogrow.plugins.plugin_managers import PluginManagers
 
 
 class PluginBase(ABC):
@@ -15,9 +18,12 @@ class PluginBase(ABC):
         """Add command-line arguments required by the plugin."""
         pass
 
-    def _validate(self, params: dict):
+    def _validate(
+        self, params: dict, plugin_managers: Optional["PluginManagers"] = None,
+    ):
         """Validate the provided arguments. This is called by the plugin manager."""
         self.params = params
+        self.plugin_managers = plugin_managers
         self.validate(params)
 
     def setup(self, **kwargs):

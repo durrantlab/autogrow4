@@ -17,8 +17,8 @@ import random
 import copy
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
+from autogrow.plugins.plugin_managers import plugin_managers
 from autogrow.plugins.crossover import CrossoverPluginManager
-from autogrow.plugins.plugin_manager_base import get_plugin_manager
 from autogrow.types import PreDockedCompound
 from autogrow.utils.logging import LogLevel, log_debug
 import rdkit  # type: ignore
@@ -29,8 +29,7 @@ from rdkit.Chem import rdFMCS  # type: ignore
 rdkit.RDLogger.DisableLog("rdApp.*")
 
 
-import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
-
+import autogrow.utils.mol_object_handling as MOH
 
 def _test_for_mcs(
     params: Dict[str, Any], mol_1: rdkit.Chem.rdchem.Mol, mol_2: rdkit.Chem.rdchem.Mol
@@ -424,9 +423,7 @@ def _do_crossovers_smiles_merge(
     ligand_1_string = lig1_smile_pair.smiles
     ligand_2_string = lig2_pair.smiles
 
-    crossover_manager = cast(
-        CrossoverPluginManager, get_plugin_manager("CrossoverPluginManager")
-    )
+    crossover_manager = cast(CrossoverPluginManager, plugin_managers.Crossover)
 
     counter = 0
     while counter < 3:
@@ -446,13 +443,9 @@ def _do_crossovers_smiles_merge(
             # pass_or_not = Filter.run_filter_on_just_smiles(
             #     ligand_new_smiles, params["filter_object_dict"]
             # )
+
             pass_or_not = (
-                len(
-                    get_plugin_manager("SmilesFilterPluginManager").run(
-                        smiles=ligand_new_smiles
-                    )
-                )
-                > 0
+                len(plugin_managers.SmilesFilter.run(smiles=ligand_new_smiles)) > 0
             )
 
             if not pass_or_not:

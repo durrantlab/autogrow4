@@ -130,26 +130,34 @@ class SelectorPluginManager(PluginManagerBase):
         diversity_smile_list: List[PreDockedCompound] = []
 
         # Select the molecules based on the docking score
-        if kwargs["num_seed_dock_fitness"] > 0:
-            log_info(f"{selector.name}: Selecting compounds by docking score")
+        num_usable_smiles = len(kwargs["usable_smiles"])
+        num_to_choose = kwargs["num_seed_dock_fitness"]
+        if num_to_choose > 0:
+            log_info(
+                f"{selector.name}: Selecting {num_to_choose} compounds by docking score from {num_usable_smiles} available compounds"
+            )
             with LogLevel():
                 docking_fitness_smiles_list = selector.run(
                     **{
                         "usable_smiles": kwargs["usable_smiles"],
-                        "num_to_choose": kwargs["num_seed_dock_fitness"],
+                        "num_to_choose": num_to_choose,
                         "score_type": ScoreType.DOCKING,
                         "favor_most_negative": kwargs["favor_most_negative"],
                     }
                 )
 
         # Select the molecules based on the diversity score
-        if kwargs["num_seed_diversity"] > 0:
-            log_info(f"{selector.name}: Selecting compounds by diversity score")
+        num_to_choose = kwargs["num_seed_diversity"]
+        if num_to_choose > 0:
+            log_info(
+                f"{selector.name}: Selecting {num_to_choose} compounds by diversity score from {num_usable_smiles} available compounds"
+            )
+
             with LogLevel():
                 diversity_smile_list = selector.run(
                     **{
                         "usable_smiles": kwargs["usable_smiles"],
-                        "num_to_choose": kwargs["num_seed_diversity"],
+                        "num_to_choose": num_to_choose,
                         "score_type": ScoreType.DIVERSITY,
                         "favor_most_negative": kwargs["favor_most_negative"],
                     }

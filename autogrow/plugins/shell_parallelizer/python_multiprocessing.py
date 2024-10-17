@@ -19,8 +19,7 @@ class PythonMultiprocessing(ShellParallelizerBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Run the Fragment Addition Mutation plugin. Creates new molecules by adding fragments to existing molecules, per user-specified reaction libraries.",
-                    # TODO: FIX HELP TEXT
+                    help="Use Python's multiprocessing module to run shell commands in parallel.",
                 )
             ],
         )

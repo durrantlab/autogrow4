@@ -99,19 +99,22 @@ class FakeDocking(DockingBase):
         pass
 
     def run_docking(
-        self, predocked_cmpd: PreDockedCompound
-    ) -> Optional[PostDockedCompound]:
+        self, predocked_cmpds: List[PreDockedCompound]
+    ) -> List[PostDockedCompound]:
         """
         run_docking is needs to be implemented in each class.
 
         Inputs:
-        :param PreDockedCompound predocked_cmpd: A PreDockedCompound object.
+        :param PreDockedCompound predocked_cmpds: A List of PreDockedCompound
+            objects.
 
         Returns:
-        :returns: PostDockedCompound: A PostDockedCompound object, containing
-            the score and a docked (posed) SDF file.
+        :returns: List[PostDockedCompound]: A list of PostDockedCompound
+            objects, each containing the score and a docked (posed) SDF file.
         """
-
-        return predocked_cmpd.to_post_docked_compound(
-            random.uniform(-12, -8), predocked_cmpd.sdf_3d_path or ""
-        )
+        return [
+            predocked_cmpd.to_post_docked_compound(
+                random.uniform(-12, -8), predocked_cmpd.sdf_3d_path or ""
+            )
+            for predocked_cmpd in predocked_cmpds
+        ]

@@ -3,12 +3,12 @@ import glob
 import os
 import sys
 
+# from autogrow.plugins.plugin_managers import plugin_managers
 from autogrow.plugins.docking import DockingBase
 from typing import Any, Dict, List, Optional, Tuple
 from autogrow.config.argparser import ArgumentVars
-from autogrow.plugins.plugin_manager_base import get_plugin_manager
 from autogrow.types import PostDockedCompound, PreDockedCompound
-from autogrow.utils.logging import LogLevel, log_info, log_warning
+from autogrow.utils.logging import log_warning
 from autogrow.utils.obabel import obabel_convert, obabel_convert_cmd
 
 
@@ -170,23 +170,22 @@ class VinaLikeDocking(DockingBase):
             )
             vina_out_convert_cmds.append(cmd)
 
-        # Get parallelizer plugin to use
-        shell_parallelizer_plugin_manager = get_plugin_manager(
-            "ShellParallelizerPluginManager"
-        )
-
         # Convert the ligands to PDBQT format
-        shell_parallelizer_plugin_manager.run(
+        assert self.plugin_managers is not None, "Plugin managers is None"
+        assert (
+            self.plugin_managers.ShellParallelizer is not None
+        ), "Shell parallelizer is None"
+        self.plugin_managers.ShellParallelizer.run(
             cmds=lig_convert_cmds
         )  # TODO: Need to specify nprocs?
 
         # Dock the ligands
-        shell_parallelizer_plugin_manager.run(
+        self.plugin_managers.ShellParallelizer.run(
             cmds=lig_dock_cmds
         )  # TODO: Need to specify nprocs?
 
         # Convert the docked ligands to SDF format
-        shell_parallelizer_plugin_manager.run(
+        self.plugin_managers.ShellParallelizer.run(
             cmds=vina_out_convert_cmds
         )  # TODO: Need to specify nprocs?
 
@@ -218,7 +217,7 @@ class VinaLikeDocking(DockingBase):
                         break
                 if score == 99999:
                     log_warning(f"Failed to parse docking score from {vina_out_file}")
-        
+
         return post_docked_cmpds
 
     #######################################

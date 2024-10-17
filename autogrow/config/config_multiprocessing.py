@@ -23,12 +23,10 @@ def config_multiprocessing(params: Dict[str, Any]) -> Dict[str, Any]:
         params["number_of_processors"] = 1
 
     # Avoid EOF error
-    from autogrow.operators.convert_files.gypsum_dl.gypsum_dl.Parallelizer import (
-        Parallelizer,
-    )
+    from autogrow.utils.parallelizer import Parallelizer
 
     params["parallelizer"] = Parallelizer(
-        params["multithread_mode"], params["number_of_processors"], True
+        params["multithread_mode"], params["number_of_processors"]
     )
 
     return params

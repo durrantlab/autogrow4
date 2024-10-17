@@ -1,6 +1,6 @@
 import __future__
 
-from autogrow.plugins.plugin_manager_base import get_plugin_manager
+# from autogrow.plugins.plugin_managers import plugin_managers
 from autogrow.plugins.smi_to_3d_sdf import SmiTo3DSdfBase
 from autogrow.plugins.smiles_filters import SmilesFilterBase
 from autogrow.types import PreDockedCompound
@@ -75,12 +75,12 @@ class ObabelSmiTo3DSDF(SmiTo3DSdfBase):
             out_files.append(out_file)
 
         # Get parallelizer plugin to use
-        shell_parallelizer_plugin_manager = get_plugin_manager(
-            "ShellParallelizerPluginManager"
-        )
-        shell_parallelizer_plugin_manager.run(
-            cmds=cmds
-        )  # TODO: Need to specify nprocs?
+        # TODO: Need to specify nprocs?
+        assert self.plugin_managers is not None, "Plugin managers is None"
+        assert (
+            self.plugin_managers.ShellParallelizer is not None
+        ), "Shell parallelizer is None"
+        self.plugin_managers.ShellParallelizer.run(cmds=cmds)
 
         for cmpd_idx, predock_cmpd in enumerate(predock_cmpds):
             out_file = out_files[cmpd_idx]

@@ -34,7 +34,10 @@ python run_autogrow.py \
     --RankSelector \
     --multithread_mode serial \
     --ObabelSmiTo3DSDF \
-    --PythonMultiprocessing
+    --ParallelExecPlugin \
+    --parallel_exec_path /opt/homebrew/bin/parallel
+
+    # --PythonMultiprocessing
     
     #\
     #>  ./output_directory/text_file.txt 2> ./output_directory/text_errormessage_file.txt

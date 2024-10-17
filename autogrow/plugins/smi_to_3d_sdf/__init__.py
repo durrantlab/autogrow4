@@ -5,13 +5,13 @@ from typing import Dict, List, Optional, Tuple, Union, cast
 
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
 from autogrow.types import PreDockedCompound
+from autogrow.utils.logging import LogLevel, log_info
 from rdkit import Chem  # type: ignore
 from rdkit.Chem.MolStandardize import rdMolStandardize  # type: ignore
 import copy
 import glob
 
 from autogrow.plugins.plugin_base import PluginBase
-import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
 
 
 class SmiTo3DSdfBase(PluginBase):
@@ -75,4 +75,5 @@ class SmiTo3DSdfPluginManager(PluginManagerBase):
         #         f"Could not find 3D SDF files associated with input file {kwargs['smi_file']}. Conversion error?"
         #     )
 
+        log_info("Converting SMILES to 3D SDF files")
         return smi_to_sdf_convertor.run(**kwargs)

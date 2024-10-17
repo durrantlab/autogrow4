@@ -13,8 +13,8 @@ from typing import Any, Dict, List, Optional, Type, Union, cast
 # from autogrow.docking.docking_class.docking_file_conversion import *
 # from autogrow.docking.docking_class.get_child_class import get_all_subclasses
 # from autogrow.docking.docking_class.parent_pdbqt_converter import ParentPDBQTConverter
+from autogrow.plugins.plugin_managers import plugin_managers
 from autogrow.plugins.docking import DockingPluginManager
-from autogrow.plugins.plugin_manager_base import get_plugin_manager
 from autogrow.types import PostDockedCompound, PreDockedCompound
 from autogrow.utils.logging import LogLevel, log_info
 
@@ -72,9 +72,7 @@ def run_docking_common(
         unweighted-ranked SMILES with their docking score
     """
 
-    docking_plugin_manager = cast(
-        DockingPluginManager, get_plugin_manager("DockingPluginManager")
-    )
+    docking_plugin_manager = cast(DockingPluginManager, plugin_managers.Docking)
 
     log_info("Starting docking")
     with LogLevel():
@@ -99,4 +97,3 @@ def run_docking_common(
     )
     print("\nCompleted Ranking and Saving results\n")
     return unweighted_ranked_smile_file
-

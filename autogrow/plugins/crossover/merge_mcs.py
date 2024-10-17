@@ -1,7 +1,7 @@
 from typing import List, Optional, Tuple
 from autogrow.config.argparser import ArgumentVars
 from autogrow.plugins.crossover import CrossoverBase
-import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
+import autogrow.utils.mol_object_handling as MOH
 from autogrow.utils.logging import log_debug
 import rdkit  # type: ignore
 from rdkit import Chem  # type: ignore

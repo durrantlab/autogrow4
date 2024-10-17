@@ -136,7 +136,7 @@ def log_info(msg: str):
 
         if logger is not None:
             # Add space to align with DEBUG
-            logger.info(f" {m}")
+            logger.info(m)
 
         with open(log_filename, "a") as f:
             f.write((level * TAB) + m + "\n")

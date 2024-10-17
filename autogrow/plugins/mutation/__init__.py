@@ -11,7 +11,6 @@ import copy
 import random
 
 from autogrow.plugins.plugin_base import PluginBase
-import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
 
 
 class MutationBase(PluginBase):

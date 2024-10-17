@@ -21,17 +21,7 @@ from autogrow.config.argparser import get_argparse_vars
 from autogrow import program_info
 import autogrow.autogrow_main_execute as AutogrowMainExecute
 from autogrow.config import load_commandline_parameters
-from autogrow.plugins.crossover import CrossoverBase, CrossoverPluginManager
-from autogrow.plugins.docking import DockingBase, DockingPluginManager
-from autogrow.plugins.mutation import MutationBase, MutationPluginManager
-from autogrow.plugins.plugin_manager_base import get_all_plugin_managers
-from autogrow.plugins.selectors import SelectorBase, SelectorPluginManager
-from autogrow.plugins.shell_parallelizer import (
-    ShellParallelizerBase,
-    ShellParallelizerPluginManager,
-)
-from autogrow.plugins.smi_to_3d_sdf import SmiTo3DSdfBase, SmiTo3DSdfPluginManager
-from autogrow.plugins.smiles_filters import SmilesFilterBase, SmilesFilterPluginManager
+from autogrow.plugins.plugin_managers import setup_plugin_managers
 from autogrow.utils.logging import LogLevel, create_logger, log_info
 
 
@@ -40,38 +30,13 @@ from autogrow.utils.logging import LogLevel, create_logger, log_info
 ################
 
 
-def _load_plugin_managers() -> None:
-    # Note that this just loads the plugins (and sets up args). It doesn't
-    # actually create the plugin objects yet.
-
-    # Set up Plugins
-    SmilesFilterPluginManager(SmilesFilterBase)
-    SelectorPluginManager(SelectorBase)
-    DockingPluginManager(DockingBase)
-    MutationPluginManager(MutationBase)
-    CrossoverPluginManager(CrossoverBase)
-    SmiTo3DSdfPluginManager(SmiTo3DSdfBase)
-    ShellParallelizerPluginManager(ShellParallelizerBase)
-
-
-def _setup_plugin_managers(params) -> None:
-    # This sets up the plugin managers, after the params have been loaded.
-
-    plugin_managers = get_all_plugin_managers()
-
-    for name, plugin_managers in plugin_managers.items():
-        plugin_managers.setup_plugin_manager(params)
-
-
 def main():
     create_logger(logging.DEBUG)
-
-    _load_plugin_managers()
 
     args_dict = get_argparse_vars()
 
     # Setup all plugin managers
-    _setup_plugin_managers(args_dict)
+    setup_plugin_managers(args_dict)
 
     _run_autogrow_with_params(args_dict)
 

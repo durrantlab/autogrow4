@@ -9,8 +9,8 @@ import copy
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 
+from autogrow.plugins.plugin_managers import plugin_managers
 from autogrow.plugins.mutation import MutationBase
-from autogrow.plugins.plugin_manager_base import get_plugin_manager
 from autogrow.types import PreDockedCompound
 from autogrow.utils.logging import LogLevel, log_debug
 
@@ -57,7 +57,7 @@ def make_mutants(
     number_of_processors = int(params["parallelizer"].return_node())
 
     # initialize the smileclickclass
-    mutation_plugin_manager = get_plugin_manager("MutationPluginManager")
+    mutation_plugin_manager = plugin_managers.Mutation
     mutation_plugin_manager.setup_plugins()
 
     log_debug("Creating new compounds from selected compounds via mutation")

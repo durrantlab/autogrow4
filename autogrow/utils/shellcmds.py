@@ -2,6 +2,7 @@ import os
 import sys
 
 
+# TODO: Candidate for deletion
 def determine_bash_timeout_vs_gtimeout() -> str:
     """
     This function tests whether we should use the BASH command "timeout" (for linux)

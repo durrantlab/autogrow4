@@ -12,7 +12,7 @@ from rdkit import Chem  # type: ignore
 # Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog("rdApp.*")
 
-import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
+import autogrow.utils.mol_object_handling as MOH
 
 
 # HANDLE THE MERGING OF THE R-groups and the MCS And cleanup

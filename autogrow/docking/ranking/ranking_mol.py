@@ -6,7 +6,6 @@ import __future__
 import os
 from typing import Dict, List, Optional
 
-from autogrow.plugins.plugin_manager_base import get_plugin_manager
 from autogrow.types import PreDockedCompound, PostDockedCompound, ScoreType
 import rdkit  # type: ignore
 import rdkit.Chem as Chem  # type: ignore
@@ -16,54 +15,7 @@ from rdkit import DataStructs  # type: ignore
 # Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog("rdApp.*")
 
-import autogrow.operators.convert_files.gypsum_dl.gypsum_dl.MolObjectHandling as MOH
-
-
-def create_seed_list(
-    usable_smiles: List[PreDockedCompound],
-    num_seed_diversity: int,
-    num_seed_dock_fitness: int,
-) -> List[PreDockedCompound]:
-    """
-    this function will take ausable_list_of_smiles which can be derived from
-    either the previous generation or a source_compounds_file. Then it will
-    select a set of smiles chosen by a weighted function to their
-    docking-fitness (docking score) Then it will select a set of smiles chosen
-    by a weighted function to their diversity-fitness (docking score) Then it
-    will merge these sets of smiles into a single list
-
-    Using the merged list it will make a list of all the smiles in the
-    merged-list (chosen_mol_list) with all the other information about each of
-    the chosen mols from the usable_smiles
-
-    It will return this list with the complete information of each chosen mol
-    (weighted_order_list)
-
-    Inputs:
-    :param list usable_smiles: a list with SMILES strings, names, and
-        information about the smiles from either the previous generation or the
-        source compound list
-    :param int num_seed_diversity: the number of seed molecules which come
-        from diversity selection
-    :param int num_seed_dock_fitness: the number of seed molecules which come
-        from eite selection by docking score
-
-    Returns:
-    :returns: list chosen_mol_full_data_list: a list of all the smiles in a
-        weighted ranking ie ["CCCC"  "zinc123"   1    -0.1]
-    """
-    selector_plugin_manager = get_plugin_manager("SelectorPluginManager")
-
-    # This assumes the most negative number is the best option which is
-    # true for both. This is true for both the diversity score and the
-    # docking score. This may need to be adjusted for different scoring
-    # functions. (favor_most_negative=True). TODO: Need to fix this!
-    return selector_plugin_manager.run(
-        usable_smiles=usable_smiles,
-        num_seed_dock_fitness=num_seed_dock_fitness,
-        num_seed_diversity=num_seed_diversity,
-        favor_most_negative=True,  # TODO: Shouldn't be hardcoded
-    )
+import autogrow.utils.mol_object_handling as MOH
 
 
 def get_usable_format(infile: str) -> List[PreDockedCompound]:

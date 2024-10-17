@@ -67,7 +67,9 @@ class DockingPluginManager(PluginManagerBase):
         post_docked_cmpds = docking.run(**kwargs)
 
         for post_docked_cmpd in post_docked_cmpds:
-            log_debug(f"Docked molecule {post_docked_cmpd.smiles}. Score: {post_docked_cmpd.docking_score:.2f}")
+            log_debug(
+                f"Docked molecule {post_docked_cmpd.smiles}. Score: {post_docked_cmpd.docking_score:.2f}"
+            )
 
         return post_docked_cmpds
 

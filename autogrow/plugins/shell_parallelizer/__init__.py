@@ -10,7 +10,7 @@ from autogrow.plugins.plugin_manager_base import PluginManagerBase
 from autogrow.types import PostDockedCompound, PreDockedCompound, ScoreType
 import autogrow.docking.scoring.execute_scoring_mol as Scoring
 import autogrow.docking.ranking.ranking_mol as Ranking
-from autogrow.utils.logging import log_debug
+from autogrow.utils.logging import log_debug, log_warning
 
 
 @dataclass
@@ -43,6 +43,25 @@ class ShellParallelizerBase(PluginBase):
         :returns: ??? TODO:
         """
         pass
+
+    def get_nprocs_to_use(self, nprocs: int) -> int:
+        """
+        Get the number of processors to use.
+
+        Inputs:
+        :param int nprocs: The number of processors to use. Default is -1 (use
+            all available).
+
+        Returns:
+        :returns: int: The number of processors to use.
+        """
+        if nprocs == -1:
+            if os.cpu_count() is None:
+                nprocs = 1
+                log_warning("Could not determine the number of CPUs. Defaulting to 1.")
+            else:
+                nprocs = os.cpu_count()  # type: ignore
+        return nprocs
 
 
 class ShellParallelizerPluginManager(PluginManagerBase):

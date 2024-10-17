@@ -12,14 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# NOTE: Adapted from Gypsum-DL. See
+# https://github.com/durrantlab/gypsum_dl/blob/main/gypsum_dl/MolObjectHandling.py
+
 ##### MolObjectHandling.py
 import __future__
 
-import rdkit
-from rdkit import Chem
+import rdkit  # type: ignore
+from rdkit import Chem  # type: ignore
 
 # Disable the unnecessary RDKit warnings
-from rdkit import RDLogger
+from rdkit import RDLogger  # type: ignore
 
 RDLogger.DisableLog("rdApp.*")
 
