@@ -1,5 +1,5 @@
 rm -f ./tutorial/PARP/4r6eA_PARP1_prepared.pdbqt
-rm -rf output_directory/*
+#rm -rf output_directory/*
 
 python run_autogrow.py \
     --receptor_path ./tutorial/PARP/4r6eA_PARP1_prepared.pdb \

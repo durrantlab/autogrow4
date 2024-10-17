@@ -40,7 +40,7 @@ class MutationBase(PluginBase):
 
 
 class MutationPluginManager(PluginManagerBase):
-    def run(self, **kwargs) -> Optional[List[Union[str, int, None]]]:
+    def execute(self, **kwargs) -> Optional[List[Union[str, int, None]]]:
         """
         Run the plugin with provided arguments.
 

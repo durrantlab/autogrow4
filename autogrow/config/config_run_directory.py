@@ -29,6 +29,14 @@ def set_run_directory(root_folder_path: str, start_a_new_run: bool) -> str:
         puting output folders
     """
 
+    if not os.path.exists(root_folder_path):
+        os.makedirs(root_folder_path)
+        log_info(f"Making the output folder path: {root_folder_path}")
+
+    return root_folder_path
+
+    # TODO: Abandoning below system. Remove cruft in time.
+
     folder_name_path = f"{root_folder_path}Run_"
     # print(folder_name_path)
 

@@ -36,7 +36,7 @@ class CrossoverBase(PluginBase):
 
 
 class CrossoverPluginManager(PluginManagerBase):
-    def run(self, **kwargs) -> Optional[str]:
+    def execute(self, **kwargs) -> Optional[str]:
         """
         Run the plugin with provided arguments.
 

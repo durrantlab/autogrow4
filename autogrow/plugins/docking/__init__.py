@@ -38,7 +38,7 @@ class DockingBase(PluginBase):
 
 
 class DockingPluginManager(PluginManagerBase):
-    def run(self, **kwargs) -> List[PostDockedCompound]:
+    def execute(self, **kwargs) -> List[PostDockedCompound]:
         """
         Run the plugin with provided arguments.
 

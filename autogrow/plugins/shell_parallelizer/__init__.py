@@ -65,7 +65,7 @@ class ShellParallelizerBase(PluginBase):
 
 
 class ShellParallelizerPluginManager(PluginManagerBase):
-    def run(self, **kwargs) -> List[ShellCmdResult]:
+    def execute(self, **kwargs) -> List[ShellCmdResult]:
         """
         Run the plugin with provided arguments.
 

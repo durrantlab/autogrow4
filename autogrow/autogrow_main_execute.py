@@ -30,8 +30,10 @@ def main_execute(params: Dict[str, Any]) -> None:
     num_gens_to_make = params["num_generations"]
 
     # Determine what was the last completed generation in the Run directory
-    last_generation = determine_current_gen(output_directory)
-    start_gen_num = 1 if last_generation is None else last_generation + 1
+    # last_generation = determine_current_gen(output_directory)
+    # start_gen_num = 1 if last_generation is None else last_generation + 1
+
+    start_gen_num = 1
 
     if start_gen_num > num_gens_to_make:
         print(
@@ -61,7 +63,7 @@ def main_execute(params: Dict[str, Any]) -> None:
 
         with LogLevel():
             smi_new_gen_path, new_gen_predock_cmpds = populate_generation(
-                params, gen_num
+                params, gen_num, cur_gen_dir
             )
             sys.stdout.flush()
 

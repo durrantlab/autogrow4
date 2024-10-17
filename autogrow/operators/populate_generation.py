@@ -30,7 +30,7 @@ import autogrow.utils.mol_object_handling as MOH
 
 
 def populate_generation(
-    params: Dict[str, Any], generation_num: int
+    params: Dict[str, Any], generation_num: int, cur_gen_dir: str
 ) -> Tuple[str, List[PreDockedCompound]]:
     """
     This will run all of the mutations, crossovers, and filters for a single
@@ -39,6 +39,7 @@ def populate_generation(
     Inputs:
     :param dict params: a dictionary of all user variables
     :param int generation_num: the generation number
+    :param str cur_gen_dir: the directory for the current generation
 
     Returns:
     :returns: str full_generation_smiles_file: the name of the .smi file
@@ -88,6 +89,7 @@ def populate_generation(
             num_seed_dock_fitness,
             src_cmpds,
             number_of_processors,
+            cur_gen_dir
         )
     else:
         log_warning("No mutations made, per user settings")
@@ -166,7 +168,7 @@ def populate_generation(
     # Note that smiles_to_convert_file is a single with with many smi files
     # in it.
     full_gen_predock_cmpds = plugin_managers.SmiTo3DSdf.run(
-        predock_cmpds=full_gen_predock_cmpds, pwd=new_gen_folder_path
+        predock_cmpds=full_gen_predock_cmpds, pwd=new_gen_folder_path, cache_dir=cur_gen_dir
     )
 
     # Remove those that failed to convert
@@ -185,9 +187,12 @@ def _generate_mutations(
     num_seed_dock_fitness: int,
     src_cmpds: List[PreDockedCompound],
     number_of_processors: int,
+    cur_gen_dir: str,
 ) -> List[PreDockedCompound]:
     """
     Generate mutations for the current generation.
+
+    TODO: Need better docstrings here.
 
     Returns:
     List[PreDockedCompound]: List of mutation smiles.
@@ -231,9 +236,10 @@ def _generate_mutations(
                 seed_list_mutations,
                 new_mutation_smiles_list,
                 rxn_library_variables,
+                cur_gen_dir
             )
             if new_mutants is None:
-                # Try once more
+                # Try once more # TODO: Why?
                 new_mutants = Mutation.make_mutants(
                     params,
                     generation_num,
@@ -242,6 +248,7 @@ def _generate_mutations(
                     seed_list_mutations,
                     new_mutation_smiles_list,
                     rxn_library_variables,
+                    cur_gen_dir
                 )
 
             if new_mutants is None:
@@ -330,8 +337,9 @@ def _generate_crossovers(
                 seed_list_crossovers,
                 new_crossover_smiles_list,
             )
+
             if new_crossovers is None:
-                # Try once more
+                # Try once more  TODO: Why?
                 new_crossovers = execute_crossover.make_crossovers(
                     params,
                     generation_num,

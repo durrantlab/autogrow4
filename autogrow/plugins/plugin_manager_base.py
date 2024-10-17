@@ -5,6 +5,9 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Type, TypeVar, TYPE_CHECKING
 from autogrow.config.argparser import register_argparse_group
 from autogrow.plugins.plugin_base import PluginBase
+import pickle as pkl
+
+from autogrow.utils.logging import LogLevel, log_warning
 
 if TYPE_CHECKING:
     from autogrow.plugins.plugin_managers import PluginManagers
@@ -117,7 +120,35 @@ class PluginManagerBase(ABC):
 
         return plugins
 
+    def run(self, cache_dir: Optional[str] = None, **kwargs) -> Any:
+        # Selects which plugin(s) to run and runs them. If cache_dir is provided
+        # (same as gen_dir), attempts to use caching.
+
+        cache_filename = ""
+        if cache_dir is not None:
+            cache_filename = os.path.join(cache_dir, f"{self.name}_results_cache.pkl")
+
+        if cache_dir is not None and os.path.exists(cache_filename):
+            log_warning(f"Loading previous {self.name} results from cache: {cache_filename}")
+            return pkl.load(open(cache_filename, "rb"))
+        
+        resp = self.execute(**kwargs)
+
+        if cache_dir is not None:
+            pkl.dump(resp, open(cache_filename, "wb"))
+        
+        return resp
+
     @abstractmethod
-    def run(self, **kwargs) -> Any:
-        # Selects which plugin(s) to run and runs them.
+    def execute(self, **kwargs) -> Any:
+        # Selects which plugin(s) to run and runs them. Defiend on child
+        # classes.
         pass
+
+
+    # @abstractmethod
+    # def load_from_cache(self, gen_dir: str) -> Optional[Any]:
+    #     """Load the plugin from the cache. All plugins should cache their
+    #     results somehow so when autogrow is restarted, it will quickly advance
+    #     to the prevous stopping point. Return None if there is no cache."""
+    #     pass

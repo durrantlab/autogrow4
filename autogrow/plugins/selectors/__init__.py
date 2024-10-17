@@ -101,7 +101,7 @@ class SelectorBase(PluginBase):
 
 
 class SelectorPluginManager(PluginManagerBase):
-    def run(self, **kwargs) -> List[PreDockedCompound]:
+    def execute(self, **kwargs) -> List[PreDockedCompound]:
         """
         Run the plugin with provided arguments.
 

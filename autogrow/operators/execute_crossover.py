@@ -433,6 +433,8 @@ def _do_crossovers_smiles_merge(
         #     params, ligand_1_string, ligand_2_string
         # )
 
+        # TODO: Need to put all input into the plugin. Don't do
+        # one-by-one here. Then you can make it cachable.
         ligand_new_smiles = crossover_manager.run(
             lig_string_1=ligand_1_string, lig_string_2=ligand_2_string
         )

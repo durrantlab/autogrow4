@@ -44,7 +44,7 @@ from autogrow.utils.logging import LogLevel, log_info
 def run_docking_common(
     params: Dict[str, Any],
     current_gen_int: int,
-    current_generation_dir: str,
+    cur_gen_dir: str,
     smiles_file_new_gen: str,
     new_gen_predock_cmpds: List[PreDockedCompound],
 ) -> str:
@@ -77,7 +77,7 @@ def run_docking_common(
     log_info("Starting docking")
     with LogLevel():
         post_docked_compounds = docking_plugin_manager.run(
-            predocked_cmpds=new_gen_predock_cmpds
+            predocked_cmpds=new_gen_predock_cmpds, cache_dir=cur_gen_dir
         )
 
     # Remove those that failed to convert
@@ -90,7 +90,7 @@ def run_docking_common(
 
     print("\nBegin Ranking and Saving results")
     unweighted_ranked_smile_file = docking_plugin_manager.rank_and_save_output_smi(
-        current_generation_dir,
+        cur_gen_dir,
         current_gen_int,
         smiles_file_new_gen,
         post_docked_compounds,

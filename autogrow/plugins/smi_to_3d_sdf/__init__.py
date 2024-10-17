@@ -46,7 +46,7 @@ class SmiTo3DSdfBase(PluginBase):
 
 
 class SmiTo3DSdfPluginManager(PluginManagerBase):
-    def run(self, **kwargs) -> List[PreDockedCompound]:
+    def execute(self, **kwargs) -> List[PreDockedCompound]:
         """
         Run the plugin with provided arguments.
 
@@ -76,4 +76,5 @@ class SmiTo3DSdfPluginManager(PluginManagerBase):
         #     )
 
         log_info("Converting SMILES to 3D SDF files")
-        return smi_to_sdf_convertor.run(**kwargs)
+        with LogLevel():
+            return smi_to_sdf_convertor.run(**kwargs)

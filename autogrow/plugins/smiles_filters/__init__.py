@@ -56,7 +56,7 @@ class SmilesFilterBase(PluginBase):
 
 
 class SmilesFilterPluginManager(PluginManagerBase):
-    def run(self, **kwargs) -> List:
+    def execute(self, **kwargs) -> List:
         """
         Run the plugin with provided arguments.
 

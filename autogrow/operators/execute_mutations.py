@@ -26,6 +26,7 @@ def make_mutants(
     ligands_list: List[PreDockedCompound],
     new_mutation_smiles_list: List[PreDockedCompound],
     rxn_library_variables: List[str],
+    cur_gen_dir: str,
 ) -> Optional[List[PreDockedCompound]]:
     """
     Make mutant compounds in a list to be returned
@@ -45,6 +46,7 @@ def make_mutants(
     :param list rxn_library_variables: a list of user variables which define
         the rxn_library_path. ie.
         rxn_library_variables = [params['rxn_library_path']]
+    :param str cur_gen_dir: the current generation directory
 
     Returns:
     :returns: list new_ligands_list: ligand/name pairs OR returns None if
@@ -54,6 +56,7 @@ def make_mutants(
     new_ligands_list: List[PreDockedCompound] = new_mutation_smiles_list or []
     loop_counter = 0
 
+    # TODO: What is this???
     number_of_processors = int(params["parallelizer"].return_node())
 
     # initialize the smileclickclass
@@ -94,6 +97,8 @@ def make_mutants(
                     (smile, mutation_plugin_manager) for smile in smile_inputs
                 )
 
+                # TODO: Need to put all input into the plugin. Don't do
+                # one-by-one here. Then you can make it cachable.
                 results = params["parallelizer"].run(
                     job_input, _run_smiles_click_for_multithread
                 )
@@ -174,7 +179,7 @@ def make_mutants(
 
 
 def _run_smiles_click_for_multithread(
-    smile: str, a_smiles_click_chem_object: MutationBase
+    smile: str, mutation_obj: MutationBase
 ) -> Optional[List[Union[str, int, None]]]:
     """
     This function takes a single smiles and performs SmileClick on it.
@@ -191,4 +196,4 @@ def _run_smiles_click_for_multithread(
         if the reactions failed
     """
 
-    return a_smiles_click_chem_object.run(parent_smiles=smile)
+    return mutation_obj.run(parent_smiles=smile)
