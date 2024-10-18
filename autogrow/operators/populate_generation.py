@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from autogrow.plugins.plugin_managers import plugin_managers
 from autogrow.types import PreDockedCompound
-from autogrow.utils.caching import load_from_cache, save_to_cache
+from autogrow.utils.caching import CacheManager
 from autogrow.utils.logging import LogLevel, log_info, log_warning
 import rdkit  # type: ignore
 import rdkit.Chem as Chem  # type: ignore
@@ -81,51 +81,73 @@ def populate_generation(
     )
 
     # Generate mutations
-    if num_mutations > 0:
-        mut_predock_cmpds = _generate_mutations(
-            params,
-            generation_num,
-            num_mutations,
-            num_seed_diversity,
-            num_seed_dock_fitness,
-            src_cmpds,
-            number_of_processors,
-            cur_gen_dir
-        )
-    else:
-        log_warning("No mutations made, per user settings")
-        mut_predock_cmpds: List[PreDockedCompound] = []
+    log_info("Creating mutant compounds")
+    with LogLevel():
+        with CacheManager("MutantCompounds", cur_gen_dir) as cache:
+            if cache.exists:
+                mut_predock_cmpds = cache.data
+            else:
+                if num_mutations > 0:
+                    mut_predock_cmpds = _generate_mutations(
+                        params,
+                        generation_num,
+                        num_mutations,
+                        num_seed_diversity,
+                        num_seed_dock_fitness,
+                        src_cmpds,
+                        number_of_processors,
+                        cur_gen_dir
+                    )
+                else:
+                    log_warning("No mutations made, per user settings")
+                    mut_predock_cmpds: List[PreDockedCompound] = []
+                cache.data = mut_predock_cmpds
+        log_info(f"Created {len(mut_predock_cmpds)} mutant compounds")
 
     # Generate crossovers
-    if num_crossovers > 0:
-        cross_predock_cmpds = _generate_crossovers(
-            params,
-            generation_num,
-            num_crossovers,
-            num_seed_diversity,
-            num_seed_dock_fitness,
-            src_cmpds,
-            number_of_processors,
-        )
-    else:
-        log_warning("No crossovers made, per user settings")
-        cross_predock_cmpds: List[PreDockedCompound] = []
+    log_info("Creating crossover compounds")
+
+    with LogLevel():
+        with CacheManager("CrossoverCompounds", cur_gen_dir) as cache:
+            if cache.exists:
+                cross_predock_cmpds = cache.data
+            else:
+                if num_crossovers > 0:
+                    cross_predock_cmpds = _generate_crossovers(
+                        params,
+                        generation_num,
+                        num_crossovers,
+                        num_seed_diversity,
+                        num_seed_dock_fitness,
+                        src_cmpds,
+                        number_of_processors,
+                    )
+                else:
+                    log_warning("No crossovers made, per user settings")
+                    cross_predock_cmpds: List[PreDockedCompound] = []
+                cache.data = cross_predock_cmpds
+
+        log_info(f"Created {len(cross_predock_cmpds)} crossover compounds")
+
 
     # Get ligands from previous generation
     log_info("Identifying elite compounds to advance, without mutation or crossover")
     with LogLevel():
-        elite_predock_cmpds = load_from_cache("EliteCompounds", cur_gen_dir)
-        if elite_predock_cmpds is None:
-            # No cache, so we need to generate the elite compounds
-            if num_elite_prev_gen > 0:
-                elite_predock_cmpds = _get_elite_cmpds_prev_gen(
-                    params, src_cmpds, num_elite_prev_gen, generation_num,
-                )
+        with CacheManager("EliteCompounds", cur_gen_dir) as cache:
+            if cache.exists:
+                elite_predock_cmpds = cache.data
             else:
-                log_warning("No elite ligands advanced, per user settings")
-                elite_predock_cmpds: List[PreDockedCompound] = []
-            
-            save_to_cache("EliteCompounds", cur_gen_dir, elite_predock_cmpds)
+                # No cache, so we need to generate the elite compounds
+                if num_elite_prev_gen > 0:
+                    elite_predock_cmpds = _get_elite_cmpds_prev_gen(
+                        params, src_cmpds, num_elite_prev_gen, generation_num,
+                    )
+                else:
+                    log_warning("No elite ligands advanced, per user settings")
+                    elite_predock_cmpds: List[PreDockedCompound] = []
+                
+                # Saves to cache
+                cache.data = elite_predock_cmpds
         log_info(f"Identified {len(elite_predock_cmpds)} elite compounds")
 
 
@@ -210,36 +232,45 @@ def _generate_mutations(
     List[PreDockedCompound]: List of mutation smiles.
     """
 
-    log_info("Creating mutant compounds")
 
-    with LogLevel():
+    # Get starting compounds for Mutations
+    seed_list_mutations = _make_seed_list(
+        src_cmpds, generation_num, num_seed_diversity, num_seed_dock_fitness,
+    )
 
-        # Get starting compounds for Mutations
-        seed_list_mutations = _make_seed_list(
-            src_cmpds, generation_num, num_seed_diversity, num_seed_dock_fitness,
-        )
+    # Save seed list for Mutations
+    _save_ligand_list(
+        params["output_directory"],
+        generation_num,
+        seed_list_mutations,
+        "Mutation_Seed_List",
+    )
 
-        # Save seed list for Mutations
-        _save_ligand_list(
-            params["output_directory"],
+    # Package user params specifying the Reaction library to use for mutation
+    rxn_library_variables = [
+        params["rxn_library_path"],
+    ]
+
+    # List of SMILES from mutation
+    new_mutation_smiles_list: List[PreDockedCompound] = []
+
+    # Make all the required ligands by mutations
+    while len(new_mutation_smiles_list) < num_mutations:
+        num_mutants_to_make = num_mutations - len(new_mutation_smiles_list)
+
+        # Make all mutants
+        new_mutants = Mutation.make_mutants(
+            params,
             generation_num,
+            number_of_processors,
+            num_mutants_to_make,
             seed_list_mutations,
-            "Mutation_Seed_List",
+            new_mutation_smiles_list,
+            rxn_library_variables,
+            cur_gen_dir
         )
-
-        # Package user params specifying the Reaction library to use for mutation
-        rxn_library_variables = [
-            params["rxn_library_path"],
-        ]
-
-        # List of SMILES from mutation
-        new_mutation_smiles_list: List[PreDockedCompound] = []
-
-        # Make all the required ligands by mutations
-        while len(new_mutation_smiles_list) < num_mutations:
-            num_mutants_to_make = num_mutations - len(new_mutation_smiles_list)
-
-            # Make all mutants
+        if new_mutants is None:
+            # Try once more # TODO: Why?
             new_mutants = Mutation.make_mutants(
                 params,
                 generation_num,
@@ -250,29 +281,17 @@ def _generate_mutations(
                 rxn_library_variables,
                 cur_gen_dir
             )
-            if new_mutants is None:
-                # Try once more # TODO: Why?
-                new_mutants = Mutation.make_mutants(
-                    params,
-                    generation_num,
-                    number_of_processors,
-                    num_mutants_to_make,
-                    seed_list_mutations,
-                    new_mutation_smiles_list,
-                    rxn_library_variables,
-                    cur_gen_dir
-                )
 
-            if new_mutants is None:
+        if new_mutants is None:
+            break
+
+        # Remove Nones
+        new_mutants = [x for x in new_mutants if x is not None]
+
+        for i in new_mutants:
+            new_mutation_smiles_list.append(i)
+            if len(new_mutation_smiles_list) == num_mutations:
                 break
-
-            # Remove Nones
-            new_mutants = [x for x in new_mutants if x is not None]
-
-            for i in new_mutants:
-                new_mutation_smiles_list.append(i)
-                if len(new_mutation_smiles_list) == num_mutations:
-                    break
 
         # Save new_mutation_smiles_list
         _save_ligand_list(
@@ -293,7 +312,6 @@ def _generate_mutations(
                 "Mutation failed to make enough new ligands.",
             )
         # print("FINISHED MAKING MUTATIONS")
-        log_info(f"Created {len(new_mutation_smiles_list)} mutant compounds")
 
     return new_mutation_smiles_list
 
@@ -313,34 +331,41 @@ def _generate_crossovers(
     Returns:
     List[PreDockedCompound]: List of crossover smiles.
     """
-    log_info("Creating crossover compounds")
+    # Get starting compounds to seed Crossovers
+    seed_list_crossovers = _make_seed_list(
+        src_cmpds, generation_num, num_seed_diversity, num_seed_dock_fitness,
+    )
 
-    with LogLevel():
+    # Save seed list for Crossovers
+    _save_ligand_list(
+        params["output_directory"],
+        generation_num,
+        seed_list_crossovers,
+        "Crossover_Seed_List",
+    )
 
-        # Get starting compounds to seed Crossovers
-        seed_list_crossovers = _make_seed_list(
-            src_cmpds, generation_num, num_seed_diversity, num_seed_dock_fitness,
-        )
+    # print("MAKE CROSSOVERS")
 
-        # Save seed list for Crossovers
-        _save_ligand_list(
-            params["output_directory"],
+    # Making Crossovers
+    # List of smiles from crossover
+    new_crossover_smiles_list: List[PreDockedCompound] = []
+
+    # Make all the required ligands by Crossover
+    while len(new_crossover_smiles_list) < num_crossovers:
+        num_crossovers_to_make = num_crossovers - len(new_crossover_smiles_list)
+
+        # Make all crossovers
+        new_crossovers = execute_crossover.make_crossovers(
+            params,
             generation_num,
+            number_of_processors,
+            num_crossovers_to_make,
             seed_list_crossovers,
-            "Crossover_Seed_List",
+            new_crossover_smiles_list,
         )
 
-        # print("MAKE CROSSOVERS")
-
-        # Making Crossovers
-        # List of smiles from crossover
-        new_crossover_smiles_list: List[PreDockedCompound] = []
-
-        # Make all the required ligands by Crossover
-        while len(new_crossover_smiles_list) < num_crossovers:
-            num_crossovers_to_make = num_crossovers - len(new_crossover_smiles_list)
-
-            # Make all crossovers
+        if new_crossovers is None:
+            # Try once more  TODO: Why?
             new_crossovers = execute_crossover.make_crossovers(
                 params,
                 generation_num,
@@ -349,49 +374,37 @@ def _generate_crossovers(
                 seed_list_crossovers,
                 new_crossover_smiles_list,
             )
+        if new_crossovers is None:
+            break
 
-            if new_crossovers is None:
-                # Try once more  TODO: Why?
-                new_crossovers = execute_crossover.make_crossovers(
-                    params,
-                    generation_num,
-                    number_of_processors,
-                    num_crossovers_to_make,
-                    seed_list_crossovers,
-                    new_crossover_smiles_list,
-                )
-            if new_crossovers is None:
+        # Remove Nones
+        new_crossovers = [x for x in new_crossovers if x is not None]
+
+        # Append those which passed the filter
+        for i in new_crossovers:
+            new_crossover_smiles_list.append(i)
+            if len(new_crossover_smiles_list) == num_crossovers:
                 break
 
-            # Remove Nones
-            new_crossovers = [x for x in new_crossovers if x is not None]
+    # Save new_crossover_smiles_list
+    _save_ligand_list(
+        params["output_directory"],
+        generation_num,
+        new_crossover_smiles_list,
+        "Chosen_Crossovers",
+    )
 
-            # Append those which passed the filter
-            for i in new_crossovers:
-                new_crossover_smiles_list.append(i)
-                if len(new_crossover_smiles_list) == num_crossovers:
-                    break
-
-        # Save new_crossover_smiles_list
-        _save_ligand_list(
-            params["output_directory"],
-            generation_num,
+    if (
+        new_crossover_smiles_list is None
+        or len(new_crossover_smiles_list) < num_crossovers
+    ):
+        _throw_error_not_enough_compounds_made(
+            num_crossovers,
+            " ligands through Crossover",
             new_crossover_smiles_list,
-            "Chosen_Crossovers",
+            "Crossover failed to make enough new ligands.",
         )
-
-        if (
-            new_crossover_smiles_list is None
-            or len(new_crossover_smiles_list) < num_crossovers
-        ):
-            _throw_error_not_enough_compounds_made(
-                num_crossovers,
-                " ligands through Crossover",
-                new_crossover_smiles_list,
-                "Crossover failed to make enough new ligands.",
-            )
-        # print("FINISHED MAKING CROSSOVERS")
-        log_info(f"Created {len(new_crossover_smiles_list)} crossover compounds")
+    # print("FINISHED MAKING CROSSOVERS")
 
     return new_crossover_smiles_list
 

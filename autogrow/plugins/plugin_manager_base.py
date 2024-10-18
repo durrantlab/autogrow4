@@ -5,9 +5,8 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Type, TYPE_CHECKING
 from autogrow.config.argparser import register_argparse_group
 from autogrow.plugins.plugin_base import PluginBase
-import pickle as pkl
 
-from autogrow.utils.caching import load_from_cache, save_to_cache
+from autogrow.utils.caching import CacheManager
 
 if TYPE_CHECKING:
     from autogrow.plugins.plugin_managers import PluginManagers
@@ -124,19 +123,28 @@ class PluginManagerBase(ABC):
         # Selects which plugin(s) to run and runs them. If cache_dir is provided
         # (same as gen_dir), attempts to use caching.
 
-        if cache_dir is not None:
-            cached_data = load_from_cache(self.name, cache_dir)
-            if cached_data is not None:
-                # Cached data exists. Use that instead.
-                return cached_data
-        
-        resp = self.execute(**kwargs)
+        # NOTE: If your plugin runs only once per generation, you should cache
+        # it using the cache_dir parameter. If your plugin runs multiple times
+        # per generation (e.g., the mutation or crossover plugins), you should
+        # cache it manually (not via plugin_manager).
 
-        # Save to cache
         if cache_dir is not None:
-            save_to_cache(self.name, cache_dir, resp)
-        
-        return resp
+            # Using the cache system
+            with CacheManager(self.name, cache_dir) as cache:
+                if cache.exists:
+                    # Cached data exists. Use that instead.
+                    return cache.data
+                
+                # No cached data, so need to generate
+                resp = self.execute(**kwargs)
+
+                # Save to cache
+                cache.data = resp
+
+                return resp
+            
+        # No cache system
+        return self.execute(**kwargs)
 
     @abstractmethod
     def execute(self, **kwargs) -> Any:
