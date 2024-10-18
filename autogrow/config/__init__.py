@@ -1,74 +1,20 @@
 import contextlib
-import os
-import datetime
-import sys
-import json
-from typing import Any, Dict, Tuple
+from typing import Any, Dict
 
 from autogrow.config.config_filters import setup_filters
 from autogrow.config.config_multiprocessing import config_multiprocessing
 from autogrow.config.config_paths import config_paths
 from autogrow.config.config_run_directory import set_run_directory
 from autogrow.config.defaults import define_defaults
-from autogrow.config.json_config_utils import (
-    convert_json_params_from_unicode,
-    save_vars_as_json,
-)
-from autogrow.validation import validate_all
 
 
-def load_commandline_parameters(argv: Dict[str, Any]) -> Tuple[Dict[str, Any], str]:
-    """
-    Load in the command-line parameters
 
-    Inputs:
-    :param dict argv: Dictionary of User specified variables
-
-    Returns:
-    :returns: dict params: Dictionary of User variables
-    :returns: str printout: a string to be printed to screen and saved to output file
-    """
-
-    printout = ""
-
-    # printout = f"(RE)STARTING AUTOGROW 4.0: {str(datetime.datetime.now())}"
-    # printout += program_info()
-    # printout += "\nUse the -h tag to get detailed help regarding program usage.\n"
-    # print(printout)
-    # sys.stdout.flush()
-
-    # output the paramters used
-    printout += "\nPARAMETERS" + "\n"
-    printout += " ========== " + "\n"
-
-    # Load the parameters from the json
-    if "json" in argv:
-        json_vars = json.load(open(argv["json"]))
-        json_vars = convert_json_params_from_unicode(json_vars)
-        cli_vars = _setup_params(json_vars, False)
-    else:
-        cli_vars = _setup_params(argv, True)
-
-    printout = validate_all(cli_vars, printout)
-
-    # Save variables in vars dict to a .json file for later usage and reference
-    # It saves the file to the output_directory + "vars.json"
-    # -If AutoGrow has been run multiple times for the same directory it
-    # will save the new vars file as append a number to the file name
-    # starting with 2. The util scripts will only look at the original "vars.json"
-    #     ie) output_directory + "vars_2.json"
-    save_vars_as_json(cli_vars)
-
-    return cli_vars, printout
-
-
-def _setup_params(orig_params: Dict[str, Any], is_argparsed: bool) -> Dict[str, Any]:
+def setup_params(orig_params: Dict[str, Any]) -> Dict[str, Any]:
     """
     Set up parameters, correct types, and set defaults.
 
     Inputs:
     :param orig_params: Dictionary of original parameters.
-    :param is_argparsed: Boolean indicating if parameters were parsed via argparse.
 
     Returns:
     :returns: corrected_params: Dictionary of corrected parameters.
@@ -162,6 +108,7 @@ def _correct_param_to_default_types(
                 except Exception:
                     _wrong_type_error(key, params, default_params_for_ref)
             else:
+                import pdb; pdb.set_trace()
                 _wrong_type_error(key, params, default_params_for_ref)
         elif type(default_params_for_ref[key]) == bool:
             if params[key] is None:

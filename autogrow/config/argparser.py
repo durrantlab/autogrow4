@@ -1,7 +1,13 @@
 import argparse
 import copy
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Type
+import json
+from typing import Any, Dict, List, Optional, Tuple, Type
+
+from autogrow.config import setup_params
+from autogrow.config.json_config_utils import convert_json_params_from_unicode, save_vars_as_json
+from autogrow.utils.logging import log_warning
+from autogrow.validation import validate_all
 
 parser = argparse.ArgumentParser(
     description="AutoGrow: An automated drug optimization and generation tool."
@@ -24,7 +30,7 @@ def register_argparse_group(title: str, arg_vars: List[ArgumentVars]):
     plugin_arg_groups_to_add.append((title, arg_vars))
 
 
-def get_argparse_vars() -> Dict[str, Any]:
+def get_user_params() -> Dict[str, Any]:
     global parser
     global plugin_arg_groups_to_add
 
@@ -121,15 +127,39 @@ def get_argparse_vars() -> Dict[str, Any]:
 
     args_dict = vars(parser.parse_args())
 
-    # copying args_dict so we can delete out of while iterating through the
-    # original args_dict
-    inputs = copy.deepcopy(args_dict)
+    if "json" in args_dict and args_dict["json"] is not None:
+        # If there's a --json parameter, load all parameters from that file,
+        # ignoring the command line.
+        new_args_dict = json.load(open(args_dict["json"]))
+        new_args_dict = convert_json_params_from_unicode(new_args_dict)
+        print("WARNING: Loaded parameters from JSON file. Ignoring other parameters specified at the command line.")
+    else:
+        # No --json, so process using command line
 
-    for k, v in args_dict.items():
-        if v is None:
-            del inputs[k]
+        # copying args_dict so we can delete out of while iterating through the
+        # original args_dict
+        new_args_dict = copy.deepcopy(args_dict)
+    
+    # Remove any None values from the dictionary
+    new_args_dict = {k: v for k, v in new_args_dict.items() if v is not None}
 
-    return inputs
+    new_args_dict = setup_params(new_args_dict)
+
+    validate_all(new_args_dict)
+
+
+    # Save variables in vars dict to a .json file for later usage and reference
+    # It saves the file to the output_directory + "vars.json"
+    # -If AutoGrow has been run multiple times for the same directory it
+    # will save the new vars file as append a number to the file name
+    # starting with 2. The util scripts will only look at the original "vars.json"
+    #     ie) output_directory + "vars_2.json"
+    save_vars_as_json(new_args_dict)
+
+    # output the paramters used
+    # new_args_dict, printout = load_commandline_parameters(new_args_dict)
+
+    return new_args_dict
 
 
 def _add_general_params(parser: argparse._ArgumentGroup):

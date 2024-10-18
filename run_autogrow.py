@@ -13,75 +13,14 @@ for de novo drug design and lead optimization. J Cheminform 12, 25 (2020).
 
 
 import __future__
-import logging
-import multiprocessing
-import datetime
-import sys
-from autogrow.config.argparser import get_argparse_vars
-from autogrow import program_info
-import autogrow.autogrow_main_execute as AutogrowMainExecute
-from autogrow.config import load_commandline_parameters
-from autogrow.plugins.plugin_managers import setup_plugin_managers
-from autogrow.utils.logging import LogLevel, create_logger, log_info
+from autogrow.config.argparser import get_user_params  # TODO: It is strange that this is in argparser. Good to clean up user_params.py and move it there.
+import autogrow.main as AutogrowMainExecute
 
 
 ################
 # Run AutoGrow #
 ################
 
-
-def main():
-    create_logger(logging.DEBUG)
-
-    args_dict = get_argparse_vars()
-
-    # Setup all plugin managers
-    setup_plugin_managers(args_dict)
-
-    _run_autogrow_with_params(args_dict)
-
-
-# TODO: Rename this here and in `main`
-def _run_autogrow_with_params(args_dict):
-    start_time = str(datetime.datetime.now())
-    # load the commandline parameters
-
-    printout = f"\n(RE)STARTING AUTOGROW 4.0: {str(datetime.datetime.now())}\n"
-
-    printout += program_info()
-
-    printout += "\nUse the -h tag to get detailed help regarding program usage.\n"
-    print(printout)
-    sys.stdout.flush()
-
-    # output the paramters used
-    params, printout = load_commandline_parameters(args_dict)
-
-    # print out the UserVars for the record
-    # print("\n=====================================================")
-    # print("==============   Parameters as list:  ===============")
-    log_info("Parameters")
-    with LogLevel():
-        for key in list(params.keys()):
-            log_info(f"{key}: {str(params[key])}")
-
-    # print("\n=====================================================")
-    # print("===========   Parameters as dictionary:  ============")
-    # print(params)
-    # print("=====================================================")
-    # print("=====================================================\n\n")
-
-    AutogrowMainExecute.main_execute(params)
-
-    # Print completion message
-
-    printout = f"\nAutoGrow4 run started at:   {start_time}\nAutoGrow4 "
-    printout = f"{printout}run completed at: {str(datetime.datetime.now())}\n"
-    print(printout)
-
-    print("AUTOGROW FINISHED")
-
-
 if __name__ == "__main__":
-    multiprocessing.freeze_support()
-    main()
+    params = get_user_params()
+    AutogrowMainExecute.main(params)
