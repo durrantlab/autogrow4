@@ -23,7 +23,6 @@ python run_autogrow.py \
     --number_of_processors -1 \
     --scoring_choice VINA \
     --LipinskiLenientFilter \
-    --start_a_new_run \
     --FragmentAddition \
     --rxn_library_path ./autogrow/plugins/mutation/reaction_libraries/all_rxns \
     --VinaLikeDocking \

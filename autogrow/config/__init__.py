@@ -87,7 +87,7 @@ def _setup_params(orig_params: Dict[str, Any], is_argparsed: bool) -> Dict[str, 
     # directory if necessary. return the Run folder path The run folder path
     # will be where we place our generations and output files
     orig_params["output_directory"] = set_run_directory(
-        orig_params["root_output_folder"], orig_params["start_a_new_run"]
+        orig_params["root_output_folder"]
     )
     corrected_params = _correct_param_to_default_types(orig_params, default_params)
 

@@ -480,7 +480,6 @@ def define_defaults() -> Dict[str, Any]:
     params["obabel_path"] = "obabel"
 
     # Crossover function
-    params["start_a_new_run"] = False
     params["max_time_mcs_prescreen"] = 1
     params["max_time_mcs_thorough"] = 1
     params["min_atom_match_mcs"] = 4
@@ -792,7 +791,7 @@ def load_in_commandline_parameters(argv: Dict[str, Any]) -> Tuple[Dict[str, Any]
     # Make new run directory if necessary. return the Run folder path
     # The run folder path will be where we place our generations and output files
     params["output_directory"] = set_run_directory(
-        params["root_output_folder"], params["start_a_new_run"]
+        params["root_output_folder"]
     )
 
     # Save variables in params dict to a .json file for later usage and reference

@@ -186,14 +186,6 @@ def _add_io_params(parser: argparse._ArgumentGroup):
         help="PATH to the file containing the source compounds. It must be \
         tab-delineated .smi file. These ligands will seed the first generation.",
     )
-    parser.add_argument(
-        "--start_a_new_run",
-        action="store_true",
-        default=False,
-        help="If False make a new folder and start a fresh simulation with Generation 0.  \
-        If True find the last generation in the root_output_folder and continue to fill.\
-        Default is False.",
-    )
 
 
 def _add_receptor_params(parser: argparse._ArgumentGroup):

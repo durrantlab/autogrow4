@@ -18,7 +18,6 @@ def define_defaults() -> Dict[str, Any]:
     default_params["obabel_path"] = "obabel"
 
     # Crossover function
-    default_params["start_a_new_run"] = False
     default_params["max_time_mcs_prescreen"] = 1
     default_params["max_time_mcs_thorough"] = 1
     default_params["min_atom_match_mcs"] = 4
