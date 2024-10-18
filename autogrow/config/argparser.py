@@ -172,16 +172,6 @@ def _add_general_params(parser: argparse._ArgumentGroup):
         Overrides other arguments.",
     )
 
-    # Allows the run in debug mode. Doesn't delete temp files.
-    parser.add_argument(
-        "--debug_mode",
-        "-d",
-        action="store_true",
-        default=False,
-        help="Run Autogrow in Debug mode. This keeps all \
-        temporary files and adds extra print statements.",
-    )
-
     # processors and multithread mode
     parser.add_argument(
         "--number_of_processors",
