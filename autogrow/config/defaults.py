@@ -67,7 +67,6 @@ def define_defaults() -> Dict[str, Any]:
     # default_params["vina_like_executable"] = None
     # default_params["docking_exhaustiveness"] = None
     # default_params["docking_num_modes"] = None
-    # default_params["docking_timeout_limit"] = 120
 
     # scoring
     default_params["scoring_choice"] = "VINA"

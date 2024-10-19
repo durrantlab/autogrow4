@@ -180,8 +180,8 @@ def run_rescoring(
     # print fails which made it through the try statement but failed to
     # produce an output file.
     if failed_to_rescore:
-        _extracted_from_run_rescoring_42(
-            "The following files failed to be rescored: ", failed_to_rescore
+        print(
+            "The following files failed to be rescored: \n", failed_to_rescore, "\n\n"
         )
     else:
         print("All rescoring attempts were successful")
@@ -192,15 +192,9 @@ def run_rescoring(
         )
         raise Exception(printout)
 
-    _extracted_from_run_rescoring_42("Finished rescoring", "######################")
+    print("Finished rescoring\n######################\n\n")
     return completed_rescore
 
-
-# TODO: Rename this here and in `run_rescoring`
-def _extracted_from_run_rescoring_42(arg0: Any, arg1: Any) -> None:
-    print(arg0)
-    print(arg1)
-    print("")
 
 
 def rescore_single_file(

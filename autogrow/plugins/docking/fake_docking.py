@@ -77,20 +77,7 @@ class FakeDocking(DockingBase):
                 #         default=9,
                 #         help=" maximum number of binding modes to generate in docking. \
                 #         See docking software for settings. ",
-                #     ),
-                #     ArgumentVars(
-                #         name="docking_timeout_limit",
-                #         type=float,
-                #         default=120,
-                #         help="The maximum amount of time allowed to dock a single ligand into a \
-                #         pocket in seconds. Many factors influence the time required to dock, such as: \
-                #         processor speed, the docking software, rotatable bonds, exhaustiveness docking,\
-                #         and number of docking modes... \
-                #         The default docking_timeout_limit is 120 seconds, which is excess for most \
-                #         docking events using QuickVina2Docking under default settings. If run with \
-                #         more exhaustive settings or with highly flexible ligands, consider increasing \
-                #         docking_timeout_limit to accommodate. Default docking_timeout_limit is 120 seconds",
-                #     ),
+                #     )
             ],
         )
 

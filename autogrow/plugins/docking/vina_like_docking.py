@@ -80,19 +80,6 @@ class VinaLikeDocking(DockingBase):
                     help=" maximum number of binding modes to generate in docking. \
                     See docking software for settings. ",
                 ),
-                ArgumentVars(
-                    name="docking_timeout_limit",
-                    type=float,
-                    default=120,
-                    help="The maximum amount of time allowed to dock a single ligand into a \
-                    pocket in seconds. Many factors influence the time required to dock, such as: \
-                    processor speed, the docking software, rotatable bonds, exhaustiveness docking,\
-                    and number of docking modes... \
-                    The default docking_timeout_limit is 120 seconds, which is excess for most \
-                    docking events using QuickVina2Docking under default settings. If run with \
-                    more exhaustive settings or with highly flexible ligands, consider increasing \
-                    docking_timeout_limit to accommodate. Default docking_timeout_limit is 120 seconds",
-                ),
             ],
         )
 
@@ -235,14 +222,9 @@ class VinaLikeDocking(DockingBase):
         """
         params = self.params
 
-        timeout_option = params["timeout_vs_gtimeout"]
-        docking_timeout_limit = params["docking_timeout_limit"]
-        # do the docking of the ligand Run with a timeout_option limit.
-        # Default setting is 5 minutes. This is excessive as most things run
-        # within 30seconds This will prevent stalling out. timeout or gtimeout
         receptor_pdbqt_file = f'{params["receptor_path"]}qt'
         torun = (
-            f'{timeout_option} {docking_timeout_limit} {params["vina_like_executable"]} '
+            f'{params["vina_like_executable"]} '
             f'--center_x {params["center_x"]} --center_y {params["center_y"]} --center_z {params["center_z"]} '
             f'--size_x {params["size_x"]} --size_y {params["size_y"]} --size_z {params["size_z"]} '
             f"--receptor {receptor_pdbqt_file} "
