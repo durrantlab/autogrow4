@@ -429,12 +429,6 @@ def _do_crossovers_smiles_merge(
     counter = 0
     while counter < 3:
         # run SmilesMerge
-        # ligand_new_smiles = smiles_merge.run_main_smiles_merge(
-        #     params, ligand_1_string, ligand_2_string
-        # )
-
-        # TODO: Need to put all input into the plugin. Don't do
-        # one-by-one here. Then you can make it cachable.
         ligand_new_smiles = crossover_manager.run(
             lig_string_1=ligand_1_string, lig_string_2=ligand_2_string
         )
@@ -443,10 +437,6 @@ def _do_crossovers_smiles_merge(
             counter += 1
         else:
             # Filter Here
-            # pass_or_not = Filter.run_filter_on_just_smiles(
-            #     ligand_new_smiles, params["filter_object_dict"]
-            # )
-
             pass_or_not = (
                 len(plugin_managers.SmilesFilter.run(smiles=ligand_new_smiles)) > 0
             )

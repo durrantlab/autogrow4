@@ -40,7 +40,8 @@ class ShellParallelizerBase(PluginBase):
             all available).
 
         Returns:
-        :returns: ??? TODO:
+        :returns: List[ShellCmdResult]: A list of ShellCmdResult objects, each
+            containing the command, return code, and output.
         """
         pass
 
@@ -73,7 +74,8 @@ class ShellParallelizerPluginManager(PluginManagerBase):
         :param dict kwargs: a dictionary of arguments to pass to the plugin
 
         Returns:
-        :returns: ???? TODO:
+        :returns: List[ShellCmdResult]: A list of ShellCmdResult objects, each
+            containing the command, return code, and output.
         """
 
         shell_parallelizers = self.get_selected_plugins_from_params()

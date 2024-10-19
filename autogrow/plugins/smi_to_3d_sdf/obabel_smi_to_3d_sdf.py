@@ -19,13 +19,13 @@ class ObabelSmiTo3DSDF(SmiTo3DSdfBase):
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
         """Add command-line arguments required by the plugin."""
         return (
-            "SMILES-to-3D-SDF Convertor",
+            "SMILES-to-3D-SDF Converter",
             [
                 ArgumentVars(
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="",  # TODO: Add this.
+                    help="Convert SMILES to 3D SDF using obabel."
                 )
             ],
         )
@@ -37,11 +37,11 @@ class ObabelSmiTo3DSDF(SmiTo3DSdfBase):
                 "You must provide the path to obabel via the --obabel_path parameter."
             )
 
-    def run_smi_to_3d_sdf_convertor(
+    def run_smi_to_3d_sdf_converter(
         self, predock_cmpds: List[PreDockedCompound], pwd: str
     ) -> List[PreDockedCompound]:
         """
-        run_smi_to_sdf_convertor is needs to be implemented in each class.
+        run_smi_to_sdf_converter is needs to be implemented in each class.
 
         Inputs:
         :param str predock_cmpds: A list of PreDockedCompound objects. Each

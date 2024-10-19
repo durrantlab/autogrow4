@@ -26,6 +26,7 @@ class CacheManager:
     def _save_to_cache(self) -> None:
         if not self.exists and self.data is not None:
             cache_filename = self._get_cache_filename()
+            # TODO: What if dir of cache_filename doesn't exist? Happened once. 
             with open(cache_filename, "wb") as f:
                 pkl.dump(self.data, f)
             log_debug(f"Saved {self.label} results to cache: {cache_filename}")

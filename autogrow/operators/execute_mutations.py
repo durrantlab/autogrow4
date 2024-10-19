@@ -97,8 +97,6 @@ def make_mutants(
                     (smile, mutation_plugin_manager) for smile in smile_inputs
                 )
 
-                # TODO: Need to put all input into the plugin. Don't do
-                # one-by-one here. Then you can make it cachable.
                 results = params["parallelizer"].run(
                     job_input, _run_smiles_click_for_multithread
                 )

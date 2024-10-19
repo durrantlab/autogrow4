@@ -67,24 +67,14 @@ class SmilesFilterPluginManager(PluginManagerBase):
         :returns: bool: True if the molecule passes the filter, False if it fails
         """
 
-        if "smiles" in kwargs:
-            # Make sure it is a list of strings
-            assert isinstance(kwargs["smiles"], str), "smiles must be a list of strings"
-            assert isinstance(
-                kwargs["smiles"][0], str
-            ), "smiles must be a list of strings"
+        # Make sure it is a list of strings
+        assert isinstance(kwargs["smiles"], str), "smiles must be a list of strings"
+        assert isinstance(
+            kwargs["smiles"][0], str
+        ), "smiles must be a list of strings"
 
-            # Run filter on a single smiles string.
-            return self._run_filter_on_just_smiles(kwargs["smiles"])
-        elif "predocked_compounds" in kwargs:
-            # Run filter on a list of smiles strings.
-            return self._run_filter_on_predocked_compounds(
-                kwargs["predocked_compounds"]
-            )
-        else:
-            raise ValueError(
-                "No smiles strings or predocked compounds provided to filter!"
-            )
+        # Run filter on a single smiles string.
+        return self._run_filter_on_just_smiles(kwargs["smiles"])
 
     def _run_filter_on_predocked_compounds(
         self, list_of_new_ligands: List[PreDockedCompound]
@@ -105,11 +95,9 @@ class SmilesFilterPluginManager(PluginManagerBase):
             which passed the filter. Excludes all molecules which failed.
         """
 
-        # make a list of tuples for multi-processing Filter
-        job_input = []
-        for smiles_info in list_of_new_ligands:
-            # TODO: I don't thiknk you need to wrap this in a tuple.
-            job_input.append((smiles_info,))
+        import pdb
+        pdb.set_trace()
+        job_input = list(list_of_new_ligands)
         job_input = tuple(job_input)
 
         results = self.params["parallelizer"].run(job_input, self._run_filters_mol)

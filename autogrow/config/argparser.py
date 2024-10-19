@@ -34,9 +34,6 @@ def get_user_params() -> Dict[str, Any]:
     global parser
     global plugin_arg_groups_to_add
 
-    # TODO: These settings grouped by ChatGPT. Good to review and regroup in
-    # some places.
-
     # General Settings
     general = parser.add_argument_group(
         "General Settings (basic configuration for the program)"
@@ -84,8 +81,8 @@ def get_user_params() -> Dict[str, Any]:
     _add_scoring_params(scoring)
 
     # Gypsum Settings
-    gypsum = parser.add_argument_group("Gypsum Settings (options for Gypsum-DL)")
-    _add_gypsum_params(gypsum)
+    # gypsum = parser.add_argument_group("Gypsum Settings (options for Gypsum-DL)")
+    # _add_gypsum_params(gypsum)
 
     # Miscellaneous
     misc = parser.add_argument_group("Miscellaneous (other settings)")
@@ -334,26 +331,6 @@ def _add_ga_subsequent_gen_params(parser: argparse._ArgumentGroup):
 
 
 def _add_ga_params(parser: argparse._ArgumentGroup):
-    # Genetic Algorithm Options
-    # parser.add_argument( TODO: Add description to plugins
-    #     "--selector_choice",
-    #     choices=["Roulette_Selector", "Rank_Selector", "Tournament_Selector"],
-    #     default="Roulette_Selector",
-    #     help="This determines whether the fitness criteria are chosen by a Weighted Roulette, \
-    #     Ranked, or Tournament style Selector. The Rank option is a non-redundant selector.\
-    #     Roulette and Tournament chose without replacement and are stoichastic options. \
-    #     Warning do not use Rank_Selector for small runs as there is potential that \
-    #     the number of desired ligands exceed the number of ligands to chose from.",
-    # )
-    # parser.add_argument(
-    #     "--tourn_size",
-    #     type=float,
-    #     default=0.1,
-    #     help="If using the Tournament_Selector this determines the size of each \
-    #     tournament. The number of ligands used for each tournament will the \
-    #     tourn_size * the number of considered ligands.",
-    # )
-
     # Populations settings
     parser.add_argument(
         "--num_generations",

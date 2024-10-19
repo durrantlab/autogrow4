@@ -28,7 +28,7 @@ class MergeMCS(CrossoverBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Run the Fragment Addition Mutation plugin. Creates new molecules by adding fragments to existing molecules, per user-specified reaction libraries.",
+                    help="Run the Maximum Common Substructure Crossover plugin. Creates new molecules by merging two existing molecules.",
                 ),
                 ArgumentVars(
                     name="max_time_mcs_prescreen",

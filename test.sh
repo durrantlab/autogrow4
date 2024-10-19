@@ -27,7 +27,6 @@ python run_autogrow.py \
     --rxn_library_path ./autogrow/plugins/mutation/reaction_libraries/all_rxns \
     --VinaLikeDocking \
     --docking_exhaustiveness 1 \
-    --max_variants_per_compound 5 \
     --redock_elite_from_previous_gen False \
     --generate_plot True \
     --RankSelector \

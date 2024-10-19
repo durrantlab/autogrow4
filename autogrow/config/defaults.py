@@ -1,5 +1,4 @@
 from typing import Any, Dict, Union
-from autogrow.utils.shellcmds import determine_bash_timeout_vs_gtimeout
 import os
 
 
@@ -84,15 +83,5 @@ def define_defaults() -> Dict[str, Any]:
 
     # Other vars
     default_params["generate_plot"] = True
-    # Check Bash Timeout function (There's a difference between MacOS and linux)
-    # Linux uses timeout while MacOS uses gtimeout
-    timeout_option = determine_bash_timeout_vs_gtimeout()
-    if timeout_option in ["timeout", "gtimeout"]:
-        default_params["timeout_vs_gtimeout"] = timeout_option
-    else:
-        raise Exception(
-            "Something is very wrong. This OS may not be supported by \
-             Autogrow or you may need to execute through Bash."
-        )
 
     return default_params

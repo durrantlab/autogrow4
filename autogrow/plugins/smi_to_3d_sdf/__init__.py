@@ -20,14 +20,14 @@ class SmiTo3DSdfBase(PluginBase):
         pwd = kwargs["pwd"]
         if pwd[-1] != os.sep:
             pwd += os.sep
-        return self.run_smi_to_3d_sdf_convertor(kwargs["predock_cmpds"], pwd)
+        return self.run_smi_to_3d_sdf_converter(kwargs["predock_cmpds"], pwd)
 
     @abstractmethod
-    def run_smi_to_3d_sdf_convertor(
+    def run_smi_to_3d_sdf_converter(
         self, predock_cmpds: List[PreDockedCompound], pwd: str
     ) -> List[PreDockedCompound]:
         """
-        run_smi_to_sdf_convertor is needs to be implemented in each class.
+        run_smi_to_sdf_converter is needs to be implemented in each class.
 
         Inputs:
         :param str predock_cmpds: A list of PreDockedCompound objects. Each
@@ -54,20 +54,20 @@ class SmiTo3DSdfPluginManager(PluginManagerBase):
         :param dict kwargs: a dictionary of arguments to pass to the plugin
         """
 
-        smi_to_sdf_convertors = self.get_selected_plugins_from_params()
+        smi_to_sdf_converters = self.get_selected_plugins_from_params()
 
-        if smi_to_sdf_convertors is None or len(smi_to_sdf_convertors) == 0:
+        if smi_to_sdf_converters is None or len(smi_to_sdf_converters) == 0:
             raise Exception(
-                f"You must specify an smi-to-3d-sdf convertor! Choose from {str(self.plugins.keys())}"
+                f"You must specify an smi-to-3d-sdf Converter! Choose from {str(self.plugins.keys())}"
             )
-        if len(smi_to_sdf_convertors) > 1:
+        if len(smi_to_sdf_converters) > 1:
             raise Exception(
-                f"Only one smi-to-3d-sdf convertor can be selected at a time! You selected {smi_to_sdf_convertors}"
+                f"Only one smi-to-3d-sdf Converter can be selected at a time! You selected {smi_to_sdf_converters}"
             )
 
         # Get the selector plugin to use
-        smi_to_sdf_convertor = cast(
-            SmiTo3DSdfBase, self.plugins[smi_to_sdf_convertors[0]]
+        smi_to_sdf_converter = cast(
+            SmiTo3DSdfBase, self.plugins[smi_to_sdf_converters[0]]
         )
 
         # if not glob.glob(kwargs["smi_file"] + "*.sdf"):
@@ -75,4 +75,4 @@ class SmiTo3DSdfPluginManager(PluginManagerBase):
         #         f"Could not find 3D SDF files associated with input file {kwargs['smi_file']}. Conversion error?"
         #     )
 
-        return smi_to_sdf_convertor.run(**kwargs)
+        return smi_to_sdf_converter.run(**kwargs)
