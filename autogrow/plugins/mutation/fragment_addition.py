@@ -23,7 +23,6 @@ rdkit.RDLogger.DisableLog("rdApp.*")
 class FragmentAddition(MutationBase):
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
         """Add command-line arguments required by the plugin."""
-
         built_in_libs = glob.glob(
             os.path.join(os.path.dirname(__file__), "reaction_libraries") + "/*"
         )
@@ -59,7 +58,6 @@ class FragmentAddition(MutationBase):
 
     def validate(self, params: dict):
         """Validate the provided arguments."""
-
         if "rxn_library_path" not in params:
             raise ValueError("rxn_library_path must be provided.")
 
@@ -136,7 +134,6 @@ class FragmentAddition(MutationBase):
         """
         Load the reaction data, if it hasn't been previously loaded.
         """
-
         rxn_library_path = self.params["rxn_library_path"]
 
         if not hasattr(self, "reaction_dict"):
@@ -257,7 +254,6 @@ class FragmentAddition(MutationBase):
             reactions for ClickChemistry and all the information required to run
             the reaction
         """
-
         return self._load_reformatted_rxn_dict(
             rxn_library_path,
             "rxn_library.json",
@@ -297,7 +293,6 @@ class FragmentAddition(MutationBase):
         :returns: dict functional_group_dict: A dictionary containing all
             SMARTS for identifying the functional groups for ClickChemistry
         """
-
         return self._load_reformatted_rxn_dict(
             rxn_library_path,
             "functional_groups.json",
@@ -334,7 +329,6 @@ class FragmentAddition(MutationBase):
         Returns:
         :returns: dict complementary_mols_dict: a dictionary of complementary molecules
         """
-
         complementary_mols = os.path.join(rxn_library_path, "complementary_mols")
 
         # script_dir = os.path.dirname(os.path.realpath(__file__))

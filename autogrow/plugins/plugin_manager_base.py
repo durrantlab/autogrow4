@@ -134,7 +134,7 @@ class PluginManagerBase(ABC):
                 if cache.exists:
                     # Cached data exists. Use that instead.
                     return cache.data
-                
+
                 # No cached data, so need to generate
                 resp = self.execute(**kwargs)
 
@@ -142,7 +142,7 @@ class PluginManagerBase(ABC):
                 cache.data = resp
 
                 return resp
-            
+
         # No cache system
         return self.execute(**kwargs)
 
@@ -151,7 +151,6 @@ class PluginManagerBase(ABC):
         # Selects which plugin(s) to run and runs them. Defiend on child
         # classes.
         pass
-
 
     # @abstractmethod
     # def load_from_cache(self, gen_dir: str) -> Optional[Any]:

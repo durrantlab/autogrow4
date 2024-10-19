@@ -3,7 +3,6 @@ def validate_dependencies() -> None:
     This function will try to import all the installed dependencies that will be
     used in Autogrow. If it fails to import it will raise an ImportError
     """
-
     try:
         import rdkit  # type: ignore
         from rdkit import Chem  # type: ignore

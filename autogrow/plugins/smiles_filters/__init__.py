@@ -66,12 +66,9 @@ class SmilesFilterPluginManager(PluginManagerBase):
         Returns:
         :returns: bool: True if the molecule passes the filter, False if it fails
         """
-
         # Make sure it is a list of strings
         assert isinstance(kwargs["smiles"], str), "smiles must be a list of strings"
-        assert isinstance(
-            kwargs["smiles"][0], str
-        ), "smiles must be a list of strings"
+        assert isinstance(kwargs["smiles"][0], str), "smiles must be a list of strings"
 
         # Run filter on a single smiles string.
         return self._run_filter_on_just_smiles(kwargs["smiles"])
@@ -92,7 +89,6 @@ class SmilesFilterPluginManager(PluginManagerBase):
         :returns: str smile_string: smile_string if it passed the filter. returns
             False If the mol fails a filter.
         """
-
         passed_smiles: List[str] = []
         for smi in smiles:
             mol = Chem.MolFromSmiles(smi, sanitize=False)
@@ -128,7 +124,6 @@ class SmilesFilterPluginManager(PluginManagerBase):
         returns bol bol: True if the mol passes all the filters. False if the mol
             fails any filters.
         """
-
         filters_failed = 0
         mol = MOH.check_sanitization(mol)
         if mol is None:

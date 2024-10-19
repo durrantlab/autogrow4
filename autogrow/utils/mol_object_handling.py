@@ -156,7 +156,6 @@ def try_reprotanation(sanitized_deprotanated_mol):
     :returns: rdkit.Chem.rdchem.Mol mol_sanitized: an rdkit molecule with H's added and sanitized.
                                             it returns None if H's can't be added or if sanitation fails
     """
-
     if sanitized_deprotanated_mol is not None:
         try:
             mol = Chem.AddHs(sanitized_deprotanated_mol)
@@ -184,7 +183,6 @@ def remove_atoms(mol, list_of_idx_to_remove):
     :returns: rdkit.Chem.rdchem.Mol new_mol: the rdkit mol as input but with
                                             the atoms from the list removed
     """
-
     if mol is None:
         return None
 

@@ -16,7 +16,6 @@ approach in designing combinatorial or medicinal chemistry libraries for drug
 discovery. 1. A qualitative and quantitative characterization of known drug
 databases Journal of Combinatorial Chemistry, 1 (1999), pp. 55-68
 """
-
 import __future__
 
 import copy

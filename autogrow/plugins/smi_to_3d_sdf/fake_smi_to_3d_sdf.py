@@ -48,7 +48,6 @@ class FakeSmiTo3DSDF(SmiTo3DSdfBase):
         :returns: List[PreDockedCompound]: A list of PreDockedCompound,
             the same as the input, but with the sdf_3d_path field filled in.
         """
-
         for cmpd_idx, predock_cmpd in enumerate(predock_cmpds):
             out_file = f"{pwd}compound{cmpd_idx}.sdf"
             predock_cmpd.sdf_3d_path = out_file

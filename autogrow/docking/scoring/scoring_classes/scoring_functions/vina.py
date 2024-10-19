@@ -37,7 +37,6 @@ class VINA(ParentScoring):
         :param bool test_boot: used to initialize class without objects for
             testing purpose
         """
-
         if not test_boot:
             self.params = params
 
@@ -60,7 +59,6 @@ class VINA(ParentScoring):
         :returns: list list_of_files: list of all files to be scored within
             the dir
         """
-
         self.file_path = file_path
         return glob.glob(f"{file_path}*.pdbqt.vina")
 
@@ -76,7 +74,6 @@ class VINA(ParentScoring):
         :returns: str "Not Applicable": Because this doesn't need to rescore
             the docking results
         """
-
         return "Not Applicable"
 
     def run_scoring(self, file_path: str) -> Optional[PostDockedCompound]:
@@ -94,7 +91,6 @@ class VINA(ParentScoring):
             Score is last index (ie. [lig_id_shortname, any_details,
             fitness_score_to_use] )
         """
-
         return self.get_score_from_a_file(file_path)
 
     def get_score_from_a_file(self, file_path: str) -> Optional[PostDockedCompound]:
@@ -109,7 +105,6 @@ class VINA(ParentScoring):
             self.smiles_dict for a given ligand and the ligands short_id_name and
             the docking score from the best pose.
         """
-
         # grab the index of the ligand for the score
         basefile = os.path.basename(file_path)
         basefile_strip = basefile.replace(".pdbqt.vina", "")
@@ -159,7 +154,6 @@ class VINA(ParentScoring):
             ligand_short_name isn't in the self.smiles_dict which should never
             happen
         """
-
         ligand_short_name, basefile_strip, affinity = lig_info
 
         # Get SMILES String of PDB

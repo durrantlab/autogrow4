@@ -30,7 +30,6 @@ approach simplifies development and allows the same program to run on a laptop
 or a high-performance computer cluster, utilizing the full resources of each
 system. (Description provided by Harrison Green.)
 """
-
 import __future__
 import multiprocessing
 
@@ -114,7 +113,6 @@ class Parallelizer(object):
         Returns:
         :returns: list results: A list containing all the results from the multiprocess
         """
-
         # determine the mode
         if mode is None:
             mode = self.mode
@@ -181,7 +179,6 @@ def MultiThreading(inputs, num_procs, task_name):
         task_class_name (class): The class that governs what to do for each
             job on each processor.
     """
-
     results = []
 
     # If there are no inputs, just return an empty list.
@@ -275,7 +272,6 @@ def start_processes(inputs, num_procs):
     """
     Creates a queue of inputs and outputs
     """
-
     # Create queues
     task_queue = multiprocessing.Queue()
     done_queue = multiprocessing.Queue()

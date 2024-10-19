@@ -77,7 +77,6 @@ class TournamentSelector(SelectorBase):
         :returns: list chosen_ligands: a list of chosen ligands containing all the
             info for each ligand with potential for redundancy
         """
-
         tourn_size: float = self.params["tourn_size"]
 
         if type(usable_smiles) is not type([]):
@@ -153,7 +152,6 @@ class TournamentSelector(SelectorBase):
         :returns: list chosen_option: a list with a single ligand chosen from a
             single tournament
         """
-
         num_ligands = len(list_of_ligands)
 
         chosen_option = PreDockedCompound(smiles="", name="")  # init

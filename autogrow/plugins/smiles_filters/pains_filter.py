@@ -12,7 +12,6 @@ Filters for Removal of Pan Assay Interference Compounds (PAINS) from Screening
 Libraries and for Their Exclusion in Bioassays. J Med Chem 53 (2010) 2719D40.
 doi:10.1021/jm901137j.
 """
-
 import __future__
 from typing import List, Tuple
 from autogrow.config.argparser import ArgumentVars
@@ -45,7 +44,6 @@ class PAINSFilter(SmilesFilterBase):
         """
         This loads in the filters which will be used.
         """
-
         self.filters_list = self.get_filters_list()
 
     def get_filters_list(self) -> List[FilterCatalog.FilterCatalog]:
@@ -56,7 +54,6 @@ class PAINSFilter(SmilesFilterBase):
         :returns: rdkit.Chem.rdfiltercatalog.FilterCatalog filters: A set of
             RDKit Filters
         """
-
         # Make a list of all the different PAINS Filters. PAINS should include
         # PAINS_A,PAINS_B, and PAINS_C, but because RDKit documentation
         # doesn't specify this explicitly we have included all 4 of the PAINS
@@ -96,7 +93,6 @@ class PAINSFilter(SmilesFilterBase):
         :returns: bool bool: True if the mol passes the filter;
             False if it fails the filter
         """
-
         # This is our set of all the PAINS filters
         for filters in self.filters_list:
 

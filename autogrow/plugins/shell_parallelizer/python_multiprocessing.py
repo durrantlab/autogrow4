@@ -11,7 +11,6 @@ from autogrow.utils.logging import log_warning
 class PythonMultiprocessing(ShellParallelizerBase):
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
         """Add command-line arguments required by the plugin."""
-
         return (
             "Python Multiprocessing Shell Parallelizer",
             [

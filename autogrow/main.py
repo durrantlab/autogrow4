@@ -3,7 +3,6 @@ Top level for running AutoGrow.
 Runs all population generation (operations) and docking.
 Runs plotting at end.
 """
-
 import __future__
 
 import datetime
@@ -29,7 +28,6 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
     :param dict params: dict of user variables which will govern how the
         programs runs
     """
-
     start_time = str(datetime.datetime.now())
 
     multiprocessing.freeze_support()
@@ -127,7 +125,6 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
 
     sys.stdout.flush()
 
-
     printout = f"\nAutoGrow4 run started at:   {start_time}\nAutoGrow4 "
     printout = f"{printout}run completed at: {str(datetime.datetime.now())}\n"
     print(printout)
@@ -165,7 +162,6 @@ def determine_current_gen(output_directory: str) -> Optional[int]:
     :returns: int last_gen_number: the int of the last generation number or
         None if no previous generations were completed.
     """
-
     folder_path_gen = f"{output_directory}generation_"
 
     for tries in range(2):
@@ -240,7 +236,6 @@ def find_last_generation(folder_path_string_no_gen: str) -> Optional[int]:
     :returns: int last_gen_number: the int of the last generation number or
         None if no previous runs.
     """
-
     path_exists = True
     i = 1
     while path_exists:
@@ -278,7 +273,6 @@ def determine_if_gen_completed(gen_dir_path: str, gen_number: int) -> bool:
         has a ranked.smi file. Returns False if the gen_dir_path does not have a
         ranked.smi file
     """
-
     ranked_file_name = f"generation_{gen_number}_ranked.smi"
     file_path = f"{gen_dir_path}{os.sep}{ranked_file_name}"
 

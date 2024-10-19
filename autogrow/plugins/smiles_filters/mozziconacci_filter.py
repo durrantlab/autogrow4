@@ -16,7 +16,6 @@ Virtual Screening Applications: Gathering, Structural Analysis and Filtering.
 9th Electronic Computational Chemistry Conference, World Wide Web, March
 (2003).
 """
-
 import __future__
 
 from autogrow.plugins.smiles_filters import SmilesFilterBase
@@ -72,7 +71,6 @@ class MozziconacciFilter(SmilesFilterBase):
         :returns: bool bool: True if the mol passes the filter; False if it
             fails the filter
         """
-
         halogen = Chem.MolFromSmarts("[*;#9,#17,#35,#53,#85]")
         number_of_halogens = len(mol.GetSubstructMatches(halogen, maxMatches=8))
         if number_of_halogens > 7:

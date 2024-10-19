@@ -51,7 +51,6 @@ class RouletteSelector(SelectorBase):
         :returns: list top_choice_smile_order: list of ligands chosen by a random
             weighted selection, without replacement, -weighted by its docking score
         """
-
         if type(usable_smiles) is not type([]):
             raise Exception("usable_smiles Must be a list, wrong data type")
 
@@ -102,7 +101,6 @@ class RouletteSelector(SelectorBase):
         :returns: list adjusted: list of ligand scores which have been weighted
             and adjusted
         """
-
         if score_type == ScoreType.DIVERSITY:
             weight_scores = [
                 x.previous_diversity_score

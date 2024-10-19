@@ -79,7 +79,6 @@ class SelectorBase(PluginBase):
         :returns: list weighted_order_list: a list of all the SMILES with all of
             the associated information in a random order
         """
-
         sorted_list = sorted(
             usable_smiles, key=lambda x: x.get_previous_score(ScoreType.DOCKING)
         )
@@ -111,7 +110,6 @@ class SelectorPluginManager(PluginManagerBase):
         Returns:
         :returns: bool: True if the molecule passes the filter, False if it fails
         """
-
         selectors = self.get_selected_plugins_from_params()
 
         if selectors is None or len(selectors) == 0:

@@ -4,7 +4,6 @@ Module to set up and manage logging.
 It provides functions to create loggers, set logging levels, and manage
 indentation levels for structured logging output.
 """
-
 import logging
 import os
 from typing import List, Optional

@@ -7,8 +7,6 @@ This is a dynamic and modular way of doing these imports.
 Code is taken from:
 https://stackoverflow.com/questions/1057431/how-to-load-all-modules-in-a-folder
 """
-
-
 from os.path import dirname, basename, isfile
 import glob
 

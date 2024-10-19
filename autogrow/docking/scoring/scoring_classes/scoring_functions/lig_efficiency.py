@@ -47,7 +47,6 @@ class LigEfficiency(VINA):
         :param bool test_boot: used to initialize class without objects for
             testing purpose
         """
-
         if not test_boot:
             self.params = params
 
@@ -135,7 +134,6 @@ def score_as_lig_efficiency(
         with each sublist now having the ligand efficiency score appended to the
         end.
     """
-
     if list_of_lig_info is None:
         return None
 

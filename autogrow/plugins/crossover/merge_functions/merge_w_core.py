@@ -50,7 +50,6 @@ def merge_smiles_with_core(
         added R-groups built onto the mcs_mol. returns None if the process fails
         or if a None-type makes it through.
     """
-
     # convert to RWMOL class of molecule which are able to add and remove
     # bonds. RWMOL class is the Read and Write-Mol Class in rdkit.
     rw_core_merg = Chem.RWMol(mcs_mol)
@@ -170,7 +169,6 @@ def make_anchor_to_bonds_and_type_for_frag(
         bound to and the bond type. ie. anchor_to_connection_dict[10007] =
         [1004,Chem.BondType.AROMATIC]
     """
-
     anchor_to_connection_dict = {}
     isos_anchors_idxs_to_remove = []
 
@@ -231,7 +229,6 @@ def make_dict_all_atoms_iso_to_idx_dict(mol: rdkit.Chem.rdchem.Mol) -> Dict[int,
         ie) {1008: 7, 1009: 8, 1003: 4, 1004: 3, 1010: 9, 1006: 5, 1007: 6, 10000:
         0, 10001: 1, 10002: 2, 1005: 10}
     """
-
     mol_iso_to_idx_dict = {}
     for atom in mol.GetAtoms():
         iso = atom.GetIsotope()
@@ -269,7 +266,6 @@ def unpack_lists_of_atoms_and_bond_type(
     :returns: list list_of_bond_types: a list containing the bond types of
         bonds connected to an anchor atom. ie) [rdkit.Chem.rdchem.BondType.SINGLE]
     """
-
     list_of_atom_idx: List[int] = []
     list_of_bond_types = []
     # this if statement determines if there are multiple connections to the
@@ -331,7 +327,6 @@ def remove_all_isolabels(
     :returns: rdkit.Chem.rdchem.RWMol rw_core_merg: the read-write rdkit
         molecule of the child molecule with all the isotope labels removed
     """
-
     # None's often end up in a pipeline use of RDKit so we handle this data
     # type as return None instead of raise TypeError
     if rw_core_merg is None:

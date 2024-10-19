@@ -32,7 +32,6 @@ class DockingBase(PluginBase):
         :returns: List[PostDockedCompound]: A list of PostDockedCompound
             objects, each containing the score and a docked (posed) SDF file.
         """
-
         # raise NotImplementedError("run_dock() not implemented")
         pass
 
@@ -49,7 +48,6 @@ class DockingPluginManager(PluginManagerBase):
         :returns: List[PostDockedCompound]: A list of PostDockedCompound
             objects, each containing the score and a docked (posed) SDF file.
         """
-
         dockings = self.get_selected_plugins_from_params()
 
         if dockings is None or len(dockings) == 0:
@@ -99,7 +97,6 @@ class DockingPluginManager(PluginManagerBase):
         :returns: str output_ranked_smile_file: the path of the output ranked
             .smi file
         """
-
         # TODO: Not the right place for this.
 
         # Get directory string of PDB files for Ligands

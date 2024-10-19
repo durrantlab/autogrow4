@@ -50,7 +50,6 @@ class MutationPluginManager(PluginManagerBase):
         Returns:
         :returns: bool: True if the molecule passes the filter, False if it fails
         """
-
         mutation_names = self.get_selected_plugins_from_params()
 
         if mutation_names is None or len(mutation_names) == 0:

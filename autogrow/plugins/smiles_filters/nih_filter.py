@@ -44,7 +44,6 @@ class NIHFilter(SmilesFilterBase):
         """
         This loads in the filters which will be used.
         """
-
         self.filters = self.get_filters()
 
     def get_filters(self) -> FilterCatalog.FilterCatalog:
@@ -55,7 +54,6 @@ class NIHFilter(SmilesFilterBase):
         :returns: rdkit.Chem.rdfiltercatalog.FilterCatalog filters: A set of
             RDKit Filters
         """
-
         # Make a list of the NIH filter.
         params = FilterCatalogParams()
         params.AddCatalog(FilterCatalogParams.FilterCatalogs.NIH)
@@ -81,7 +79,6 @@ class NIHFilter(SmilesFilterBase):
         :returns: bool bool: True if the mol passes the filter; False if it
             fails the filter
         """
-
         # If the mol matches a mol in the filter list. we return a False (as it
         # failed the filter). if No matches are found to filter list this will
         # return a True as it Passed the filter.

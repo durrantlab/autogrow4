@@ -3,7 +3,6 @@ This should contain the functions for defining input variables.
 Both the default variables and the user input variables.
 This should also validate them.
 """
-
 import __future__
 import os
 

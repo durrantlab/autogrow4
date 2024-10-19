@@ -76,7 +76,6 @@ class LipinskiStrictFilter(SmilesFilterBase):
         :returns: bool bool: True if the mol passes the filter; False if it
           fails the filter
         """
-
         exact_mwt = Descriptors.ExactMolWt(mol)
         if exact_mwt > 500:
             return False

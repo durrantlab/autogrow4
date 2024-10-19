@@ -283,7 +283,6 @@ class VinaLikeDocking(DockingBase):
         :returns: bool retry: If True it will be ligand will be redocked, if
             False its dones and wont be docked again.
         """
-
         # VINA/QuickVINA and MGL have problems with the forcefields for
         # certain atom types To correct this, Autodock Vina suggests replacing
         # the
@@ -341,7 +340,6 @@ class VinaLikeDocking(DockingBase):
         :returns: int result: the exit output for the command. If its None of
             256 it failed.
         """
-
         try:
             result = os.system(command)
         except Exception:

@@ -12,7 +12,6 @@ et al Estimation of Dlood-Brain Barrier Crossing of Drugs Using Molecular Size
 and Shape, and H-Bonding Descriptors. Journal of Drug Targeting (1998), 6(2),
 151-165.
 """
-
 import __future__
 from typing import List, Tuple
 from autogrow.config.argparser import ArgumentVars
@@ -64,7 +63,6 @@ class VandeWaterbeemdFilter(SmilesFilterBase):
         :returns: bool bool: True if the mol passes the filter; False if it
             fails the filter
         """
-
         exact_mwt = Descriptors.ExactMolWt(mol)
         if exact_mwt >= 450:
             return False

@@ -38,7 +38,6 @@ def get_usable_format(infile: str) -> List[List[str]]:
     :returns: list usable_smiles: list of SMILES and their associated
         information formatted into a list which is usable by the rest of Autogrow
     """
-
     # IMPORT SMILES FROM THE PREVIOUS GENERATION
     usable_smiles = []
 
@@ -78,7 +77,6 @@ def get_average_score_per_gen(
     :returns: list usable_smiles: list of SMILES and their associated
         information formatted into a list which is usable by the rest of Autogrow
     """
-
     average_affinity_dict = {}
     for gen_folder in folder_list:
         gen_folder_name = infolder + gen_folder + os.sep
@@ -129,7 +127,6 @@ def get_average_top_score_per_gen(
     :returns: dict average_affinity_dict: dictionary of average affinity
         scores for top_score_per_gen number of ligands
     """
-
     average_affinity_dict = {}
 
     for gen_folder in folder_list:
@@ -182,7 +179,6 @@ def print_gens(average_affinity_dict: Dict[str, Union[float, str]]) -> None:
     :param dict average_affinity_dict: dictionary of average affinity scores
         for top_score_per_gen number of ligands
     """
-
     print("generation_number              average affinity score")
     affinity_keys = list(average_affinity_dict.keys())
     affinity_keys.sort(key=lambda x: int(x.split("_")[1]))
@@ -208,7 +204,6 @@ def make_graph(
     :returns: list list_of_scores: list of averages for each generation; if a
         generation lacks ligands to generate the average it will return "N/A"
     """
-
     list_generations = []
     list_of_gen_names = []
     list_of_scores = []
@@ -250,7 +245,6 @@ def run_plotter(
         overall average for each generation.
     :param str outfile: Path for the output file for the plot
     """
-
     average_affinity_dict = dict_of_averages["average_affinity_dict"]
     top_fifty_dict = dict_of_averages["top_fifty_dict"]
     top_twenty_dict = dict_of_averages["top_twenty_dict"]
@@ -383,7 +377,6 @@ def print_data_table(
         the average of each generation for the top 50,20, 10, and 1 ligand(s) and
         the overall average for each generation.
     """
-
     print("Overall Scoring Average for all Compounds")
     average_affinity_dict = get_average_score_per_gen(infolder, folder_list)
     print("")
@@ -423,7 +416,6 @@ def generate_figures(params: Dict[str, Any]) -> None:
     :param dict params: dict of user variables which will govern how the
         programs runs
     """
-
     for _ in range(10):
         print("")
     infolder = params["output_directory"]

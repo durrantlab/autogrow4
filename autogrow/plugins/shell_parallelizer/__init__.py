@@ -23,7 +23,6 @@ class ShellCmdResult:
 class ShellParallelizerBase(PluginBase):
     def run(self, **kwargs) -> List[ShellCmdResult]:
         """Run the plugin with provided arguments."""
-
         nprocs = kwargs.get("nprocs", -1)
         return self.run_cmds_in_parallel(cmds=kwargs["cmds"], nprocs=nprocs)
 
@@ -77,7 +76,6 @@ class ShellParallelizerPluginManager(PluginManagerBase):
         :returns: List[ShellCmdResult]: A list of ShellCmdResult objects, each
             containing the command, return code, and output.
         """
-
         shell_parallelizers = self.get_selected_plugins_from_params()
 
         if shell_parallelizers is None or len(shell_parallelizers) == 0:

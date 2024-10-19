@@ -79,7 +79,6 @@ class Mapping(object):
             isotope labels; items are B-groups ie) {10002: ['2B1'], 10003: ['1B1',
             '2B2'], 10005: ['2B3']}
         """
-
         self.b_to_is = copy.deepcopy(
             b_to_is
         )  # B-I mapping dictionary from outside class
@@ -128,7 +127,6 @@ class Mapping(object):
         :param str b: A B-group to be removed from the b_to_is and B in
             i_to_bs dicts.
         """
-
         i_list_to_modify = self.locate_i(b)
         for i in i_list_to_modify:
             blank = self.i_to_bs[i].remove(b)
@@ -146,7 +144,6 @@ class Mapping(object):
             anchor/node/i atom to be removed from the b_to_is and b in i_to_bs
             dicts.
         """
-
         bs_to_modify = self.locate_b(i)
         for b in bs_to_modify:
             self.b_to_is[b].remove(i)
@@ -187,7 +184,6 @@ class Mapping(object):
         :returns: str b_x: A string of the name of a chosen B-group; None if
             not in the dictionary or if there is no available choices
         """
-
         # Developers Notes
 
         # Current implementation has no Null/None as choices this means that

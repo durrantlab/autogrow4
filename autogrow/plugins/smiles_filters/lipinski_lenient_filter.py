@@ -77,7 +77,6 @@ class LipinskiLenientFilter(SmilesFilterBase):
         :returns: bool bool: True if the mol passes the filter; False if it
             fails the filter
         """
-
         violation_counter = 0
 
         exact_mwt = Descriptors.ExactMolWt(mol)

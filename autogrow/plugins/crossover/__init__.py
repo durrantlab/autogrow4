@@ -45,7 +45,6 @@ class CrossoverPluginManager(PluginManagerBase):
         Returns:
         :returns: bool: True if the molecule passes the filter, False if it fails
         """
-
         crossover_names = self.get_selected_plugins_from_params()
 
         if crossover_names is None or len(crossover_names) == 0:

@@ -1,7 +1,6 @@
 """
 This function handles the scoring/rescoring of docked molecules.
 """
-
 import __future__
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -27,7 +26,6 @@ def pick_run_class_dict(scoring_choice: str) -> type:
     :returns: object child_dict[scoring_choice]: the class for running the
         chosen scoring method
     """
-
     children = get_all_subclasses(ParentScoring)
 
     child_dict = {child.__name__: child for child in children}
@@ -60,7 +58,6 @@ def run_scoring_common(
         shorthand names and the items are a list of any information about the
         ligand with the fitness measure as the -1 idx in each list
     """
-
     # Retrieve a list of all files with the proper information within
     # folder_to_search
     scoring_choice = params["scoring_choice"]
@@ -153,7 +150,6 @@ def run_rescoring(
     :returns: list completed_rescore: a list of all ligands which passed a
         scoring function.
     """
-
     files_to_score = [x for x in files_to_score if x is not None]
 
     # Run Rescoring If applicable (All classes should have this even if its
@@ -196,7 +192,6 @@ def run_rescoring(
     return completed_rescore
 
 
-
 def rescore_single_file(
     file_path: str, scoring_object: ParentScoring
 ) -> Tuple[str, bool]:
@@ -212,7 +207,6 @@ def rescore_single_file(
     :returns: list results of a rescoring function: [file_path, it_rescored]
         [PATH, True] means it passed [PATH, False] means it failed
     """
-
     return scoring_object.run_rescoring(file_path)
 
 
@@ -239,7 +233,6 @@ def make_lig_score_dict(
         a given ligand, this will reduce down multiple confirmations to a single
         ligand with the most negative fitness score.
     """
-
     lig_dict: Dict[str, PostDockedCompound] = {}
     for lig in list_of_list_of_lig_data:
         if lig is None:
@@ -290,7 +283,6 @@ def score_files_multithread(
         Score is last index (ie. [SMILES, lig_id, lig_id_shortname, any_details,
         fitness_score_to_use] )
     """
-
     lig_data = scoring_object.run_scoring(file_path)
     if rescore_lig_efficiency:
         assert lig_eff_scoring is not None, "lig_eff_scoring is None"
@@ -318,7 +310,6 @@ def make_dict_of_smiles(smiles_file: str) -> Dict[str, PreDockedCompound]:
     Returns:
     :return dict smiles_dict: a list of ligand info before docking
     """
-
     smiles_dict: Dict[str, PreDockedCompound] = {}
     # load smile file and convert to list with index
     with open(smiles_file, "r") as smi:

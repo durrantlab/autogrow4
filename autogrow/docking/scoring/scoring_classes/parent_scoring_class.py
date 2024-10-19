@@ -36,6 +36,5 @@ class ParentScoring(ABC):
             self.smiles_dict for a given ligand and the ligands short_id_name and
             the docking score from the best pose.
         """
-
         # raise NotImplementedError("run_scoring() not implemented")
         pass

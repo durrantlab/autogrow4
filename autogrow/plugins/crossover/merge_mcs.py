@@ -18,7 +18,6 @@ rdkit.RDLogger.DisableLog("rdApp.*")
 class MergeMCS(CrossoverBase):
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
         """Add command-line arguments required by the plugin."""
-
         # TODO: These parameter names are not descriptive.
 
         return (
@@ -81,7 +80,6 @@ class MergeMCS(CrossoverBase):
         :returns: str ligand_new_smiles: smile string for the child ligand derived
             from mol1 and mol2. Returns None if it failed at any point.
         """
-
         # lig_string_1 = "[N-] = [N+] = NCC(O)COc1cccc2ccccc12"
         # lig_string_2 = "C# CCOc1ccc2ccccc2c1CO"
         # lig_string_1 = "C1 = CC = CC = C1"
@@ -182,7 +180,6 @@ class MergeMCS(CrossoverBase):
         :returns: str ligand_new_smiles: either returns the SMILES
             string of ligand_new_mol or None if it failed at any step.
         """
-
         ligand_new_mol = MOH.check_sanitization(ligand_new_mol)
         if ligand_new_mol is None:
             return None

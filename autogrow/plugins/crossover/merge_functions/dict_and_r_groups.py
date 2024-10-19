@@ -32,7 +32,6 @@ def handle_dicts_and_select_b_groups(
     :returns: list rs_chosen_smiles: smiles strings for the the R groups which
         correspond to the chosen B's returns None if it fails
     """
-
     # Confirm that mcs_mol can be replaced in mol_1 and mol_2 around 0.8% of
     # the time this function fails so we will filter this 1st
     they_pass = check_replace_mol(mol_1, mol_2, mcs_mol)
@@ -127,7 +126,6 @@ def mol_handling_of_fragmenting_labeling_and_indexing(mol, mcs_mol, lig_number):
         the iso label of the anchor atoms for B-group returns None if it fails.
         Example:{'1B1': [10000], '1B2': [10003]}
     """
-
     # Find which MCS Atoms Rs branch from Function to find all neighbors for a
     # set of molecules touching an Isolabeled core
     mcs_touches = get_atoms_touch_mcs(mol)
@@ -202,7 +200,6 @@ def mol_handling_of_fragmenting_labeling_and_indexing(mol, mcs_mol, lig_number):
         important.
     make_b_dictionaries (B is the name we gave to R-groups sets)
     """
-
     b_to_r_master_dict, b_to_anchor_master_dict = make_b_dic(i_dict, r_dict, lig_number)
 
     return r_smiles_dictionary, b_to_r_master_dict, b_to_anchor_master_dict
@@ -223,7 +220,6 @@ def check_replace_mol(mol_1, mol_2, mcs_mol):
     :returns: bool True/False: Returns True if it passes for both mol_1 and
         mol_2 returns False if either fails.
     """
-
     temp = r_group_list(mol_1, mcs_mol)
     if temp is None:
         return False
@@ -256,7 +252,6 @@ def r_group_list(mol, core_mol):
         the common core removed from a ligand fragments the mol which can be used
         to make lists of R-groups
     """
-
     # This returns all the mol frags for a particular compound against the
     # core molecule
     replace_core_mol = Chem.ReplaceCore(
@@ -300,7 +295,6 @@ def replace_core_mol_dummy_atoms(mol, mcs, replace_core_mol):
         to make lists of R-groups. The * atoms will be isotope labeled with the
         isotope label from the core.
     """
-
     replace_core_mol_original = copy.deepcopy(replace_core_mol)
     anchor_dict = {}
     anchor_to_set_dict = {}
@@ -342,7 +336,6 @@ def r_groups_dict(mol_frags, lig_number_for_multiplier):
         '1R2':'[3*][1024C]([1026H])([1027H])[1023N] = [1022N+] = [1021N-]',
         '1R3':'[4*][1025O][1029H]'}
     """
-
     num_frags = len(mol_frags)
     r_chain_dictionary = {}
     r_smiles_dictionary = {}
@@ -384,7 +377,6 @@ def get_r_dict(r_chain_dict, lig_r_atom_touch_mcs):
         connected to. keys are R-groups. items are isolabel of anchor atoms. ie)
         {'1R1': [10000]}
     """
-
     r_s_dict = {}
     for key in list(r_chain_dict.keys()):
         temp_r_list = r_chain_dict[key]
@@ -416,7 +408,6 @@ def get_idx_using_unique_iso(mol, iso_val):
     :returns: int idx:  the Idx index number of the atom whose isotope label
         is the same as iso_val. Returns None if iso_val not in mol.
     """
-
     return next(
         (atom.GetIdx() for atom in mol.GetAtoms() if atom.GetIsotope() == iso_val),
         None,
@@ -446,7 +437,6 @@ def make_b_dic(i_dictionary, r_dict_num, lig_number):
         anchors that B connects to. example
         {'1B1':[10008,10007],'1B2':[10000],'1B3':[10006]}
     """
-
     k = lig_number
     b_to_r_master_dict = {}
     b_to_anchor_master_dict = {}
@@ -504,7 +494,6 @@ def invert_dictionary(old_dic):
     :returns: dict inverted_dic: old_dict dict inverted so the keys are the
         items and the items are the keys
     """
-
     # inverted_dic = {}
     # for k, v in old_dic.iteritems():
     # keys = inverted_dic.setdefault(v, [])
@@ -536,7 +525,6 @@ def get_atoms_touch_mcs(mol):
         which touch it. If a core atom touch no non-core atoms it will not be
         added to the dictionary.
     """
-
     mcs_touches = {}
     all_atoms = mol.GetAtoms()
 
@@ -591,7 +579,6 @@ def get_rs_chosen_from_bs(bs_chosen, b_to_r_master_dict_1, b_to_r_master_dict_2)
     :returns: list rs_chosen: a list containing all the R-groups represented
         by the chosen B-groups. ie) ['1R1', '1R2', '1R3','1R4', '2R5', '2R6']
     """
-
     rs_chosen = []
     for B in bs_chosen:
         Rs_for_the_B = []
@@ -627,7 +614,6 @@ def get_rs_chosen_smiles(rs_chosen, r_smiles_dict_1, r_smiles_dict_2):
         to be added to make the child ligand. Each SMILES is a sublist.
         ie)[['[10006*][1009N]=[1008N+]=[1007N-]'],['[10006*][2009OH]']]
     """
-
     rs_chosen_smiles = []
     for R in rs_chosen:
         Rs_for_the_R = []

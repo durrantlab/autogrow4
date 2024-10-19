@@ -10,7 +10,6 @@ from autogrow.utils.logging import log_warning
 class ParallelExecPlugin(ShellParallelizerBase):
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
         """Add command-line arguments required by the plugin."""
-
         return (
             "Parallel Exec Shell Parallelizer",
             [

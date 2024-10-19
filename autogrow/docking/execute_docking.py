@@ -14,6 +14,7 @@ from autogrow.plugins.docking import DockingPluginManager
 from autogrow.types import PreDockedCompound
 from autogrow.utils.logging import LogLevel, log_info
 
+
 def run_docking_common(
     params: Dict[str, Any],  # TODO: Not used.
     current_gen_int: int,
@@ -38,7 +39,6 @@ def run_docking_common(
     Returns:
         str: Filename of the unweighted-ranked SMILES with their docking scores.
     """
-
     docking_plugin_manager = cast(DockingPluginManager, plugin_managers.Docking)
 
     log_info("Starting docking")
@@ -57,10 +57,7 @@ def run_docking_common(
 
     print("\nBegin Ranking and Saving results")
     unweighted_ranked_smile_file = docking_plugin_manager.rank_and_save_output_smi(
-        cur_gen_dir,
-        current_gen_int,
-        smiles_file_new_gen,
-        post_docked_compounds,
+        cur_gen_dir, current_gen_int, smiles_file_new_gen, post_docked_compounds,
     )
     print("\nCompleted Ranking and Saving results\n")
     return unweighted_ranked_smile_file

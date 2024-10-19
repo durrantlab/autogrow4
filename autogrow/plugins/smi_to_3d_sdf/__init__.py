@@ -53,7 +53,6 @@ class SmiTo3DSdfPluginManager(PluginManagerBase):
         Inputs:
         :param dict kwargs: a dictionary of arguments to pass to the plugin
         """
-
         smi_to_sdf_converters = self.get_selected_plugins_from_params()
 
         if smi_to_sdf_converters is None or len(smi_to_sdf_converters) == 0:

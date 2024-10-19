@@ -7,7 +7,6 @@ AutoGrow program.
 from typing import Any, Dict
 
 
-
 def define_defaults() -> Dict[str, Any]:
     """
     Set the default values for AutoGrow command-line parameters.

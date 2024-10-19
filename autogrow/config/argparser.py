@@ -32,7 +32,10 @@ import json
 from typing import Any, Dict, List, Optional, Tuple, Type
 
 from autogrow.config import setup_params
-from autogrow.config.json_config_utils import convert_json_params_from_unicode, save_vars_as_json
+from autogrow.config.json_config_utils import (
+    convert_json_params_from_unicode,
+    save_vars_as_json,
+)
 from autogrow.utils.logging import log_warning
 from autogrow.validation import validate_all
 
@@ -60,6 +63,7 @@ class ArgumentVars:
         action (Optional[str]): The action to be taken when the argument is
             encountered. Defaults to None.
     """
+
     name: str
     default: Any
     help: str
@@ -189,21 +193,22 @@ def get_user_params() -> Dict[str, Any]:
         # ignoring the command line.
         new_args_dict = json.load(open(args_dict["json"]))
         new_args_dict = convert_json_params_from_unicode(new_args_dict)
-        print("WARNING: Loaded parameters from JSON file. Ignoring other parameters specified at the command line.")
+        print(
+            "WARNING: Loaded parameters from JSON file. Ignoring other parameters specified at the command line."
+        )
     else:
         # No --json, so process using command line
 
         # copying args_dict so we can delete out of while iterating through the
         # original args_dict
         new_args_dict = copy.deepcopy(args_dict)
-    
+
     # Remove any None values from the dictionary
     new_args_dict = {k: v for k, v in new_args_dict.items() if v is not None}
 
     new_args_dict = setup_params(new_args_dict)
 
     validate_all(new_args_dict)
-
 
     # Save variables in vars dict to a .json file for later usage and reference
     # It saves the file to the output_directory + "vars.json"

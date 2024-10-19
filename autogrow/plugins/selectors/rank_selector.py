@@ -54,7 +54,6 @@ class RankSelector(SelectorBase):
         :returns: list top_choice_smile_order: list of ligands chosen by a elitism
             selection, without replacement,
         """
-
         if type(usable_smiles) is not type([]):
             raise Exception("usable_smiles Must be a list, wrong data type")
 

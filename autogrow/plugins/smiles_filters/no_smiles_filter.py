@@ -1,7 +1,6 @@
 """#No filter for SMILES
 Useful for skipping the filter step.
 """
-
 import __future__
 
 from autogrow.plugins.smiles_filters import SmilesFilterBase

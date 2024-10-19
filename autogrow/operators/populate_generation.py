@@ -73,9 +73,7 @@ def populate_generation(
         # Later generations
         num_crossovers = params["number_of_crossovers"]
         num_mutations = params["number_of_mutants"]
-        num_elite_prev_gen = params[
-            "number_elitism_advance_from_previous_gen"
-        ]
+        num_elite_prev_gen = params["number_elitism_advance_from_previous_gen"]
 
     # Get the source compound list
     src_cmpds = _get_cmpds_prev_gen(params, generation_num)
@@ -85,9 +83,7 @@ def populate_generation(
     )
 
     # Total population size of this generation
-    total_num_desired_new_ligands = (
-        num_crossovers + num_mutations + num_elite_prev_gen
-    )
+    total_num_desired_new_ligands = num_crossovers + num_mutations + num_elite_prev_gen
 
     # Generate mutations
     log_info("Creating mutant compounds")
@@ -105,7 +101,7 @@ def populate_generation(
                         num_seed_dock_fitness,
                         src_cmpds,
                         number_of_processors,
-                        cur_gen_dir
+                        cur_gen_dir,
                     )
                 else:
                     log_warning("No mutations made, per user settings")
@@ -138,7 +134,6 @@ def populate_generation(
 
         log_info(f"Created {len(cross_predock_cmpds)} crossover compounds")
 
-
     # Get ligands from previous generation
     log_info("Identifying elite compounds to advance, without mutation or crossover")
     with LogLevel():
@@ -154,11 +149,10 @@ def populate_generation(
                 else:
                     log_warning("No elite ligands advanced, per user settings")
                     elite_predock_cmpds: List[PreDockedCompound] = []
-                
+
                 # Saves to cache
                 cache.data = elite_predock_cmpds
         log_info(f"Identified {len(elite_predock_cmpds)} elite compounds")
-
 
     # Build new_gen_smis and full_gen_smis
     # TODO: Need to understand why these two are separate.
@@ -211,7 +205,9 @@ def populate_generation(
     log_info("Converting SMILES to 3D SDF files")
     with LogLevel():
         full_gen_predock_cmpds = plugin_managers.SmiTo3DSdf.run(
-            predock_cmpds=full_gen_predock_cmpds, pwd=new_gen_folder_path, cache_dir=cur_gen_dir
+            predock_cmpds=full_gen_predock_cmpds,
+            pwd=new_gen_folder_path,
+            cache_dir=cur_gen_dir,
         )
 
     # Remove those that failed to convert
@@ -288,7 +284,7 @@ def _generate_mutations(
             seed_list_mutations,
             new_mutation_smiles_list,
             rxn_library_variables,
-            cur_gen_dir
+            cur_gen_dir,
         )
         if new_mutants is None:
             # Try once more # TODO: Why?
@@ -300,7 +296,7 @@ def _generate_mutations(
                 seed_list_mutations,
                 new_mutation_smiles_list,
                 rxn_library_variables,
-                cur_gen_dir
+                cur_gen_dir,
             )
 
         if new_mutants is None:
@@ -808,9 +804,7 @@ def _make_seed_list(
     return usable_smiles
 
 
-def _get_seed_pop_sizes(
-    params: Dict[str, Any], gen_num: int
-) -> Tuple[int, int]:
+def _get_seed_pop_sizes(params: Dict[str, Any], gen_num: int) -> Tuple[int, int]:
     """
     This function determines how many molecules will be chosen to seed a
     generation because of their docking score and how many will assess because

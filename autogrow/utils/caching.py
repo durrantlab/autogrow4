@@ -3,6 +3,7 @@ import os
 import pickle as pkl
 from autogrow.utils.logging import log_debug, log_info
 
+
 class CacheManager:
     def __init__(self, label: str, cache_dir: str):
         self.label = label
@@ -20,13 +21,15 @@ class CacheManager:
             return None
         with open(cache_filename, "rb") as f:
             c = pkl.load(f)
-            log_info(f"Loaded previous {self.label} results from cache: {cache_filename}")
+            log_info(
+                f"Loaded previous {self.label} results from cache: {cache_filename}"
+            )
             return c
 
     def _save_to_cache(self) -> None:
         if not self.exists and self.data is not None:
             cache_filename = self._get_cache_filename()
-            # TODO: What if dir of cache_filename doesn't exist? Happened once. 
+            # TODO: What if dir of cache_filename doesn't exist? Happened once.
             with open(cache_filename, "wb") as f:
                 pkl.dump(self.data, f)
             log_debug(f"Saved {self.label} results to cache: {cache_filename}")

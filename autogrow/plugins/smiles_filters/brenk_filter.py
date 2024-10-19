@@ -9,7 +9,6 @@ If using the BRENK filter please cite: Brenk R et al. Lessons Learnt from
 Assembling Screening Libraries for Drug Discovery for Neglected Diseases.
 ChemMedChem 3 (2008) 435-444. doi:10.1002/cmdc.200700139.
 """
-
 import __future__
 
 from autogrow.plugins.smiles_filters import SmilesFilterBase
@@ -41,7 +40,6 @@ class BRENKFilter(SmilesFilterBase):
         """
         This loads in the filters which will be used.
         """
-
         self.filters = self.get_filters()
 
     def get_filters(self) -> FilterCatalog.FilterCatalog:
@@ -52,7 +50,6 @@ class BRENKFilter(SmilesFilterBase):
         :returns: rdkit.Chem.rdfiltercatalog.FilterCatalog filters: A set of
             RDKit Filters
         """
-
         # Make a list of the BRENK filter.
         params = FilterCatalogParams()
         params.AddCatalog(FilterCatalogParams.FilterCatalogs.BRENK)
@@ -75,7 +72,6 @@ class BRENKFilter(SmilesFilterBase):
         :returns: bool bool: True if the mol passes the filter; False if it
             fails the filter
         """
-
         # If the mol matches a mol in the filter list. we return a False (as it
         # failed the filter). If No matches are found to filter list this will
         # return a True as it Passed the filter.

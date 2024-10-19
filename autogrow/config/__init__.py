@@ -8,7 +8,6 @@ from autogrow.config.config_run_directory import set_run_directory
 from autogrow.config.defaults import define_defaults
 
 
-
 def setup_params(orig_params: Dict[str, Any]) -> Dict[str, Any]:
     """
     Set up parameters, correct types, and set defaults.
@@ -108,7 +107,9 @@ def _correct_param_to_default_types(
                 except Exception:
                     _wrong_type_error(key, params, default_params_for_ref)
             else:
-                import pdb; pdb.set_trace()
+                import pdb
+
+                pdb.set_trace()
                 _wrong_type_error(key, params, default_params_for_ref)
         elif type(default_params_for_ref[key]) == bool:
             if params[key] is None:
@@ -141,7 +142,6 @@ def _cast_some_params(input_params: Dict[str, Any]) -> None:
     Raises:
         Exception: If a required parameter cannot be cast to the correct type.
     """
-
     # Make sure the dimmensions are in floats. If in int convert to float.
     for x in ["center_x", "center_y", "center_z", "size_x", "size_y", "size_z"]:
         if type(input_params[x]) == float:

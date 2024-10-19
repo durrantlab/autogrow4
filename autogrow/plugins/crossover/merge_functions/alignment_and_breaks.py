@@ -44,7 +44,6 @@ def handle_mcs_align_labeling_and_cyclicbreaks(
     :returns: mcs_res_Mol mcs_mol: an MCS result isolabeled and no breaks or
         None if it fails
     """
-
     if type(mol1) is not rdkit.Chem.rdchem.Mol:
         return None, None, None
     if type(mol2) is not rdkit.Chem.rdchem.Mol:
@@ -171,7 +170,6 @@ def check_cyclic_breaks(
         did_a_ring_break is True
     :returns: bool None: returns 3 Nones if it failed to fix the cyclic breaks
     """
-
     if type(mol1) is not rdkit.Chem.rdchem.Mol:
         return None, None, None
     if type(mol2) is not rdkit.Chem.rdchem.Mol:
@@ -292,7 +290,6 @@ def ringbreak_frag_handling(
         as mcs_ringbreak_idx unless there was fragmentation that needed to be
         handled.
     """
-
     ##########################
     # Check for fragmentation, if core is fragmented than additional
     # processing is required to find the largest frag and to then reassign the
@@ -363,7 +360,6 @@ def find_biggest_frag(
     :returns: int idx_of_max: the idx number of the largest rdkit mol obj in
         the provided tuple.
     """
-
     if len(frag_mols_obj) <= 1:
         return frag_mols_obj, 0
     idx_of_max = None
@@ -391,7 +387,6 @@ def remove_iso_labels(
     :param list list_of_idx_to_remove: a list of the idx's which need the
         isolabels removed
     """
-
     for i in list_of_idx_to_remove:
         atom = mol.GetAtomWithIdx(i)
         atom.SetIsotope(0)
@@ -409,7 +404,6 @@ def add_r_atom_isolabels(
     :param rdkit.Chem.rdchem.Mol mol1: rdkit mol for ligand 1
     :param rdkit.Chem.rdchem.Mol mol2: rdkit mol for ligand 2
     """
-
     # isotope label mol1
     for atom in mol1.GetAtoms():
         if atom.GetIsotope() < 9999:
@@ -470,7 +464,6 @@ def pick_mcs_alignment(
         match the atom in the same index in the sublist for all 3 mols
         (mol1,mol2,common_core)
     """
-
     # Get the substructure match for the MCS within each ligand
     mol1_match_idx = mol1.GetSubstructMatches(
         common_core, uniquify=False, maxMatches=10
@@ -567,7 +560,6 @@ def renumber_to_mcs(
         atom idx's renumbered to be consistent with the common core, as provided
         by the tuple_order_list
     """
-
     # make a tuple the same length as the mol the beggining needs to be the
     # same as the aligment numbering to the MCS and there can be no redundancy
     # in the tuple.
