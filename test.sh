@@ -21,8 +21,6 @@ python run_autogrow.py \
     --diversity_seed_depreciation_per_gen 1 \
     --num_generations 5 \
     --number_of_processors -1 \
-    --scoring_choice VINA \
-    --NoSmilesFilter \
     --FragmentAddition \
     --rxn_library_path ./autogrow/plugins/mutation/reaction_libraries/all_rxns \
     --VinaLikeDocking \

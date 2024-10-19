@@ -1,24 +1,23 @@
-import sys
 from typing import Any, Dict, List, Tuple
 
 
 def setup_filters(params: Dict[str, Any]) -> Dict[str, Any]:
     """
-    This function handles selecting the user defined Ligand filters.
+    Handle selecting the user-defined Ligand filters.
 
-    Inputs:
-    :param dict params: Dictionary of User variables
+    This function processes the user parameters to determine which ligand
+    filters should be applied. If "No_Filters" is specified and set to True,
+    no filters will be used. Otherwise, it calls _picked_filters to determine
+    the list of filters to apply.
+
+    Args:
+        params (Dict[str, Any]): Dictionary of user variables.
+
     Returns:
-    :returns: dict params: Dictionary of User variables with the
-        chosen_ligand_filters added
+        Dict[str, Any]: Updated dictionary of user variables with the
+            chosen_ligand_filters added.
     """
-    if "No_Filters" in list(params.keys()):
-        if params["No_Filters"] is True:
-            chosen_ligand_filters = None
-        else:
-            chosen_ligand_filters, params = _picked_filters(params)
-    else:
-        chosen_ligand_filters, params = _picked_filters(params)
+    chosen_ligand_filters, params = _picked_filters(params)
     params["chosen_ligand_filters"] = chosen_ligand_filters
 
     return params
@@ -26,19 +25,21 @@ def setup_filters(params: Dict[str, Any]) -> Dict[str, Any]:
 
 def _picked_filters(params: Dict[str, Any]) -> Tuple[List[str], Dict[str, Any]]:
     """
-    This will take the user params and return a list of the filters
-    which a molecule must pass to move into the next generation.
+    Determine the list of filters to apply based on user parameters.
 
-    Inputs:
-    :param dict params: Dictionary of User variables
+    This function examines the user parameters and compiles a list of filters
+    that will be used to check for drug-likeness in each generation. If no
+    filters are specified, it defaults to using the LipinskiLenientFilter.
+
+    Args:
+        params (Dict[str, Any]): Dictionary of user variables.
+
     Returns:
-    :returns: list filter_list: a list of the class of filter which will be used
-        later to check for drug likeliness for a generation.
-        If a User adds their own filter they just need to follow
-        the same nomenclature and enter that filter in the user
-        params["alternative_filters"] as the name of that class and place
-        that file in the same folder as the other filter classes.
+        Tuple[List[str], Dict[str, Any]]: A tuple containing:
+            - A list of filter names to be applied.
+            - The updated params dictionary with filter flags set.
     """
+    # TODO: This is not how filters should work anymore. Need to fix this.
     filter_list = []
     vars_keys = list(params.keys())
 

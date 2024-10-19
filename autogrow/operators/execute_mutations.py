@@ -1,7 +1,10 @@
 """
-This function should contain all the info for executing the mutation functions
-"""
+Handles mutation operations for molecular structures.
 
+This module contains functions for creating molecular mutations using various
+reaction libraries. It includes functionality for parallel processing of
+mutations and handling of mutation results.
+"""
 import __future__
 
 import random
@@ -25,34 +28,30 @@ def make_mutants(
     num_mutants_to_make: int,
     ligands_list: List[PreDockedCompound],
     new_mutation_smiles_list: List[PreDockedCompound],
-    rxn_library_variables: List[str],
+    rxn_library_variables: List[str],  # TODO: Not used.
     cur_gen_dir: str,
 ) -> Optional[List[PreDockedCompound]]:
     """
-    Make mutant compounds in a list to be returned
+    Creates mutant compounds based on a list of ligands.
 
-    This runs SmileClick and returns a list of new molecules
-
-    Inputs:
-    :param dict params: a dictionary of all user variables
-    :param int generation_num: generation number
-    :param int number_of_processors: number of processors as specified by the
-        user
-    :param int num_mutants_to_make: number of mutants to return
-    :param list ligands_list: list of ligand/name pairs which are the order in
-        which to be sampled :param list new_mutation_smiles_list: is the list of
-        mutants made for the current generation being populated but in a previous
-        iteration of the loop in Operations
-    :param list rxn_library_variables: a list of user variables which define
-        the rxn_library_path. ie.
-        rxn_library_variables = [params['rxn_library_path']]
-    :param str cur_gen_dir: the current generation directory
+    Args:
+        params (Dict[str, Any]): User parameters governing the mutation process.
+        generation_num (int): Current generation number.
+        number_of_processors (int): Number of processors for parallelization.
+        num_mutants_to_make (int): Number of mutants to generate.
+        ligands_list (List[PreDockedCompound]): List of ligands to mutate.
+        new_mutation_smiles_list (List[PreDockedCompound]): Previously generated mutants.
+        rxn_library_variables (List[str]): Variables defining the reaction library path.
+        cur_gen_dir (str): Current generation directory.
 
     Returns:
-    :returns: list new_ligands_list: ligand/name pairs OR returns None if
-        sufficient number was not generated. None: bol if mutations failed
-    """
+        Optional[List[PreDockedCompound]]: List of new mutant ligands, or None if
+        generation fails.
 
+    Note:
+        Uses multiprocessing to generate mutations efficiently.
+        Attempts to create unique mutants, avoiding duplicates.
+    """
     new_ligands_list: List[PreDockedCompound] = new_mutation_smiles_list or []
     loop_counter = 0
 
@@ -180,18 +179,22 @@ def _run_smiles_click_for_multithread(
     smile: str, mutation_obj: MutationBase
 ) -> Optional[List[Union[str, int, None]]]:
     """
-    This function takes a single smiles and performs SmileClick on it.
+    Performs a single mutation operation on a SMILES string.
 
-    This is necessary for Multithreading as it is unable to execute
-    multithread on a class function, but can thread a class run within a
-    function.
+    This function is designed to be used in a multithreaded context, allowing
+    for parallel processing of mutations.
 
-    Inputs:
-    :param str smile: a SMILES string
+    Args:
+        smile (str): SMILES string of the molecule to mutate.
+        mutation_obj (MutationBase): Mutation object to perform the mutation.
 
     Returns:
-    :returns: str result_of_run: either a smile string of a child mol or None
-        if the reactions failed
-    """
+        Optional[List[Union[str, int, None]]]: List containing the mutated SMILES
+        string, reaction ID, and complementary molecule ID (if any), or None if
+        the mutation fails.
 
+    Note:
+        This function is a wrapper around the mutation object's run method,
+        making it suitable for use in multiprocessing contexts.
+    """
     return mutation_obj.run(parent_smiles=smile)

@@ -1,3 +1,30 @@
+"""
+AutoGrow Configuration and Command-Line Argument Parsing Module
+
+This module provides functionality for setting up and parsing command-line
+arguments for the AutoGrow program, an automated drug optimization and
+generation tool. It defines the structure of the argument parser, including
+various argument groups for different aspects of the program such as general
+settings, input/output, receptor information, genetic algorithm parameters,
+conversion settings, and scoring options.
+
+The module also supports dynamic addition of argument groups through a plugin
+system, allowing for extensibility of the command-line interface.
+
+Key components:
+- ArgumentVars: A dataclass for defining argument properties
+- register_argparse_group: A function for plugins to register new argument groups
+- get_user_params: The main function for parsing and processing user parameters
+
+The module uses argparse for command-line parsing and supports loading
+parameters from a JSON file. It also performs parameter validation and
+type correction.
+
+Note:
+    When adding new parameters or modifying existing ones, make sure to update
+    the relevant _add_*_params functions and consider any impacts on the
+    plugin system.
+"""
 import argparse
 import copy
 from dataclasses import dataclass
@@ -18,6 +45,21 @@ plugin_arg_groups_to_add = []
 
 @dataclass
 class ArgumentVars:
+    """
+    A data class to represent argument variables for command-line parsing.
+
+    This class is used to define the properties of command-line arguments,
+    which can be used to dynamically add arguments to the ArgumentParser.
+
+    Attributes:
+        name (str): The name of the argument.
+        default (Any): The default value of the argument.
+        help (str): The help text describing the argument.
+        type (Optional[Type]): The expected type of the argument value.
+            Defaults to None.
+        action (Optional[str]): The action to be taken when the argument is
+            encountered. Defaults to None.
+    """
     name: str
     default: Any
     help: str
@@ -26,11 +68,33 @@ class ArgumentVars:
 
 
 def register_argparse_group(title: str, arg_vars: List[ArgumentVars]):
+    """
+    Register an argument group with its associated arguments.
+
+    This function is used by plugins to add their own argument groups and
+    arguments to the main parser.
+
+    Args:
+        title (str): The title of the argument group.
+        arg_vars (List[ArgumentVars]): A list of ArgumentVars objects
+            representing the arguments to be added to the group.
+    """
     global plugin_arg_groups_to_add
     plugin_arg_groups_to_add.append((title, arg_vars))
 
 
 def get_user_params() -> Dict[str, Any]:
+    """
+    Parse command-line arguments and return a dictionary of user parameters.
+
+    This function sets up argument groups, adds arguments to each group, parses
+    the command-line arguments, and processes them. It also handles loading
+    parameters from a JSON file if specified.
+
+    Returns:
+        Dict[str, Any]: A dictionary containing all the parsed and processed
+        user parameters.
+    """
     global parser
     global plugin_arg_groups_to_add
 
@@ -74,15 +138,11 @@ def get_user_params() -> Dict[str, Any]:
     )
     _add_conversion_params(conversion)
 
-    # Scoring Settings
-    scoring = parser.add_argument_group(
-        "Scoring Settings (options for scoring docked compounds)"
-    )
-    _add_scoring_params(scoring)
-
-    # Gypsum Settings
-    # gypsum = parser.add_argument_group("Gypsum Settings (options for Gypsum-DL)")
-    # _add_gypsum_params(gypsum)
+    # Scoring Settings TODO: Restore this (after refactoring) later.
+    # scoring = parser.add_argument_group(
+    #     "Scoring Settings (options for scoring docked compounds)"
+    # )
+    # _add_scoring_params(scoring)
 
     # Miscellaneous
     misc = parser.add_argument_group("Miscellaneous (other settings)")
@@ -160,6 +220,16 @@ def get_user_params() -> Dict[str, Any]:
 
 
 def _add_general_params(parser: argparse._ArgumentGroup):
+    """
+    Add general parameters to the argument group.
+
+    This function adds arguments for JSON file input, number of processors,
+    and multithread mode to the general settings group.
+
+    Args:
+        parser (argparse._ArgumentGroup): The argument group to add the
+            parameters to.
+    """
     # Allows the run commands to be submitted via a .json file.
     parser.add_argument(
         "--json",
@@ -189,6 +259,16 @@ def _add_general_params(parser: argparse._ArgumentGroup):
 
 
 def _add_io_params(parser: argparse._ArgumentGroup):
+    """
+    Add input/output parameters to the argument group.
+
+    This function adds arguments for root output folder and source compound
+    file to the input/output settings group.
+
+    Args:
+        parser (argparse._ArgumentGroup): The argument group to add the
+            parameters to.
+    """
     # Input/Output directories
     parser.add_argument(
         "--root_output_folder",
@@ -206,6 +286,16 @@ def _add_io_params(parser: argparse._ArgumentGroup):
 
 
 def _add_receptor_params(parser: argparse._ArgumentGroup):
+    """
+    Add receptor-related parameters to the argument group.
+
+    This function adds an argument for the receptor file path to the receptor
+    information group.
+
+    Args:
+        parser (argparse._ArgumentGroup): The argument group to add the
+            parameters to.
+    """
     # receptor information
     parser.add_argument(
         "--receptor_path",
@@ -213,43 +303,20 @@ def _add_receptor_params(parser: argparse._ArgumentGroup):
         metavar="receptor.pdb",
         help="The path to the receptor file. Should be .pdb file.",
     )
-    # parser.add_argument(
-    #     "--center_x",
-    #     "-x",
-    #     type=float,
-    #     help="x-coordinate for the center of the pocket to be tested by docking. (Angstrom)",
-    # )
-    # parser.add_argument(
-    #     "--center_y",
-    #     "-y",
-    #     type=float,
-    #     help="y-coordinate for the center of the pocket to be tested by docking. (Angstrom)",
-    # )
-    # parser.add_argument(
-    #     "--center_z",
-    #     "-z",
-    #     type=float,
-    #     help="z-coordinate for the center of the pocket to be tested by docking. (Angstrom)",
-    # )
-
-    # parser.add_argument(
-    #     "--size_x",
-    #     type=float,
-    #     help="dimension of box to dock into in the x-axis (Angstrom)",
-    # )
-    # parser.add_argument(
-    #     "--size_y",
-    #     type=float,
-    #     help="dimension of box to dock into in the y-axis (Angstrom)",
-    # )
-    # parser.add_argument(
-    #     "--size_z",
-    #     type=float,
-    #     help="dimension of box to dock into in the z-axis (Angstrom)",
-    # )
 
 
 def _add_ga_first_gen_params(parser: argparse._ArgumentGroup):
+    """
+    Add genetic algorithm parameters for the first generation.
+
+    This function adds arguments specific to the first generation of the
+    genetic algorithm, such as number of molecules to seed the next generation,
+    diversity molecules, crossovers, mutants, and elitism.
+
+    Args:
+        parser (argparse._ArgumentGroup): The argument group to add the
+            parameters to.
+    """
     # Seeding next gen and diversity
     parser.add_argument(
         "--top_mols_to_seed_next_generation_first_generation",
@@ -306,6 +373,17 @@ def _add_ga_first_gen_params(parser: argparse._ArgumentGroup):
 
 
 def _add_ga_subsequent_gen_params(parser: argparse._ArgumentGroup):
+    """
+    Add genetic algorithm parameters for subsequent generations.
+
+    This function adds arguments for the number of molecules to seed the next
+    generation, number of crossovers, and number of mutants for generations
+    after the first.
+
+    Args:
+        parser (argparse._ArgumentGroup): The argument group to add the
+            parameters to.
+    """
     parser.add_argument(
         "--top_mols_to_seed_next_generation",
         type=int,
@@ -331,6 +409,16 @@ def _add_ga_subsequent_gen_params(parser: argparse._ArgumentGroup):
 
 
 def _add_ga_params(parser: argparse._ArgumentGroup):
+    """
+    Add general genetic algorithm parameters.
+
+    This function adds arguments for the number of generations, elitism,
+    redocking elite compounds, and diversity seed depreciation.
+
+    Args:
+        parser (argparse._ArgumentGroup): The argument group to add the
+            parameters to.
+    """
     # Populations settings
     parser.add_argument(
         "--num_generations",
@@ -365,88 +453,18 @@ def _add_ga_params(parser: argparse._ArgumentGroup):
     )
 
 
-def _add_filter_params(parser: argparse._ArgumentGroup):
-    ####### FILTER VARIABLES
-    # parser.add_argument(
-    #     "--LipinskiStrictFilter",
-    #     action="store_true",
-    #     default=False,
-    #     help="Lipinski filters for orally available drugs following Lipinski rule of fives. \
-    #     Filters by molecular weight, logP and number of hydrogen bond donors and acceptors. \
-    #     Strict implementation means a ligand must pass all requirements.",
-    # )
-    # parser.add_argument(
-    #     "--LipinskiLenientFilter",
-    #     action="store_true",
-    #     default=False,
-    #     help="Lipinski filters for orally available drugs following Lipinski rule of fives. \
-    #     Filters by molecular weight, logP and number of hydrogen bond donors and acceptors. \
-    #     Lenient implementation means a ligand may fail all but one requirement and still passes.",
-    # )
-    # parser.add_argument(
-    #     "--GhoseFilter",
-    #     action="store_true",
-    #     default=False,
-    #     help="Ghose filters for drug-likeliness; filters by molecular weight,\
-    #     logP and number of atoms.",
-    # )
-    # parser.add_argument(
-    #     "--GhoseModifiedFilter",
-    #     action="store_true",
-    #     default=False,
-    #     help="Ghose filters for drug-likeliness; filters by molecular weight,\
-    #     logP and number of atoms. This is the same as the GhoseFilter, but \
-    #     the upper-bound of the molecular weight restrict is loosened from \
-    #     480Da to 500Da. This is intended to be run with Lipinski Filter and \
-    #     to match AutoGrow 3's Ghose Filter.",
-    # )
-    # parser.add_argument(
-    #     "--MozziconacciFilter",
-    #     action="store_true",
-    #     default=False,
-    #     help="Mozziconacci filters for drug-likeliness; filters by the number of \
-    #     rotatable bonds, rings, oxygens, and halogens.",
-    # )
-    # parser.add_argument(
-    #     "--VandeWaterbeemdFilter",
-    #     action="store_true",
-    #     default=False,
-    #     help="VandeWaterbeemd filters for drug likely to be blood brain barrier permeable. \
-    #     Filters by the number of molecular weight and Polar Sureface Area (PSA).",
-    # )
-    # parser.add_argument(
-    #     "--PAINSFilter",
-    #     action="store_true",
-    #     default=False,
-    #     help="PAINS filters against Pan Assay Interference Compounds using \
-    #     substructure a search.",
-    # )
-    # parser.add_argument(
-    #     "--NIHFilter",
-    #     action="store_true",
-    #     default=False,
-    #     help="NIH filters against molecules with undersirable functional groups \
-    #     using substructure a search.",
-    # )
-    # parser.add_argument(
-    #     "--BRENKFilter",
-    #     action="store_true",
-    #     default=False,
-    #     help="BRENK filter for lead-likeliness, by matching common false positive \
-    #     molecules to the current mol.",
-    # )
-
-    # TODO: Make sure this is just default
-    parser.add_argument(
-        "--No_Filters",
-        action="store_true",
-        default=False,
-        help="No filters will be applied to compounds.",
-    )
-
-
 def _add_conversion_params(parser: argparse._ArgumentGroup):
-    # DOCUMENT THE file conversion for docking inputs
+    """
+    Add file conversion parameters.
+
+    This function adds an argument for the path to the OpenBabel executable.
+    TODO: Describe nuance here.
+
+    Args:
+        parser (argparse._ArgumentGroup): The argument group to add the
+            parameters to.
+    """
+    # Path to Open Babel file conversion for docking inputs
     parser.add_argument(
         "--obabel_path",
         help="The path to the open babel executable. \
@@ -456,6 +474,16 @@ def _add_conversion_params(parser: argparse._ArgumentGroup):
 
 
 def _add_scoring_params(parser: argparse._ArgumentGroup):
+    """
+    Add scoring-related parameters.
+
+    This function adds arguments for the scoring choice and ligand efficiency
+    rescoring option. TODO: Need to implement this in the future.
+
+    Args:
+        parser (argparse._ArgumentGroup): The argument group to add the
+            parameters to.
+    """
     # scoring
     parser.add_argument(
         "--scoring_choice",
@@ -475,62 +503,72 @@ def _add_scoring_params(parser: argparse._ArgumentGroup):
     )
 
 
-def _add_gypsum_params(parser: argparse._ArgumentGroup):
-    # gypsum # max variance is the number of conformers made per ligand
-    parser.add_argument(
-        "--max_variants_per_compound",
-        type=int,
-        default=3,
-        help="number of conformers made per ligand. \
-        See Gypsum-DL publication for details",
-    )
-    parser.add_argument(
-        "--gypsum_thoroughness",
-        "-t",
-        type=str,
-        help="How widely Gypsum-DL will search for \
-        low-energy conformers. Larger values increase \
-        run times but can produce better results. \
-        See Gypsum-DL publication for details",
-    )
-    parser.add_argument(
-        "--min_ph",
-        metavar="MIN",
-        type=float,
-        default=6.4,
-        help="Minimum pH to consider.See Gypsum-DL \
-        and Dimorphite-D publication for details.",
-    )
-    parser.add_argument(
-        "--max_ph",
-        metavar="MAX",
-        type=float,
-        default=8.4,
-        help="Maximum pH to consider.See Gypsum-DL \
-        and Dimorphite-D publication for details.",
-    )
-    parser.add_argument(
-        "--pka_precision",
-        metavar="D",
-        type=float,
-        default=1.0,
-        help="Size of pH substructure ranges. See Dimorphite-DL \
-        publication for details.",
-    )
-    parser.add_argument(
-        "--gypsum_timeout_limit",
-        type=float,
-        default=15,
-        help="Maximum time gypsum is allowed to run for a given ligand in seconds. \
-        On average Gypsum-DL takes on several seconds to run for a given ligand, but \
-        factors such as mol size, rotatable bonds, processor speed, and gypsum \
-        settings (ie gypsum_thoroughness or max_variants_per_compound) will change \
-        how long it takes to run. If increasing gypsum settings it is best to increase \
-        the gypsum_timeout_limit. Default gypsum_timeout_limit is 15 seconds",
-    )
+# TODO: Use these parameter later when you implement gypsum option.
+# def _add_gypsum_params(parser: argparse._ArgumentGroup):
+#     # gypsum # max variance is the number of conformers made per ligand
+#     parser.add_argument(
+#         "--max_variants_per_compound",
+#         type=int,
+#         default=3,
+#         help="number of conformers made per ligand. \
+#         See Gypsum-DL publication for details",
+#     )
+#     parser.add_argument(
+#         "--gypsum_thoroughness",
+#         "-t",
+#         type=str,
+#         help="How widely Gypsum-DL will search for \
+#         low-energy conformers. Larger values increase \
+#         run times but can produce better results. \
+#         See Gypsum-DL publication for details",
+#     )
+#     parser.add_argument(
+#         "--min_ph",
+#         metavar="MIN",
+#         type=float,
+#         default=6.4,
+#         help="Minimum pH to consider.See Gypsum-DL \
+#         and Dimorphite-D publication for details.",
+#     )
+#     parser.add_argument(
+#         "--max_ph",
+#         metavar="MAX",
+#         type=float,
+#         default=8.4,
+#         help="Maximum pH to consider.See Gypsum-DL \
+#         and Dimorphite-D publication for details.",
+#     )
+#     parser.add_argument(
+#         "--pka_precision",
+#         metavar="D",
+#         type=float,
+#         default=1.0,
+#         help="Size of pH substructure ranges. See Dimorphite-DL \
+#         publication for details.",
+#     )
+#     parser.add_argument(
+#         "--gypsum_timeout_limit",
+#         type=float,
+#         default=15,
+#         help="Maximum time gypsum is allowed to run for a given ligand in seconds. \
+#         On average Gypsum-DL takes on several seconds to run for a given ligand, but \
+#         factors such as mol size, rotatable bonds, processor speed, and gypsum \
+#         settings (ie gypsum_thoroughness or max_variants_per_compound) will change \
+#         how long it takes to run. If increasing gypsum settings it is best to increase \
+#         the gypsum_timeout_limit. Default gypsum_timeout_limit is 15 seconds",
+#     )
 
 
 def _add_misc_params(parser: argparse._ArgumentGroup):
+    """
+    Add miscellaneous parameters.
+
+    This function adds an argument for generating a plot at the end of the run.
+
+    Args:
+        parser (argparse._ArgumentGroup): The argument group to add the
+            parameters to.
+    """
     # Make a line plot of the simulation at the end of the run.
     parser.add_argument(
         "--generate_plot",

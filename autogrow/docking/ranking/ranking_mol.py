@@ -1,5 +1,9 @@
 """
-This script runs the ranking and selection of ligands.
+Handles ranking and selection of ligands based on docking scores and diversity.
+
+This module provides functions to process and evaluate ligands from .smi files,
+calculate diversity scores, and prepare data structures for further processing
+in AutoGrow.
 """
 import __future__
 
@@ -20,35 +24,26 @@ import autogrow.utils.mol_object_handling as MOH
 
 def get_usable_format(infile: str) -> List[PreDockedCompound]:
     """
-    This code takes a string for an file which is formatted as an .smi file. It
-    opens the file and reads in the components into a usable list.
+    Reads and processes a .smi file into a list of PreDockedCompound objects.
 
-    The .smi must follow the following format for each line:
-        MANDATORY INFO
-            part 1 is the SMILES string
-            part 2 is the SMILES name/ID
+    The .smi file must follow this format for each line:
+    SMILES<tab>ID[<tab>optional_info...]<tab>docking_score<tab>diversity_score
 
-        Optional info
-            part -1 (the last piece of info) is the SMILES diversity score
-                relative to its population
-            part -2 (the second to last piece of info) is the fitness metric
-                for evaluating
-                - For default setting this is the Docking score
-                - If you add a unique scoring function Docking score should be
-                    -3 and that score function should be -2
-
-            Any other information MUST be between part 2 and part -2 (this
-            allows for the expansion of features without disrupting the rest of the code)
-
-    Inputs:
-    :param str infile: the string of the PATHname of a formatted .smi file to
-        be read into the program
+    Args:
+        infile (str): Path to the formatted .smi file to be read.
 
     Returns:
-    :returns: list usable_smiles: list of SMILES and their associated
-        information formatted into a list which is usable by the rest of Autogrow
-    """
+        List[PreDockedCompound]: List of PreDockedCompound objects with
+        information from the .smi file.
 
+    Raises:
+        Exception: If the input file does not exist.
+
+    Note:
+        - The last two fields are assumed to be docking_score and 
+          diversity_score if present.
+        - Any fields between ID and docking_score are ignored but allowed.
+    """
     # IMPORT SMILES FROM THE PREVIOUS GENERATION
     usable_smiles: List[PreDockedCompound] = []
 
@@ -83,19 +78,22 @@ def convert_usable_list_to_lig_dict(
     usable_smiles: List[PreDockedCompound],
 ) -> Optional[Dict[str, PreDockedCompound]]:
     """
-    This will convert a list created by get_usable_format() to a dictionary
-    using the ligand smile+lig_id as the key. This makes for faster searching
-    in larger Autogrow runs.
+    Converts a list of PreDockedCompound objects to a dictionary.
 
-    Inputs:
-    :param list usable_smiles: list of SMILES and their associated
-        information formatted into a list which is usable by the rest of Autogrow
+    Args:
+        usable_smiles (List[PreDockedCompound]): List of PreDockedCompound
+        objects.
 
     Returns:
-    :returns: list usable_dict_of_smiles: dict of all the ligand info with a
-        key containing both the SMILES string and the unique lig ID
-    """
+        Optional[Dict[str, PreDockedCompound]]: Dictionary with keys as
+        'SMILES+ID' and values as PreDockedCompound objects. Returns None if
+        input is not a list.
 
+    Note:
+        If duplicate keys exist, it keeps the entry with the higher docking
+        score (lower is better).
+        # TODO: Should this be hardcoded?
+    """
     if type(usable_smiles) is not type([]):
         return None
 
@@ -118,46 +116,28 @@ def score_and_calc_diversity_scores(
     postDockedCompoundInfos: List[PostDockedCompound],
 ) -> List[PostDockedCompound]:
     """
-    This function will take list of molecules which makes up a population. It
-    will then create a diversity score for each molecules:
-    It creates the diversity score by determining the Morgan Fingerprint for
-        each molecule in the population.
-    It then compares the fingerprints for every molecule against every
-        molecule in a pairwise manner.
-        Based on the approach provided on
-            http://www.rdkit.org/docs/GettingStartedInPython.html section: "Picking
-            Diverse Molecules Using Fingerprints"
-        It determines a score of similarity using the RDKit function
-            DataStructs.DiceSimilarity
-            -The higher the similarity the higher the similarity score
-                -ie) if you compare two identical SMILES the similarity score
-                    is 1.0. I.e., if you compare 4 identical SMILES the
-                    similarity score for each is 4.0.
-                -ie) if you compare two completely different SMILES, the score
-                    is 0.0
+    Calculates diversity scores for a list of PostDockedCompound objects.
 
-        It sums the similarity score for each pairwise comparison.
-            -ie) if there are 15 ligands the max score is 15 the minimum is 0.0
-                    with 15.0 if all ligands are identical
+    This function computes Morgan Fingerprints for each molecule and calculates
+    pairwise Dice Similarity scores. The sum of these scores becomes the
+    diversity score for each molecule.
 
-        It then appends the diversity score to the molecule list which it
-        returns.
-
-        It can raise an AssertionError if there are ligs which fail to
-            sanitize or deprotanate.
-                -this prevents future errors from occuring in later steps and
-                    makes this funciton usable for multiple codes
-        It will remove any Nones from the input list
-
-    Inputs:
-    :param list molecules_list: list of all molecules in the populations with
-    the respective info
+    Args:
+        postDockedCompoundInfos (List[PostDockedCompound]): List of
+        PostDockedCompound objects to process.
 
     Returns:
-    :returns: list molecules_list: list of all molecules in the populations
-        with the respective info and append diversity score
-    """
+        List[PostDockedCompound]: Input list with updated diversity scores and
+        fingerprints.
 
+    Raises:
+        AssertionError: If any molecule fails to sanitize or deprotonate.
+
+    Note:
+        - Lower diversity scores indicate more diverse molecules. TODO: Verify this is true.
+        - Removes any None entries from the input list.
+        - Uses Morgan Fingerprints with radius 10 and feature-based encoding.
+    """
     postDockedCompoundInfosToKeep: List[PostDockedCompound] = []
 
     for postDockedCompoundInfo in postDockedCompoundInfos:

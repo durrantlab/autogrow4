@@ -1,20 +1,32 @@
-from typing import Any, Dict, Union
-import os
+"""
+Default Parameters Module for AutoGrow
+
+This module defines the default values for various parameters used in the
+AutoGrow program.
+"""
+from typing import Any, Dict
+
 
 
 def define_defaults() -> Dict[str, Any]:
     """
-    Sets the command-line parameters to their default values.
+    Set the default values for AutoGrow command-line parameters.
+
+    This function initializes a dictionary with default values for various
+    AutoGrow parameters, including settings for file locations, crossover
+    functions, mutations, genetic algorithm components, population settings,
+    filters, docking, and scoring configurations.
 
     Returns:
-    :returns: dict default_params: a dictionary of all default variables
+        Dict[str, Any]: A dictionary containing all default parameter values.
     """
-
     default_params: Dict[str, Any] = {}
 
     #### OPTIONAL FILE-LOCATION VARIABLES ####
     # (RECOMMEND SETTING TO "" SO AUTOGROW CAN AUTOLOCATE THESE FILES)#
     default_params["obabel_path"] = "obabel"
+
+    # TODO: Doesn't argparse already handle this? Why this here?
 
     # Crossover function
     default_params["max_time_mcs_prescreen"] = 1
@@ -49,7 +61,7 @@ def define_defaults() -> Dict[str, Any]:
     default_params["number_elitism_advance_from_previous_gen_first_generation"] = 10
     default_params["redock_elite_from_previous_gen"] = False
 
-    # Filters
+    # Filters # TODO: Not how filters work
     default_params["LipinskiStrictFilter"] = False
     default_params["LipinskiLenientFilter"] = False
     default_params["GhoseFilter"] = False
@@ -69,16 +81,16 @@ def define_defaults() -> Dict[str, Any]:
     # default_params["docking_num_modes"] = None
 
     # scoring
-    default_params["scoring_choice"] = "VINA"
-    default_params["rescore_lig_efficiency"] = False
+    # default_params["scoring_choice"] = "VINA"
+    # default_params["rescore_lig_efficiency"] = False
 
     # gypsum # max variance is the number of conformers made per ligand
-    default_params["max_variants_per_compound"] = 3
-    default_params["gypsum_thoroughness"] = 3
-    default_params["min_ph"] = 6.4
-    default_params["max_ph"] = 8.4
-    default_params["pka_precision"] = 1.0
-    default_params["gypsum_timeout_limit"] = 10
+    # default_params["max_variants_per_compound"] = 3
+    # default_params["gypsum_thoroughness"] = 3
+    # default_params["min_ph"] = 6.4
+    # default_params["max_ph"] = 8.4
+    # default_params["pka_precision"] = 1.0
+    # default_params["gypsum_timeout_limit"] = 10
 
     # Other vars
     default_params["generate_plot"] = True

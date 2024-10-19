@@ -1,22 +1,27 @@
+"""
+Path Configuration Module for AutoGrow
+
+This module handles the configuration of file and directory paths for the
+AutoGrow program, ensuring proper path formatting and directory creation.
+"""
 import os
 from typing import Any, Dict
 
 
 def config_paths(params: Dict[str, Any]) -> None:
     """
-    Configures paths by converting them to absolute paths, ensuring directories end with a separator,
-    and creating the output folder if it does not exist.
+    Configure paths for the AutoGrow program.
 
     This function performs the following actions:
-    1. Converts specified path parameters in `params` to absolute paths.
-    2. Ensures that directory paths end with the OS-specific path separator.
-    3. Creates the output folder if it does not already exist.
+    1. Converts specified path parameters to absolute paths.
+    2. Ensures directory paths end with the OS-specific path separator.
+    3. Creates the output folder if it doesn't exist.
 
-    Inputs:
-    :param params: Dictionary of user variables governing how the program runs.
+    Args:
+        params (Dict[str, Any]): Dictionary of user variables governing how the
+            program runs.
 
-    Returns:
-    :returns: None. The function modifies the `params` dictionary in place.
+    The function modifies the `params` dictionary in place.
     """
     _make_paths_abs(params)
     _make_dirs_end_in_sep(params)
@@ -25,17 +30,14 @@ def config_paths(params: Dict[str, Any]) -> None:
 
 def _make_paths_abs(params: Dict[str, Any]) -> None:
     """
-    Converts specified path parameters in `params` to absolute paths.
+    Convert specified path parameters to absolute paths.
 
-    This helper function iterates over a predefined list of parameter names and converts their
-    values to absolute paths using `os.path.abspath`. It ensures that all relevant paths are
-    absolute, which helps avoid issues related to relative paths during program execution.
+    Args:
+        params (Dict[str, Any]): Dictionary of user variables.
 
-    Inputs:
-    :param params: Dictionary of user variables.
-
-    Returns:
-    :returns: None. The function modifies the `params` dictionary in place.
+    The function modifies the `params` dictionary in place, converting paths
+    for 'receptor_path', 'root_output_folder', and 'source_compound_file' to
+    absolute paths.
     """
     # convert paths to abspath, in case necessary
     for pname in ["receptor_path", "root_output_folder", "source_compound_file"]:
@@ -46,17 +48,13 @@ def _make_paths_abs(params: Dict[str, Any]) -> None:
 
 def _make_dirs_end_in_sep(params: Dict[str, Any]) -> None:
     """
-    Ensures that specified directory paths in `params` end with the OS-specific path separator.
+    Ensure specified directory paths end with the OS-specific path separator.
 
-    This helper function iterates over a predefined list of directory parameter names and appends
-    the OS-specific path separator (`os.sep`) to the end of each directory path if it does not
-    already end with one. This standardizes directory paths, making file operations more predictable.
+    Args:
+        params (Dict[str, Any]): Dictionary of user variables.
 
-    Inputs:
-    :param params: Dictionary of user variables.
-
-    Returns:
-    :returns: None. The function modifies the `params` dictionary in place.
+    The function modifies the `params` dictionary in place, appending the
+    OS-specific path separator to 'root_output_folder' if necessary.
     """
     dir_params = ["root_output_folder"]
 
@@ -69,17 +67,13 @@ def _make_dirs_end_in_sep(params: Dict[str, Any]) -> None:
 
 def _create_output_folder(out_folder: str) -> None:
     """
-    Creates the output folder if it does not already exist.
+    Create the output folder if it doesn't exist.
 
-    This helper function checks whether the specified `out_folder` exists. If it does not, the
-    function attempts to create the directory using `os.makedirs`. If directory creation fails,
-    it raises a `NotImplementedError` with an informative message.
+    Args:
+        out_folder (str): The path to the output folder.
 
-    Inputs:
-    :param out_folder: The path to the output folder.
-
-    Returns:
-    :returns: None. The function may raise a `NotImplementedError` if the folder cannot be created.
+    Raises:
+        NotImplementedError: If the folder cannot be created.
     """
     # Check root_output_folder exists
     if os.path.exists(out_folder) is False:

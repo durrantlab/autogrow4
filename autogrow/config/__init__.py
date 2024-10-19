@@ -13,11 +13,15 @@ def setup_params(orig_params: Dict[str, Any]) -> Dict[str, Any]:
     """
     Set up parameters, correct types, and set defaults.
 
-    Inputs:
-    :param orig_params: Dictionary of original parameters.
+    This function processes the original parameters, casts certain parameters to
+    the correct types, sets up filters, configures paths and multiprocessing,
+    and applies default values where necessary.
+
+    Args:
+        orig_params (Dict[str, Any]): Dictionary of original parameters.
 
     Returns:
-    :returns: corrected_params: Dictionary of corrected parameters.
+        Dict[str, Any]: Dictionary of corrected and completed parameters.
     """
     _cast_some_params(orig_params)
     _set_missing_first_generation_params(orig_params)
@@ -49,30 +53,26 @@ def _correct_param_to_default_types(
     params: Dict[str, Any], default_params_for_ref: Dict[str, Any]
 ) -> Dict[str, Any]:
     """
-    This checks that all the user variables loaded in use that same or comparable
-    datatypes as the defaults in params. This prevents type issues later in the
-    simulation.
+    Correct parameter types to match default types.
 
-    Given the many uservars and the possibility for intentional differences,
-    especially as the program is developed, this function tries to be
-    NOT OPINIONATED, only correcting for several obvious and easy to correct issues
-    of type discrepancies occur between params[key] and default_params_for_ref[key]
-        ie
-            1) params[key] = "true" and default_params_for_ref[key] = False
-                this script will not change params[key] to False... it will
-                convert "true" to True
-                ---> params[key]=True
-            2) params[key] = "1.01" and default_params_for_ref[key] = 2.1
-                this script will change params[key] from "1.01" to float(1.01)
+    This function checks that all user variables use the same or comparable
+    datatypes as the defaults. It corrects obvious type discrepancies while
+    trying to be non-opinionated about intentional differences.
 
-    Inputs:
-    :param dict params: Dictionary of user specified variables, to
-        correct.
-    :param dict default_params_for_ref: Dictionary of program defaults, used to 
-        identify the proper types.
-    
+    Examples:
+        1) If params[key] = "true" and default_params_for_ref[key] = False,
+           this function will convert "true" to True.
+        2) If params[key] = "1.01" and default_params_for_ref[key] = 2.1,
+           this function will change params[key] from "1.01" to float(1.01).
+
+    Args:
+        params (Dict[str, Any]): Dictionary of user-specified variables to
+            correct.
+        default_params_for_ref (Dict[str, Any]): Dictionary of program defaults,
+            used to identify the proper types.
+
     Returns:
-    :returns: dict params: Dictionary of corrected user specified variables
+        Dict[str, Any]: Dictionary of corrected user-specified variables.
     """
     for key in list(params.keys()):
         if key not in list(default_params_for_ref.keys()):
@@ -130,12 +130,16 @@ def _correct_param_to_default_types(
 
 def _cast_some_params(input_params: Dict[str, Any]) -> None:
     """
-    Some parameters must be cast to different types.
+    Cast specific parameters to their required types.
 
-    Required Variables go here.
+    This function ensures that certain parameters, particularly those related to
+    dimensions and docking settings, are cast to the correct data types.
 
-    Inputs:
-    :param dict input_params: The parameters. A dictionary of {parameter name: value}.
+    Args:
+        input_params (Dict[str, Any]): The parameters dictionary to be modified.
+
+    Raises:
+        Exception: If a required parameter cannot be cast to the correct type.
     """
 
     # Make sure the dimmensions are in floats. If in int convert to float.
@@ -155,6 +159,17 @@ def _cast_some_params(input_params: Dict[str, Any]) -> None:
 
 
 def _set_missing_first_generation_params(params: Dict[str, Any]) -> None:
+    """
+    Set missing parameters specific to the first generation.
+
+    This function checks for parameters specific to the first generation and
+    sets them if they're not defined. If the first-generation version is not
+    defined, it uses either the default value of 10 or the value defined for
+    subsequent generations.
+
+    Args:
+        params (Dict[str, Any]): The parameters dictionary to be modified.
+    """
     # Check parameters specific to the first generation. If not defined, use the
     # default of 10. If defined, use the same number for the first generation.
 
@@ -179,13 +194,18 @@ def _set_missing_first_generation_params(params: Dict[str, Any]) -> None:
 
 def _wrong_type_error(key: str, argv: Dict[str, Any], params: Dict[str, Any]) -> None:
     """
-    This function is used to raise an error when the user has inputted the wrong
-    type for a variable. It is used in the check_value_types function.
+    Raise an error for wrong parameter types.
 
-    Inputs:
-    :param str key: the key of the variable that is the wrong type
-    :param dict argv: the dictionary of user specified variables
-    :param dict params: the dictionary of program defaults
+    This function is used to raise an error when the user has input the wrong
+    type for a variable.
+
+    Args:
+        key (str): The key of the variable that is the wrong type.
+        argv (Dict[str, Any]): The dictionary of user-specified variables.
+        params (Dict[str, Any]): The dictionary of program defaults.
+
+    Raises:
+        IOError: With a message detailing the type mismatch.
     """
     printout = (
         "This parameter is the wrong type. \n \t Check :"
@@ -200,13 +220,19 @@ def _convert_param_to_int_if_needed(
     param_name: str, input_params: Dict[str, Any]
 ) -> None:
     """
-    Converts the parameter to an integer if needed.
+    Convert a parameter to an integer if needed.
 
-    If the parameter is a string representation of an integer or "None", it converts it accordingly.
+    This function attempts to convert the specified parameter to an integer. If
+    the parameter is "None" or None, it leaves it as None. If conversion fails,
+    it raises an exception.
 
-    Inputs:
-    :param param_name: Name of the parameter to convert.
-    :param input_params: Dictionary of input parameters.
+    Args:
+        param_name (str): Name of the parameter to convert.
+        input_params (Dict[str, Any]): Dictionary of input parameters.
+
+    Raises:
+        Exception: If the parameter cannot be converted to an integer and is not
+            None.
     """
     if param_name not in list(input_params.keys()):
         return

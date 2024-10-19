@@ -1,16 +1,11 @@
-"""Pre-SmileMerge_mcs_Filter
-
-This script should take an input of a randomly selected file containing a list
-of smiles.
-
-A random number function will be used to pick 2 non-identical numbers for 0 to
-the len(smile_list) Then those numbers are used to grab 2 non-identical
-molecules from smile_list Those 2 smiles are tested using the MCS function to
-find the most common structure (MCS). If MCS returns None (ie. no shared
-structures) then mol2 is reassigned using the random function generator. This
-iterates until a shared structure is returned.
 """
+Performs crossover operations on molecular structures using SMILES.
 
+This module implements a crossover algorithm for molecular structures, using the
+Most Common Substructure (MCS) method to identify suitable pairs of molecules
+for crossover. It includes functions for selecting molecules, finding MCS, and
+performing the actual crossover operation. TODO: Shouldn't be MCS specific here.
+"""
 import __future__
 
 import random
@@ -31,34 +26,28 @@ rdkit.RDLogger.DisableLog("rdApp.*")
 
 import autogrow.utils.mol_object_handling as MOH
 
+# TODO: Lots of this code is specific to the MCS crossover. But that code should
+# all be in the appropriate plugin, not here in this generic function.
 
 def _test_for_mcs(
     params: Dict[str, Any], mol_1: rdkit.Chem.rdchem.Mol, mol_2: rdkit.Chem.rdchem.Mol
 ) -> Optional[rdkit.Chem.rdFMCS.MCSResult]:
     """
-    Takes a ligand and a random selected molecule and looks for the Most
-    common structure. rdFMCS.FindMCS(mols) flags an error if there are no
-    common structures being compared. Try/except statement used to prevent
-    program crash when 2 unlike molecules are compared. mols is a list of the
-    molecules to be compare using rdFMCS.FindMCS
+    Finds the Most Common Substructure (MCS) between two molecules.
 
-    This can function with mol_1 and mol_2 having H's but we recommend using
-    this function with molecules with H's removed. If implicit H's are added
-    they will be recoginized as part of MCS. This means 1 atom in common with
-    3H's in common would pass a atom similarity count of 4 atoms shared, but
-    really its only 1 non-H atom...
-
-    Inputs:
-    :param dict params: User variables which will govern how the programs runs
-    :param rdkit.Chem.rdchem.Mol mol_1: the 1st rdkit molecule
-    :param rdkit.Chem.rdchem.Mol mol_2: the 2nd rdkit molecule
+    Args:
+        params (Dict[str, Any]): User parameters governing the MCS search.
+        mol_1 (rdkit.Chem.rdchem.Mol): The first RDKit molecule.
+        mol_2 (rdkit.Chem.rdchem.Mol): The second RDKit molecule.
 
     Returns:
-    :returns: <class 'rdkit.Chem.rdFMCS.MCSResult'> results: an MCSResults
-        object returns None if it fails to find MCS sufficient with the User
-        defined parameters.
-    """
+        Optional[rdkit.Chem.rdFMCS.MCSResult]: MCS result object if found,
+        None otherwise.
 
+    Note:
+        - Recommended to use with molecules that have H's removed.
+        - Implicit H's are recognized as part of MCS.
+    """
     mols = [mol_1, mol_2]
     time_timeout = params["max_time_mcs_prescreen"]
     min_number_atoms_matched = params["min_atom_match_mcs"]
@@ -94,26 +83,17 @@ def _find_random_lig2(
     ligand1_pair: PreDockedCompound,
 ) -> Union[PreDockedCompound, None]:
     """
-    Pick a random molecule from the list and check that it can be converted
-    into a rdkit mol object and then test for a satistifactory Most common
-    substructure (MCS) which satisifies the User specified minimum shared
-    substructure
+    Selects a random molecule with satisfactory MCS to the given ligand.
 
-    NECESSARY INCASE THE SMILE CANNOT BE USED (ie. valence issue)
-
-    Inputs:
-    :param dict params: User variables which will govern how the programs runs
-    :param list ligands_list: list of all the lignads to chose from
-    :param list ligand1_pair: information for the Ligand 1. This info includes
-        the name and SMILES string
+    Args:
+        params (Dict[str, Any]): User parameters governing the selection.
+        ligands_list (List[PreDockedCompound]): List of ligands to choose from.
+        ligand1_pair (PreDockedCompound): The reference ligand.
 
     Returns:
-    :returns: list mol2_pair: a set of information for a 2nd ligand (Lig2)
-        This includes the name and SMILES string this mol is from the ligands_list
-    :returns: returns None if no satistifactory matches were found
-        it returns None
+        Union[PreDockedCompound, None]: A suitable second ligand if found,
+        None otherwise.
     """
-
     count = 0
     shuffled_num_list = list(range(len(ligands_list) - 1))
     random.shuffle(shuffled_num_list)
@@ -152,17 +132,18 @@ def _find_random_lig2(
 
 def _convert_mol_from_smiles(smiles: str) -> Union[rdkit.Chem.rdchem.Mol, bool]:
     """
-    Test a SMILES string can be converted into an rdkit molecule
-    (rdkit.Chem.rdchem.Mol) and be sanitize. This also deprotanates them
+    Converts a SMILES string to an RDKit molecule object.
 
-    Inputs:
-    :param str smiles: a single SMILES String
+    Args:
+        smiles (str): SMILES string of the molecule.
 
     Returns:
-    :returns: rdkit.Chem.rdchem.Mol mol: an rdkit molecule object if it
-        properly converts from the SMILE and None
-    """
+        Union[rdkit.Chem.rdchem.Mol, bool]: RDKit molecule object if 
+        conversion is successful, False otherwise.
 
+    Note:
+        The function also sanitizes and deprotonates the molecule.
+    """
     try:
         mol = Chem.MolFromSmiles(smiles, sanitize=False)
     except Exception:
@@ -190,30 +171,23 @@ def make_crossovers(
     new_crossover_smiles_list: List[PreDockedCompound],
 ) -> Optional[List[PreDockedCompound]]:
     """
-    Make crossover compounds in a list to be returned.
+    Creates crossover compounds based on previous generation molecules.
 
-    This runs SmileClick and returns a list of new molecules.
-
-    Inputs:
-    :param dict params: User variables which will govern how the programs runs
-    :param int generation_num: the generation number indexed by 0
-    :param int number_of_processors: number of processors to multithread with
-    :param int num_crossovers_to_make: number of crossovers to make User
-        specified
-    :param list list_previous_gen_smiles: a list of molecules to seed the
-        current generations crossovers
-    :param list new_crossover_smiles_list: a list of ligands made by crossover
-        for this generation but in a previous run of crossover, i.e., if filtering
-        ligands removed some of the ligands generated by crossover, it requires
-        another loop of crossover to fill out the list so this is used to prevent
-        creating the same mol multiple times
+    Args:
+        params (Dict[str, Any]): User parameters governing the crossover process.
+        generation_num (int): Current generation number.
+        number_of_processors (int): Number of processors for multithreading.
+        num_crossovers_to_make (int): Number of crossovers to generate.
+        list_previous_gen_smiles (List[PreDockedCompound]): Molecules from previous generation.
+        new_crossover_smiles_list (List[PreDockedCompound]): Previously generated crossovers.
 
     Returns:
-    :returns: list new_ligands_list: list of new unique ligands with unique
-        names/IDS ["CCC" (zinc123+zinc456)Gen_1_Cross_123456"] return None if no
-        new mol gets generated
-    """
+        Optional[List[PreDockedCompound]]: List of new unique ligands, or None if
+        generation fails.
 
+    Note:
+        Uses multiprocessing to generate crossovers efficiently.
+    """
     # TODO: This gets defined again below, so what's the point of defining it
     # here?
     if not new_crossover_smiles_list:
@@ -350,25 +324,16 @@ def _run_smiles_merge_prescreen(
     ligand1_pair: PreDockedCompound,
 ) -> Optional[PreDockedCompound]:
     """
-    This function runs a series of functions to find two molecules with a
-    sufficient amount of shared common structure (most common structure = MCS)
+    Finds a molecule with sufficient shared structure to the given ligand.
 
-    These two parent molecules will be derived from a list of molecules from
-    the parent generation.
-
-    Inputs:
-    :param dict params: User variables which will govern how the programs runs
-    :param list ligands_list: list of all the lignads to chose from
-    :param list ligand1_pair: information for the Ligand 1. This info includes
-        the name and SMILES string
+    Args:
+        params (Dict[str, Any]): User parameters governing the process.
+        ligands_list (List[PreDockedCompound]): List of ligands to choose from.
+        ligand1_pair (PreDockedCompound): The reference ligand.
 
     Returns:
-    :returns: list lig2_pair: a set of information for a 2nd ligand (Lig2)
-        This includes the name and SMILES string this mol is from the
-        ligands_list. returns None if a ligand with a sufficient MCS can not be
-        found return None.
+        Optional[PreDockedCompound]: A suitable second ligand if found, None otherwise.
     """
-
     ligand_1_string = ligand1_pair.smiles
 
     # check if ligand_1 can be converted to an rdkit mol
@@ -387,33 +352,21 @@ def _do_crossovers_smiles_merge(
     ligands_list: List[PreDockedCompound],
 ) -> Optional[Tuple[str, PreDockedCompound, PreDockedCompound]]:
     """
-    This function will take the list of ligands to work on and the number in
-    that list for the Ligand 1.
+    Performs a crossover operation between two ligands.
 
-    It will then prescreen the Ligand 1 using the run_smiles_merge_prescreen
-    which should return either a None if no matches are found, or the Smile
-    string of a second ligand (ligand 2) which has some share common
-    substructure with Ligand 1.
-
-    This pair of ligands will be passed off to the
-    SmilesMerge.run_main_smiles_merge function which will execute a crossover
-    and return a new molecule
-
-    Inputs:
-    :param dict params: User variables which will govern how the programs runs
-    :param list lig1_smile_pair: a list with the SMILES string and info for
-        lig1
-    :param list ligands_list: a list of all the seed ligands from the previous
-        generation
+    Args:
+        params (Dict[str, Any]): User parameters governing the process.
+        lig1_smile_pair (PreDockedCompound): Information for the first ligand.
+        ligands_list (List[PreDockedCompound]): List of all seed ligands.
 
     Returns:
-    :returns: str ligand_new_smiles: a new mol's SMILES string
-    :returns: list lig1_smile_pair: a list of parent ligand 1's information
-    :returns: list lig2_pair: a list of the parent ligand 2's information
-    :returns: bool None: returns three Nones if there are no sufficient
-        matches
-    """
+        Optional[Tuple[str, PreDockedCompound, PreDockedCompound]]: 
+        Tuple containing new ligand SMILES and parent ligand information,
+        or None if crossover fails.
 
+    Note:
+        Attempts crossover up to 3 times before giving up.
+    """
     # Run the run_smiles_merge_prescreen of the ligand. This gets a new a lig2
     # which passed the prescreen.
     lig2_pair = _run_smiles_merge_prescreen(params, ligands_list, lig1_smile_pair)

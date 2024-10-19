@@ -33,7 +33,7 @@ class NoSmilesFilter(SmilesFilterBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Apply no SMILES filter. Useful to skip the SMILES-filter step.",
+                    help="Apply no SMILES filter. Useful to skip the SMILES-filter step. NOTE: You can also simply omit all SMILES filters from the user parameters to achieve the same effect.",
                 )
             ],
         )

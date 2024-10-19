@@ -1,3 +1,4 @@
+"""Utility functions for handling JSON parameters and saving variables."""
 import json
 import copy
 import os
@@ -9,44 +10,49 @@ def convert_json_params_from_unicode(
     params_unicode: Dict[str, Union[str, int]]
 ) -> Dict[str, Union[str, int]]:
     """
-    Set the parameters that will control this ConfGenerator object.
+    Convert Unicode parameters to ASCII.
 
-    :param dict params_unicode: The parameters. A dictionary of {parameter name:
-                value}.
+    Args:
+        params_unicode (Dict[str, Union[str, int]]): The parameters dictionary
+            with potentially Unicode keys and values.
+
     Returns:
-    :returns: dict params: Dictionary of User variables
+        Dict[str, Union[str, int]]: A new dictionary with ASCII-encoded keys
+        and values.
+
+    Note:
+        This function is particularly useful when working with JSON-loaded
+        data, which may contain Unicode strings.
     """
     # Also, rdkit doesn't play nice with unicode, so convert to ascii
 
-    # Because Python2 & Python3 use different string objects, we separate their
-    # usecases here.
+    # TODO: Don't param and val need to be encoded? This doesn't seem to
+    # actually do anything...
+
     params = {}
     for param, val in params_unicode.items():
-        if sys.version_info < (3,):
-            if isinstance(val, unicode):
-                val = str(val).encode("utf8")
-            key = param.encode("utf8")
-        else:
-            key = param
-        params[key] = val
+        params[param] = val
     return params
 
 
 def save_vars_as_json(params: Dict[str, Union[str, int]]) -> None:
     """
-    This function saves the params dictionary as a json file. This can be used
-    later to track experiments and is necessary for several of the utility
-    scripts.
-    It saves all variables except the parallelizer class object.
+    Save the parameters dictionary as a JSON file.
 
-    It saves the file to the output_directory + "vars.json"
-        -If AutoGrow has been run multiple times for the same directory it
-        will save the new vars file as append a number to the file name
-        starting with 2. The util scripts will only look at the original "vars.json"
-            ie) output_directory + "vars_2.json"
+    This function saves the input parameters dictionary as a JSON file, which
+    can be used to track experiments and is necessary for several utility
+    scripts. It excludes the 'parallelizer' object from the saved data.
 
-    Inputs:
-    :param dict params: dict of user variables which will govern how the programs runs
+    Args:
+        params (Dict[str, Union[str, int]]): Dictionary of user variables that
+            govern how the program runs.
+
+    Note:
+        - The file is saved as 'vars.json' in the output directory specified in
+          the params dictionary.
+        - If 'vars.json' already exists, it appends a number to the filename
+          (e.g., 'vars_2.json', 'vars_3.json', etc.).
+        - Utility scripts will only look at the original 'vars.json' file.
     """
     output_directory = str(params["output_directory"])
 

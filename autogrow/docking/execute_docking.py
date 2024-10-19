@@ -1,75 +1,42 @@
 """
-This script handles the docking and file conversion for docking.
+Handles docking and file conversion for molecular docking simulations.
+
+This module provides functions to run docking simulations using various docking
+programs and process the results. It includes common operations for different
+docking software and manages the workflow from pre-docked compounds to
+post-docked, ranked compounds.
 """
 import __future__
 
-import os
-from typing import Any, Dict, List, Optional, Type, Union, cast
-
-
-# from autogrow.docking.docking_class.docking_class_children \
-#                           import VinaDocking, QuickVina2Docking
-
-# from autogrow.docking.docking_class.docking_file_conversion import *
-# from autogrow.docking.docking_class.get_child_class import get_all_subclasses
-# from autogrow.docking.docking_class.parent_pdbqt_converter import ParentPDBQTConverter
+from typing import Any, Dict, List, cast
 from autogrow.plugins.plugin_managers import plugin_managers
 from autogrow.plugins.docking import DockingPluginManager
-from autogrow.types import PostDockedCompound, PreDockedCompound
+from autogrow.types import PreDockedCompound
 from autogrow.utils.logging import LogLevel, log_info
 
-
-# def pick_run_conversion_class_dict(
-#     conversion_choice: str,
-# ) -> Type[ParentPDBQTConverter]:
-#     """
-#     This will retrieve all the names of every child class of the parent class
-#     ParentDocking
-
-#     Inputs:
-#     :param list conversion_choice: List with the User specified docking
-#         choices
-
-#     Returns:
-#     :returns: object child_dict[conversion_choice]: the class for running the
-#         chosen docking method
-#     """
-
-#     children = get_all_subclasses(ParentPDBQTConverter)
-
-#     child_dict = {child.__name__: child for child in children}
-#     return child_dict[conversion_choice]
-
-
 def run_docking_common(
-    params: Dict[str, Any],
+    params: Dict[str, Any],  # TODO: Not used.
     current_gen_int: int,
     cur_gen_dir: str,
     smiles_file_new_gen: str,
     new_gen_predock_cmpds: List[PreDockedCompound],
 ) -> str:
     """
-    This section runs the functions common to all Docking programs.
+    Runs common docking operations for all docking programs.
 
-    IF ONE INCORPORATES A NEW DOCKING SOFTWARE, CONFIRM THAT ITS INPUT/OUTPUTS
-    CONFORM TO THIS SECTION.
+    This function handles the docking process, including running the docking
+    simulation, processing results, and ranking the docked compounds.
 
-    ############## VERY IMPORTANT SECTION ########################
-
-    Inputs:
-    :param dict params: User variables which will govern how the programs runs
-    :param int current_gen_int: the interger of the current generation indexed
-        to zero
-    :param str current_generation_dir: the current generation directory to
-        find the subfolder with pdb files
-    :param str smile_file_new_gen: the name of the file containing the
-        molecules in the new population
-    :param list new_gen_predock_cmpnds: a list of PreDockedCompound
-        objects for the new generation
+    Args:
+        params (Dict[str, Any]): User variables governing program execution.
+        current_gen_int (int): Current generation number.
+        cur_gen_dir (str): Directory for the current generation.
+        smiles_file_new_gen (str): Filename containing new population molecules.
+        new_gen_predock_cmpds (List[PreDockedCompound]): List of PreDockedCompound
+            objects for the new generation.
 
     Returns:
-    :returns: str unweighted_ranked_smile_file: the name of the
-        unweighted-ranked SMILES with their docking score
+        str: Filename of the unweighted-ranked SMILES with their docking scores.
     """
 
     docking_plugin_manager = cast(DockingPluginManager, plugin_managers.Docking)

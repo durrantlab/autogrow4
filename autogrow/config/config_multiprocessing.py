@@ -1,16 +1,32 @@
+"""
+Multiprocessing Configuration Module
+
+This module handles the configuration of multiprocessing settings for AutoGrow.
+"""
 from typing import Any, Dict
 
 
 def config_multiprocessing(params: Dict[str, Any]) -> Dict[str, Any]:
     """
-    This function handles the multiprocessing functions. It establishes a Paralellizer object
-    and adds it to the params dictionary.
-    Inputs:
-    :param dict params: dict of user variables which will govern how the programs runs
-    Returns:
-    :returns: dict params: dict of user variables which will govern how the programs runs
-    """
+    Configure multiprocessing settings and establish a Parallelizer object.
 
+    This function handles the multiprocessing configuration based on user
+    parameters. It creates a Parallelizer object and adds it to the params
+    dictionary. If the multithread mode is set to "serial", it ensures that
+    only one processor is used. TODO: Explain nuances here.
+
+    Args:
+        params (Dict[str, Any]): Dictionary of user variables governing how the
+            program runs.
+
+    Returns:
+        Dict[str, Any]: Updated dictionary of user variables with the
+            Parallelizer object added.
+
+    Notes:
+        If multithread_mode is set to "serial", the number_of_processors is
+        forcibly set to 1, regardless of the user's input.
+    """
     # Handle Serial overriding number_of_processors
     # serial fixes it to 1 processor
     if params["multithread_mode"].lower() == "serial":

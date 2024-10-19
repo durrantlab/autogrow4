@@ -1,6 +1,10 @@
 """
 Populates an AutoGrow generation via mutation, crossover, and elitism.
-Also filters and converts SMILES to 3d SDFS.
+
+This module handles the creation of a new generation of compounds in the 
+AutoGrow evolutionary algorithm. It includes functions for generating mutations
+and crossovers, selecting elite compounds, and managing the overall population
+generation process. It also handles filtering and conversion of SMILES to 3D SDFs.
 """
 import __future__
 
@@ -34,18 +38,23 @@ def populate_generation(
     params: Dict[str, Any], generation_num: int, cur_gen_dir: str
 ) -> Tuple[str, List[PreDockedCompound]]:
     """
-    This will run all of the mutations, crossovers, and filters for a single
-    generation. Populates a new generation of ligands.
+    Populates a new generation of ligands through mutation, crossover, and elitism.
 
-    Inputs:
-    :param dict params: a dictionary of all user variables
-    :param int generation_num: the generation number
-    :param str cur_gen_dir: the directory for the current generation
+    This function orchestrates the entire process of creating a new generation,
+    including mutation, crossover, elite selection, and file management.
+
+    Args:
+        params (Dict[str, Any]): Dictionary of all user variables.
+        generation_num (int): The current generation number.
+        cur_gen_dir (str): Directory for the current generation.
 
     Returns:
-    :returns: str full_generation_smiles_file: the name of the .smi file
-        containing the new population
-    :returns: list full_gen_smis: list with the new population of ligands
+        Tuple[str, List[PreDockedCompound]]: A tuple containing:
+            - The name of the .smi file containing the new population.
+            - A list of PreDockedCompound objects representing the new population.
+
+    Raises:
+        AssertionError: If the population fails to make enough compounds.
     """
     number_of_processors = int(params["number_of_processors"])
 
@@ -224,15 +233,27 @@ def _generate_mutations(
     cur_gen_dir: str,
 ) -> List[PreDockedCompound]:
     """
-    Generate mutations for the current generation.
+    Generates mutations for the current generation.
 
-    TODO: Need better docstrings here.
+    This function creates mutant compounds based on the seed list from the
+    previous generation, using the specified reaction library.
+
+    Args:
+        params (Dict[str, Any]): User parameters governing the mutation process.
+        generation_num (int): Current generation number.
+        num_mutations (int): Number of mutations to generate.
+        num_seed_diversity (int): Number of seed molecules chosen for diversity.
+        num_seed_dock_fitness (int): Number of seed molecules chosen for docking fitness.
+        src_cmpds (List[PreDockedCompound]): Source compounds from previous generation.
+        number_of_processors (int): Number of processors for parallel processing.
+        cur_gen_dir (str): Current generation directory.
 
     Returns:
-    List[PreDockedCompound]: List of mutation smiles.
+        List[PreDockedCompound]: List of newly generated mutant compounds.
+
+    Raises:
+        Exception: If insufficient mutants are generated.
     """
-
-
     # Get starting compounds for Mutations
     seed_list_mutations = _make_seed_list(
         src_cmpds, generation_num, num_seed_diversity, num_seed_dock_fitness,
@@ -326,10 +347,25 @@ def _generate_crossovers(
     number_of_processors: int,
 ) -> List[PreDockedCompound]:
     """
-    Generate crossovers for the current generation.
+    Generates crossovers for the current generation.
+
+    This function creates crossover compounds based on the seed list from the
+    previous generation.
+
+    Args:
+        params (Dict[str, Any]): User parameters governing the crossover process.
+        generation_num (int): Current generation number.
+        num_crossovers (int): Number of crossovers to generate.
+        num_seed_diversity (int): Number of seed molecules chosen for diversity.
+        num_seed_dock_fitness (int): Number of seed molecules chosen for docking fitness.
+        src_cmpds (List[PreDockedCompound]): Source compounds from previous generation.
+        number_of_processors (int): Number of processors for parallel processing.
 
     Returns:
-    List[PreDockedCompound]: List of crossover smiles.
+        List[PreDockedCompound]: List of newly generated crossover compounds.
+
+    Raises:
+        Exception: If insufficient crossovers are generated.
     """
     # Get starting compounds to seed Crossovers
     seed_list_crossovers = _make_seed_list(
@@ -416,10 +452,23 @@ def _get_elite_cmpds_prev_gen(
     generation_num: int,
 ) -> List[PreDockedCompound]:
     """
-    Make a list of the ligands chosen to pass through to the next generation via elitism.
-    This handles creating a seed list and defining the advance to the next generation final selection.
-    """
+    Selects elite compounds from the previous generation to advance.
 
+    This function handles the selection of top-performing compounds from the
+    previous generation to be carried forward without modification.
+
+    Args:
+        params (Dict[str, Any]): User parameters.
+        src_cmpds (List[PreDockedCompound]): Source compounds from previous generation.
+        num_elite_prev_gen (int): Number of elite compounds to select.
+        generation_num (int): Current generation number.
+
+    Returns:
+        List[PreDockedCompound]: List of selected elite compounds.
+
+    Raises:
+        Exception: If selection process fails or insufficient compounds are available.
+    """
     chosen_mol_to_pass_through_list = _make_pass_through_list(
         params, src_cmpds, num_elite_prev_gen, generation_num
     )
