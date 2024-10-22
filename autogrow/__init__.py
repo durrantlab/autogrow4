@@ -1,4 +1,17 @@
-"""AutoGrow core module providing version and citation information."""
+"""
+The AutoGrow framework for automated drug discovery and optimization.
+
+AutoGrow is a modular, plugin-based framework for automated drug discovery and
+optimization, combining evolutionary algorithms with molecular docking and
+cheminformatics. It supports various features including:
+
+- Automated drug design and optimization
+- Fragment-based mutation and crossover operations
+- Molecular docking with various backends
+- Drug-likeness and ADME filters
+- Parallel processing support
+- Flexible plugin system
+"""
 
 __version__ = "4.0.3"
 

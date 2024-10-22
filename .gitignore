@@ -13,3 +13,5 @@ docker/output_and_log_dir
 docker/output_and_log_dir/*
 docker/temp_user_files
 docker/temp_user_files/*
+docs/build
+docs/source

@@ -1,3 +1,15 @@
+"""
+Configuration system for managing AutoGrow settings and parameters.
+
+This package handles all aspects of configuration for AutoGrow, including:
+
+- Parameter parsing and validation
+- Path configuration and management
+- Multiprocessing setup
+- Default value definitions
+- JSON configuration utilities
+"""
+
 import contextlib
 from typing import Any, Dict
 
