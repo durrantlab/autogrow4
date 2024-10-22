@@ -1,3 +1,24 @@
+"""
+Rank-based selector plugin for AutoGrow.
+
+This module provides the RankSelector class, which implements a selection
+strategy based on ranking compounds according to their scores. 
+
+The RankSelector chooses compounds based on their rank in a specified score type
+(such as docking or diversity scores), selecting the top-ranked compounds up to
+a specified number. This selector is non-redundant, meaning it avoids selecting
+duplicate compounds.
+
+Key features:
+- Rank-based selection of compounds
+- Support for both docking and diversity scores
+- Non-redundant selection to ensure diversity
+- Configurable to favor either lower or higher scores
+
+Note: This selector is not recommended for small runs where the number of
+desired ligands might exceed the number of available ligands to choose from.
+"""
+
 import __future__
 
 from autogrow.plugins.selectors import SelectorBase
@@ -8,8 +29,24 @@ from autogrow.utils.logging import log_debug
 
 
 class RankSelector(SelectorBase):
+    """
+    A selector plugin that chooses compounds based on their rank in a specified
+    score.
+
+    This selector is non-redundant and selects the top-ranked compounds up to
+    the specified number. It's not recommended for small runs where the number
+    of desired ligands might exceed the number of ligands to choose from.
+    """
+
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
-        """Add command-line arguments required by the plugin."""
+        """
+        Add command-line arguments required by the plugin.
+
+        Returns:
+            Tuple[str, List[ArgumentVars]]: A tuple containing the plugin
+                category name and a list of ArgumentVars for the plugin's specific
+                arguments.
+        """
         return (
             "Selectors",
             [
@@ -23,7 +60,15 @@ class RankSelector(SelectorBase):
         )
 
     def validate(self, params: dict):
-        """Validate the provided arguments."""
+        """
+        Validate the provided arguments.
+
+        Args:
+            params (dict): A dictionary of parameters to validate.
+
+        Note:
+            This method is currently a placeholder and needs to be implemented.
+        """
         pass
 
     def run_selector(
@@ -34,25 +79,26 @@ class RankSelector(SelectorBase):
         favor_most_negative: bool = True,
     ) -> List[PreDockedCompound]:
         """
-        Given a data set and an idx number to select based on it will select the
-        top rank scores for that critera. The number is choses is defined by
-        number_to_chose.
+        Select compounds based on their rank in the specified score.
 
-        This is an alternative to the weight roulette style selectors.
+        This method selects the top-ranked compounds up to the specified number,
+        removing any redundancies in the process.
 
-        Inputs:
-        :param list usable_smiles: a list with all the information of all
-            the mols in the previous generation
-        :param int number_to_chose: the number of molecules to chose based on
-            diversity score
-        :param int score_type: Whether to consider docking or diversity scores.
-        :param bol favor_most_negative:    Set to False if you want to select the most
-            positive number is the best choice Set to False if you want to select the
-            most negative number
+        Args:
+            usable_smiles (List[PreDockedCompound]): A list of all compounds
+                from the previous generation.
+            num_to_choose (int): The number of compounds to select.
+            score_type (ScoreType): The type of score to use for ranking (e.g.,
+                docking or diversity).
+            favor_most_negative (bool): If True, lower scores are considered
+                better. Default is True.
 
         Returns:
-        :returns: list top_choice_smile_order: list of ligands chosen by a elitism
-            selection, without replacement,
+            List[PreDockedCompound]: A list of selected compounds.
+
+        Raises:
+            Exception: If usable_smiles is not a list, is empty, or if there are
+                fewer unique compounds than requested.
         """
         if type(usable_smiles) is not type([]):
             raise Exception("usable_smiles Must be a list, wrong data type")
@@ -135,6 +181,24 @@ class RankSelector(SelectorBase):
         docking_diversity_list: List[PreDockedCompound],
         usable_smiles: List[PreDockedCompound],
     ) -> List[PreDockedCompound]:
+        """
+        Finalize the list of selected compounds by retrieving full data for
+        each.
+
+        This method takes the list of selected compounds and retrieves their
+        full data from the usable_smiles list.
+
+        Args:
+            docking_diversity_list (List[PreDockedCompound]): The list of
+                selected compounds.
+            usable_smiles (List[PreDockedCompound]): The full list of available
+                compounds.
+
+        Returns:
+            List[PreDockedCompound]: A list of selected compounds with their
+                full data.
+        """
+
         # Get all the information about the chosen molecules. chosen_mol_list is
         # 1D list of all chosen ligands chosen_mol_full_data_list is a 1D list
         # with each item of the list having multiple pieces of information such

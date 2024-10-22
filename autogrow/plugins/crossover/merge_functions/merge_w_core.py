@@ -1,6 +1,8 @@
 """
-This script is handles the merging of two molecules and cleans up
-the molecule.
+Handles the merging of two molecules and cleans up the resulting molecule.
+
+This module provides functions for combining R-groups with a core molecule
+structure, managing atom connections, and cleaning up the final merged molecule.
 """
 import __future__
 
@@ -21,34 +23,33 @@ def merge_smiles_with_core(
     rs_chosen_smiles: List[List[str]], mcs_mol: rdkit.Chem.rdchem.Mol
 ) -> Optional[rdkit.Chem.rdchem.Mol]:
     """
-    This function runs most of the ligand merger portion of the script. It
-    merges the chosen R-groups (rs_chosen_smiles) with the common core
-    (mcs_mol) by bonding anchors in the core to the atoms bound to the
-    respective anchor in the R-group fragment.
+    Merge chosen R-groups with a common core molecule.
 
-    Variables used in this function
-        anchor_to_connection_dict: dict of anchor to connected atoms and bond
-        types.
+    This function combines the chosen R-groups (rs_chosen_smiles) with the 
+    common core (mcs_mol) by bonding anchors in the core to the atoms bound to 
+    the respective anchor in the R-group fragment.
 
-        example anchor_to_connection_dict = {10008: [1016, rdkit.Chem.rdchem.BondType.AROMATIC],
-                                            10007: [1013, rdkit.Chem.rdchem.BondType.AROMATIC]})
-
-        mol_frag, keys are isotope label, value is Idx.
-
-        example mol_frag_iso_to_idx_dict = {10007: 0, 10008: 8, 1013: 1, 1014: 3, 1015: 5, 1016: 7,
-                                           1017: 9, 1018: 6, 1019: 4, 1020: 2})
-
-    Inputs:
-    :param list rs_chosen_smiles: A list containing the  SMILES strings for
-        the chosen R-groups to add
-    :param rdkit.Chem.rdchem.Mol mcs_mol: an rdkit molecule representing the
-        Most common substructure (MCS) which will be expanded by adding R-groups
-        to make the child molecule
+    Args:
+        rs_chosen_smiles (List[List[str]]): A list containing the SMILES 
+            strings for the chosen R-groups to add.
+        mcs_mol (rdkit.Chem.rdchem.Mol): An RDKit molecule representing the 
+            Most Common Substructure (MCS) which will be expanded by adding 
+            R-groups to make the child molecule.
 
     Returns:
-    :returns: rdkit.Chem.rdchem.Mol rw_core_merg: The child molecule with the
-        added R-groups built onto the mcs_mol. returns None if the process fails
-        or if a None-type makes it through.
+        rdkit.Chem.rdchem.Mol: The child molecule with the added R-groups 
+            built onto the mcs_mol. Returns None if the process fails or if a 
+            None-type makes it through.
+
+    Note:
+        Variables used in this function:
+        - anchor_to_connection_dict: dict of anchor to connected atoms and 
+          bond types.
+          Example: {10008: [1016, rdkit.Chem.rdchem.BondType.AROMATIC],
+                    10007: [1013, rdkit.Chem.rdchem.BondType.AROMATIC]}
+        - mol_frag_iso_to_idx_dict: keys are isotope label, value is Idx.
+          Example: {10007: 0, 10008: 8, 1013: 1, 1014: 3, 1015: 5, 1016: 7,
+                    1017: 9, 1018: 6, 1019: 4, 1020: 2}
     """
     # convert to RWMOL class of molecule which are able to add and remove
     # bonds. RWMOL class is the Read and Write-Mol Class in rdkit.
@@ -89,13 +90,15 @@ def merge_smiles_with_core(
             # example anchor_to_connection_dict = {
             #           10008: [1016, rdkit.Chem.rdchem.BondType.AROMATIC],
             #           10007: [1013, rdkit.Chem.rdchem.BondType.AROMATIC]})
-            anchor_to_connection_dict = make_anchor_to_bonds_and_type_for_frag(mol_frag)
+            anchor_to_connection_dict = _make_anchor_to_bonds_and_type_for_frag(
+                mol_frag
+            )
 
             # Make Dict of all atoms in mol_frag, keys are isotope label,
             # value is Idx.
             # example mol_frag_iso_to_idx_dict = {10007: 0, 10008: 8, 1013: 1,
             #   1014: 3, 1015: 5, 1016: 7, 1017: 9, 1018: 6, 1019: 4, 1020: 2})
-            mol_frag_iso_to_idx_dict = make_dict_all_atoms_iso_to_idx_dict(mol_frag)
+            mol_frag_iso_to_idx_dict = _make_dict_all_atoms_iso_to_idx_dict(mol_frag)
 
             # Make list of atoms idx to remove the anchor atoms from the frag.
             # this is necessary to prevent the redundancy of multiple of the
@@ -119,7 +122,7 @@ def merge_smiles_with_core(
 
             # make a dictionary of every atom in rw_core_merg with Iso as the
             # key and the Idx as its value
-            core_merg_iso_to_idx_dict = make_dict_all_atoms_iso_to_idx_dict(
+            core_merg_iso_to_idx_dict = _make_dict_all_atoms_iso_to_idx_dict(
                 rw_core_merg
             )
 
@@ -130,7 +133,7 @@ def merge_smiles_with_core(
                 (
                     list_of_atom_idx,
                     list_of_bond_types,
-                ) = unpack_lists_of_atoms_and_bond_type(
+                ) = _unpack_lists_of_atoms_and_bond_type(
                     anchor_to_connection_dict,
                     anchor_atom_iso,
                     core_merg_iso_to_idx_dict,
@@ -149,25 +152,26 @@ def merge_smiles_with_core(
     return rw_core_merg
 
 
-def make_anchor_to_bonds_and_type_for_frag(
+def _make_anchor_to_bonds_and_type_for_frag(
     mol_frag: rdkit.Chem.rdchem.Mol,
 ) -> Dict[int, List[List[Union[int, rdkit.Chem.rdchem.BondType]]]]:
     """
-    Create a dictionary w anchor atoms as keys.
+    Create a dictionary with anchor atoms as keys.
 
-    for each key, the items are broken into lists of lists with the 1st number
+    For each key, the items are broken into lists of lists with the 1st number
     of each as the isotope of the atom bound and the second value as the bond
-    type to recreat bonds later to merge..
+    type to recreate bonds later to merge.
 
-    Inputs:
-    :param rdkit.Chem.rdchem.Mol mol_frag: an R-group which was converted into
-        a mol
+    Args:
+        mol_frag (rdkit.Chem.rdchem.Mol): An R-group which was converted into
+            a mol.
 
     Returns:
-    :returns: dict anchor_to_connection_dict: a dictionary of anchor atom
-        isolabels as keys, item is a list of the isolabel of the atom the key is
-        bound to and the bond type. ie. anchor_to_connection_dict[10007] =
-        [1004,Chem.BondType.AROMATIC]
+        Dict[int, List[List[Union[int, rdkit.Chem.rdchem.BondType]]]]: A 
+            dictionary of anchor atom isolabels as keys, item is a list of the 
+            isolabel of the atom the key is bound to and the bond type.
+            Example: anchor_to_connection_dict[10007] = 
+                     [1004, Chem.BondType.AROMATIC]
     """
     anchor_to_connection_dict = {}
     isos_anchors_idxs_to_remove = []
@@ -215,19 +219,19 @@ def make_anchor_to_bonds_and_type_for_frag(
     return anchor_to_connection_dict
 
 
-def make_dict_all_atoms_iso_to_idx_dict(mol: rdkit.Chem.rdchem.Mol) -> Dict[int, int]:
+def _make_dict_all_atoms_iso_to_idx_dict(mol: rdkit.Chem.rdchem.Mol) -> Dict[int, int]:
     """
     Make a dictionary of every atom in a molecule with Iso as the key and the
     Idx as its value.
 
-    Inputs:
-    :param rdkit.Chem.rdchem.Mol mol: an rdkit molecule
+    Args:
+        mol (rdkit.Chem.rdchem.Mol): An RDKit molecule.
 
-    Return
-    :returns: dict mol_iso_to_idx_dict: a dictionary of the iso-label of every
-        atom in the mol as the keys and the idx of that atom in the mol object.
-        ie) {1008: 7, 1009: 8, 1003: 4, 1004: 3, 1010: 9, 1006: 5, 1007: 6, 10000:
-        0, 10001: 1, 10002: 2, 1005: 10}
+    Returns:
+        Dict[int, int]: A dictionary of the iso-label of every atom in the mol 
+            as the keys and the idx of that atom in the mol object.
+            Example: {1008: 7, 1009: 8, 1003: 4, 1004: 3, 1010: 9, 1006: 5, 
+                      1007: 6, 10000: 0, 10001: 1, 10002: 2, 1005: 10}
     """
     mol_iso_to_idx_dict = {}
     for atom in mol.GetAtoms():
@@ -237,7 +241,7 @@ def make_dict_all_atoms_iso_to_idx_dict(mol: rdkit.Chem.rdchem.Mol) -> Dict[int,
     return mol_iso_to_idx_dict
 
 
-def unpack_lists_of_atoms_and_bond_type(
+def _unpack_lists_of_atoms_and_bond_type(
     anchor_to_connection_dict: Dict[
         int, List[List[Union[int, rdkit.Chem.rdchem.BondType]]]
     ],
@@ -248,23 +252,26 @@ def unpack_lists_of_atoms_and_bond_type(
     Iterate through all atoms which will be bound to the anchor and unpackage
     all the bond types in a list.
 
-    Inputs:
-    :param dict anchor_to_connection_dict: a dictionary of anchor isotope
-        labels as keys and a lists as the items. these lists have 2 variables, the
-        1st is the atom iso-label of the atom connected to an anchor, and the
-        second variable is the rdkit bond type. ie) {10004: [1007,
-        rdkit.Chem.rdchem.BondType.SINGLE]}
-    :param int anchor_atom_iso: the interger of an anchor atom's isotope
-        label. ie) 10004
-    :param dict core_merg_iso_to_idx_dict: a dictionary of atom's isotope
-        labels as keys and their corresponding Idx as the items. ie) {1008: 14,
-        1014: 11, 1009: 15, 1010: 7, 1007: 13, 10000: 0, 10001: 1, 10002: 2,
-        10003: 3, 10004: 4}
+    Args:
+        anchor_to_connection_dict (Dict[int, List[List[Union[int, 
+            rdkit.Chem.rdchem.BondType]]]]): A dictionary of anchor isotope
+            labels as keys and lists as the items. These lists have 2 
+            variables, the 1st is the atom iso-label of the atom connected to 
+            an anchor, and the second variable is the RDKit bond type.
+            Example: {10004: [1007, rdkit.Chem.rdchem.BondType.SINGLE]}
+        anchor_atom_iso (int): The integer of an anchor atom's isotope label.
+            Example: 10004
+        core_merg_iso_to_idx_dict (Dict[int, int]): A dictionary of atom's 
+            isotope labels as keys and their corresponding Idx as the items.
+            Example: {1008: 14, 1014: 11, 1009: 15, 1010: 7, 1007: 13, 
+                      10000: 0, 10001: 1, 10002: 2, 10003: 3, 10004: 4}
 
     Returns:
-    :returns: list list_of_atom_idx: a list containing the atom idx. ie) [13]
-    :returns: list list_of_bond_types: a list containing the bond types of
-        bonds connected to an anchor atom. ie) [rdkit.Chem.rdchem.BondType.SINGLE]
+        Tuple[List[int], List[rdkit.Chem.rdchem.BondType]]: 
+            - list_of_atom_idx: A list containing the atom idx. Example: [13]
+            - list_of_bond_types: A list containing the bond types of bonds 
+              connected to an anchor atom. 
+              Example: [rdkit.Chem.rdchem.BondType.SINGLE]
     """
     list_of_atom_idx: List[int] = []
     list_of_bond_types = []
@@ -315,17 +322,23 @@ def remove_all_isolabels(
     rw_core_merg: Union[rdkit.Chem.rdchem.Mol, rdkit.Chem.rdchem.RWMol]
 ) -> Optional[Union[rdkit.Chem.rdchem.Mol, rdkit.Chem.rdchem.RWMol]]:
     """
-    Remove all the isotope labels from a molecule. One of the finalizing steps
-    used when LigSmiles is nearly complete.
+    Remove all the isotope labels from a molecule.
 
-    Inputs:
-    :param rdkit.Chem.rdchem.RWMol rw_core_merg: a read-write rdkit molecule
-        of the child molecule (after R-groups have been added) to have the
-        isotopes to be removed
+    One of the finalizing steps used when LigSmiles is nearly complete.
+
+    Args:
+        rw_core_merg (Union[rdkit.Chem.rdchem.Mol, rdkit.Chem.rdchem.RWMol]): 
+            A read-write RDKit molecule of the child molecule (after R-groups 
+            have been added) to have the isotopes removed.
 
     Returns:
-    :returns: rdkit.Chem.rdchem.RWMol rw_core_merg: the read-write rdkit
-        molecule of the child molecule with all the isotope labels removed
+        Optional[Union[rdkit.Chem.rdchem.Mol, rdkit.Chem.rdchem.RWMol]]: The 
+            read-write RDKit molecule of the child molecule with all the 
+            isotope labels removed. Returns None if the input is None.
+
+    Raises:
+        TypeError: If rw_core_merg is not of type rdkit.Chem.rdchem.Mol or 
+            rdkit.Chem.rdchem.RWMol.
     """
     # None's often end up in a pipeline use of RDKit so we handle this data
     # type as return None instead of raise TypeError

@@ -1,3 +1,8 @@
+"""Utilities for file format conversion using OpenBabel.
+
+This module provides functions to construct and execute OpenBabel commands for
+converting between different molecular file formats.
+"""
 import os
 
 from autogrow.utils.logging import log_warning
@@ -6,6 +11,27 @@ from autogrow.utils.logging import log_warning
 def obabel_convert_cmd(
     in_file: str, out_file: str, obabel_path: str, extra_params: str = ""
 ) -> str:
+    """Constructs an OpenBabel conversion command string.
+
+    Creates a shell command for OpenBabel to convert between molecular file
+    formats. Handles special cases like 'vina' extension and supports additional
+    parameters.
+
+    Args:
+        in_file (str): Path to input file
+        out_file (str): Path for output file
+        obabel_path (str): Path to OpenBabel executable
+        extra_params (str, optional): Additional OpenBabel parameters. Defaults
+            to empty string
+
+    Returns:
+        str: Complete OpenBabel conversion command with error output suppressed
+
+    Note:
+        - Treats '.vina' extension as '.pdbqt'
+        - Redirects stdout and stderr to /dev/null
+        - Uses '-e' flag for error checking
+    """
     # prot_and_3d: bool = False
     in_ext = in_file.split(".")[-1]
     out_ext = out_file.split(".")[-1]
@@ -26,6 +52,28 @@ def obabel_convert_cmd(
 def obabel_convert(
     in_file: str, out_file: str, obabel_path: str, extra_params: str = ""
 ) -> bool:
+    """Executes an OpenBabel conversion between file formats.
+
+    Attempts to convert a molecular file from one format to another using
+    OpenBabel. Validates the conversion by checking the output file exists and
+    is non-empty.
+
+    Args:
+        in_file (str): Path to input file
+        out_file (str): Path for output file
+        obabel_path (str): Path to OpenBabel executable
+        extra_params (str, optional): Additional OpenBabel parameters. Defaults
+            to empty string
+
+    Returns:
+        bool: True if conversion succeeds, False otherwise
+
+    Note:
+        Logs warnings via log_warning() if conversion fails for any reason:
+        - Command execution fails
+        - Output file is not created
+        - Output file is empty
+    """
     cmd = obabel_convert_cmd(in_file, out_file, obabel_path, extra_params)
     try:
         os.system(cmd)

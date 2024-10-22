@@ -1,3 +1,11 @@
+"""
+Defines base classes and plugin manager for SMILES to 3D SDF conversion in
+AutoGrow.
+
+This module provides the SmiTo3DSdfBase abstract base class and
+SmiTo3DSdfPluginManager for managing SMILES to 3D SDF conversion plugins.
+"""
+
 from abc import ABC, abstractmethod
 from argparse import ArgumentParser
 import os
@@ -15,8 +23,26 @@ from autogrow.plugins.plugin_base import PluginBase
 
 
 class SmiTo3DSdfBase(PluginBase):
+    """
+    An abstract base class for SMILES to 3D SDF converter plugins.
+
+    This class defines the interface for SMILES to 3D SDF converter plugins and
+    provides some common utility methods.
+    """
+
     def run(self, **kwargs) -> List[PreDockedCompound]:
-        """Run the plugin(s) with provided arguments."""
+        """
+        Run the SMILES to 3D SDF conversion with provided arguments.
+
+        Args:
+            **kwargs: Arbitrary keyword arguments. Expected keys:
+                - predock_cmpds (List[PreDockedCompound]): Compounds to convert.
+                - pwd (str): Working directory path.
+
+        Returns:
+            List[PreDockedCompound]: Updated list of compounds with 3D SDF
+                paths.
+        """
         pwd = kwargs["pwd"]
         if pwd[-1] != os.sep:
             pwd += os.sep
@@ -27,31 +53,63 @@ class SmiTo3DSdfBase(PluginBase):
         self, predock_cmpds: List[PreDockedCompound], pwd: str
     ) -> List[PreDockedCompound]:
         """
-        run_smi_to_sdf_converter is needs to be implemented in each class.
+        Convert SMILES to 3D SDF files.
 
-        Inputs:
-        :param str predock_cmpds: A list of PreDockedCompound objects. Each
-            conains a SMILES string, a name, etc.
-        :param str pwd: The path to the working directory.
+        This method must be implemented by subclasses.
+
+        Args:
+            predock_cmpds (List[PreDockedCompound]): List of compounds to
+                convert.
+            pwd (str): Working directory path.
 
         Returns:
-        :returns: List[PreDockedCompound]: A list of PreDockedCompound,
-            the same as the input, but with the sdf_3d_path field filled in.
+            List[PreDockedCompound]: Updated list of compounds with 3D SDF
+                paths.
         """
         pass
 
     def validate(self, params: dict):
-        """Validate the provided arguments."""
+        """
+        Validate the arguments provided for the SMILES to 3D SDF converter.
+
+        This method is a placeholder and should be overridden by subclasses if
+        specific validation is required.
+
+        Args:
+            params (dict): A dictionary of parameters provided to the plugin.
+        """
         pass
 
 
 class SmiTo3DSdfPluginManager(PluginManagerBase):
+    """
+    A plugin manager for SMILES to 3D SDF converter plugins.
+
+    This class manages the selection and execution of SMILES to 3D SDF converter
+    plugins.
+    """
+
     def execute(self, **kwargs) -> List[PreDockedCompound]:
         """
-        Run the plugin with provided arguments.
+        Execute the selected SMILES to 3D SDF converter plugin.
 
-        Inputs:
-        :param dict kwargs: a dictionary of arguments to pass to the plugin
+        This method selects and runs the appropriate SMILES to 3D SDF converter
+        based on the provided parameters.
+
+        Args:
+            **kwargs: Arbitrary keyword arguments to pass to the selected
+                plugin.
+
+        Returns:
+            List[PreDockedCompound]: Updated list of compounds with 3D SDF
+                paths.
+
+        Raises:
+            Exception: If no SMILES to 3D SDF converter is specified or if
+                multiple are selected.
+
+        Note:
+            Only one SMILES to 3D SDF converter can be selected at a time.
         """
         smi_to_sdf_converters = self.get_selected_plugins_from_params()
 

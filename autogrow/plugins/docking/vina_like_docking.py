@@ -1,11 +1,21 @@
+"""
+This module implements a docking plugin for Vina-like docking software.
+
+The VinaLikeDocking class in this module provides functionality to perform
+molecular docking using Vina, QVina2, Smina, or similar software. It handles
+the conversion of input files, execution of docking commands, and processing
+of docking results.
+
+Classes:
+    VinaLikeDocking: A docking class for Vina-like docking software.
+"""
+
 import __future__
-import glob
 import os
-import sys
 
 # from autogrow.plugins.plugin_managers import plugin_managers
 from autogrow.plugins.docking import DockingBase
-from typing import Any, Dict, List, Optional, Tuple
+from typing import List, Tuple
 from autogrow.config.argparser import ArgumentVars
 from autogrow.types import PostDockedCompound, PreDockedCompound
 from autogrow.utils.logging import log_warning
@@ -13,8 +23,23 @@ from autogrow.utils.obabel import obabel_convert, obabel_convert_cmd
 
 
 class VinaLikeDocking(DockingBase):
+    """
+    A docking class for Vina-like docking software (Vina, QVina2, Smina, etc.).
+
+    This class provides methods to set up and execute docking runs using
+    Vina-like software, including file format conversion, parameter setting,
+    and result processing.
+    """
+
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
-        """Add command-line arguments required by the plugin."""
+        """
+        Add command-line arguments required by the Vina-like docking plugin.
+
+        Returns:
+            Tuple[str, List[ArgumentVars]]: A tuple containing the argument
+            group name and a list of ArgumentVars objects defining the
+            command-line arguments for Vina-like docking.
+        """
         return (
             "Vina-Like Docking Options",
             [
@@ -84,7 +109,15 @@ class VinaLikeDocking(DockingBase):
         )
 
     def validate(self, params: dict):
-        """Validate the provided arguments."""
+        """
+        Validate the provided arguments for Vina-like docking.
+
+        Args:
+            params (dict): A dictionary of plugin parameters to validate.
+
+        Raises:
+            ValueError: If the required 'obabel_path' is not defined in params.
+        """
         if "obabel_path" not in params:
             raise ValueError(
                 f"obabel_path must be defined in the params to use {self.name}"
@@ -94,15 +127,19 @@ class VinaLikeDocking(DockingBase):
         self, predocked_cmpds: List[PreDockedCompound]
     ) -> List[PostDockedCompound]:
         """
-        run_docking is needs to be implemented in each class.
+        Run docking using Vina-like software on a list of compounds.
 
-        Inputs:
-        :param PreDockedCompound predocked_cmpds: A List of PreDockedCompound
-            objects.
+        This method prepares input files, executes docking commands, and
+        processes docking results for multiple compounds in parallel.
+
+        Args:
+            predocked_cmpds (List[PreDockedCompound]): A list of
+                PreDockedCompound objects to be docked.
 
         Returns:
-        :returns: List[PostDockedCompound]: A list of PostDockedCompound
-            objects, each containing the score and a docked (posed) SDF file.
+            List[PostDockedCompound]: A list of PostDockedCompound objects,
+            each containing the docking score and the path to the docked
+            (posed) SDF file.
         """
         # Convert receptor (PDB format) to PDBQT format if necessary
         receptor_pdbqt = self.params["receptor_path"] + "qt"
@@ -212,13 +249,13 @@ class VinaLikeDocking(DockingBase):
     #######################################
     def get_dock_cmd(self, lig_pdbqt_filename) -> str:
         """
-        Dock the ligand pdbqt files in a given directory using AutoDock Vina
+        Generate the docking command for a given ligand using Vina-like software.
 
-        Inputs:
-        :param str lig_pdbqt_filename: the ligand pdbqt filename
+        Args:
+            lig_pdbqt_filename (str): The filename of the ligand in PDBQT format.
 
         Returns:
-        :returns: str torun: the command to run
+            str: The complete command string to run the docking for the given ligand.
         """
         params = self.params
 
@@ -251,38 +288,21 @@ class VinaLikeDocking(DockingBase):
 
         return torun
 
-        # log_info(f"Docking: {lig_pdbqt_filename}")
-
-        # with LogLevel():
-        #     results = self.execute_docking_vina(torun)
-
-        #     if results is None or results == 256:
-        #         made_changes = self.replace_atoms_not_handled_by_forcefield(
-        #             lig_pdbqt_filename
-        #         )
-        #         if made_changes is True:
-        #             results = self.execute_docking_vina(torun)
-        #             if results == 256 or results is None:
-        #                 log_warning(
-        #                     f"Ligand failed to dock after corrections: {lig_pdbqt_filename}"
-        #                 )
-        #     #     else:
-        #     #         print(f"\tFinished Docking: {lig_pdbqt_filename}")
-        #     # else:
-        #     #     print(f"\tFinished Docking: {lig_pdbqt_filename}")
-
     def replace_atoms_not_handled_by_forcefield(self, lig_pdbqt_filename):
         """
-        Replaces atoms not handled by the forcefield to prevent errors. Atoms
-        include B and Si.
+        Replace atoms not handled by the forcefield to prevent docking errors.
 
-        Inputs:
-        :param str lig_pdbqt_filename: the ligand pdbqt filename
+        This method replaces problematic atoms (e.g., B, Si) with 'A' in the
+        PDBQT file to allow docking to proceed.
+
+        Args:
+            lig_pdbqt_filename (str): The filename of the ligand in PDBQT format.
 
         Returns:
-        :returns: bool retry: If True it will be ligand will be redocked, if
-            False its dones and wont be docked again.
+            bool: True if changes were made and the ligand should be redocked,
+            False otherwise.
         """
+        # TODO: Never used, but might consider in the future...
         # VINA/QuickVINA and MGL have problems with the forcefields for
         # certain atom types To correct this, Autodock Vina suggests replacing
         # the
@@ -328,24 +348,6 @@ class VinaLikeDocking(DockingBase):
             printout_info += f"\n\t Verify for this ligand: {lig_pdbqt_filename}\n"
             print(printout_info)
         return retry
-
-    def execute_docking_vina(self, command):
-        """
-        Run a single docking execution command
-
-        Inputs:
-        :param str command: string of command to run.
-
-        Returns:
-        :returns: int result: the exit output for the command. If its None of
-            256 it failed.
-        """
-        try:
-            result = os.system(command)
-        except Exception:
-            result = None
-            print(f"Failed to execute: {command}")
-        return result
 
     ##########################################
     # Convert the dock outputs to a usable formatted .smi file

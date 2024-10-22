@@ -1,3 +1,22 @@
+"""
+Plugin management system.
+
+This module provides the base classes for AutoGrow's plugin management system,
+which enables extensible, modular functionality through plugins. It handles
+plugin discovery, loading, validation, setup, execution, and caching.
+
+The system consists of two main components:
+    - PluginManagerBase: Abstract base class for plugin managers that handle
+      specific types of plugins (e.g., filters, mutations).
+    - PluginBase: Abstract base class that all plugins must inherit from,
+      defining the required interface.
+
+Plugin managers automatically discover and load plugins from their respective
+directories. Plugins can be selectively enabled via command-line arguments,
+which are automatically registered during plugin loading. Results can be cached
+to enable quick restart of interrupted runs.
+"""
+
 import os
 import importlib
 import inspect
@@ -13,7 +32,29 @@ if TYPE_CHECKING:
 
 
 class PluginManagerBase(ABC):
+    """
+    Abstract base class for plugin managers in the AutoGrow system.
+
+    This class handles plugin loading, setup, execution, and caching. It
+    provides a framework for managing different types of plugins and their
+    lifecycle.
+
+    Attributes:
+        plugin_base_class (Type[PluginBase]): The base class for plugins managed
+            by this manager.
+        plugins (Dict[str, PluginBase]): Dictionary of loaded plugin instances.
+        params (dict): Parameters for configuring the plugin manager and its
+            plugins.
+    """
+
     def __init__(self, plugin_base_class: Type[PluginBase]):
+        """
+        Initialize the plugin manager.
+
+        Args:
+            plugin_base_class (Type[PluginBase]): The base class for plugins
+                managed by this manager.
+        """
         self.plugin_base_class = plugin_base_class
 
         # Initially loads all plugins
@@ -21,21 +62,28 @@ class PluginManagerBase(ABC):
 
     @property
     def name(self) -> str:
+        """
+        Get the name of the current class.
+
+        Returns:
+            str: The name of the current class.
+        """
         return self.__class__.__name__
 
     def setup_plugin_manager(
         self, params: dict, plugin_managers: Optional["PluginManagers"] = None,
     ):
         """
-        Sets up the plugin manager with the provided parameters. NOTE: This
-        sets up the plugin manager, not individual plugins.
-        
-        Inputs:
-        :param dict params: a dictionary of parameters to set up the plugin
-            manager.
-        :param PluginManagers plugin_managers: a PluginManagers object that
-            contains all the plugin managers. This is used to access a plugin
-            from within another plugin. Simple import would be circular.
+        Set up the plugin manager with provided parameters.
+
+        Note: This sets up the plugin manager, not individual plugins.
+
+        Args:
+            params (dict): Dictionary of parameters to set up the plugin
+                manager.
+            plugin_managers (Optional[PluginManagers]): PluginManagers object
+                containing all plugin managers. Used to access plugins from
+                within other plugins to avoid circular imports.
         """
         self.params = params
 
@@ -57,33 +105,39 @@ class PluginManagerBase(ABC):
 
     def setup_plugins(self, **kwargs):
         """
-        Sets up the plugins with the provided arguments. This is required because
-        one can imagine a scenario where you want to setup a plugin only once,
-        then execute the run function multiple times.
-        
-        NOTE: This sets up the plugins, not the plugin manager.
+        Set up the plugins with provided arguments.
 
-        Inputs:
-        :param dict kwargs: a dictionary of arguments to pass to the plugin
-            setup functions.
+        This allows for scenarios where you want to setup a plugin once, then
+        execute the run function multiple times.
+
+        Note: This sets up the plugins, not the plugin manager.
+
+        Args:
+            **kwargs: Arguments to pass to the plugin setup functions.
         """
         for plugin in self.plugins.values():
             plugin.setup(**kwargs)
 
     def get_selected_plugins_from_params(self) -> Optional[List[str]]:
         """
-        Extract the list of plugins to load from the provided parameters
-        (self.params). Children classes should override this method.
+        Extract the list of plugins to load from the provided parameters.
 
         Returns:
-        :returns: list of str: the list of plugins to load, or None if the
-            program should load all plugins.
+            Optional[List[str]]: List of plugins to load, or None to load all
+            plugins. Child classes should override this method.
         """
         # Get the keys taht self.plugins and self.params have in common.
         keys_in_common = set(self.plugins.keys()) & set(self.params.keys())
         return [key for key in keys_in_common if self.params[key]]
 
     def load_plugins(self) -> Dict[str, PluginBase]:
+        """
+        Load all available plugins from the plugin directory.
+
+        Returns:
+            Dict[str, PluginBase]: Dictionary mapping plugin names to plugin
+                instances.
+        """
         plugins: Dict[str, PluginBase] = {}
         plugin_directory = os.path.dirname(os.path.abspath(__file__))
         # Get the package name
@@ -120,6 +174,22 @@ class PluginManagerBase(ABC):
         return plugins
 
     def run(self, cache_dir: Optional[str] = None, **kwargs) -> Any:
+        """
+        Run the selected plugin(s) with optional caching.
+
+        Note: If your plugin runs only once per generation, you should cache it
+        using the cache_dir parameter. If your plugin runs multiple times per
+        generation (e.g., mutation or crossover plugins), you should cache it
+        manually elsewhere.
+
+        Args:
+            cache_dir (Optional[str]): Directory for caching results. If
+                provided (same as gen_dir), attempts to use caching.
+            **kwargs: Additional arguments to pass to execute().
+
+        Returns:
+            Any: The result of executing the plugin(s).
+        """
         # Selects which plugin(s) to run and runs them. If cache_dir is provided
         # (same as gen_dir), attempts to use caching.
 
@@ -148,6 +218,18 @@ class PluginManagerBase(ABC):
 
     @abstractmethod
     def execute(self, **kwargs) -> Any:
+        """
+        Execute the selected plugin(s).
+
+        This method should be implemented by child classes to define how
+        plugins are selected and executed.
+
+        Args:
+            **kwargs: Arguments to pass to the plugin execution.
+
+        Returns:
+            Any: The result of executing the plugin(s).
+        """
         # Selects which plugin(s) to run and runs them. Defiend on child
         # classes.
         pass

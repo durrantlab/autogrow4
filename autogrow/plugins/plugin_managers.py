@@ -1,5 +1,15 @@
+"""
+Central management of AutoGrow's plugin system.
+
+This module provides centralized access and coordination for all of AutoGrow's
+plugin managers. It defines a PluginManagers class that maintains instances of
+all plugin managers and provides utilities for their setup and coordination.
+
+A single global instance of PluginManagers is created and maintained to provide
+consistent access to all plugin managers throughout the application.
+"""
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict
 
 from autogrow.plugins.crossover import CrossoverBase, CrossoverPluginManager
 from autogrow.plugins.docking import DockingBase, DockingPluginManager
@@ -15,6 +25,14 @@ from autogrow.plugins.smiles_filters import SmilesFilterBase, SmilesFilterPlugin
 
 @dataclass
 class PluginManagers:
+    """
+    Container class for all plugin managers in the AutoGrow system.
+
+    This class serves as a central point of access for all plugin managers,
+    making it easy to coordinate their setup and usage. It maintains one
+    instance of each type of plugin manager.
+    """
+
     SmilesFilter: SmilesFilterPluginManager = SmilesFilterPluginManager(
         SmilesFilterBase
     )
@@ -31,7 +49,19 @@ class PluginManagers:
 plugin_managers = PluginManagers()
 
 
-def setup_plugin_managers(params):
+def setup_plugin_managers(params: Dict[str, Any]):
+    """
+    Set up all plugin managers with the provided parameters.
+
+    This function iterates through all plugin managers defined in the
+    PluginManagers class and sets up each one with the provided parameters. Each
+    manager is initialized with access to all other managers to enable
+    inter-plugin coordination.
+
+    Args:
+        params (Dict[str, Any]): Configuration parameters for all plugin
+            managers.
+    """
     # Iterate through all plugin managers in the PluginManagers class and setup each one
     for name, plugin_manager in PluginManagers.__annotations__.items():
         getattr(plugin_managers, name).setup_plugin_manager(params, plugin_managers)

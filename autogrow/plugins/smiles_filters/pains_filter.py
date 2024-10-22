@@ -1,13 +1,16 @@
-"""#PAINS Filter
-This will filter a ligand using a PAINS filter. PAINS eliminates of Pan Assay
-Interference Compounds using substructure a search.
+"""
+PAINS Filter for removing Pan Assay Interference Compounds.
 
-This will include PAINS_A, PAINS_B, and PAINS_C filtering.
+This module implements the PAINS (Pan Assay Interference Compounds) filter to
+eliminate compounds that are likely to interfere with biological assays. It uses
+substructure search to identify and filter out these compounds.
 
-This script relies on the RDKit predefined FilterCatalog. FilterCatalog is
-    maintained by RDKit.
+This implementation includes PAINS_A, PAINS_B, and PAINS_C filtering.
 
-If using the PAINS filter please cite: Baell JB, Holloway GA. New Substructure
+The filter relies on the RDKit predefined FilterCatalog, which is maintained by
+RDKit.
+
+If using the PAINS filter, please cite: Baell JB, Holloway GA. New Substructure
 Filters for Removal of Pan Assay Interference Compounds (PAINS) from Screening
 Libraries and for Their Exclusion in Bioassays. J Med Chem 53 (2010) 2719D40.
 doi:10.1021/jm901137j.
@@ -23,36 +26,34 @@ from rdkit.Chem.FilterCatalog import FilterCatalogParams  # type: ignore
 
 class PAINSFilter(SmilesFilterBase):
     """
-    This will filter a ligand using a PAINS filter. PAINS eliminates of Pan
-    Assay Interference Compounds using substructure a search.
+    Implements the PAINS filter for removing Pan Assay Interference Compounds.
 
-    This will include PAINS_A, PAINS_B, and PAINS_C filtering.
+    This class filters ligands using PAINS filters, which eliminate Pan Assay
+    Interference Compounds using substructure search. It includes PAINS_A,
+    PAINS_B, and PAINS_C filtering.
 
-    This script relies on the RDKit predefined FilterCatalog. FilterCatalog is
-        maintained by RDKit.
+    The filter relies on the RDKit predefined FilterCatalog, which is maintained
+    by RDKit.
 
-    If using the PAINS filter please cite: Baell JB, Holloway GA. New
-    Substructure Filters for Removal of Pan Assay Interference Compounds
-    (PAINS) from Screening Libraries and for Their Exclusion in Bioassays. J
-    Med Chem 53 (2010) 2719D40. doi:10.1021/jm901137j.
-
-    Inputs:
-    :param class ParentFilter: a parent class to initialize off
+    If using the PAINS filter, please cite: Baell JB, Holloway GA. New
+    Substructure Filters for Removal of Pan Assay Interference Compounds (PAINS)
+    from Screening Libraries and for Their Exclusion in Bioassays. J Med Chem 53
+    (2010) 2719D40. doi:10.1021/jm901137j.
     """
 
     def __init__(self) -> None:
         """
-        This loads in the filters which will be used.
+        Initialize the PAINS filter by loading the required filters.
         """
         self.filters_list = self.get_filters_list()
 
     def get_filters_list(self) -> List[FilterCatalog.FilterCatalog]:
         """
-        This loads in the filters which will be used.
+        Load and return the list of PAINS filters.
 
         Returns:
-        :returns: rdkit.Chem.rdfiltercatalog.FilterCatalog filters: A set of
-            RDKit Filters
+            List[FilterCatalog.FilterCatalog]: A list of RDKit PAINS Filters
+                including PAINS_A, PAINS_B, PAINS_C, and general PAINS.
         """
         # Make a list of all the different PAINS Filters. PAINS should include
         # PAINS_A,PAINS_B, and PAINS_C, but because RDKit documentation
@@ -77,21 +78,22 @@ class PAINSFilter(SmilesFilterBase):
 
     def run_filter(self, mol: rdkit.Chem.rdchem.Mol) -> bool:
         """
-        Runs a PAINS filter by matching common false positive molecules to the
-        current mol.
+        Run the PAINS filter on a given molecule.
 
-        This will filter a ligand using a PAINS filter. PAINS eliminates of
-        Pan Assay Interference Compounds using substructure a search.
+        This method applies the PAINS filter to eliminate Pan Assay Interference
+        Compounds using substructure search. It checks the molecule against
+        PAINS_A, PAINS_B, PAINS_C, and general PAINS filters.
 
         Based on the PAINS filter implementation in RDKit described in
         http://rdkit.blogspot.com/2016/04/changes-in-201603-release-filtercatalog.html
 
-        Inputs:
-        :param rdkit.Chem.rdchem.Mol object mol: An rdkit mol object to be
-            tested if it passes the filters Returns:
+        Args:
+            mol (rdkit.Chem.rdchem.Mol): An RDKit mol object to be tested
+                against the filter criteria.
+
         Returns:
-        :returns: bool bool: True if the mol passes the filter;
-            False if it fails the filter
+            bool: True if the molecule passes all PAINS filters (no matches
+                found in any filter list), False otherwise.
         """
         # This is our set of all the PAINS filters
         for filters in self.filters_list:
@@ -106,7 +108,17 @@ class PAINSFilter(SmilesFilterBase):
         return True
 
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
-        """Add command-line arguments required by the plugin."""
+        """
+        Add command-line arguments required by the plugin.
+
+        This method defines the command-line arguments specific to the PAINS
+        Filter. It allows users to enable the filter via command-line options.
+
+        Returns:
+            Tuple[str, List[ArgumentVars]]: A tuple containing the argument
+                group name and a list of ArgumentVars objects defining the
+                command-line arguments.
+        """
         return (
             "SMILES Filters",
             [

@@ -1,3 +1,11 @@
+"""
+Implements base classes and utilities for shell parallelization in AutoGrow.
+
+This module provides the ShellCmdResult dataclass, ShellParallelizerBase
+abstract base class, and ShellParallelizerPluginManager for managing shell
+parallelization plugins.
+"""
+
 from abc import abstractmethod
 from dataclasses import dataclass
 import glob
@@ -15,14 +23,41 @@ from autogrow.utils.logging import log_debug, log_warning
 
 @dataclass
 class ShellCmdResult:
+    """
+    Represents the result of a shell command execution.
+
+    Attributes:
+        cmd (str): The shell command that was executed.
+        return_code (int): The return code of the command execution.
+        output (str): The combined stdout and stderr output of the command.
+    """
+
     cmd: str
     return_code: int
     output: str
 
 
 class ShellParallelizerBase(PluginBase):
+    """
+    An abstract base class for shell parallelizer plugins.
+
+    This class defines the interface for shell parallelizer plugins and provides
+    some common utility methods.
+    """
+
     def run(self, **kwargs) -> List[ShellCmdResult]:
-        """Run the plugin with provided arguments."""
+        """
+        Run the plugin with provided arguments.
+
+        Args:
+            **kwargs: Arbitrary keyword arguments. Expected keys:
+                - cmds (List[str]): A list of shell commands to run in parallel.
+                - nprocs (int, optional): The number of processors to use.
+
+        Returns:
+            List[ShellCmdResult]: A list of ShellCmdResult objects for each
+                command.
+        """
         nprocs = kwargs.get("nprocs", -1)
         return self.run_cmds_in_parallel(cmds=kwargs["cmds"], nprocs=nprocs)
 
@@ -31,29 +66,35 @@ class ShellParallelizerBase(PluginBase):
         self, cmds: List[str], nprocs: int = -1
     ) -> List[ShellCmdResult]:
         """
-        run_cmds_in_parallel is needs to be implemented in each class.
+        Run a list of shell commands in parallel.
 
-        Inputs:
-        :param List[str] cmds: A list of shell commands to run in parallel.
-        :param int nprocs: The number of processors to use. Default is -1 (use
-            all available).
+        This method must be implemented by subclasses.
+
+        Args:
+            cmds (List[str]): A list of shell commands to run in parallel.
+            nprocs (int, optional): The number of processors to use. Defaults
+                to -1 (use all available).
 
         Returns:
-        :returns: List[ShellCmdResult]: A list of ShellCmdResult objects, each
-            containing the command, return code, and output.
+            List[ShellCmdResult]: A list of ShellCmdResult objects for each
+                command.
         """
         pass
 
     def get_nprocs_to_use(self, nprocs: int) -> int:
         """
-        Get the number of processors to use.
+        Determine the number of processors to use for parallelization.
 
-        Inputs:
-        :param int nprocs: The number of processors to use. Default is -1 (use
-            all available).
+        Args:
+            nprocs (int): The requested number of processors. If -1, uses all
+                available.
 
         Returns:
-        :returns: int: The number of processors to use.
+            int: The number of processors to use.
+
+        Note:
+            If the number of CPUs cannot be determined, it defaults to 1 and
+            logs a warning.
         """
         if nprocs == -1:
             if os.cpu_count() is None:
@@ -65,16 +106,31 @@ class ShellParallelizerBase(PluginBase):
 
 
 class ShellParallelizerPluginManager(PluginManagerBase):
+    """
+    A plugin manager for shell parallelizer plugins.
+
+    This class manages the selection and execution of shell parallelizer
+    plugins.
+    """
+
     def execute(self, **kwargs) -> List[ShellCmdResult]:
         """
-        Run the plugin with provided arguments.
+        Execute the selected shell parallelizer plugin.
 
-        Inputs:
-        :param dict kwargs: a dictionary of arguments to pass to the plugin
+        Args:
+            **kwargs: Arbitrary keyword arguments to pass to the selected
+                plugin.
 
         Returns:
-        :returns: List[ShellCmdResult]: A list of ShellCmdResult objects, each
-            containing the command, return code, and output.
+            List[ShellCmdResult]: A list of ShellCmdResult objects from the
+                executed commands.
+
+        Raises:
+            Exception: If no shell parallelizer is specified or if multiple are
+                selected.
+
+        Note:
+            Only one shell parallelizer can be selected at a time.
         """
         shell_parallelizers = self.get_selected_plugins_from_params()
 

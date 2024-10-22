@@ -1,11 +1,14 @@
-"""#BRENK filter
-This will filter a ligand using the BRENK filter for lead-likeliness, by
-matching common false positive molecules to the current mol..
+"""
+Implements the BRENK filter for lead-likeness screening in AutoGrow.
 
-This script relies on the RDKit predefined FilterCatalog. FilterCatalog is
+This module provides the BRENKFilter class that filters ligands using the BRENK
+screening filter for lead-likeness. It matches common false positive molecules
+to the current molecule.
+
+The BRENK filter relies on the RDKit predefined FilterCatalog. FilterCatalog is
 maintained by RDKit.
 
-If using the BRENK filter please cite: Brenk R et al. Lessons Learnt from
+If using the BRENK filter, please cite: Brenk R et al. Lessons Learnt from
 Assembling Screening Libraries for Drug Discovery for Neglected Diseases.
 ChemMedChem 3 (2008) 435-444. doi:10.1002/cmdc.200700139.
 """
@@ -21,34 +24,28 @@ from autogrow.config.argparser import ArgumentVars
 
 class BRENKFilter(SmilesFilterBase):
     """
-    This will filter a ligand using a BRENK screening filter for
-    lead-likeliness, by matching common false positive molecules to the
-    current mol.
+    A filter that uses the BRENK screening filter for lead-likeness.
 
-    This script relies on the RDKit predefined FilterCatalog. FilterCatalog is
-        maintained by RDKit.
+    This class implements a filter that matches common false positive molecules
+    to the current molecule using the BRENK screening filter. It relies on the
+    RDKit predefined FilterCatalog.
 
-    If using the BRENK filter please cite: Brenk R et al. Lessons Learnt from
-    Assembling Screening Libraries for Drug Discovery for Neglected Diseases.
-    ChemMedChem 3 (2008) 435-444. doi:10.1002/cmdc.200700139.
-
-    Inputs:
-    :param class ParentFilter: a parent class to initialize off of.
+    Attributes:
+        filters (FilterCatalog.FilterCatalog): A set of RDKit BRENK filters.
     """
 
     def __init__(self) -> None:
         """
-        This loads in the filters which will be used.
+        Initialize the BRENKFilter by loading the BRENK filters.
         """
         self.filters = self.get_filters()
 
     def get_filters(self) -> FilterCatalog.FilterCatalog:
         """
-        This loads in the filters which will be used.
+        Load the BRENK filters from RDKit.
 
         Returns:
-        :returns: rdkit.Chem.rdfiltercatalog.FilterCatalog filters: A set of
-            RDKit Filters
+            FilterCatalog.FilterCatalog: A set of RDKit BRENK filters.
         """
         # Make a list of the BRENK filter.
         params = FilterCatalogParams()
@@ -58,19 +55,23 @@ class BRENKFilter(SmilesFilterBase):
 
     def run_filter(self, mol: rdkit.Chem.rdchem.Mol) -> bool:
         """
-        Runs a BRENK filter by matching common false positive molecules to the
-        current mol. Filters for for lead-likeliness.
+        Run the BRENK filter on a given molecule.
 
-        Based on the PAINS filter implementation in RDKit described in
+        This method matches common false positive molecules to the current
+        molecule to filter for lead-likeness. It's based on the PAINS filter
+        implementation in RDKit described in:
         http://rdkit.blogspot.com/2016/04/changes-in-201603-release-filtercatalog.html
 
-        Inputs:
-        :param rdkit.Chem.rdchem.Mol object mol: An rdkit mol object to be
-            tested if it passes the filters
+        Args:
+            mol (rdkit.Chem.rdchem.Mol): An RDKit molecule object to be tested.
 
         Returns:
-        :returns: bool bool: True if the mol passes the filter; False if it
-            fails the filter
+            bool: True if the molecule passes the filter; False if it fails.
+
+        Note:
+            If the molecule matches any molecule in the filter list, it fails
+            the filter (returns False). If no matches are found, it passes the
+            filter (returns True).
         """
         # If the mol matches a mol in the filter list. we return a False (as it
         # failed the filter). If No matches are found to filter list this will
@@ -79,7 +80,15 @@ class BRENKFilter(SmilesFilterBase):
         return self.filters.HasMatch(mol) is not True
 
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
-        """Add command-line arguments required by the plugin."""
+        """
+        Add command-line arguments specific to the BRENK filter.
+
+        Returns:
+            Tuple[str, List[ArgumentVars]]: A tuple containing:
+                - The name of the argument group ("SMILES Filters")
+                - A list with one ArgumentVars object defining the argument to
+                  enable the BRENK filter
+        """
         return (
             "SMILES Filters",
             [

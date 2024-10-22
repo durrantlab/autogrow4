@@ -1,3 +1,10 @@
+"""Provides base classes and manager for selector plugins in AutoGrow.
+
+This module defines base selector classes and plugin manager for handling compound
+selection operations in the genetic algorithm. It includes abstract methods that must
+be implemented by specific selector plugins.
+"""
+
 from abc import abstractmethod
 import random
 from typing import Any, List, Optional, Tuple, cast
@@ -9,6 +16,20 @@ from autogrow.utils.logging import LogLevel, log_info
 
 
 class SelectorBase(PluginBase):
+    """Run the plugin with provided arguments.
+
+    Args:
+        **kwargs: Dictionary containing:
+            usable_smiles (List[PreDockedCompound]): Available compounds to
+                select from
+            score_type (ScoreType): Type of score to use for selection
+            num_to_choose (int): Number of compounds to select
+            favor_most_negative (bool): If True, lower scores are preferred
+
+    Returns:
+        List[PreDockedCompound]: Selected compounds
+    """
+
     def run(self, **kwargs) -> Any:
         """Run the plugin with provided arguments."""
         usable_smiles: List[PreDockedCompound] = kwargs["usable_smiles"]
@@ -31,6 +52,21 @@ class SelectorBase(PluginBase):
         score_type: ScoreType,
         favor_most_negative: bool = True,
     ) -> List[PreDockedCompound]:
+        """Abstract method for implementing selector-specific compound
+        selection logic.
+
+        Args:
+            usable_smiles (List[PreDockedCompound]): Available compounds to
+                select from
+            num_to_choose (int): Number of compounds to select
+            score_type (ScoreType): Type of score to use for selection (docking
+                or diversity)
+            favor_most_negative (bool, optional): If True, lower scores are
+                preferred. Defaults to True.
+
+        Returns:
+            List[PreDockedCompound]: Selected compounds
+        """
         pass
 
     @abstractmethod
@@ -39,6 +75,22 @@ class SelectorBase(PluginBase):
         docking_diversity_list: List[PreDockedCompound],
         usable_smiles: List[PreDockedCompound],
     ) -> List[PreDockedCompound]:
+        """Abstract method for finalizing the combined docking and diversity
+        selections.
+
+        This method is called after both docking-based and diversity-based
+        selections are complete to perform any final processing on the combined
+        list.
+
+        Args:
+            docking_diversity_list (List[PreDockedCompound]): Combined list of
+                compounds selected by both docking and diversity criteria
+            usable_smiles (List[PreDockedCompound]): Master list of all
+                available compounds with complete data
+
+        Returns:
+            List[PreDockedCompound]: Finalized list of selected compounds
+        """
         pass
 
     def get_chosen_mol_full_data_list(
@@ -46,38 +98,32 @@ class SelectorBase(PluginBase):
         chosen_mol_list: List[PreDockedCompound],
         usable_smiles: List[PreDockedCompound],
     ) -> List[PreDockedCompound]:
-        """
-        This function will take a list of chosen molecules and a list of all the
-        SMILES which could have been chosen and all of the information about those
-        SMILES (ie. ligand name, SMILES string, docking score, diversity score...)
+        """Get complete data for selected molecules from master list.
 
-        It will iterated through the list of chosen mols (chosen_mol_list), get
-        all the information from the usable_smiles Then it appends the
-        corresponding item in usable_smiles to a new list
-        weighted_order_list
+        Retrieves full compound information for a list of selected molecules by
+        matching against a master list. Sorts by docking score, matches by
+        SMILES string, and randomly shuffles the final list to prevent order
+        bias.
 
-        --- an issue to be aware of is that there may be redundancies in both
-            chosen_mol_list and usable_smiles this causes a many-to-many
-            problem so if manipulating this section you need to solve for
-            one-to-many
-        ---for this reason if this gets altered it will raise an
-            AssertionError if the one-to-many is violated.
-
-        It then shuffles the order of the list which to prevent biasing by the
-        order of the ligands.
-
-        It will return that list of the chosen molecules in a randomly shuffled
-        order.
-
-        Inputs:
-        :param list chosen_mol_list: a list of chosen molecules
-        :param list usable_smiles: List of all the possibly chosen ligs
-            and all the of the info about it (ie. ligand name, SMILES string, docking
-            score, diversity score...) ["CCCC"  "zinc123"   1    -0.1  -0.1]
+        Args:
+            chosen_mol_list (List[PreDockedCompound]): Selected compounds to
+                retrieve data for
+            usable_smiles (List[PreDockedCompound]): Master list of all
+                compounds with complete data
 
         Returns:
-        :returns: list weighted_order_list: a list of all the SMILES with all of
-            the associated information in a random order
+            List[PreDockedCompound]: Randomly shuffled list of selected
+                compounds with complete data
+
+        Raises:
+            AssertionError: If number of matches found doesn't equal number of
+                chosen molecules
+
+        Note:
+            - When matching compounds between lists, there may be redundancies
+              causing a many-to-many mapping problem. This function enforces
+              one-to-one mapping. 
+            - Random shuffling prevents biases from compound ordering
         """
         sorted_list = sorted(
             usable_smiles, key=lambda x: x.get_previous_score(ScoreType.DOCKING)
@@ -101,14 +147,24 @@ class SelectorBase(PluginBase):
 
 class SelectorPluginManager(PluginManagerBase):
     def execute(self, **kwargs) -> List[PreDockedCompound]:
-        """
-        Run the plugin with provided arguments.
+        """Execute selector plugin to choose compounds based on scores.
 
-        Inputs:
-        :param dict kwargs: a dictionary of arguments to pass to the plugin
+        Runs the selected plugin to choose compounds based on both docking and
+        diversity scores. Combines the selected compounds into a single list.
+
+        Args:
+            **kwargs: Dictionary containing:
+                usable_smiles (List[PreDockedCompound]): Available compounds
+                num_seed_dock_fitness (int): Number to choose by docking score
+                num_seed_diversity (int): Number to choose by diversity score
+                favor_most_negative (bool): If True, lower scores are preferred
 
         Returns:
-        :returns: bool: True if the molecule passes the filter, False if it fails
+            List[PreDockedCompound]: Combined list of compounds selected by both
+                docking and diversity scores
+
+        Raises:
+            Exception: If no selector specified or multiple selectors selected
         """
         selectors = self.get_selected_plugins_from_params()
 

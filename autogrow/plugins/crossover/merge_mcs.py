@@ -1,3 +1,5 @@
+"""Module for Maximum Common Substructure (MCS) based crossover in AutoGrow."""
+
 from typing import List, Optional, Tuple
 from autogrow.config.argparser import ArgumentVars
 from autogrow.plugins.crossover import CrossoverBase
@@ -16,8 +18,23 @@ rdkit.RDLogger.DisableLog("rdApp.*")
 
 
 class MergeMCS(CrossoverBase):
+    """
+    Implements Maximum Common Substructure (MCS) based crossover for molecules.
+
+    This class creates new molecules by merging two existing molecules based on
+    their maximum common substructure. It handles molecule sanitization,
+    protonation, MCS finding, and R-group selection and merging.
+    """
+
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
-        """Add command-line arguments required by the plugin."""
+        """
+        Add command-line arguments required by the plugin.
+
+        Returns:
+            Tuple[str, List[ArgumentVars]]: A tuple containing the plugin name
+                and a list of ArgumentVars objects defining the required
+                command-line arguments.
+        """
         # TODO: These parameter names are not descriptive.
 
         return (
@@ -66,19 +83,20 @@ class MergeMCS(CrossoverBase):
 
     def run_crossover(self, lig_string_1: str, lig_string_2: str) -> Optional[str]:
         """
-        This runs the main script for SmileMerge.
+        Run the main script for SmileMerge.
 
-        Inputs:
-        :param dict params: User variables which will govern how the programs runs
-
-        :param str lig_string_1: smile string for lig 1
-        :param str lig_string_2: smile string for lig 2. example: lig_string_1 =
-            "[N-] = [N+] = NCC(O)COc1cccc2ccccc12"; example: lig_string_2 = "C#
-            CCOc1ccc2ccccc2c1CO"
+        Args:
+            lig_string_1 (str): SMILES string for the first ligand.
+            lig_string_2 (str): SMILES string for the second ligand.
 
         Returns:
-        :returns: str ligand_new_smiles: smile string for the child ligand derived
-            from mol1 and mol2. Returns None if it failed at any point.
+            Optional[str]: SMILES string for the child ligand derived from mol1
+                and mol2. Returns None if it failed at any point.
+
+        Notes:
+            Example inputs:
+            lig_string_1 = "[N-]=[N+]=NCC(O)COc1cccc2ccccc12"
+            lig_string_2 = "C#CCOc1ccc2ccccc2c1CO"
         """
         # lig_string_1 = "[N-] = [N+] = NCC(O)COc1cccc2ccccc12"
         # lig_string_2 = "C# CCOc1ccc2ccccc2c1CO"
@@ -169,16 +187,19 @@ class MergeMCS(CrossoverBase):
         self, ligand_new_mol: rdkit.Chem.rdchem.Mol
     ) -> Optional[str]:
         """
-        This function processes the ligand_new_mol.
-        It either returns the SMILES string of ligand_new_mol (ligand_new_smiles)
-        or None if it failed at any step.
+        Process the new ligand molecule.
 
-        Inputs:
-        :param str lig_string_1: smile string for lig 1
+        This function sanitizes the new molecule, removes isotope labels and
+        fragments, checks for unassigned atoms, and converts the molecule to a
+        SMILES string.
+
+        Args:
+            ligand_new_mol (rdkit.Chem.rdchem.Mol): The new ligand molecule to
+                process.
 
         Returns:
-        :returns: str ligand_new_smiles: either returns the SMILES
-            string of ligand_new_mol or None if it failed at any step.
+            Optional[str]: The SMILES string of the processed ligand molecule,
+                or None if processing failed at any step.
         """
         ligand_new_mol = MOH.check_sanitization(ligand_new_mol)
         if ligand_new_mol is None:

@@ -34,7 +34,21 @@ class SmilesFilterBase(PluginBase):
     """
 
     def run(self, **kwargs) -> bool:
-        """Run the plugin(s) with provided arguments."""
+        """
+        Execute the filter plugin with the provided molecule.
+
+        This method serves as a standardized entry point for all filter plugins,
+        delegating the actual filtering logic to the plugin-specific
+        `run_filter` implementation.
+
+        Args:
+            **kwargs: Keyword arguments containing filter parameters, must
+                include: mol (rdkit.Chem.rdchem.Mol): The molecule to be filtered
+
+        Returns:
+            bool: True if the molecule passes the filter criteria, False
+                otherwise
+        """
         return self.run_filter(kwargs["mol"])
 
     @abstractmethod

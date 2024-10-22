@@ -1,3 +1,10 @@
+"""
+Implements a roulette selector for choosing compounds in AutoGrow.
+
+This module provides a RouletteSelector class that selects compounds to advance
+to the next generation using a weighted roulette selection method.
+"""
+
 import __future__
 
 from autogrow.plugins.selectors import SelectorBase
@@ -10,8 +17,31 @@ from autogrow.utils.logging import log_debug
 
 
 class RouletteSelector(SelectorBase):
+    """
+    A selector that uses weighted roulette selection to choose compounds.
+
+    This selector chooses compounds to advance to the next generation using a
+    weighted roulette selection method. The selection is stochastic and done
+    without replacement.
+    """
+
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
-        """Add command-line arguments required by the plugin."""
+        """
+        Add command-line arguments specific to the Roulette Selector.
+
+        This method defines the command-line arguments that can be used to
+        configure the Roulette Selector.
+
+        Returns:
+            Tuple[str, List[ArgumentVars]]: A tuple containing:
+                - The name of the argument group ("Selectors")
+                - A list with one ArgumentVars object defining the argument
+                  to enable the Roulette Selector
+
+        Note:
+            The Roulette Selector doesn't require additional parameters beyond
+            its activation flag.
+        """
         return (
             "Selectors",
             [
@@ -25,7 +55,17 @@ class RouletteSelector(SelectorBase):
         )
 
     def validate(self, params: dict):
-        """Validate the provided arguments."""
+        """
+        Validate the arguments provided for the Roulette Selector.
+
+        This method is a placeholder for argument validation. Currently, the
+        Roulette Selector doesn't require any additional validation beyond its
+        activation.
+
+        Args:
+            params (dict): A dictionary of parameters provided to the selector.
+                Not used in the current implementation.
+        """
         pass
 
     def run_selector(
@@ -36,20 +76,27 @@ class RouletteSelector(SelectorBase):
         favor_most_negative: bool = True,
     ) -> List[PreDockedCompound]:
         """
-        Make a list of ligands chosen by a random weighted roulette selection,
-        without replacement, weighted by its docking score
+        Select compounds using weighted roulette selection without replacement.
 
-        Inputs:
-        :param list usable_smiles: a list with all the information of all
-            the mols in the previous generation
-        :param int number_to_chose: the number of molecules to chose based on
-            docking score
-        :param str score_type: an string describing either "docking" or
-            "diversity" this tells the function how to adjust the weighted scores
+        Args:
+            usable_smiles (List[PreDockedCompound]): A list of all compounds
+                from the previous generation.
+            num_to_choose (int): The number of compounds to select based on
+                their score.
+            score_type (ScoreType): Specifies whether to use "docking" or
+                "diversity" scores for weighting.
+            favor_most_negative (bool): If True, lower scores are considered
+                better. Defaults to True.
 
         Returns:
-        :returns: list top_choice_smile_order: list of ligands chosen by a random
-            weighted selection, without replacement, -weighted by its docking score
+            List[PreDockedCompound]: List of selected compounds.
+
+        Raises:
+            Exception: If usable_smiles is not a list or is empty.
+
+        Note:
+            The selection is weighted by the compounds' scores, with the
+                weighting adjusted based on the score_type.
         """
         if type(usable_smiles) is not type([]):
             raise Exception("usable_smiles Must be a list, wrong data type")
@@ -85,21 +132,30 @@ class RouletteSelector(SelectorBase):
         favor_most_negative: bool,
     ) -> List[float]:
         """
-        This function adjusts the scores appropriately. This is where we weight
-        the scores so smaller differences are more pronounced and where we adjust
-        for the fact that docking score is better with a more negative number
-        while diversity score is the smallest positive number is the most unique.
+        Adjust scores for weighting in the selection process.
 
-        Inputs:
-        :param list usable_smiles: a list with all the information of all
-            the mols in the previous generation
-        :param str score_type: an string describing either "docking"
-            or "diversity" this tells the function how to adjust the weighted
-            scores
+        This method adjusts the scores to emphasize smaller differences and
+        account for the directionality of the scores (i.e., whether lower or
+        higher scores are better).
+
+        Args:
+            usable_smiles (List[PreDockedCompound]): A list of all compounds
+                from the previous generation.
+            score_type (ScoreType): Specifies whether to use "docking" or
+                "diversity" scores.
+            favor_most_negative (bool): If True, lower scores are considered
+                better.
 
         Returns:
-        :returns: list adjusted: list of ligand scores which have been weighted
-            and adjusted
+            List[float]: A list of adjusted scores.
+
+        Raises:
+            Exception: If an invalid score_type is provided.
+
+        Note:
+            For diversity scores, the adjustment is (1/x^2) to make smaller
+            (more diverse) scores more prominent. For docking scores, the
+            adjustment depends on the favor_most_negative parameter.
         """
         if score_type == ScoreType.DIVERSITY:
             weight_scores = [
@@ -139,6 +195,19 @@ class RouletteSelector(SelectorBase):
         docking_diversity_list: List[PreDockedCompound],
         usable_smiles: List[PreDockedCompound],
     ) -> List[PreDockedCompound]:
+        """
+        Retrieve full data for selected compounds.
+
+        Args:
+            docking_diversity_list (List[PreDockedCompound]): List of selected
+                compounds.
+            usable_smiles (List[PreDockedCompound]): List of all available
+                compounds with their full data.
+
+        Returns:
+            List[PreDockedCompound]: A list of selected compounds with their
+                complete information.
+        """
         # Get all the information about the chosen molecules. chosen_mol_list is
         # 1D list of all chosen ligands chosen_mol_full_data_list is a 1D list
         # with each item of the list having multiple pieces of information such

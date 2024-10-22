@@ -35,30 +35,35 @@ import multiprocessing
 
 
 class Parallelizer(object):
-    """
-    Abstract parallelization class
+    """Abstract class for parallel computation management.
+
+    Exposes a simple map interface that takes a function and list of arguments
+    and returns the result of applying the function to each argument.
+    Automatically detects system parallel capabilities and chooses between
+    'multiprocessing' or 'serial' modes to optimize performance.
+
+    Attributes:
+        mode (str): Mode used for parallelization. Determined by mode parameter
+            and environment. Defaults to multiprocessing unless specified
+            otherwise.
+        parallel_obj: Instantiated parallelization class object. Set to None for
+            simpler methods like serial.
+        num_procs (int): Number of processors/nodes to use. If None, uses all
+            available. Forced to 1 if mode is serial.
     """
 
     def __init__(self, mode=None, num_procs=None):
-        """
-        This will initialize the Parallelizer class and kick off the specific classes for multiprocessing.
+        """Initializes parallelizer and configures specific multiprocessing class.
 
-        Default num_procs is all the processesors possible
-
-        This will also establish:
-            :self   str     self.mode:  The mode which will be used for this paralellization. This determined by mode and the enviorment
-                                        default is multiprocessing on all processors unless stated otherwise.
-            :self   class   self.parallel_obj: This is the obstantiated object of the class of parallizations.
-                            ie)
-                            self.parallel_obj will be set to None for simpler parallization methods like serial
-            :self   int     self.num_processor:   the number of processors or nodes that will be used. If None than we will use all available nodes/processors
-                                                This will be overriden and fixed to a single processor if mode==serial
-        Inputs:
-        :param str mode: the multiprocess mode to be used, ie) serial, multiprocessing, or None:
-                            if None then we will try to pick a possible multiprocessing choice. This should only be used for
-                            top level coding. It is best practice to specify which multiprocessing choice to use.
-        :param int num_procs:   the number of processors or nodes that will be used. If None than we will use all available nodes/processors
-                                        This will be overriden and fixed to a single processor if mode==serial
+        Args:
+            mode (str, optional): Multiprocess mode to use ('serial',
+                'multiprocessing', or None). If None, attempts to choose an
+                available multiprocessing option. Best practice is to specify mode
+                explicitly, especially for sub-programs used by larger programs.
+                Defaults to None.
+            num_procs (int, optional): Number of processors/nodes to use. If None,
+                uses all available. Overridden to 1 if mode is serial. Defaults to
+                None.
         """
         if mode in ["none", "None"]:
             mode = None
@@ -79,39 +84,42 @@ class Parallelizer(object):
             self.num_procs = 1
 
         elif num_procs is None or num_procs < 1:
-            self.num_procs = self.compute_nodes()
+            self.num_procs = self._compute_nodes()
 
         else:
             self.num_procs = num_procs
 
     def run(self, args, func, num_procs=None, mode=None):
-        """
-        Run a task in parallel across the system.
+        """Runs a task in parallel across the system.
 
-        Mode can be one of 'multiprocessing' or 'none' (serial). If it is not
-        set, the best value will be determined automatically.
+        Args:
+            args (list): List of tuples/lists, each containing all parameters
+                required by func for a single task
+            func (callable): Function object to be executed
+            num_procs (int, optional): Number of processors to use. If None, uses
+                value from initialization. Cannot override in serial mode. Defaults
+                to None.
+            mode (str, optional): Multiprocess mode to use. Must be
+                'multiprocessing' or 'serial'. If None, uses mode from
+                initialization. Primarily for developers. Best to leave as None.
+                Defaults to None.
 
-        By default, this method will use the full resources of the system. However,
-        if the mode is set to 'multiprocessing', num_procs can control the number
-        of threads initialized when it is set to a nonzero value.
-
-        Example: If one wants to multiprocess function  def foo(x,y) which takes 2 ints and one wants to test all permutations of x and y between 0 and 2:
-                    args = [(0,0),(1,0),(2,0),(0,1),(1,1),(2,1),(0,2),(1,2),(2,2)]
-                    func = foo      The namespace of foo
-
-
-        Inputs:
-        :param python_obj func: This is the object of the function which will be used.
-        :param list args: a list of lists/tuples, each sublist/tuple must contain all information required by the function for a single object which will be multiprocessed
-        :param int num_procs:  (Primarily for Developers)  the number of processors or nodes that will be used. If None than we will use all available nodes/processors
-                                        This will be overriden and fixed to a single processor if mode==serial
-        :param str mode:  (Primarily for Developers) the multiprocess mode to be used, ie) serial, multiprocessing, or None:
-                            if None then we will try to pick a possible multiprocessing choice. This should only be used for
-                            top level coding. It is best practice to specify which multiprocessing choice to use.
-                            if you have smaller programs used by a larger program, with both mpi enabled there will be problems, so specify multiprocessing is important.
-                            BEST TO LEAVE THIS BLANK. NOTE: mpi no longer supported anyway.
         Returns:
-        :returns: list results: A list containing all the results from the multiprocess
+            list: Results from all parallel processes
+
+        Raises:
+            Exception: If incompatible mode specified or attempting to override
+                num_procs in serial mode
+
+        Example:
+            To multiprocess function foo(x,y) for all permutations of x,y from 0-2:
+            >>> args = [(0,0),(1,0),(2,0),(0,1),(1,1),(2,1),(0,2),(1,2),(2,2)]
+            >>> func = foo  # The namespace of foo
+            >>> parallelizer.run(args, func)
+
+        Note:
+            For sub-programs used by larger programs with multiprocessing,
+            explicitly specify mode to avoid conflicts.
         """
         # determine the mode
         if mode is None:
@@ -138,19 +146,23 @@ class Parallelizer(object):
             print(printout)
         # compute
         if mode == "multiprocessing":
-            return MultiThreading(args, num_procs, func)
+            return _multi_threading(args, num_procs, func)
         else:
             # serial is running the ParallelThreading with num_procs=1
-            return MultiThreading(args, 1, func)
+            return _multi_threading(args, 1, func)
 
-    def compute_nodes(self, mode=None):
-        """
-        Computes the number of "compute nodes" according to the selected mode.
+    def _compute_nodes(self, mode=None):
+        """Computes available compute nodes for selected mode.
 
-        For multiprocessing this is the number of available cores
-        For serial, this value is 1
+        For multiprocessing, returns number of available cores. For serial mode,
+        returns 1.
+
+        Args:
+            mode (str, optional): Mode to check ('multiprocessing' or 'serial').
+                If None, uses current mode. Defaults to None.
+
         Returns:
-        :returns: int num_procs: the number of nodes/processors which is to be used
+            int: Number of compute nodes/processors available
         """
         if mode is None:
             mode = self.mode
@@ -169,15 +181,24 @@ class Parallelizer(object):
         return self.num_procs
 
 
-def MultiThreading(inputs, num_procs, task_name):
-    """Initialize this object.
+def _multi_threading(inputs, num_procs, task_name):
+    """Executes parallel processing using multiprocessing.
+
+    If num_procs is 1, executes tasks serially. Otherwise distributes tasks
+    across specified number of processors.
 
     Args:
-        inputs ([data]): A list of data. Each datum contains the details to
-            run a single job on a single processor.
-        num_procs (int): The number of processors to use.
-        task_class_name (class): The class that governs what to do for each
-            job on each processor.
+        inputs (list): List of data where each item contains details for a
+            single job on a single processor
+        num_procs (int): Number of processors to use task_name (callable):
+        Function that governs processing for each job
+
+    Returns:
+        list: Results from all processors. Empty list if no inputs provided.
+
+    Note:
+        Automatically formats inputs to tuples and adjusts processor count if
+        needed.
     """
     results = []
 
@@ -185,9 +206,9 @@ def MultiThreading(inputs, num_procs, task_name):
     if len(inputs) == 0:
         return results
 
-    inputs = check_and_format_inputs_to_list_of_tuples(inputs)
+    inputs = _check_and_format_inputs_to_list_of_tuples(inputs)
 
-    num_procs = count_processors(len(inputs), num_procs)
+    num_procs = _count_processors(len(inputs), num_procs)
 
     tasks = []
 
@@ -203,17 +224,22 @@ def MultiThreading(inputs, num_procs, task_name):
             output = job(*args)
             results.append(output)
     else:
-        results = start_processes(tasks, num_procs)
+        results = _start_processes(tasks, num_procs)
 
     return results
 
 
-###
-# Worker function
-###
+def _(input: multiprocessing.Queue, output: multiprocessing.Queue):
+    """Worker function for parallel processing.
 
+    Continuously processes jobs from input queue until receiving 'STOP' signal.
 
-def worker(input, output):
+    Args:
+        input (multiprocessing.Queue): Queue containing (sequence, job) pairs.
+            Jobs consist of (function, arguments) pairs.
+        output (multiprocessing.Queue): Queue for storing (sequence, result)
+            pairs
+    """
     for seq, job in iter(input.get, "STOP"):
         func, args = job
         result = func(*args)
@@ -221,7 +247,20 @@ def worker(input, output):
         output.put(ret_val)
 
 
-def check_and_format_inputs_to_list_of_tuples(args):
+def _check_and_format_inputs_to_list_of_tuples(args):
+    """Validates and formats input arguments list.
+
+    Args:
+        args (list): List of input arguments. All items must be the same type
+            (either lists or tuples).
+
+    Returns:
+        list: List of argument tuples (converts lists to tuples if needed)
+
+    Raises:
+        Exception: If args is not a list/tuple, if items are not all same type,
+            or if items are neither lists nor tuples
+    """
     # Make sure args is a list of tuples
     if type(args) not in [list, tuple]:
         printout = "args must be a list of tuples"
@@ -246,15 +285,18 @@ def check_and_format_inputs_to_list_of_tuples(args):
         raise Exception(printout)
 
 
-def count_processors(num_inputs, num_procs):
-    """
-    Checks processors available and returns a safe number of them to
-    utilize.
+def _count_processors(num_inputs, num_procs):
+    """Determines appropriate number of processors to use.
 
-    :param int num_inputs: The number of inputs.
-    :param int num_procs: The number of desired processors.
+    If num_procs <= 0, automatically determines count using multiprocessing.
+    Reduces processor count if it exceeds number of inputs.
 
-    :returns: The number of processors to use.
+    Args:
+        num_inputs (int): Number of inputs to process
+        num_procs (int): Desired number of processors
+
+    Returns:
+        int: Number of processors to use
     """
     # first, if num_procs <= 0, determine the number of processors to
     # use programatically
@@ -268,9 +310,18 @@ def count_processors(num_inputs, num_procs):
     return num_procs
 
 
-def start_processes(inputs, num_procs):
-    """
-    Creates a queue of inputs and outputs
+def _start_processes(inputs, num_procs):
+    """Creates and manages multiprocessing queues and worker processes.
+
+    Creates input and output queues, starts worker processes, collects results,
+    and sends stop signals to workers.
+
+    Args:
+        inputs (list): List of (index, (task_name, arguments)) pairs
+        num_procs (int): Number of worker processes to create
+
+    Returns:
+        list: Results from all workers, sorted by original input order
     """
     # Create queues
     task_queue = multiprocessing.Queue()
@@ -282,7 +333,7 @@ def start_processes(inputs, num_procs):
 
     # Start worker processes
     for _ in range(num_procs):
-        multiprocessing.Process(target=worker, args=(task_queue, done_queue)).start()
+        multiprocessing.Process(target=_, args=(task_queue, done_queue)).start()
 
     results = [done_queue.get() for _ in range(len(inputs))]
     # Tell child processes to stop

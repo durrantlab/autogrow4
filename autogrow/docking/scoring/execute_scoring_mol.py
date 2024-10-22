@@ -265,6 +265,7 @@ def score_files_multithread(
     rescore_lig_efficiency: bool,
     lig_eff_scoring: Optional[LigEfficiency],
 ) -> Optional[PostDockedCompound]:
+    # TODO: I think not used, but could be good stuff here.
     """
     Run the scoring of a single molecule.
 

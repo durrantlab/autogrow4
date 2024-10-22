@@ -1,20 +1,21 @@
-"""Ghose Filter
-This runs a Ghose filter for drug-likeliness. Ghose filter filters molecules
-by Molecular weight (MW), the number of atoms, and the logP value.
-The upper bound of MW is relaxed from 480Da to 500Da. This is
-less restrictive and works in conjunction with Lipinski. This is also
-to retro-match AutoGrow 3.1.3 which set Lipinski's upper limit to 500Da.
+"""
+Ghose Filter for drug-likeness.
 
-We protonate the mol in this filter because hydrogens affect
-atom count. Our Ghose implementation counts hydrogens in against
-the total number of atoms.
+This module implements a modified Ghose filter for drug-likeness. It filters
+molecules based on Molecular Weight (MW), number of atoms, and LogP value. The
+upper bound of MW is relaxed from 480Da to 500Da, making it less restrictive and
+compatible with Lipinski's rule. This also matches AutoGrow 3.1.3's
+implementation.
 
-To pass the filter a molecule must be:
-    MW between 160 and 500 dalton
-    Number of Atoms: between 20 and 70
-    logP  between -0,4 and +5,6
+The filter protonates molecules as hydrogens affect atom count. This
+implementation counts hydrogens against the total number of atoms.
 
-If you use the Ghose Filter please cite: A.K. Ghose et al. A knowledge-based
+To pass the filter, a molecule must meet the following criteria:
+    - MW between 160 and 500 dalton
+    - Number of Atoms: between 20 and 70
+    - LogP between -0.4 and +5.6
+
+If you use the Ghose Filter, please cite: A.K. Ghose et al. A knowledge-based
 approach in designing combinatorial or medicinal chemistry libraries for drug
 discovery. 1. A qualitative and quantitative characterization of known drug
 databases Journal of Combinatorial Chemistry, 1 (1999), pp. 55-68
@@ -38,53 +39,48 @@ rdkit.RDLogger.DisableLog("rdApp.*")
 
 class GhoseModifiedFilter(SmilesFilterBase):
     """
-    This runs a Ghose filter for drug-likeliness. Ghose filter filters
-    molecules by Molecular weight (MW), the number of atoms, and the logP
-    value. The upper bound of MW is relaxed from 480Da to 500Da. This is
-    less restrictive and works in conjunction with Lipinski. This is also
-    to retro-match AutoGrow 3.1.3 which set Lipinski's upper limit to 500Da.
+    Implements a modified Ghose filter for drug-likeness.
 
-    We protonate the mol in this filter because hydrogens affect
-    atom count. Our Ghose implementation counts hydrogens in against
-    the total number of atoms.
+    This class runs a Ghose filter that checks molecules for drug-likeness based
+    on Molecular Weight (MW), number of atoms, and LogP value. The upper bound
+    of MW is relaxed from 480Da to 500Da, making it less restrictive and
+    compatible with Lipinski's rule. This also matches AutoGrow 3.1.3's
+    implementation.
 
-    To pass the filter a molecule must be:
-        MW between 160 and 500 dalton
-        Number of Atoms: between 20 and 70
-        logP  between -0,4 and +5,6
+    The filter protonates molecules as hydrogens affect atom count. This
+    implementation counts hydrogens against the total number of atoms.
 
-    If you use the Ghose Filter please cite: A.K. Ghose et al. A
+    To pass the filter, a molecule must meet the following criteria:
+        - MW between 160 and 500 dalton
+        - Number of Atoms: between 20 and 70
+        - LogP between -0.4 and +5.6
+
+    If you use the Ghose Filter, please cite: A.K. Ghose et al. A
     knowledge-based approach in designing combinatorial or medicinal chemistry
     libraries for drug discovery. 1. A qualitative and quantitative
-    characterization of known drug databases Journal of Combinatorial
-    Chemistry, 1 (1999), pp. 55-68
-
-    Inputs:
-    :param class ParentFilter: a parent class to initialize off
+    characterization of known drug databases Journal of Combinatorial Chemistry,
+    1 (1999), pp. 55-68
     """
 
     def run_filter(self, mol: rdkit.Chem.rdchem.Mol) -> bool:
         """
-        This runs a Ghose filter for drug-likeliness. Ghose filter filters
-        molecules by Molecular weight (MW), the number of atoms, and the logP
-        value.
+        Run the modified Ghose filter on a given molecule.
 
-        We protonate the mol in this filter because hydrogens affect
-        atom count. Our Ghose implementation counts hydrogens in against
-        the total number of atoms.
+        This method applies the Ghose filter criteria to determine if a molecule
+        is drug-like. It checks the molecular weight, number of atoms, molar
+        refractivity, and molar LogP.
 
-        To pass the filter a molecule must be:
-            MW between 160 and 500 dalton
-            Number of Atoms: between 20 and 70
-            logP  between -0,4 and +5,6
+        The molecule is protonated before analysis as hydrogens affect the atom
+        count. This implementation counts hydrogens against the total number of
+        atoms.
 
-        Inputs:
-        :param rdkit.Chem.rdchem.Mol object mol: An rdkit mol object to be
-            tested if it passes the filters
+        Args:
+            mol (rdkit.Chem.rdchem.Mol): An RDKit mol object to be tested
+                against the filter criteria.
 
         Returns:
-        :returns: bool bool: True if the mol passes the filter; False if it
-            fails the filter
+            bool: True if the molecule passes all filter criteria, False
+                otherwise.
         """
         copy_mol = copy.deepcopy(mol)
         copy_mol = Chem.AddHs(copy_mol)
@@ -110,7 +106,18 @@ class GhoseModifiedFilter(SmilesFilterBase):
         return True
 
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
-        """Add command-line arguments required by the plugin."""
+        """
+        Add command-line arguments required by the plugin.
+
+        This method defines the command-line arguments specific to the Ghose
+        Modified Filter. It allows users to enable the filter via command-line
+        options.
+
+        Returns:
+            Tuple[str, List[ArgumentVars]]: A tuple containing the argument
+                group name and a list of ArgumentVars objects defining the
+                command-line arguments.
+        """
         return (
             "SMILES Filters",
             [

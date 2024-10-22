@@ -1,3 +1,10 @@
+"""
+Implements a tournament selector for choosing compounds in AutoGrow.
+
+This module provides a TournamentSelector class that selects compounds to
+advance to the next generation using a tournament selection method.
+"""
+
 import __future__
 import copy
 import math
@@ -11,8 +18,32 @@ from autogrow.utils.logging import log_debug
 
 
 class TournamentSelector(SelectorBase):
+    """
+    A selector that uses tournament selection to choose compounds.
+
+    This selector chooses compounds to advance to the next generation using a
+    tournament selection method. The selection is stochastic and done without
+    replacement.
+    """
+
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
-        """Add command-line arguments required by the plugin."""
+        """
+        Add command-line arguments specific to the Tournament Selector.
+
+        This method defines the command-line arguments that can be used to
+        configure the Tournament Selector.
+
+        Returns:
+            Tuple[str, List[ArgumentVars]]: A tuple containing:
+                - The name of the argument group ("Selectors")
+                - A list of ArgumentVars objects defining the arguments:
+                    1. An argument to enable the Tournament Selector
+                    2. The 'tourn_size' parameter to set the tournament size
+
+        Note:
+            The 'tourn_size' parameter determines the fraction of the total
+            population to include in each tournament.
+        """
         return (
             "Selectors",
             [
@@ -32,7 +63,19 @@ class TournamentSelector(SelectorBase):
         )
 
     def validate(self, params: dict):
-        """Validate the provided arguments."""
+        """
+        Validate the arguments provided for the Tournament Selector.
+
+        This method checks if the required 'tourn_size' parameter is present in
+        the provided parameters.
+
+        Args:
+            params (dict): A dictionary of parameters provided to the selector.
+
+        Raises:
+            Exception: If the 'tourn_size' parameter is not specified when using
+                the Tournament Selector.
+        """
         if "tourn_size" not in self.params:
             raise Exception(
                 "You are using the tournament selector, but you have not specified the tourn_size parameter."
@@ -46,36 +89,31 @@ class TournamentSelector(SelectorBase):
         favor_most_negative: bool = True,
     ) -> List[PreDockedCompound]:
         """
-        This runs a tournament style selector given a list of ligands and
-        specified metric. It will randomly select ligands for tournaments. The
-        best scoring ligand for each of these groups will end up in the
-        chosen_ligands list.
+        Select compounds using tournament selection without replacement.
 
-        This is done WITHOUT REPLACEMENT. This does provide an opportunity for any
-        ligand to make it into the chosen_ligands list even if it doesn't have a
-        high score, but that chance of random incorporation decreases as
-        tourn_size increases.
-            -ie tourn_size=1.0 will randomly pick N number of ligands equal to the
-                total number of ligands in the list this means theres a high chance that
-                the top ligand will be chosen enter every tournament and will win
-                everytime. This could result in a very homogenous choice.
+        This method runs multiple tournaments to select compounds. In each
+        tournament, a subset of compounds is randomly chosen, and the
+        best-scoring compound wins the tournament.
 
-        Inputs:
-        :param list list_of_ligands: The list of lists containing info about
-            ligands with scores to select from.
-        :param int num_to_choose: the number of ligands to be chosen total this
-            also is the number of tournaments that will be conducted.
-        :param float tourn_size: percentage of the total pool of ligands to be
-            tested in each tournament.
-        :param int idx_to_sel: the idx within each sublist which will serve as
-            the metric for each tournament.
-        :param bol favor_most_negative: True if the most negative number is
-            the best solution. False if the most positive number is the best
-            solution default to True.
+        Args:
+            usable_smiles (List[PreDockedCompound]): A list of all compounds
+                from the previous generation.
+            num_to_choose (int): The number of compounds to select (also the
+                number of tournaments to run).
+            score_type (ScoreType): Specifies whether to use "docking" or
+                "diversity" scores for selection.
+            favor_most_negative (bool): If True, lower scores are considered
+                better. Defaults to True.
 
         Returns:
-        :returns: list chosen_ligands: a list of chosen ligands containing all the
-            info for each ligand with potential for redundancy
+            List[PreDockedCompound]: List of selected compounds.
+
+        Raises:
+            Exception: If usable_smiles is not a list or is empty.
+
+        Note:
+            The tournament size is determined by the 'tourn_size' parameter,
+            which is a fraction of the total number of compounds.
         """
         tourn_size: float = self.params["tourn_size"]
 
@@ -121,36 +159,23 @@ class TournamentSelector(SelectorBase):
         favor_most_negative: bool = True,
     ) -> PreDockedCompound:
         """
-        This runs a single tournament style selection given a list of ligands and
-        specified metric. It will randomly select ligands for the tournament. The
-        best scoring ligand from the tournament will be returned.
+        Run a single tournament to select one compound.
 
-        This is done WITHOUT REPLACEMENT. This does provide an opportunity for any
-        ligand to make it into the chosen_ligands list even if it doesn't have a
-        high score, but that chance of random incorporation decreases as
-        tourn_size increases.
-            -ie tourn_size=1.0 will randomly pick N number of ligands equal to the
-                total number of ligands in the list this means theres a high chance
-                that the top ligand will be chosen enter every tournament and will
-                win everytime. This could result in a very homogenous choice.
+        This method randomly selects a subset of compounds for the tournament
+        and returns the best-scoring compound from this subset.
 
-            -num_per_tourn is the int(math.ceil(num_ligands * tourn_size)) so that
-                it rounds to the nearest int with a minimum values of 1
-
-        Inputs:
-        :param list list_of_ligands: The list of lists containing info about
-            ligands with scores to select from.
-        :param int num_per_tourn: the number of ligands to be tested in each
-            tournament.
-        :param int idx_to_sel: the idx within each sublist which will serve as
-            the metric for each tournament.
-        :param bol favor_most_negative: True if the most negative number is
-            the best solution. False if the most positive number is the best
-            solution default to True.
+        Args:
+            list_of_ligands (List[PreDockedCompound]): The list of all compounds
+                to select from.
+            num_per_tourn (int): The number of compounds to include in the
+                tournament.
+            score_type (ScoreType): Specifies whether to use "docking" or
+                "diversity" scores for selection.
+            favor_most_negative (bool): If True, lower scores are considered
+                better. Defaults to True.
 
         Returns:
-        :returns: list chosen_option: a list with a single ligand chosen from a
-            single tournament
+            PreDockedCompound: The winning compound from the tournament.
         """
         num_ligands = len(list_of_ligands)
 
@@ -181,6 +206,25 @@ class TournamentSelector(SelectorBase):
         docking_diversity_list: List[PreDockedCompound],
         usable_smiles: List[PreDockedCompound],
     ) -> List[PreDockedCompound]:
+        """
+        Finalize the list of selected compounds.
+
+        For the Tournament Selector, this method simply returns the input list
+        as the selection process is already complete.
+
+        Args:
+            docking_diversity_list (List[PreDockedCompound]): List of selected
+                compounds from the tournament selection process.
+            usable_smiles (List[PreDockedCompound]): List of all available
+                compounds (not used in this method).
+
+        Returns:
+            List[PreDockedCompound]: The input docking_diversity_list,
+                unmodified.
+        """
+
+        # TODO: What is the point of this?
+
         # Tournament_Selector returns an already full list of ligands so you can
         # skip the get_chosen_mol_full_data_list step
         return docking_diversity_list

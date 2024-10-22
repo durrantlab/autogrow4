@@ -501,7 +501,25 @@ def _save_smiles_files(
     suffix: Optional[str],
 ) -> Tuple[str, str, str]:
     """
-    Save the full generation and the SMILES file to convert to 3D.
+    Save SMILES files for the current generation.
+
+    This function saves the full generation and the SMILES file to be 
+    converted to 3D structures.
+
+    Args:
+        params (Dict[str, Any]): User parameters for output paths.
+        generation_num (int): Current generation number.
+        full_gen_smis (List[PreDockedCompound]): Full list of compounds for 
+            the generation.
+        new_gen_smis (List[PreDockedCompound]): List of new compounds for 
+            conversion.
+        suffix (Optional[str]): Suffix to append to the file name.
+
+    Returns:
+        Tuple[str, str, str]: A tuple containing:
+            - The full generation SMILES file path.
+            - The SMILES-to-convert file path.
+            - The folder path for the current generation.
     """
     # Save the full generation
     full_generation_smiles_file, new_gen_folder_path = _save_generation_smi(
@@ -517,6 +535,22 @@ def _save_smiles_files(
 
 
 def _throw_error_not_enough_compounds_made(arg0, arg1, arg2, arg3):
+    """
+    Raise an error if insufficient compounds are generated.
+
+    This function prints details about the number of required and generated 
+    compounds, then raises an exception if the generated compounds are 
+    fewer than required.
+
+    Args:
+        arg0 (int): Number of compounds that should have been generated.
+        arg1 (str): Descriptor of the compounds (e.g., 'mutants' or 'crossovers').
+        arg2 (List[PreDockedCompound]): List of generated compounds.
+        arg3 (str): Error message to raise if there are insufficient compounds.
+
+    Raises:
+        Exception: Raised with the provided error message.
+    """
     print("")
     print("")
     print(f"We needed to make {arg0}{arg1}")
@@ -533,22 +567,21 @@ def _test_source_smiles_convert(
     smile_info: PreDockedCompound,
 ) -> Union[PreDockedCompound, str]:
     """
-    This attempts to convert a SMILES string to an rdkit.Chem.rdchem.Mol
-    object
-        -done in a try statement so that it is some bad SMILES string which is
-        incapable of being converted
-        - it also checks that the SMILES string is able to be sanitized
+    Attempts to convert a SMILES string to an rdkit.Chem.rdchem.Mol object.
 
-    Inputs:
-    :param list smile_info: a list containing the SMILES of a ligand, its ID
-        and potentially additional information about the ligand
+    This function is done in a try statement to handle bad SMILES strings that
+    are incapable of being converted. It also checks that the SMILES string is
+    able to be sanitized.
+
+    Args:
+        smile_info (PreDockedCompound): A PreDockedCompound object containing
+            the SMILES of a ligand, its ID, and potentially additional
+            information about the ligand.
 
     Returns:
-    :returns: list smile_info: If it passed the test, it returns the list
-        containing the SMILES of a ligand, its ID and potentially additional
-        information about the ligand
-    :returns: str printout: If it failed to convert it returns the error
-        message. This passess out to prevent MPI print issues
+        Union[PreDockedCompound, str]: If it passed the test, it returns the
+            PreDockedCompound object. If it failed to convert, it returns an
+            error message string. This passes out to prevent MPI print issues.
     """
     if smile_info is None or not smile_info:
         printout = (
@@ -639,6 +672,20 @@ def _test_source_smiles_convert(
 
 
 def _report_removed_compound_info(smile_str, printout, smile_id):
+    """
+    Create a report for a removed compound.
+
+    This function formats the information about a removed SMILES string 
+    and its ID for logging purposes.
+
+    Args:
+        smile_str (str): SMILES string of the compound.
+        printout (str): Initial message to include in the report.
+        smile_id (str): Identifier for the compound.
+
+    Returns:
+        str: Formatted string describing the removed compound.
+    """
     printout += f"\t Removed SMILE string is: {smile_str} \n"
     printout += f"\t Removed SMILE ID is: {smile_id}"
     return printout
@@ -712,12 +759,40 @@ def _get_cmpds_prev_gen(
 
 
 def _raise_exception_with_message(arg0):
+    """
+    Raise an exception with a specific message.
+
+    This function prints the provided error message and then raises it as an 
+    exception.
+
+    Args:
+        arg0 (str): Error message to display and raise.
+
+    Raises:
+        Exception: Raised with the provided error message.
+    """
     printout = arg0
     print(printout)
     raise Exception(printout)
 
 
 def _get_source_compounds_or_raise(params) -> List[PreDockedCompound]:
+    """
+    Retrieve source compounds or raise an error if none are found.
+
+    This function loads the source compounds specified in the user parameters 
+    and raises an exception if the list is empty.
+
+    Args:
+        params (Dict[str, Any]): User parameters containing the source 
+            compound file path.
+
+    Returns:
+        List[PreDockedCompound]: List of source compounds.
+
+    Raises:
+        Exception: If no ligands are found in the source compound file.
+    """
     # This will be the full length list of starting molecules as the seed
     source_file = str(params["source_compound_file"])
     result = Ranking.get_usable_format(source_file)
@@ -734,6 +809,18 @@ def _get_source_compounds_or_raise(params) -> List[PreDockedCompound]:
 
 
 def _handle_no_ligands_found(arg0):
+    """
+    Handle the case where no ligands are found.
+
+    This function logs and raises an error when no ligands are available in 
+    the previous generation's ranked file.
+
+    Args:
+        arg0 (str): Additional information about the error.
+
+    Raises:
+        Exception: Raised with a message indicating no ligands were found.
+    """
     printout = (
         "\n"
         + "There were no available ligands in previous"
@@ -751,27 +838,22 @@ def _make_seed_list(
     num_seed_dock_fitness: int,
 ) -> List[PreDockedCompound]:
     """
-    Get the starting compound list for running the Mutation and Crossovers
+    Get the starting compound list for running the Mutation and Crossovers.
 
-    If generation = 0 use the User specified starting compounds If generation
-    is >0 than use the previous generations top ligands. This takes an .smi
-    file
-
-    Inputs:
-    :param dict params: a dictionary of all user variables
-    :param list source_compounds_list: a list with SMILES strings, names, and
-        information about the smiles from either the previous generation or the
-        source compound list
-    :param int generation_num: the interger of the current generation
-    :param int num_seed_diversity: the number of seed molecules which come
-        from diversity selection
-    :param int num_seed_dock_fitness: the number of seed molecules which come
-        from eite selection by docking score
+    Args:
+        source_compounds_list (List[PreDockedCompound]): A list with SMILES
+            strings, names, and information about the smiles from either the
+            previous generation or the source compound list.
+        generation_num (int): The integer of the current generation.
+        num_seed_diversity (int): The number of seed molecules which come
+            from diversity selection.
+        num_seed_dock_fitness (int): The number of seed molecules which come
+            from elite selection by docking score.
 
     Returns:
-    :returns: list usable_smiles: a list with SMILES strings, names,
-        and information about the smiles which will be used to seed the next
-        generation
+        List[PreDockedCompound]: A list with SMILES strings, names, and
+            information about the smiles which will be used to seed the next
+            generation.
     """
     usable_smiles: List[PreDockedCompound] = copy.deepcopy(source_compounds_list)
 
@@ -806,20 +888,18 @@ def _make_seed_list(
 
 def _get_seed_pop_sizes(params: Dict[str, Any], gen_num: int) -> Tuple[int, int]:
     """
-    This function determines how many molecules will be chosen to seed a
-    generation because of their docking score and how many will assess because
-    of their diversity score.
+    Determines how many molecules will be chosen to seed a generation based on
+    their docking score and diversity score.
 
-    Inputs:
-    :param dict params: a dictionary of all user variables
-    :param int generation_num: the interger of the current generation
+    Args:
+        params (Dict[str, Any]): A dictionary of all user variables.
+        gen_num (int): The integer of the current generation.
 
     Returns:
-    :returns:  int num_seed_diversity: the number of seed molecules which come
-        from diversity selection
-    :returns:  int num_seed_dock_fitness: the number of seed molecules which
-        come from eite selection by docking score
-
+        Tuple[int, int]: A tuple containing:
+            - The number of seed molecules which come from diversity selection.
+            - The number of seed molecules which come from elite selection by
+              docking score.
     """
     # How many fewer seed mols are chosen from diversity compared to the 1st
     # generation This is also how many more get chosen from elitist selection
@@ -862,23 +942,23 @@ def _make_pass_through_list(
     gen_num: int,
 ) -> Union[List[PreDockedCompound], str]:
     """
-    This function determines the molecules which elite ligands will advance
-    from the previous generation without being altered into the next
-    generation.
+    Determines the elite ligands to advance from the previous generation without
+    being altered into the next generation.
 
-    Inputs:
-    :param dict params: a dictionary of all user variables
-    :param list smis_from_prev_gen: List of SMILES from the last
-        generation chosen to seed the list of molecules to advance to the next
-        generation without modification via elitism.
-    :param int num_elite_prev_gen: the number of molecules
-        to advance from the last generation without modifications.
-    :param int gen_num: the interger of the current generation
+    Args:
+        params (Dict[str, Any]): A dictionary of all user variables.
+        smis_from_prev_gen (List[PreDockedCompound]): List of SMILES from the
+            last generation chosen to seed the list of molecules to advance to
+            the next generation without modification via elitism.
+        num_elite_prev_gen (int): The number of molecules to advance from the
+            last generation without modifications.
+        gen_num (int): The integer of the current generation.
 
     Returns:
-    :returns: list ligs_to_advance: a list of ligands which should
-        advance into the new generation without modifications, via elitism from
-        the last generation. Returns a printout of why it failed if it fails
+        Union[List[PreDockedCompound], str]: A list of ligands which should
+            advance into the new generation without modifications, via elitism
+            from the last generation. Returns a printout of why it failed if it
+            fails.
     """
     # this will be a list of lists. Each sublist will be  [SMILES_string, ID]
     ligs_to_advance = []
@@ -960,29 +1040,26 @@ def _save_generation_smi(
     formatted_smile_list: List[PreDockedCompound],
     nomenclature_tag: Optional[str],
 ) -> Tuple[str, str]:
-    """"
-    This function saves a list of newly generated population of ligands as an
-    .smi file. .smi file column 1 is the SMILES string and column 2 is its
-    smile ID
+    """
+    Save a list of newly generated compounds as an .smi file.
 
+    This function saves the SMILES and IDs of the current generation's 
+    compounds to a tab-delimited .smi file. The .smi file contains two 
+    columns:
+        - Column 1: SMILES string of the compound.
+        - Column 2: ID of the compound.
 
-    Inputs:
-    :param dict output_directory: the directory of the run to save the
-        generation
-    :param int generation_num: the interger of the current generation
-    :param list formatted_smile_list: list of the newly generated population
-        of ligands
-    :param str nomenclature_tag: The str describing the ligand list if None
-        than don't add tag. It is the full list of all ligands for the
-        generation
-        If it says '_to_convert' its the list of ligands which will need to be
-        converted to 3D -this may or may not have the ligands which pass
-        through from the last gen.
+    Args:
+        output_directory (str): Directory for saving the generation files.
+        generation_num (int): Current generation number.
+        formatted_smile_list (List[PreDockedCompound]): List of compounds to save.
+        nomenclature_tag (Optional[str]): Tag to append to the file name. If 
+            None, no tag is added.
 
     Returns:
-    :returns: str output_file_name: name of the output file
-    :returns: str new_gen_folder_path: the path to the folder containing all
-        that will be in this generation
+        Tuple[str, str]: A tuple containing:
+            - The output .smi file name.
+            - The path to the folder containing the generation files.
     """
     # folder for this new generation
     new_gen_folder_path = f"{output_directory}generation_{generation_num}{os.sep}"
@@ -1010,22 +1087,25 @@ def _save_ligand_list(
     nomenclature_tag: str,
 ) -> None:
     """
-    Save the list of ligands. nomenclature_tag is a string such as "Mutation"
-    or "Crossover" or "Previous_Gen_choice" describing what this data is used
-    for. If it says seeding it is the chosen mols from the previous generation
-    being used to seed the next generation
+    Save a list of ligands to an .smi file.
 
-    Inputs:
-    :param dict output_directory: the directory of the run to save the
-        generation
-    :param int generation_num: The generation number
-    :param list list_of_chosen_ligands: The formatted list of ligands to seed
-        a generation
-    :param str nomenclature_tag: The str describing the ligand list
-        -ie seeding_mutations is the list that seeded the mutations while
-            mutations would be the list of mutations generated from the
-            seeding_mutations list
-        -ie. mutation, crossover, Previous_Gen_choice
+    This function saves a specified list of ligands (e.g., 'Mutation', 
+    'Crossover', or 'Previous_Gen_choice') to an .smi file. The nomenclature_tag 
+    describes the purpose of the ligand list. If the tag indicates 'seeding', 
+    it represents ligands carried over from the previous generation to seed the 
+    next one.
+
+    The .smi file is tab-delimited with two columns:
+        - Column 1: SMILES string of the ligand.
+        - Column 2: ID of the ligand.
+
+    Args:
+        output_directory (str): Directory to save the generation files.
+        generation_num (int): The current generation number.
+        chosen_ligands (List[PreDockedCompound]): The list of ligands to save 
+            for the next generation.
+        nomenclature_tag (str): Description of the ligand list, such as 
+            'Mutation', 'Crossover', 'Previous_Gen_choice', or 'seeding'.
     """
     # make a folder for the new generation
     new_gen_folder_path = f"{output_directory}generation_{generation_num}{os.sep}"

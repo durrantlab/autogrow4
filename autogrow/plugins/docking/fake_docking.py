@@ -1,3 +1,15 @@
+"""
+This module implements a fake docking plugin for testing purposes.
+
+The FakeDocking class in this module simulates a docking process by assigning
+random scores to compounds without performing actual docking calculations. 
+This is useful for testing the AutoGrow pipeline without the computational 
+overhead of real docking simulations.
+
+Classes:
+    FakeDocking: A fake docking class that inherits from DockingBase.
+"""
+
 import os
 import random
 from typing import List, Optional, Tuple
@@ -8,14 +20,21 @@ from autogrow.types import PostDockedCompound, PreDockedCompound
 
 class FakeDocking(DockingBase):
     """
-    RUN FAKE DOCKING
+    A fake docking class for testing purposes.
 
-    Inputs:
-    :param class ParentDocking: Parent docking class to inherit from
+    This class implements a simple docking simulation that assigns random
+    scores to compounds without actually performing docking calculations.
     """
 
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
-        """Add command-line arguments required by the plugin."""
+        """
+        Add command-line arguments required by the fake docking plugin.
+
+        Returns:
+            Tuple[str, List[ArgumentVars]]: A tuple containing the argument
+            group name and a list of ArgumentVars objects defining the
+            command-line arguments.
+        """
         return (
             "Fake Docking Options",
             [
@@ -82,22 +101,31 @@ class FakeDocking(DockingBase):
         )
 
     def validate(self, params: dict):
-        """Validate the provided arguments."""
+        """
+        Validate the provided arguments for the fake docking plugin.
+
+        Args:
+            params (dict): A dictionary of plugin parameters to validate.
+        """
         pass
 
     def run_docking(
         self, predocked_cmpds: List[PreDockedCompound]
     ) -> List[PostDockedCompound]:
         """
-        run_docking is needs to be implemented in each class.
+        Perform fake docking on a list of compounds.
 
-        Inputs:
-        :param PreDockedCompound predocked_cmpds: A List of PreDockedCompound
-            objects.
+        This method assigns random docking scores to the input compounds
+        without performing actual docking calculations.
+
+        Args:
+            predocked_cmpds (List[PreDockedCompound]): A list of
+                PreDockedCompound objects to be "docked".
 
         Returns:
-        :returns: List[PostDockedCompound]: A list of PostDockedCompound
-            objects, each containing the score and a docked (posed) SDF file.
+            List[PostDockedCompound]: A list of PostDockedCompound objects,
+            each containing a random score between -12 and -8, and the original
+            3D SDF file path.
         """
         return [
             predocked_cmpd.to_post_docked_compound(

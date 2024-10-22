@@ -1,17 +1,20 @@
-"""Ghose Filter
-This runs a Ghose filter for drug-likeliness. Ghose filter filters molecules
-by Molecular weight (MW), the number of atoms, and the logP value.
+"""
+Implements the Ghose filter for drug-likeness screening in AutoGrow.
 
-We protonate the mol in this filter because hydrogens affect
-atom count. Our Ghose implementation counts hydrogens in against
-the total number of atoms.
+This module provides the GhoseFilter class that filters ligands using the Ghose
+filter for drug-likeness. The filter screens molecules based on Molecular Weight
+(MW), number of atoms, and LogP value.
 
-To pass the filter a molecule must be:
-    MW between 160 and 480 dalton
-    Number of Atoms: between 20 and 70
-    logP  between -0,4 and +5,6
+To pass the filter, a molecule must meet the following criteria:
+    - MW between 160 and 480 daltons
+    - Number of Atoms: between 20 and 70
+    - LogP between -0.4 and +5.6
 
-If you use the Ghose Filter please cite: A.K. Ghose et al. A knowledge-based
+Note: This implementation protonates the molecule before filtering because
+hydrogens affect atom count. The Ghose filter implementation counts hydrogens
+against the total number of atoms.
+
+If using the Ghose Filter, please cite: A.K. Ghose et al. A knowledge-based
 approach in designing combinatorial or medicinal chemistry libraries for drug
 discovery. 1. A qualitative and quantitative characterization of known drug
 databases Journal of Combinatorial Chemistry, 1 (1999), pp. 55-68
@@ -35,51 +38,35 @@ rdkit.RDLogger.DisableLog("rdApp.*")
 
 class GhoseFilter(SmilesFilterBase):
     """
-    This runs a Ghose filter for drug-likeliness. Ghose filter filters
-    molecules by Molecular weight (MW), the number of atoms, and the logP
-    value.
+    A filter that implements the Ghose filter for drug-likeness screening.
 
-    We protonate the mol in this filter because hydrogens affect
-    atom count. Our Ghose implementation counts hydrogens in against
-    the total number of atoms.
+    This class filters molecules based on Molecular Weight (MW), number of
+    atoms, and LogP value according to the Ghose criteria for drug-likeness.
 
-    To pass the filter a molecule must be:
-        MW between 160 and 480 dalton
-        Number of Atoms: between 20 and 70
-        logP  between -0,4 and +5,6
-
-    If you use the Ghose Filter please cite: A.K. Ghose et al. A
-    knowledge-based approach in designing combinatorial or medicinal chemistry
-    libraries for drug discovery. 1. A qualitative and quantitative
-    characterization of known drug databases Journal of Combinatorial
-    Chemistry, 1 (1999), pp. 55-68
-
-    Inputs:
-    :param class ParentFilter: a parent class to initialize off
+    Note:
+        This implementation protonates the molecule before filtering because
+        hydrogens affect atom count. The Ghose filter implementation counts
+        hydrogens against the total number of atoms.
     """
 
     def run_filter(self, mol: rdkit.Chem.rdchem.Mol) -> bool:
         """
-        This runs a Ghose filter for drug-likeliness. Ghose filter filters
-        molecules by Molecular weight (MW), the number of atoms, and the logP
-        value.
+        Run the Ghose filter on a given molecule.
 
-        We protonate the mol in this filter because hydrogens affect
-        atom count. Our Ghose implementation counts hydrogens in against
-        the total number of atoms.
+        This method applies the Ghose filter criteria to determine if a molecule
+        is drug-like. It checks the molecular weight, number of atoms, molar
+        refractivity, and molar LogP.
 
-        To pass the filter a molecule must be:
-            MW between 160 and 480 dalton
-            Number of Atoms: between 20 and 70
-            logP  between -0,4 and +5,6
-
-        Inputs:
-        :param rdkit.Chem.rdchem.Mol object mol: An rdkit mol object to be
-            tested if it passes the filters
+        Args:
+            mol (rdkit.Chem.rdchem.Mol): An RDKit molecule object to be tested.
 
         Returns:
-        :returns: bool bool: True if the mol passes the filter; False if it
-            fails the filter
+            bool: True if the molecule passes the filter; False if it fails.
+
+        Note:
+            This method creates a copy of the input molecule and adds hydrogens
+            to it before applying the filter. This ensures that hydrogens are
+            counted in the total atom count without affecting other filters.
         """
         # Make a copy of the mol so we can AddHs without affecting other filters
         # number of atoms is altered by the presence/absence of hydrogens.
@@ -108,7 +95,15 @@ class GhoseFilter(SmilesFilterBase):
         return True
 
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
-        """Add command-line arguments required by the plugin."""
+        """
+        Add command-line arguments specific to the Ghose filter.
+
+        Returns:
+            Tuple[str, List[ArgumentVars]]: A tuple containing:
+                - The name of the argument group ("SMILES Filters")
+                - A list with one ArgumentVars object defining the argument to
+                  enable the Ghose filter
+        """
         return (
             "SMILES Filters",
             [

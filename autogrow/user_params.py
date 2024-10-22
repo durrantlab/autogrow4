@@ -1,7 +1,9 @@
-"""user_vars
-This should contain the functions for defining input variables.
-Both the default variables and the user input variables.
-This should also validate them.
+"""Parameter management and validation for AutoGrow.
+
+This module handles the definition and validation of input parameters for
+AutoGrow, including both default variables and user-provided inputs. It ensures
+all required parameters are present and valid, performs path validation, and
+sets appropriate defaults when needed.
 """
 import __future__
 import os
@@ -10,13 +12,39 @@ import os
 ###### Variables Handlining Settings #######
 ############################################
 def check_for_required_inputs(input_params):
-    """
-    Confirm all the required inputs were provided.
+    """Validates and processes required input parameters for AutoGrow.
 
-    Required Variables go here.
+    Verifies the presence of all required parameters, sets defaults for missing
+    values, and validates file paths. Handles parameters for generation seeding,
+    crossovers, mutations, and elitism, with special handling for
+    first-generation parameters.
 
-    Inputs:
-    :param dict input_params: The parameters. A dictionary of {parameter name: value}.
+    Args:
+        input_params (dict): Dictionary containing parameter names and their
+        values.
+            Required parameters include:
+                - receptor_path: Path to PDB receptor file
+                - root_output_folder: Directory for output files
+                - source_compound_file: Path to tab-delimited SMI file
+            Optional parameters with defaults (value=10):
+                - top_mols_to_seed_next_generation
+                - number_of_crossovers
+                - number_of_mutants
+                - number_elitism_advance_from_previous_gen
+            First generation parameters are automatically set based on their
+            non-first-generation counterparts.
+
+    Raises:
+        NotImplementedError: If any of the following conditions are met:
+            - Receptor file doesn't exist or isn't a PDB file
+            - Output folder can't be created or accessed
+            - Source compound file doesn't exist or isn't a SMI file
+
+    Notes:
+        - All file paths are converted to absolute paths
+        - Output directory is created if it doesn't exist
+        - First generation parameters are set to match their general
+          counterparts if not explicitly defined
     """
     # Check numbers which may be defined by first generation
     if "top_mols_to_seed_next_generation_first_generation" not in list(

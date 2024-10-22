@@ -1,3 +1,9 @@
+"""
+Implements an OpenBabel-based SMILES to 3D SDF converter for AutoGrow.
+
+This module provides the ObabelSmiTo3DSDF class, which uses OpenBabel to convert
+SMILES representations of compounds to 3D SDF files.
+"""
 import __future__
 
 # from autogrow.plugins.plugin_managers import plugin_managers
@@ -16,8 +22,27 @@ import os
 
 
 class ObabelSmiTo3DSDF(SmiTo3DSdfBase):
+    """
+    A plugin that uses OpenBabel to convert SMILES to 3D SDF files.
+
+    This class extends SmiTo3DSdfBase to provide SMILES to 3D SDF conversion
+    functionality using OpenBabel.
+    """
+
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
-        """Add command-line arguments required by the plugin."""
+        """
+        Add command-line arguments specific to the OpenBabel SMILES to 3D SDF
+        converter.
+
+        This method defines the command-line arguments that can be used to
+        configure the OpenBabel SMILES to 3D SDF converter.
+
+        Returns:
+            Tuple[str, List[ArgumentVars]]: A tuple containing:
+                - The name of the argument group ("SMILES-to-3D-SDF Converter")
+                - A list with one ArgumentVars object defining the argument to
+                  enable the OpenBabel SMILES to 3D SDF converter
+        """
         return (
             "SMILES-to-3D-SDF Converter",
             [
@@ -31,7 +56,18 @@ class ObabelSmiTo3DSDF(SmiTo3DSdfBase):
         )
 
     def validate(self, params: dict):
-        """Validate the provided arguments."""
+        """
+        Validate the arguments provided for the OpenBabel SMILES to 3D SDF
+        converter.
+
+        This method checks if the required 'obabel_path' parameter is provided.
+
+        Args:
+            params (dict): A dictionary of parameters provided to the plugin.
+
+        Raises:
+            Exception: If the 'obabel_path' parameter is not provided.
+        """
         if "obabel_path" not in params:
             raise Exception(
                 "You must provide the path to obabel via the --obabel_path parameter."
@@ -41,16 +77,31 @@ class ObabelSmiTo3DSDF(SmiTo3DSdfBase):
         self, predock_cmpds: List[PreDockedCompound], pwd: str
     ) -> List[PreDockedCompound]:
         """
-        run_smi_to_sdf_converter is needs to be implemented in each class.
+        Convert a list of SMILES representations to 3D SDF files using
+        OpenBabel.
 
-        Inputs:
-        :param str predock_cmpds: A list of PreDockedCompound objects. Each
-            conains a SMILES string, a name, etc.
-        :param str pwd: The path to the working directory.
+        This method takes a list of PreDockedCompound objects containing SMILES
+        strings and converts them to 3D SDF files using OpenBabel. The
+        conversion is done in parallel using a shell parallelizer plugin.
+
+        Args:
+            predock_cmpds (List[PreDockedCompound]): A list of PreDockedCompound
+                objects, each containing a SMILES string and other compound
+                information.
+            pwd (str): The path to the working directory where temporary files
+            will be created.
 
         Returns:
-        :returns: List[PreDockedCompound]: A list of PreDockedCompound,
-            the same as the input, but with the sdf_3d_path field filled in.
+            List[PreDockedCompound]: The input list of PreDockedCompound
+                objects, updated with the paths to the generated 3D SDF files.
+
+        Note:
+            - This method uses OpenBabel with the '--gen3d' and '--p 7.4'
+              options.
+            - If the conversion fails for a compound, a warning is logged and
+              the compound's sdf_3d_path is not set.
+            - The method assumes that a ShellParallelizer plugin is available
+              for parallel execution of OpenBabel commands.
         """
         # If the mol matches a mol in the filter list. we return a False (as it
         # failed the filter). If No matches are found to filter list this will

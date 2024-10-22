@@ -19,12 +19,19 @@ INDENT = " "
 
 
 def create_logger(level: int, file_path: str = "log.txt"):
-    """
-    Create and configure the logger with the specified level.
+    """Creates and configures a logger with specified level and file path.
+
+    Sets up a global logger with a StreamHandler and basic configuration. The
+    logger is named "autogrow" and will output to both console and file.
 
     Args:
-        level (int): Logging level (e.g., logging.DEBUG, logging.INFO).
-        file_path (str): Dated results directory.
+        level (int): Logging level (e.g., logging.DEBUG, logging.INFO)
+        file_path (str): Path where log file will be created. Defaults to
+            "log.txt"
+
+    Note:
+        This function modifies global logger, handler, and log_filename
+        variables.
     """
     global logger
     global handler
@@ -33,7 +40,7 @@ def create_logger(level: int, file_path: str = "log.txt"):
     log_filename = file_path
 
     # Create a logger
-    logger = logging.getLogger("grid_ml")
+    logger = logging.getLogger("autogrow")
     logger.setLevel(level)
 
     # Create a handler
@@ -47,6 +54,19 @@ def create_logger(level: int, file_path: str = "log.txt"):
 
 
 class CustomFormatter(logging.Formatter):
+    """Custom logging formatter that uses abbreviated level names.
+
+    Customizes the format of log messages by using shorter level names (e.g.,
+    "DEBG" instead of "DEBUG") while maintaining timestamp and message
+    formatting.
+
+    Args:
+        fmt (str, optional): Message format string. Defaults to timestamp-level-
+            message format
+        datefmt (str, optional): Date format string. Defaults to ISO-like format
+        style (str, optional): Style of format string. Defaults to "%"
+    """
+
     def __init__(self, fmt=None, datefmt=None, style="%"):
         if fmt is None:
             fmt = "%(asctime)s - %(levelname)s - %(message)s"
@@ -68,11 +88,16 @@ class CustomFormatter(logging.Formatter):
 
 
 def set_log_tab_level(tab_count: int):
-    """
-    Set the log tab level, which affects the indentation of log messages.
+    """Sets the indentation level for log messages.
+
+    Configures a new formatter with the specified indentation level and applies
+    it to the global handler.
 
     Args:
-        tab_count (int): The number of tabs to use.
+        tab_count (int): Number of tab indentations to prepend to log messages
+
+    Note:
+        Modifies the global handler's formatter and level variables.
     """
     global level, handler
 
@@ -89,30 +114,42 @@ def set_log_tab_level(tab_count: int):
 
 
 def wrap_msg(msg: str) -> List[str]:
-    """
-    Wrap a message to fit within the maximum line length using textwrap.
+    """Wraps a message to fit within the maximum line length.
 
     Args:
-        msg (str): The message to wrap.
+        msg (str): The message to wrap
 
     Returns:
-        List[str]: The wrapped message.
+        List[str]: List of strings, each representing a wrapped line of the
+            original message
+
+    Note:
+        Uses MAX_MSG_LINE_LENGTH (60) as the maximum width for wrapping.
     """
     return textwrap.wrap(msg, width=MAX_MSG_LINE_LENGTH, break_long_words=True)
 
 
 def increase_log_tab_level():
-    """
-    Increase the log tab level, which affects the indentation of log messages.
+    """Increases the indentation level for log messages by one tab.
+
+    Increments the global indentation level and updates the log formatter
+    accordingly.
+
+    Note:
+        Modifies the global level variable.
     """
     global level
     set_log_tab_level(level + 1)
 
 
 def decrease_log_tab_level():
-    """
-    Decrease the log tab level, which affects the indentation of log messages.
-    Ensures that the level does not go below zero.
+    """Decreases the indentation level for log messages by one tab.
+
+    Decrements the global indentation level if it's greater than zero and
+    updates the log formatter accordingly.
+
+    Note:
+        Modifies the global level variable. Will not decrease level below zero.
     """
     global level
     if level > 0:
@@ -120,11 +157,18 @@ def decrease_log_tab_level():
 
 
 def log_info(msg: str):
-    """
-    Log an informational message.
+    """Logs a message at INFO level with proper indentation and line wrapping.
+
+    Writes the message to both the logger (if configured) and the log file. Long
+    messages are wrapped to fit MAX_MSG_LINE_LENGTH, with subsequent lines
+    indented.
 
     Args:
-        msg (str): The message to log.
+        msg (str): The message to log
+
+    Note:
+        Uses global level and logger variables. Writes to global log_filename.
+        Wrapped lines are indented with INDENT.
     """
     global level
     global logger
@@ -142,11 +186,18 @@ def log_info(msg: str):
 
 
 def log_debug(msg: str):
-    """
-    Log a debug message.
+    """Logs a message at DEBUG level with proper indentation and line wrapping.
+
+    Writes the message to both the logger (if configured) and the log file. Long
+    messages are wrapped to fit MAX_MSG_LINE_LENGTH, with subsequent lines
+    indented.
 
     Args:
-        msg (str): The message to log.
+        msg (str): The message to log
+
+    Note:
+        Uses global level and logger variables. Writes to global log_filename.
+        Wrapped lines are indented with INDENT.
     """
     global level
     global logger
@@ -162,11 +213,19 @@ def log_debug(msg: str):
 
 
 def log_warning(msg: str):
-    """
-    Log a warning message.
+    """Logs a message at WARNING level with proper indentation and line
+    wrapping.
+
+    Writes the message to both the logger (if configured) and the log file. Long
+    messages are wrapped to fit MAX_MSG_LINE_LENGTH, with subsequent lines
+    indented.
 
     Args:
-        msg (str): The message to log.
+        msg (str): The message to log
+
+    Note:
+        Uses global level and logger variables. Writes to global log_filename.
+        Wrapped lines are indented with INDENT.
     """
     global level
     global logger
@@ -182,31 +241,62 @@ def log_warning(msg: str):
 
 
 class LogLevel:
-    """Context manager to increase and decrease the log tab level."""
+    """Context manager for temporarily adjusting log indentation levels.
+
+    Increases the log indentation level upon entering the context and decreases
+    it upon exit, ensuring proper nesting of logged messages.
+
+    Example:
+        >>> with LogLevel():
+        ...     # Messages logged here will be indented one level
+        ...     log_info("This message is indented")
+    """
 
     def __enter__(self):
-        """
-        Increase the log tab level when entering a block of code.
+        """Increases log indentation level when entering the context.
+
+        Returns:
+            LogLevel: The context manager instance
         """
         increase_log_tab_level()
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        """
-        Decrease the log tab level when exiting a block of code.
+        """Decreases log indentation level when exiting the context.
+
+        Args:
+            exc_type: Type of any exception that occurred
+            exc_value: Instance of any exception that occurred
+            traceback: Traceback of any exception that occurred
         """
         decrease_log_tab_level()
 
 
 class WithoutLogging:
-    """Context manager to temporarily disable all logging, including new loggers."""
+    """Context manager that temporarily disables all logging operations.
+
+    Provides a context where all logging is disabled, including for newly
+    created loggers. Restores the original logging state upon exit.
+
+    Example:
+        >>> with WithoutLogging():
+        ...     # All logging operations in this block will be suppressed
+        ...     logger.info("This won't be logged")
+    """
 
     def __init__(self):
         self.original_logging_class = logging.getLoggerClass()
         self.original_get_logger = logging.getLogger
 
     def disabled_getLogger(self, name=None):
-        """Custom getLogger function that returns disabled loggers."""
+        """Returns a disabled logger instance.
+
+        Args:
+            name (str, optional): Name for the logger. Defaults to None
+
+        Returns:
+            logging.Logger: A disabled logger instance
+        """
         logger = self.original_get_logger(name)
         logger.disabled = True
         return logger

@@ -1,13 +1,26 @@
+"""Parameter validation utilities for AutoGrow.
+
+This module handles validation of required parameters and input files, ensuring
+that all necessary configuration is present and properly formatted before AutoGrow
+execution begins.
+"""
 import os
 from typing import Any, Dict, List
 
 
 def validate_params(params: Dict[str, Any]) -> None:
-    """
-    Check for missing variables in the required inputs.
+    """Validates required input parameters and files.
 
-    Inputs:
-    :param dict params: The parameters. A dictionary of {parameter name: value}.
+    Checks for presence of all required parameters and verifies that specified
+    input files exist with correct formats. Required parameters include receptor
+    configuration, grid specifications, output folder, and source compounds.
+
+    Args:
+        params (Dict[str, Any]): Dictionary of parameter names and values
+
+    Raises:
+        NotImplementedError: If required parameters are missing, input files
+            don't exist, or files have incorrect formats
     """
     keys_from_input = list(params.keys())
 
@@ -44,16 +57,18 @@ def validate_params(params: Dict[str, Any]) -> None:
 
 
 def _throw_missing_params_error(missing_params: List[str]) -> None:
-    """
-    Raises an error if any required parameters are missing.
+    """Raises error with details about missing required parameters.
 
-    This function generates and prints a message listing all the missing parameters
-    that are required for the program to run. It raises a NotImplementedError with 
-    the list of missing parameters and instructions for how to obtain help.
+    Generates a detailed error message listing all missing required parameters
+    and instructions for getting help with parameter usage.
 
-    Inputs:
-    :param List[str] missing_params: A list of the required parameter names that 
-                                     are missing from the input.
+    Args:
+        missing_params (List[str]): List of required parameter names missing
+            from input
+
+    Raises:
+        NotImplementedError: Always raised with message detailing missing
+            parameters and help instructions
     """
     printout = "\nRequired variables are missing from the input. A description \
             of each of these can be found by running python ./RunAutogrow -h"
@@ -69,22 +84,21 @@ def _throw_missing_params_error(missing_params: List[str]) -> None:
 def _check_file_exists(
     pname: str, ext: str, file_desc: str, params: Dict[str, Any]
 ) -> None:
-    """
-    Verifies that a specified file exists and has the correct extension.
+    """Verifies existence and format of required input files.
 
-    This function checks whether the file specified by the parameter name exists 
-    in the provided dictionary of parameters. It also ensures the file has the 
-    expected extension (e.g., ".pdb" for PDB files). If the file does not exist or 
-    has an incorrect extension, a NotImplementedError is raised.
-
-    Inputs:
-    :param str pname: The key in the params dictionary representing the file path.
-    :param str ext: The expected file extension (e.g., "pdb", "smi").
-    :param str file_desc: A description of the expected file type (e.g., ".PDB file").
-    :param Dict[str, Any] params: A dictionary of parameter names and values.
+    Args:
+        pname (str): Parameter name for file path in params dictionary
+        ext (str): Expected file extension without dot (e.g. "pdb", "smi")
+        file_desc (str): Description of expected file type 
+        params (Dict[str, Any]): Dictionary of parameter names and values
 
     Raises:
-    :raises NotImplementedError: If the file does not exist or does not have the expected extension.
+        NotImplementedError: If file doesn't exist or has incorrect extension
+
+    Example:
+        >>> _check_file_exists("receptor_path", "pdb", ".PDB file", params)
+        >>> _check_file_exists("source_compound_file", "smi", 
+        ...                   "tab delineated .smi file", params)
     """
     if os.path.isfile(params[pname]) is False:
         raise NotImplementedError(

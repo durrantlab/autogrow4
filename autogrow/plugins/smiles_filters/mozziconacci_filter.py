@@ -1,20 +1,21 @@
-"""Mozziconacci Filter
-This runs a Mozziconacci filter. Mozziconacci filter is a filter for
-Drug-likeliness which filters molecules by the number of: rotatable bonds,
-rings, oxygens, and halogens.
+"""
+Mozziconacci Filter for drug-likeness.
 
-To pass the filter a molecule must be:
-    # of Rotatable bonds: Max 15
-    # of Rings: Max 6
-    # of Oxygens: Min 1
-    # of Nitrogens: Min 1
-    # of Halogens: Max 7
+This module implements a Mozziconacci filter to refine molecules for
+drug-likeness. It filters molecules based on the number of rotatable bonds,
+rings, oxygens, nitrogens, and halogens.
 
-If you use the Mozziconacci Filter please cite: Mozziconacci, J. C. et al.
+To pass the filter, a molecule must meet the following criteria:
+    - Number of Rotatable bonds: Max 15
+    - Number of Rings: Max 6
+    - Number of Oxygens: Min 1
+    - Number of Nitrogens: Min 1
+    - Number of Halogens: Max 7
+
+If you use the Mozziconacci Filter, please cite: Mozziconacci, J. C. et al.
 Preparation of a Molecular Database from a Set of 2 Million Compounds for
 Virtual Screening Applications: Gathering, Structural Analysis and Filtering.
-9th Electronic Computational Chemistry Conference, World Wide Web, March
-(2003).
+9th Electronic Computational Chemistry Conference, World Wide Web, March (2003).
 """
 import __future__
 
@@ -31,45 +32,41 @@ rdkit.RDLogger.DisableLog("rdApp.*")
 
 class MozziconacciFilter(SmilesFilterBase):
     """
-    This runs a Mozziconacci filter. Mozziconacci filter is a filter for
-    Drug-likeliness which filters molecules by the number of:
+    Implements a Mozziconacci filter for drug-likeness.
 
-    To pass the filter a molecule must be:
-        # of Rotatable bonds: Max 15
-        # of Rings: Max 6
-        # of Oxygens: Min 1
-        # of Nitrogens: Min 1
-        # of Halogens: Max 7
+    This class runs a Mozziconacci filter to refine molecules for drug-likeness.
+    It filters molecules based on the number of rotatable bonds, rings, oxygens,
+    nitrogens, and halogens.
 
-    If you use the Mozziconacci Filter please cite: Mozziconacci, J. C. et al.
+    To pass the filter, a molecule must meet the following criteria:
+        - Number of Rotatable bonds: Max 15
+        - Number of Rings: Max 6
+        - Number of Oxygens: Min 1
+        - Number of Nitrogens: Min 1
+        - Number of Halogens: Max 7
+
+    If you use the Mozziconacci Filter, please cite: Mozziconacci, J. C. et al.
     Preparation of a Molecular Database from a Set of 2 Million Compounds for
     Virtual Screening Applications: Gathering, Structural Analysis and
     Filtering. 9th Electronic Computational Chemistry Conference, World Wide
     Web, March (2003).
-
-    Inputs:
-    :param class ParentFilter: a parent class to initialize off
     """
 
     def run_filter(self, mol: rdkit.Chem.rdchem.Mol) -> bool:
         """
-        This runs a Mozziconacci filter. Mozziconacci filter is a filter for
-        Drug-likeliness which filters molecules by the number of:
+        Run the Mozziconacci filter on a given molecule.
 
-        To pass the filter a molecule must be:
-            # of Rotatable bonds: Max 15
-            # of Rings: Max 6
-            # of Oxygens: Min 1
-            # of Nitrogens: Min 1
-            # of Halogens: Max 7
+        This method applies the Mozziconacci filter criteria to determine if a
+        molecule is likely to be drug-like. It checks the number of rotatable
+        bonds, rings, oxygens, nitrogens, and halogens.
 
-        Inputs:
-        :param rdkit.Chem.rdchem.Mol object mol: An rdkit mol object to be
-            tested if it passes the filters
+        Args:
+            mol (rdkit.Chem.rdchem.Mol): An RDKit mol object to be tested
+                against the filter criteria.
 
         Returns:
-        :returns: bool bool: True if the mol passes the filter; False if it
-            fails the filter
+            bool: True if the molecule passes all filter criteria, False
+                otherwise.
         """
         halogen = Chem.MolFromSmarts("[*;#9,#17,#35,#53,#85]")
         number_of_halogens = len(mol.GetSubstructMatches(halogen, maxMatches=8))
@@ -98,7 +95,18 @@ class MozziconacciFilter(SmilesFilterBase):
         return True
 
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
-        """Add command-line arguments required by the plugin."""
+        """
+        Add command-line arguments required by the plugin.
+
+        This method defines the command-line arguments specific to the
+        Mozziconacci Filter. It allows users to enable the filter via
+        command-line options.
+
+        Returns:
+            Tuple[str, List[ArgumentVars]]: A tuple containing the argument
+                group name and a list of ArgumentVars objects defining the
+                command-line arguments.
+        """
         return (
             "SMILES Filters",
             [

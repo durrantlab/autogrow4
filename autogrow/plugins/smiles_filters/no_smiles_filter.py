@@ -1,7 +1,12 @@
-"""#No filter for SMILES
-Useful for skipping the filter step.
+"""
+No SMILES Filter module.
+
+This module provides a dummy filter that allows skipping the SMILES filtering
+step in the pipeline.
 """
 import __future__
+
+# TODO: Needed?
 
 from autogrow.plugins.smiles_filters import SmilesFilterBase
 import rdkit  # type: ignore
@@ -13,18 +18,39 @@ from autogrow.config.argparser import ArgumentVars
 
 class NoSmilesFilter(SmilesFilterBase):
     """
-    This essentially skip the smiles filtering step.
+    A dummy filter class that skips the SMILES filtering step.
 
-    Inputs:
-    :param class ParentFilter: a parent class to initialize off of.
+    This class essentially allows all compounds to pass through without any
+    filtering, effectively skipping the SMILES filtering step in the pipeline.
     """
 
     def run_filter(self, mol: rdkit.Chem.rdchem.Mol) -> bool:
-        # All compounds pass
+        """
+        Run the dummy filter on a given molecule.
+
+        This method always returns True, allowing all compounds to pass.
+
+        Args:
+            mol (rdkit.Chem.rdchem.Mol): An RDKit mol object to be "filtered".
+
+        Returns:
+            bool: Always returns True, indicating that all compounds pass.
+        """
         return True
 
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
-        """Add command-line arguments required by the plugin."""
+        """
+        Add command-line arguments required by the plugin.
+
+        This method defines the command-line arguments specific to the No SMILES
+        Filter. It allows users to explicitly choose to skip the SMILES
+        filtering step via command-line options.
+
+        Returns:
+            Tuple[str, List[ArgumentVars]]: A tuple containing the argument
+            group name and a list of ArgumentVars objects defining the
+            command-line arguments.
+        """
         return (
             "SMILES Filters",
             [

@@ -1,20 +1,41 @@
+"""
+This module defines base classes for docking plugins and manages their
+execution.
+
+It includes abstract base classes for docking plugins and a plugin manager for
+handling docking operations. The module also provides functionality for ranking
+and saving docked compounds.
+"""
+
 from abc import abstractmethod
-import glob
 import os
-import random
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
-from autogrow.config.argparser import ArgumentVars
+from typing import List, cast
 from autogrow.plugins.plugin_base import PluginBase
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
-from autogrow.types import PostDockedCompound, PreDockedCompound, ScoreType
-import autogrow.docking.scoring.execute_scoring_mol as Scoring
+from autogrow.types import PostDockedCompound, PreDockedCompound
 import autogrow.docking.ranking.ranking_mol as Ranking
 from autogrow.utils.logging import log_debug
 
 
 class DockingBase(PluginBase):
+    """
+    Abstract base class for docking plugins.
+
+    This class defines the interface for docking plugins and provides a common
+    run method that calls the abstract run_docking method.
+    """
+
     def run(self, **kwargs) -> List[PostDockedCompound]:
-        """Run the plugin with provided arguments."""
+        """
+        Run the docking plugin with provided arguments.
+
+        Args:
+            **kwargs: Keyword arguments to be passed to run_docking method.
+
+        Returns:
+            List[PostDockedCompound]: A list of PostDockedCompound objects
+            containing docking results.
+        """
         return self.run_docking(predocked_cmpds=kwargs["predocked_cmpds"])
 
     @abstractmethod
@@ -22,31 +43,42 @@ class DockingBase(PluginBase):
         self, predocked_cmpds: List[PreDockedCompound]
     ) -> List[PostDockedCompound]:
         """
-        run_docking is needs to be implemented in each class.
+        Abstract method to be implemented by each docking plugin.
 
-        Inputs:
-        :param PreDockedCompound predocked_cmpds: A List of PreDockedCompound
-            objects.
+        Args:
+            predocked_cmpds (List[PreDockedCompound]): A list of PreDockedCompound
+                objects to be docked.
 
         Returns:
-        :returns: List[PostDockedCompound]: A list of PostDockedCompound
-            objects, each containing the score and a docked (posed) SDF file.
+            List[PostDockedCompound]: A list of PostDockedCompound objects, each
+            containing the score and a docked (posed) SDF file.
         """
         # raise NotImplementedError("run_dock() not implemented")
         pass
 
 
 class DockingPluginManager(PluginManagerBase):
+    """
+    Manages the execution of docking plugins.
+
+    This class is responsible for selecting and executing docking plugins,
+    as well as ranking and saving the output of docking operations.
+    """
+
     def execute(self, **kwargs) -> List[PostDockedCompound]:
         """
-        Run the plugin with provided arguments.
+        Execute the selected docking plugin with provided arguments.
 
-        Inputs:
-        :param dict kwargs: a dictionary of arguments to pass to the plugin
+        Args:
+            **kwargs: A dictionary of arguments to pass to the plugin.
 
         Returns:
-        :returns: List[PostDockedCompound]: A list of PostDockedCompound
-            objects, each containing the score and a docked (posed) SDF file.
+            List[PostDockedCompound]: A list of PostDockedCompound objects, each
+            containing the score and a docked (posed) SDF file.
+
+        Raises:
+            Exception: If no docking program is specified or if multiple docking
+            programs are selected.
         """
         dockings = self.get_selected_plugins_from_params()
 
@@ -79,23 +111,27 @@ class DockingPluginManager(PluginManagerBase):
         postDockedCompoundInfos: List[PostDockedCompound],
     ) -> str:
         """
-        Given a folder with PDBQT's, rank all the SMILES based on docking
-        score (High to low). Then format it into a .smi file. Then save the
-        file.
+        Rank and save docked compounds based on docking score.
 
-        Inputs:
-        :param dict params: params needs to be threaded here because it has the
-            paralizer object which is needed within Scoring.run_scoring_common
-        :param str current_generation_dir: path of directory of current
-            generation
-        :param int current_gen_int: the interger of the current generation
-            indexed to zero
-        :param str smiles_file:  File path for the file with the ligands for
-            the generation which will be a .smi file
+        This method ranks all the SMILES based on docking score (low to high),
+        formats them into a .smi file, and saves the file.
+
+        Args:
+            current_generation_dir (str): Path of directory of current generation.
+            current_gen_int (int): The integer of the current generation
+                (zero-indexed).
+            smiles_file (str): File path for the file with the ligands for the
+                generation (a .smi file).
+            postDockedCompoundInfos (List[PostDockedCompound]): List of
+                PostDockedCompound objects containing docking results.
 
         Returns:
-        :returns: str output_ranked_smile_file: the path of the output ranked
-            .smi file
+            str: The path of the output ranked .smi file.
+
+        Note:
+            This method handles pass-through ligands from the previous generation
+            based on the 'redock_elite_from_previous_gen' parameter and the current
+            generation number.
         """
         # TODO: Not the right place for this.
 
@@ -179,9 +215,28 @@ class DockingPluginManager(PluginManagerBase):
         ranked_smi_file_prev_gen: str,
         current_generation_dir: str,
         current_gen_int: int,
-        smiles_list: list[PostDockedCompound],
+        smiles_list: List[PostDockedCompound],
     ):
-        # Note that this modifies the smiles_list in place
+        """
+        Process ligand scores from the previous generation.
+
+        This method retrieves ligand scores from the previous generation and
+        updates the current generation's smiles_list with pass-through ligands.
+
+        Args:
+            ranked_smi_file_prev_gen (str): Path to the ranked .smi file from the
+                previous generation.
+            current_generation_dir (str): Path to the current generation directory.
+            current_gen_int (int): The current generation number.
+            smiles_list (List[PostDockedCompound]): List of PostDockedCompound
+                objects to be updated.
+
+        Raises:
+            Exception: If the previous generation ranked .smi file does not exist.
+
+        Note:
+            This method modifies the smiles_list in place.
+        """
 
         # TODO: Not the right place for this...
 

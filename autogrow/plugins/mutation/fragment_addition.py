@@ -1,3 +1,19 @@
+"""
+Provides functionality for fragment addition mutation.
+
+This module implements the FragmentAddition class, a mutation plugin that adds
+fragments to existing molecules using specified reaction libraries. It includes
+methods for loading and managing reaction libraries, identifying functional
+groups, and performing chemical reactions on molecules.
+
+Key components:
+- FragmentAddition: Main class for performing fragment addition mutations.
+- Reaction library management: Functions for loading and validating reaction
+  libraries.
+- Molecule preparation: Methods for preparing molecules for reactions.
+- Reaction execution: Functions for trying single and multi-reactant reactions.
+"""
+
 import contextlib
 import json
 import os
@@ -21,8 +37,19 @@ rdkit.RDLogger.DisableLog("rdApp.*")
 
 
 class FragmentAddition(MutationBase):
+    """
+    A mutation plugin that adds fragments to existing molecules using specified
+    reaction libraries.
+    """
+
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
-        """Add command-line arguments required by the plugin."""
+        """
+        Add command-line arguments required by the plugin.
+
+        Returns:
+            Tuple[str, List[ArgumentVars]]: A tuple containing the plugin category
+                and a list of ArgumentVars.
+        """
         built_in_libs = glob.glob(
             os.path.join(os.path.dirname(__file__), "reaction_libraries") + "/*"
         )
@@ -57,7 +84,15 @@ class FragmentAddition(MutationBase):
         )
 
     def validate(self, params: dict):
-        """Validate the provided arguments."""
+        """
+        Validate the provided arguments.
+
+        Args:
+            params (dict): A dictionary of parameters to validate.
+
+        Raises:
+            ValueError: If rxn_library_path is not provided or is invalid.
+        """
         if "rxn_library_path" not in params:
             raise ValueError("rxn_library_path must be provided.")
 
@@ -78,31 +113,38 @@ class FragmentAddition(MutationBase):
 
     def setup(self, **kwargs):
         """
-        Setup the plugin with provided arguments. This is required because one
-        can imagine a scenario where you want to setup a plugin only once, then
-        execute the run function multiple times.
+        Setup the plugin with provided arguments.
+
+        This method is required because one can imagine a scenario where you
+        want to setup a plugin only once, then execute the run function multiple
+        times.
+
+        Args:
+            **kwargs (Any): Arbitrary keyword arguments used for plugin setup.
         """
         self._load_rxn_data()
 
     def run_mutation(self, parent_smiles: str) -> Optional[List[Union[str, int, None]]]:
         """
-        This will take the shuffled list of reaction names
-        (self.shuffled_reaction_list) and test the Ligand to see if it is
-        capable of being used in the reaction. If the ligand is unable to be
-        used in the reaction, then we move on to the next reaction in the
-        list. If none work, we return a  None.
+        Run the mutation on the parent molecule.
 
-        Inputs:
-        :param str ligand_smiles: SMILES string of a molecule to be
-            reacted
+        This will take the shuffled list of reaction names
+        (self.shuffled_reaction_list) and test the molecule
+        to see if it is capable of being used in the reaction. If the molecule
+        is unable to be used in the reaction, then we move on to the next
+        reaction in the list. If none work, we return None.
+
+        Args:
+            parent_smiles (str): SMILES string of a molecule to be reacted.
 
         Returns:
-        :returns: list product_info: list containing the reaction product, the
-            id_number of the reaction as found in the reaction_dict and the id for
-            the complementary mol (None if it was a single reactant reaction)
-            [reaction_product_smiles, reaction_id_number,
-            zinc_database_comp_mol_name]. returns None if all reactions failed or
-            input failed to convert to a sanitizable rdkit mol.
+            Optional[List[Union[str, int, None]]]: A list containing the
+                reaction product SMILES, the id_number of the reaction as found
+                in the reaction_dict, and the id for the complementary mol
+                (None if it was a single reactant reaction). TODO: Should be a 
+                typed tuple instead of a list.
+            Returns None if all reactions failed or input failed to convert to
+                a sanitizable rdkit mol.
         """
         # Prepare the molecule
         mol_data = self._prepare_mol(parent_smiles)
@@ -166,6 +208,12 @@ class FragmentAddition(MutationBase):
         self._validate_rxn_lib()
 
     def _validate_rxn_lib(self):
+        """
+        Validate the reaction library data.
+
+        Raises:
+            AssertionError: If any of the validation checks fail.
+        """
         for key, val in self.reaction_dict.items():
             # Make sure these keys exist: ['reaction_name',
             # 'example_rxn_product', 'example_rxn_reactants',
@@ -231,28 +279,25 @@ class FragmentAddition(MutationBase):
 
     def _load_rxn_lib(self, rxn_library_path: str) -> Dict[str, Dict[str, Any]]:
         """
+        Load the chemical reactions for SmartClickChem.
+
         This is where all the chemical reactions for SmartClickChem are
-        retrieved. If you want to add more just add a Custom set of reactions
-        please add a folder to
-        PATH/autogrow/operators/mutation/smiles_click_chem/Reaction_libraries/.
-        They should be formatted as a dictionary of dictionary using the same
-        format as :
-        os.path.join(pwd,"reaction_libraries",
-                    "click_chem_rxns","ClickChem_rxn_library.json")
+        retrieved.
 
-        The reactions are written as SMARTS-reaction strings.
+        The reactions are written as SMARTS-reaction strings. This dictionary
+        uses the reaction name as the key and the Reaction Smarts as the value.
 
-        This dictionary uses the reaction name as the key and the Reaction
-        Smarts as the value.
-
-        Inputs:
-        :param str rxn_library_path: A string defining the choice of the reaction
-            library. ClickChem uses the set of reactions from Autogrow 3.1.2.
+        Args:
+            rxn_library_path (str): A string defining the choice of the reaction
+                library.
 
         Returns:
-        :returns: dict reaction_dict: A dictionary containing all the
-            reactions for ClickChemistry and all the information required to run
-            the reaction
+            Dict[str, Dict[str, Any]]: A dictionary containing all the reactions
+                and all the information required to run the reaction.
+
+        Raises:
+            Exception: If the rxn_library file cannot be imported or if the
+                rxn_library_path is incorrectly formatted.
         """
         return self._load_reformatted_rxn_dict(
             rxn_library_path,
@@ -263,35 +308,26 @@ class FragmentAddition(MutationBase):
 
     def _load_functional_grps(self, rxn_library_path: str) -> Dict[str, str]:
         """
+        Load the functional groups required for the respective reactions.
+
         This retrieves a dictionary of all functional groups required for the
-        respective reactions. This dictionary will be used to identify
-        possible reactions.
+        respective reactions. This dictionary will be used to identify possible
+        reactions.
 
-        This is where all the functional groups which will be used in the
-        SmartClickChem reactions are retrieved. If you want to add more just
-        add a Custom set of reactions please add a folder to
-        PATH/autogrow/operators/mutation/smiles_click_chem/Reaction_libraries/.
-        They should be formatted as a dictionary of dictionary using the same
-        format as :
-        os.path.join(pwd,"reaction_libraries","click_chem_rxns",
-                     "ClickChem_functional_groups.json")
+        Note: If your functional groups involve stereochemistry notations such
+        as '\', please replace with '\\' (all functional groups should be
+        formatted as SMARTS)
 
-        IF YOU CHOSE TO DO A Custom REACTION SET YOU MUST PROVIDE A DICTIONARY
-        OF ALL FUNCTIONAL GROUPS IT WILL REACT. IF YOU FORGET TO ADD A
-        FUNCTIONAL GROUP TO YOUR Custom DICTIONARY, THE REACTION MAY NEVER BE
-        UTILIZED.
-
-        Please note if your functional groups involve stereochemistry
-            notations such as '\' please replace with '\\' (all functional
-            groups should be formatted as SMARTS)
-
-        Inputs:
-        :param str rxn_library_path: A string defining the choice of the reaction
-            library. ClickChem uses the set of reactions from Autogrow 3.1.2.
+        Args:
+            rxn_library_path (str): A string defining the choice of the reaction library.
 
         Returns:
-        :returns: dict functional_group_dict: A dictionary containing all
-            SMARTS for identifying the functional groups for ClickChemistry
+            Dict[str, str]: A dictionary containing all SMARTS for identifying
+                the functional groups.
+
+        Raises:
+            Exception: If the function_group_library json file cannot be
+                imported or if the rxn_library_path is incorrectly formatted.
         """
         return self._load_reformatted_rxn_dict(
             rxn_library_path,
@@ -313,21 +349,25 @@ class FragmentAddition(MutationBase):
         self, rxn_library_path: str  # , complementary_mols: str
     ) -> Dict[str, str]:
         """
-        Based on user controlled variables, this definition will retrieve a
+        Load the complementary molecules for reactions.
+
+        Based on user-controlled variables, this definition will retrieve a
         dictionary of molecules separated into classes by their functional
         groups. The sorting of a .smi file into this should be handled in the
         user parameter testing when autogrow is initially started.
 
-        Inputs:
-        :param str rxn_library_path: A string defining the choice of the reaction
-            library. ClickChem uses the set of reactions from Autogrow 3.1.2.
-        :param dict complementary_mols: the path to the
-            complementary_mols directory. It may be an empty string in which
-            case the complementary_mols directory will default to those of the
-            rxn_library_path
+        Args:
+            rxn_library_path (str): A string defining the choice of the reaction
+                library.
 
         Returns:
-        :returns: dict complementary_mols_dict: a dictionary of complementary molecules
+            Dict[str, str]: A dictionary of complementary molecules where keys
+                are functional group names and values are paths to corresponding
+                .smi files.
+
+        Raises:
+            Exception: If any required .smi files are missing in the
+                complementary_mols directory.
         """
         complementary_mols = os.path.join(rxn_library_path, "complementary_mols")
 
@@ -397,26 +437,28 @@ class FragmentAddition(MutationBase):
 
     def _reformat_rxn_dict(self, old_dict: Dict[str, Any]) -> Dict[str, Any]:
         """
-        json dictionaries  import as type unicode. This script converts all
-        the keys and items to strings, with a few specific exceptions. It
-        takes both the functional group dictionary and the reaction library.
+        Convert json dictionary items to appropriate Python data types.
 
-        The reaction library is a dictionary of dictionary and has a few
-        exceptions which are not intended to be strings. ie. the num_reactants
-        which converts to interger and functional_groups which convert to a
-        list of strings.
+        Json dictionaries import as type unicode. This script converts all the
+        keys and items to strings, with a few specific exceptions. It takes both
+        the functional group dictionary and the reaction library.
+
+        The reaction library is a dictionary of dictionaries and has a few
+        exceptions which are not intended to be strings, i.e., the num_reactants
+        which converts to integer and functional_groups which convert to a list
+        of strings.
 
         The functional_group_dictionary is simply a dictionary with all items
         and keys needing to be strings.
 
-        Inputs:
-        :param dic old_dict: a dictionary of the the reaction library or
-            functional groups. This is what is importanted from the .json file.
+        Args:
+            old_dict (Dict[str, Any]): A dictionary of the reaction library or
+                functional groups. This is what is imported from the .json file.
 
         Returns:
-        :returns: dic new_dict: a dictionary of the the reaction library or
-            functional groups where the unicode type items have been replaced with
-            the proper python data types.
+            Dict[str, Any]: A dictionary of the reaction library or functional
+                groups where the unicode type items have been replaced with the
+                proper Python data types.
         """
         new_dict = {}
         for rxn_key, rxn_dic_old in old_dict.items():
@@ -456,12 +498,14 @@ class FragmentAddition(MutationBase):
         """
         Prepare the molecule for reaction.
 
-        Inputs:
-        :param str ligand_smiles: SMILES string of a molecule to be reacted
+        Args:
+            ligand_smiles (str): SMILES string of a molecule to be reacted.
 
         Returns:
-        :returns: tuple of mol, mol_reprotanated, mol_deprotanated, list_subs_within_mol
-                or None if preparation fails.
+            Optional[Tuple[Chem.Mol, Chem.Mol, Chem.Mol, List[str]]]: A tuple
+                containing the original molecule, reprotanated molecule,
+                deprotanated molecule, and a list of functional groups within
+                the molecule. Returns None if preparation fails.
         """
         try:
             mol = Chem.MolFromSmiles(
@@ -507,14 +551,17 @@ class FragmentAddition(MutationBase):
         """
         Try reactions on the molecule.
 
-        Inputs:
-        :param Chem.Mol mol_reprotanated: reprotanated molecule
-        :param Chem.Mol mol_deprotanated: deprotanated molecule
-        :param List[str] list_subs_within_mol: list of functional groups within the molecule
+        Args:
+            mol_reprotanated (Chem.Mol): Reprotanated molecule.
+            mol_deprotanated (Chem.Mol): Deprotanated molecule.
+            list_subs_within_mol (List[str]): List of functional groups within
+                the molecule.
 
         Returns:
-        :returns: tuple of reaction_product_smiles, reaction_id_number, zinc_database_comp_mol_names
-                or None if all reactions fail
+            Optional[Tuple[str, int, Optional[str]]]: A tuple containing the
+                reaction product SMILES, reaction ID number, and complementary
+                molecule name (if applicable). Returns None if all reactions
+                fail.
         """
         # Randomize the order of the list of reactions
         shuffled_reaction_list = self._shuffle_dict_keys(self.reaction_dict)
@@ -537,20 +584,22 @@ class FragmentAddition(MutationBase):
         self, mol_deprotanated: Chem.Mol, mol_reprotanated: Chem.Mol
     ) -> List[str]:
         """
-        This function will take a molecule and find which functional groups it
-        has. This will save time for picking reactions, particularly as
-        reaction lists become larger.
+        Identify functional groups present in a molecule.
 
-        Inputs:
-        :param rdkit.Chem.rdchem.Mol mol_deprotanated: an rdkit molecule which
-            has been sanitized and deprotanated
-        :param rdkit.Chem.rdchem.Mol mol_reprotanated: an rdkit molecule which
-            has been sanitized and fully protanated
+        This function will take a molecule and find which functional groups it
+        has. This will save time for picking reactions, particularly as reaction
+        lists become larger.
+
+        Args:
+            mol_deprotanated (Chem.Mol): An rdkit molecule which has been
+                sanitized and deprotanated.
+            mol_reprotanated (Chem.Mol): An rdkit molecule which has been
+                sanitized and fully protanated.
 
         Returns:
-        :returns: list list_subs_within_mol: a list of the name of every
-            functional group found within the molecule. these will be used later
-            to filter for reactions.
+            List[str]: A list of the names of every functional group found
+                within the molecule. These will be used later to filter for
+                reactions.
         """
         list_subs_within_mol = []
         functional_group_dict = self.functional_group_dict
@@ -565,14 +614,14 @@ class FragmentAddition(MutationBase):
 
     def _shuffle_dict_keys(self, dictionary: Dict[Any, Any]) -> List[Any]:
         """
-        Get a random ordered list of all the keys from  a dictionary.
+        Get a random ordered list of all the keys from a dictionary.
 
-        Inputs:
-        :param dict dictionary: any dictionary
+        Args:
+            dictionary (Dict[Any, Any]): Any dictionary.
 
         Returns:
-        :returns: list keys: a randomly ordered list containing all the keys
-            from the dictionary
+            List[Any]: A randomly ordered list containing all the keys from the
+                dictionary.
         """
         keys = list(dictionary.keys())  # List of keys
         random.shuffle(keys)
@@ -586,17 +635,20 @@ class FragmentAddition(MutationBase):
         list_subs_within_mol: List[str],
     ) -> Optional[Tuple[str, int, Optional[str]]]:
         """
-        Try to perform the reaction specified in a_reaction_dict on the molecule.
+        Try to perform the reaction specified in a_reaction_dict on the
+        molecule.
 
-        Inputs:
-        :param dict a_reaction_dict: the reaction to try
-        :param Chem.Mol mol_deprotanated: deprotanated molecule
-        :param Chem.Mol mol_reprotanated: reprotanated molecule
-        :param List[str] list_subs_within_mol: list of functional groups within the molecule
+        Args:
+            a_reaction_dict (Dict[str, Any]): The reaction to try.
+            mol_deprotanated (Chem.Mol): Deprotanated molecule.
+            mol_reprotanated (Chem.Mol): Reprotanated molecule.
+            list_subs_within_mol (List[str]): List of functional groups within
+                the molecule.
 
         Returns:
-        :returns: tuple of reaction_product_smiles, reaction_id_number, zinc_database_comp_mol_names
-                or None if reaction fails
+            Optional[Tuple[str, int, Optional[str]]]: A tuple containing the
+                reaction product SMILES, reaction ID number, and complementary
+                molecule name (if applicable). Returns None if reaction fails.
         """
         fun_groups_in_rxn = a_reaction_dict["functional_groups"]
         contains_group = None
@@ -646,14 +698,16 @@ class FragmentAddition(MutationBase):
         """
         Try a single reactant reaction.
 
-        Inputs:
-        :param rxn: the reaction object
-        :param mol_to_use: the molecule to react
-        :param a_reaction_dict: the reaction dictionary
+        Args:
+            rxn (AllChem.ChemicalReaction): The reaction object.
+            mol_to_use (Chem.Mol): The molecule to react.
+            a_reaction_dict (Dict[str, Any]): The reaction dictionary.
 
         Returns:
-        :returns: tuple of reaction_product_smiles, reaction_id_number, None
-                or None if reaction fails
+            Optional[Tuple[str, int, Optional[str]]]: A tuple containing the
+                reaction product SMILES, reaction ID number, and None (as
+                there's no complementary molecule). Returns None if reaction
+                fails.
         """
         with contextlib.suppress(Exception):
             # if reaction works keep it
@@ -685,15 +739,17 @@ class FragmentAddition(MutationBase):
         """
         Try a multi-reactant reaction.
 
-        Inputs:
-        :param rxn: the reaction object
-        :param mol_to_use: the molecule to react
-        :param a_reaction_dict: the reaction dictionary
-        :param contains_group: index of the functional group in the reaction that is in the molecule
+        Args:
+            rxn (AllChem.ChemicalReaction): The reaction object.
+            mol_to_use (Chem.Mol): The molecule to react.
+            a_reaction_dict (Dict[str, Any]): The reaction dictionary.
+            contains_group (int): Index of the functional group in the reaction
+                that is in the molecule.
 
         Returns:
-        :returns: tuple of reaction_product_smiles, reaction_id_number, zinc_database_comp_mol_names
-                or None if reaction fails
+            Optional[Tuple[str, int, Optional[str]]]: A tuple containing the
+                reaction product SMILES, reaction ID number, and complementary
+                molecule name(s). Returns None if reaction fails.
         """
         fun_groups_in_rxn = a_reaction_dict["functional_groups"]
         list_reactant_mols = []
@@ -789,20 +845,20 @@ class FragmentAddition(MutationBase):
 
     def _validate_product(self, reaction_product):
         """
-        This function will test whether the product passes all of the
-            requirements:
-            1) Mol sanitizes
-            2) It isn't in the self.existing_smiles
-            3) It passes Filters
-        Returns the smile if it passes; returns None if it fails.
+        Validate the reaction product.
 
-        Inputs:
-        :param rdkit.Chem.rdchem.Mol reaction_product: an rdkit
-            molecule to be checked.
+        This function will test whether the product passes all of the
+        requirements:
+
+        1) Mol sanitizes
+        2) It passes Filters
+
+        Args:
+            reaction_product (Chem.Mol): An rdkit molecule to be checked.
+
         Returns:
-        :returns: str reaction_product_smiles:
-            this will return either a SMILES string if it is a good molecule
-            or None if it can not sanitize and be cleaned
+            Optional[str]: The SMILES string of the validated product if it
+                passes all checks, or None if it fails any check.
         """
         reaction_product = MOH.check_sanitization(reaction_product)
         if reaction_product is None:
@@ -861,15 +917,15 @@ class FragmentAddition(MutationBase):
 
     def _get_random_complementary_mol(self, functional_group: str) -> List[str]:
         """
-        This function will get a dictionary of complementary mols
+        Get a random complementary molecule for a given functional group.
 
-        Inputs:
-        :param str functional_group: the functional group of the needed
-            complementary molecule for the reaction
+        Args:
+            functional_group (str): The functional group of the needed
+                complementary molecule for the reaction.
 
         Returns:
-        :returns: list random_comp_mol: list with the SMILES string and name
-            of molecule for the randomly chosen comp mol
+            List[str]: A list containing the SMILES string and name of the
+                randomly chosen complementary molecule.
         """
         infile = self.complementary_mol_dict[functional_group]
 

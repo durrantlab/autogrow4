@@ -1,15 +1,20 @@
-"""Lipinski Lenient
-This runs a Lenient Lipinski filter. Lipinski filter refines for orally
-available drugs. It filters molecules by Molecular weight (MW), the number of
-hydrogen donors, the number hydrogen acceptors, and the logP value.
+"""
+Lenient Lipinski Filter for oral drug availability.
 
-To pass the Lipinski filter a molecule must be:
-    MW: Max 500 dalton
-    Number of H acceptors: Max 10
-    Number of H donors: Max 5
-    logP Max +5.0
+This module implements a Lenient Lipinski filter to refine molecules for oral
+drug availability. It filters molecules based on Molecular Weight (MW), number
+of hydrogen donors and acceptors, and LogP value.
 
-If you use the Lipinski Filter please cite: C.A. Lipinski et al. Experimental
+To pass the Lipinski filter, a molecule must meet the following criteria:
+    - MW: Max 500 dalton
+    - Number of H acceptors: Max 10
+    - Number of H donors: Max 5
+    - LogP: Max +5.0
+
+This lenient implementation allows one violation of the Lipinski Rule of 5
+constraints.
+
+If you use the Lipinski Filter, please cite: C.A. Lipinski et al. Experimental
 and computational approaches to estimate solubility and permeability in drug
 discovery and development settings Advanced Drug Delivery Reviews, 46 (2001),
 pp. 3-26
@@ -31,51 +36,46 @@ rdkit.RDLogger.DisableLog("rdApp.*")
 
 class LipinskiLenientFilter(SmilesFilterBase):
     """
-    This runs a Lenient Lipinski filter. Lipinski filter refines for orally
-    available drugs. It filters molecules by Molecular weight (MW), the number
-    of hydrogen donors, the number hydrogen acceptors, and the logP value.
+    Implements a Lenient Lipinski filter for oral drug availability.
 
-    This is a Lenient Lipinski which means a ligand is allowed one violation
-    exception to the Lipinski Rule of 5 restraints.
+    This class runs a Lenient Lipinski filter to refine molecules for oral drug
+    availability. It filters molecules based on Molecular Weight (MW), number of
+    hydrogen donors and acceptors, and LogP value.
 
-    To pass the Lipinski filter a molecule must be:
-        MW: Max 500 dalton
-        Number of H acceptors: Max 10
-        Number of H donors: Max 5
-        logP Max +5.0
+    This lenient implementation allows one violation of the Lipinski Rule of 5
+    constraints.
 
-    If you use the Lipinski Filter please cite: C.A. Lipinski et al.
+    To pass the Lipinski filter, a molecule must meet the following criteria:
+        - MW: Max 500 dalton
+        - Number of H acceptors: Max 10
+        - Number of H donors: Max 5
+        - LogP: Max +5.0
+
+    If you use the Lipinski Filter, please cite: C.A. Lipinski et al.
     Experimental and computational approaches to estimate solubility and
     permeability in drug discovery and development settings Advanced Drug
     Delivery Reviews, 46 (2001), pp. 3-26
-
-    Inputs:
-    :param class ParentFilter: a parent class to initialize off
     """
 
     def run_filter(self, mol: rdkit.Chem.rdchem.Mol) -> bool:
         """
-        This runs the Lenient Lipinski filter. Lipinski filter refines for
-        orally available drugs. It filters molecules by Molecular weight (MW),
-        the number of hydrogen donors, the number hydrogen acceptors, and the
-        logP value.
+        Run the Lenient Lipinski filter on a given molecule.
 
-        This is a Lenient Lipinski which means a ligand is allowed one
-        violation exception to the Lipinski Rule of 5 restraints.
+        This method applies the Lenient Lipinski filter criteria to determine if
+        a molecule is likely to be orally available as a drug. It checks the
+        molecular weight, number of hydrogen bond donors and acceptors, and LogP
+        value.
 
-        To pass the Lipinski filter a molecule must be:
-            MW: Max 500 dalton
-            Number of H acceptors: Max 10
-            Number of H donors: Max 5
-            logP Max +5.0
+        This lenient implementation allows one violation of the Lipinski Rule of
+        5 constraints.
 
-        Inputs:
-        :param rdkit.Chem.rdchem.Mol object mol: An rdkit mol object to be
-            tested if it passes the filters
+        Args:
+            mol (rdkit.Chem.rdchem.Mol): An RDKit mol object to be tested
+                against the filter criteria.
 
         Returns:
-        :returns: bool bool: True if the mol passes the filter; False if it
-            fails the filter
+            bool: True if the molecule passes the filter (allows up to one
+                violation), False otherwise.
         """
         violation_counter = 0
 
@@ -101,7 +101,18 @@ class LipinskiLenientFilter(SmilesFilterBase):
         return False
 
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
-        """Add command-line arguments required by the plugin."""
+        """
+        Add command-line arguments required by the plugin.
+
+        This method defines the command-line arguments specific to the Lenient
+        Lipinski Filter. It allows users to enable the filter via command-line
+        options.
+
+        Returns:
+            Tuple[str, List[ArgumentVars]]: A tuple containing the argument
+                group name and a list of ArgumentVars objects defining the
+                command-line arguments.
+        """
         return (
             "SMILES Filters",
             [

@@ -1,11 +1,11 @@
-"""#NIH Filter
-This will filter a ligand using the NIH filter to remove ligands with
-undersirable functional groups.
+"""
+NIH Filter for removing ligands with undesirable functional groups.
 
-This script relies on the RDKit predefined FilterCatalog. FilterCatalog is
+This module implements the NIH filter to eliminate ligands with undesirable
+functional groups. It uses the RDKit predefined FilterCatalog, which is
 maintained by RDKit.
 
-If using the NIH filter please cite: Jadhav A, et al. Quantitative Analyses of
+If using the NIH filter, please cite: Jadhav A, et al. Quantitative Analyses of
 Aggregation, Autofluorescence, and Reactivity Artifacts in a Screen for
 Inhibitors of a Thiol Protease. J Med Chem 53 (2009) 37D51.
 doi:10.1021/jm901070c.
@@ -24,35 +24,31 @@ from autogrow.config.argparser import ArgumentVars
 
 class NIHFilter(SmilesFilterBase):
     """
-    This will filter a ligand using a NIH screening filter. This script relies
-    on the RDKit predefined FilterCatalog. FilterCatalog is maintained by
-    RDKit.
+    Implements the NIH filter for removing ligands with undesirable functional
+    groups.
 
-    The NIH filter is used to eliminate ligands with undersirable functional
-    groups
+    This class uses the NIH screening filter to eliminate ligands with
+    undesirable functional groups. It relies on the RDKit predefined
+    FilterCatalog, which is maintained by RDKit.
 
-    If using the NIH filter please cite: Jadhav A, et al. Quantitative
-    Analyses of Aggregation, Autofluorescence, and Reactivity Artifacts in a
-    Screen for Inhibitors of a Thiol Protease. J Med Chem 53 (2009) 37D51.
+    If using the NIH filter, please cite: Jadhav A, et al. Quantitative Analyses
+    of Aggregation, Autofluorescence, and Reactivity Artifacts in a Screen for
+    Inhibitors of a Thiol Protease. J Med Chem 53 (2009) 37D51.
     doi:10.1021/jm901070c.
-
-    Inputs:
-    :param class ParentFilter: a parent class to initialize off of.
     """
 
     def __init__(self) -> None:
         """
-        This loads in the filters which will be used.
+        Initialize the NIH filter by loading the required filters.
         """
         self.filters = self.get_filters()
 
     def get_filters(self) -> FilterCatalog.FilterCatalog:
         """
-        This loads in the filters which will be used.
+        Load and return the NIH filters.
 
         Returns:
-        :returns: rdkit.Chem.rdfiltercatalog.FilterCatalog filters: A set of
-            RDKit Filters
+            FilterCatalog.FilterCatalog: A set of RDKit NIH Filters.
         """
         # Make a list of the NIH filter.
         params = FilterCatalogParams()
@@ -62,22 +58,22 @@ class NIHFilter(SmilesFilterBase):
 
     def run_filter(self, mol: rdkit.Chem.rdchem.Mol) -> bool:
         """
-        Runs a NIH filter by matching common false positive molecules to the
-        current mol.
+        Run the NIH filter on a given molecule.
 
-        The NIH filter is used to eliminate ligands with undersirable
-        functional groups
+        This method applies the NIH filter to eliminate ligands with undesirable
+        functional groups. It matches common false positive molecules to the
+        current mol.
 
         Based on the PAINS filter implementation in RDKit described in
         http://rdkit.blogspot.com/2016/04/changes-in-201603-release-filtercatalog.html
 
-        Inputs:
-        :param rdkit.Chem.rdchem.Mol object mol: An rdkit mol object to be
-            tested if it passes the filters
+        Args:
+            mol (rdkit.Chem.rdchem.Mol): An RDKit mol object to be tested
+                against the filter criteria.
 
         Returns:
-        :returns: bool bool: True if the mol passes the filter; False if it
-            fails the filter
+            bool: True if the molecule passes the filter (no matches found in
+                the filter list), False otherwise.
         """
         # If the mol matches a mol in the filter list. we return a False (as it
         # failed the filter). if No matches are found to filter list this will
@@ -85,7 +81,17 @@ class NIHFilter(SmilesFilterBase):
         return self.filters.HasMatch(mol) is not True
 
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
-        """Add command-line arguments required by the plugin."""
+        """
+        Add command-line arguments required by the plugin.
+
+        This method defines the command-line arguments specific to the NIH
+        Filter. It allows users to enable the filter via command-line options.
+
+        Returns:
+            Tuple[str, List[ArgumentVars]]: A tuple containing the argument
+                group name and a list of ArgumentVars objects defining the
+                command-line arguments.
+        """
         return (
             "SMILES Filters",
             [

@@ -1,4 +1,9 @@
-""" Plots AutoGrow Run"""
+"""
+Plots the results of an AutoGrow run.
+
+This module reads SMILES files from an AutoGrow run, calculates average docking
+scores, and generates line plots of these scores across generations.
+"""
 import __future__
 
 import os
@@ -10,33 +15,25 @@ import matplotlib.pyplot as plt  # type: ignore
 
 def get_usable_format(infile: str) -> List[List[str]]:
     """
-    This code takes a string for an file which is formatted as an .smi file. It
-    opens the file and reads in the components into a usable list.
+    Read an .smi file and format it into a usable list.
 
-    The .smi must follow the following format for each line:
-        MANDATORY INFO
-            part 1 is the SMILES string
-            part 2 is the SMILES name/ID
+    This function reads a specified .smi file and parses its components into a 
+    list format suitable for further processing in AutoGrow. The .smi file 
+    should follow this format:
+        - Part 1: SMILES string (mandatory)
+        - Part 2: SMILES name/ID (mandatory)
+        - Part -1: SMILES diversity score (optional)
+        - Part -2: Fitness metric, e.g., docking score (optional)
+        - Additional information can be between Part 2 and Part -2.
 
-        Optional info
-            part -1 (the last piece of info) is the SMILES diversity score
-                relative to its population
-            part -2 (the second to last piece of info) is the fitness metric
-                for evaluating
-                - For default setting this is the Docking score
-                - If you add a unique scoring function Docking score should be
-                    -3 and that score function should be -2
-
-            Any other information MUST be between part 2 and part -2 (this
-            allows for the expansion of features without disrupting the rest of the code)
-
-    Inputs:
-    :param str infile: the string of the PATHname of a formatted .smi file to
-        be read into the program
+    Args:
+        infile (str): Path to the formatted .smi file.
 
     Returns:
-    :returns: list usable_smiles: list of SMILES and their associated
-        information formatted into a list which is usable by the rest of Autogrow
+        List[List[str]]: List of SMILES and associated information.
+    
+    Raises:
+        Exception: If the .smi file does not exist.
     """
     # IMPORT SMILES FROM THE PREVIOUS GENERATION
     usable_smiles = []
@@ -64,18 +61,18 @@ def get_average_score_per_gen(
     infolder: str, folder_list: List[str]
 ) -> Dict[str, Union[float, str]]:
     """
-    This script will get the average docking score from the ranked .smi file
-    from each generation.
+    Calculate the average docking score for each generation.
 
-    Inputs:
-    :param str infolder: the path of the folder which has all of the
-        generation folders
-    :param list folder_list: a list of generation folders for each generation
-        within infolder
+    This function reads ranked .smi files from each generation folder and 
+    calculates the average docking score for each generation.
+
+    Args:
+        infolder (str): Path to the folder containing all generation folders.
+        folder_list (List[str]): List of generation folders within the infolder.
 
     Returns:
-    :returns: list usable_smiles: list of SMILES and their associated
-        information formatted into a list which is usable by the rest of Autogrow
+        Dict[str, Union[float, str]]: Dictionary of average docking scores 
+        for each generation, with generation names as keys.
     """
     average_affinity_dict = {}
     for gen_folder in folder_list:
@@ -111,21 +108,23 @@ def get_average_top_score_per_gen(
     infolder: str, folder_list: List[str], top_score_per_gen: int
 ) -> Dict[str, Union[float, str]]:
     """
+    Get the average docking score of the top N number of ligands from each generation.
+
     This script will get the average docking score of the top N number of
     ligands ranked .smi file from each generation.
 
-    Inputs:
-    :param str infolder: the path of the folder which has all of the
-        generation folders
-    :param list folder_list: a list of generation folders for each generation
-        within infolder
-    :param int top_score_per_gen: the number of ligands to determine the
-        average score. ie) if top_score_per_gen=50 it will return the average of
-        the top 50 scores.
+    Args:
+        infolder (str): The path of the folder which has all of the
+            generation folders.
+        folder_list (List[str]): A list of generation folders for each generation
+            within infolder.
+        top_score_per_gen (int): The number of ligands to determine the
+            average score. ie) if top_score_per_gen=50 it will return the average of
+            the top 50 scores.
 
     Returns:
-    :returns: dict average_affinity_dict: dictionary of average affinity
-        scores for top_score_per_gen number of ligands
+        Dict[str, Union[float, str]]: Dictionary of average affinity
+            scores for top_score_per_gen number of ligands.
     """
     average_affinity_dict = {}
 
@@ -173,11 +172,14 @@ def get_average_top_score_per_gen(
 
 def print_gens(average_affinity_dict: Dict[str, Union[float, str]]) -> None:
     """
-    This prints out the average scores for each generation
+    Print the average scores for each generation.
 
-    Inputs:
-    :param dict average_affinity_dict: dictionary of average affinity scores
-        for top_score_per_gen number of ligands
+    This function displays the average docking scores for each generation 
+    in a formatted table.
+
+    Args:
+        average_affinity_dict (Dict[str, Union[float, str]]): Dictionary of 
+            average affinity scores for each generation.
     """
     print("generation_number              average affinity score")
     affinity_keys = list(average_affinity_dict.keys())
@@ -190,19 +192,20 @@ def make_graph(
     dictionary: Dict[str, Union[float, str]]
 ) -> Tuple[Optional[List[int]], Optional[List[Union[float, str]]]]:
     """
-    Because some generations may not have 50 ligands this basically checks to
-    see if theres enough ligands and prepares lists to be plotted
+    Prepare data for plotting average scores across generations.
 
-    Inputs:
-    :param dict dictionary: dictionary of average affinity scores for
-        top_score_per_gen number of ligands
+    This function processes the dictionary of average scores to generate lists 
+    for plotting. If any generation has 'N/A' scores, it returns None for 
+    both lists.
+
+    Args:
+        dictionary (Dict[str, Union[float, str]]): Dictionary of average affinity 
+            scores for each generation.
 
     Returns:
-    :returns: list list_generations: list of ints for each generation to be
-        plotted. if a generation lacks ligands to generate the average it will
-        return "N/A"
-    :returns: list list_of_scores: list of averages for each generation; if a
-        generation lacks ligands to generate the average it will return "N/A"
+        Tuple[Optional[List[int]], Optional[List[Union[float, str]]]]: 
+            - List of generation numbers for plotting (or None if data is insufficient).
+            - List of average scores for each generation (or None if data is insufficient).
     """
     list_generations = []
     list_of_gen_names = []
@@ -234,16 +237,20 @@ def run_plotter(
     outfile: str,
 ) -> None:
     """
-    This plots the averages into a matplotlib figure. It will require you to
-    answer questions about titles and labels
+    Generate a line plot of average scores from an AutoGrow simulation.
 
-    Inputs:
-    :param dict params: dict of user variables which will govern how the
-        programs runs
-    :param dict dict_of_averages: a dictionary of dictionaries containing the
-        average of each generation for the top 50,20, 10, and 1 ligand(s) and the
-        overall average for each generation.
-    :param str outfile: Path for the output file for the plot
+    This function creates a matplotlib plot showing average docking scores 
+    across generations for different categories (e.g., top 50, top 20). The 
+    plot is saved to the specified output file.
+
+    Args:
+        params (Dict[str, Any]): User parameters governing plot generation.
+        dict_of_averages (Dict[str, Dict[str, Union[float, str]]]): Dictionary 
+            containing average scores for each category and generation.
+        outfile (str): Path for the output plot file.
+
+    Raises:
+        Exception: If the plot cannot be created due to insufficient data.
     """
     average_affinity_dict = dict_of_averages["average_affinity_dict"]
     top_fifty_dict = dict_of_averages["top_fifty_dict"]
@@ -359,23 +366,25 @@ def print_data_table(
     infolder: str, folder_list: List[str]
 ) -> Dict[str, Dict[str, Union[float, str]]]:
     """
+    Calculate and print average docking scores for different subsets of ligands.
+
     This function takes a folder of an Autogrow Run and a list of all folders
-    within the infolder, and finds the average of each generation, the average
-    of the top 50,20, 10, and 1 ligand(s) in each generation.
+    within the infolder, and finds the average of each generation, as well as
+    the average of the top 50, 20, 10, and 1 ligand(s) in each generation.
 
     It prints the average docking score values in a table and returns that
     information as a dictionary of dictionaries.
 
-    Inputs:
-    :param str infolder: a string for the file path to a directory containing
-        an Autogrow run. ie) "PATH/Run_0/"
-    :param list folder_list: a list of every generation folders within the
-        infolder
+    Args:
+        infolder (str): A string for the file path to a directory containing
+            an Autogrow run. ie) "PATH/Run_0/"
+        folder_list (List[str]): A list of every generation folders within the
+            infolder.
 
-    Returns
-    :returns: dict dict_of_averages: a dictionary of dictionaries containing
-        the average of each generation for the top 50,20, 10, and 1 ligand(s) and
-        the overall average for each generation.
+    Returns:
+        Dict[str, Dict[str, Union[float, str]]]: A dictionary of dictionaries containing
+            the average of each generation for the top 50, 20, 10, and 1 ligand(s) and
+            the overall average for each generation.
     """
     print("Overall Scoring Average for all Compounds")
     average_affinity_dict = get_average_score_per_gen(infolder, folder_list)
@@ -409,12 +418,14 @@ def print_data_table(
 # Run Everything
 def generate_figures(params: Dict[str, Any]) -> None:
     """
+    Generate line plots of results from an Autogrow simulation.
+
     This runs everything to make a line plot of the results of an Autogrow
     simulation.
 
-    Inputs:
-    :param dict params: dict of user variables which will govern how the
-        programs runs
+    Args:
+        params (Dict[str, Any]): Dict of user variables which will govern how the
+            program runs.
     """
     for _ in range(10):
         print("")

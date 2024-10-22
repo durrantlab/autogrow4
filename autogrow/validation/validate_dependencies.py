@@ -1,7 +1,35 @@
+"""Dependency validation utilities for AutoGrow.
+
+This module verifies that all required Python packages are installed and
+importable before AutoGrow execution begins. This includes comprehensive checks
+for RDKit and its submodules, numpy, and scipy components.
+"""
+
+
 def validate_dependencies() -> None:
-    """
-    This function will try to import all the installed dependencies that will be
-    used in Autogrow. If it fails to import it will raise an ImportError
+    """Validates that all required dependencies are installed.
+   
+    Attempts to import all dependencies used by AutoGrow including:
+    
+    RDKit packages:
+        - rdkit core
+        - Chem and AllChem
+        - rdDepictor
+        - rdMolDraw2D and PrepareMolForDrawing 
+        - rdFMCS
+        - FilterCatalog and FilterCatalogParams
+        - Lipinski
+        - Crippen
+        - Descriptors
+        - MolSurf
+   
+    Other required packages:
+        - numpy
+        - scipy.cluster.vq.kmeans2
+   
+    Raises:
+        ImportError: If any required package fails to import. Message specifies
+            which package is missing.
     """
     try:
         import rdkit  # type: ignore

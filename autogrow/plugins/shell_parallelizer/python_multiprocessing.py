@@ -1,3 +1,12 @@
+"""
+Implements a parallel execution plugin for AutoGrow using Python's
+multiprocessing.
+
+This module provides a PythonMultiprocessing class that uses Python's
+multiprocessing module to run shell commands in parallel, improving performance
+for multi-core systems.
+"""
+
 from typing import List, Tuple
 from autogrow.config.argparser import ArgumentVars
 from autogrow.plugins.shell_parallelizer import ShellCmdResult, ShellParallelizerBase
@@ -9,8 +18,33 @@ from autogrow.utils.logging import log_warning
 
 
 class PythonMultiprocessing(ShellParallelizerBase):
+    """
+    A plugin that uses Python's multiprocessing to execute shell commands in
+    parallel.
+
+    This plugin extends ShellParallelizerBase to provide parallel execution
+    capabilities using Python's built-in multiprocessing module.
+    """
+
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
-        """Add command-line arguments required by the plugin."""
+        """
+        Add command-line arguments specific to the Python Multiprocessing
+        Plugin.
+
+        This method defines the command-line arguments that can be used to
+        configure the Python Multiprocessing Plugin.
+
+        Returns:
+            Tuple[str, List[ArgumentVars]]: A tuple containing:
+                - The name of the argument group ("Python Multiprocessing Shell
+                  Parallelizer")
+                - A list with one ArgumentVars object defining the argument
+                  to enable the Python Multiprocessing Plugin
+
+        Note:
+            This plugin doesn't require additional parameters beyond its
+            activation flag.
+        """
         return (
             "Python Multiprocessing Shell Parallelizer",
             [
@@ -24,15 +58,32 @@ class PythonMultiprocessing(ShellParallelizerBase):
         )
 
     def validate(self, params: dict):
-        """Validate the provided arguments."""
+        """
+        Validate the arguments provided for the Python Multiprocessing Plugin.
+
+        This method is a placeholder for argument validation. Currently, the
+        Python Multiprocessing Plugin doesn't require any additional validation
+        beyond its activation.
+
+        Args:
+            params (dict): A dictionary of parameters provided to the plugin.
+                Not used in the current implementation.
+        """
         pass
 
     def run_cmd(self, cmd: str) -> ShellCmdResult:
         """
         Run a single shell command and return its output.
 
-        :param str cmd: The shell command to run.
-        :return: A ShellCmdResult containing command, return_code, and output.
+        This method executes a shell command using subprocess and captures its
+        output and return code.
+
+        Args:
+            cmd (str): The shell command to run.
+
+        Returns:
+            ShellCmdResult: An object containing the command, return code,
+                and output (stdout and stderr combined).
         """
         process = subprocess.Popen(
             cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
@@ -45,16 +96,24 @@ class PythonMultiprocessing(ShellParallelizerBase):
         self, cmds: List[str], nprocs: int = -1
     ) -> List[ShellCmdResult]:
         """
-        Uses python multiprocessing to run a list of shell commands in
-        parallel.
+        Run a list of shell commands in parallel using Python's multiprocessing.
 
-        Inputs:
-        :param List[str] cmds: A list of shell commands to run in parallel.
-        :param int nprocs: The number of processors to use. Default is -1 (use
-            all available).
+        This method uses Python's multiprocessing module to execute multiple
+        shell commands concurrently, improving performance on multi-core
+        systems.
+
+        Args:
+            cmds (List[str]): A list of shell commands to run in parallel.
+            nprocs (int, optional): The number of processors to use. Defaults
+                to -1, which uses all available processors.
 
         Returns:
-        :returns: List[ShellCmdResult]: A list of ShellCmdResult objects for each command.
+            List[ShellCmdResult]: A list of ShellCmdResult objects, one for
+                each command executed.
+
+        Note:
+            If the number of CPUs cannot be determined, it defaults to using a
+            single processor and logs a warning.
         """
         if nprocs == -1:
             if os.cpu_count() is None:

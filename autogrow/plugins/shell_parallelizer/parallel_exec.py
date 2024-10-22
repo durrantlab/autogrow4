@@ -1,3 +1,10 @@
+"""
+Implements a parallel execution plugin for AutoGrow using GNU parallel.
+
+This module provides a ParallelExecPlugin class that uses GNU parallel to run
+shell commands in parallel, improving performance for multi-core systems.
+"""
+
 from typing import List, Tuple
 from autogrow.config.argparser import ArgumentVars
 from autogrow.plugins.shell_parallelizer import ShellCmdResult, ShellParallelizerBase
@@ -8,8 +15,32 @@ from autogrow.utils.logging import log_warning
 
 
 class ParallelExecPlugin(ShellParallelizerBase):
+    """
+    A plugin that uses GNU parallel to execute shell commands in parallel.
+
+    This plugin extends ShellParallelizerBase to provide parallel execution
+    capabilities using the GNU parallel utility.
+    """
+
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
-        """Add command-line arguments required by the plugin."""
+        """
+        Add command-line arguments specific to the Parallel Exec Plugin.
+
+        This method defines the command-line arguments that can be used to
+        configure the Parallel Exec Plugin.
+
+        Returns:
+            Tuple[str, List[ArgumentVars]]: A tuple containing:
+                - The name of the argument group ("Parallel Exec Shell
+                  Parallelizer")
+                - A list of ArgumentVars objects defining the arguments:
+                    1. An argument to enable the Parallel Exec Plugin
+                    2. The path to the GNU parallel executable
+
+        Note:
+            The default path for the GNU parallel executable is set to
+            "/usr/bin/parallel".
+        """
         return (
             "Parallel Exec Shell Parallelizer",
             [
@@ -29,7 +60,19 @@ class ParallelExecPlugin(ShellParallelizerBase):
         )
 
     def validate(self, params: dict):
-        """Validate the provided arguments."""
+        """
+        Validate the arguments provided for the Parallel Exec Plugin.
+
+        This method checks if the specified GNU parallel executable exists and
+        is executable.
+
+        Args:
+            params (dict): A dictionary of parameters provided to the plugin.
+
+        Raises:
+            ValueError: If the parallel exec executable is not found or not
+                executable at the specified path.
+        """
         if not os.path.isfile(params["parallel_exec_path"]):
             raise ValueError(
                 f"Parallel exec executable not found at {params['parallel_exec_path']}"
@@ -57,15 +100,17 @@ class ParallelExecPlugin(ShellParallelizerBase):
         self, cmds: List[str], nprocs: int = -1
     ) -> List[ShellCmdResult]:
         """
-        Uses parallel exec to run a list of shell commands in parallel.
+        Run a single shell command and return its output.
 
-        Inputs:
-        :param List[str] cmds: A list of shell commands to run in parallel.
-        :param int nprocs: The number of processors to use. Default is -1 (use
-            all available).
+        This method executes a shell command using subprocess and captures its
+        output and return code.
+
+        Args:
+            cmd (str): The shell command to run.
 
         Returns:
-        :returns: List[ShellCmdResult]: A list of ShellCmdResult objects for each command.
+            ShellCmdResult: An object containing the command, return code,
+                and output (stdout and stderr combined).
         """
         nprocs = self.get_nprocs_to_use(nprocs)
 

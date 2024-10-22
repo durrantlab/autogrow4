@@ -1,12 +1,14 @@
+"""AutoGrow core module providing version and citation information."""
+
 __version__ = "4.0.3"
 
 
 def program_info() -> str:
-    """
-    Get the program version number, etc.
+    """Gets program version and citation information for AutoGrow.
 
     Returns:
-    :returns: str program_output: a string for the print of the program information
+        str: A formatted string containing the AutoGrow version number and
+            complete citation information for the primary AutoGrow publication.
     """
     return (
         f"\nAutoGrow Version {__version__}\n\n"

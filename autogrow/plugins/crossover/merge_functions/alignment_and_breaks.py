@@ -1,4 +1,4 @@
-"""This handles alignment and ring breaks for Crossover"""
+"""Handles alignment and ring breaks for molecular crossover operations."""
 import __future__
 
 import random
@@ -25,24 +25,28 @@ def handle_mcs_align_labeling_and_cyclicbreaks(
     Optional[rdkit.Chem.rdchem.Mol],
 ]:
     """
-    This will take 2 aligned molecules and pick a specific alignment, check
-    for any ring and cyclic breaks and fragmentation removing any atoms from
-    the common core which caused those issues, renumber and isotope atoms in
-    mol1, mol2, mcs_mol to be tractable, and consistent amongst the three.
+    Aligns molecules, labels atoms, and handles cyclic breaks.
 
-    Inputs:
-    :param rdkit.Chem.rdchem.Mol mol1: an rdkit molecule
-    :param rdkit.Chem.rdchem.Mol mol2: an rdkit molecule
-    :param Chem.MolFromSmarts(mcs_res_SMART) mcs_mol: a result object from
-        rdkits MCS function
+    This function takes two aligned molecules and a common substructure (MCS),
+    picks a specific alignment, checks for ring and cyclic breaks, removes
+    problematic atoms from the common core, and renumbers and isotope labels
+    atoms in mol1, mol2, and mcs_mol for consistency.
+
+    Args:
+        mol1 (rdkit.Chem.rdchem.Mol): The first RDKit molecule.
+        mol2 (rdkit.Chem.rdchem.Mol): The second RDKit molecule.
+        mcs_mol (rdkit.Chem.rdchem.Mol): The Maximum Common Substructure (MCS)
+            molecule.
 
     Returns:
-    :returns: rdkit.Chem.rdchem.Mol mol1: an rdkit molecule isolabeled and
-        renumbered or None if it fails
-    :returns: rdkit.Chem.rdchem.Mol mol2: an rdkit molecule isolabeled  and
-        renumbered or None if it fails
-    :returns: mcs_res_Mol mcs_mol: an MCS result isolabeled and no breaks or
-        None if it fails
+        Tuple[Optional[rdkit.Chem.rdchem.Mol], Optional[rdkit.Chem.rdchem.Mol],
+        Optional[rdkit.Chem.rdchem.Mol]]: A tuple containing:
+            - mol1: The first molecule, isolabeled and renumbered, or None if
+              it fails.
+            - mol2: The second molecule, isolabeled and renumbered, or None if
+              it fails.
+            - mcs_mol: The MCS molecule, isolabeled and without breaks, or None
+              if it fails.
     """
     if type(mol1) is not rdkit.Chem.rdchem.Mol:
         return None, None, None
@@ -137,38 +141,27 @@ def check_cyclic_breaks(
     Tuple[None, None, None],
 ]:
     """
-    Check for cyclic breaks and fixes them.
+    Checks for and fixes cyclic breaks in the common core.
 
-    Fixing cyclic breaks is handled by removing the atoms from the core (MCS
-    substructure). Removing atoms will often cause fragmentation (ie. removing
-    a carbon from a methyl will leave 3 fragmented hydrogens). Fragmented
-    atoms need to be removed. The largest fragment is assumed to be the core
-    of interest which we don't want to remove.
+    This function identifies cyclic breaks in the common core and fixes them by
+    removing problematic atoms. It also handles resulting fragmentation issues.
 
-    Inputs:
-    :param tuple alignment_tuple: a tuple with the atoms with IDX which match
-        in the same order ie. alignment_tuple[0][0] is the IDX for the atom in
-        mol1 which is matched to alignment_tuple[1][0] and alignment_tuple[2][0]
-        (for mol2) alignment_tuple[3] (for core) is the reference index which
-        ranges from 0 to the number of atoms in the order (0,1,2,3,4...n)
-    :param rdkit.Chem.rdchem.Mol mol1: rdkit mol for ligand 1
-    :param rdkit.Chem.rdchem.Mol mol2: rdkit mol for ligand 2
-    :param rdkit.Chem.rdchem.Mol core: rdkit mol for shared common core
-        between mol1 and mol2
+    Args:
+        alignment_tuple (Tuple[List[int], List[int], List[int]]): A tuple
+            containing atom index mappings for mol1, mol2, and the core.
+        mol1 (rdkit.Chem.rdchem.Mol): The first RDKit molecule.
+        mol2 (rdkit.Chem.rdchem.Mol): The second RDKit molecule.
+        core (rdkit.Chem.rdchem.Mol): The common core RDKit molecule.
 
     Returns:
-    :returns: rdkit.Chem.rdchem.Mol core: the original core rdkit mol returned
-        if did_a_ring_break is False
-    :returns: tuple alignment_tuple: the unaltered input param alignment_tuple
-        returned if did_a_ring_break is False
-    :returns: bool did_a_ring_break: True if the ring broke and was fixed;
-        False if there were no breaks and required no modifications to be made to
-        the alignment_tuple or core
-    :returns: rdkit.Chem.rdchem.Mol new_core: the modified core rdkit mol
-        returned if did_a_ring_break is True
-    :returns: tuple new_align_tuple: the modified alignment_tuple returned if
-        did_a_ring_break is True
-    :returns: bool None: returns 3 Nones if it failed to fix the cyclic breaks
+        Union[Tuple[rdkit.Chem.rdchem.Mol, Tuple[List[int], List[int],
+        List[int]], bool], Tuple[None, None, None]]:
+            If successful:
+                - The modified core RDKit molecule.
+                - A tuple with updated alignment information.
+                - A boolean indicating if a ring break occurred and was fixed.
+            If unsuccessful:
+                - A tuple of three None values.
     """
     if type(mol1) is not rdkit.Chem.rdchem.Mol:
         return None, None, None
@@ -273,22 +266,20 @@ def ringbreak_frag_handling(
     new_core: rdkit.Chem.rdchem.Mol, mcs_ringbreak_idx: List[int]
 ) -> List[int]:
     """
-    This takes a rdkit mol of the core (after atoms were removed to resolve
-    cyclic breaks). It then tests and handles ringbreaks and fragmentation.
+    Handles ringbreaks and fragmentation in the core molecule.
 
-    if an atom in the core was deleted, if it had additional atoms attached to
-    it it can cause fragmenation. so this step handles that and takes the
-    largest fragment as the new common core.
+    This function processes the core molecule after cyclic break resolution,
+    handling any resulting fragmentation by keeping only the largest fragment.
 
-    Inputs:
-    :param rdkit.Chem.rdchem.Mol new_core: common core mol object
-    :param list mcs_ringbreak_idx: list of the idx's of the common core for
-        iso labels and later adjustment iso labels and idx numbers
+    Args:
+        new_core (rdkit.Chem.rdchem.Mol): The core molecule after initial
+            cyclic break resolution.
+        mcs_ringbreak_idx (List[int]): List of atom indices in the core that
+            were involved in cyclic breaks.
 
     Returns:
-    :returns: list iso_core_frag_list: list of the idx's of common core; same
-        as mcs_ringbreak_idx unless there was fragmentation that needed to be
-        handled.
+        List[int]: A list of atom indices to be removed from the core,
+            including those from cyclic breaks and resulting fragmentations.
     """
     ##########################
     # Check for fragmentation, if core is fragmented than additional
@@ -347,18 +338,17 @@ def find_biggest_frag(
     frag_mols_obj: Tuple[rdkit.Chem.rdchem.Mol, ...]
 ) -> Tuple[Tuple[rdkit.Chem.rdchem.Mol, ...], Union[int, None]]:
     """
-    This will take a frag mol object and return the largest fragment and the
-    index in frag_mols_obj.
+    Identifies the largest fragment in a set of molecular fragments.
 
-    Inputs:
-    :param tuple frag_mols_obj: A tuple containing all the fragments of an
-        rdkit mol.
+    Args:
+        frag_mols_obj (Tuple[rdkit.Chem.rdchem.Mol, ...]): A tuple containing
+            all fragments of an RDKit molecule.
 
     Returns:
-    :returns: rdkit.Chem.rdchem.Mol frag_mols_obj: The largest rdkit mol obj
-        in the provided tuple
-    :returns: int idx_of_max: the idx number of the largest rdkit mol obj in
-        the provided tuple.
+        Tuple[Tuple[rdkit.Chem.rdchem.Mol, ...], Union[int, None]]:
+            - The input tuple of fragment molecules.
+            - The index of the largest fragment in the tuple, or None if the
+              input is empty.
     """
     if len(frag_mols_obj) <= 1:
         return frag_mols_obj, 0
@@ -378,14 +368,12 @@ def remove_iso_labels(
     mol: rdkit.Chem.rdchem.Mol, list_of_idx_to_remove: List[int]
 ) -> None:
     """
-    Given a molecule and a set of idx numbers this will remove the isotope
-    labels for atoms with the idx numbers in the list.
+    Removes isotope labels from specified atoms in a molecule.
 
-    Inputs:
-    :param rdkit.Chem.rdchem.Mol mol: rdkit mol which needs the iso labeles
-        removed
-    :param list list_of_idx_to_remove: a list of the idx's which need the
-        isolabels removed
+    Args:
+        mol (rdkit.Chem.rdchem.Mol): The RDKit molecule to modify.
+        list_of_idx_to_remove (List[int]): A list of atom indices for which to
+            remove isotope labels.
     """
     for i in list_of_idx_to_remove:
         atom = mol.GetAtomWithIdx(i)
@@ -396,13 +384,14 @@ def add_r_atom_isolabels(
     mol1: rdkit.Chem.rdchem.Mol, mol2: rdkit.Chem.rdchem.Mol
 ) -> None:
     """
-    Label the 1st atom in R-group with its idx + (1000 for lig1 and 2000 for
-    lig 2) the 1000 vs 2000 label will be used to deconvelute later. These
-    will be the iso values assigned to the 1st atom in an R-group
+    Adds isotope labels to R-group atoms in two molecules.
 
-    Inputs:
-    :param rdkit.Chem.rdchem.Mol mol1: rdkit mol for ligand 1
-    :param rdkit.Chem.rdchem.Mol mol2: rdkit mol for ligand 2
+    Labels the first atom in each R-group with its index + 1000 for mol1 and
+    + 2000 for mol2. These labels are used to differentiate R-groups later.
+
+    Args:
+        mol1 (rdkit.Chem.rdchem.Mol): The first RDKit molecule to label.
+        mol2 (rdkit.Chem.rdchem.Mol): The second RDKit molecule to label.
     """
     # isotope label mol1
     for atom in mol1.GetAtoms():
@@ -423,46 +412,23 @@ def pick_mcs_alignment(
     mol2: rdkit.Chem.rdchem.Mol,
     common_core: rdkit.Chem.rdchem.Mol,
 ) -> Optional[Tuple[Tuple[int, ...], Tuple[int, ...], Tuple[int, ...]]]:
-
     """
-    This will take the common substructure (aka the common_core) and find
-    every match to it within each of the two ligands and produce to list of
-    tuples for the atom index (Idx) relative to the indexing of the
-    common_core substrure.
+    Selects an alignment for two molecules based on their common substructure.
 
-    It will then randomly pick combination of an alignment for mol1 and
-    mol2.
+    This function finds all matches of the common substructure in both
+    molecules and randomly selects one alignment for future atom numbering.
 
-    This should pick the alignments for future numbering.
-
-    This should return picked_alignment (tuple)
-        picked_alignment[0] is alignment for mol1
-        picked_alignment[1] is alignment for mol2
-        picked_alignment[2] is the atom idx of the common_core
-
-        ie. picked_alignment[0][0] is the atom IDx for the atom in mol1 which
-        corresponds to the atom in the common substructure index as 0
-
-        picked_alignment[0][1] is the atom IDx for the atom in mol1 which
-        corresponds to the atom in the common substructure index as 1
-
-        picked_alignment[1][0] is the atom IDx for the atom in mol2 which
-        corresponds to the atom in the common substructure index as 0
-
-        picked_alignment[1][1] is the atom IDx for the atom in mol2 which
-        corresponds to the atom in the common substructure index as 1
-
-    Inputs:
-    :param rdkit.Chem.rdchem.Mol mol1: rdkit mol for ligand 1
-    :param rdkit.Chem.rdchem.Mol mol2: rdkit mol for ligand 2
-    :param rdkit.Chem.rdchem.Mol common_core: rdkit mol for the shared core
-        between mol1 and mol2
+    Args:
+        mol1 (rdkit.Chem.rdchem.Mol): The first RDKit molecule.
+        mol2 (rdkit.Chem.rdchem.Mol): The second RDKit molecule.
+        common_core (rdkit.Chem.rdchem.Mol): The common substructure as an
+            RDKit molecule.
 
     Returns:
-    :returns: tuple picked_alignment: tuple with 3 sub lists of the atoms IDx
-        which correspond to their respective mol object in the order that they
-        match the atom in the same index in the sublist for all 3 mols
-        (mol1,mol2,common_core)
+        Optional[Tuple[Tuple[int, ...], Tuple[int, ...], Tuple[int, ...]]]:
+            A tuple containing three sub-tuples of atom indices corresponding
+            to mol1, mol2, and the common_core, respectively. Returns None if
+            no valid alignment is found.
     """
     # Get the substructure match for the MCS within each ligand
     mol1_match_idx = mol1.GetSubstructMatches(
@@ -502,25 +468,24 @@ def add_mcs_isolabels(
     picked_alignment: Tuple[Tuple[int, ...], Tuple[int, ...], Tuple[int, ...]],
 ) -> Tuple[List[int], List[int], List[int]]:
     """
-    This will modify every atom in mol1, mol2, and the common_core to have
-    the same isotope labels based on the index of the common_core atoms.
+    Adds isotope labels to atoms in two molecules and their common core.
 
-    Isotope number is set as the index number for the common_core atoms + 10,000
+    This function modifies atoms in mol1, mol2, and the common_core to have
+    consistent isotope labels based on the common_core atom indices.
 
-    Input
-    :param rdkit.Chem.rdchem.Mol mol1: an rdkit molecule
-    :param rdkit.Chem.rdchem.Mol mol2: an rdkit molecule
-    :param Chem.MolFromSmarts(mcs_res_SMART) common_core: mcs_res_Mol
-    :param tupple picked_alignment: a tuple with 3 subtuples for
-        mol1,mol2,common_core. The numbers within the sublist is the atom IDx
-        for a given atom in a ligand. The sublist index for each atom in for
-        picked_alignment corresponds to the Idx of that atoms match in the
-        commmon_core. ie picked_alignment[1][3] = 10; thus the IDx atom in mol2
-        which corresponds to the 3rd atom in the common_core is 10.
+    Args:
+        mol1 (rdkit.Chem.rdchem.Mol): The first RDKit molecule.
+        mol2 (rdkit.Chem.rdchem.Mol): The second RDKit molecule.
+        common_core (rdkit.Chem.rdchem.Mol): The common substructure as an
+            RDKit molecule.
+        picked_alignment (Tuple[Tuple[int, ...], Tuple[int, ...],
+        Tuple[int, ...]]): A tuple containing atom index mappings for mol1,
+            mol2, and the common_core.
 
     Returns:
-    :returns: tuple final_index: tuple with three sublists which are the same
-        as picked_alignment[2]).
+        Tuple[List[int], List[int], List[int]]: A tuple of three identical
+            lists containing the new isotope labels (as indices) for the atoms
+            in mol1, mol2, and common_core.
     """
     i = 0
     index_list = []
@@ -543,22 +508,19 @@ def renumber_to_mcs(
     mol: rdkit.Chem.rdchem.Mol, tuple_order_list: Tuple[int, ...]
 ) -> rdkit.Chem.rdchem.Mol:
     """
-    This renumbers the indexes of the atoms in a lig to that of the MCS and
-    returns a renumbered atom.
+    Renumbers atom indices in a molecule to match the MCS ordering.
 
-    Inputs:
-    :param rdkit.Chem.rdchem.Mol mol: an rdkit molecule
-    :param tuple tuple_order_list: a tuple with 3 subtuples for
-        mol1,mol2,common_core. The numbers within the sublist is the atom IDx
-        for a given atom in a ligand. The sublist index for each atom in for
-        tuple_order_list corresponds to the Idx of that atoms match in the
-        commmon_core. ie tuple_order_list[1][3] = 10; thus the IDx atom in mol2
-        which corresponds to the 3rd atom in the common_core is 10.
+    This function reorders the atom indices of the input molecule to be
+    consistent with the common core, as specified by the tuple_order_list.
 
-    :returns:
-    :returns: rdkit.Chem.rdchem.Mol mol: the same rdkit molecule but with the
-        atom idx's renumbered to be consistent with the common core, as provided
-        by the tuple_order_list
+    Args:
+        mol (rdkit.Chem.rdchem.Mol): The RDKit molecule to be renumbered.
+        tuple_order_list (Tuple[int, ...]): A tuple specifying the new atom
+            order, where each element is the current index of the atom that
+            should be at that position in the new ordering.
+
+    Returns:
+        rdkit.Chem.rdchem.Mol: The input molecule with renumbered atom indices.
     """
     # make a tuple the same length as the mol the beggining needs to be the
     # same as the aligment numbering to the MCS and there can be no redundancy
