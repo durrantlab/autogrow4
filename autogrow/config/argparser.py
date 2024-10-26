@@ -149,8 +149,8 @@ def get_user_params() -> Dict[str, Any]:
     # _add_scoring_params(scoring)
 
     # Miscellaneous
-    misc = parser.add_argument_group("Miscellaneous (other settings)")
-    _add_misc_params(misc)
+    # misc = parser.add_argument_group("Miscellaneous (other settings)")
+    # _add_misc_params(misc)
 
     # Now add in plugin arg groups
     titles = []
@@ -574,10 +574,10 @@ def _add_misc_params(parser: argparse._ArgumentGroup):
         parser (argparse._ArgumentGroup): The argument group to add the
             parameters to.
     """
-    # Make a line plot of the simulation at the end of the run.
-    parser.add_argument(
-        "--generate_plot",
-        choices=[True, False, "True", "False", "true", "false"],
-        default=True,
-        help="Make a line plot of the simulation at the end of the run.",
-    )
+    # # Make a line plot of the simulation at the end of the run.
+    # parser.add_argument(
+    #     "--generate_plot",
+    #     choices=[True, False, "True", "False", "true", "false"],
+    #     default=True,
+    #     help="Make a line plot of the simulation at the end of the run.",
+    # )

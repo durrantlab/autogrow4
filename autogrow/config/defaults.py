@@ -92,6 +92,6 @@ def define_defaults() -> Dict[str, Any]:
     # default_params["gypsum_timeout_limit"] = 10
 
     # Other vars
-    default_params["generate_plot"] = True
+    # default_params["generate_plot"] = True
 
     return default_params

@@ -119,21 +119,21 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
 
         sys.stdout.flush()
 
-    if params["generate_plot"] is True:
-        matplotlib_is_callable = False
-        try:
-            import matplotlib  # type: ignore
+    # if params["generate_plot"] is True:
+    #     matplotlib_is_callable = False
+    #     try:
+    #         import matplotlib  # type: ignore
 
-            matplotlib_is_callable = True
-        except Exception:
-            matplotlib_is_callable = False
-        if not matplotlib_is_callable:
-            print("Can not make figure as matplotlib is not installed")
-        else:
-            print("Plotting")
-            import autogrow.plotting.generate_line_plot as plot
+    #         matplotlib_is_callable = True
+    #     except Exception:
+    #         matplotlib_is_callable = False
+    #     if not matplotlib_is_callable:
+    #         print("Can not make figure as matplotlib is not installed")
+    #     else:
+    #         print("Plotting")
+    #         import autogrow.plotting.generate_line_plot as plot
 
-            plot.generate_figures(params)
+    #         plot.generate_figures(params)
 
     sys.stdout.flush()
 
