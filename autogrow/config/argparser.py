@@ -490,14 +490,14 @@ def _add_scoring_params(parser: argparse._ArgumentGroup):
             parameters to.
     """
     # scoring
-    parser.add_argument(
-        "--scoring_choice",
-        metavar="scoring_choice",
-        choices=["VINA"],
-        default="VINA",
-        help="The scoring_choice to use to assess the ligands docking fitness. \
-        Default is using Vina/QuickVina2 ligand affinity.",
-    )
+    # parser.add_argument(
+    #     "--scoring_choice",
+    #     metavar="scoring_choice",
+    #     choices=["VINA"],
+    #     default="VINA",
+    #     help="The scoring_choice to use to assess the ligands docking fitness. \
+    #     Default is using Vina/QuickVina2 ligand affinity.",
+    # )
     parser.add_argument(
         "--rescore_lig_efficiency",
         action="store_true",
