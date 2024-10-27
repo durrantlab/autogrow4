@@ -16,11 +16,10 @@ import os
 
 from autogrow.config.config_multiprocessing import config_multiprocessing
 from autogrow.config.config_paths import config_paths
-from autogrow.config.defaults import define_defaults
 from autogrow.utils.logging import log_info
 
 
-def setup_params(orig_params: Dict[str, Any]) -> Dict[str, Any]:
+def setup_params(params: Dict[str, Any]) -> Dict[str, Any]:
     """
     Set up parameters, correct types, and set defaults.
 
@@ -34,108 +33,18 @@ def setup_params(orig_params: Dict[str, Any]) -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: Dictionary of corrected and completed parameters.
     """
-    _cast_some_params(orig_params)
-    _set_missing_first_generation_params(orig_params)
-    config_paths(orig_params)
-    config_multiprocessing(orig_params)
-
-    # Start with getting the default values
-    default_params = define_defaults()
+    _cast_some_params(params)
+    _set_missing_first_generation_params(params)
+    config_paths(params)
+    config_multiprocessing(params)
 
     # Check if the user wants to continue a run or start a new run. Make new run
     # directory if necessary. return the Run folder path The run folder path
     # will be where we place our generations and output files
-    if not os.path.exists(orig_params["output_directory"]):
-        os.makedirs(orig_params["output_directory"])
-        log_info(f"Making the output folder path: {orig_params['output_directory']}")
-    corrected_params = _correct_param_to_default_types(orig_params, default_params)
+    if not os.path.exists(params["output_directory"]):
+        os.makedirs(params["output_directory"])
+        log_info(f"Making the output folder path: {params['output_directory']}")
 
-    # Now add defaults to corrected_params
-    for key in list(default_params.keys()):
-        if key not in list(corrected_params.keys()):
-            corrected_params[key] = default_params[key]
-
-    return corrected_params
-
-
-def _correct_param_to_default_types(
-    params: Dict[str, Any], default_params_for_ref: Dict[str, Any]
-) -> Dict[str, Any]:
-    """
-    Correct parameter types to match default types.
-
-    This function checks that all user variables use the same or comparable
-    datatypes as the defaults. It corrects obvious type discrepancies while
-    trying to be non-opinionated about intentional differences.
-
-    Examples:
-        1) If params[key] = "true" and default_params_for_ref[key] = False,
-           this function will convert "true" to True.
-        2) If params[key] = "1.01" and default_params_for_ref[key] = 2.1,
-           this function will change params[key] from "1.01" to float(1.01).
-
-    Args:
-        params (Dict[str, Any]): Dictionary of user-specified variables to
-            correct.
-        default_params_for_ref (Dict[str, Any]): Dictionary of program defaults,
-            used to identify the proper types.
-
-    Returns:
-        Dict[str, Any]: Dictionary of corrected user-specified variables.
-    """
-    for key in list(params.keys()):
-        if key not in list(default_params_for_ref.keys()):
-            # Examples may be things like receptor_path or dimensions of
-            # the docking box. Just skip these
-            continue
-
-        if type(params[key]) == type(default_params_for_ref[key]):
-            # The types are the same, so you can go on to the text one.
-            continue
-
-        # Several variable default is None which means checks are processed
-        # elsewhere...
-        if default_params_for_ref[key] is None:
-            # check argv[key] is "none" or "None"
-            if type(params[key]) != str:
-                continue
-
-            if params[key].lower() == "none":
-                params[key] = None
-        elif type(default_params_for_ref[key]) in [int, float]:
-            if type(params[key]) in [int, float]:
-                # this is fine
-                continue
-
-            if type(params[key]) == str:
-                try:
-                    temp_item = float(params[key])
-                    if type(temp_item) == float:
-                        params[key] = temp_item
-                    else:
-                        _wrong_type_error(key, params, default_params_for_ref)
-                except Exception:
-                    _wrong_type_error(key, params, default_params_for_ref)
-            else:
-                import pdb
-
-                pdb.set_trace()
-                _wrong_type_error(key, params, default_params_for_ref)
-        elif type(default_params_for_ref[key]) == bool:
-            if params[key] is None:
-                # Do not try to handle this. May make sense.
-                continue
-            if type(params[key]) == str:
-                if params[key].lower() in ["true", "1"]:
-                    params[key] = True
-                elif params[key].lower() in ["false", "0"]:
-                    params[key] = False
-                elif params[key].lower() in ["none"]:
-                    params[key] = None
-                else:
-                    _wrong_type_error(key, params, default_params_for_ref)
-            else:
-                _wrong_type_error(key, params, default_params_for_ref)
     return params
 
 
@@ -200,30 +109,6 @@ def _set_missing_first_generation_params(params: Dict[str, Any]) -> None:
                 # Subsequent-generation versions are defined. Use the same
                 # number for the first generation.
                 params[f"{pname}_first_generation"] = params[pname]
-
-
-def _wrong_type_error(key: str, argv: Dict[str, Any], params: Dict[str, Any]) -> None:
-    """
-    Raise an error for wrong parameter types.
-
-    This function is used to raise an error when the user has input the wrong
-    type for a variable.
-
-    Args:
-        key (str): The key of the variable that is the wrong type.
-        argv (Dict[str, Any]): The dictionary of user-specified variables.
-        params (Dict[str, Any]): The dictionary of program defaults.
-
-    Raises:
-        IOError: With a message detailing the type mismatch.
-    """
-    printout = (
-        "This parameter is the wrong type. \n \t Check :"
-        + f" {key} type={type(argv[key])}\n"
-    )
-    printout += f"\t Should be type={type(params[key])}\n\t"
-    printout += "Please check Autogrow documentation using -h"
-    raise IOError(printout)
 
 
 def _convert_param_to_int_if_needed(

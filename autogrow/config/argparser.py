@@ -142,7 +142,7 @@ def get_user_params() -> Dict[str, Any]:
     )
     _add_conversion_params(conversion)
 
-    # Scoring Settings TODO: Restore this (after refactoring) later.
+    # Scoring Settings TODO: LATER: Restore this (after refactoring) later.
     # scoring = parser.add_argument_group(
     #     "Scoring Settings (options for scoring docked compounds)"
     # )

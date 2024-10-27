@@ -28,8 +28,6 @@ def make_mutants(
     num_mutants_to_make: int,
     ligands_list: List[PreDockedCompound],
     new_mutation_smiles_list: List[PreDockedCompound],
-    rxn_library_variables: List[str],  # TODO: Not used.
-    cur_gen_dir: str,
 ) -> Optional[List[PreDockedCompound]]:
     """
     Creates mutant compounds based on a list of ligands.
@@ -41,8 +39,6 @@ def make_mutants(
         num_mutants_to_make (int): Number of mutants to generate.
         ligands_list (List[PreDockedCompound]): List of ligands to mutate.
         new_mutation_smiles_list (List[PreDockedCompound]): Previously generated mutants.
-        rxn_library_variables (List[str]): Variables defining the reaction library path.
-        cur_gen_dir (str): Current generation directory.
 
     Returns:
         Optional[List[PreDockedCompound]]: List of new mutant ligands, or None if

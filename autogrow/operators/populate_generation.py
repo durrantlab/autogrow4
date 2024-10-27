@@ -282,22 +282,8 @@ def _generate_mutations(
             number_of_processors,
             num_mutants_to_make,
             seed_list_mutations,
-            new_mutation_smiles_list,
-            rxn_library_variables,
-            cur_gen_dir,
+            new_mutation_smiles_list
         )
-        if new_mutants is None:
-            # Try once more # TODO: Why?
-            new_mutants = Mutation.make_mutants(
-                params,
-                generation_num,
-                number_of_processors,
-                num_mutants_to_make,
-                seed_list_mutations,
-                new_mutation_smiles_list,
-                rxn_library_variables,
-                cur_gen_dir,
-            )
 
         if new_mutants is None:
             break

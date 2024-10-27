@@ -16,7 +16,6 @@ from autogrow.utils.logging import LogLevel, log_info
 
 
 def run_docking_common(
-    params: Dict[str, Any],  # TODO: Not used.
     current_gen_int: int,
     cur_gen_dir: str,
     smiles_file_new_gen: str,
@@ -29,7 +28,6 @@ def run_docking_common(
     simulation, processing results, and ranking the docked compounds.
 
     Args:
-        params (Dict[str, Any]): User variables governing program execution.
         current_gen_int (int): Current generation number.
         cur_gen_dir (str): Directory for the current generation.
         smiles_file_new_gen (str): Filename containing new population molecules.
@@ -55,9 +53,9 @@ def run_docking_common(
         x for x in post_docked_compounds if x.docked_sdf_path is not None
     ]
 
-    print("\nBegin Ranking and Saving results")
+    # print("\nBegin Ranking and Saving results")
     unweighted_ranked_smile_file = docking_plugin_manager.rank_and_save_output_smi(
         cur_gen_dir, current_gen_int, smiles_file_new_gen, post_docked_compounds,
     )
-    print("\nCompleted Ranking and Saving results\n")
+    # print("\nCompleted Ranking and Saving results\n")
     return unweighted_ranked_smile_file
