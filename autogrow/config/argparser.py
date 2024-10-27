@@ -463,7 +463,6 @@ def _add_conversion_params(parser: argparse._ArgumentGroup):
     Add file conversion parameters.
 
     This function adds an argument for the path to the OpenBabel executable.
-    TODO: Describe nuance here.
 
     Args:
         parser (argparse._ArgumentGroup): The argument group to add the

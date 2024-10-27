@@ -26,7 +26,6 @@ python run_autogrow.py \
     --VinaLikeDocking \
     --docking_exhaustiveness 1 \
     --redock_elite_from_previous_gen False \
-    --generate_plot True \
     --RankSelector \
     --multithread_mode serial \
     --ObabelSmiTo3DSDF \
