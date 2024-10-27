@@ -23,12 +23,12 @@ python run_autogrow.py \
     --number_of_processors -1 \
     --FragmentAddition \
     --rxn_library_path ./autogrow/plugins/mutation/reaction_libraries/all_rxns \
-    --VinaLikeDocking \
+    --FakeDocking \
     --docking_exhaustiveness 1 \
     --redock_elite_from_previous_gen False \
     --RankSelector \
     --multithread_mode serial \
-    --ObabelSmiTo3DSDF \
+    --FakeSmiTo3DSDF \
     --ParallelExecPlugin \
     --parallel_exec_path /opt/homebrew/bin/parallel
 

@@ -13,7 +13,6 @@ This package handles all aspects of configuration for AutoGrow, including:
 import contextlib
 from typing import Any, Dict
 
-from autogrow.config.config_filters import setup_filters
 from autogrow.config.config_multiprocessing import config_multiprocessing
 from autogrow.config.config_paths import config_paths
 from autogrow.config.config_run_directory import set_run_directory
@@ -41,8 +40,6 @@ def setup_params(orig_params: Dict[str, Any]) -> Dict[str, Any]:
 
     # Start with getting the default values
     default_params = define_defaults()
-
-    orig_params = setup_filters(orig_params)
 
     # Check if the user wants to continue a run or start a new run. Make new run
     # directory if necessary. return the Run folder path The run folder path
