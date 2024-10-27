@@ -28,7 +28,7 @@ class MutationBase(PluginBase):
     implement. It inherits from PluginBase and adds mutation-specific methods.
     """
 
-    def run(self, **kwargs) -> Optional[List[Union[str, int, None]]]:
+    def run(self, **kwargs) -> Optional[Tuple[str, int, Union[str, None]]]:
         """
         Run the mutation plugin with provided arguments.
 
@@ -36,7 +36,7 @@ class MutationBase(PluginBase):
             **kwargs: Arbitrary keyword arguments. Must include 'parent_smiles'.
 
         Returns:
-            Optional[List[Union[str, int, None]]]: A list containing:
+            Optional[Tuple[str, int, Union[str, None]]]: A tuple containing:
                 - [0] str: SMILES string of the mutated molecule
                 - [1] int: ID number of the reaction used
                 - [2] Optional[str]: Name of the complementary molecule used (if
@@ -46,7 +46,7 @@ class MutationBase(PluginBase):
         return self.run_mutation(kwargs["parent_smiles"])
 
     @abstractmethod
-    def run_mutation(self, parent_smiles: str) -> Optional[List[Union[str, int, None]]]:
+    def run_mutation(self, parent_smiles: str) -> Optional[Tuple[str, int, Union[str, None]]]:
         """
         Abstract method to be implemented by each mutation plugin.
 
@@ -55,7 +55,7 @@ class MutationBase(PluginBase):
                 mutated.
 
         Returns:
-            Optional[List[Union[str, int, None]]]: A list containing:
+            Optional[Tuple[str, int, Union[str, None]]]: A tuple containing:
                 - [0] str: SMILES string of the mutated molecule
                 - [1] int: ID number of the reaction used
                 - [2] Optional[str]: Name of the complementary molecule used (if
@@ -86,7 +86,7 @@ class MutationBase(PluginBase):
 class MutationPluginManager(PluginManagerBase):
     """Manager class for handling multiple mutation plugins."""
 
-    def execute(self, **kwargs) -> Optional[List[Union[str, int, None]]]:
+    def execute(self, **kwargs) -> Optional[Tuple[str, int, Union[str, None]]]:
         """
         Execute a randomly selected mutation plugin with the provided arguments.
 
@@ -95,7 +95,7 @@ class MutationPluginManager(PluginManagerBase):
                 include 'parent_smiles'.
 
         Returns:
-            Optional[List[Union[str, int, None]]]: A list containing:
+            Optional[Tuple[str, int, Union[str, None]]]: A tuple containing:
                 - [0] str: SMILES string of the mutated molecule
                 - [1] int: ID number of the reaction used
                 - [2] Optional[str]: Name of the complementary molecule used (if
@@ -109,7 +109,7 @@ class MutationPluginManager(PluginManagerBase):
         mutation_names = self.get_selected_plugins_from_params()
 
         if mutation_names is None or len(mutation_names) == 0:
-            # TODO: Throw warning? No mutations selected.
+            # Throw warning. No mutations selected.
             log_warning("No mutations selected.")
             return None
 

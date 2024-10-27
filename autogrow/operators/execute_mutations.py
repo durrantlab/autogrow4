@@ -173,7 +173,7 @@ def make_mutants(
 
 def _run_smiles_click_for_multithread(
     smile: str, mutation_obj: MutationBase
-) -> Optional[List[Union[str, int, None]]]:
+) -> Optional[Tuple[str, int, Union[str, None]]]:
     """
     Performs a single mutation operation on a SMILES string.
 
@@ -185,7 +185,7 @@ def _run_smiles_click_for_multithread(
         mutation_obj (MutationBase): Mutation object to perform the mutation.
 
     Returns:
-        Optional[List[Union[str, int, None]]]: List containing the mutated SMILES
+        Optional[Tuple[str, int, Union[str, None]]]: Tuple containing the mutated SMILES
         string, reaction ID, and complementary molecule ID (if any), or None if
         the mutation fails.
 

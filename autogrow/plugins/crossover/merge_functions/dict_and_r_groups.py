@@ -395,24 +395,6 @@ def _get_r_dict(r_chain_dict, lig_r_atom_touch_mcs):
 ##########
 # Mapping functions and finding neighbors
 #########
-def get_idx_using_unique_iso(mol, iso_val):
-    """
-    Find the atom index in a molecule with a specific isotope label.
-
-    Args:
-        mol (rdkit.Chem.rdchem.Mol): Molecule with uniquely labeled atoms.
-        iso_val (int): Isotope value to search for.
-
-    Returns:
-        int: Index of the atom with the specified isotope label, or None if not 
-            found.
-    """
-    # TODO: Never used?
-    return next(
-        (atom.GetIdx() for atom in mol.GetAtoms() if atom.GetIsotope() == iso_val),
-        None,
-    )
-
 
 def _make_b_dic(i_dictionary, r_dict_num, lig_number):
     """

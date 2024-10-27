@@ -124,7 +124,7 @@ class FragmentAddition(MutationBase):
         """
         self._load_rxn_data()
 
-    def run_mutation(self, parent_smiles: str) -> Optional[List[Union[str, int, None]]]:
+    def run_mutation(self, parent_smiles: str) -> Optional[Tuple[str, int, Union[str, None]]]:
         """
         Run the mutation on the parent molecule.
 
@@ -138,11 +138,10 @@ class FragmentAddition(MutationBase):
             parent_smiles (str): SMILES string of a molecule to be reacted.
 
         Returns:
-            Optional[List[Union[str, int, None]]]: A list containing the
+            Optional[Tuple[str, int, Union[str, None]]]: A tuple containing the
                 reaction product SMILES, the id_number of the reaction as found
                 in the reaction_dict, and the id for the complementary mol
-                (None if it was a single reactant reaction). TODO: Should be a 
-                typed tuple instead of a list.
+                (None if it was a single reactant reaction).
             Returns None if all reactions failed or input failed to convert to
                 a sanitizable rdkit mol.
         """
@@ -166,11 +165,11 @@ class FragmentAddition(MutationBase):
             zinc_database_comp_mol_names,
         ) = reaction_result
 
-        return [
+        return (
             reaction_product_smiles,
             reaction_id_number,
             zinc_database_comp_mol_names,
-        ]
+        )
 
     def _load_rxn_data(self):
         """

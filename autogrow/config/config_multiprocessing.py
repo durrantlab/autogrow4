@@ -13,7 +13,7 @@ def config_multiprocessing(params: Dict[str, Any]) -> Dict[str, Any]:
     This function handles the multiprocessing configuration based on user
     parameters. It creates a Parallelizer object and adds it to the params
     dictionary. If the multithread mode is set to "serial", it ensures that
-    only one processor is used. TODO: Explain nuances here.
+    only one processor is used.
 
     Args:
         params (Dict[str, Any]): Dictionary of user variables governing how the

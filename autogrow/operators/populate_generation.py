@@ -282,7 +282,7 @@ def _generate_mutations(
             number_of_processors,
             num_mutants_to_make,
             seed_list_mutations,
-            new_mutation_smiles_list
+            new_mutation_smiles_list,
         )
 
         if new_mutants is None:
@@ -382,16 +382,6 @@ def _generate_crossovers(
             new_crossover_smiles_list,
         )
 
-        if new_crossovers is None:
-            # Try once more  TODO: Why?
-            new_crossovers = execute_crossover.make_crossovers(
-                params,
-                generation_num,
-                number_of_processors,
-                num_crossovers_to_make,
-                seed_list_crossovers,
-                new_crossover_smiles_list,
-            )
         if new_crossovers is None:
             break
 

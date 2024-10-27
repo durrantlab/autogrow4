@@ -11,9 +11,11 @@ for de novo drug design and lead optimization. J Cheminform 12, 25 (2020).
 [doi: 10.1186/s13321-020-00429-4]
 """
 import __future__
-from autogrow.config.argparser import (
-    get_user_params,
-)  # TODO: It is strange that this is in argparser. Good to clean up user_params.py and move it there.
+
+# TODO: It is strange that this is in argparser. Good to clean up user_params.py
+# and move it there.
+from autogrow.config.argparser import get_user_params
+
 import autogrow.main as AutogrowMainExecute
 
 
