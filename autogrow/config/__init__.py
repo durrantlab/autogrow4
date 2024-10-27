@@ -12,11 +12,12 @@ This package handles all aspects of configuration for AutoGrow, including:
 
 import contextlib
 from typing import Any, Dict
+import os
 
 from autogrow.config.config_multiprocessing import config_multiprocessing
 from autogrow.config.config_paths import config_paths
-from autogrow.config.config_run_directory import set_run_directory
 from autogrow.config.defaults import define_defaults
+from autogrow.utils.logging import log_info
 
 
 def setup_params(orig_params: Dict[str, Any]) -> Dict[str, Any]:
@@ -44,9 +45,10 @@ def setup_params(orig_params: Dict[str, Any]) -> Dict[str, Any]:
     # Check if the user wants to continue a run or start a new run. Make new run
     # directory if necessary. return the Run folder path The run folder path
     # will be where we place our generations and output files
-    orig_params["output_directory"] = set_run_directory(
-        orig_params["root_output_folder"]
-    )
+    if not os.path.exists(orig_params["root_output_folder"]):
+        os.makedirs(orig_params["root_output_folder"])
+        log_info(f"Making the output folder path: {orig_params["root_output_folder"]}")
+    orig_params["output_directory"] = orig_params["root_output_folder"]
     corrected_params = _correct_param_to_default_types(orig_params, default_params)
 
     # Now add defaults to corrected_params
