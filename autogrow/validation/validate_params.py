@@ -32,7 +32,7 @@ def validate_params(params: Dict[str, Any]) -> None:
         "size_x",
         "size_y",
         "size_z",
-        "root_output_folder",
+        "output_directory",
         "source_compound_file",
     ]
 
@@ -49,9 +49,9 @@ def validate_params(params: Dict[str, Any]) -> None:
         "source_compound_file", "smi", "tab delineated .smi file", params
     )
 
-    if os.path.isdir(params["root_output_folder"]) is False:
+    if os.path.isdir(params["output_directory"]) is False:
         raise NotImplementedError(
-            "root_output_folder is not a directory. \
+            "output_directory is not a directory. \
             Check your input parameters."
         )
 

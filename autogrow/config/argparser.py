@@ -276,7 +276,7 @@ def _add_io_params(parser: argparse._ArgumentGroup):
     """
     # Input/Output directories
     parser.add_argument(
-        "--root_output_folder",
+        "--output_directory",
         "-o",
         type=str,
         help="The Path to the folder which all output files will be placed.",

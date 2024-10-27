@@ -24,7 +24,7 @@ def check_for_required_inputs(input_params):
         values.
             Required parameters include:
                 - receptor_path: Path to PDB receptor file
-                - root_output_folder: Directory for output files
+                - output_directory: Directory for output files
                 - source_compound_file: Path to tab-delimited SMI file
             Optional parameters with defaults (value=10):
                 - top_mols_to_seed_next_generation
@@ -99,8 +99,8 @@ def check_for_required_inputs(input_params):
 
     # convert paths to abspath, in case necessary
     input_params["receptor_path"] = os.path.abspath(input_params["receptor_path"])
-    input_params["root_output_folder"] = os.path.abspath(
-        input_params["root_output_folder"]
+    input_params["output_directory"] = (
+        os.path.abspath(input_params["output_directory"]) + os.sep
     )
     input_params["source_compound_file"] = os.path.abspath(
         input_params["source_compound_file"]
@@ -114,27 +114,27 @@ def check_for_required_inputs(input_params):
     if ".pdb" not in input_params["receptor_path"]:
         raise NotImplementedError("receptor_path must be a .PDB file.")
 
-    # Check root_output_folder exists
-    if os.path.exists(input_params["root_output_folder"]) is False:
+    # Check output_directory exists
+    if os.path.exists(input_params["output_directory"]) is False:
         # If the output directory doesn't exist, then make ithe output
         # directory doesn't exist, then make it
         try:
-            os.makedirs(input_params["root_output_folder"])
+            os.makedirs(input_params["output_directory"])
         except Exception as e:
             raise NotImplementedError(
-                "root_output_folder could not be found and could not be created. \
+                "output_directory could not be found and could not be created. \
                 Please manual create desired directory or check input parameters"
             ) from e
 
-        if os.path.exists(input_params["root_output_folder"]) is False:
+        if os.path.exists(input_params["output_directory"]) is False:
             raise NotImplementedError(
-                "root_output_folder could not be found and could not be created. \
+                "output_directory could not be found and could not be created. \
                 Please manual create desired directory or check input parameters"
             )
 
-    if os.path.isdir(input_params["root_output_folder"]) is False:
+    if os.path.isdir(input_params["output_directory"]) is False:
         raise NotImplementedError(
-            "root_output_folder is not a directory. \
+            "output_directory is not a directory. \
             Check your input parameters."
         )
 

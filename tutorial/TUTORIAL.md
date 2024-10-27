@@ -400,7 +400,7 @@ python run_autogrow.py \
     --center_x -70.76 --center_y  21.82 --center_z 28.33 \
     --size_x 25.0 --size_y 16.0 --size_z 25.0 \
     --source_compound_file /autogrow4/autogrow/source_compounds/naphthalene_smiles.smi \
-    --root_output_folder /PATH_TO/output_directory/ \
+    --output_directory /PATH_TO/output_directory/ \
     --number_of_mutants_first_generation 50 \
     --number_of_crossovers_first_generation 50 \
     --number_of_mutants 50 \
@@ -540,7 +540,7 @@ Linux/MacOS:
    JSON file (MUST EXECUTE FROM `/autogrow4/docker/`): `sudo python
    autogrow_in_docker.py -j ./examples/sample_autogrow_docker_json.json`
 4. Results will appear in the output directory specified by the
-   `--root_output_folder` parameter.
+   `--output_directory` parameter.
 
 Windows OS:
 
@@ -552,7 +552,7 @@ Windows OS:
    JSON file (MUST EXECUTE FROM `/autogrow4/docker/`): `python
    autogrow_in_docker.py -j ./examples/sample_autogrow_docker_json.json`
 4. Results will appear in the output directory specified by the
-   `--root_output_folder` parameter.
+   `--output_directory` parameter.
 
 ## Providing Custom Plugins
 

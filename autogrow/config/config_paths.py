@@ -25,7 +25,7 @@ def config_paths(params: Dict[str, Any]) -> None:
     """
     _make_paths_abs(params)
     _make_dirs_end_in_sep(params)
-    _create_output_folder(params["root_output_folder"])
+    _create_output_folder(params["output_directory"])
 
 
 def _make_paths_abs(params: Dict[str, Any]) -> None:
@@ -36,11 +36,11 @@ def _make_paths_abs(params: Dict[str, Any]) -> None:
         params (Dict[str, Any]): Dictionary of user variables.
 
     The function modifies the `params` dictionary in place, converting paths
-    for 'receptor_path', 'root_output_folder', and 'source_compound_file' to
+    for 'receptor_path', 'output_directory', and 'source_compound_file' to
     absolute paths.
     """
     # convert paths to abspath, in case necessary
-    for pname in ["receptor_path", "root_output_folder", "source_compound_file"]:
+    for pname in ["receptor_path", "output_directory", "source_compound_file"]:
         if pname not in list(params.keys()):
             continue
         params[pname] = os.path.abspath(params[pname])
@@ -54,9 +54,9 @@ def _make_dirs_end_in_sep(params: Dict[str, Any]) -> None:
         params (Dict[str, Any]): Dictionary of user variables.
 
     The function modifies the `params` dictionary in place, appending the
-    OS-specific path separator to 'root_output_folder' if necessary.
+    OS-specific path separator to 'output_directory' if necessary.
     """
-    dir_params = ["root_output_folder"]
+    dir_params = ["output_directory"]
 
     for dir_param in dir_params:
         if dir_param not in params:
@@ -75,7 +75,7 @@ def _create_output_folder(out_folder: str) -> None:
     Raises:
         NotImplementedError: If the folder cannot be created.
     """
-    # Check root_output_folder exists
+    # Check output_directory exists
     if os.path.exists(out_folder) is False:
         # If the output directory doesn't exist, then make ithe output
         # directory doesn't exist, then make it
@@ -83,6 +83,6 @@ def _create_output_folder(out_folder: str) -> None:
             os.makedirs(out_folder)
         except Exception as e:
             raise NotImplementedError(
-                "root_output_folder could not be found and could not be created. \
+                "output_directory could not be found and could not be created. \
                 Please manual create desired directory or check input parameters"
             ) from e
