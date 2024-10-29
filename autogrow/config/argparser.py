@@ -36,7 +36,6 @@ from autogrow.config.json_config_utils import (
     convert_json_params_from_unicode,
     save_vars_as_json,
 )
-from autogrow.utils.logging import log_warning
 from autogrow.validation import validate_all
 
 parser = argparse.ArgumentParser(
@@ -580,3 +579,4 @@ def _add_misc_params(parser: argparse._ArgumentGroup):
     #     default=True,
     #     help="Make a line plot of the simulation at the end of the run.",
     # )
+
