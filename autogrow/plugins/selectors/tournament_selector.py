@@ -85,8 +85,7 @@ class TournamentSelector(SelectorBase):
         self,
         predock_cmpds: List[PreDockedCompound],
         num_to_choose: int,
-        score_type: ScoreType,
-        favor_most_negative: bool = True,
+        score_type: ScoreType
     ) -> List[PreDockedCompound]:
         """
         Select compounds using tournament selection without replacement.
@@ -102,8 +101,6 @@ class TournamentSelector(SelectorBase):
                 number of tournaments to run).
             score_type (ScoreType): Specifies whether to use "docking" or
                 "diversity" scores for selection.
-            favor_most_negative (bool): If True, lower scores are considered
-                better. Defaults to True.
 
         Returns:
             List[PreDockedCompound]: List of selected compounds.
@@ -137,7 +134,7 @@ class TournamentSelector(SelectorBase):
         list_of_ligands_reduced = copy.deepcopy(predock_cmpds)
         for _ in range(num_to_choose):
             chosen_predock_cmpd = self._run_one_tournament(
-                predock_cmpds, num_per_tourn, score_type, favor_most_negative
+                predock_cmpds, num_per_tourn, score_type
             )
             list_of_ligands_reduced = [
                 x for x in list_of_ligands_reduced if x != chosen_predock_cmpd
@@ -155,8 +152,7 @@ class TournamentSelector(SelectorBase):
         self,
         list_of_ligands: List[PreDockedCompound],
         num_per_tourn: int,
-        score_type: ScoreType,
-        favor_most_negative: bool = True,
+        score_type: ScoreType
     ) -> PreDockedCompound:
         """
         Run a single tournament to select one compound.
@@ -171,8 +167,6 @@ class TournamentSelector(SelectorBase):
                 tournament.
             score_type (ScoreType): Specifies whether to use "docking" or
                 "diversity" scores for selection.
-            favor_most_negative (bool): If True, lower scores are considered
-                better. Defaults to True.
 
         Returns:
             PreDockedCompound: The winning compound from the tournament.
@@ -187,16 +181,9 @@ class TournamentSelector(SelectorBase):
                 chosen_option = list_of_ligands[random.randint(0, num_ligands - 1)]
             else:
                 choice = list_of_ligands[random.randint(0, num_ligands - 1)]
-                if favor_most_negative:
-                    if float(chosen_option.get_previous_score(score_type)) > float(
-                        choice.get_previous_score(score_type)
-                    ):
-                        chosen_option = choice
-                elif float(chosen_option.get_previous_score(score_type)) < float(
+                if float(chosen_option.get_previous_score(score_type)) > float(
                     choice.get_previous_score(score_type)
                 ):
                     chosen_option = choice
-                else:
-                    continue
 
         return chosen_option

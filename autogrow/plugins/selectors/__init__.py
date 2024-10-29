@@ -12,7 +12,7 @@ from autogrow.config.argparser import ArgumentVars
 from autogrow.plugins.plugin_base import PluginBase
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
 from autogrow.types import PreDockedCompound, ScoreType
-from autogrow.utils.logging import LogLevel, log_info
+from autogrow.utils.logging import LogLevel, log_info, log_warning
 
 
 class SelectorBase(PluginBase):
@@ -24,7 +24,6 @@ class SelectorBase(PluginBase):
                 select from
             score_type (ScoreType): Type of score to use for selection
             num_to_choose (int): Number of compounds to select
-            favor_most_negative (bool): If True, lower scores are preferred
 
     Returns:
         List[PreDockedCompound]: Selected compounds
@@ -35,13 +34,11 @@ class SelectorBase(PluginBase):
         predock_cmpds: List[PreDockedCompound] = kwargs["predock_cmpds"]
         score_type: ScoreType = kwargs["score_type"]
         num_to_choose: int = kwargs["num_to_choose"]
-        favor_most_negative: bool = kwargs["favor_most_negative"]
 
         return self.run_selector(
             predock_cmpds=predock_cmpds,
             num_to_choose=num_to_choose,
-            score_type=score_type,
-            favor_most_negative=favor_most_negative,
+            score_type=score_type
         )
 
     @abstractmethod
@@ -49,8 +46,7 @@ class SelectorBase(PluginBase):
         self,
         predock_cmpds: List[PreDockedCompound],
         num_to_choose: int,
-        score_type: ScoreType,
-        favor_most_negative: bool = True,
+        score_type: ScoreType
     ) -> List[PreDockedCompound]:
         """Abstract method for implementing selector-specific compound
         selection logic.
@@ -61,13 +57,12 @@ class SelectorBase(PluginBase):
             num_to_choose (int): Number of compounds to select
             score_type (ScoreType): Type of score to use for selection (docking
                 or diversity)
-            favor_most_negative (bool, optional): If True, lower scores are
-                preferred. Defaults to True.
 
         Returns:
             List[PreDockedCompound]: Selected compounds
         """
         pass
+
 
 class SelectorPluginManager(PluginManagerBase):
     def execute(self, **kwargs) -> List[PreDockedCompound]:
@@ -81,7 +76,6 @@ class SelectorPluginManager(PluginManagerBase):
                 predock_cmpds (List[PreDockedCompound]): Available compounds
                 num_seed_dock_fitness (int): Number to choose by docking score
                 num_seed_diversity (int): Number to choose by diversity score
-                favor_most_negative (bool): If True, lower scores are preferred
 
         Returns:
             List[PreDockedCompound]: Combined list of compounds selected by both
@@ -119,8 +113,7 @@ class SelectorPluginManager(PluginManagerBase):
                     **{
                         "predock_cmpds": kwargs["predock_cmpds"],
                         "num_to_choose": num_to_choose,
-                        "score_type": ScoreType.DOCKING,
-                        "favor_most_negative": kwargs["favor_most_negative"],
+                        "score_type": ScoreType.DOCKING
                     }
                 )
 
@@ -136,16 +129,26 @@ class SelectorPluginManager(PluginManagerBase):
                     **{
                         "predock_cmpds": kwargs["predock_cmpds"],
                         "num_to_choose": num_to_choose,
-                        "score_type": ScoreType.DIVERSITY,
-                        "favor_most_negative": kwargs["favor_most_negative"],
+                        "score_type": ScoreType.DIVERSITY
                     }
                 )
+
+        # Calculate the average docking score of the
+        # docking_fitness_smiles_list.
+        avg_docking_score = sum(
+            x.get_previous_score(ScoreType.DOCKING)
+            for x in docking_fitness_smiles_list
+        ) / len(docking_fitness_smiles_list)
+        if avg_docking_score > 0:
+            log_warning(
+                f"Average docking score of selected compounds, +{avg_docking_score:.2f}, was greater than 0. Are you sure the docking plugin is correctly assigning lower (more negative) scores to better compounds?"
+            )
 
         # Combine the two lists
         docking_diversity_list = list(docking_fitness_smiles_list)
         docking_diversity_list.extend(diversity_smile_list)
 
-        #Shuffle the list to prevent bias
+        # Shuffle the list to prevent bias
         random.shuffle(docking_diversity_list)
 
         return docking_diversity_list

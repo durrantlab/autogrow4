@@ -72,8 +72,7 @@ class RouletteSelector(SelectorBase):
         self,
         predock_cmpds: List[PreDockedCompound],
         num_to_choose: int,
-        score_type: ScoreType,
-        favor_most_negative: bool = True,
+        score_type: ScoreType
     ) -> List[PreDockedCompound]:
         """
         Select compounds using weighted roulette selection without replacement.
@@ -85,8 +84,6 @@ class RouletteSelector(SelectorBase):
                 their score.
             score_type (ScoreType): Specifies whether to use "docking" or
                 "diversity" scores for weighting.
-            favor_most_negative (bool): If True, lower scores are considered
-                better. Defaults to True.
 
         Returns:
             List[PreDockedCompound]: List of selected compounds.
@@ -110,7 +107,9 @@ class RouletteSelector(SelectorBase):
         if num_to_choose <= 0:
             return []
 
-        adjusted_scores = self._adjust_scores(predock_cmpds, score_type, favor_most_negative)
+        adjusted_scores = self._adjust_scores(
+            predock_cmpds, score_type
+        )
 
         total = sum(adjusted_scores)
         probabilities = [x / total for x in adjusted_scores]
@@ -119,8 +118,8 @@ class RouletteSelector(SelectorBase):
         # NOTE: I'm not sure why type: ignore is needed below. It seems like it should be
         # inferred correctly.
         chosen_predock_cmpds: List[PreDockedCompound] = rn.choice(
-            predock_cmpds, size=num_to_choose, replace=False, p=probabilities # type: ignore
-        ).tolist() # type: ignore
+            predock_cmpds, size=num_to_choose, replace=False, p=probabilities  # type: ignore
+        ).tolist()  # type: ignore
 
         for chosen_predock_cmpd in chosen_predock_cmpds:
             log_debug(chosen_predock_cmpd.smiles)
@@ -130,8 +129,7 @@ class RouletteSelector(SelectorBase):
     def _adjust_scores(
         self,
         predock_cmpds: List[PreDockedCompound],
-        score_type: ScoreType,
-        favor_most_negative: bool,
+        score_type: ScoreType
     ) -> List[float]:
         """
         Adjust scores for weighting in the selection process.
@@ -145,8 +143,6 @@ class RouletteSelector(SelectorBase):
                 from the previous generation.
             score_type (ScoreType): Specifies whether to use "docking" or
                 "diversity" scores.
-            favor_most_negative (bool): If True, lower scores are considered
-                better.
 
         Returns:
             List[float]: A list of adjusted scores.
@@ -157,7 +153,8 @@ class RouletteSelector(SelectorBase):
         Note:
             For diversity scores, the adjustment is (1/x^2) to make smaller
             (more diverse) scores more prominent. For docking scores, the
-            adjustment depends on the favor_most_negative parameter.
+            adjustment is (x^10) to emphasize the difference between the
+            scores and account for the directionality of the scores.
         """
         if score_type == ScoreType.DIVERSITY:
             weight_scores = [
@@ -176,13 +173,8 @@ class RouletteSelector(SelectorBase):
                 for x in predock_cmpds
                 if x.previous_docking_score is not None
             ]
-            # minimum is the most positive value from predock_cmpds the
-            # more negative the docking score the better the dock
-
-            # TODO: See comment above? Need to account for the fact that the docking
-            # score could be reversed depending on docking program. Need to use
-            # favor_most_negative
-
+            # minimum is the most positive value from predock_cmpds the more
+            # negative the docking score the better the dock
             minimum = max(weight_scores) + 0.1
             minimum = max(minimum, 0)
             adjusted = [(x ** 10) + minimum for x in weight_scores]

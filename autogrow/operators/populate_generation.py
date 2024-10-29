@@ -846,15 +846,14 @@ def _make_seed_list(
         # Get subset of the source_file based on diversity scores and docking
         # scores
 
-        # This assumes the most negative number is the best option which is
-        # true for both. This is true for both the diversity score and the
-        # docking score. This may need to be adjusted for different scoring
-        # functions. (favor_most_negative=True). TODO: Need to fix this!
+        # This assumes the most negative number is the best option which is true
+        # for both. This is true for both the diversity score and the docking
+        # score, because the docking plugin should return more negative scores
+        # for better compounds.
         predock_cmpds = plugin_managers.Selector.run(
             predock_cmpds=predock_cmpds,
             num_seed_dock_fitness=num_seed_dock_fitness,
-            num_seed_diversity=num_seed_diversity,
-            favor_most_negative=True,  # TODO: Shouldn't be hardcoded
+            num_seed_diversity=num_seed_diversity
         )
 
     random.shuffle(predock_cmpds)

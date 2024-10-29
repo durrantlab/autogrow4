@@ -101,6 +101,3 @@ class DockingPluginManager(PluginManagerBase):
             )
 
         return post_docked_cmpds
-
-
-

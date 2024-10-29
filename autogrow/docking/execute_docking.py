@@ -56,9 +56,5 @@ def run_docking_common(
     ]
 
     return rank_and_save_output_smi(
-        cur_gen_dir,
-        current_gen_int,
-        smiles_file_new_gen,
-        post_docked_compounds,
-        params
+        cur_gen_dir, current_gen_int, smiles_file_new_gen, post_docked_compounds, params
     )

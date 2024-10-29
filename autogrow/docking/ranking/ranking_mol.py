@@ -72,10 +72,7 @@ def rank_and_save_output_smi(
     # last gen to smiles_list
 
     # Only add these when we haven't already redocked the ligand
-    if (
-        params["redock_elite_from_previous_gen"] is False
-        and current_gen_int != 0
-    ):
+    if params["redock_elite_from_previous_gen"] is False and current_gen_int != 0:
         # Go to previous generation folder
         prev_gen_num = str(current_gen_int - 1)
         run_folder = params["output_directory"]
@@ -111,9 +108,7 @@ def rank_and_save_output_smi(
     # ligands in the group this adds on a float in the last column for the
     # sum of pairwise comparisons the lower the diversity score the more
     # unique a molecule is from the other mols in the same generation
-    postDockedCompoundInfos = Ranking.calc_diversity_scores(
-        postDockedCompoundInfos
-    )
+    postDockedCompoundInfos = Ranking.calc_diversity_scores(postDockedCompoundInfos)
 
     # name for the output file
     output_ranked_smile_file = smiles_file.replace(".smi", "") + "_ranked.smi"
@@ -128,6 +123,7 @@ def rank_and_save_output_smi(
             output.write(output_line)
 
     return output_ranked_smile_file
+
 
 def _process_ligand_scores_from_prev_gen(
     ranked_smi_file_prev_gen: str,
@@ -169,7 +165,9 @@ def _process_ligand_scores_from_prev_gen(
 
     # Get the data for all ligands from previous generation ranked
     # file
-    prev_gen_data_list = Ranking.get_predockcmpds_from_smi_file(ranked_smi_file_prev_gen)
+    prev_gen_data_list = Ranking.get_predockcmpds_from_smi_file(
+        ranked_smi_file_prev_gen
+    )
     # CHECKED: prev_gen_data_list of type List[PreDockedCompound] here.
 
     # Get the list of pass through ligands
@@ -177,7 +175,9 @@ def _process_ligand_scores_from_prev_gen(
         current_generation_dir
         + f"SeedFolder{os.sep}Chosen_Elite_To_advance_Gen_{current_gen_int}.smi"
     )
-    pass_through_list = Ranking.get_predockcmpds_from_smi_file(current_gen_pass_through_smi)
+    pass_through_list = Ranking.get_predockcmpds_from_smi_file(
+        current_gen_pass_through_smi
+    )
     # CHECKED: pass_through_list is of type List[PreDockedCompound] here.
 
     # Convert lists to searchable Dictionaries.
@@ -210,6 +210,7 @@ def _process_ligand_scores_from_prev_gen(
         pass_through_data.append(lig_info_remove_diversity_info)
 
     smiles_list.extend(pass_through_data)
+
 
 def get_predockcmpds_from_smi_file(infile: str) -> List[PreDockedCompound]:
     """

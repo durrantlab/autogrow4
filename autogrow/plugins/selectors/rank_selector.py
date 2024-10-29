@@ -75,8 +75,7 @@ class RankSelector(SelectorBase):
         self,
         predock_cmpds: List[PreDockedCompound],
         num_to_choose: int,
-        score_type: ScoreType,
-        favor_most_negative: bool = True,
+        score_type: ScoreType
     ) -> List[PreDockedCompound]:
         """
         Select compounds based on their rank in the specified score.
@@ -90,8 +89,6 @@ class RankSelector(SelectorBase):
             num_to_choose (int): The number of compounds to select.
             score_type (ScoreType): The type of score to use for ranking (e.g.,
                 docking or diversity).
-            favor_most_negative (bool): If True, lower scores are considered
-                better. Default is True.
 
         Returns:
             List[PreDockedCompound]: A list of selected compounds.
@@ -116,7 +113,7 @@ class RankSelector(SelectorBase):
         sorted_list = sorted(
             predock_cmpds,
             key=lambda x: x.get_previous_score(score_type),
-            reverse=not favor_most_negative,
+            reverse=False,
         )
 
         # sorted_list = sorted(
@@ -152,7 +149,7 @@ class RankSelector(SelectorBase):
         new_sorted_list = sorted(
             new_sorted_list,
             key=lambda x: x.get_previous_score(score_type),
-            reverse=not favor_most_negative,
+            reverse=False,
         )
 
         if len(list({x.smiles for x in new_sorted_list})) >= num_to_choose:
