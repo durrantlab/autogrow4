@@ -234,7 +234,7 @@ def get_predockcmpds_from_smi_file(infile: str) -> List[PreDockedCompound]:
         - Any fields between ID and docking_score are ignored but allowed.
     """
     # IMPORT SMILES FROM THE PREVIOUS GENERATION
-    usable_smiles: List[PreDockedCompound] = []
+    predock_cmpds: List[PreDockedCompound] = []
 
     if os.path.exists(infile) is False:
         print(f"\nFile of Source compounds does not exist: {infile}\n")
@@ -258,19 +258,19 @@ def get_predockcmpds_from_smi_file(infile: str) -> List[PreDockedCompound]:
                 compoundInfo.previous_diversity_score = (
                     postDockedCompound.diversity_score
                 )
-            usable_smiles.append(compoundInfo)
+            predock_cmpds.append(compoundInfo)
 
-    return usable_smiles
+    return predock_cmpds
 
 
 def convert_usable_list_to_lig_dict(
-    usable_smiles: List[PreDockedCompound],
+    predock_cmpds: List[PreDockedCompound],
 ) -> Optional[Dict[str, PreDockedCompound]]:
     """
     Converts a list of PreDockedCompound objects to a dictionary.
 
     Args:
-        usable_smiles (List[PreDockedCompound]): List of PreDockedCompound
+        predock_cmpds (List[PreDockedCompound]): List of PreDockedCompound
         objects.
 
     Returns:
@@ -283,11 +283,11 @@ def convert_usable_list_to_lig_dict(
         score (lower is better).
         # TODO: Should this be hardcoded?
     """
-    if type(usable_smiles) is not type([]):
+    if type(predock_cmpds) is not type([]):
         return None
 
     usable_dict_of_smiles: Dict[str, PreDockedCompound] = {}
-    for item in usable_smiles:
+    for item in predock_cmpds:
         key = item.smiles + item.name
         if key in usable_dict_of_smiles and usable_dict_of_smiles[
             key

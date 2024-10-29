@@ -36,7 +36,7 @@ def get_predockcmpds_from_smi_file(infile: str) -> List[List[str]]:
         Exception: If the .smi file does not exist.
     """
     # IMPORT SMILES FROM THE PREVIOUS GENERATION
-    usable_smiles = []
+    predock_cmpds = []
 
     if os.path.exists(infile) is False:
         print(f"\nFile of Source compounds does not exist: {infile}\n")
@@ -52,9 +52,9 @@ def get_predockcmpds_from_smi_file(infile: str) -> List[List[str]]:
                 )  # split line into parts separated by 4-spaces
 
             choice_list = [parts[i] for i in range(len(parts))]
-            usable_smiles.append(choice_list)
+            predock_cmpds.append(choice_list)
 
-    return usable_smiles
+    return predock_cmpds
 
 
 def get_average_score_per_gen(

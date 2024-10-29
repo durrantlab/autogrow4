@@ -686,7 +686,7 @@ def _get_cmpds_prev_gen(
     :param int generation_num: the interger of the current generation
 
     Returns:
-    :returns: list usable_smiles: a list with SMILES strings, names,
+    :returns: list predock_cmpds: a list with SMILES strings, names,
         and information about the smiles from the previous generation or the
         source compound list
     """
@@ -694,9 +694,9 @@ def _get_cmpds_prev_gen(
         f"{params['output_directory']}generation_0{os.sep}generation_0_ranked.smi"
     )
     if generation_num == 0:
-        usable_smiles = _get_source_compounds_or_raise(params)
+        predock_cmpds = _get_source_compounds_or_raise(params)
     elif generation_num == 1 and os.path.exists(source_file_gen_0) is False:
-        usable_smiles = _get_source_compounds_or_raise(params)
+        predock_cmpds = _get_source_compounds_or_raise(params)
     else:
         source_file = (
             params["output_directory"]
@@ -704,34 +704,34 @@ def _get_cmpds_prev_gen(
         )
         if os.path.exists(source_file) is False:
             _handle_no_ligands_found("\tCheck formatting or if file has been moved.\n")
-        usable_smiles = Ranking.get_predockcmpds_from_smi_file(source_file)
+        predock_cmpds = Ranking.get_predockcmpds_from_smi_file(source_file)
 
-        if len(usable_smiles) == 0:
+        if len(predock_cmpds) == 0:
             _handle_no_ligands_found("\tCheck formatting or if file has been moved. \n")
-    # Test that every SMILES in the usable_smiles is a valid SMILES
+    # Test that every SMILES in the predock_cmpds is a valid SMILES
     # which will import and Sanitize in RDKit. SMILES will be excluded if they
     # are fragmented, contain atoms with no atomic number (*), or do not
     # sanitize
-    job_input = tuple((i,) for i in usable_smiles)
+    job_input = tuple((i,) for i in predock_cmpds)
 
-    usable_smiles: List[PreDockedCompound] = params["parallelizer"].run(
+    predock_cmpds: List[PreDockedCompound] = params["parallelizer"].run(
         job_input, _test_source_smiles_convert
     )
-    usable_smiles = [x for x in usable_smiles if x is not None]
-    print_errors = [x for x in usable_smiles if type(x) is str]
-    usable_smiles = [x for x in usable_smiles if type(x) is PreDockedCompound]
+    predock_cmpds = [x for x in predock_cmpds if x is not None]
+    print_errors = [x for x in predock_cmpds if type(x) is str]
+    predock_cmpds = [x for x in predock_cmpds if type(x) is PreDockedCompound]
     for x in print_errors:
         print(x)
 
-    if not usable_smiles:
+    if not predock_cmpds:
         _raise_exception_with_message(
             "\nThere were no ligands in source compound or previous \
             generation which could sanitize.\n"
         )
 
-    random.shuffle(usable_smiles)
+    random.shuffle(predock_cmpds)
 
-    return usable_smiles
+    return predock_cmpds
 
 
 def _raise_exception_with_message(arg0):
@@ -831,7 +831,7 @@ def _make_seed_list(
             information about the smiles which will be used to seed the next
             generation.
     """
-    usable_smiles: List[PreDockedCompound] = copy.deepcopy(source_compounds_list)
+    predock_cmpds: List[PreDockedCompound] = copy.deepcopy(source_compounds_list)
 
     # Code no longer uses generation_num == 0, but just to make sure...
     assert generation_num >= 0, "Generation number must be greater than or equal to 0"
@@ -839,7 +839,7 @@ def _make_seed_list(
     if generation_num == 1:
         # If generation 1, then we don't need to do anything. All source compounds
         # are available to participate in mutations and crossovers.
-        log_info(f"Selecting all {len(usable_smiles)} source compounds (generation 1)")
+        log_info(f"Selecting all {len(predock_cmpds)} source compounds (generation 1)")
     else:
         # selector_choice = params["selector_choice"]
         # tourn_size = params["tourn_size"]
@@ -850,18 +850,16 @@ def _make_seed_list(
         # true for both. This is true for both the diversity score and the
         # docking score. This may need to be adjusted for different scoring
         # functions. (favor_most_negative=True). TODO: Need to fix this!
-        usable_smiles = plugin_managers.Selector.run(
-            usable_smiles=usable_smiles,
+        predock_cmpds = plugin_managers.Selector.run(
+            predock_cmpds=predock_cmpds,
             num_seed_dock_fitness=num_seed_dock_fitness,
             num_seed_diversity=num_seed_diversity,
             favor_most_negative=True,  # TODO: Shouldn't be hardcoded
         )
 
-        import pdb; pdb.set_trace()
+    random.shuffle(predock_cmpds)
 
-    random.shuffle(usable_smiles)
-
-    return usable_smiles
+    return predock_cmpds
 
 
 def _get_seed_pop_sizes(params: Dict[str, Any], gen_num: int) -> Tuple[int, int]:

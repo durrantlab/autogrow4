@@ -83,7 +83,7 @@ class TournamentSelector(SelectorBase):
 
     def run_selector(
         self,
-        usable_smiles: List[PreDockedCompound],
+        predock_cmpds: List[PreDockedCompound],
         num_to_choose: int,
         score_type: ScoreType,
         favor_most_negative: bool = True,
@@ -96,7 +96,7 @@ class TournamentSelector(SelectorBase):
         best-scoring compound wins the tournament.
 
         Args:
-            usable_smiles (List[PreDockedCompound]): A list of all compounds
+            predock_cmpds (List[PreDockedCompound]): A list of all compounds
                 from the previous generation.
             num_to_choose (int): The number of compounds to select (also the
                 number of tournaments to run).
@@ -109,7 +109,7 @@ class TournamentSelector(SelectorBase):
             List[PreDockedCompound]: List of selected compounds.
 
         Raises:
-            Exception: If usable_smiles is not a list or is empty.
+            Exception: If predock_cmpds is not a list or is empty.
 
         Note:
             The tournament size is determined by the 'tourn_size' parameter,
@@ -117,10 +117,10 @@ class TournamentSelector(SelectorBase):
         """
         tourn_size: float = self.params["tourn_size"]
 
-        if type(usable_smiles) is not type([]):
+        if type(predock_cmpds) is not type([]):
             raise Exception("list_of_ligands Must be a list, wrong data type")
 
-        num_ligands = len(usable_smiles)
+        num_ligands = len(predock_cmpds)
         if num_ligands == 0:
             raise Exception(
                 "list_of_ligands is an empty list. There is nothing to chose from."
@@ -133,23 +133,23 @@ class TournamentSelector(SelectorBase):
 
         num_per_tourn = int(math.ceil(num_ligands * tourn_size))
 
-        chosen_ligands = []
-        list_of_ligands_reduced = copy.deepcopy(usable_smiles)
+        chosen_predock_cmpds: List[PreDockedCompound] = []
+        list_of_ligands_reduced = copy.deepcopy(predock_cmpds)
         for _ in range(num_to_choose):
-            chosen_ligand = self._run_one_tournament(
-                usable_smiles, num_per_tourn, score_type, favor_most_negative
+            chosen_predock_cmpd = self._run_one_tournament(
+                predock_cmpds, num_per_tourn, score_type, favor_most_negative
             )
             list_of_ligands_reduced = [
-                x for x in list_of_ligands_reduced if x != chosen_ligand
+                x for x in list_of_ligands_reduced if x != chosen_predock_cmpd
             ]
-            chosen_ligands.append(chosen_ligand)
+            chosen_predock_cmpds.append(chosen_predock_cmpd)
 
-            scre = chosen_ligand.get_previous_score(score_type)
+            scre = chosen_predock_cmpd.get_previous_score(score_type)
             log_debug(
-                f"{chosen_ligand.smiles} ({chosen_ligand.name}): score {scre:.2f}"
+                f"{chosen_predock_cmpd.smiles} ({chosen_predock_cmpd.name}): score {scre:.2f}"
             )
 
-        return chosen_ligands
+        return chosen_predock_cmpds
 
     def _run_one_tournament(
         self,
@@ -200,32 +200,3 @@ class TournamentSelector(SelectorBase):
                     continue
 
         return chosen_option
-
-    def finalize_composite_docking_diversity_list(
-        self,
-        docking_diversity_list: List[PreDockedCompound],
-        usable_smiles: List[PreDockedCompound],
-    ) -> List[PreDockedCompound]:
-        """
-        Finalize the list of selected compounds.
-
-        For the Tournament Selector, this method simply returns the input list
-        as the selection process is already complete.
-
-        Args:
-            docking_diversity_list (List[PreDockedCompound]): List of selected
-                compounds from the tournament selection process.
-            usable_smiles (List[PreDockedCompound]): List of all available
-                compounds (not used in this method).
-
-        Returns:
-            List[PreDockedCompound]: The input docking_diversity_list,
-                unmodified.
-        """
-
-        # NOTE: It seems like this is pointless, but other similar plugins
-        # require it (standard interface).
-
-        # Tournament_Selector returns an already full list of ligands so you can
-        # skip the get_chosen_mol_full_data_list step
-        return docking_diversity_list

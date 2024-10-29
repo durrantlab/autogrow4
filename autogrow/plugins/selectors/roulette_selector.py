@@ -70,7 +70,7 @@ class RouletteSelector(SelectorBase):
 
     def run_selector(
         self,
-        usable_smiles: List[PreDockedCompound],
+        predock_cmpds: List[PreDockedCompound],
         num_to_choose: int,
         score_type: ScoreType,
         favor_most_negative: bool = True,
@@ -79,7 +79,7 @@ class RouletteSelector(SelectorBase):
         Select compounds using weighted roulette selection without replacement.
 
         Args:
-            usable_smiles (List[PreDockedCompound]): A list of all compounds
+            predock_cmpds (List[PreDockedCompound]): A list of all compounds
                 from the previous generation.
             num_to_choose (int): The number of compounds to select based on
                 their score.
@@ -92,42 +92,44 @@ class RouletteSelector(SelectorBase):
             List[PreDockedCompound]: List of selected compounds.
 
         Raises:
-            Exception: If usable_smiles is not a list or is empty.
+            Exception: If predock_cmpds is not a list or is empty.
 
         Note:
             The selection is weighted by the compounds' scores, with the
                 weighting adjusted based on the score_type.
         """
-        if type(usable_smiles) is not type([]):
-            raise Exception("usable_smiles Must be a list, wrong data type")
+        if type(predock_cmpds) is not type([]):
+            raise Exception("predock_cmpds Must be a list, wrong data type")
 
-        num_ligands = len(usable_smiles)
+        num_ligands = len(predock_cmpds)
         if num_ligands == 0:
             raise Exception(
-                "usable_smiles is an empty list. There is nothing to chose from."
+                "predock_cmpds is an empty list. There is nothing to chose from."
             )
 
         if num_to_choose <= 0:
             return []
 
-        adjusted = self._adjust_scores(usable_smiles, score_type, favor_most_negative)
+        adjusted_scores = self._adjust_scores(predock_cmpds, score_type, favor_most_negative)
 
-        total = sum(adjusted)
-        probability = [x / total for x in adjusted]
-        smiles_list = [x.smiles for x in usable_smiles]
+        total = sum(adjusted_scores)
+        probabilities = [x / total for x in adjusted_scores]
+        # smiles_list = [x.smiles for x in predock_cmpds]
 
-        chosen_smis = rn.choice(
-            smiles_list, size=num_to_choose, replace=False, p=probability
-        ).tolist()
+        # NOTE: I'm not sure why type: ignore is needed below. It seems like it should be
+        # inferred correctly.
+        chosen_predock_cmpds: List[PreDockedCompound] = rn.choice(
+            predock_cmpds, size=num_to_choose, replace=False, p=probabilities # type: ignore
+        ).tolist() # type: ignore
 
-        for chosen_smi in chosen_smis:
-            log_debug(chosen_smi)
+        for chosen_predock_cmpd in chosen_predock_cmpds:
+            log_debug(chosen_predock_cmpd.smiles)
 
-        return chosen_smis
+        return chosen_predock_cmpds
 
     def _adjust_scores(
         self,
-        usable_smiles: List[PreDockedCompound],
+        predock_cmpds: List[PreDockedCompound],
         score_type: ScoreType,
         favor_most_negative: bool,
     ) -> List[float]:
@@ -139,7 +141,7 @@ class RouletteSelector(SelectorBase):
         higher scores are better).
 
         Args:
-            usable_smiles (List[PreDockedCompound]): A list of all compounds
+            predock_cmpds (List[PreDockedCompound]): A list of all compounds
                 from the previous generation.
             score_type (ScoreType): Specifies whether to use "docking" or
                 "diversity" scores.
@@ -160,7 +162,7 @@ class RouletteSelector(SelectorBase):
         if score_type == ScoreType.DIVERSITY:
             weight_scores = [
                 x.previous_diversity_score
-                for x in usable_smiles
+                for x in predock_cmpds
                 if x.previous_diversity_score is not None
             ]
             # adjust by squaring the number to make the discrpency larger and
@@ -171,10 +173,10 @@ class RouletteSelector(SelectorBase):
         elif ScoreType.DOCKING:
             weight_scores = [
                 x.previous_docking_score
-                for x in usable_smiles
+                for x in predock_cmpds
                 if x.previous_docking_score is not None
             ]
-            # minimum is the most positive value from usable_smiles the
+            # minimum is the most positive value from predock_cmpds the
             # more negative the docking score the better the dock
 
             # TODO: See comment above? Need to account for the fact that the docking
@@ -189,28 +191,3 @@ class RouletteSelector(SelectorBase):
             raise Exception("docking_or_diversity choice not an option")
 
         return adjusted
-
-    def finalize_composite_docking_diversity_list(
-        self,
-        docking_diversity_list: List[PreDockedCompound],
-        usable_smiles: List[PreDockedCompound],
-    ) -> List[PreDockedCompound]:
-        """
-        Retrieve full data for selected compounds.
-
-        Args:
-            docking_diversity_list (List[PreDockedCompound]): List of selected
-                compounds.
-            usable_smiles (List[PreDockedCompound]): List of all available
-                compounds with their full data.
-
-        Returns:
-            List[PreDockedCompound]: A list of selected compounds with their
-                complete information.
-        """
-        # Get all the information about the chosen molecules. chosen_mol_list is
-        # 1D list of all chosen ligands chosen_mol_full_data_list is a 1D list
-        # with each item of the list having multiple pieces of information such
-        # as the ligand name/id, the smiles string, the diversity and docking
-        # score...
-        return self.get_chosen_mol_full_data_list(docking_diversity_list, usable_smiles)

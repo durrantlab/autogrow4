@@ -73,7 +73,7 @@ class RankSelector(SelectorBase):
 
     def run_selector(
         self,
-        usable_smiles: List[PreDockedCompound],
+        predock_cmpds: List[PreDockedCompound],
         num_to_choose: int,
         score_type: ScoreType,
         favor_most_negative: bool = True,
@@ -85,7 +85,7 @@ class RankSelector(SelectorBase):
         removing any redundancies in the process.
 
         Args:
-            usable_smiles (List[PreDockedCompound]): A list of all compounds
+            predock_cmpds (List[PreDockedCompound]): A list of all compounds
                 from the previous generation.
             num_to_choose (int): The number of compounds to select.
             score_type (ScoreType): The type of score to use for ranking (e.g.,
@@ -97,16 +97,16 @@ class RankSelector(SelectorBase):
             List[PreDockedCompound]: A list of selected compounds.
 
         Raises:
-            Exception: If usable_smiles is not a list, is empty, or if there are
+            Exception: If predock_cmpds is not a list, is empty, or if there are
                 fewer unique compounds than requested.
         """
-        if type(usable_smiles) is not type([]):
-            raise Exception("usable_smiles Must be a list, wrong data type")
+        if type(predock_cmpds) is not type([]):
+            raise Exception("predock_cmpds Must be a list, wrong data type")
 
-        num_ligands = len(usable_smiles)
+        num_ligands = len(predock_cmpds)
         if num_ligands == 0:
             raise Exception(
-                "usable_smiles is an empty list. There is nothing to chose from."
+                "predock_cmpds is an empty list. There is nothing to chose from."
             )
 
         if num_to_choose <= 0:
@@ -114,13 +114,13 @@ class RankSelector(SelectorBase):
 
         # Sort by chosen idx property
         sorted_list = sorted(
-            usable_smiles,
+            predock_cmpds,
             key=lambda x: x.get_previous_score(score_type),
             reverse=not favor_most_negative,
         )
 
         # sorted_list = sorted(
-        #     usable_smiles,
+        #     predock_cmpds,
         #     key=lambda x: x.score_by_index_lookup(column_idx_to_select),
         #     reverse=reverse_sort,
         # )
@@ -167,41 +167,11 @@ class RankSelector(SelectorBase):
         else:
             sorted_list = new_sorted_list
 
-        top_choice_smiles_in_order = []
+        top_choice_smiles_in_order: List[PreDockedCompound] = []
         for i in range(num_to_choose):
             predock_cmpd = sorted_list[i]
-            top_choice_smiles_in_order.append(predock_cmpd.smiles)
+            top_choice_smiles_in_order.append(predock_cmpd)
             scre = predock_cmpd.get_previous_score(score_type)
             log_debug(f"{predock_cmpd.smiles} ({predock_cmpd.name}): score {scre:.2f}")
 
         return top_choice_smiles_in_order
-
-    def finalize_composite_docking_diversity_list(
-        self,
-        docking_diversity_list: List[PreDockedCompound],
-        usable_smiles: List[PreDockedCompound],
-    ) -> List[PreDockedCompound]:
-        """
-        Finalize the list of selected compounds by retrieving full data for
-        each.
-
-        This method takes the list of selected compounds and retrieves their
-        full data from the usable_smiles list.
-
-        Args:
-            docking_diversity_list (List[PreDockedCompound]): The list of
-                selected compounds.
-            usable_smiles (List[PreDockedCompound]): The full list of available
-                compounds.
-
-        Returns:
-            List[PreDockedCompound]: A list of selected compounds with their
-                full data.
-        """
-
-        # Get all the information about the chosen molecules. chosen_mol_list is
-        # 1D list of all chosen ligands chosen_mol_full_data_list is a 1D list
-        # with each item of the list having multiple pieces of information such
-        # as the ligand name/id, the smiles string, the diversity and docking
-        # score...
-        return self.get_chosen_mol_full_data_list(docking_diversity_list, usable_smiles)
