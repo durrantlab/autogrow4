@@ -3,7 +3,7 @@ rm -f ./tutorial/PARP/4r6eA_PARP1_prepared.pdbqt
 
 python run_autogrow.py \
     --receptor_path ./tutorial/PARP/4r6eA_PARP1_prepared.pdb \
-    --center_x -70.76 --center_y  21.82 --center_z 28.33 \
+    --center_x -70.76 --center_y 21.82 --center_z 28.33 \
     --size_x 25.0 --size_y 16.0 --size_z 25.0 \
     --obabel_path /Users/jdurrant/opt/anaconda3/bin/obabel \
     --source_compound_file tmp_20.smi \
@@ -20,7 +20,7 @@ python run_autogrow.py \
     --top_mols_to_seed_next_generation 5 \
     --diversity_seed_depreciation_per_gen 1 \
     --num_generations 5 \
-    --number_of_processors -1 \
+    --number_of_processors 3 \
     --FragmentAddition \
     --rxn_library_path ./autogrow/plugins/mutation/reaction_libraries/all_rxns \
     --FakeDocking \

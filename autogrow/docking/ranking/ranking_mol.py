@@ -8,7 +8,7 @@ in AutoGrow.
 import __future__
 
 import os
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from autogrow.types import PreDockedCompound, PostDockedCompound, ScoreType
 import rdkit  # type: ignore
@@ -20,9 +20,198 @@ from rdkit import DataStructs  # type: ignore
 rdkit.RDLogger.DisableLog("rdApp.*")
 
 import autogrow.utils.mol_object_handling as MOH
+import autogrow.docking.ranking.ranking_mol as Ranking
 
 
-def get_usable_format(infile: str) -> List[PreDockedCompound]:
+def rank_and_save_output_smi(
+    current_generation_dir: str,
+    current_gen_int: int,
+    smiles_file: str,
+    postDockedCompoundInfos: List[PostDockedCompound],
+    params: Dict[str, Any],
+) -> str:
+    """
+    Rank and save docked compounds based on docking score.
+
+    This method ranks all the SMILES based on docking score (low to high),
+    formats them into a .smi file, and saves the file.
+
+    Args:
+        current_generation_dir (str): Path of directory of current generation.
+        current_gen_int (int): The integer of the current generation
+            (zero-indexed).
+        smiles_file (str): File path for the file with the ligands for the
+            generation (a .smi file).
+        postDockedCompoundInfos (List[PostDockedCompound]): List of
+            PostDockedCompound objects containing docking results.
+        params (Dict[str, Optional[str]]): Dictionary of parameters.
+
+    Returns:
+        str: The path of the output ranked .smi file.
+
+    Note:
+        This method handles pass-through ligands from the previous generation
+        based on the 'redock_elite_from_previous_gen' parameter and the current
+        generation number.
+    """
+    # Get directory string of PDB files for Ligands
+    # folder_with_pdbqts = f"{current_generation_dir}PDBs{os.sep}"
+
+    # Run any compatible Scoring Function
+    # postDockedCompoundInfos = Scoring.run_scoring_common(
+    #     params, smiles_file, folder_with_pdbqts
+    # )
+
+    # Before ranking these we need to handle Pass-Through ligands from the
+    # last generation If it's current_gen_int==1 or if
+    # params['redock_elite_from_previous_gen'] is True -Both of these states
+    # dock all ligands from the last generation so all of the pass-through
+    # lig are already in the PDB's folder thus they should be accounted
+    # for in smiles_list If params['redock_elite_from_previous_gen'] is False
+    # and current_gen_int != 1 - We need to append the scores form the
+    # last gen to smiles_list
+
+    # Only add these when we haven't already redocked the ligand
+    if (
+        params["redock_elite_from_previous_gen"] is False
+        and current_gen_int != 0
+    ):
+        # Go to previous generation folder
+        prev_gen_num = str(current_gen_int - 1)
+        run_folder = params["output_directory"]
+        previous_gen_folder = f"{run_folder}generation_{prev_gen_num}{os.sep}"
+        ranked_smi_file_prev_gen = (
+            f"{previous_gen_folder}generation_{prev_gen_num}_ranked.smi"
+        )
+
+        # Also check sometimes Generation 1 won't have a previous
+        # generation to do this with and sometimes it will
+        if (
+            current_gen_int != 1
+            or os.path.exists(ranked_smi_file_prev_gen) is not False
+        ):
+            # Shouldn't happen but to be safe.
+            _process_ligand_scores_from_prev_gen(
+                ranked_smi_file_prev_gen,
+                current_generation_dir,
+                current_gen_int,
+                postDockedCompoundInfos,
+            )
+    # Output format of the .smi file will be: SMILES    Full_lig_name
+    # shorthandname   ...AnyCustominfo... Fitness_metric  diversity
+    # Normally the docking score is the fitness metric but if we use a
+    # Custom metric than dock score gets moved to index -3 and the new
+    # fitness metric gets -2
+
+    # sort list by the affinity of each sublist (which is the last index
+    # of sublist)
+    postDockedCompoundInfos.sort(key=lambda x: x.docking_score, reverse=False)
+
+    # score the diversity of each ligand compared to the rest of the
+    # ligands in the group this adds on a float in the last column for the
+    # sum of pairwise comparisons the lower the diversity score the more
+    # unique a molecule is from the other mols in the same generation
+    postDockedCompoundInfos = Ranking.calc_diversity_scores(
+        postDockedCompoundInfos
+    )
+
+    # name for the output file
+    output_ranked_smile_file = smiles_file.replace(".smi", "") + "_ranked.smi"
+
+    # save to a new output smiles file. ie. save to ranked_smiles_file
+
+    with open(output_ranked_smile_file, "w") as output:
+        for postDockedCompoundInfo in postDockedCompoundInfos:
+            lst = postDockedCompoundInfo.to_list()
+            lst[-1] = os.path.basename(lst[-1])
+            output_line = "\t".join(lst) + "\n"
+            output.write(output_line)
+
+    return output_ranked_smile_file
+
+def _process_ligand_scores_from_prev_gen(
+    ranked_smi_file_prev_gen: str,
+    current_generation_dir: str,
+    current_gen_int: int,
+    smiles_list: List[PostDockedCompound],
+):
+    """
+    Process ligand scores from the previous generation.
+
+    This method retrieves ligand scores from the previous generation and
+    updates the current generation's smiles_list with pass-through ligands.
+
+    Args:
+        ranked_smi_file_prev_gen (str): Path to the ranked .smi file from the
+            previous generation.
+        current_generation_dir (str): Path to the current generation directory.
+        current_gen_int (int): The current generation number.
+        smiles_list (List[PostDockedCompound]): List of PostDockedCompound
+            objects to be updated.
+
+    Raises:
+        Exception: If the previous generation ranked .smi file does not exist.
+
+    Note:
+        This method modifies the smiles_list in place.
+    """
+
+    # CHECKED: smiles_list is of type List[PostDockedCompound] here.
+
+    print("Getting ligand scores from the previous generation")
+
+    # Shouldn't happen but to be safe.
+    if os.path.exists(ranked_smi_file_prev_gen) is False:
+        raise Exception(
+            "Previous generation ranked .smi file does not exist. "
+            + "Check if output folder has been moved"
+        )
+
+    # Get the data for all ligands from previous generation ranked
+    # file
+    prev_gen_data_list = Ranking.get_predockcmpds_from_smi_file(ranked_smi_file_prev_gen)
+    # CHECKED: prev_gen_data_list of type List[PreDockedCompound] here.
+
+    # Get the list of pass through ligands
+    current_gen_pass_through_smi = (
+        current_generation_dir
+        + f"SeedFolder{os.sep}Chosen_Elite_To_advance_Gen_{current_gen_int}.smi"
+    )
+    pass_through_list = Ranking.get_predockcmpds_from_smi_file(current_gen_pass_through_smi)
+    # CHECKED: pass_through_list is of type List[PreDockedCompound] here.
+
+    # Convert lists to searchable Dictionaries.
+    prev_gen_data_dict = Ranking.convert_usable_list_to_lig_dict(prev_gen_data_list)
+    # CHECKED: prev_gen_data_dict is of type Dict[str, PreDockedCompound] here.
+
+    assert prev_gen_data_dict is not None, "prev_gen_data_dict is None"
+
+    pass_through_data: List[PostDockedCompound] = []
+    for lig in pass_through_list:
+        # CHECKED: lig is of type PreDockedCompound here.
+
+        lig_data = prev_gen_data_dict[str(lig.smiles + lig.name)]
+        # CHECKED: lig_data is of type PreDockedCompound here.
+
+        # NOTE: Here it must be converted to a PostDockedCompound
+        assert (
+            lig_data.previous_docking_score is not None
+        ), "lig_data.previous_docking_score is None"
+
+        # TODO: Nervous that additional_info = "". Not sure what to put there.
+        lig_info_remove_diversity_info = PostDockedCompound(
+            smiles=lig.smiles,
+            id=lig.name,
+            short_id=lig.name,
+            additional_info="",
+            docking_score=lig_data.previous_docking_score,
+            diversity_score=None,
+        )
+        pass_through_data.append(lig_info_remove_diversity_info)
+
+    smiles_list.extend(pass_through_data)
+
+def get_predockcmpds_from_smi_file(infile: str) -> List[PreDockedCompound]:
     """
     Reads and processes a .smi file into a list of PreDockedCompound objects.
 
@@ -112,15 +301,17 @@ def convert_usable_list_to_lig_dict(
 
 
 ##### Called in the docking class ######
-def score_and_calc_diversity_scores(
+def calc_diversity_scores(
     postDockedCompoundInfos: List[PostDockedCompound],
 ) -> List[PostDockedCompound]:
     """
     Calculates diversity scores for a list of PostDockedCompound objects.
 
     This function computes Morgan Fingerprints for each molecule and calculates
-    pairwise Dice Similarity scores. The sum of these scores becomes the
-    diversity score for each molecule.
+    pairwise Dice Similarity scores (1.0 meanas a perfect match, 0.0 means no
+    match at all). The sum of these scores becomes the diversity score for each
+    molecule. Lower scores indicate better diversity, because you want low
+    similarity between molecules.
 
     Args:
         postDockedCompoundInfos (List[PostDockedCompound]): List of
@@ -134,7 +325,7 @@ def score_and_calc_diversity_scores(
         AssertionError: If any molecule fails to sanitize or deprotonate.
 
     Note:
-        - Lower diversity scores indicate more diverse molecules. TODO: Verify this is true.
+        - Lower diversity scores indicate more diverse molecules.
         - Removes any None entries from the input list.
         - Uses Morgan Fingerprints with radius 10 and feature-based encoding.
     """
@@ -152,21 +343,21 @@ def score_and_calc_diversity_scores(
             if mol is None:
                 raise AssertionError(
                     "mol in list failed to sanitize. Issue in Ranking.py \
-                                    def score_and_calc_diversity_scores"
+                                    def calc_diversity_scores"
                 )
 
             mol = MOH.check_sanitization(mol)
             if mol is None:
                 raise AssertionError(
                     "mol in list failed to sanitize. Issue in Ranking.py \
-                                        def score_and_calc_diversity_scores"
+                                        def calc_diversity_scores"
                 )
 
             mol = MOH.try_deprotanation(mol)
             if mol is None:
                 raise AssertionError(
                     "mol in list failed to sanitize. Issue in Ranking.py \
-                                        def score_and_calc_diversity_scores"
+                                        def calc_diversity_scores"
                 )
 
             postDockedCompoundInfo.mol = mol
@@ -178,7 +369,7 @@ def score_and_calc_diversity_scores(
 
             postDockedCompoundInfosToKeep.append(postDockedCompoundInfo)
         else:
-            print("noneitem in molecules_list in score_and_calc_diversity_scores")
+            print("noneitem in molecules_list in calc_diversity_scores")
 
     for postDockedCompoundInfo in postDockedCompoundInfosToKeep:
         fp = GetMorganFingerprint(postDockedCompoundInfo.mol, 10, useFeatures=True)

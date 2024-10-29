@@ -396,6 +396,7 @@ def _get_r_dict(r_chain_dict, lig_r_atom_touch_mcs):
 # Mapping functions and finding neighbors
 #########
 
+
 def _make_b_dic(i_dictionary, r_dict_num, lig_number):
     """
     Generate dictionaries for B-groups, tracking R-groups and anchor atoms.

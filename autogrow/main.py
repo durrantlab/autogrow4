@@ -114,7 +114,7 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
             # Begin Docking unweighted_ranked_smile_file is the file name
             # where the unweighted ranked but score .smi file resides
             unweighted_ranked_smile_file = DockingClass.run_docking_common(
-                gen_num, cur_gen_dir, smi_new_gen_path, new_gen_predock_cmpds,
+                gen_num, cur_gen_dir, smi_new_gen_path, new_gen_predock_cmpds, params
             )
 
         sys.stdout.flush()

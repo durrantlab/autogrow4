@@ -223,7 +223,8 @@ class TournamentSelector(SelectorBase):
                 unmodified.
         """
 
-        # TODO: What is the point of this?
+        # NOTE: It seems like this is pointless, but other similar plugins
+        # require it (standard interface).
 
         # Tournament_Selector returns an already full list of ligands so you can
         # skip the get_chosen_mol_full_data_list step

@@ -13,7 +13,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import matplotlib.pyplot as plt  # type: ignore
 
 
-def get_usable_format(infile: str) -> List[List[str]]:
+def get_predockcmpds_from_smi_file(infile: str) -> List[List[str]]:
     """
     Read an .smi file and format it into a usable list.
 

@@ -169,10 +169,10 @@ class RankSelector(SelectorBase):
 
         top_choice_smiles_in_order = []
         for i in range(num_to_choose):
-            smiles = sorted_list[i]
-            top_choice_smiles_in_order.append(smiles.smiles)
-            scre = smiles.get_previous_score(score_type)
-            log_debug(f"{smiles.smiles} ({smiles.name}): score {scre:.2f}")
+            predock_cmpd = sorted_list[i]
+            top_choice_smiles_in_order.append(predock_cmpd.smiles)
+            scre = predock_cmpd.get_previous_score(score_type)
+            log_debug(f"{predock_cmpd.smiles} ({predock_cmpd.name}): score {scre:.2f}")
 
         return top_choice_smiles_in_order
 

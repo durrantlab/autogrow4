@@ -26,12 +26,18 @@ def convert_json_params_from_unicode(
     """
     # Also, rdkit doesn't play nice with unicode, so convert to ascii
 
-    # TODO: Don't param and val need to be encoded? This doesn't seem to
-    # actually do anything...
-
     params = {}
     for param, val in params_unicode.items():
-        params[param] = val
+        # Encode both keys and values if they're strings
+        ascii_param = (
+            param.encode("ascii", "ignore").decode()
+            if isinstance(param, str)
+            else param
+        )
+        ascii_val = (
+            val.encode("ascii", "ignore").decode() if isinstance(val, str) else val
+        )
+        params[ascii_param] = ascii_val
     return params
 
 

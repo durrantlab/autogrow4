@@ -579,4 +579,3 @@ def _add_misc_params(parser: argparse._ArgumentGroup):
     #     default=True,
     #     help="Make a line plot of the simulation at the end of the run.",
     # )
-

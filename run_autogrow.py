@@ -12,10 +12,7 @@ for de novo drug design and lead optimization. J Cheminform 12, 25 (2020).
 """
 import __future__
 
-# TODO: It is strange that this is in argparser. Good to clean up user_params.py
-# and move it there.
 from autogrow.config.argparser import get_user_params
-
 import autogrow.main as AutogrowMainExecute
 
 

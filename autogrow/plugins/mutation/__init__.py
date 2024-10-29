@@ -46,7 +46,9 @@ class MutationBase(PluginBase):
         return self.run_mutation(kwargs["parent_smiles"])
 
     @abstractmethod
-    def run_mutation(self, parent_smiles: str) -> Optional[Tuple[str, int, Union[str, None]]]:
+    def run_mutation(
+        self, parent_smiles: str
+    ) -> Optional[Tuple[str, int, Union[str, None]]]:
         """
         Abstract method to be implemented by each mutation plugin.
 
@@ -67,19 +69,6 @@ class MutationBase(PluginBase):
             docstring is not present in the method signature. Subclasses should
             handle duplicate prevention if necessary.
         """
-        pass
-
-    def validate(self, params: dict):
-        """
-        Validate the provided arguments for the mutation plugin.
-
-        Args:
-            params (dict): A dictionary of parameters to validate.
-
-        Note:
-            This method is currently a placeholder and needs to be implemented.
-        """
-        # TODO: Implement validation
         pass
 
 

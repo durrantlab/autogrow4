@@ -124,7 +124,9 @@ class FragmentAddition(MutationBase):
         """
         self._load_rxn_data()
 
-    def run_mutation(self, parent_smiles: str) -> Optional[Tuple[str, int, Union[str, None]]]:
+    def run_mutation(
+        self, parent_smiles: str
+    ) -> Optional[Tuple[str, int, Union[str, None]]]:
         """
         Run the mutation on the parent molecule.
 
@@ -184,11 +186,6 @@ class FragmentAddition(MutationBase):
         if not (hasattr(self, "functional_group_dict")):
             # Only load if not already loaded
             self.functional_group_dict = self._load_functional_grps(rxn_library_path)
-
-        # Retrieve the dictionary containing
-        # TODO: I think self.list_of_reaction_names is never used.
-        # all the possible ClickChem Reactions
-        # self.list_of_reaction_names = list(self.reaction_dict.keys())
 
         if not hasattr(self, "complementary_mol_dict"):
             # Only load if not already loaded

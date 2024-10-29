@@ -704,7 +704,7 @@ def _get_cmpds_prev_gen(
         )
         if os.path.exists(source_file) is False:
             _handle_no_ligands_found("\tCheck formatting or if file has been moved.\n")
-        usable_smiles = Ranking.get_usable_format(source_file)
+        usable_smiles = Ranking.get_predockcmpds_from_smi_file(source_file)
 
         if len(usable_smiles) == 0:
             _handle_no_ligands_found("\tCheck formatting or if file has been moved. \n")
@@ -771,7 +771,7 @@ def _get_source_compounds_or_raise(params) -> List[PreDockedCompound]:
     """
     # This will be the full length list of starting molecules as the seed
     source_file = str(params["source_compound_file"])
-    result = Ranking.get_usable_format(source_file)
+    result = Ranking.get_predockcmpds_from_smi_file(source_file)
 
     if len(result) == 0:
         print(
@@ -856,6 +856,8 @@ def _make_seed_list(
             num_seed_diversity=num_seed_diversity,
             favor_most_negative=True,  # TODO: Shouldn't be hardcoded
         )
+
+        import pdb; pdb.set_trace()
 
     random.shuffle(usable_smiles)
 

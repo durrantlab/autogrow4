@@ -80,7 +80,9 @@ class CacheManager:
         """
         if not self.exists and self.data is not None:
             cache_filename = self._get_cache_filename()
-            # TODO: What if dir of cache_filename doesn't exist? Happened once.
+            assert os.path.exists(
+                self.cache_dir
+            ), f"Cache directory {self.cache_dir} doesn't exist"
             with open(cache_filename, "wb") as f:
                 pkl.dump(self.data, f)
             log_debug(f"Saved {self.label} results to cache: {cache_filename}")

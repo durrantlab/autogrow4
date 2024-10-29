@@ -30,7 +30,7 @@ class SelectorBase(PluginBase):
         List[PreDockedCompound]: Selected compounds
     """
 
-    def run(self, **kwargs) -> Any:
+    def run(self, **kwargs) -> List[PreDockedCompound]:
         """Run the plugin with provided arguments."""
         usable_smiles: List[PreDockedCompound] = kwargs["usable_smiles"]
         score_type: ScoreType = kwargs["score_type"]
@@ -220,6 +220,8 @@ class SelectorPluginManager(PluginManagerBase):
         # Combine the two lists
         docking_diversity_list = list(docking_fitness_smiles_list)
         docking_diversity_list.extend(diversity_smile_list)
+
+        import pdb; pdb.set_trace()
 
         # Finalize the list
         return selector.finalize_composite_docking_diversity_list(

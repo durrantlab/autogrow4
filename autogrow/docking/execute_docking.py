@@ -9,6 +9,7 @@ post-docked, ranked compounds.
 import __future__
 
 from typing import Any, Dict, List, cast
+from autogrow.docking.ranking.ranking_mol import rank_and_save_output_smi
 from autogrow.plugins.plugin_managers import plugin_managers
 from autogrow.plugins.docking import DockingPluginManager
 from autogrow.types import PreDockedCompound
@@ -20,6 +21,7 @@ def run_docking_common(
     cur_gen_dir: str,
     smiles_file_new_gen: str,
     new_gen_predock_cmpds: List[PreDockedCompound],
+    params: Dict[str, Any],
 ) -> str:
     """
     Runs common docking operations for all docking programs.
@@ -53,9 +55,10 @@ def run_docking_common(
         x for x in post_docked_compounds if x.docked_sdf_path is not None
     ]
 
-    # print("\nBegin Ranking and Saving results")
-    unweighted_ranked_smile_file = docking_plugin_manager.rank_and_save_output_smi(
-        cur_gen_dir, current_gen_int, smiles_file_new_gen, post_docked_compounds,
+    return rank_and_save_output_smi(
+        cur_gen_dir,
+        current_gen_int,
+        smiles_file_new_gen,
+        post_docked_compounds,
+        params
     )
-    # print("\nCompleted Ranking and Saving results\n")
-    return unweighted_ranked_smile_file
