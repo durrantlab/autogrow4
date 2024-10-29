@@ -78,34 +78,34 @@ def _test_for_mcs(
     return None if result.canceled else result
 
 
-def _find_random_lig2(
+def _find_sufficiently_similar_cmpd(
     params: Dict[str, Any],
-    ligands_list: List[PreDockedCompound],
-    ligand1_pair: PreDockedCompound,
-) -> Union[PreDockedCompound, None]:
+    predock_cmpds: List[PreDockedCompound],
+    query_predock_cmpd: PreDockedCompound,
+) -> Optional[PreDockedCompound]:
     """
     Selects a random molecule with satisfactory MCS to the given ligand.
 
     Args:
         params (Dict[str, Any]): User parameters governing the selection.
-        ligands_list (List[PreDockedCompound]): List of ligands to choose from.
-        ligand1_pair (PreDockedCompound): The reference ligand.
+        predock_cmpds (List[PreDockedCompound]): List of ligands to choose from.
+        query_predock_cmpd (PreDockedCompound): The reference (query) ligand.
 
     Returns:
-        Union[PreDockedCompound, None]: A suitable second ligand if found,
+        Optional[PreDockedCompound]: A suitable second ligand if found,
         None otherwise.
     """
     count = 0
-    shuffled_num_list = list(range(len(ligands_list) - 1))
+    shuffled_num_list = list(range(len(predock_cmpds) - 1))
     random.shuffle(shuffled_num_list)
 
     # Convert lig1 into an RDkit mol
-    lig1_string = ligand1_pair.smiles
+    lig1_string = query_predock_cmpd.smiles
     lig1_mol = _convert_mol_from_smiles(lig1_string)
 
-    while count < len(ligands_list) - 1:
+    while count < len(predock_cmpds) - 1:
         rand_num = shuffled_num_list[count]
-        mol2_pair = ligands_list[rand_num]
+        mol2_pair = predock_cmpds[rand_num]
 
         if mol2_pair.smiles == lig1_string:
             count += 1
@@ -131,7 +131,7 @@ def _find_random_lig2(
     return None
 
 
-def _convert_mol_from_smiles(smiles: str) -> Union[rdkit.Chem.rdchem.Mol, bool]:
+def _convert_mol_from_smiles(smiles: str) -> Union[rdkit.Chem.rdchem.Mol, bool, None]:
     """
     Converts a SMILES string to an RDKit molecule object.
 
@@ -139,7 +139,7 @@ def _convert_mol_from_smiles(smiles: str) -> Union[rdkit.Chem.rdchem.Mol, bool]:
         smiles (str): SMILES string of the molecule.
 
     Returns:
-        Union[rdkit.Chem.rdchem.Mol, bool]: RDKit molecule object if 
+        Union[rdkit.Chem.rdchem.Mol, bool, None]: RDKit molecule object if 
         conversion is successful, False otherwise.
 
     Note:
@@ -319,10 +319,10 @@ def make_crossovers(
     return new_ligands
 
 
-def _run_smiles_merge_prescreen(
+def _find_similar_cmpd(
     params: Dict[str, Any],
     ligands_list: List[PreDockedCompound],
-    ligand1_pair: PreDockedCompound,
+    lig1_smile_pair: PreDockedCompound,
 ) -> Optional[PreDockedCompound]:
     """
     Finds a molecule with sufficient shared structure to the given ligand.
@@ -335,7 +335,7 @@ def _run_smiles_merge_prescreen(
     Returns:
         Optional[PreDockedCompound]: A suitable second ligand if found, None otherwise.
     """
-    ligand_1_string = ligand1_pair.smiles
+    ligand_1_string = lig1_smile_pair.smiles
 
     # check if ligand_1 can be converted to an rdkit mol
     lig1 = _convert_mol_from_smiles(ligand_1_string)
@@ -344,21 +344,21 @@ def _run_smiles_merge_prescreen(
         return None
 
     # GET TWO UNIQUE LIGANDS TO WITH A SHARED SUBSTRUCTURE
-    return _find_random_lig2(params, ligands_list, ligand1_pair)
+    return _find_sufficiently_similar_cmpd(params, ligands_list, lig1_smile_pair)
 
 
 def _do_crossovers_smiles_merge(
     params: Dict[str, Any],
-    lig1_smile_pair: PreDockedCompound,
-    ligands_list: List[PreDockedCompound],
+    lig1_predock_cmpd: PreDockedCompound,
+    all_predock_cmpds: List[PreDockedCompound],
 ) -> Optional[Tuple[str, PreDockedCompound, PreDockedCompound]]:
     """
     Performs a crossover operation between two ligands.
 
     Args:
         params (Dict[str, Any]): User parameters governing the process.
-        lig1_smile_pair (PreDockedCompound): Information for the first ligand.
-        ligands_list (List[PreDockedCompound]): List of all seed ligands.
+        all_predock_cmpds (PreDockedCompound): Information for the first ligand.
+        predock_cmpds (List[PreDockedCompound]): List of all seed ligands.
 
     Returns:
         Optional[Tuple[str, PreDockedCompound, PreDockedCompound]]: 
@@ -370,13 +370,19 @@ def _do_crossovers_smiles_merge(
     """
     # Run the run_smiles_merge_prescreen of the ligand. This gets a new a lig2
     # which passed the prescreen.
-    lig2_pair = _run_smiles_merge_prescreen(params, ligands_list, lig1_smile_pair)
+    # check if ligand_1 can be converted to an rdkit mol
+    lig1_rdkit_mol = _convert_mol_from_smiles(lig1_predock_cmpd.smiles)
+    if lig1_rdkit_mol is False:
+        # Ligand1_string failed to be converted to rdkit mol format
+        lig2_predock_cmpd = None
 
-    if lig2_pair is None:
+    # GET A UNIQUE LIGANDS TO WITH A SHARED SUBSTRUCTURE
+    lig2_predock_cmpd = _find_sufficiently_similar_cmpd(
+        params, all_predock_cmpds, lig1_predock_cmpd
+    )
+
+    if lig2_predock_cmpd is None:
         return None
-
-    ligand_1_string = lig1_smile_pair.smiles
-    ligand_2_string = lig2_pair.smiles
 
     crossover_manager = cast(CrossoverPluginManager, plugin_managers.Crossover)
 
@@ -384,19 +390,26 @@ def _do_crossovers_smiles_merge(
     while counter < 3:
         # run SmilesMerge
         ligand_new_smiles = crossover_manager.run(
-            lig_string_1=ligand_1_string, lig_string_2=ligand_2_string
+            predock_cmpd1=lig1_predock_cmpd, predock_cmpd2=lig2_predock_cmpd
         )
 
         if ligand_new_smiles is None:
             counter += 1
         else:
+            # TODO: Filter accepts a list of PreDockedCompounds. So we need to
+            # convert smiles string to that just for the purpose of filtering.
+            # This is because crossover doesn't return a PreDockCompound object
+            # yet. Need to refactor so that happens. As is, smiles getting
+            # converted to PreDockCompound twice.
+            tmp_predock_cmpd = PreDockedCompound(smiles=ligand_new_smiles, name="tmp")
+
             # Filter Here
             pass_or_not = (
-                len(plugin_managers.SmilesFilter.run(smiles=ligand_new_smiles)) > 0
+                len(plugin_managers.SmilesFilter.run(predock_cmpds=[tmp_predock_cmpd])) > 0
             )
 
             if not pass_or_not:
                 counter += 1
             else:
-                return (ligand_new_smiles, lig1_smile_pair, lig2_pair)
+                return (ligand_new_smiles, lig1_predock_cmpd, lig2_predock_cmpd)
     return None

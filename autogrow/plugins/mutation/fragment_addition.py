@@ -22,6 +22,7 @@ from autogrow.config.argparser import ArgumentVars
 
 # from autogrow.plugins.plugin_managers import plugin_managers
 from autogrow.plugins.mutation import MutationBase
+from autogrow.types import PreDockedCompound
 from autogrow.utils.logging import log_debug, log_warning
 import rdkit  # type: ignore
 from rdkit import Chem  # type: ignore
@@ -125,19 +126,20 @@ class FragmentAddition(MutationBase):
         self._load_rxn_data()
 
     def run_mutation(
-        self, parent_smiles: str
+        self, predock_cmpd: PreDockedCompound
     ) -> Optional[Tuple[str, int, Union[str, None]]]:
         """
         Run the mutation on the parent molecule.
 
         This will take the shuffled list of reaction names
-        (self.shuffled_reaction_list) and test the molecule
-        to see if it is capable of being used in the reaction. If the molecule
-        is unable to be used in the reaction, then we move on to the next
-        reaction in the list. If none work, we return None.
+        (self.shuffled_reaction_list) and test the molecule to see if it is
+        capable of being used in the reaction. If the molecule is unable to be
+        used in the reaction, then we move on to the next reaction in the list.
+        If none work, we return None.
 
         Args:
-            parent_smiles (str): SMILES string of a molecule to be reacted.
+            predock_cmpd (PreDockedCompound): PreDockedCompound of a molecule to
+                be reacted.
 
         Returns:
             Optional[Tuple[str, int, Union[str, None]]]: A tuple containing the
@@ -148,7 +150,7 @@ class FragmentAddition(MutationBase):
                 a sanitizable rdkit mol.
         """
         # Prepare the molecule
-        mol_data = self._prepare_mol(parent_smiles)
+        mol_data = self._prepare_mol(predock_cmpd.smiles)
         if mol_data is None:
             return None
         mol, mol_reprotanated, mol_deprotanated, list_subs_within_mol = mol_data
@@ -899,9 +901,17 @@ class FragmentAddition(MutationBase):
         # passed_filter = Filter.run_filter_on_just_smiles(
         #     reaction_product_smiles, self.filter_object_dict
         # )
+        # TODO: Not good for this to be here. Should be applied to all
+        # mutations. Perhpas in execute_mutation.py, just as there is analogous
+        # code in execute_crossover.py.
         assert self.plugin_managers is not None, "Plugin managers not set"
+
+        # TODO: Filter accepts a list of PreDockedCompound. So we need to
+        # convert smiles string to that just for the purpose of filtering.
+        tmp_predock_cmpd = PreDockedCompound(smiles=reaction_product_smiles, name="tmp")
+
         passed_filter = (
-            len(self.plugin_managers.SmilesFilter.run(smiles=reaction_product_smiles))
+            len(self.plugin_managers.SmilesFilter.run(predock_cmpds=[tmp_predock_cmpd]))
             > 0
         )
 

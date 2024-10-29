@@ -853,7 +853,7 @@ def _make_seed_list(
         predock_cmpds = plugin_managers.Selector.run(
             predock_cmpds=predock_cmpds,
             num_seed_dock_fitness=num_seed_dock_fitness,
-            num_seed_diversity=num_seed_diversity
+            num_seed_diversity=num_seed_diversity,
         )
 
     random.shuffle(predock_cmpds)

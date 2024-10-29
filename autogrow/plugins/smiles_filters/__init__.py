@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from argparse import ArgumentParser
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union, cast
 
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
 from autogrow.types import PreDockedCompound
@@ -43,21 +43,22 @@ class SmilesFilterBase(PluginBase):
 
         Args:
             **kwargs: Keyword arguments containing filter parameters, must
-                include: mol (rdkit.Chem.rdchem.Mol): The molecule to be filtered
+                include: predock_cmpd (PreDockedCompound): The molecule to be
+                filtered
 
         Returns:
             bool: True if the molecule passes the filter criteria, False
                 otherwise
         """
-        return self.run_filter(kwargs["mol"])
+        return self.run_filter(kwargs["predock_cmpd"])
 
     @abstractmethod
-    def run_filter(self, mol: Chem.rdchem.Mol) -> bool:
+    def run_filter(self, predock_cmpd: PreDockedCompound) -> bool:
         """
         run_filter is needs to be implemented in each class.
 
         Inputs:
-        :param rdkit.Chem.rdchem.Mol mol: a molecule to filter
+        :param PreDockedCompound predock_cmpd: a molecule to filter
 
         Returns:
         :returns: bool: True if the molecule passes the filter, False if it fails
@@ -67,6 +68,35 @@ class SmilesFilterBase(PluginBase):
     def validate(self, params: dict):
         """Validate the provided arguments."""
         pass
+
+    def predock_cmpd_to_rdkit_mol(
+        self, predock_cmpd: PreDockedCompound
+    ) -> Optional[Chem.Mol]:
+        """
+        Convert a PreDockedCompound object to an RDKit molecule object.
+
+        Args:
+            predock_cmpd (PreDockedCompound): The PreDockedCompound object to
+                convert.
+
+        Returns:
+            Optional[Chem.Mol]: The RDKit molecule object. None if fails.
+        """
+        mol = Chem.MolFromSmiles(predock_cmpd.smiles, sanitize=False)
+        # try sanitizing, which is necessary later
+        mol = MOH.check_sanitization(mol)
+        if mol is None:
+            return None
+
+        mol = MOH.try_deprotanation(mol)
+        if mol is None:
+            return None
+
+        mol = MOH.check_sanitization(mol)
+        if mol is None:
+            return None
+
+        return mol
 
 
 class SmilesFilterPluginManager(PluginManagerBase):
@@ -80,75 +110,42 @@ class SmilesFilterPluginManager(PluginManagerBase):
         Returns:
         :returns: bool: True if the molecule passes the filter, False if it fails
         """
-        # Make sure it is a list of strings
-        assert isinstance(kwargs["smiles"], str), "smiles must be a list of strings"
-        assert isinstance(kwargs["smiles"][0], str), "smiles must be a list of strings"
+        # # Make sure it is a list of strings
+        # assert isinstance(kwargs["smiles"], str), "smiles must be a list of strings"
+        # assert isinstance(kwargs["smiles"][0], str), "smiles must be a list of strings"
 
         # Run filter on a single smiles string.
-        return self._run_filter_on_just_smiles(kwargs["smiles"])
-
-    def _run_filter_on_just_smiles(self, smiles: str) -> List[str]:
-        """
-        This takes a smiles and the selected filter list (child_dict) and
-        runs it through the selected filters.
-
-        Inputs:
-        :param str smile_string: A smiles. example: smiles_info
-            ["CCCCCCC","zinc123"]
-        :param dict child_dict: This dictionary contains all the names of the
-            chosen filters as keys and the the filter objects as the items Or None if
-            User specifies no filters
-
-        Returns:
-        :returns: str smile_string: smile_string if it passed the filter. returns
-            False If the mol fails a filter.
-        """
-        passed_smiles: List[str] = []
-        for smi in smiles:
-            mol = Chem.MolFromSmiles(smi, sanitize=False)
-            # try sanitizing, which is necessary later
-            mol = MOH.check_sanitization(mol)
-            if mol is None:
-                continue
-
-            mol = MOH.try_deprotanation(mol)
-            if mol is None:
-                continue
-
+        passed_cmpds: List[PreDockedCompound] = []
+        for predock_cmpd in kwargs["predock_cmpds"]:
             # run through the filters
-            passed = self._run_all_selected_filters(mol)
+            passed = self._run_all_selected_filters(predock_cmpd)
             if passed:
-                passed_smiles.append(smi)
+                passed_cmpds.append(predock_cmpd)
 
-        return passed_smiles
+        return passed_cmpds
 
-    def _run_all_selected_filters(self, mol: Chem.rdchem.Mol) -> bool:
+    def _run_all_selected_filters(self, predock_cmpd: PreDockedCompound) -> bool:
         """
         Iterate through all of the filters specified by the user for a single
         molecule. returns True if the mol passes all the chosen filters. returns
         False if the mol fails any of the filters.
 
         Inputs:
-        :param rdkit.Chem.rdchem.Mol object mol: An rdkit mol object to be tested
+        :param PreDockedCompound predock_cmpd: An rdkit mol object to be tested
             if it passes the filters
-        :param dict child_dict: This dictionary contains all the names of the
-            chosen filters as keys and the the filter objects as the items
 
         Returns:
         returns bol bol: True if the mol passes all the filters. False if the mol
             fails any filters.
         """
         filters_failed = 0
-        mol = MOH.check_sanitization(mol)
-        if mol is None:
-            return False
         for plugin_name in self.plugins:
-            mol_copy = copy.deepcopy(mol)
-            plugin = self.plugins[plugin_name]
+            # mol_copy = copy.deepcopy(mol)
+            plugin = cast(SmilesFilterBase, self.plugins[plugin_name])
             filter_function = plugin.run
-            if not filter_function(mol=mol_copy):
+            if not filter_function(predock_cmpd=predock_cmpd):
                 filters_failed = filters_failed + 1
-                print(f"Failed {plugin_name} filter: {Chem.MolToSmiles(mol_copy)}")
+                print(f"Failed {plugin_name} filter: {predock_cmpd.smiles}")
 
         if filters_failed == 0:
             return True

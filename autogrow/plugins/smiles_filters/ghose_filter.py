@@ -24,6 +24,7 @@ import __future__
 import copy
 
 from autogrow.plugins.smiles_filters import SmilesFilterBase
+from autogrow.types import PreDockedCompound
 import rdkit  # type: ignore
 import rdkit.Chem as Chem  # type: ignore
 import rdkit.Chem.Lipinski as Lipinski  # type: ignore
@@ -49,7 +50,7 @@ class GhoseFilter(SmilesFilterBase):
         hydrogens against the total number of atoms.
     """
 
-    def run_filter(self, mol: rdkit.Chem.rdchem.Mol) -> bool:
+    def run_filter(self, predock_cmpd: PreDockedCompound) -> bool:
         """
         Run the Ghose filter on a given molecule.
 
@@ -58,7 +59,7 @@ class GhoseFilter(SmilesFilterBase):
         refractivity, and molar LogP.
 
         Args:
-            mol (rdkit.Chem.rdchem.Mol): An RDKit molecule object to be tested.
+            predock_cmpd (PreDockedCompound): A PreDockedCompound to be tested.
 
         Returns:
             bool: True if the molecule passes the filter; False if it fails.
@@ -68,6 +69,10 @@ class GhoseFilter(SmilesFilterBase):
             to it before applying the filter. This ensures that hydrogens are
             counted in the total atom count without affecting other filters.
         """
+        mol = self.predock_cmpd_to_rdkit_mol(predock_cmpd)
+        if mol is None:
+            return False
+
         # Make a copy of the mol so we can AddHs without affecting other filters
         # number of atoms is altered by the presence/absence of hydrogens.
         # Our Ghose filter counts hydrogenss towards atom count

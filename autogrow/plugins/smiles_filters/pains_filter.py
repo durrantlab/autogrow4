@@ -19,6 +19,7 @@ import __future__
 from typing import List, Tuple
 from autogrow.config.argparser import ArgumentVars
 from autogrow.plugins.smiles_filters import SmilesFilterBase
+from autogrow.types import PreDockedCompound
 import rdkit  # type: ignore
 from rdkit.Chem import FilterCatalog  # type: ignore
 from rdkit.Chem.FilterCatalog import FilterCatalogParams  # type: ignore
@@ -76,7 +77,7 @@ class PAINSFilter(SmilesFilterBase):
 
         return filters_list
 
-    def run_filter(self, mol: rdkit.Chem.rdchem.Mol) -> bool:
+    def run_filter(self, predock_cmpd: PreDockedCompound) -> bool:
         """
         Run the PAINS filter on a given molecule.
 
@@ -88,13 +89,16 @@ class PAINSFilter(SmilesFilterBase):
         http://rdkit.blogspot.com/2016/04/changes-in-201603-release-filtercatalog.html
 
         Args:
-            mol (rdkit.Chem.rdchem.Mol): An RDKit mol object to be tested
-                against the filter criteria.
+            predock_cmpd (PreDockedCompound): A PreDockedCompound to be tested.
 
         Returns:
             bool: True if the molecule passes all PAINS filters (no matches
                 found in any filter list), False otherwise.
         """
+        mol = self.predock_cmpd_to_rdkit_mol(predock_cmpd)
+        if mol is None:
+            return False
+
         # This is our set of all the PAINS filters
         for filters in self.filters_list:
 

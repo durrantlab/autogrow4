@@ -282,23 +282,21 @@ def convert_usable_list_to_lig_dict(
     Note:
         If duplicate keys exist, it keeps the entry with the higher docking
         score (lower is better).
-        # TODO: Should this be hardcoded?
     """
     if type(predock_cmpds) is not type([]):
         return None
 
-    usable_dict_of_smiles: Dict[str, PreDockedCompound] = {}
-    for item in predock_cmpds:
-        key = item.smiles + item.name
-        if key in usable_dict_of_smiles and usable_dict_of_smiles[
+    usable_dict_of_predock_cmpds: Dict[str, PreDockedCompound] = {}
+    for predock_cmpd in predock_cmpds:
+        key = predock_cmpd.smiles + predock_cmpd.name
+        if key in usable_dict_of_predock_cmpds and usable_dict_of_predock_cmpds[
             key
-        ].get_previous_score(ScoreType.DIVERSITY) < item.get_previous_score(
+        ].get_previous_score(ScoreType.DOCKING) < predock_cmpd.get_previous_score(
             ScoreType.DOCKING
         ):
-            # TODO: Why DIVERSITY vs. DOCKING? Not understanding the comparison here.
             continue
-        usable_dict_of_smiles[key] = item
-    return usable_dict_of_smiles
+        usable_dict_of_predock_cmpds[key] = predock_cmpd
+    return usable_dict_of_predock_cmpds
 
 
 ##### Called in the docking class ######

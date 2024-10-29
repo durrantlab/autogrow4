@@ -85,7 +85,7 @@ class TournamentSelector(SelectorBase):
         self,
         predock_cmpds: List[PreDockedCompound],
         num_to_choose: int,
-        score_type: ScoreType
+        score_type: ScoreType,
     ) -> List[PreDockedCompound]:
         """
         Select compounds using tournament selection without replacement.
@@ -152,7 +152,7 @@ class TournamentSelector(SelectorBase):
         self,
         list_of_ligands: List[PreDockedCompound],
         num_per_tourn: int,
-        score_type: ScoreType
+        score_type: ScoreType,
     ) -> PreDockedCompound:
         """
         Run a single tournament to select one compound.

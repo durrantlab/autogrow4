@@ -13,7 +13,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 
 from autogrow.plugins.plugin_managers import plugin_managers
-from autogrow.plugins.mutation import MutationBase
+from autogrow.plugins.mutation import MutationBase, MutationPluginManager
 from autogrow.types import PreDockedCompound
 from autogrow.utils.logging import LogLevel, log_debug
 
@@ -26,7 +26,7 @@ def make_mutants(
     generation_num: int,
     number_of_processors: int,
     num_mutants_to_make: int,
-    ligands_list: List[PreDockedCompound],
+    predock_cmpds: List[PreDockedCompound],
     new_mutation_smiles_list: List[PreDockedCompound],
 ) -> Optional[List[PreDockedCompound]]:
     """
@@ -48,7 +48,7 @@ def make_mutants(
         Uses multiprocessing to generate mutations efficiently.
         Attempts to create unique mutants, avoiding duplicates.
     """
-    new_ligands_list: List[PreDockedCompound] = new_mutation_smiles_list or []
+    new_predock_cmpds: List[PreDockedCompound] = new_mutation_smiles_list or []
     loop_counter = 0
 
     # TODO: What is this???
@@ -66,34 +66,34 @@ def make_mutants(
         #     rxn_library_variables, new_mutation_smiles_list
         # )
 
-        while loop_counter < 2000 and len(new_ligands_list) < num_mutants_to_make:
+        while loop_counter < 2000 and len(new_predock_cmpds) < num_mutants_to_make:
 
-            react_list = copy.deepcopy(ligands_list)
+            react_list = copy.deepcopy(predock_cmpds)
 
-            while len(new_ligands_list) < num_mutants_to_make and react_list:
+            while len(new_predock_cmpds) < num_mutants_to_make and react_list:
 
                 # mutation_plugin_manager.add_mutant_smiles(new_ligands_list)
 
-                num_to_grab = num_mutants_to_make - len(new_ligands_list)
+                num_to_grab = num_mutants_to_make - len(new_predock_cmpds)
                 num_to_make = num_to_grab
 
                 # to minimize a big loop of running a single mutation at a time we
                 # will make 1 new lig/processor. This will help to prevent wasting
                 # reasources and time.
                 num_to_make = max(num_to_make, number_of_processors)
-                smile_pairs = [
+                predock_cmpds = [
                     react_list.pop() for _ in range(num_to_make) if len(react_list) > 0
                 ]
 
-                smile_inputs = [x.smiles for x in smile_pairs]
-                smile_names = [x.name for x in smile_pairs]
+                smile_names = [x.name for x in predock_cmpds]
 
                 job_input = tuple(
-                    (smile, mutation_plugin_manager) for smile in smile_inputs
+                    (predock_cmpd, mutation_plugin_manager)
+                    for predock_cmpd in predock_cmpds
                 )
 
                 results = params["parallelizer"].run(
-                    job_input, _run_smiles_click_for_multithread
+                    job_input, _run_mutation_for_multithread
                 )
 
                 for index, i in enumerate(results):
@@ -114,7 +114,7 @@ def make_mutants(
 
                     # fill lists of all smiles and smile_id's of all
                     # previously made smiles in this generation
-                    for x in new_ligands_list:
+                    for x in new_predock_cmpds:
                         list_of_already_made_smiles.append(x.smiles)
                         list_of_already_made_id.append(x.name)
 
@@ -160,29 +160,29 @@ def make_mutants(
 
                         # append the new ligand smile and ID to the list of
                         # all newly made ligands
-                        new_ligands_list.append(ligand_info)
+                        new_predock_cmpds.append(ligand_info)
 
             loop_counter += 1
 
-    if len(new_ligands_list) < num_mutants_to_make:
+    if len(new_predock_cmpds) < num_mutants_to_make:
         return None
 
     # once the number of mutants we need is generated return the list
-    return new_ligands_list
+    return new_predock_cmpds
 
 
-def _run_smiles_click_for_multithread(
-    smile: str, mutation_obj: MutationBase
+def _run_mutation_for_multithread(
+    predock_cmpd: PreDockedCompound, mutation_obj: MutationPluginManager
 ) -> Optional[Tuple[str, int, Union[str, None]]]:
     """
-    Performs a single mutation operation on a SMILES string.
+    Performs a single mutation operation on a PreDockedCompound.
 
     This function is designed to be used in a multithreaded context, allowing
     for parallel processing of mutations.
 
     Args:
-        smile (str): SMILES string of the molecule to mutate.
-        mutation_obj (MutationBase): Mutation object to perform the mutation.
+        smile (PreDockedCompound): PreDockedCompound of the molecule to mutate.
+        mutation_obj (MutationPluginManager): Mutation object to perform the mutation.
 
     Returns:
         Optional[Tuple[str, int, Union[str, None]]]: Tuple containing the mutated SMILES
@@ -193,4 +193,4 @@ def _run_smiles_click_for_multithread(
         This function is a wrapper around the mutation object's run method,
         making it suitable for use in multiprocessing contexts.
     """
-    return mutation_obj.run(parent_smiles=smile)
+    return mutation_obj.run(predock_cmpd=predock_cmpd)

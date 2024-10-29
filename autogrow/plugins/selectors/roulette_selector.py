@@ -72,7 +72,7 @@ class RouletteSelector(SelectorBase):
         self,
         predock_cmpds: List[PreDockedCompound],
         num_to_choose: int,
-        score_type: ScoreType
+        score_type: ScoreType,
     ) -> List[PreDockedCompound]:
         """
         Select compounds using weighted roulette selection without replacement.
@@ -107,9 +107,7 @@ class RouletteSelector(SelectorBase):
         if num_to_choose <= 0:
             return []
 
-        adjusted_scores = self._adjust_scores(
-            predock_cmpds, score_type
-        )
+        adjusted_scores = self._adjust_scores(predock_cmpds, score_type)
 
         total = sum(adjusted_scores)
         probabilities = [x / total for x in adjusted_scores]
@@ -127,9 +125,7 @@ class RouletteSelector(SelectorBase):
         return chosen_predock_cmpds
 
     def _adjust_scores(
-        self,
-        predock_cmpds: List[PreDockedCompound],
-        score_type: ScoreType
+        self, predock_cmpds: List[PreDockedCompound], score_type: ScoreType
     ) -> List[float]:
         """
         Adjust scores for weighting in the selection process.

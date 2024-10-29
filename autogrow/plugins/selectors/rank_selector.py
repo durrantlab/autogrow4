@@ -75,7 +75,7 @@ class RankSelector(SelectorBase):
         self,
         predock_cmpds: List[PreDockedCompound],
         num_to_choose: int,
-        score_type: ScoreType
+        score_type: ScoreType,
     ) -> List[PreDockedCompound]:
         """
         Select compounds based on their rank in the specified score.

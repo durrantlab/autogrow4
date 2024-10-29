@@ -3,6 +3,7 @@
 from typing import List, Optional, Tuple
 from autogrow.config.argparser import ArgumentVars
 from autogrow.plugins.crossover import CrossoverBase
+from autogrow.types import PreDockedCompound
 import autogrow.utils.mol_object_handling as MOH
 from autogrow.utils.logging import log_debug
 import rdkit  # type: ignore
@@ -81,13 +82,17 @@ class MergeMCS(CrossoverBase):
         """Validate the provided arguments."""
         pass
 
-    def run_crossover(self, lig_string_1: str, lig_string_2: str) -> Optional[str]:
+    def run_crossover(
+        self, predock_cmpd1: PreDockedCompound, predock_cmpd2: PreDockedCompound
+    ) -> Optional[str]:
         """
         Run the main script for SmileMerge.
 
         Args:
-            lig_string_1 (str): SMILES string for the first ligand.
-            lig_string_2 (str): SMILES string for the second ligand.
+            predock_cmpd1 (PreDockedCompound): PreDockedCompound of the first
+                ligand.
+            predock_cmpd2 (PreDockedCompound):PreDockedCompound of the second
+                ligand.
 
         Returns:
             Optional[str]: SMILES string for the child ligand derived from mol1
@@ -102,8 +107,8 @@ class MergeMCS(CrossoverBase):
         # lig_string_2 = "C# CCOc1ccc2ccccc2c1CO"
         # lig_string_1 = "C1 = CC = CC = C1"
         # Sanitize
-        mol1 = Chem.MolFromSmiles(lig_string_1, sanitize=False)
-        mol2 = Chem.MolFromSmiles(lig_string_2, sanitize=False)
+        mol1 = Chem.MolFromSmiles(predock_cmpd1.smiles, sanitize=False)
+        mol2 = Chem.MolFromSmiles(predock_cmpd2.smiles, sanitize=False)
 
         # Sanitize, deprotanate, and reprotanate both molecules
         mol1 = MOH.check_sanitization(mol1)
@@ -177,7 +182,7 @@ class MergeMCS(CrossoverBase):
         clean_smiles = AllChem.MolToSmiles(
             ligand_new_mol_copy, canonical=True, isomericSmiles=False
         )
-        log_debug(f"Merge by MCS: {lig_string_1} + {lig_string_2} => {clean_smiles}")
+        log_debug(f"Merge by MCS: {predock_cmpd1} + {predock_cmpd2} => {clean_smiles}")
 
         # ligand_new_smiles is either a SMILES string if processing works
         # or None if processing fails

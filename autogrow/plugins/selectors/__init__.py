@@ -38,7 +38,7 @@ class SelectorBase(PluginBase):
         return self.run_selector(
             predock_cmpds=predock_cmpds,
             num_to_choose=num_to_choose,
-            score_type=score_type
+            score_type=score_type,
         )
 
     @abstractmethod
@@ -46,7 +46,7 @@ class SelectorBase(PluginBase):
         self,
         predock_cmpds: List[PreDockedCompound],
         num_to_choose: int,
-        score_type: ScoreType
+        score_type: ScoreType,
     ) -> List[PreDockedCompound]:
         """Abstract method for implementing selector-specific compound
         selection logic.
@@ -113,7 +113,7 @@ class SelectorPluginManager(PluginManagerBase):
                     **{
                         "predock_cmpds": kwargs["predock_cmpds"],
                         "num_to_choose": num_to_choose,
-                        "score_type": ScoreType.DOCKING
+                        "score_type": ScoreType.DOCKING,
                     }
                 )
 
@@ -129,15 +129,14 @@ class SelectorPluginManager(PluginManagerBase):
                     **{
                         "predock_cmpds": kwargs["predock_cmpds"],
                         "num_to_choose": num_to_choose,
-                        "score_type": ScoreType.DIVERSITY
+                        "score_type": ScoreType.DIVERSITY,
                     }
                 )
 
         # Calculate the average docking score of the
         # docking_fitness_smiles_list.
         avg_docking_score = sum(
-            x.get_previous_score(ScoreType.DOCKING)
-            for x in docking_fitness_smiles_list
+            x.get_previous_score(ScoreType.DOCKING) for x in docking_fitness_smiles_list
         ) / len(docking_fitness_smiles_list)
         if avg_docking_score > 0:
             log_warning(

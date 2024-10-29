@@ -22,6 +22,7 @@ pp. 3-26
 import __future__
 
 from autogrow.plugins.smiles_filters import SmilesFilterBase
+from autogrow.types import PreDockedCompound
 import rdkit  # type: ignore
 import rdkit.Chem as Chem  # type: ignore
 import rdkit.Chem.Lipinski as Lipinski  # type: ignore
@@ -57,7 +58,7 @@ class LipinskiLenientFilter(SmilesFilterBase):
     Delivery Reviews, 46 (2001), pp. 3-26
     """
 
-    def run_filter(self, mol: rdkit.Chem.rdchem.Mol) -> bool:
+    def run_filter(self, predock_cmpd: PreDockedCompound) -> bool:
         """
         Run the Lenient Lipinski filter on a given molecule.
 
@@ -70,13 +71,16 @@ class LipinskiLenientFilter(SmilesFilterBase):
         5 constraints.
 
         Args:
-            mol (rdkit.Chem.rdchem.Mol): An RDKit mol object to be tested
-                against the filter criteria.
+            predock_cmpd (PreDockedCompound): A PreDockedCompound to be tested.
 
         Returns:
             bool: True if the molecule passes the filter (allows up to one
                 violation), False otherwise.
         """
+        mol = self.predock_cmpd_to_rdkit_mol(predock_cmpd)
+        if mol is None:
+            return False
+
         violation_counter = 0
 
         exact_mwt = Descriptors.ExactMolWt(mol)

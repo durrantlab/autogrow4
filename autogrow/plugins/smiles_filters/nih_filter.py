@@ -13,6 +13,7 @@ doi:10.1021/jm901070c.
 import __future__
 
 from autogrow.plugins.smiles_filters import SmilesFilterBase
+from autogrow.types import PreDockedCompound
 import rdkit  # type: ignore
 from rdkit.Chem import FilterCatalog  # type: ignore
 from rdkit.Chem.FilterCatalog import FilterCatalogParams  # type: ignore
@@ -56,7 +57,7 @@ class NIHFilter(SmilesFilterBase):
         # This is our set of all the NIH filters
         return FilterCatalog.FilterCatalog(params)
 
-    def run_filter(self, mol: rdkit.Chem.rdchem.Mol) -> bool:
+    def run_filter(self, predock_cmpd: PreDockedCompound) -> bool:
         """
         Run the NIH filter on a given molecule.
 
@@ -68,8 +69,7 @@ class NIHFilter(SmilesFilterBase):
         http://rdkit.blogspot.com/2016/04/changes-in-201603-release-filtercatalog.html
 
         Args:
-            mol (rdkit.Chem.rdchem.Mol): An RDKit mol object to be tested
-                against the filter criteria.
+            predock_cmpd (PreDockedCompound): A PreDockedCompound to be tested.
 
         Returns:
             bool: True if the molecule passes the filter (no matches found in
@@ -78,6 +78,10 @@ class NIHFilter(SmilesFilterBase):
         # If the mol matches a mol in the filter list. we return a False (as it
         # failed the filter). if No matches are found to filter list this will
         # return a True as it Passed the filter.
+        mol = self.predock_cmpd_to_rdkit_mol(predock_cmpd)
+        if mol is None:
+            return False
+
         return self.filters.HasMatch(mol) is not True
 
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
