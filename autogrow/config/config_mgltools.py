@@ -6,7 +6,7 @@ def config_mgltools(params: dict):
         return
     
     # find other mgltools-related scripts
-    if params["prepare_ligand4.py"] == "":
+    if params.get("prepare_ligand4.py", "") == "":
         params["prepare_ligand4.py"] = (
             params["mgltools_directory"]
             + "MGLToolsPckgs"
@@ -17,7 +17,7 @@ def config_mgltools(params: dict):
             + os.sep
             + "prepare_ligand4.py"
         )
-    if params["prepare_receptor4.py"] == "":
+    if params.get("prepare_receptor4.py", "") == "":
         params["prepare_receptor4.py"] = (
             params["mgltools_directory"]
             + "MGLToolsPckgs"
@@ -28,7 +28,7 @@ def config_mgltools(params: dict):
             + os.sep
             + "prepare_receptor4.py"
         )
-    if params["mgl_python"] == "":
+    if params.get("mgl_python", "") == "":
         params["mgl_python"] = (
             params["mgltools_directory"] + "bin" + os.sep + "pythonsh"
         )

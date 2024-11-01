@@ -35,6 +35,6 @@
     "prepare_ligand4.py": "",
     "prepare_receptor4.py": "",
     "mgl_python": "",
-    "multithread_mode": "serial",
-    "number_of_processors": 1
+    "multithread_mode": "multithreading",
+    "number_of_processors": 8
 }
