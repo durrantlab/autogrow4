@@ -182,7 +182,7 @@ class MergeMCS(CrossoverBase):
         clean_smiles = AllChem.MolToSmiles(
             ligand_new_mol_copy, canonical=True, isomericSmiles=False
         )
-        log_debug(f"Merge by MCS: {predock_cmpd1} + {predock_cmpd2} => {clean_smiles}")
+        log_debug(f"Merge by MCS: {predock_cmpd1.smiles} + {predock_cmpd2.smiles} => {clean_smiles}")
 
         # ligand_new_smiles is either a SMILES string if processing works
         # or None if processing fails

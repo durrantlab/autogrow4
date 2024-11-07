@@ -15,7 +15,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union, cast
 from autogrow.plugins.plugin_managers import plugin_managers
 from autogrow.plugins.crossover import CrossoverPluginManager
 from autogrow.types import PreDockedCompound
-from autogrow.utils.logging import LogLevel, log_debug
+from autogrow.utils.logging import LogLevel, log_debug, log_warning
 import rdkit  # type: ignore
 from rdkit import Chem  # type: ignore
 from rdkit.Chem import rdFMCS  # type: ignore
@@ -168,9 +168,8 @@ def make_crossovers(
     generation_num: int,
     number_of_processors: int,
     num_crossovers_to_make: int,
-    list_previous_gen_smiles: List[PreDockedCompound],
-    new_crossover_smiles_list: List[PreDockedCompound],
-) -> Optional[List[PreDockedCompound]]:
+    predock_cmpds: List[PreDockedCompound]
+) -> List[PreDockedCompound]:
     """
     Creates crossover compounds based on previous generation molecules.
 
@@ -179,172 +178,122 @@ def make_crossovers(
         generation_num (int): Current generation number.
         number_of_processors (int): Number of processors for multithreading.
         num_crossovers_to_make (int): Number of crossovers to generate.
-        list_previous_gen_smiles (List[PreDockedCompound]): Molecules from previous generation.
-        new_crossover_smiles_list (List[PreDockedCompound]): Previously generated crossovers.
+        predock_cmpds (List[PreDockedCompound]): Molecules from previous generation.
 
     Returns:
-        Optional[List[PreDockedCompound]]: List of new unique ligands, or None if
-        generation fails.
+        Optional[List[PreDockedCompound]]: List of new unique ligands.
 
     Note:
         Uses multiprocessing to generate crossovers efficiently.
+        Attempts to create unique crossovers, avoiding duplicates.
     """
-    # TODO: This gets defined again below, so what's the point of defining it
-    # here?
-    if not new_crossover_smiles_list:
-        new_ligands: List[PreDockedCompound] = []
-    else:
-        new_ligands = copy.deepcopy(new_crossover_smiles_list)
+    new_predock_cmpds: List[PreDockedCompound] = []
 
-    # Use a temp params dict so you don't put mpi multiprocess info through
-    # itself...
-    temp_params = {
-        key: params[key] for key in list(params.keys()) if key != "parallelizer"
-    }
-    new_ligands: List[PreDockedCompound] = []
-    number_of_processors = int(params["parallelizer"].return_node())
+    # Create clean params dict without parallelizer to avoid recursion
+    temp_params = {k: v for k, v in params.items() if k != "parallelizer"}
 
     log_debug("Creating new compounds from selected compounds via crossover")
 
     with LogLevel():
+        predock_cmpds_queue = copy.deepcopy(predock_cmpds)
+        smiles_already_generated = {x.smiles for x in new_predock_cmpds}
+        ids_already_generated = {x.name for x in new_predock_cmpds}
+        attempts_to_fill_queue = 0
 
-        loop_counter = 0
-        while loop_counter < 2000 and len(new_ligands) < num_crossovers_to_make:
+        while len(new_predock_cmpds) < num_crossovers_to_make and attempts_to_fill_queue < 5:
+            attempts_to_fill_queue += 1
 
-            react_list = copy.deepcopy(list_previous_gen_smiles)
+            buffer_num = attempts_to_fill_queue * 2
+            num_to_process = num_crossovers_to_make - len(new_predock_cmpds) + buffer_num
+            num_to_process = max(num_to_process, number_of_processors)
 
-            while len(new_ligands) < num_crossovers_to_make and react_list:
+            # Prepare crossover pairs
+            smile_pairs = [
+                predock_cmpds_queue.pop() 
+                for _ in range(num_to_process) 
+                if predock_cmpds_queue
+            ]
 
-                num_to_grab = num_crossovers_to_make - len(new_ligands)
-                num_to_make = num_to_grab
+            job_input_list = [
+                (temp_params, compound, predock_cmpds)
+                for compound in smile_pairs
+            ]
+            # Run crossovers in parallel
+            results = params["parallelizer"].run(
+                tuple(job_input_list), _do_crossovers_smiles_merge
+            )
 
-                # to minimize a big loop of running a single crossover at a time
-                # we will make 1 new lig/processor. This will help to prevent
-                # wasting reasources and time.
-                num_to_make = max(num_to_make, number_of_processors)
-                smile_pairs = [
-                    react_list.pop() for _ in range(num_to_make) if len(react_list) > 0
-                ]
+            # Filter out None results
+            results = [x for x in results if x is not None]
 
-                # smile_inputs = [x[0] for x in smile_pairs]
-                # smile_names = [x[1] for x in smile_pairs]
+            # Process successful crossovers
+            for result in results:
+                if result is None:
+                    continue
 
-                # make a list of tuples for multi-processing Crossover
-                job_input: List[
-                    Tuple[Dict[str, Any], PreDockedCompound, List[PreDockedCompound],]
-                ] = []
-                for i in smile_pairs:
-                    temp = temp_params, i, list_previous_gen_smiles
-                    job_input.append(temp)
+                child_lig_smile = result[0]
+                parent_lig1_id = result[1].name.split(")")[-1]
+                parent_lig2_id = result[2].name.split(")")[-1]
 
-                # Example information:
-                # result is a list of lists
-                # result = [[ligand_new_smiles, lig1_smile_pair,lig2_pair],...]
-                # ligand_new_smiles is the smiles string of a new ligand from crossover
-                # lig1_smile_pair = ["NCCCCCC","zinc123"]
-                # Lig2_smile_pair = ["NCCCO","zinc456"]
-                # Lig1 and lig 2 were used to generate the ligand_new_smiles
+                # Skip if smile already exists
+                if child_lig_smile in smiles_already_generated:
+                    continue
 
-                results: List[
-                    Tuple[str, PreDockedCompound, PreDockedCompound]
-                ] = params["parallelizer"].run(
-                    tuple(job_input), _do_crossovers_smiles_merge
+                # Generate unique ID
+                new_lig_id = ""
+                while new_lig_id in ids_already_generated or not new_lig_id:
+                    random_id_num = random.randint(100, 1000000)
+                    new_lig_id = f"({parent_lig1_id}+{parent_lig2_id})Gen_{generation_num}_Cross_{random_id_num}"
+
+                ids_already_generated.add(new_lig_id)
+                smiles_already_generated.add(child_lig_smile)
+
+                # Create and store new compound
+                ligand_info = PreDockedCompound(
+                    smiles=child_lig_smile,
+                    name=new_lig_id
                 )
-                results = [x for x in results if x is not None]
+                new_predock_cmpds.append(ligand_info)
 
-                for i in results:
-                    if i is None:
-                        continue
+            # Replenish queue if needed
+            if not predock_cmpds_queue:
+                predock_cmpds_queue = copy.deepcopy(predock_cmpds)
+                random.shuffle(predock_cmpds_queue)
 
-                    # Get the new molecule's (aka the Child lig) Smile string
-                    child_lig_smile = i[0]
+    if len(new_predock_cmpds) < num_crossovers_to_make:
+        log_warning(
+            f"Only able to create {len(new_predock_cmpds)} of {num_crossovers_to_make} requested crossovers."
+        )
 
-                    # get the ID for the parent of a child mol
-                    parent_lig1_id = i[1].name
-                    parent_lig_2_id = i[2].name
-
-                    # get the unique ID (last few diget ID of the parent mol)
-                    parent_lig1_id = parent_lig1_id.split(")")[-1]
-                    parent_lig_2_id = parent_lig_2_id.split(")")[-1]
-
-                    # Make a list of all smiles and smile_id's of all previously
-                    # made smiles in this generation
-                    list_of_already_made_smiles = []
-                    list_of_already_made_id = []
-
-                    # fill lists of all smiles and smile_id's of all previously made
-                    # smiles in this generation
-                    for x in new_ligands:
-                        list_of_already_made_smiles.append(x.smiles)
-                        list_of_already_made_id.append(x.name)
-
-                    if child_lig_smile not in list_of_already_made_smiles:
-                        # if the smiles string is unique to the list of previous
-                        # smile strings in this round of reactions then we append it
-                        # to the list of newly created ligands we append it with a
-                        # unique ID, which also tracks the progress of the reactant
-                        is_name_unique = False
-                        new_lig_id = None
-                        while not is_name_unique:
-
-                            # make unique ID with the 1st number being the
-                            # ligand_id_Name for the derived mol. second being the
-                            # lig2 number. Followed by Cross. folowed by the
-                            # generation number. followed by a  unique.
-
-                            random_id_num = random.randint(100, 1000000)
-                            new_lig_id = f"({parent_lig1_id}+{parent_lig_2_id})Gen_{generation_num}_Cross_{random_id_num}"
-
-                            # check name is unique
-                            if new_lig_id not in list_of_already_made_id:
-                                is_name_unique = True
-
-                        # make a temporary list containing the smiles string of
-                        # the new product and the unique ID
-                        assert new_lig_id is not None, "new_lig_id is None"
-                        ligand_info = PreDockedCompound(
-                            smiles=child_lig_smile, name=new_lig_id
-                        )
-
-                        # append the new ligand smile and ID to the list of all
-                        # newly made ligands
-                        new_ligands.append(ligand_info)
-
-            loop_counter += 1
-
-    if len(new_ligands) < num_crossovers_to_make:
-        return None
-
-    # once the number of mutants we need is generated return the list
-    return new_ligands
+    return new_predock_cmpds
 
 
-def _find_similar_cmpd(
-    params: Dict[str, Any],
-    ligands_list: List[PreDockedCompound],
-    lig1_smile_pair: PreDockedCompound,
-) -> Optional[PreDockedCompound]:
-    """
-    Finds a molecule with sufficient shared structure to the given ligand.
+# def _find_similar_cmpd(
+#     params: Dict[str, Any],
+#     ligands_list: List[PreDockedCompound],
+#     lig1_smile_pair: PreDockedCompound,
+# ) -> Optional[PreDockedCompound]:
+#     """
+#     Finds a molecule with sufficient shared structure to the given ligand.
 
-    Args:
-        params (Dict[str, Any]): User parameters governing the process.
-        ligands_list (List[PreDockedCompound]): List of ligands to choose from.
-        ligand1_pair (PreDockedCompound): The reference ligand.
+#     Args:
+#         params (Dict[str, Any]): User parameters governing the process.
+#         ligands_list (List[PreDockedCompound]): List of ligands to choose from.
+#         ligand1_pair (PreDockedCompound): The reference ligand.
 
-    Returns:
-        Optional[PreDockedCompound]: A suitable second ligand if found, None otherwise.
-    """
-    ligand_1_string = lig1_smile_pair.smiles
+#     Returns:
+#         Optional[PreDockedCompound]: A suitable second ligand if found, None otherwise.
+#     """
+#     ligand_1_string = lig1_smile_pair.smiles
 
-    # check if ligand_1 can be converted to an rdkit mol
-    lig1 = _convert_mol_from_smiles(ligand_1_string)
-    if lig1 is False:
-        # Ligand1_string failed to be converted to rdkit mol format
-        return None
+#     # check if ligand_1 can be converted to an rdkit mol
+#     lig1 = _convert_mol_from_smiles(ligand_1_string)
+#     if lig1 is False:
+#         # Ligand1_string failed to be converted to rdkit mol format
+#         return None
 
-    # GET TWO UNIQUE LIGANDS TO WITH A SHARED SUBSTRUCTURE
-    return _find_sufficiently_similar_cmpd(params, ligands_list, lig1_smile_pair)
+#     # GET TWO UNIQUE LIGANDS TO WITH A SHARED SUBSTRUCTURE
+#     return _find_sufficiently_similar_cmpd(params, ligands_list, lig1_smile_pair)
 
 
 def _do_crossovers_smiles_merge(

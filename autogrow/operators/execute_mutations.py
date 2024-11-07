@@ -60,7 +60,7 @@ def make_mutants(
         ids_already_generated = set([])
         attempts_to_fill_queue = 0  # to prevent infinite loop
 
-        while len(new_predock_cmpds) < num_mutants_to_make and attempts_to_fill_queue < 5:
+        while len(new_predock_cmpds) < num_mutants_to_make and attempts_to_fill_queue < 10:
             attempts_to_fill_queue += 1
             random.shuffle(predock_cmpds_queue)
 
