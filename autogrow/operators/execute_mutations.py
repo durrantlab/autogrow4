@@ -15,7 +15,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from autogrow.plugins.plugin_managers import plugin_managers
 from autogrow.plugins.mutation import MutationBase, MutationPluginManager
 from autogrow.types import PreDockedCompound
-from autogrow.utils.logging import LogLevel, log_debug
+from autogrow.utils.logging import LogLevel, log_debug, log_warning
 
 
 #######################################
@@ -27,8 +27,7 @@ def make_mutants(
     number_of_processors: int,
     num_mutants_to_make: int,
     predock_cmpds: List[PreDockedCompound],
-    new_mutation_smiles_list: List[PreDockedCompound],
-) -> Optional[List[PreDockedCompound]]:
+) -> List[PreDockedCompound]:
     """
     Creates mutant compounds based on a list of ligands.
 
@@ -38,7 +37,6 @@ def make_mutants(
         number_of_processors (int): Number of processors for parallelization.
         num_mutants_to_make (int): Number of mutants to generate.
         ligands_list (List[PreDockedCompound]): List of ligands to mutate.
-        new_mutation_smiles_list (List[PreDockedCompound]): Previously generated mutants.
 
     Returns:
         Optional[List[PreDockedCompound]]: List of new mutant ligands, or None if
@@ -48,11 +46,7 @@ def make_mutants(
         Uses multiprocessing to generate mutations efficiently.
         Attempts to create unique mutants, avoiding duplicates.
     """
-    new_predock_cmpds: List[PreDockedCompound] = new_mutation_smiles_list or []
-    loop_counter = 0
-
-    # TODO: What is this???
-    number_of_processors = int(params["parallelizer"].return_node())
+    new_predock_cmpds: List[PreDockedCompound] = []
 
     # initialize the smileclickclass
     mutation_plugin_manager = plugin_managers.Mutation
@@ -61,111 +55,78 @@ def make_mutants(
     log_debug("Creating new compounds from selected compounds via mutation")
 
     with LogLevel():
+        predock_cmpds_queue = copy.deepcopy(predock_cmpds)
+        smiles_already_generated = set([])
+        ids_already_generated = set([])
+        attempts_to_fill_queue = 0  # to prevent infinite loop
 
-        # SmileClickClass.SmilesClickChem(
-        #     rxn_library_variables, new_mutation_smiles_list
-        # )
+        while len(new_predock_cmpds) < num_mutants_to_make and attempts_to_fill_queue < 5:
+            attempts_to_fill_queue += 1
+            random.shuffle(predock_cmpds_queue)
 
-        while loop_counter < 2000 and len(new_predock_cmpds) < num_mutants_to_make:
+            job_input_list = []
+            buffer_num = attempts_to_fill_queue * 2  # To avoid zeno's paradox
+            for i in range(num_mutants_to_make - len(new_predock_cmpds) + buffer_num):
+                imod = i % len(predock_cmpds_queue)
+                job_input_list.append(
+                    (predock_cmpds_queue[imod], mutation_plugin_manager)
+                )
+            job_input = tuple(job_input_list)
 
-            react_list = copy.deepcopy(predock_cmpds)
+            results = params["parallelizer"].run(
+                job_input, _run_mutation_for_multithread
+            )
 
-            while len(new_predock_cmpds) < num_mutants_to_make and react_list:
+            # Remove mutants that have already been generated (so unique)
+            for i, result in enumerate(results):
+                if result is None:
+                    continue
+                if result[0] in smiles_already_generated:
+                    results[i] = None
+                smiles_already_generated.add(result[0])
 
-                # mutation_plugin_manager.add_mutant_smiles(new_ligands_list)
+            # Remove None mutant compounds
+            results = [x for x in results if x is not None]
 
-                num_to_grab = num_mutants_to_make - len(new_predock_cmpds)
-                num_to_make = num_to_grab
+            # Add the remaining mutants to the list of new compounds
 
-                # to minimize a big loop of running a single mutation at a time we
-                # will make 1 new lig/processor. This will help to prevent wasting
-                # reasources and time.
-                num_to_make = max(num_to_make, number_of_processors)
-                predock_cmpds = [
-                    react_list.pop() for _ in range(num_to_make) if len(react_list) > 0
-                ]
+            for i in results:
+                # Get the new molecule's (aka the Child lig) Smile string
+                child_lig_smile, reaction_id_number, zinc_id_comp_mol, parent_lig_id = i
 
-                smile_names = [x.name for x in predock_cmpds]
+                new_lig_id = ""
+                while new_lig_id in ids_already_generated or not new_lig_id:
+                    # make unique ID with the 1st number being the
+                    # parent_lig_id for the derived mol, Followed by
+                    # Mutant, folowed by the generationnumber,
+                    # followed by a unique.
 
-                job_input = tuple(
-                    (predock_cmpd, mutation_plugin_manager)
-                    for predock_cmpd in predock_cmpds
+                    # get the unique ID (last few diget ID of the
+                    # parent mol
+                    parent_lig_id = parent_lig_id.split(")")[-1]
+
+                    random_id_num = random.randint(100, 1000000)
+                    if zinc_id_comp_mol is None:
+                        new_lig_id = f"({parent_lig_id})Gen_{generation_num}_Mutant_{reaction_id_number}_{random_id_num}"
+                    else:
+                        new_lig_id = f"({parent_lig_id}+{zinc_id_comp_mol})Gen_{generation_num}_Mutant_{reaction_id_number}_{random_id_num}"
+
+                ids_already_generated.add(new_lig_id)
+
+                # make a temporary list containing the smiles string
+                # of the new product and the unique ID
+                ligand_info = PreDockedCompound(
+                    smiles=child_lig_smile, name=new_lig_id
                 )
 
-                results = params["parallelizer"].run(
-                    job_input, _run_mutation_for_multithread
-                )
-
-                for index, i in enumerate(results):
-                    if i is None:
-                        continue
-
-                    # Get the new molecule's (aka the Child lig) Smile string
-                    child_lig_smile = i[0]
-
-                    # get the ID for the parent of a child mol and the
-                    # complementary parent mol. comp mol could be None or a
-                    # zinc database ID
-                    parent_lig_id = smile_names[index]
-                    # Make a list of all smiles and smile_id's of all
-                    # previously made smiles in this generation
-                    list_of_already_made_smiles = []
-                    list_of_already_made_id = []
-
-                    # fill lists of all smiles and smile_id's of all
-                    # previously made smiles in this generation
-                    for x in new_predock_cmpds:
-                        list_of_already_made_smiles.append(x.smiles)
-                        list_of_already_made_id.append(x.name)
-
-                    if child_lig_smile not in list_of_already_made_smiles:
-                        # if the smiles string is unique to the list of
-                        # previous smile strings in this round of reactions
-                        # then we append it to the list of newly created
-                        # ligands we append it with a unique ID, which also
-                        # tracks the progress of the reactant
-                        is_name_unique = False
-                        new_lig_id = ""
-
-                        # get the reaction id number
-                        reaction_id_number = i[1]
-
-                        zinc_id_comp_mol = i[2]
-
-                        while not is_name_unique:
-                            # make unique ID with the 1st number being the
-                            # parent_lig_id for the derived mol, Followed by
-                            # Mutant, folowed by the generationnumber,
-                            # followed by a unique.
-
-                            # get the unique ID (last few diget ID of the
-                            # parent mol
-                            parent_lig_id = parent_lig_id.split(")")[-1]
-
-                            random_id_num = random.randint(100, 1000000)
-                            if zinc_id_comp_mol is None:
-                                new_lig_id = f"({parent_lig_id})Gen_{generation_num}_Mutant_{reaction_id_number}_{random_id_num}"
-                            else:
-                                new_lig_id = f"({parent_lig_id}+{zinc_id_comp_mol})Gen_{generation_num}_Mutant_{reaction_id_number}_{random_id_num}"
-
-                            # check name is unique
-                            if new_lig_id not in list_of_already_made_id:
-                                is_name_unique = True
-
-                        # make a temporary list containing the smiles string
-                        # of the new product and the unique ID
-                        ligand_info = PreDockedCompound(
-                            smiles=child_lig_smile, name=new_lig_id
-                        )
-
-                        # append the new ligand smile and ID to the list of
-                        # all newly made ligands
-                        new_predock_cmpds.append(ligand_info)
-
-            loop_counter += 1
+                # append the new ligand smile and ID to the list of
+                # all newly made ligands
+                new_predock_cmpds.append(ligand_info)
 
     if len(new_predock_cmpds) < num_mutants_to_make:
-        return None
+        log_warning(
+            f"Only able to create {len(new_predock_cmpds)} of {num_mutants_to_make} requested mutants."
+        )
 
     # once the number of mutants we need is generated return the list
     return new_predock_cmpds
@@ -193,4 +154,5 @@ def _run_mutation_for_multithread(
         This function is a wrapper around the mutation object's run method,
         making it suitable for use in multiprocessing contexts.
     """
-    return mutation_obj.run(predock_cmpd=predock_cmpd)
+    resp = mutation_obj.run(predock_cmpd=predock_cmpd)
+    return None if resp is None else tuple(list(resp) + [predock_cmpd.name])

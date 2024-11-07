@@ -263,58 +263,50 @@ def _generate_mutations(
         "Mutation_Seed_List",
     )
 
-    # Package user params specifying the Reaction library to use for mutation
-    rxn_library_variables = [
-        params["rxn_library_path"],
-    ]
+    # Make all mutants
+    new_mutants = Mutation.make_mutants(
+        params,
+        generation_num,
+        number_of_processors,
+        num_mutations,
+        seed_list_mutations
+    )
+
+    import pdb; pdb.set_trace()
+
+    # if new_mutants is None:
+    #     break
+
+    # Remove Nones
+    new_mutants = [x for x in new_mutants if x is not None]
 
     # List of SMILES from mutation
     new_mutation_smiles_list: List[PreDockedCompound] = []
 
-    # Make all the required ligands by mutations
-    while len(new_mutation_smiles_list) < num_mutations:
-        num_mutants_to_make = num_mutations - len(new_mutation_smiles_list)
-
-        # Make all mutants
-        new_mutants = Mutation.make_mutants(
-            params,
-            generation_num,
-            number_of_processors,
-            num_mutants_to_make,
-            seed_list_mutations,
-            new_mutation_smiles_list,
-        )
-
-        if new_mutants is None:
+    for i in new_mutants:
+        new_mutation_smiles_list.append(i)
+        if len(new_mutation_smiles_list) == num_mutations:
             break
 
-        # Remove Nones
-        new_mutants = [x for x in new_mutants if x is not None]
+    # Save new_mutation_smiles_list
+    _save_ligand_list(
+        params["output_directory"],
+        generation_num,
+        new_mutation_smiles_list,
+        "Chosen_Mutants",
+    )
 
-        for i in new_mutants:
-            new_mutation_smiles_list.append(i)
-            if len(new_mutation_smiles_list) == num_mutations:
-                break
-
-        # Save new_mutation_smiles_list
-        _save_ligand_list(
-            params["output_directory"],
-            generation_num,
-            new_mutation_smiles_list,
-            "Chosen_Mutants",
-        )
-
-        if (
-            new_mutation_smiles_list is None
-            or len(new_mutation_smiles_list) < num_mutations
-        ):
-            _throw_error_not_enough_compounds_made(
-                num_mutations,
-                " ligands through Mutation",
-                new_mutation_smiles_list,
-                "Mutation failed to make enough new ligands.",
-            )
-        # print("FINISHED MAKING MUTATIONS")
+    # if (
+    #     new_mutation_smiles_list is None
+    #     or len(new_mutation_smiles_list) < num_mutations
+    # ):
+    #     _throw_error_not_enough_compounds_made(
+    #         num_mutations,
+    #         " ligands through Mutation",
+    #         new_mutation_smiles_list,
+    #         "Mutation failed to make enough new ligands.",
+    #     )
+    # print("FINISHED MAKING MUTATIONS")
 
     return new_mutation_smiles_list
 
@@ -402,16 +394,16 @@ def _generate_crossovers(
         "Chosen_Crossovers",
     )
 
-    if (
-        new_crossover_smiles_list is None
-        or len(new_crossover_smiles_list) < num_crossovers
-    ):
-        _throw_error_not_enough_compounds_made(
-            num_crossovers,
-            " ligands through Crossover",
-            new_crossover_smiles_list,
-            "Crossover failed to make enough new ligands.",
-        )
+    # if (
+    #     new_crossover_smiles_list is None
+    #     or len(new_crossover_smiles_list) < num_crossovers
+    # ):
+    #     _throw_error_not_enough_compounds_made(
+    #         num_crossovers,
+    #         " ligands through Crossover",
+    #         new_crossover_smiles_list,
+    #         "Crossover failed to make enough new ligands.",
+    #     )
     # print("FINISHED MAKING CROSSOVERS")
 
     return new_crossover_smiles_list
@@ -510,30 +502,30 @@ def _save_smiles_files(
     return full_generation_smiles_file, smiles_to_convert_file, new_gen_folder_path
 
 
-def _throw_error_not_enough_compounds_made(arg0, arg1, arg2, arg3):
-    """
-    Raise an error if insufficient compounds are generated.
+# def _throw_error_not_enough_compounds_made(arg0, arg1, arg2, arg3):
+#     """
+#     Raise an error if insufficient compounds are generated.
 
-    This function prints details about the number of required and generated 
-    compounds, then raises an exception if the generated compounds are 
-    fewer than required.
+#     This function prints details about the number of required and generated 
+#     compounds, then raises an exception if the generated compounds are 
+#     fewer than required.
 
-    Args:
-        arg0 (int): Number of compounds that should have been generated.
-        arg1 (str): Descriptor of the compounds (e.g., 'mutants' or 'crossovers').
-        arg2 (List[PreDockedCompound]): List of generated compounds.
-        arg3 (str): Error message to raise if there are insufficient compounds.
+#     Args:
+#         arg0 (int): Number of compounds that should have been generated.
+#         arg1 (str): Descriptor of the compounds (e.g., 'mutants' or 'crossovers').
+#         arg2 (List[PreDockedCompound]): List of generated compounds.
+#         arg3 (str): Error message to raise if there are insufficient compounds.
 
-    Raises:
-        Exception: Raised with the provided error message.
-    """
-    print("")
-    print("")
-    print(f"We needed to make {arg0}{arg1}")
-    print(f"We only made {len(arg2)}{arg1}")
-    print("")
-    print("")
-    raise Exception(arg3)
+#     Raises:
+#         Exception: Raised with the provided error message.
+#     """
+#     print("")
+#     print("")
+#     print(f"We needed to make {arg0}{arg1}")
+#     print(f"We only made {len(arg2)}{arg1}")
+#     print("")
+#     print("")
+#     raise Exception(arg3)
 
 
 #############
