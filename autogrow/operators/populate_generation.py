@@ -12,8 +12,9 @@ import os
 import random
 import copy
 import sys
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
+from autogrow.operators.mutant_crossover_parent import CompoundGenerator
 from autogrow.plugins.plugin_managers import plugin_managers
 from autogrow.types import PreDockedCompound
 from autogrow.utils.caching import CacheManager
@@ -102,7 +103,7 @@ def populate_generation(
                         src_cmpds,
                         number_of_processors,
                         "mutation",
-                        Mutation.make_mutants
+                        Mutation.MutationGenerator
                     )
                 else:
                     log_warning("No mutations made, per user settings")
@@ -128,7 +129,7 @@ def populate_generation(
                         src_cmpds,
                         number_of_processors,
                         "crossover",
-                        Crossover.make_crossovers
+                        Crossover.CrossoverGenerator
                     )
                 else:
                     log_warning("No crossovers made, per user settings")
@@ -177,16 +178,20 @@ def populate_generation(
             full_gen_predock_cmpds.append(i)
 
     if len(full_gen_predock_cmpds) < total_num_desired_new_ligands:
-        print("We needed ", total_num_desired_new_ligands)
-        print("We made ", len(full_gen_predock_cmpds))
-        print(
-            "Population failed to make enough mutants or crossovers... "
-            "Errors could include not enough diversity, too few seeds to "
-            "the generation, the seed mols are unable to cross-over due "
-            "to lack of similarity, or all of the seed lack functional groups "
-            "for performing reactions"
+        log_warning(
+            f"Only {len(full_gen_predock_cmpds)} compounds were generated, but {total_num_desired_new_ligands} were requested."
+            " It may be that (1) the source compounds are not diverse enough, (2) there are too few seed compounds, (3) the seed molecules lack the similarity for crossover, or (4) the seed molecules lack the functional groups for mutation."
         )
-        assert False
+        # print("We needed ", total_num_desired_new_ligands)
+        # print("We made ", len(full_gen_predock_cmpds))
+        # print(
+        #     "Population failed to make enough mutants or crossovers... "
+        #     "Errors could include not enough diversity, too few seeds to "
+        #     "the generation, the seed mols are unable to cross-over due "
+        #     "to lack of similarity, or all of the seed lack functional groups "
+        #     "for performing reactions"
+        # )
+        # assert False
 
     # Save the full generation and the SMILES to convert
     (
@@ -231,7 +236,7 @@ def _generate_compounds(
     src_cmpds: List[PreDockedCompound],
     number_of_processors: int,
     compound_type: str,
-    gen_func: Any
+    compound_gen_cls: Type[CompoundGenerator]
 ) -> List[PreDockedCompound]:
     """
     Generates new compounds (mutations or crossovers) for the current generation.
@@ -248,7 +253,7 @@ def _generate_compounds(
         src_cmpds (List[PreDockedCompound]): Source compounds from previous generation.
         number_of_processors (int): Number of processors for parallel processing.
         compound_type (str): Type of generation ("mutation" or "crossover").
-        gen_func (Any): Function to generate compounds.
+        compound_gen_cls (CompoundGenerator): CompoundGenerator class to use.
 
     Returns:
         List[PreDockedCompound]: List of newly generated compounds.
@@ -274,13 +279,13 @@ def _generate_compounds(
     )
 
     # Make all compounds
-    new_compounds = gen_func(
+    new_compounds = compound_gen_cls(
         params,
         generation_num,
         number_of_processors,
         num_compounds,
         seed_list
-    )
+    ).generate()
 
     # Remove Nones
     new_compounds = [x for x in new_compounds if x is not None]
@@ -484,14 +489,15 @@ def _get_elite_cmpds_prev_gen(
         params, src_cmpds, num_elite_prev_gen, generation_num
     )
 
-    if isinstance(chosen_mol_to_pass_through_list, str):
-        printout = (
-            chosen_mol_to_pass_through_list
-            + "\nIf this is the 1st generation, it may be due to the starting "
-            + "library having SMILES which could not be converted to sanitizable "
-            + "RDKit Molecules"
-        )
-        raise Exception(printout)
+    if len(chosen_mol_to_pass_through_list) < num_elite_prev_gen:
+        log_warning("If this is the 1st generation, your starting library may have too few SMILES that could be converted to sanitizable RDKit Molecules. Consider adding more SMILES to your starting library or checking the SMILES for errors.")
+
+    # if isinstance(chosen_mol_to_pass_through_list, str):
+    #     printout = (
+    #         chosen_mol_to_pass_through_list
+    #         + " If this is the 1st generation, your starting library may have too few SMILES that could be converted to sanitizable RDKit Molecules. Consider adding more SMILES to your starting library or checking the SMILES for errors."
+    #     )
+    #     raise Exception(printout)
 
     assert isinstance(
         chosen_mol_to_pass_through_list, list
@@ -951,50 +957,46 @@ def _get_seed_pop_sizes(params: Dict[str, Any], gen_num: int) -> Tuple[int, int]
 
 def _make_pass_through_list(
     params: Dict[str, Any],
-    smis_from_prev_gen: List[PreDockedCompound],
+    predock_cmpd_from_prev_gen: List[PreDockedCompound],
     num_elite_prev_gen: int,
     gen_num: int,
-) -> Union[List[PreDockedCompound], str]:
+) -> List[PreDockedCompound]:
     """
     Determines the elite ligands to advance from the previous generation without
     being altered into the next generation.
 
     Args:
         params (Dict[str, Any]): A dictionary of all user variables.
-        smis_from_prev_gen (List[PreDockedCompound]): List of SMILES from the
-            last generation chosen to seed the list of molecules to advance to
-            the next generation without modification via elitism.
+        predock_cmpd_from_prev_gen (List[PreDockedCompound]): List of SMILES
+            from the last generation chosen to seed the list of molecules to
+            advance to the next generation without modification via elitism.
         num_elite_prev_gen (int): The number of molecules to advance from the
             last generation without modifications.
         gen_num (int): The integer of the current generation.
 
     Returns:
-        Union[List[PreDockedCompound], str]: A list of ligands which should
+        List[PreDockedCompound]: A list of ligands which should
             advance into the new generation without modifications, via elitism
-            from the last generation. Returns a printout of why it failed if it
-            fails.
+            from the last generation.
     """
     # this will be a list of lists. Each sublist will be  [SMILES_string, ID]
     ligs_to_advance = []
 
     # If not enough of your previous generation sanitize to make the list
     # Return None and trigger an Error
-    if len(smis_from_prev_gen) < num_elite_prev_gen:
-        return (
-            "Not enough ligands in initial list the filter to progress"
-            + "\n len(smiles_from_previous_gen_list): {} ; \
-                num_elite_prev_gen: {}".format(
-                len(smis_from_prev_gen), num_elite_prev_gen,
-            )
-        )
-    smis_from_prev_gen = [x for x in smis_from_prev_gen if type(x) == PreDockedCompound]
-
-    ligs_that_passed_filters = [x for x in smis_from_prev_gen if x is not None]
+    # if len(smis_from_prev_gen) < num_elite_prev_gen:
+    #         # + f"\n len(smiles_from_previous_gen_list): {len(smis_from_prev_gen)} ; \
+    #         #     num_elite_prev_gen: {num_elite_prev_gen}"
+    #     log_warning(f"Too few compounds to advance via elitism (trying to advance {num_elite_prev_gen} compounds, but only {len(smis_from_prev_gen)} compounds are available).")
+    
+    predock_cmpd_from_prev_gen = [x for x in predock_cmpd_from_prev_gen if type(x) == PreDockedCompound]
+    ligs_that_passed_filters = [x for x in predock_cmpd_from_prev_gen if x is not None]
 
     # If not enough of your previous generation sanitize to make the list
     # Return None and trigger an Error
-    if len(ligs_that_passed_filters) < num_elite_prev_gen:
-        return "Not enough ligands passed the filter to progress"
+    # if len(ligs_that_passed_filters) < num_elite_prev_gen:
+    #     log_warning(f"Too few compounds passed the filter to advance via elitism (trying to advance {num_elite_prev_gen} compounds, but only {len(ligs_that_passed_filters)} compounds are available).")
+
     # Save seed list of all ligands which passed which will serve as the seed
     # list.
     _save_ligand_list(
@@ -1022,13 +1024,14 @@ def _make_pass_through_list(
         # Take the 1st num_elite_prev_gen number of
         # molecules from ligands_which_passed_filters
         log_info(
-            f"Randomly selecting {num_elite_prev_gen} compounds from the {len(ligs_that_passed_filters)} source compounds"
+            f"Randomly selecting {num_elite_prev_gen} compounds from {len(ligs_that_passed_filters)} available source compounds"
         )
 
         random.shuffle(ligs_that_passed_filters)
-        ligs_to_advance = [
-            ligs_that_passed_filters[x] for x in range(num_elite_prev_gen)
-        ]
+        ligs_to_advance = ligs_that_passed_filters[:num_elite_prev_gen]
+        # ligs_to_advance = [
+        #     ligs_that_passed_filters[x] for x in range(num_elite_prev_gen)
+        # ]
     else:
         # Use the make_seed_list function to select the list to advance. This
         # list will be chosen strictly by
@@ -1039,10 +1042,12 @@ def _make_pass_through_list(
             num_elite_prev_gen,  # But yes based on docking score
         )
 
-    if len(ligs_to_advance) >= num_elite_prev_gen:
-        return ligs_to_advance
+    if len(ligs_to_advance) < num_elite_prev_gen:
+        log_warning(f"Too few compounds were chosen to advance to the next generation via elitism (tried to advance {num_elite_prev_gen} compounds, but only {len(ligs_to_advance)} compounds were chosen).")
+        # import pdb; pdb.set_trace()
+    
+    return ligs_to_advance
 
-    return "Not enough ligands were chosen to advance to the next generation."
 
 
 #############

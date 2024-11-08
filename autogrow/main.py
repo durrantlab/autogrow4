@@ -94,7 +94,7 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
         # Get directory for smi to go
         cur_gen_dir = f"{params['output_directory']}generation_{gen_num}{os.sep}"
 
-        log_info(f"Creating Generation {gen_num}")
+        log_info(f"Creating generation {gen_num}")
 
         with LogLevel():
             smi_new_gen_path, new_gen_predock_cmpds = populate_generation(

@@ -6,7 +6,7 @@ python run_autogrow.py \
     --center_x -70.76 --center_y 21.82 --center_z 28.33 \
     --size_x 25.0 --size_y 16.0 --size_z 25.0 \
     --obabel_path /Users/jdurrant/opt/anaconda3/bin/obabel \
-    --source_compound_file tmp_20.smi \
+    --source_compound_file tmp_1.smi \
     --output_directory ./output_directory/ \
     --vina_like_executable /Applications/vina_1.2.5_mac_x86_64 \
     --number_of_mutants_first_generation 100 \

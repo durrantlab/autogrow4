@@ -98,4 +98,10 @@ class CrossoverPluginManager(PluginManagerBase):
 
         crossover = cast(CrossoverBase, self.plugins[crossover_name])
 
-        return crossover.run(**kwargs)
+        resp = crossover.run(**kwargs)
+
+        if resp in [kwargs["predock_cmpd1"].smiles, kwargs["predock_cmpd2"].smiles]:
+            # log_warning("Crossover failed. Child molecule is the same as one of the parents. Skipping.")
+            return None
+
+        return resp

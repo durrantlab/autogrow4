@@ -10,8 +10,9 @@ import __future__
 
 import random
 import copy
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
+from autogrow.operators.mutant_crossover_parent import CompoundGenerator
 from autogrow.plugins.plugin_managers import plugin_managers
 from autogrow.plugins.crossover import CrossoverPluginManager
 from autogrow.types import PreDockedCompound
@@ -157,116 +158,41 @@ def _convert_mol_from_smiles(smiles: str) -> Union[rdkit.Chem.rdchem.Mol, bool, 
     mol = MOH.try_deprotanation(mol)
     return False if mol is None else mol
 
+class CrossoverGenerator(CompoundGenerator):
+    """Handles crossover-specific compound generation."""
 
-#########################
-#### RUN MAIN PARTS #####
-#########################
+    def prepare_params(self) -> Dict[str, Any]:
+        return {k: v for k, v in self.params.items() if k != "parallelizer"}
 
+    def prepare_job_inputs(
+        self, compounds: List[PreDockedCompound], num_to_process: int
+    ) -> List[Tuple]:
+        # Create a working copy for popping compounds
+        working_compounds = compounds.copy()
+        # Keep the original list intact for pairing
+        available_compounds = compounds.copy()
+        
+        pairs = [
+            working_compounds.pop() 
+            for _ in range(num_to_process) 
+            if working_compounds
+        ]
+        
+        # Use the full available_compounds list for each pair
+        return [(self.operation_params, compound, available_compounds) for compound in pairs]
 
-def make_crossovers(
-    params: Dict[str, Any],
-    generation_num: int,
-    number_of_processors: int,
-    num_crossovers_to_make: int,
-    predock_cmpds: List[PreDockedCompound]
-) -> List[PreDockedCompound]:
-    """
-    Creates crossover compounds based on previous generation molecules.
+    def get_parallel_function(self) -> Callable:
+        return _do_crossovers_smiles_merge
 
-    Args:
-        params (Dict[str, Any]): User parameters governing the crossover process.
-        generation_num (int): Current generation number.
-        number_of_processors (int): Number of processors for multithreading.
-        num_crossovers_to_make (int): Number of crossovers to generate.
-        predock_cmpds (List[PreDockedCompound]): Molecules from previous generation.
+    def make_compound_id(self, result: Tuple) -> str:
+        _, parent1, parent2 = result
+        parent1_id = parent1.name.split(")")[-1]
+        parent2_id = parent2.name.split(")")[-1]
+        random_id_num = random.randint(100, 1000000)
+        return f"({parent1_id}+{parent2_id})Gen_{self.generation_num}_Cross_{random_id_num}"
 
-    Returns:
-        Optional[List[PreDockedCompound]]: List of new unique ligands.
-
-    Note:
-        Uses multiprocessing to generate crossovers efficiently.
-        Attempts to create unique crossovers, avoiding duplicates.
-    """
-    new_predock_cmpds: List[PreDockedCompound] = []
-
-    # Create clean params dict without parallelizer to avoid recursion
-    temp_params = {k: v for k, v in params.items() if k != "parallelizer"}
-
-    log_debug("Creating new compounds from selected compounds via crossover")
-
-    with LogLevel():
-        predock_cmpds_queue = copy.deepcopy(predock_cmpds)
-        smiles_already_generated = {x.smiles for x in new_predock_cmpds}
-        ids_already_generated = {x.name for x in new_predock_cmpds}
-        attempts_to_fill_queue = 0
-
-        while len(new_predock_cmpds) < num_crossovers_to_make and attempts_to_fill_queue < 5:
-            attempts_to_fill_queue += 1
-
-            buffer_num = attempts_to_fill_queue * 2
-            num_to_process = num_crossovers_to_make - len(new_predock_cmpds) + buffer_num
-            num_to_process = max(num_to_process, number_of_processors)
-
-            # Prepare crossover pairs
-            smile_pairs = [
-                predock_cmpds_queue.pop() 
-                for _ in range(num_to_process) 
-                if predock_cmpds_queue
-            ]
-
-            job_input_list = [
-                (temp_params, compound, predock_cmpds)
-                for compound in smile_pairs
-            ]
-            # Run crossovers in parallel
-            results = params["parallelizer"].run(
-                tuple(job_input_list), _do_crossovers_smiles_merge
-            )
-
-            # Filter out None results
-            results = [x for x in results if x is not None]
-
-            # Process successful crossovers
-            for result in results:
-                if result is None:
-                    continue
-
-                child_lig_smile = result[0]
-                parent_lig1_id = result[1].name.split(")")[-1]
-                parent_lig2_id = result[2].name.split(")")[-1]
-
-                # Skip if smile already exists
-                if child_lig_smile in smiles_already_generated:
-                    continue
-
-                # Generate unique ID
-                new_lig_id = ""
-                while new_lig_id in ids_already_generated or not new_lig_id:
-                    random_id_num = random.randint(100, 1000000)
-                    new_lig_id = f"({parent_lig1_id}+{parent_lig2_id})Gen_{generation_num}_Cross_{random_id_num}"
-
-                ids_already_generated.add(new_lig_id)
-                smiles_already_generated.add(child_lig_smile)
-
-                # Create and store new compound
-                ligand_info = PreDockedCompound(
-                    smiles=child_lig_smile,
-                    name=new_lig_id
-                )
-                new_predock_cmpds.append(ligand_info)
-
-            # Replenish queue if needed
-            if not predock_cmpds_queue:
-                predock_cmpds_queue = copy.deepcopy(predock_cmpds)
-                random.shuffle(predock_cmpds_queue)
-
-    if len(new_predock_cmpds) < num_crossovers_to_make:
-        log_warning(
-            f"Only able to create {len(new_predock_cmpds)} of {num_crossovers_to_make} requested crossovers."
-        )
-
-    return new_predock_cmpds
-
+    def get_operation_name(self) -> str:
+        return "crossover"
 
 # def _find_similar_cmpd(
 #     params: Dict[str, Any],
@@ -306,8 +232,8 @@ def _do_crossovers_smiles_merge(
 
     Args:
         params (Dict[str, Any]): User parameters governing the process.
-        all_predock_cmpds (PreDockedCompound): Information for the first ligand.
-        predock_cmpds (List[PreDockedCompound]): List of all seed ligands.
+        lig1_predock_cmpd (PreDockedCompound): Information for the first ligand.
+        all_predock_cmpds (List[PreDockedCompound]): List of all seed ligands.
 
     Returns:
         Optional[Tuple[str, PreDockedCompound, PreDockedCompound]]: 
