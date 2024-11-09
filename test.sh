@@ -6,11 +6,11 @@ python run_autogrow.py \
     --center_x -70.76 --center_y 21.82 --center_z 28.33 \
     --size_x 25.0 --size_y 16.0 --size_z 25.0 \
     --obabel_path /Users/jdurrant/opt/anaconda3/bin/obabel \
-    --source_compound_file tmp_1.smi \
+    --source_compound_file tmp_20.smi \
     --output_directory ./output_directory/ \
     --vina_like_executable /Applications/vina_1.2.5_mac_x86_64 \
-    --number_of_mutants_first_generation 100 \
-    --number_of_crossovers_first_generation 100 \
+    --number_of_mutants_first_generation 5 \
+    --number_of_crossovers_first_generation 5 \
     --number_elitism_advance_from_previous_gen_first_generation 5 \
     --diversity_mols_to_seed_first_generation 5 \
     --number_of_mutants 5 \
@@ -20,15 +20,15 @@ python run_autogrow.py \
     --top_mols_to_seed_next_generation 5 \
     --diversity_seed_depreciation_per_gen 1 \
     --num_generations 5 \
-    --number_of_processors 3 \
+    --procs_per_node 3 \
     --FragmentAddition \
     --rxn_library_path ./autogrow/plugins/mutation/reaction_libraries/all_rxns \
-    --FakeDocking \
+    --VinaLikeDocking \
     --docking_exhaustiveness 1 \
     --redock_elite_from_previous_gen False \
     --RankSelector \
     --multithread_mode serial \
-    --FakeSmiTo3DSDF \
+    --ObabelSmiTo3DSDF \
     --ParallelExecPlugin \
     --parallel_exec_path /opt/homebrew/bin/parallel
 

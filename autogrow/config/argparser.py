@@ -245,7 +245,7 @@ def _add_general_params(parser: argparse._ArgumentGroup):
 
     # processors and multithread mode
     parser.add_argument(
-        "--number_of_processors",
+        "--procs_per_node",
         "-p",
         type=int,
         metavar="N",
@@ -258,7 +258,7 @@ def _add_general_params(parser: argparse._ArgumentGroup):
         choices=["multithreading", "serial"],
         help="Determine what style \
         multithreading: multithreading or serial. serial will override \
-        number_of_processors and force it to be on a single processor.",
+        procs_per_node and force it to be on a single processor.",
     )
 
 

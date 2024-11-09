@@ -57,7 +57,7 @@ def populate_generation(
     Raises:
         AssertionError: If the population fails to make enough compounds.
     """
-    number_of_processors = int(params["number_of_processors"])
+    procs_per_node = int(params["procs_per_node"])
 
     # Determine which generation it is and how many mutations and crossovers to make
     if generation_num == 1:
@@ -101,7 +101,7 @@ def populate_generation(
                         num_seed_diversity,
                         num_seed_dock_fitness,
                         src_cmpds,
-                        number_of_processors,
+                        procs_per_node,
                         "mutation",
                         Mutation.MutationGenerator
                     )
@@ -127,7 +127,7 @@ def populate_generation(
                         num_seed_diversity,
                         num_seed_dock_fitness,
                         src_cmpds,
-                        number_of_processors,
+                        procs_per_node,
                         "crossover",
                         Crossover.CrossoverGenerator
                     )
@@ -234,7 +234,7 @@ def _generate_compounds(
     num_seed_diversity: int,
     num_seed_dock_fitness: int,
     src_cmpds: List[PreDockedCompound],
-    number_of_processors: int,
+    procs_per_node: int,
     compound_type: str,
     compound_gen_cls: Type[CompoundGenerator]
 ) -> List[PreDockedCompound]:
@@ -251,7 +251,7 @@ def _generate_compounds(
         num_seed_diversity (int): Number of seed molecules chosen for diversity.
         num_seed_dock_fitness (int): Number of seed molecules chosen for docking fitness.
         src_cmpds (List[PreDockedCompound]): Source compounds from previous generation.
-        number_of_processors (int): Number of processors for parallel processing.
+        procs_per_node (int): Number of processors for parallel processing.
         compound_type (str): Type of generation ("mutation" or "crossover").
         compound_gen_cls (CompoundGenerator): CompoundGenerator class to use.
 
@@ -282,7 +282,7 @@ def _generate_compounds(
     new_compounds = compound_gen_cls(
         params,
         generation_num,
-        number_of_processors,
+        procs_per_node,
         num_compounds,
         seed_list
     ).generate()
@@ -320,7 +320,7 @@ def _generate_compounds(
 #     num_seed_diversity: int,
 #     num_seed_dock_fitness: int,
 #     src_cmpds: List[PreDockedCompound],
-#     number_of_processors: int
+#     procs_per_node: int
 # ) -> List[PreDockedCompound]:
 #     """
 #     Generates mutations for the current generation.
@@ -335,7 +335,7 @@ def _generate_compounds(
 #         num_seed_diversity (int): Number of seed molecules chosen for diversity.
 #         num_seed_dock_fitness (int): Number of seed molecules chosen for docking fitness.
 #         src_cmpds (List[PreDockedCompound]): Source compounds from previous generation.
-#         number_of_processors (int): Number of processors for parallel processing.
+#         procs_per_node (int): Number of processors for parallel processing.
 
 #     Returns:
 #         List[PreDockedCompound]: List of newly generated mutant compounds.
@@ -360,7 +360,7 @@ def _generate_compounds(
 #     new_mutants = Mutation.make_mutants(
 #         params,
 #         generation_num,
-#         number_of_processors,
+#         procs_per_node,
 #         num_mutations,
 #         seed_list_mutations
 #     )
@@ -394,7 +394,7 @@ def _generate_compounds(
 #     num_seed_diversity: int,
 #     num_seed_dock_fitness: int,
 #     src_cmpds: List[PreDockedCompound],
-#     number_of_processors: int,
+#     procs_per_node: int,
 # ) -> List[PreDockedCompound]:
 #     """
 #     Generates crossovers for the current generation.
@@ -409,7 +409,7 @@ def _generate_compounds(
 #         num_seed_diversity (int): Number of seed molecules chosen for diversity.
 #         num_seed_dock_fitness (int): Number of seed molecules chosen for docking fitness.
 #         src_cmpds (List[PreDockedCompound]): Source compounds from previous generation.
-#         number_of_processors (int): Number of processors for parallel processing.
+#         procs_per_node (int): Number of processors for parallel processing.
 
 #     Returns:
 #         List[PreDockedCompound]: List of newly generated crossover compounds.
@@ -434,7 +434,7 @@ def _generate_compounds(
 #     new_crossovers = execute_crossover.make_crossovers(
 #         params,
 #         generation_num,
-#         number_of_processors,
+#         procs_per_node,
 #         num_crossovers,
 #         seed_list_crossovers,
 #         []  # Start with empty list of existing crossovers

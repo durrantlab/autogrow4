@@ -24,25 +24,25 @@ def config_multiprocessing(params: Dict[str, Any]) -> Dict[str, Any]:
             Parallelizer object added.
 
     Notes:
-        If multithread_mode is set to "serial", the number_of_processors is
+        If multithread_mode is set to "serial", the procs_per_node is
         forcibly set to 1, regardless of the user's input.
     """
-    # Handle Serial overriding number_of_processors
+    # Handle Serial overriding procs_per_node
     # serial fixes it to 1 processor
     if params["multithread_mode"].lower() == "serial":
         params["multithread_mode"] = "serial"
-        if params["number_of_processors"] != 1:
+        if params["procs_per_node"] != 1:
             print(
                 "Because --multithread_mode was set to serial, "
                 + "this will be run on a single processor."
             )
-        params["number_of_processors"] = 1
+        params["procs_per_node"] = 1
 
     # Avoid EOF error
     from autogrow.utils.parallelizer import Parallelizer
 
     params["parallelizer"] = Parallelizer(
-        params["multithread_mode"], params["number_of_processors"]
+        params["multithread_mode"], params["procs_per_node"]
     )
 
     return params

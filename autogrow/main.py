@@ -18,6 +18,7 @@ from autogrow.config.argparser import get_user_params
 import autogrow.docking.execute_docking as DockingClass
 from autogrow.operators.populate_generation import populate_generation
 from autogrow.plugins.plugin_managers import setup_plugin_managers
+from autogrow.summary import generate_summary_html
 from autogrow.utils.logging import LogLevel, create_logger, log_info, log_warning
 
 
@@ -136,6 +137,8 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
     #         plot.generate_figures(params)
 
     sys.stdout.flush()
+
+    generate_summary_html(params['output_directory'])
 
     printout = f"\nAutoGrow4 run started at:   {start_time}\nAutoGrow4 "
     printout = f"{printout}run completed at: {str(datetime.datetime.now())}\n"
