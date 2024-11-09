@@ -140,8 +140,7 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
 
     generate_summary_html(params['output_directory'])
 
-    printout = f"\nAutoGrow4 run started at:   {start_time}\nAutoGrow4 "
-    printout = f"{printout}run completed at: {str(datetime.datetime.now())}\n"
-    print(printout)
-
-    print("AUTOGROW FINISHED")
+    log_info("Run time")
+    with LogLevel():
+        log_info(f"AutoGrow4 run started at:   {start_time}")
+        log_info(f"AutoGrow4 run completed at: {str(datetime.datetime.now())}")

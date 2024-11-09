@@ -1,3 +1,4 @@
+from autogrow.utils.logging import log_info
 import numpy as np
 import math
 
@@ -65,7 +66,7 @@ def generate_summary_html(output_dir: str) -> None:
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- RDKit.js -->
-    <script src="https://unpkg.com/@rdkit/rdkit/Code/MinimalLib/dist/RDKit_minimal.js"></script>
+    <script src="https://unpkg.com/smiles-drawer@2.0.1/dist/smiles-drawer.min.js"></script>
     <!-- Chart.js and Annotation plugin -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -76,9 +77,9 @@ def generate_summary_html(output_dir: str) -> None:
             align-items: center;
             justify-content: center;
         }}
-        .structure-container svg {{
-            max-width: 100%;
-            max-height: 100%;
+        .structure-container canvas {{
+            width: 150px !important;
+            height: 150px !important;
         }}
         .slider-container {{
             margin: 20px 0;
@@ -122,8 +123,8 @@ def generate_summary_html(output_dir: str) -> None:
                                 <thead>
                                     <tr>
                                         <th>Structure</th>
-                                        <th>ID</th>
                                         <th>SMILES</th>
+                                        <th>ID</th>
                                         <th>Docking Score</th>
                                     </tr>
                                 </thead>
@@ -146,7 +147,14 @@ def generate_summary_html(output_dir: str) -> None:
         const binWidth = {bin_width};
         const maxY = {max_y};
         
-        let rdkit = null;
+        let smilesDrawer = new SmilesDrawer.Drawer({{
+            width: 450,  // 3x larger for better resolution
+            height: 450, // 3x larger for better resolution
+            bondThickness: 2.0,  // Increase bond thickness for better visibility
+            fontSizeLarge: 16,   // Increase font sizes proportionally
+            fontSizeSmall: 14,
+        }});
+
         let histogramChart = null;
         let moleculeQueue = [];
         let isProcessingQueue = false;
@@ -154,12 +162,26 @@ def generate_summary_html(output_dir: str) -> None:
         // Initialize RDKit
         async function initRDKit() {{
             try {{
-                rdkit = await window.RDKit;
+                // Wait for RDKit to be loaded
+                if (!window.RDKit) {{
+                    console.log("Waiting for RDKit...");
+                    await new Promise(resolve => {{
+                        window.addEventListener('RDKitReady', resolve);
+                    }});
+                }}
+                console.log("RDKit loaded, initializing...");
+                rdkit = await window.RDKit();
+                console.log("RDKit initialized");
                 processNextMolecule();
             }} catch (error) {{
                 console.error('Failed to initialize RDKit:', error);
             }}
         }}
+        
+        window.addEventListener('DOMContentLoaded', function() {{
+            initRDKit();  // Simplified initialization
+            updateVisualization();
+        }});
         
         window.addEventListener('DOMContentLoaded', function() {{
             // Check if RDKit is defined
@@ -180,11 +202,13 @@ def generate_summary_html(output_dir: str) -> None:
 
         async function generateMoleculeImage(smiles, containerId) {{
             if (!rdkit) {{
+                console.log("RDKit not ready, queueing molecule:", smiles);
                 moleculeQueue.push({{ smiles, containerId }});
                 return;
             }}
             
             try {{
+                console.log("Generating molecule for:", smiles);
                 const mol = rdkit.get_mol(smiles);
                 if (mol) {{
                     const svg = mol.get_svg();
@@ -192,20 +216,28 @@ def generate_summary_html(output_dir: str) -> None:
                     if (container) {{
                         container.innerHTML = svg;
                     }}
+                    mol.delete();  // Clean up the molecule object
                 }}
             }} catch (error) {{
-                console.error('Error generating molecule:', error);
+                console.error('Error generating molecule:', error, smiles);
             }}
         }}
 
         async function processNextMolecule() {{
-            if (!rdkit || isProcessingQueue || moleculeQueue.length === 0) return;
+            if (!rdkit || isProcessingQueue || moleculeQueue.length === 0) {{
+                if (!rdkit) console.log("RDKit not ready");
+                if (isProcessingQueue) console.log("Already processing queue");
+                if (moleculeQueue.length === 0) console.log("Queue empty");
+                return;
+            }}
             
             isProcessingQueue = true;
-            const {{ smiles, containerId }} = moleculeQueue.shift();
-            await generateMoleculeImage(smiles, containerId);
+            console.log("Processing next molecule in queue");
+            while (moleculeQueue.length > 0) {{
+                const {{ smiles, containerId }} = moleculeQueue.shift();
+                await generateMoleculeImage(smiles, containerId);
+            }}
             isProcessingQueue = false;
-            processNextMolecule();
         }}
 
         function calculateHistogramData(scores) {{
@@ -301,23 +333,29 @@ def generate_summary_html(output_dir: str) -> None:
                 <tr>
                     <td>
                         <div id="mol-${{index}}" class="structure-container">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
+                            <canvas width="150" height="150"></canvas>
                         </div>
                     </td>
-                    <td>${{compound.id}}</td>
                     <td class="text-truncate" style="max-width: 200px;">
                         ${{compound.smiles}}
                     </td>
+                    <td class="text-truncate" style="max-width: 200px;">${{compound.id}}</td>
                     <td>${{compound.docking_score.toFixed(2)}}</td>
                 </tr>
             `).join('');
 
             document.getElementById('compoundsTable').innerHTML = tableHtml;
             
+            // Draw molecules
             topCompounds.forEach((compound, index) => {{
-                generateMoleculeImage(compound.smiles, `mol-${{index}}`);
+                const container = document.getElementById(`mol-${{index}}`);
+                const canvas = container.querySelector('canvas');
+                // Set high resolution canvas size
+                canvas.width = 450;  // 3x larger
+                canvas.height = 450; // 3x larger
+                SmilesDrawer.parse(compound.smiles, function(tree) {{
+                    smilesDrawer.draw(tree, canvas, 'light', false);
+                }});
             }});
         }}
 
@@ -329,6 +367,8 @@ def generate_summary_html(output_dir: str) -> None:
 """
 
     # Write the HTML file
-    output_file = os.path.join(output_dir, 'results_visualization.html')
+    output_file = os.path.join(output_dir, 'summary.html')
     with open(output_file, 'w') as f:
         f.write(html_template)
+
+    log_info(f"Summary HTML file saved to: {output_file}")
