@@ -29,7 +29,8 @@ python run_autogrow.py \
     --RankSelector \
     --multithread_mode serial \
     --ObabelSmiTo3DSDF \
-    --ParallelExecPlugin \
+    --Slurm \
+    --slurm_template_file tmp.txt \
     --parallel_exec_path /opt/homebrew/bin/parallel
 
     # --PythonMultiprocessing

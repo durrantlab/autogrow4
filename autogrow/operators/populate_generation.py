@@ -23,7 +23,7 @@ import rdkit  # type: ignore
 import rdkit.Chem as Chem  # type: ignore
 
 # Disable the unnecessary RDKit warnings
-rdkit.RDLogger.DisableLog("rdApp.*")
+rdkit.RDLogger.DisableLog("rdApp.*")  # type: ignore
 
 import autogrow.docking.ranking.ranking_mol as Ranking
 import autogrow.operators.execute_mutations as Mutation
@@ -58,6 +58,11 @@ def populate_generation(
         AssertionError: If the population fails to make enough compounds.
     """
     procs_per_node = int(params["procs_per_node"])
+
+    # This is a little hacky, but we need to pass the current generation
+    # directory to the plugins. It's easier to do this by setting it in the
+    # params dict than as a separate argument to plugin.run() methods.
+    params["cur_gen_dir"] = cur_gen_dir
 
     # Determine which generation it is and how many mutations and crossovers to make
     if generation_num == 1:
@@ -629,7 +634,7 @@ def _test_source_smiles_convert(
     # Try importing it into RDKit with Sanitization off. Tests for errors in
     # having the wrong data type
     try:
-        mol = Chem.MolFromSmiles(str(smile_str), sanitize=False)
+        mol = Chem.MolFromSmiles(str(smile_str), sanitize=False)  # type: ignore
     except Exception:
         printout = (
             "REMOVING SMILES FROM SOURCE LIST: SMILES string failed "
@@ -643,7 +648,7 @@ def _test_source_smiles_convert(
     # someones source compound list Although the MOH.check_sanitization will
     # do that. try sanitizing, which is necessary later
     try:
-        Chem.SanitizeMol(mol)
+        Chem.SanitizeMol(mol)  # type: ignore
     except Exception:
         printout = (
             "REMOVING SMILES FROM SOURCE LIST: SMILES "
@@ -657,7 +662,7 @@ def _test_source_smiles_convert(
     # will try protanating and Deprotanating the mol. If it can't handle that
     # We reject it as many functions will require this sort of manipulation.
     # More advanced sanitization issues will also be removed in this step
-    mol = Chem.MolFromSmiles(str(smile_str), sanitize=False)
+    mol = Chem.MolFromSmiles(str(smile_str), sanitize=False)  # type: ignore
     mol = MOH.handleHs(mol, True)
 
     if mol is None:
@@ -678,7 +683,7 @@ def _test_source_smiles_convert(
         )
         return _report_removed_compound_info(smile_str, printout, smile_id)
     # Check for fragments.
-    if len(Chem.GetMolFrags(mol, asMols=True, sanitizeFrags=False)) != 1:
+    if len(Chem.GetMolFrags(mol, asMols=True, sanitizeFrags=False)) != 1:  # type: ignore
 
         printout = "REMOVING SMILES FROM SOURCE LIST: SMILES string was fragmented.\n"
         return _report_removed_compound_info(smile_str, printout, smile_id)

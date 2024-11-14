@@ -105,7 +105,7 @@ class PythonMultiprocessing(ShellParallelizerBase):
         Args:
             cmds (List[str]): A list of shell commands to run in parallel.
             nprocs (int, optional): The number of processors to use. Defaults
-                to -1, which uses all available processors.
+                to -1 (use all available).
 
         Returns:
             List[ShellCmdResult]: A list of ShellCmdResult objects, one for

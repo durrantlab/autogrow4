@@ -14,7 +14,7 @@ import os
 from autogrow.utils.logging import log_warning
 
 
-class ParallelExecPlugin(ShellParallelizerBase):
+class ParallelExec(ShellParallelizerBase):
     """
     A plugin that uses GNU parallel to execute shell commands in parallel.
 
@@ -106,7 +106,9 @@ class ParallelExecPlugin(ShellParallelizerBase):
         output and return code.
 
         Args:
-            cmd (str): The shell command to run.
+            cmds (List[str]): A list of shell commands to run in parallel.
+            nprocs (int, optional): The number of processors to use. Defaults
+                to -1 (use all available).
 
         Returns:
             ShellCmdResult: An object containing the command, return code,
