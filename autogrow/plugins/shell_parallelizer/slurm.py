@@ -153,8 +153,8 @@ fi
 
         # Submit array job
         num_tasks = len(cmds)
-        # os.system(f"{sbatch_path} --array=1-{num_tasks} {array_script}")
-        print(f"{sbatch_path} --array=1-{num_tasks} {array_script}")
+        os.system(f"{sbatch_path} --array=1-{num_tasks} {array_script}")
+        # print(f"{sbatch_path} --array=1-{num_tasks} {array_script}")
 
     def _collect_results(
         self, commands_file: str, cache_dir: str
