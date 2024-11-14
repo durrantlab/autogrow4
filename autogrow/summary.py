@@ -2,6 +2,7 @@ from autogrow.utils.logging import log_info
 import numpy as np
 import math
 
+
 def generate_summary_html(output_dir: str) -> None:
     """
     Generate a standalone HTML visualization of AutoGrow4 results.
@@ -12,32 +13,36 @@ def generate_summary_html(output_dir: str) -> None:
     import os
     import glob
     import json
-    
+
     # Read all generation data
     all_generations = []
     generation_dirs = sorted(glob.glob(os.path.join(output_dir, "generation_*")))
-    
+
     for gen_dir in generation_dirs:
         gen_file = os.path.join(gen_dir, f"{os.path.basename(gen_dir)}_ranked.smi")
         if not os.path.exists(gen_file):
             continue
-            
+
         generation_data = []
-        with open(gen_file, 'r') as f:
+        with open(gen_file, "r") as f:
             for line in f:
-                parts = line.strip().split('\t')
+                parts = line.strip().split("\t")
                 if len(parts) >= 5:  # Ensure we have at least SMILES, ID, and score
-                    generation_data.append({
-                        'smiles': parts[0],
-                        'id': parts[1],
-                        'docking_score': float(parts[4])
-                    })
+                    generation_data.append(
+                        {
+                            "smiles": parts[0],
+                            "id": parts[1],
+                            "docking_score": float(parts[4]),
+                        }
+                    )
         all_generations.append(generation_data)
 
     # Calculate global min/max scores and bin configuration
-    all_scores = [compound['docking_score'] 
-                 for generation in all_generations 
-                 for compound in generation]
+    all_scores = [
+        compound["docking_score"]
+        for generation in all_generations
+        for compound in generation
+    ]
     global_min = min(all_scores)
     global_max = max(all_scores)
     max_compounds_in_bin = 0
@@ -47,12 +52,14 @@ def generate_summary_html(output_dir: str) -> None:
     # Calculate max count across all possible histogram configurations
     bin_edges = [global_min + i * bin_width for i in range(bins + 1)]
     for generation in all_generations:
-        scores = [c['docking_score'] for c in generation]
+        scores = [c["docking_score"] for c in generation]
         counts, _ = np.histogram(scores, bins=bin_edges)
         max_compounds_in_bin = max(max_compounds_in_bin, max(counts))
-        
+
     # Add this line to get max generation size
-    max_generation_size = min(50, max(len(generation) for generation in all_generations))
+    max_generation_size = min(
+        50, max(len(generation) for generation in all_generations)
+    )
 
     # Round up max_compounds_in_bin to nearest 5 or 10 for nice y-axis
     max_y = 5 * math.ceil(max_compounds_in_bin / 5)
@@ -367,8 +374,166 @@ def generate_summary_html(output_dir: str) -> None:
 """
 
     # Write the HTML file
-    output_file = os.path.join(output_dir, 'summary.html')
-    with open(output_file, 'w') as f:
+    output_file = os.path.join(output_dir, "summary.html")
+    with open(output_file, "w") as f:
         f.write(html_template)
 
     log_info(f"Summary HTML file saved to: {output_file}")
+
+
+def generate_summary_txt(output_dir: str) -> None:
+    """Generate text-based summary of best compounds across all generations.
+    
+    Creates a ranked summary file containing the best compounds from all generations,
+    along with a merged SDF file of their 3D structures.
+    
+    Args:
+        output_dir (str): Path to AutoGrow output directory containing generation_X folders
+    """
+    import os
+    import glob
+    from autogrow.utils.logging import log_info, log_debug, log_warning
+
+    # Read all generation data
+    all_compounds = []
+    generation_dirs = sorted(glob.glob(os.path.join(output_dir, "generation_*")))
+
+    # Track stats for debugging
+    total_lines = 0
+    compounds_with_sdf = 0
+    compounds_with_valid_sdf = 0
+
+    for gen_dir in generation_dirs:
+        gen_file = os.path.join(gen_dir, f"{os.path.basename(gen_dir)}_ranked.smi")
+        if not os.path.exists(gen_file):
+            continue
+
+        log_debug(f"Processing generation directory: {gen_dir}")
+        with open(gen_file, "r") as f:
+            for line in f:
+                total_lines += 1
+                parts = line.strip().split("\t")
+
+                # From your example file, the format is:
+                # SMILES, ID, short_ID, _, docking_score, diversity_score, sdf_path
+                if len(parts) >= 7:  # Make sure we have all needed fields
+                    compound = {
+                        "smiles": parts[0],
+                        "id": parts[1],
+                        "docking_score": float(parts[4]),
+                        "diversity_score": float(parts[5]),
+                        "sdf_path": os.path.join(gen_dir, parts[6]),
+                        "generation": os.path.basename(gen_dir),
+                    }
+
+                    # Verify SDF exists and is valid
+                    if os.path.exists(compound["sdf_path"]):
+                        compounds_with_sdf += 1
+                        if os.path.getsize(compound["sdf_path"]) > 0:
+                            with open(compound["sdf_path"], "r") as test_f:
+                                content = test_f.read()
+                                if "$$$$" in content:  # Check if it's a valid SDF
+                                    compounds_with_valid_sdf += 1
+                                else:
+                                    log_warning(
+                                        f"Found SDF but it appears invalid: {compound['sdf_path']}"
+                                    )
+                                    compound["sdf_path"] = None
+                        else:
+                            log_warning(f"Found empty SDF file: {compound['sdf_path']}")
+                            compound["sdf_path"] = None
+                    else:
+                        log_warning(f"SDF file not found: {compound['sdf_path']}")
+                        compound["sdf_path"] = None
+
+                    all_compounds.append(compound)
+
+    # Log debug info
+    log_debug(f"Total lines processed: {total_lines}")
+    log_debug(f"Compounds with SDF path: {compounds_with_sdf}")
+    log_debug(f"Compounds with valid SDF: {compounds_with_valid_sdf}")
+
+    # Sort by docking score
+    all_compounds.sort(key=lambda x: x["docking_score"])
+
+    # Create summary files
+    summary_tsv = os.path.join(output_dir, "summary_ranked.tsv")
+    summary_sdf = os.path.join(output_dir, "summary_ranked.sdf")
+
+    # Write ranked summary text file
+    with open(summary_tsv, "w") as f:
+        # Write header
+        f.write(
+            "Rank\tSMILES\tID\tDocking Score\tDiversity Score\tGeneration\tSDF Path\n"
+        )
+
+        # Write compound data
+        for i, compound in enumerate(all_compounds, 1):
+            f.write(
+                f"{i}\t{compound['smiles']}\t{compound['id']}\t"
+                f"{compound['docking_score']}\t{compound['diversity_score']}\t"
+                f"{compound['generation']}\t"
+                f"{compound['sdf_path'] or ''}\n"
+            )
+
+    # Create merged SDF file if SDF paths are available
+    sdf_written = 0
+    with open(summary_sdf, "w") as outfile:
+        for rank, compound in enumerate(all_compounds, 1):
+            if compound["sdf_path"] and os.path.exists(compound["sdf_path"]):
+                try:
+                    with open(compound["sdf_path"], "r") as infile:
+                        content = infile.read()
+                        if content.strip():  # Check if there's actual content
+                            if "$$$$" in content:  # Verify it's a valid SDF
+                                # Strip the last "$$$$" if it exists
+                                content = content.strip()
+                                if content.endswith("$$$$"):
+                                    content = content[:-4].strip()
+
+                                # Copy SDF content without the terminator
+                                outfile.write(content)
+                                outfile.write("\n")
+
+                                # Add custom properties to SDF
+                                outfile.write(f">  <Rank>\n{rank}\n\n")
+                                outfile.write(
+                                    f">  <Generation>\n{compound['generation']}\n\n"
+                                )
+                                outfile.write(f">  <ID>\n{compound['id']}\n\n")
+                                outfile.write(
+                                    f">  <Docking_Score>\n{compound['docking_score']}\n\n"
+                                )
+                                outfile.write(
+                                    f">  <Diversity_Score>\n{compound['diversity_score']}\n\n"
+                                )
+                                outfile.write("$$$$\n")  # SDF separator
+                                sdf_written += 1
+                                log_debug(
+                                    f"Successfully wrote structure {rank} from {compound['sdf_path']}"
+                                )
+                            else:
+                                log_warning(
+                                    f"Invalid SDF format in {compound['sdf_path']}"
+                                )
+                except Exception as e:
+                    log_warning(f"Error processing {compound['sdf_path']}: {str(e)}")
+
+    log_info("Created summary files:")
+    log_info(f"  Ranked compounds: {summary_tsv}")
+    log_info(f"  3D structures: {summary_sdf} ({sdf_written} structures)")
+
+    # If no structures were written, something went wrong
+    if sdf_written == 0:
+        log_warning("No structures were written to the SDF file!")
+        # List a few example compounds to help debugging
+        for i, compound in enumerate(all_compounds[:5]):
+            log_debug(f"Example compound {i+1}:")
+            log_debug(f"  ID: {compound['id']}")
+            log_debug(f"  SDF path: {compound['sdf_path']}")
+            if compound["sdf_path"]:
+                log_debug(f"  SDF exists: {os.path.exists(compound['sdf_path'])}")
+                if os.path.exists(compound["sdf_path"]):
+                    log_debug(
+                        f"  SDF size: {os.path.getsize(compound['sdf_path'])} bytes"
+                    )

@@ -18,7 +18,7 @@ from autogrow.config.argparser import get_user_params
 import autogrow.docking.execute_docking as DockingClass
 from autogrow.operators.populate_generation import populate_generation
 from autogrow.plugins.plugin_managers import setup_plugin_managers
-from autogrow.summary import generate_summary_html
+from autogrow.summary import generate_summary_html, generate_summary_txt
 from autogrow.utils.logging import LogLevel, create_logger, log_info, log_warning
 
 
@@ -138,7 +138,10 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
 
     sys.stdout.flush()
 
-    generate_summary_html(params['output_directory'])
+    log_info("Writing summary files")
+    with LogLevel():
+        generate_summary_html(params["output_directory"])
+        generate_summary_txt(params["output_directory"])
 
     log_info("Run time")
     with LogLevel():

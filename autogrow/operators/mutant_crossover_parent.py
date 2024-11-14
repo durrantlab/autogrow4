@@ -6,6 +6,7 @@ from typing import Callable, Dict, List, Any, Tuple, Set, Optional
 from autogrow.types import PreDockedCompound
 from autogrow.utils.logging import LogLevel, log_debug, log_warning
 
+
 class CompoundGenerator(ABC):
     """Abstract base class for compound generation operations."""
 
@@ -63,7 +64,9 @@ class CompoundGenerator(ABC):
             Attempts to create unique compounds, avoiding duplicates.
         """
         new_predock_cmpds: List[PreDockedCompound] = []
-        log_debug(f"Creating new compounds from selected compounds via {self.get_operation_name()}")
+        log_debug(
+            f"Creating new compounds from selected compounds via {self.get_operation_name()}"
+        )
 
         with LogLevel():
             predock_cmpds_queue = copy.deepcopy(self.predock_cmpds)
@@ -72,29 +75,32 @@ class CompoundGenerator(ABC):
             ids_already_generated = set()
             attempts_to_fill_queue = 0
 
-            while len(new_predock_cmpds) < self.num_compounds and attempts_to_fill_queue < 10:
+            while (
+                len(new_predock_cmpds) < self.num_compounds
+                and attempts_to_fill_queue < 10
+            ):
                 attempts_to_fill_queue += 1
                 random.shuffle(predock_cmpds_queue)
 
                 # Prepare job inputs
                 buffer_num = attempts_to_fill_queue * 2
-                num_to_process = self.num_compounds - len(new_predock_cmpds) + buffer_num
+                num_to_process = (
+                    self.num_compounds - len(new_predock_cmpds) + buffer_num
+                )
                 num_to_process = max(num_to_process, self.procs_per_node)
-                
+
                 job_input_list = self.prepare_job_inputs(
-                    predock_cmpds_queue,
-                    num_to_process
+                    predock_cmpds_queue, num_to_process
                 )
 
                 # Run parallel operation
                 results = self.params["parallelizer"].run(
-                    tuple(job_input_list),
-                    self.get_parallel_function()
+                    tuple(job_input_list), self.get_parallel_function()
                 )
 
                 # Process results
                 results = [x for x in results if x is not None]
-                
+
                 for result in results:
                     if result is None:
                         continue
@@ -113,8 +119,7 @@ class CompoundGenerator(ABC):
 
                     # Create and store new compound
                     ligand_info = PreDockedCompound(
-                        smiles=child_lig_smile,
-                        name=new_lig_id
+                        smiles=child_lig_smile, name=new_lig_id
                     )
                     new_predock_cmpds.append(ligand_info)
 

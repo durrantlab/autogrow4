@@ -158,6 +158,7 @@ def _convert_mol_from_smiles(smiles: str) -> Union[rdkit.Chem.rdchem.Mol, bool, 
     mol = MOH.try_deprotanation(mol)
     return False if mol is None else mol
 
+
 class CrossoverGenerator(CompoundGenerator):
     """Handles crossover-specific compound generation."""
 
@@ -171,15 +172,15 @@ class CrossoverGenerator(CompoundGenerator):
         working_compounds = compounds.copy()
         # Keep the original list intact for pairing
         available_compounds = compounds.copy()
-        
+
         pairs = [
-            working_compounds.pop() 
-            for _ in range(num_to_process) 
-            if working_compounds
+            working_compounds.pop() for _ in range(num_to_process) if working_compounds
         ]
-        
+
         # Use the full available_compounds list for each pair
-        return [(self.operation_params, compound, available_compounds) for compound in pairs]
+        return [
+            (self.operation_params, compound, available_compounds) for compound in pairs
+        ]
 
     def get_parallel_function(self) -> Callable:
         return _do_crossovers_smiles_merge
@@ -193,6 +194,7 @@ class CrossoverGenerator(CompoundGenerator):
 
     def get_operation_name(self) -> str:
         return "crossover"
+
 
 # def _find_similar_cmpd(
 #     params: Dict[str, Any],
@@ -280,7 +282,8 @@ def _do_crossovers_smiles_merge(
 
             # Filter Here
             pass_or_not = (
-                len(plugin_managers.SmilesFilter.run(predock_cmpds=[tmp_predock_cmpd])) > 0
+                len(plugin_managers.SmilesFilter.run(predock_cmpds=[tmp_predock_cmpd]))
+                > 0
             )
 
             if not pass_or_not:

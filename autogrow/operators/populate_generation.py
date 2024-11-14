@@ -103,7 +103,7 @@ def populate_generation(
                         src_cmpds,
                         procs_per_node,
                         "mutation",
-                        Mutation.MutationGenerator
+                        Mutation.MutationGenerator,
                     )
                 else:
                     log_warning("No mutations made, per user settings")
@@ -129,7 +129,7 @@ def populate_generation(
                         src_cmpds,
                         procs_per_node,
                         "crossover",
-                        Crossover.CrossoverGenerator
+                        Crossover.CrossoverGenerator,
                     )
                 else:
                     log_warning("No crossovers made, per user settings")
@@ -226,7 +226,6 @@ def populate_generation(
     return full_gen_smi_file, full_gen_predock_cmpds
 
 
-
 def _generate_compounds(
     params: Dict[str, Any],
     generation_num: int,
@@ -236,7 +235,7 @@ def _generate_compounds(
     src_cmpds: List[PreDockedCompound],
     procs_per_node: int,
     compound_type: str,
-    compound_gen_cls: Type[CompoundGenerator]
+    compound_gen_cls: Type[CompoundGenerator],
 ) -> List[PreDockedCompound]:
     """
     Generates new compounds (mutations or crossovers) for the current generation.
@@ -280,11 +279,7 @@ def _generate_compounds(
 
     # Make all compounds
     new_compounds = compound_gen_cls(
-        params,
-        generation_num,
-        procs_per_node,
-        num_compounds,
-        seed_list
+        params, generation_num, procs_per_node, num_compounds, seed_list
     ).generate()
 
     # Remove Nones
@@ -307,10 +302,6 @@ def _generate_compounds(
     )
 
     return new_compounds_list
-
-
-
-
 
 
 # def _generate_mutations(
@@ -461,6 +452,7 @@ def _generate_compounds(
 
 #     return new_crossover_smiles_list
 
+
 def _get_elite_cmpds_prev_gen(
     params: Dict[str, Any],
     src_cmpds: List[PreDockedCompound],
@@ -490,7 +482,9 @@ def _get_elite_cmpds_prev_gen(
     )
 
     if len(chosen_mol_to_pass_through_list) < num_elite_prev_gen:
-        log_warning("If this is the 1st generation, your starting library may have too few SMILES that could be converted to sanitizable RDKit Molecules. Consider adding more SMILES to your starting library or checking the SMILES for errors.")
+        log_warning(
+            "If this is the 1st generation, your starting library may have too few SMILES that could be converted to sanitizable RDKit Molecules. Consider adding more SMILES to your starting library or checking the SMILES for errors."
+        )
 
     # if isinstance(chosen_mol_to_pass_through_list, str):
     #     printout = (
@@ -559,8 +553,8 @@ def _save_smiles_files(
 #     """
 #     Raise an error if insufficient compounds are generated.
 
-#     This function prints details about the number of required and generated 
-#     compounds, then raises an exception if the generated compounds are 
+#     This function prints details about the number of required and generated
+#     compounds, then raises an exception if the generated compounds are
 #     fewer than required.
 
 #     Args:
@@ -988,8 +982,10 @@ def _make_pass_through_list(
     #         # + f"\n len(smiles_from_previous_gen_list): {len(smis_from_prev_gen)} ; \
     #         #     num_elite_prev_gen: {num_elite_prev_gen}"
     #     log_warning(f"Too few compounds to advance via elitism (trying to advance {num_elite_prev_gen} compounds, but only {len(smis_from_prev_gen)} compounds are available).")
-    
-    predock_cmpd_from_prev_gen = [x for x in predock_cmpd_from_prev_gen if type(x) == PreDockedCompound]
+
+    predock_cmpd_from_prev_gen = [
+        x for x in predock_cmpd_from_prev_gen if type(x) == PreDockedCompound
+    ]
     ligs_that_passed_filters = [x for x in predock_cmpd_from_prev_gen if x is not None]
 
     # If not enough of your previous generation sanitize to make the list
@@ -1043,11 +1039,12 @@ def _make_pass_through_list(
         )
 
     if len(ligs_to_advance) < num_elite_prev_gen:
-        log_warning(f"Too few compounds were chosen to advance to the next generation via elitism (tried to advance {num_elite_prev_gen} compounds, but only {len(ligs_to_advance)} compounds were chosen).")
+        log_warning(
+            f"Too few compounds were chosen to advance to the next generation via elitism (tried to advance {num_elite_prev_gen} compounds, but only {len(ligs_to_advance)} compounds were chosen)."
+        )
         # import pdb; pdb.set_trace()
-    
-    return ligs_to_advance
 
+    return ligs_to_advance
 
 
 #############

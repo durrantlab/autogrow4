@@ -13,7 +13,7 @@ from typing import List, cast
 from autogrow.plugins.plugin_base import PluginBase
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
 from autogrow.types import PostDockedCompound, PreDockedCompound
-from autogrow.utils.logging import log_debug
+from autogrow.utils.logging import log_debug, log_warning
 
 
 class DockingBase(PluginBase):
@@ -99,5 +99,22 @@ class DockingPluginManager(PluginManagerBase):
             log_debug(
                 f"Docked molecule {post_docked_cmpd.smiles}. Score: {post_docked_cmpd.docking_score:.2f}"
             )
+
+        # Sanity check: Make sure each output sdf file contains only one model.
+        for sdf_filename in [
+            c.docked_sdf_path
+            for c in post_docked_cmpds
+            if c.docked_sdf_path is not None
+        ]:
+            with open(sdf_filename, "r") as f:
+                orig_sdf_content = f.read()
+
+            if orig_sdf_content.count("$$$$") > 1:
+                log_warning(
+                    f"Docked SDF file {sdf_filename} contains more than one molecule. The docking plugin must output SDF files with a single molecule and a single pose. Keeping only the first model."
+                )
+                with open(sdf_filename, "w") as f:
+                    new_sdf_content = orig_sdf_content.split("$$$$")[0] + "$$$$\n"
+                    f.write(new_sdf_content)
 
         return post_docked_cmpds

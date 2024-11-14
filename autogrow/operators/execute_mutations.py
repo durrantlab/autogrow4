@@ -42,7 +42,7 @@ class MutationGenerator(CompoundGenerator):
         _, reaction_id_number, zinc_id_comp_mol, parent_lig_id = result
         parent_lig_id = parent_lig_id.split(")")[-1]
         random_id_num = random.randint(100, 1000000)
-        
+
         if zinc_id_comp_mol is None:
             return f"({parent_lig_id})Gen_{self.generation_num}_Mutant_{reaction_id_number}_{random_id_num}"
         return f"({parent_lig_id}+{zinc_id_comp_mol})Gen_{self.generation_num}_Mutant_{reaction_id_number}_{random_id_num}"

@@ -339,6 +339,8 @@ def calc_diversity_scores(
             except Exception:
                 mol = None
 
+            # TODO: Should not be assertion here.
+
             if mol is None:
                 raise AssertionError(
                     "mol in list failed to sanitize. Issue in Ranking.py \
