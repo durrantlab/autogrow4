@@ -58,7 +58,7 @@ class Slurm(ShellParallelizerBase):
                 "sbatch executable path not specified. Use the --sbatch_path flag."
             )
         if not os.path.exists(params["sbatch_path"]):
-            raise ValueError(f"sbatch executable not found: {params['sbatch_path']}")
+            raise ValueError(f"sbatch executable not found: {params['sbatch_path']} (hint: `which sbatch`)")
 
     def run_cmds_in_parallel(
         self, cmds: List[str], nprocs: int = -1
