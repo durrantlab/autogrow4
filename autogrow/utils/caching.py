@@ -106,6 +106,5 @@ class CacheManager:
             exc_val: The instance of the exception that occurred, if any
             exc_tb: The traceback of the exception that occurred, if any
         """
-        if not self.exists:
-            import pdb; pdb.set_trace()
+        if not self.exists and len(self.data) > 0:
             self._save_to_cache()
