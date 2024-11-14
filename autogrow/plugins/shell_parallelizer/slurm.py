@@ -9,6 +9,7 @@ from autogrow.plugins.shell_parallelizer import ShellCmdResult, ShellParallelize
 from autogrow.utils.logging import log_info
 import random
 import string
+import hashlib
 
 class Slurm(ShellParallelizerBase):
     """A plugin that uses Slurm array jobs to execute shell commands in parallel.
@@ -87,8 +88,10 @@ class Slurm(ShellParallelizerBase):
         # Get the current generation directory
         cache_dir = self.params["cur_gen_dir"]
 
-        # Get random prefix (10 random letters)
-        prefix = "".join(random.choices(string.ascii_letters, k=10))
+        # Make a copy of cmds, sort it, concatenate it, and hash it
+        cmds_str = "".join(sorted(cmds))
+        prefix = hashlib.md5(cmds_str.encode()).hexdigest()
+        prefix = prefix[:10]  # Truncate to 10 characters
 
         # Define paths for job files
         completion_file = os.path.join(cache_dir, f"{prefix}_slurm_job_complete")
