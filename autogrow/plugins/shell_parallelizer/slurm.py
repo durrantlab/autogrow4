@@ -10,7 +10,7 @@ from autogrow.utils.logging import log_info
 import random
 import string
 import hashlib
-
+import time
 
 class Slurm(ShellParallelizerBase):
     """A plugin that uses Slurm array jobs to execute shell commands in parallel.
@@ -120,7 +120,12 @@ class Slurm(ShellParallelizerBase):
         log_info(
             "\nSlurm array job submitted. Please wait for completion and then restart AutoGrow to continue the process.\n"
         )
-        sys.exit(0)
+        # sys.exit(0)
+
+        while not os.path.exists(completion_file):
+            time.sleep(5)
+        
+        return self._collect_results(commands_file, cache_dir, prefix)
 
     def _submit_array_job(
         self,
