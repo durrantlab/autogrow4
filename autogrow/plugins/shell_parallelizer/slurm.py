@@ -145,7 +145,7 @@ class Slurm(ShellParallelizerBase):
             cache_dir, prefix + "_${SLURM_ARRAY_TASK_ID}_output.txt"
         )
         error_path = os.path.join(
-            cache_dir, prefix + "_${SLURM_ARRAY_TASK_ID}_output.txt"
+            cache_dir, prefix + "_${SLURM_ARRAY_TASK_ID}_error.txt"
         )
 
         # Create array script
