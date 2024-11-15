@@ -42,6 +42,12 @@ class Slurm(ShellParallelizerBase):
                     help="Path to the sbatch executable",
                     default="sbatch",
                 ),
+                ArgumentVars(
+                    name="wait_for_slurm",
+                    action="store_true",
+                    default=False,
+                    help="Wait for the slurm job to complete. If this parameter is not given, AutoGrow4 will submit slurm jobs as needed and exit after each submission. You will have to restart AutoGrow4 after each slurm job finishes to continue.",
+                )
             ],
         )
 
@@ -87,6 +93,9 @@ class Slurm(ShellParallelizerBase):
             If the number of CPUs cannot be determined, it defaults to using a
             single processor and logs a warning.
         """
+
+        print(self.params["wait_for_slurm"])
+        import pdb; pdb.set_trace()
 
         # Get the current generation directory
         cache_dir = self.params["cur_gen_dir"]
