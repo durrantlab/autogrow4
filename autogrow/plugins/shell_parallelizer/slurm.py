@@ -11,6 +11,7 @@ import random
 import string
 import hashlib
 
+
 class Slurm(ShellParallelizerBase):
     """A plugin that uses Slurm array jobs to execute shell commands in parallel.
     
@@ -59,7 +60,9 @@ class Slurm(ShellParallelizerBase):
                 "sbatch executable path not specified. Use the --sbatch_path flag."
             )
         if not os.path.exists(params["sbatch_path"]):
-            raise ValueError(f"sbatch executable not found: {params['sbatch_path']} (hint: `which sbatch`)")
+            raise ValueError(
+                f"sbatch executable not found: {params['sbatch_path']} (hint: `which sbatch`)"
+            )
 
     def run_cmds_in_parallel(
         self, cmds: List[str], nprocs: int = -1
@@ -100,13 +103,23 @@ class Slurm(ShellParallelizerBase):
 
         # If completion file exists, collect and return results
         if os.path.exists(completion_file):
-            return self._collect_results(commands_file, cache_dir)
+            return self._collect_results(commands_file, cache_dir, prefix)
 
         # Otherwise, submit array job
-        self._submit_array_job(cmds, commands_file, array_script, completion_file, self.params["sbatch_path"])
+        self._submit_array_job(
+            cmds,
+            commands_file,
+            array_script,
+            completion_file,
+            self.params["sbatch_path"],
+            cache_dir,
+            prefix,
+        )
 
         # Exit program with message
-        log_info("\nSlurm array job submitted. Please wait for completion and then restart AutoGrow to continue the process.\n")
+        log_info(
+            "\nSlurm array job submitted. Please wait for completion and then restart AutoGrow to continue the process.\n"
+        )
         sys.exit(0)
 
     def _submit_array_job(
@@ -115,7 +128,9 @@ class Slurm(ShellParallelizerBase):
         commands_file: str,
         array_script: str,
         completion_file: str,
-        sbatch_path: str
+        sbatch_path: str,
+        cache_dir: str,
+        prefix: str,
     ):
         """Create and submit Slurm array job."""
         # Write commands to file
@@ -125,6 +140,13 @@ class Slurm(ShellParallelizerBase):
 
         # Read template
         template = pathlib.Path(self.params["slurm_template_file"]).read_text()
+
+        out_path = os.path.join(
+            cache_dir, prefix + "_${SLURM_ARRAY_TASK_ID}_output.txt"
+        )
+        error_path = os.path.join(
+            cache_dir, prefix + "_${SLURM_ARRAY_TASK_ID}_output.txt"
+        )
 
         # Create array script
         with open(array_script, "w") as f:
@@ -136,12 +158,11 @@ class Slurm(ShellParallelizerBase):
 CMD=$(sed -n "${SLURM_ARRAY_TASK_ID}p" "${commands_file}")
 
 # Create output directory for this task
-OUT_DIR="${SLURM_SUBMIT_DIR}/task_${SLURM_ARRAY_TASK_ID}"
-mkdir -p "${OUT_DIR}"
+OUT_DIR="${cache_dir}"
 
 # Run command and capture output
 cd "${OUT_DIR}"
-eval "${CMD}" > output.txt 2> error.txt
+eval "${CMD}" > ${out_path} 2> ${error_path}
 
 # Last task creates completion file
 if [ "${SLURM_ARRAY_TASK_ID}" -eq "${SLURM_ARRAY_TASK_MAX}" ]; then
@@ -149,9 +170,11 @@ if [ "${SLURM_ARRAY_TASK_ID}" -eq "${SLURM_ARRAY_TASK_MAX}" ]; then
 fi
 """.replace(
                     "${commands_file}", commands_file
-                ).replace(
-                    "${completion_file}", completion_file
                 )
+                .replace("${completion_file}", completion_file)
+                .replace("${out_path}", out_path)
+                .replace("${error_path}", error_path)
+                .replace("${cache_dir}", cache_dir)
             )
 
         # Submit array job
@@ -160,7 +183,7 @@ fi
         # print(f"{sbatch_path} --array=1-{num_tasks} {array_script}")
 
     def _collect_results(
-        self, commands_file: str, cache_dir: str
+        self, commands_file: str, cache_dir: str, prefix: str
     ) -> List[ShellCmdResult]:
         """Collect results from completed array job tasks."""
         results = []
@@ -172,11 +195,15 @@ fi
         # Collect results from each task
         for i, cmd in enumerate(cmds, 1):
             cmd = cmd.strip()
-            task_dir = os.path.join(cache_dir, f"task_{i}")
+            # task_dir = os.path.join(cache_dir, f"task_{i}")
 
             # Read output and error files
-            output = pathlib.Path(os.path.join(task_dir, "output.txt")).read_text()
-            error = pathlib.Path(os.path.join(task_dir, "error.txt")).read_text()
+            output = pathlib.Path(
+                os.path.join(cache_dir, f"{prefix}_{i}_output.txt")
+            ).read_text()
+            error = pathlib.Path(
+                os.path.join(cache_dir, f"{prefix}_{i}_error.txt")
+            ).read_text()
             # Determine return code (0 if output exists and error is empty)
             return_code = 1 if error.strip() else 0
 
