@@ -94,9 +94,6 @@ class Slurm(ShellParallelizerBase):
             single processor and logs a warning.
         """
 
-        print(self.params["wait_for_slurm"])
-        import pdb; pdb.set_trace()
-
         # Get the current generation directory
         cache_dir = self.params["cur_gen_dir"]
 
@@ -125,16 +122,23 @@ class Slurm(ShellParallelizerBase):
             prefix,
         )
 
+        if self.params["wait_for_slurm"]:
+            log_info(
+                f"Slurm array job submitted (id {prefix}). Waiting for completion..."
+            )
+
+            while not os.path.exists(completion_file):
+                time.sleep(5)
+            
+            return self._collect_results(commands_file, cache_dir, prefix)
+        
+        # Not supposed to wait for slurm.
+
         # Exit program with message
         log_info(
-            f"Slurm array job submitted (id {prefix}). Please wait for completion and then restart AutoGrow to continue the process."
+            f"Slurm array job submitted (id {prefix}). After the job finishes, restart AutoGrow to continue."
         )
         sys.exit(0)
-
-        # while not os.path.exists(completion_file):
-        #     time.sleep(5)
-        
-        # return self._collect_results(commands_file, cache_dir, prefix)
 
     def _submit_array_job(
         self,
