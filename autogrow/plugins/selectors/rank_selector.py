@@ -136,7 +136,7 @@ class RankSelector(SelectorBase):
         del sorted_list
         del temp_list_info
         if len(new_sorted_list) < num_to_choose:
-
+            # TODO: Should not raise an exception, but rather return the available ligands
             raise Exception(
                 "Asked for {} but only {} availabe to chose from \
                 There are more ligands to chose to seed the list than ligands to select from. \

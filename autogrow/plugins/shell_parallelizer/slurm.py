@@ -118,14 +118,14 @@ class Slurm(ShellParallelizerBase):
 
         # Exit program with message
         log_info(
-            "\nSlurm array job submitted. Please wait for completion and then restart AutoGrow to continue the process.\n"
+            f"Slurm array job submitted (id {prefix}). Please wait for completion and then restart AutoGrow to continue the process."
         )
-        # sys.exit(0)
+        sys.exit(0)
 
-        while not os.path.exists(completion_file):
-            time.sleep(5)
+        # while not os.path.exists(completion_file):
+        #     time.sleep(5)
         
-        return self._collect_results(commands_file, cache_dir, prefix)
+        # return self._collect_results(commands_file, cache_dir, prefix)
 
     def _submit_array_job(
         self,
