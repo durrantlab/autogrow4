@@ -51,8 +51,7 @@ def rank_and_save_output_smi(
 
     Note:
         This method handles pass-through ligands from the previous generation
-        based on the 'redock_elite_from_previous_gen' parameter and the current
-        generation number.
+        and the current generation number.
     """
     # Get directory string of PDB files for Ligands
     # folder_with_pdbqts = f"{current_generation_dir}PDBs{os.sep}"
@@ -62,17 +61,18 @@ def rank_and_save_output_smi(
     #     params, smiles_file, folder_with_pdbqts
     # )
 
-    # Before ranking these we need to handle Pass-Through ligands from the
-    # last generation If it's current_gen_int==1 or if
-    # params['redock_elite_from_previous_gen'] is True -Both of these states
-    # dock all ligands from the last generation so all of the pass-through
-    # lig are already in the PDB's folder thus they should be accounted
-    # for in smiles_list If params['redock_elite_from_previous_gen'] is False
-    # and current_gen_int != 1 - We need to append the scores form the
-    # last gen to smiles_list
+    # Before ranking these we need to handle Pass-Through ligands from the last
+    # generation 
+    # 
+    # current_gen_int==1: dock all ligands from the last generation so all of
+    # the pass-through lig are already in the PDB's folder thus they should be
+    # accounted for in smiles_list
+    #
+    # current_gen_int != 1: We need to append the scores form the last gen to
+    # smiles_list
 
     # Only add these when we haven't already redocked the ligand
-    if params["redock_elite_from_previous_gen"] is False and current_gen_int != 0:
+    if current_gen_int != 0:
         # Go to previous generation folder
         prev_gen_num = str(current_gen_int - 1)
         run_folder = params["output_directory"]

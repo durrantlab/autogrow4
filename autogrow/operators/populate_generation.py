@@ -173,8 +173,7 @@ def populate_generation(
         PreDockedCompound
     ] = mut_predock_cmpds + cross_predock_cmpds
 
-    # TODO: Consider depreciating redock_elite_from_previous_gen
-    if params["redock_elite_from_previous_gen"] is False and generation_num != 1:
+    if generation_num != 1:
         # Doesn't append to the new_generation_smiles_list
         full_gen_predock_cmpds.extend(iter(elite_predock_cmpds))
     else:

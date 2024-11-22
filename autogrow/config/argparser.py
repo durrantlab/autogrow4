@@ -439,15 +439,6 @@ def _add_ga_params(parser: argparse._ArgumentGroup):
         This is purely advancing based on Docking/Rescore \
         fitness. This does not select for diversity.",
     )
-    parser.add_argument(
-        "--redock_elite_from_previous_gen",
-        choices=[True, False, "True", "False", "true", "false"],
-        default=False,
-        help="If True than ligands chosen via Elitism (ie advanced from last generation) \
-        will be passed through Gypsum and docked again. This provides a better exploration of conformer space \
-        but also requires more computation time. If False, advancing ligands are simply carried forward by \
-        copying the PDBQT files.",
-    )
 
     parser.add_argument(
         "--diversity_seed_depreciation_per_gen",
