@@ -64,7 +64,8 @@ class SmiTo3DSdfBase(PluginBase):
 
         Returns:
             List[PreDockedCompound]: Updated list of compounds with 3D SDF
-                paths.
+                paths (must populate sdf_3d_path properties of each
+                PreDockedCompound).
         """
         pass
 
@@ -132,4 +133,13 @@ class SmiTo3DSdfPluginManager(PluginManagerBase):
         #         f"Could not find 3D SDF files associated with input file {kwargs['smi_file']}. Conversion error?"
         #     )
 
-        return smi_to_sdf_converter.run(**kwargs)
+        resp = smi_to_sdf_converter.run(**kwargs)
+
+        # Validate that the sdf_3d_path property is populated
+        for cmpd in resp:
+            if cmpd.sdf_3d_path is None:
+                raise Exception(
+                    "ERROR! Your SmiTo3DSdf plugin must populate the sdf_3d_path property of each PreDockedCompound."
+                )
+
+        return resp

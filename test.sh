@@ -23,13 +23,13 @@ python run_autogrow.py \
     --procs_per_node 3 \
     --FragmentAddition \
     --rxn_library_path ./autogrow/plugins/mutation/reaction_libraries/all_rxns \
-    --VinaLikeDocking \
+    --FakeDocking \
     --docking_exhaustiveness 1 \
     --redock_elite_from_previous_gen False \
     --RankSelector \
     --multithread_mode serial \
-    --ObabelSmiTo3DSDF \
-    --Slurm \
+    --FakeSmiTo3DSDF \
+    --PythonMultiprocessing \
     --slurm_template_file tmp.txt \
     --parallel_exec_path /opt/homebrew/bin/parallel
 
