@@ -915,11 +915,7 @@ class FragmentAddition(MutationBase):
             > 0
         )
 
-        if not passed_filter:
-            return None
-
-        # passes
-        return reaction_product_smiles
+        return reaction_product_smiles if passed_filter else None
 
     def _get_random_complementary_mol(self, functional_group: str) -> List[str]:
         """
