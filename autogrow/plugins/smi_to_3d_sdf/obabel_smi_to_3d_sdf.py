@@ -9,7 +9,7 @@ import __future__
 # from autogrow.plugins.plugin_managers import plugin_managers
 from autogrow.plugins.smi_to_3d_sdf import SmiTo3DSdfBase
 from autogrow.plugins.smiles_filters import SmilesFilterBase
-from autogrow.types import PreDockedCompound
+from autogrow.types import Compound
 from autogrow.utils.logging import log_warning
 from autogrow.utils.obabel import obabel_convert, obabel_convert_cmd
 import rdkit  # type: ignore
@@ -74,25 +74,25 @@ class ObabelSmiTo3DSDF(SmiTo3DSdfBase):
             )
 
     def run_smi_to_3d_sdf_converter(
-        self, predock_cmpds: List[PreDockedCompound], pwd: str
-    ) -> List[PreDockedCompound]:
+        self, predock_cmpds: List[Compound], pwd: str
+    ) -> List[Compound]:
         """
         Convert a list of SMILES representations to 3D SDF files using
         OpenBabel.
 
-        This method takes a list of PreDockedCompound objects containing SMILES
+        This method takes a list of PostDockedCompound objects containing SMILES
         strings and converts them to 3D SDF files using OpenBabel. The
         conversion is done in parallel using a shell parallelizer plugin.
 
         Args:
-            predock_cmpds (List[PreDockedCompound]): A list of PreDockedCompound
+            predock_cmpds (List[PostDockedCompound]): A list of PostDockedCompound
                 objects, each containing a SMILES string and other compound
                 information.
             pwd (str): The path to the working directory where temporary files
             will be created.
 
         Returns:
-            List[PreDockedCompound]: The input list of PreDockedCompound
+            List[PostDockedCompound]: The input list of PostDockedCompound
                 objects, updated with the paths to the generated 3D SDF files.
 
         Note:

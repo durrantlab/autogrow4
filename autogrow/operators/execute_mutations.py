@@ -15,7 +15,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from autogrow.operators.mutant_crossover_parent import CompoundGenerator
 from autogrow.plugins.plugin_managers import plugin_managers
 from autogrow.plugins.mutation import MutationBase, MutationPluginManager
-from autogrow.types import PreDockedCompound
+from autogrow.types import Compound
 from autogrow.utils.logging import LogLevel, log_debug, log_warning
 
 
@@ -28,7 +28,7 @@ class MutationGenerator(CompoundGenerator):
         return {"plugin_manager": mutation_plugin_manager}
 
     def prepare_job_inputs(
-        self, compounds: List[PreDockedCompound], num_to_process: int
+        self, compounds: List[Compound], num_to_process: int
     ) -> List[Tuple]:
         return [
             (compounds[i % len(compounds)], self.operation_params["plugin_manager"])
@@ -52,16 +52,16 @@ class MutationGenerator(CompoundGenerator):
 
 
 def _run_mutation_for_multithread(
-    predock_cmpd: PreDockedCompound, mutation_obj: MutationPluginManager
+    predock_cmpd: Compound, mutation_obj: MutationPluginManager
 ) -> Optional[Tuple[str, int, Union[str, None]]]:
     """
-    Performs a single mutation operation on a PreDockedCompound.
+    Performs a single mutation operation on a PostDockedCompound.
 
     This function is designed to be used in a multithreaded context, allowing
     for parallel processing of mutations.
 
     Args:
-        smile (PreDockedCompound): PreDockedCompound of the molecule to mutate.
+        smile (PostDockedCompound): PostDockedCompound of the molecule to mutate.
         mutation_obj (MutationPluginManager): Mutation object to perform the mutation.
 
     Returns:
@@ -74,4 +74,4 @@ def _run_mutation_for_multithread(
         making it suitable for use in multiprocessing contexts.
     """
     resp = mutation_obj.run(predock_cmpd=predock_cmpd)
-    return None if resp is None else tuple(list(resp) + [predock_cmpd.name])
+    return None if resp is None else tuple(list(resp) + [predock_cmpd.id])

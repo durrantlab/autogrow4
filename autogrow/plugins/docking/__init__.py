@@ -12,7 +12,7 @@ import os
 from typing import List, cast
 from autogrow.plugins.plugin_base import PluginBase
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
-from autogrow.types import PostDockedCompound, PreDockedCompound
+from autogrow.types import Compound, Compound
 from autogrow.utils.logging import log_debug, log_warning
 
 
@@ -24,7 +24,7 @@ class DockingBase(PluginBase):
     run method that calls the abstract run_docking method.
     """
 
-    def run(self, **kwargs) -> List[PostDockedCompound]:
+    def run(self, **kwargs) -> List[Compound]:
         """
         Run the docking plugin with provided arguments.
 
@@ -39,13 +39,13 @@ class DockingBase(PluginBase):
 
     @abstractmethod
     def run_docking(
-        self, predocked_cmpds: List[PreDockedCompound]
-    ) -> List[PostDockedCompound]:
+        self, predocked_cmpds: List[Compound]
+    ) -> List[Compound]:
         """
         Abstract method to be implemented by each docking plugin.
 
         Args:
-            predocked_cmpds (List[PreDockedCompound]): A list of PreDockedCompound
+            predocked_cmpds (List[PostDockedCompound]): A list of PostDockedCompound
                 objects to be docked.
 
         Returns:
@@ -64,7 +64,7 @@ class DockingPluginManager(PluginManagerBase):
     as well as ranking and saving the output of docking operations.
     """
 
-    def execute(self, **kwargs) -> List[PostDockedCompound]:
+    def execute(self, **kwargs) -> List[Compound]:
         """
         Execute the selected docking plugin with provided arguments.
 
@@ -116,5 +116,9 @@ class DockingPluginManager(PluginManagerBase):
                 with open(sdf_filename, "w") as f:
                     new_sdf_content = orig_sdf_content.split("$$$$")[0] + "$$$$\n"
                     f.write(new_sdf_content)
+
+        # TODO: Validation needed here. Some docking scores could be the same,
+        # but they shouldn't all be the same. SDF paths must be updated. And
+        # history must be augmented.
 
         return post_docked_cmpds

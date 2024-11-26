@@ -10,7 +10,7 @@ from argparse import ArgumentParser
 from typing import Dict, List, Optional, Tuple, Union, cast
 
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
-from autogrow.types import PreDockedCompound
+from autogrow.types import Compound
 from autogrow.utils.logging import LogLevel, log_debug, log_warning
 from rdkit import Chem  # type: ignore
 from rdkit.Chem.MolStandardize import rdMolStandardize  # type: ignore
@@ -47,13 +47,13 @@ class MutationBase(PluginBase):
 
     @abstractmethod
     def run_mutation(
-        self, predock_cmpd: PreDockedCompound
+        self, predock_cmpd: Compound
     ) -> Optional[Tuple[str, int, Union[str, None]]]:
         """
         Abstract method to be implemented by each mutation plugin.
 
         Args:
-            predock_cmpd (PreDockedCompound): The PreDockedCompound of the
+            predock_cmpd (PostDockedCompound): The PostDockedCompound of the
                 parent molecule to be mutated.
 
         Returns:

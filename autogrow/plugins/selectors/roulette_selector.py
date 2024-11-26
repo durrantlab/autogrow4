@@ -10,7 +10,7 @@ import __future__
 from autogrow.plugins.selectors import SelectorBase
 from typing import List, Tuple
 from autogrow.config.argparser import ArgumentVars
-from autogrow.types import PreDockedCompound, ScoreType
+from autogrow.types import Compound, ScoreType
 import numpy.random as rn
 
 from autogrow.utils.logging import log_debug
@@ -70,15 +70,15 @@ class RouletteSelector(SelectorBase):
 
     def run_selector(
         self,
-        predock_cmpds: List[PreDockedCompound],
+        predock_cmpds: List[Compound],
         num_to_choose: int,
         score_type: ScoreType,
-    ) -> List[PreDockedCompound]:
+    ) -> List[Compound]:
         """
         Select compounds using weighted roulette selection without replacement.
 
         Args:
-            predock_cmpds (List[PreDockedCompound]): A list of all compounds
+            predock_cmpds (List[PostDockedCompound]): A list of all compounds
                 from the previous generation.
             num_to_choose (int): The number of compounds to select based on
                 their score.
@@ -86,7 +86,7 @@ class RouletteSelector(SelectorBase):
                 "diversity" scores for weighting.
 
         Returns:
-            List[PreDockedCompound]: List of selected compounds.
+            List[PostDockedCompound]: List of selected compounds.
 
         Raises:
             Exception: If predock_cmpds is not a list or is empty.
@@ -115,7 +115,7 @@ class RouletteSelector(SelectorBase):
 
         # NOTE: I'm not sure why type: ignore is needed below. It seems like it should be
         # inferred correctly.
-        chosen_predock_cmpds: List[PreDockedCompound] = rn.choice(
+        chosen_predock_cmpds: List[Compound] = rn.choice(
             predock_cmpds, size=num_to_choose, replace=False, p=probabilities  # type: ignore
         ).tolist()  # type: ignore
 
@@ -125,7 +125,7 @@ class RouletteSelector(SelectorBase):
         return chosen_predock_cmpds
 
     def _adjust_scores(
-        self, predock_cmpds: List[PreDockedCompound], score_type: ScoreType
+        self, predock_cmpds: List[Compound], score_type: ScoreType
     ) -> List[float]:
         """
         Adjust scores for weighting in the selection process.
@@ -135,7 +135,7 @@ class RouletteSelector(SelectorBase):
         higher scores are better).
 
         Args:
-            predock_cmpds (List[PreDockedCompound]): A list of all compounds
+            predock_cmpds (List[PostDockedCompound]): A list of all compounds
                 from the previous generation.
             score_type (ScoreType): Specifies whether to use "docking" or
                 "diversity" scores.

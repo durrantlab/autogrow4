@@ -18,7 +18,7 @@ import __future__
 from typing import List, Tuple
 from autogrow.config.argparser import ArgumentVars
 from autogrow.plugins.smiles_filters import SmilesFilterBase
-from autogrow.types import PreDockedCompound
+from autogrow.types import Compound
 import rdkit  # type: ignore
 import rdkit.Chem as Chem  # type: ignore
 import rdkit.Chem.MolSurf as MolSurf  # type: ignore
@@ -46,7 +46,7 @@ class VandeWaterbeemdFilter(SmilesFilterBase):
     Targeting (1998), 6(2), 151-165.
     """
 
-    def run_filter(self, predock_cmpd: PreDockedCompound) -> bool:
+    def run_filter(self, predock_cmpd: Compound) -> bool:
         """
         Run the VandeWaterbeemd filter on a given molecule.
 
@@ -55,7 +55,7 @@ class VandeWaterbeemdFilter(SmilesFilterBase):
         molecular weight and polar surface area of the molecule.
 
         Args:
-            predock_cmpd (PreDockedCompound): A PreDockedCompound to be tested.
+            predock_cmpd (PostDockedCompound): A PostDockedCompound to be tested.
 
         Returns:
             bool: True if the molecule passes all filter criteria (MW < 450

@@ -12,7 +12,7 @@ from typing import Any, Dict, List, cast
 from autogrow.docking.ranking.ranking_mol import rank_and_save_output_smi
 from autogrow.plugins.plugin_managers import plugin_managers
 from autogrow.plugins.docking import DockingPluginManager
-from autogrow.types import PreDockedCompound
+from autogrow.types import Compound
 from autogrow.utils.logging import LogLevel, log_info
 
 
@@ -20,7 +20,7 @@ def run_docking_common(
     current_gen_int: int,
     cur_gen_dir: str,
     smiles_file_new_gen: str,
-    new_gen_predock_cmpds: List[PreDockedCompound],
+    new_gen_predock_cmpds: List[Compound],
     params: Dict[str, Any],
 ) -> str:
     """
@@ -33,7 +33,7 @@ def run_docking_common(
         current_gen_int (int): Current generation number.
         cur_gen_dir (str): Directory for the current generation.
         smiles_file_new_gen (str): Filename containing new population molecules.
-        new_gen_predock_cmpds (List[PreDockedCompound]): List of PreDockedCompound
+        new_gen_predock_cmpds (List[PostDockedCompound]): List of PostDockedCompound
             objects for the new generation.
 
     Returns:
@@ -52,7 +52,7 @@ def run_docking_common(
 
     # Remove those not associated with a docked sdf file
     post_docked_compounds = [
-        x for x in post_docked_compounds if x.docked_sdf_path is not None
+        x for x in post_docked_compounds if x.sdf_path is not None
     ]
 
     return rank_and_save_output_smi(

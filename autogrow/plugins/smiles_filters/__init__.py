@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 from typing import Dict, List, Optional, Tuple, Union, cast
 
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
-from autogrow.types import PreDockedCompound
+from autogrow.types import Compound
 from rdkit import Chem  # type: ignore
 from rdkit.Chem.MolStandardize import rdMolStandardize  # type: ignore
 import copy
@@ -43,7 +43,7 @@ class SmilesFilterBase(PluginBase):
 
         Args:
             **kwargs: Keyword arguments containing filter parameters, must
-                include: predock_cmpd (PreDockedCompound): The molecule to be
+                include: predock_cmpd (PostDockedCompound): The molecule to be
                 filtered
 
         Returns:
@@ -53,12 +53,12 @@ class SmilesFilterBase(PluginBase):
         return self.run_filter(kwargs["predock_cmpd"])
 
     @abstractmethod
-    def run_filter(self, predock_cmpd: PreDockedCompound) -> bool:
+    def run_filter(self, predock_cmpd: Compound) -> bool:
         """
         run_filter is needs to be implemented in each class.
 
         Inputs:
-        :param PreDockedCompound predock_cmpd: a molecule to filter
+        :param PostDockedCompound predock_cmpd: a molecule to filter
 
         Returns:
         :returns: bool: True if the molecule passes the filter, False if it fails
@@ -70,13 +70,13 @@ class SmilesFilterBase(PluginBase):
         pass
 
     def predock_cmpd_to_rdkit_mol(
-        self, predock_cmpd: PreDockedCompound
+        self, predock_cmpd: Compound
     ) -> Optional[Chem.Mol]:
         """
-        Convert a PreDockedCompound object to an RDKit molecule object.
+        Convert a PostDockedCompound object to an RDKit molecule object.
 
         Args:
-            predock_cmpd (PreDockedCompound): The PreDockedCompound object to
+            predock_cmpd (PostDockedCompound): The PostDockedCompound object to
                 convert.
 
         Returns:
@@ -115,7 +115,7 @@ class SmilesFilterPluginManager(PluginManagerBase):
         # assert isinstance(kwargs["smiles"][0], str), "smiles must be a list of strings"
 
         # Run filter on a single smiles string.
-        passed_cmpds: List[PreDockedCompound] = []
+        passed_cmpds: List[Compound] = []
         for predock_cmpd in kwargs["predock_cmpds"]:
             # run through the filters
             passed = self._run_all_selected_filters(predock_cmpd)
@@ -124,14 +124,14 @@ class SmilesFilterPluginManager(PluginManagerBase):
 
         return passed_cmpds
 
-    def _run_all_selected_filters(self, predock_cmpd: PreDockedCompound) -> bool:
+    def _run_all_selected_filters(self, predock_cmpd: Compound) -> bool:
         """
         Iterate through all of the filters specified by the user for a single
         molecule. returns True if the mol passes all the chosen filters. returns
         False if the mol fails any of the filters.
 
         Inputs:
-        :param PreDockedCompound predock_cmpd: An rdkit mol object to be tested
+        :param PostDockedCompound predock_cmpd: An rdkit mol object to be tested
             if it passes the filters
 
         Returns:

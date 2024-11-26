@@ -25,7 +25,7 @@ import __future__
 import copy
 
 from autogrow.plugins.smiles_filters import SmilesFilterBase
-from autogrow.types import PreDockedCompound
+from autogrow.types import Compound
 import rdkit  # type: ignore
 import rdkit.Chem as Chem  # type: ignore
 import rdkit.Chem.Lipinski as Lipinski  # type: ignore
@@ -63,7 +63,7 @@ class GhoseModifiedFilter(SmilesFilterBase):
     1 (1999), pp. 55-68
     """
 
-    def run_filter(self, predock_cmpd: PreDockedCompound) -> bool:
+    def run_filter(self, predock_cmpd: Compound) -> bool:
         """
         Run the modified Ghose filter on a given molecule.
 
@@ -76,7 +76,7 @@ class GhoseModifiedFilter(SmilesFilterBase):
         atoms.
 
         Args:
-            predock_cmpd (PreDockedCompound): A PreDockedCompound to be tested.
+            predock_cmpd (PostDockedCompound): A PostDockedCompound to be tested.
 
         Returns:
             bool: True if the molecule passes all filter criteria, False

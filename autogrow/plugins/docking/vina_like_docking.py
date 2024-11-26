@@ -17,7 +17,7 @@ import os
 from autogrow.plugins.docking import DockingBase
 from typing import List, Tuple
 from autogrow.config.argparser import ArgumentVars
-from autogrow.types import PostDockedCompound, PreDockedCompound
+from autogrow.types import Compound, Compound
 from autogrow.utils.logging import log_warning
 from autogrow.utils.obabel import obabel_convert, obabel_convert_cmd
 
@@ -124,8 +124,8 @@ class VinaLikeDocking(DockingBase):
             )
 
     def run_docking(
-        self, predocked_cmpds: List[PreDockedCompound]
-    ) -> List[PostDockedCompound]:
+        self, predocked_cmpds: List[Compound]
+    ) -> List[Compound]:
         """
         Run docking using Vina-like software on a list of compounds.
 
@@ -133,8 +133,8 @@ class VinaLikeDocking(DockingBase):
         processes docking results for multiple compounds in parallel.
 
         Args:
-            predocked_cmpds (List[PreDockedCompound]): A list of
-                PreDockedCompound objects to be docked.
+            predocked_cmpds (List[PostDockedCompound]): A list of
+                PostDockedCompound objects to be docked.
 
         Returns:
             List[PostDockedCompound]: A list of PostDockedCompound objects,
@@ -164,7 +164,7 @@ class VinaLikeDocking(DockingBase):
         for predocked_cmpd in predocked_cmpds:
             if predocked_cmpd.sdf_path is None:
                 log_warning(
-                    f"Skipping {predocked_cmpd.name} because sdf_3d_path is None"
+                    f"Skipping {predocked_cmpd.id} because sdf_3d_path is None"
                 )
                 vina_out_files.append(None)
                 continue
@@ -213,11 +213,10 @@ class VinaLikeDocking(DockingBase):
             cmds=vina_out_convert_cmds
         )  # TODO: Need to specify nprocs?
 
-        post_docked_cmpds = []
         for predocked_cmpd, vina_out_file in zip(predocked_cmpds, vina_out_files):
             if vina_out_file is None or not os.path.exists(vina_out_file):
                 # Throw out ones that failed to dock
-                log_warning(f"Failed to dock {predocked_cmpd.name}")
+                log_warning(f"Failed to dock {predocked_cmpd.id}")
                 continue
 
             # TODO: Does this work for qvina2, smina, etc.?
@@ -227,22 +226,22 @@ class VinaLikeDocking(DockingBase):
                 # REMARK INTER + INTRA:         -13.559
 
                 lines = f.readlines()
-                score = 99999
-                for line in lines:
-                    if "REMARK VINA RESULT:" in line:
-                        score = float(line.split()[3])
-
-                        post_docked_cmpds.append(
-                            predocked_cmpd.to_post_docked_compound(
-                                score, f"{vina_out_file}.sdf"
-                            )
-                        )
-
-                        break
+                score = next(
+                    (
+                        float(line.split()[3])
+                        for line in lines
+                        if "REMARK VINA RESULT:" in line
+                    ),
+                    99999,
+                )
                 if score == 99999:
                     log_warning(f"Failed to parse docking score from {vina_out_file}")
 
-        return post_docked_cmpds
+            # TODO: Update a history in the future.
+            predocked_cmpd.docking_score = score
+            predocked_cmpd.sdf_path = f"{vina_out_file}.sdf"
+
+        return predocked_cmpds
 
     #######################################
     # DOCK USING VINA                     #

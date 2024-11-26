@@ -15,7 +15,7 @@ ChemMedChem 3 (2008) 435-444. doi:10.1002/cmdc.200700139.
 import __future__
 
 from autogrow.plugins.smiles_filters import SmilesFilterBase
-from autogrow.types import PreDockedCompound
+from autogrow.types import Compound
 import rdkit  # type: ignore
 from rdkit.Chem import FilterCatalog  # type: ignore
 from rdkit.Chem.FilterCatalog import FilterCatalogParams  # type: ignore
@@ -54,7 +54,7 @@ class BRENKFilter(SmilesFilterBase):
         # This is our set of all the BRENK filters
         return FilterCatalog.FilterCatalog(params)
 
-    def run_filter(self, predock_cmpd: PreDockedCompound) -> bool:
+    def run_filter(self, predock_cmpd: Compound) -> bool:
         """
         Run the BRENK filter on a given molecule.
 
@@ -64,7 +64,7 @@ class BRENKFilter(SmilesFilterBase):
         http://rdkit.blogspot.com/2016/04/changes-in-201603-release-filtercatalog.html
 
         Args:
-            predock_cmpd (PreDockedCompound): A PreDockedCompound to be tested.
+            predock_cmpd (PostDockedCompound): A PostDockedCompound to be tested.
 
         Returns:
             bool: True if the molecule passes the filter; False if it fails.

@@ -13,7 +13,7 @@ import random
 from autogrow.plugins.selectors import SelectorBase
 from typing import List, Tuple
 from autogrow.config.argparser import ArgumentVars
-from autogrow.types import PreDockedCompound, ScoreType
+from autogrow.types import Compound, ScoreType
 from autogrow.utils.logging import log_debug
 
 
@@ -83,10 +83,10 @@ class TournamentSelector(SelectorBase):
 
     def run_selector(
         self,
-        predock_cmpds: List[PreDockedCompound],
+        predock_cmpds: List[Compound],
         num_to_choose: int,
         score_type: ScoreType,
-    ) -> List[PreDockedCompound]:
+    ) -> List[Compound]:
         """
         Select compounds using tournament selection without replacement.
 
@@ -95,7 +95,7 @@ class TournamentSelector(SelectorBase):
         best-scoring compound wins the tournament.
 
         Args:
-            predock_cmpds (List[PreDockedCompound]): A list of all compounds
+            predock_cmpds (List[PostDockedCompound]): A list of all compounds
                 from the previous generation.
             num_to_choose (int): The number of compounds to select (also the
                 number of tournaments to run).
@@ -103,7 +103,7 @@ class TournamentSelector(SelectorBase):
                 "diversity" scores for selection.
 
         Returns:
-            List[PreDockedCompound]: List of selected compounds.
+            List[PostDockedCompound]: List of selected compounds.
 
         Raises:
             Exception: If predock_cmpds is not a list or is empty.
@@ -130,7 +130,7 @@ class TournamentSelector(SelectorBase):
 
         num_per_tourn = int(math.ceil(num_ligands * tourn_size))
 
-        chosen_predock_cmpds: List[PreDockedCompound] = []
+        chosen_predock_cmpds: List[Compound] = []
         list_of_ligands_reduced = copy.deepcopy(predock_cmpds)
         for _ in range(num_to_choose):
             chosen_predock_cmpd = self._run_one_tournament(
@@ -141,19 +141,19 @@ class TournamentSelector(SelectorBase):
             ]
             chosen_predock_cmpds.append(chosen_predock_cmpd)
 
-            scre = chosen_predock_cmpd.get_previous_score(score_type)
+            scre = chosen_predock_cmpd.get_score_by_type(score_type)
             log_debug(
-                f"{chosen_predock_cmpd.smiles} ({chosen_predock_cmpd.name}): score {scre:.2f}"
+                f"{chosen_predock_cmpd.smiles} ({chosen_predock_cmpd.id}): score {scre:.2f}"
             )
 
         return chosen_predock_cmpds
 
     def _run_one_tournament(
         self,
-        list_of_ligands: List[PreDockedCompound],
+        list_of_ligands: List[Compound],
         num_per_tourn: int,
         score_type: ScoreType,
-    ) -> PreDockedCompound:
+    ) -> Compound:
         """
         Run a single tournament to select one compound.
 
@@ -161,7 +161,7 @@ class TournamentSelector(SelectorBase):
         and returns the best-scoring compound from this subset.
 
         Args:
-            list_of_ligands (List[PreDockedCompound]): The list of all compounds
+            list_of_ligands (List[PostDockedCompound]): The list of all compounds
                 to select from.
             num_per_tourn (int): The number of compounds to include in the
                 tournament.
@@ -169,11 +169,11 @@ class TournamentSelector(SelectorBase):
                 "diversity" scores for selection.
 
         Returns:
-            PreDockedCompound: The winning compound from the tournament.
+            PostDockedCompound: The winning compound from the tournament.
         """
         num_ligands = len(list_of_ligands)
 
-        chosen_option = PreDockedCompound(smiles="", name="")  # init
+        chosen_option = Compound(smiles="", id="")  # init
         temp = []
         for i in range(num_per_tourn):
             temp.append(i)
@@ -181,8 +181,8 @@ class TournamentSelector(SelectorBase):
                 chosen_option = list_of_ligands[random.randint(0, num_ligands - 1)]
             else:
                 choice = list_of_ligands[random.randint(0, num_ligands - 1)]
-                if float(chosen_option.get_previous_score(score_type)) > float(
-                    choice.get_previous_score(score_type)
+                if float(chosen_option.get_score_by_type(score_type)) > float(
+                    choice.get_score_by_type(score_type)
                 ):
                     chosen_option = choice
 

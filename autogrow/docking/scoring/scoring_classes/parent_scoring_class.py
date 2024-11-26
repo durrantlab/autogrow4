@@ -6,7 +6,7 @@ import __future__
 from abc import ABC, abstractmethod
 from typing import Union
 
-from autogrow.types import PostDockedCompound
+from autogrow.types import Compound
 
 
 class ParentScoring(ABC):
@@ -24,7 +24,7 @@ class ParentScoring(ABC):
         return self.__class__.__name__
 
     @abstractmethod
-    def run_scoring(self, file_path: str) -> Union[PostDockedCompound, None]:
+    def run_scoring(self, file_path: str) -> Union[Compound, None]:
         """
         run_scoring is needs to be implemented in each class.
 
@@ -33,7 +33,7 @@ class ParentScoring(ABC):
 
         Returns:
         :returns: list lig_info: a list containing all info from
-            self.smiles_dict for a given ligand and the ligands short_id_name and
+            self.smiles_dict for a given ligand and the ligands id_name and
             the docking score from the best pose.
         """
         # raise NotImplementedError("run_scoring() not implemented")

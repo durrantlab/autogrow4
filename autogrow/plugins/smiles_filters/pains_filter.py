@@ -19,7 +19,7 @@ import __future__
 from typing import List, Tuple
 from autogrow.config.argparser import ArgumentVars
 from autogrow.plugins.smiles_filters import SmilesFilterBase
-from autogrow.types import PreDockedCompound
+from autogrow.types import Compound
 import rdkit  # type: ignore
 from rdkit.Chem import FilterCatalog  # type: ignore
 from rdkit.Chem.FilterCatalog import FilterCatalogParams  # type: ignore
@@ -77,7 +77,7 @@ class PAINSFilter(SmilesFilterBase):
 
         return filters_list
 
-    def run_filter(self, predock_cmpd: PreDockedCompound) -> bool:
+    def run_filter(self, predock_cmpd: Compound) -> bool:
         """
         Run the PAINS filter on a given molecule.
 
@@ -89,7 +89,7 @@ class PAINSFilter(SmilesFilterBase):
         http://rdkit.blogspot.com/2016/04/changes-in-201603-release-filtercatalog.html
 
         Args:
-            predock_cmpd (PreDockedCompound): A PreDockedCompound to be tested.
+            predock_cmpd (PostDockedCompound): A PostDockedCompound to be tested.
 
         Returns:
             bool: True if the molecule passes all PAINS filters (no matches

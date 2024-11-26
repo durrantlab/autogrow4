@@ -11,7 +11,7 @@ from typing import Any, List, Optional, Tuple, cast
 from autogrow.config.argparser import ArgumentVars
 from autogrow.plugins.plugin_base import PluginBase
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
-from autogrow.types import PreDockedCompound, ScoreType
+from autogrow.types import Compound, ScoreType
 from autogrow.utils.logging import LogLevel, log_info, log_warning
 
 
@@ -20,18 +20,18 @@ class SelectorBase(PluginBase):
 
     Args:
         **kwargs: Dictionary containing:
-            predock_cmpds (List[PreDockedCompound]): Available compounds to
+            predock_cmpds (List[PostDockedCompound]): Available compounds to
                 select from
             score_type (ScoreType): Type of score to use for selection
             num_to_choose (int): Number of compounds to select
 
     Returns:
-        List[PreDockedCompound]: Selected compounds
+        List[PostDockedCompound]: Selected compounds
     """
 
-    def run(self, **kwargs) -> List[PreDockedCompound]:
+    def run(self, **kwargs) -> List[Compound]:
         """Run the plugin with provided arguments."""
-        predock_cmpds: List[PreDockedCompound] = kwargs["predock_cmpds"]
+        predock_cmpds: List[Compound] = kwargs["predock_cmpds"]
         score_type: ScoreType = kwargs["score_type"]
         num_to_choose: int = kwargs["num_to_choose"]
 
@@ -44,28 +44,28 @@ class SelectorBase(PluginBase):
     @abstractmethod
     def run_selector(
         self,
-        predock_cmpds: List[PreDockedCompound],
+        predock_cmpds: List[Compound],
         num_to_choose: int,
         score_type: ScoreType,
-    ) -> List[PreDockedCompound]:
+    ) -> List[Compound]:
         """Abstract method for implementing selector-specific compound
         selection logic.
 
         Args:
-            predock_cmpds (List[PreDockedCompound]): Available compounds to
+            predock_cmpds (List[PostDockedCompound]): Available compounds to
                 select from
             num_to_choose (int): Number of compounds to select
             score_type (ScoreType): Type of score to use for selection (docking
                 or diversity)
 
         Returns:
-            List[PreDockedCompound]: Selected compounds
+            List[PostDockedCompound]: Selected compounds
         """
         pass
 
 
 class SelectorPluginManager(PluginManagerBase):
-    def execute(self, **kwargs) -> List[PreDockedCompound]:
+    def execute(self, **kwargs) -> List[Compound]:
         """Execute selector plugin to choose compounds based on scores.
 
         Runs the selected plugin to choose compounds based on both docking and
@@ -73,12 +73,12 @@ class SelectorPluginManager(PluginManagerBase):
 
         Args:
             **kwargs: Dictionary containing:
-                predock_cmpds (List[PreDockedCompound]): Available compounds
+                predock_cmpds (List[PostDockedCompound]): Available compounds
                 num_seed_dock_fitness (int): Number to choose by docking score
                 num_seed_diversity (int): Number to choose by diversity score
 
         Returns:
-            List[PreDockedCompound]: Combined list of compounds selected by both
+            List[PostDockedCompound]: Combined list of compounds selected by both
                 docking and diversity scores
 
         Raises:
@@ -98,8 +98,8 @@ class SelectorPluginManager(PluginManagerBase):
         # Get the selector plugin to use
         selector = cast(SelectorBase, self.plugins[selectors[0]])
 
-        docking_fitness_smiles_list: List[PreDockedCompound] = []
-        diversity_smile_list: List[PreDockedCompound] = []
+        docking_fitness_smiles_list: List[Compound] = []
+        diversity_smile_list: List[Compound] = []
 
         # Select the molecules based on the docking score
         num_predock_cmpds = len(kwargs["predock_cmpds"])
@@ -136,7 +136,7 @@ class SelectorPluginManager(PluginManagerBase):
         # Calculate the average docking score of the
         # docking_fitness_smiles_list.
         avg_docking_score = sum(
-            x.get_previous_score(ScoreType.DOCKING) for x in docking_fitness_smiles_list
+            x.get_score_by_type(ScoreType.DOCKING) for x in docking_fitness_smiles_list
         ) / len(docking_fitness_smiles_list)
         if avg_docking_score > 0:
             log_warning(

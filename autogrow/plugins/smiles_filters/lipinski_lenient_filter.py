@@ -22,7 +22,7 @@ pp. 3-26
 import __future__
 
 from autogrow.plugins.smiles_filters import SmilesFilterBase
-from autogrow.types import PreDockedCompound
+from autogrow.types import Compound
 import rdkit  # type: ignore
 import rdkit.Chem as Chem  # type: ignore
 import rdkit.Chem.Lipinski as Lipinski  # type: ignore
@@ -58,7 +58,7 @@ class LipinskiLenientFilter(SmilesFilterBase):
     Delivery Reviews, 46 (2001), pp. 3-26
     """
 
-    def run_filter(self, predock_cmpd: PreDockedCompound) -> bool:
+    def run_filter(self, predock_cmpd: Compound) -> bool:
         """
         Run the Lenient Lipinski filter on a given molecule.
 
@@ -71,7 +71,7 @@ class LipinskiLenientFilter(SmilesFilterBase):
         5 constraints.
 
         Args:
-            predock_cmpd (PreDockedCompound): A PreDockedCompound to be tested.
+            predock_cmpd (PostDockedCompound): A PostDockedCompound to be tested.
 
         Returns:
             bool: True if the molecule passes the filter (allows up to one

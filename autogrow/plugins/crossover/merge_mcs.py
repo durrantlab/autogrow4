@@ -3,7 +3,7 @@
 from typing import List, Optional, Tuple
 from autogrow.config.argparser import ArgumentVars
 from autogrow.plugins.crossover import CrossoverBase
-from autogrow.types import PreDockedCompound
+from autogrow.types import Compound
 import autogrow.utils.mol_object_handling as MOH
 from autogrow.utils.logging import log_debug
 import rdkit  # type: ignore
@@ -83,15 +83,15 @@ class MergeMCS(CrossoverBase):
         pass
 
     def run_crossover(
-        self, predock_cmpd1: PreDockedCompound, predock_cmpd2: PreDockedCompound
+        self, predock_cmpd1: Compound, predock_cmpd2: Compound
     ) -> Optional[str]:
         """
         Run the main script for SmileMerge.
 
         Args:
-            predock_cmpd1 (PreDockedCompound): PreDockedCompound of the first
+            predock_cmpd1 (PostDockedCompound): PostDockedCompound of the first
                 ligand.
-            predock_cmpd2 (PreDockedCompound):PreDockedCompound of the second
+            predock_cmpd2 (PostDockedCompound):PostDockedCompound of the second
                 ligand.
 
         Returns:

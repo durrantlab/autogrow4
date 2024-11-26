@@ -15,7 +15,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union, cast
 from autogrow.config.argparser import ArgumentVars
 from autogrow.plugins.plugin_base import PluginBase
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
-from autogrow.types import PostDockedCompound, PreDockedCompound, ScoreType
+from autogrow.types import Compound, Compound, ScoreType
 import autogrow.docking.scoring.execute_scoring_mol as Scoring
 import autogrow.docking.ranking.ranking_mol as Ranking
 from autogrow.utils.logging import log_debug, log_warning

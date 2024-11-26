@@ -11,7 +11,7 @@
 # from autogrow.docking.scoring.scoring_classes.scoring_functions.lig_efficiency import (
 #     LigEfficiency,
 # )
-# from autogrow.types import PreDockedCompound, PostDockedCompound
+# from autogrow.types import PostDockedCompound, PostDockedCompound
 
 
 # def pick_run_class_dict(scoring_choice: str) -> type:
@@ -297,7 +297,7 @@
 # ############
 
 
-# def make_dict_of_smiles(smiles_file: str) -> Dict[str, PreDockedCompound]:
+# def make_dict_of_smiles(smiles_file: str) -> Dict[str, PostDockedCompound]:
 #     """
 #     This will take a .smi file and make a dictionary with all of the info
 #     about the smiles. This list won't have scores yet but will have all of the
@@ -311,7 +311,7 @@
 #     Returns:
 #     :return dict smiles_dict: a list of ligand info before docking
 #     """
-#     smiles_dict: Dict[str, PreDockedCompound] = {}
+#     smiles_dict: Dict[str, PostDockedCompound] = {}
 #     # load smile file and convert to list with index
 #     with open(smiles_file, "r") as smi:
 
@@ -333,7 +333,7 @@
 
 #             assert lig_name_short is not None, "lig_name_short is None"
 
-#             smiles_dict[lig_name_short] = PreDockedCompound(
+#             smiles_dict[lig_name_short] = PostDockedCompound(
 #                 smiles=split_line[0], name=split_line[1]
 #             )
 

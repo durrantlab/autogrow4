@@ -22,7 +22,7 @@ from autogrow.config.argparser import ArgumentVars
 
 # from autogrow.plugins.plugin_managers import plugin_managers
 from autogrow.plugins.mutation import MutationBase
-from autogrow.types import PreDockedCompound
+from autogrow.types import Compound
 from autogrow.utils.logging import log_debug, log_warning
 import rdkit  # type: ignore
 from rdkit import Chem  # type: ignore
@@ -126,7 +126,7 @@ class FragmentAddition(MutationBase):
         self._load_rxn_data()
 
     def run_mutation(
-        self, predock_cmpd: PreDockedCompound
+        self, predock_cmpd: Compound
     ) -> Optional[Tuple[str, int, Union[str, None]]]:
         """
         Run the mutation on the parent molecule.
@@ -138,7 +138,7 @@ class FragmentAddition(MutationBase):
         If none work, we return None.
 
         Args:
-            predock_cmpd (PreDockedCompound): PreDockedCompound of a molecule to
+            predock_cmpd (PostDockedCompound): PostDockedCompound of a molecule to
                 be reacted.
 
         Returns:
@@ -198,7 +198,7 @@ class FragmentAddition(MutationBase):
         # List of already predicted smiles (to make sure no duplicates)
         # TODO: Think more about this. Needs to be only once, but if here, it will be with every reaction.
         # Now called from setup, so only once, but think more about implementation.
-        # existing_smiles: List[PreDockedCompound],
+        # existing_smiles: List[PostDockedCompound],
         # self.existing_smiles = [
         #     x.smiles for x in existing_smiles
         # ]
@@ -906,9 +906,9 @@ class FragmentAddition(MutationBase):
         # code in execute_crossover.py.
         assert self.plugin_managers is not None, "Plugin managers not set"
 
-        # TODO: Filter accepts a list of PreDockedCompound. So we need to
+        # TODO: Filter accepts a list of PostDockedCompound. So we need to
         # convert smiles string to that just for the purpose of filtering.
-        tmp_predock_cmpd = PreDockedCompound(smiles=reaction_product_smiles, name="tmp")
+        tmp_predock_cmpd = Compound(smiles=reaction_product_smiles, id="tmp")
 
         passed_filter = (
             len(self.plugin_managers.SmilesFilter.run(predock_cmpds=[tmp_predock_cmpd]))

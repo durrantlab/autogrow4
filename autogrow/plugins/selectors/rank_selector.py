@@ -24,7 +24,7 @@ import __future__
 from autogrow.plugins.selectors import SelectorBase
 from typing import List, Tuple
 from autogrow.config.argparser import ArgumentVars
-from autogrow.types import PreDockedCompound, ScoreType
+from autogrow.types import Compound, ScoreType
 from autogrow.utils.logging import log_debug
 
 
@@ -73,10 +73,10 @@ class RankSelector(SelectorBase):
 
     def run_selector(
         self,
-        predock_cmpds: List[PreDockedCompound],
+        predock_cmpds: List[Compound],
         num_to_choose: int,
         score_type: ScoreType,
-    ) -> List[PreDockedCompound]:
+    ) -> List[Compound]:
         """
         Select compounds based on their rank in the specified score.
 
@@ -84,14 +84,14 @@ class RankSelector(SelectorBase):
         removing any redundancies in the process.
 
         Args:
-            predock_cmpds (List[PreDockedCompound]): A list of all compounds
+            predock_cmpds (List[PostDockedCompound]): A list of all compounds
                 from the previous generation.
             num_to_choose (int): The number of compounds to select.
             score_type (ScoreType): The type of score to use for ranking (e.g.,
                 docking or diversity).
 
         Returns:
-            List[PreDockedCompound]: A list of selected compounds.
+            List[PostDockedCompound]: A list of selected compounds.
 
         Raises:
             Exception: If predock_cmpds is not a list, is empty, or if there are
@@ -112,7 +112,7 @@ class RankSelector(SelectorBase):
         # Sort by chosen idx property
         sorted_list = sorted(
             predock_cmpds,
-            key=lambda x: x.get_previous_score(score_type),
+            key=lambda x: x.get_score_by_type(score_type),
             reverse=False,
         )
 
@@ -123,14 +123,14 @@ class RankSelector(SelectorBase):
         # )
 
         # remove any redundants
-        new_sorted_list: List[PreDockedCompound] = []
+        new_sorted_list: List[Compound] = []
         temp_list_info: List[str] = []
         for i in range(len(sorted_list)):
             info = sorted_list[i]
-            if "\t".join(info.to_list()) in temp_list_info:
+            if info.from_tsv_line in temp_list_info:
                 continue
 
-            temp_list_info.append("\t".join(info.to_list()))
+            temp_list_info.append(info.tsv_line)
             new_sorted_list.append(info)
 
         del sorted_list
@@ -148,7 +148,7 @@ class RankSelector(SelectorBase):
 
         new_sorted_list = sorted(
             new_sorted_list,
-            key=lambda x: x.get_previous_score(score_type),
+            key=lambda x: x.get_score_by_type(score_type),
             reverse=False,
         )
 
@@ -164,11 +164,11 @@ class RankSelector(SelectorBase):
         else:
             sorted_list = new_sorted_list
 
-        top_choice_smiles_in_order: List[PreDockedCompound] = []
+        top_choice_smiles_in_order: List[Compound] = []
         for i in range(num_to_choose):
             predock_cmpd = sorted_list[i]
             top_choice_smiles_in_order.append(predock_cmpd)
-            scre = predock_cmpd.get_previous_score(score_type)
-            log_debug(f"{predock_cmpd.smiles} ({predock_cmpd.name}): score {scre:.2f}")
+            scre = predock_cmpd.get_score_by_type(score_type)
+            log_debug(f"{predock_cmpd.smiles} ({predock_cmpd.id}): score {scre:.2f}")
 
         return top_choice_smiles_in_order

@@ -19,7 +19,7 @@ python run_autogrow.py \
     --MergeMCS \
     --top_mols_to_seed_next_generation 5 \
     --diversity_seed_depreciation_per_gen 1 \
-    --num_generations 5 \
+    --num_generations 2 \
     --procs_per_node 3 \
     --FragmentAddition \
     --rxn_library_path ./autogrow/plugins/mutation/reaction_libraries/all_rxns \

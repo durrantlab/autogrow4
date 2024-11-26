@@ -12,7 +12,7 @@ import os
 from typing import Dict, List, Optional, Tuple, Union, cast
 
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
-from autogrow.types import PreDockedCompound
+from autogrow.types import Compound
 from autogrow.utils.logging import LogLevel, log_info
 from rdkit import Chem  # type: ignore
 from rdkit.Chem.MolStandardize import rdMolStandardize  # type: ignore
@@ -30,17 +30,17 @@ class SmiTo3DSdfBase(PluginBase):
     provides some common utility methods.
     """
 
-    def run(self, **kwargs) -> List[PreDockedCompound]:
+    def run(self, **kwargs) -> List[Compound]:
         """
         Run the SMILES to 3D SDF conversion with provided arguments.
 
         Args:
             **kwargs: Arbitrary keyword arguments. Expected keys:
-                - predock_cmpds (List[PreDockedCompound]): Compounds to convert.
+                - predock_cmpds (List[PostDockedCompound]): Compounds to convert.
                 - pwd (str): Working directory path.
 
         Returns:
-            List[PreDockedCompound]: Updated list of compounds with 3D SDF
+            List[PostDockedCompound]: Updated list of compounds with 3D SDF
                 paths.
         """
         pwd = kwargs["pwd"]
@@ -50,22 +50,22 @@ class SmiTo3DSdfBase(PluginBase):
 
     @abstractmethod
     def run_smi_to_3d_sdf_converter(
-        self, predock_cmpds: List[PreDockedCompound], pwd: str
-    ) -> List[PreDockedCompound]:
+        self, predock_cmpds: List[Compound], pwd: str
+    ) -> List[Compound]:
         """
         Convert SMILES to 3D SDF files.
 
         This method must be implemented by subclasses.
 
         Args:
-            predock_cmpds (List[PreDockedCompound]): List of compounds to
+            predock_cmpds (List[PostDockedCompound]): List of compounds to
                 convert.
             pwd (str): Working directory path.
 
         Returns:
-            List[PreDockedCompound]: Updated list of compounds with 3D SDF
+            List[PostDockedCompound]: Updated list of compounds with 3D SDF
                 paths (must populate sdf_3d_path properties of each
-                PreDockedCompound).
+                PostDockedCompound).
         """
         pass
 
@@ -90,7 +90,7 @@ class SmiTo3DSdfPluginManager(PluginManagerBase):
     plugins.
     """
 
-    def execute(self, **kwargs) -> List[PreDockedCompound]:
+    def execute(self, **kwargs) -> List[Compound]:
         """
         Execute the selected SMILES to 3D SDF converter plugin.
 
@@ -102,7 +102,7 @@ class SmiTo3DSdfPluginManager(PluginManagerBase):
                 plugin.
 
         Returns:
-            List[PreDockedCompound]: Updated list of compounds with 3D SDF
+            List[PostDockedCompound]: Updated list of compounds with 3D SDF
                 paths.
 
         Raises:
@@ -139,7 +139,7 @@ class SmiTo3DSdfPluginManager(PluginManagerBase):
         for cmpd in resp:
             if cmpd.sdf_path is None:
                 raise Exception(
-                    "ERROR! Your SmiTo3DSdf plugin must populate the sdf_3d_path property of each PreDockedCompound."
+                    "ERROR! Your SmiTo3DSdf plugin must populate the sdf_3d_path property of each PostDockedCompound."
                 )
 
         return resp

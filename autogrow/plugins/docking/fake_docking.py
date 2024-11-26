@@ -15,7 +15,7 @@ import random
 from typing import List, Optional, Tuple
 from autogrow.config.argparser import ArgumentVars
 from autogrow.plugins.docking import DockingBase
-from autogrow.types import PostDockedCompound, PreDockedCompound
+from autogrow.types import Compound, Compound
 
 
 class FakeDocking(DockingBase):
@@ -110,8 +110,8 @@ class FakeDocking(DockingBase):
         pass
 
     def run_docking(
-        self, predocked_cmpds: List[PreDockedCompound]
-    ) -> List[PostDockedCompound]:
+        self, predocked_cmpds: List[Compound]
+    ) -> List[Compound]:
         """
         Perform fake docking on a list of compounds.
 
@@ -119,17 +119,17 @@ class FakeDocking(DockingBase):
         without performing actual docking calculations.
 
         Args:
-            predocked_cmpds (List[PreDockedCompound]): A list of
-                PreDockedCompound objects to be "docked".
+            predocked_cmpds (List[PostDockedCompound]): A list of
+                PostDockedCompound objects to be "docked".
 
         Returns:
             List[PostDockedCompound]: A list of PostDockedCompound objects,
             each containing a random score between -12 and -8, and the original
             3D SDF file path.
         """
-        return [
-            predocked_cmpd.to_post_docked_compound(
-                random.uniform(-12, -8), predocked_cmpd.sdf_path or ""
-            )
-            for predocked_cmpd in predocked_cmpds
-        ]
+        for predocked_cmpd in predocked_cmpds:
+            predocked_cmpd.docking_score = random.uniform(-12, -8)
+            predocked_cmpd.sdf_path = predocked_cmpd.sdf_path or ""
+
+        return predocked_cmpds
+

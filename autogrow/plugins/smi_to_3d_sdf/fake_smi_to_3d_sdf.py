@@ -8,7 +8,7 @@ import __future__
 
 from autogrow.plugins.smi_to_3d_sdf import SmiTo3DSdfBase
 from autogrow.plugins.smiles_filters import SmilesFilterBase
-from autogrow.types import PreDockedCompound
+from autogrow.types import Compound
 from autogrow.utils.logging import log_warning
 from autogrow.utils.obabel import obabel_convert
 import rdkit  # type: ignore
@@ -69,24 +69,24 @@ class FakeSmiTo3DSDF(SmiTo3DSdfBase):
         pass
 
     def run_smi_to_3d_sdf_converter(
-        self, predock_cmpds: List[PreDockedCompound], pwd: str
-    ) -> List[PreDockedCompound]:
+        self, predock_cmpds: List[Compound], pwd: str
+    ) -> List[Compound]:
         """
         Simulate the conversion of SMILES representations to 3D SDF files.
 
-        This method takes a list of PreDockedCompound objects containing SMILES
+        This method takes a list of PostDockedCompound objects containing SMILES
         strings and creates fake 3D SDF files. Instead of actual 3D conversion,
         it creates placeholder files with a simple string content.
 
         Args:
-            predock_cmpds (List[PreDockedCompound]): A list of PreDockedCompound
+            predock_cmpds (List[PostDockedCompound]): A list of PostDockedCompound
                 objects, each containing a SMILES string and other compound
                 information.
             pwd (str): The path to the working directory where fake SDF files
                 will be created.
 
         Returns:
-            List[PreDockedCompound]: The input list of PreDockedCompound
+            List[PostDockedCompound]: The input list of PostDockedCompound
                 objects, updated with the paths to the generated fake 3D SDF
                 files.
 

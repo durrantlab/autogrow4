@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, List, Optional, Tuple, Union, cast
 
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
-from autogrow.types import PreDockedCompound
+from autogrow.types import Compound
 from autogrow.utils.logging import log_warning
 import copy
 import random
@@ -26,8 +26,8 @@ class CrossoverBase(PluginBase):
 
         Args:
             **kwargs: Arbitrary keyword arguments including:
-                predock_cmpd1 (str): PreDockedCompound of the first ligand.
-                predock_cmpd2 (str): PreDockedCompound of the second ligand.
+                predock_cmpd1 (str): PostDockedCompound of the first ligand.
+                predock_cmpd2 (str): PostDockedCompound of the second ligand.
 
         Returns:
             Optional[str]: The SMILES string of the crossed-over molecule, or None
@@ -37,7 +37,7 @@ class CrossoverBase(PluginBase):
 
     @abstractmethod
     def run_crossover(
-        self, predock_cmpd1: PreDockedCompound, predock_cmpd2: PreDockedCompound
+        self, predock_cmpd1: Compound, predock_cmpd2: Compound
     ) -> Optional[str]:
         """
         Implement crossover operation for two ligands.
@@ -45,9 +45,9 @@ class CrossoverBase(PluginBase):
         This method needs to be implemented in each subclass.
 
         Args:
-            predock_cmpd1 (PreDockedCompound): PreDockedCompound of the first
+            predock_cmpd1 (PostDockedCompound): PostDockedCompound of the first
                 ligand.
-            predock_cmpd2 (PreDockedCompound):PreDockedCompound of the second
+            predock_cmpd2 (PostDockedCompound):PostDockedCompound of the second
                 ligand.
 
         Returns:

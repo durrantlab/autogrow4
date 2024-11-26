@@ -9,7 +9,7 @@ import os
 from typing import Dict, List, Optional, Union
 
 from autogrow.docking.scoring.scoring_classes.parent_scoring_class import ParentScoring
-from autogrow.types import PreDockedCompound, PostDockedCompound
+from autogrow.types import Compound, Compound
 
 
 class VINA(ParentScoring):
@@ -24,7 +24,7 @@ class VINA(ParentScoring):
     def __init__(
         self,
         params: Optional[Dict[str, Union[str, int, float, bool]]] = None,
-        smiles_dict: Optional[Dict[str, PreDockedCompound]] = None,
+        smiles_dict: Optional[Dict[str, Compound]] = None,
         test_boot: bool = True,
     ) -> None:
         """
@@ -76,7 +76,7 @@ class VINA(ParentScoring):
         """
         return "Not Applicable"
 
-    def run_scoring(self, file_path: str) -> Optional[PostDockedCompound]:
+    def run_scoring(self, file_path: str) -> Optional[Compound]:
         """
         Get all relevant scoring info and return as a list
 
@@ -93,7 +93,7 @@ class VINA(ParentScoring):
         """
         return self.get_score_from_a_file(file_path)
 
-    def get_score_from_a_file(self, file_path: str) -> Optional[PostDockedCompound]:
+    def get_score_from_a_file(self, file_path: str) -> Optional[Compound]:
         """
         Make a list of a ligands information including its docking score.
 
@@ -102,7 +102,7 @@ class VINA(ParentScoring):
 
         Returns:
         :returns: list lig_info: a list containing all info from
-            self.smiles_dict for a given ligand and the ligands short_id_name and
+            self.smiles_dict for a given ligand and the ligands id_name and
             the docking score from the best pose.
         """
         # grab the index of the ligand for the score
@@ -136,7 +136,7 @@ class VINA(ParentScoring):
 
     def merge_smile_info_w_affinity_info(
         self, lig_info: List
-    ) -> Optional[PostDockedCompound]:
+    ) -> Optional[Compound]:
         """
         From the info in self.smiles_dict get that info and merge that with
         the affinity info
@@ -145,11 +145,11 @@ class VINA(ParentScoring):
         SMILES string in the PDB which conservers stereoChem
 
         Inputs:
-        :param list lig_info: list containing [ligand_short_name, affinity]
+        :param list lig_info: list containing [ligand_name, affinity]
 
         Returns:
         :returns: list ligand_full_info: a list containing all info from
-            self.smiles_dict for a given ligand and the ligands short_id_name and
+            self.smiles_dict for a given ligand and the ligands id_name and
             the docking score from the best pose. returns None if
             ligand_short_name isn't in the self.smiles_dict which should never
             happen
@@ -178,13 +178,12 @@ class VINA(ParentScoring):
 
         assert self.smiles_dict is not None, "smiles_dict is None"
         if ligand_short_name in self.smiles_dict:
-            return PostDockedCompound(
+            return Compound(
                 smiles=new_smiles,
                 id=ligand_short_name,
-                short_id=lig_info[0],
-                additional_info=lig_info[1],
-                docking_score=lig_info[2],
-                # diversity_score=lig_info[3],
+                additional_info=lig_info[0],
+                docking_score=lig_info[1],
+                # diversity_score=lig_info[2],
             )
 
             # ligand_full_info = [

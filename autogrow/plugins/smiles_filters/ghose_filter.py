@@ -24,7 +24,7 @@ import __future__
 import copy
 
 from autogrow.plugins.smiles_filters import SmilesFilterBase
-from autogrow.types import PreDockedCompound
+from autogrow.types import Compound
 import rdkit  # type: ignore
 import rdkit.Chem as Chem  # type: ignore
 import rdkit.Chem.Lipinski as Lipinski  # type: ignore
@@ -50,7 +50,7 @@ class GhoseFilter(SmilesFilterBase):
         hydrogens against the total number of atoms.
     """
 
-    def run_filter(self, predock_cmpd: PreDockedCompound) -> bool:
+    def run_filter(self, predock_cmpd: Compound) -> bool:
         """
         Run the Ghose filter on a given molecule.
 
@@ -59,7 +59,7 @@ class GhoseFilter(SmilesFilterBase):
         refractivity, and molar LogP.
 
         Args:
-            predock_cmpd (PreDockedCompound): A PreDockedCompound to be tested.
+            predock_cmpd (PostDockedCompound): A PostDockedCompound to be tested.
 
         Returns:
             bool: True if the molecule passes the filter; False if it fails.

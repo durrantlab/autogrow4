@@ -15,7 +15,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 from autogrow.operators.mutant_crossover_parent import CompoundGenerator
 from autogrow.plugins.plugin_managers import plugin_managers
 from autogrow.plugins.crossover import CrossoverPluginManager
-from autogrow.types import PreDockedCompound
+from autogrow.types import Compound
 from autogrow.utils.logging import LogLevel, log_debug, log_warning
 import rdkit  # type: ignore
 from rdkit import Chem  # type: ignore
@@ -81,19 +81,19 @@ def _test_for_mcs(
 
 def _find_sufficiently_similar_cmpd(
     params: Dict[str, Any],
-    predock_cmpds: List[PreDockedCompound],
-    query_predock_cmpd: PreDockedCompound,
-) -> Optional[PreDockedCompound]:
+    predock_cmpds: List[Compound],
+    query_predock_cmpd: Compound,
+) -> Optional[Compound]:
     """
     Selects a random molecule with satisfactory MCS to the given ligand.
 
     Args:
         params (Dict[str, Any]): User parameters governing the selection.
-        predock_cmpds (List[PreDockedCompound]): List of ligands to choose from.
-        query_predock_cmpd (PreDockedCompound): The reference (query) ligand.
+        predock_cmpds (List[PostDockedCompound]): List of ligands to choose from.
+        query_predock_cmpd (PostDockedCompound): The reference (query) ligand.
 
     Returns:
-        Optional[PreDockedCompound]: A suitable second ligand if found,
+        Optional[PostDockedCompound]: A suitable second ligand if found,
         None otherwise.
     """
     count = 0
@@ -166,7 +166,7 @@ class CrossoverGenerator(CompoundGenerator):
         return {k: v for k, v in self.params.items() if k != "parallelizer"}
 
     def prepare_job_inputs(
-        self, compounds: List[PreDockedCompound], num_to_process: int
+        self, compounds: List[Compound], num_to_process: int
     ) -> List[Tuple]:
         # Create a working copy for popping compounds
         working_compounds = compounds.copy()
@@ -187,8 +187,8 @@ class CrossoverGenerator(CompoundGenerator):
 
     def make_compound_id(self, result: Tuple) -> str:
         _, parent1, parent2 = result
-        parent1_id = parent1.name.split(")")[-1]
-        parent2_id = parent2.name.split(")")[-1]
+        parent1_id = parent1.id.split(")")[-1]
+        parent2_id = parent2.id.split(")")[-1]
         random_id_num = random.randint(100, 1000000)
         return f"({parent1_id}+{parent2_id})Gen_{self.generation_num}_Cross_{random_id_num}"
 
@@ -198,19 +198,19 @@ class CrossoverGenerator(CompoundGenerator):
 
 # def _find_similar_cmpd(
 #     params: Dict[str, Any],
-#     ligands_list: List[PreDockedCompound],
-#     lig1_smile_pair: PreDockedCompound,
-# ) -> Optional[PreDockedCompound]:
+#     ligands_list: List[PostDockedCompound],
+#     lig1_smile_pair: PostDockedCompound,
+# ) -> Optional[PostDockedCompound]:
 #     """
 #     Finds a molecule with sufficient shared structure to the given ligand.
 
 #     Args:
 #         params (Dict[str, Any]): User parameters governing the process.
-#         ligands_list (List[PreDockedCompound]): List of ligands to choose from.
-#         ligand1_pair (PreDockedCompound): The reference ligand.
+#         ligands_list (List[PostDockedCompound]): List of ligands to choose from.
+#         ligand1_pair (PostDockedCompound): The reference ligand.
 
 #     Returns:
-#         Optional[PreDockedCompound]: A suitable second ligand if found, None otherwise.
+#         Optional[PostDockedCompound]: A suitable second ligand if found, None otherwise.
 #     """
 #     ligand_1_string = lig1_smile_pair.smiles
 
@@ -226,19 +226,19 @@ class CrossoverGenerator(CompoundGenerator):
 
 def _do_crossovers_smiles_merge(
     params: Dict[str, Any],
-    lig1_predock_cmpd: PreDockedCompound,
-    all_predock_cmpds: List[PreDockedCompound],
-) -> Optional[Tuple[str, PreDockedCompound, PreDockedCompound]]:
+    lig1_predock_cmpd: Compound,
+    all_predock_cmpds: List[Compound],
+) -> Optional[Tuple[str, Compound, Compound]]:
     """
     Performs a crossover operation between two ligands.
 
     Args:
         params (Dict[str, Any]): User parameters governing the process.
-        lig1_predock_cmpd (PreDockedCompound): Information for the first ligand.
-        all_predock_cmpds (List[PreDockedCompound]): List of all seed ligands.
+        lig1_predock_cmpd (PostDockedCompound): Information for the first ligand.
+        all_predock_cmpds (List[PostDockedCompound]): List of all seed ligands.
 
     Returns:
-        Optional[Tuple[str, PreDockedCompound, PreDockedCompound]]: 
+        Optional[Tuple[str, PostDockedCompound, PostDockedCompound]]: 
         Tuple containing new ligand SMILES and parent ligand information,
         or None if crossover fails.
 
@@ -278,7 +278,7 @@ def _do_crossovers_smiles_merge(
             # This is because crossover doesn't return a PreDockCompound object
             # yet. Need to refactor so that happens. As is, smiles getting
             # converted to PreDockCompound twice.
-            tmp_predock_cmpd = PreDockedCompound(smiles=ligand_new_smiles, name="tmp")
+            tmp_predock_cmpd = Compound(smiles=ligand_new_smiles, id="tmp")
 
             # Filter Here
             pass_or_not = (

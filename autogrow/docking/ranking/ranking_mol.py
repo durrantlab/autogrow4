@@ -10,7 +10,7 @@ import __future__
 import os
 from typing import Any, Dict, List, Optional
 
-from autogrow.types import PreDockedCompound, PostDockedCompound, ScoreType
+from autogrow.types import Compound, Compound, ScoreType
 import rdkit  # type: ignore
 import rdkit.Chem as Chem  # type: ignore
 from rdkit.Chem.rdMolDescriptors import GetMorganFingerprint  # type: ignore
@@ -27,7 +27,7 @@ def rank_and_save_output_smi(
     current_generation_dir: str,
     current_gen_int: int,
     smiles_file: str,
-    postDockedCompoundInfos: List[PostDockedCompound],
+    postDockedCompoundInfos: List[Compound],
     params: Dict[str, Any],
 ) -> str:
     """
@@ -116,11 +116,12 @@ def rank_and_save_output_smi(
     # save to a new output smiles file. ie. save to ranked_smiles_file
 
     with open(output_ranked_smile_file, "w") as output:
-        for postDockedCompoundInfo in postDockedCompoundInfos:
-            lst = postDockedCompoundInfo.to_list()
-            lst[-1] = os.path.basename(lst[-1])
-            output_line = "\t".join(lst) + "\n"
-            output.write(output_line)
+        for cmpdInf in postDockedCompoundInfos:
+            output.write(cmpdInf.tsv_line)
+            # sdf_path = "" if cmpdInf.sdf_path is None else cmpdInf.sdf_path
+            # sdf_basename = os.path.basename(sdf_path)
+            # output_line = f"{cmpdInf.smiles}\t{cmpdInf.id}\t{cmpdInf.additional_info}\t{cmpdInf.docking_score}\t{cmpdInf.diversity_score}\t{sdf_basename}\n"
+            # output.write(output_line)
 
     return output_ranked_smile_file
 
@@ -129,7 +130,7 @@ def _process_ligand_scores_from_prev_gen(
     ranked_smi_file_prev_gen: str,
     current_generation_dir: str,
     current_gen_int: int,
-    smiles_list: List[PostDockedCompound],
+    smiles_list: List[Compound],
 ):
     """
     Process ligand scores from the previous generation.
@@ -168,7 +169,7 @@ def _process_ligand_scores_from_prev_gen(
     prev_gen_data_list = Ranking.get_predockcmpds_from_smi_file(
         ranked_smi_file_prev_gen
     )
-    # CHECKED: prev_gen_data_list of type List[PreDockedCompound] here.
+    # CHECKED: prev_gen_data_list of type List[PostDockedCompound] here.
 
     # Get the list of pass through ligands
     current_gen_pass_through_smi = (
@@ -178,20 +179,20 @@ def _process_ligand_scores_from_prev_gen(
     pass_through_list = Ranking.get_predockcmpds_from_smi_file(
         current_gen_pass_through_smi
     )
-    # CHECKED: pass_through_list is of type List[PreDockedCompound] here.
+    # CHECKED: pass_through_list is of type List[PostDockedCompound] here.
 
     # Convert lists to searchable Dictionaries.
     prev_gen_data_dict = Ranking.convert_usable_list_to_lig_dict(prev_gen_data_list)
-    # CHECKED: prev_gen_data_dict is of type Dict[str, PreDockedCompound] here.
+    # CHECKED: prev_gen_data_dict is of type Dict[str, PostDockedCompound] here.
 
     assert prev_gen_data_dict is not None, "prev_gen_data_dict is None"
 
-    pass_through_data: List[PostDockedCompound] = []
+    pass_through_data: List[Compound] = []
     for lig in pass_through_list:
-        # CHECKED: lig is of type PreDockedCompound here.
+        # CHECKED: lig is of type PostDockedCompound here.
 
-        lig_data = prev_gen_data_dict[str(lig.smiles + lig.name)]
-        # CHECKED: lig_data is of type PreDockedCompound here.
+        lig_data = prev_gen_data_dict[str(lig.smiles + lig.id)]
+        # CHECKED: lig_data is of type PostDockedCompound here.
 
         # NOTE: Here it must be converted to a PostDockedCompound
         assert (
@@ -199,10 +200,9 @@ def _process_ligand_scores_from_prev_gen(
         ), "lig_data.previous_docking_score is None"
 
         # TODO: Nervous that additional_info = "". Not sure what to put there.
-        lig_info_remove_diversity_info = PostDockedCompound(
+        lig_info_remove_diversity_info = Compound(
             smiles=lig.smiles,
-            id=lig.name,
-            short_id=lig.name,
+            id=lig.id,
             additional_info="",
             docking_score=lig_data.docking_score,
             diversity_score=None,
@@ -212,9 +212,9 @@ def _process_ligand_scores_from_prev_gen(
     smiles_list.extend(pass_through_data)
 
 
-def get_predockcmpds_from_smi_file(infile: str) -> List[PreDockedCompound]:
+def get_predockcmpds_from_smi_file(infile: str) -> List[Compound]:
     """
-    Reads and processes a .smi file into a list of PreDockedCompound objects.
+    Reads and processes a .smi file into a list of PostDockedCompound objects.
 
     The .smi file must follow this format for each line:
     SMILES<tab>ID[<tab>optional_info...]<tab>docking_score<tab>diversity_score
@@ -223,7 +223,7 @@ def get_predockcmpds_from_smi_file(infile: str) -> List[PreDockedCompound]:
         infile (str): Path to the formatted .smi file to be read.
 
     Returns:
-        List[PreDockedCompound]: List of PreDockedCompound objects with
+        List[PostDockedCompound]: List of PostDockedCompound objects with
         information from the .smi file.
 
     Raises:
@@ -235,7 +235,7 @@ def get_predockcmpds_from_smi_file(infile: str) -> List[PreDockedCompound]:
         - Any fields between ID and docking_score are ignored but allowed.
     """
     # IMPORT SMILES FROM THE PREVIOUS GENERATION
-    predock_cmpds: List[PreDockedCompound] = []
+    predock_cmpds: List[Compound] = []
 
     if os.path.exists(infile) is False:
         print(f"\nFile of Source compounds does not exist: {infile}\n")
@@ -243,40 +243,25 @@ def get_predockcmpds_from_smi_file(infile: str) -> List[PreDockedCompound]:
 
     with open(infile) as smiles_file:
         for line in smiles_file:
-            line = line.replace("\n", "")
-            parts = line.split("\t")  # split line into parts separated by 4-spaces
-            if len(parts) == 1:
-                # split line into parts separated by 4-spaces
-                parts = line.split("    ")
-
-            # choice_list = [parts[i] for i in range(len(parts))]
-            postDockedCompound = PostDockedCompound.from_list(parts)
-            compoundInfo = PreDockedCompound(
-                smiles=postDockedCompound.smiles, name=postDockedCompound.id
-            )
-            if len(parts) > 2:
-                compoundInfo.docking_score = postDockedCompound.docking_score
-                compoundInfo.diversity_score = (
-                    postDockedCompound.diversity_score
-                )
+            compoundInfo = Compound.from_tsv_line(line)
             predock_cmpds.append(compoundInfo)
 
     return predock_cmpds
 
 
 def convert_usable_list_to_lig_dict(
-    predock_cmpds: List[PreDockedCompound],
-) -> Optional[Dict[str, PreDockedCompound]]:
+    predock_cmpds: List[Compound],
+) -> Optional[Dict[str, Compound]]:
     """
-    Converts a list of PreDockedCompound objects to a dictionary.
+    Converts a list of PostDockedCompound objects to a dictionary.
 
     Args:
-        predock_cmpds (List[PreDockedCompound]): List of PreDockedCompound
+        predock_cmpds (List[PostDockedCompound]): List of PostDockedCompound
         objects.
 
     Returns:
-        Optional[Dict[str, PreDockedCompound]]: Dictionary with keys as
-        'SMILES+ID' and values as PreDockedCompound objects. Returns None if
+        Optional[Dict[str, PostDockedCompound]]: Dictionary with keys as
+        'SMILES+ID' and values as PostDockedCompound objects. Returns None if
         input is not a list.
 
     Note:
@@ -286,12 +271,12 @@ def convert_usable_list_to_lig_dict(
     if type(predock_cmpds) is not type([]):
         return None
 
-    usable_dict_of_predock_cmpds: Dict[str, PreDockedCompound] = {}
+    usable_dict_of_predock_cmpds: Dict[str, Compound] = {}
     for predock_cmpd in predock_cmpds:
-        key = predock_cmpd.smiles + predock_cmpd.name
+        key = predock_cmpd.smiles + predock_cmpd.id
         if key in usable_dict_of_predock_cmpds and usable_dict_of_predock_cmpds[
             key
-        ].get_previous_score(ScoreType.DOCKING) < predock_cmpd.get_previous_score(
+        ].get_score_by_type(ScoreType.DOCKING) < predock_cmpd.get_score_by_type(
             ScoreType.DOCKING
         ):
             continue
@@ -301,8 +286,8 @@ def convert_usable_list_to_lig_dict(
 
 ##### Called in the docking class ######
 def calc_diversity_scores(
-    postDockedCompoundInfos: List[PostDockedCompound],
-) -> List[PostDockedCompound]:
+    postDockedCompoundInfos: List[Compound],
+) -> List[Compound]:
     """
     Calculates diversity scores for a list of PostDockedCompound objects.
 
@@ -328,7 +313,7 @@ def calc_diversity_scores(
         - Removes any None entries from the input list.
         - Uses Morgan Fingerprints with radius 10 and feature-based encoding.
     """
-    postDockedCompoundInfosToKeep: List[PostDockedCompound] = []
+    postDockedCompoundInfosToKeep: List[Compound] = []
 
     for postDockedCompoundInfo in postDockedCompoundInfos:
         if postDockedCompoundInfo is not None:

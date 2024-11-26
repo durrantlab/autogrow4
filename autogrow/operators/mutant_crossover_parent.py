@@ -3,7 +3,7 @@ import copy
 import random
 from typing import Callable, Dict, List, Any, Tuple, Set, Optional
 
-from autogrow.types import PreDockedCompound
+from autogrow.types import Compound
 from autogrow.utils.logging import LogLevel, log_debug, log_warning
 
 
@@ -16,7 +16,7 @@ class CompoundGenerator(ABC):
         generation_num: int,
         procs_per_node: int,
         num_compounds: int,
-        predock_cmpds: List[PreDockedCompound],
+        predock_cmpds: List[Compound],
     ):
         self.params = params
         self.generation_num = generation_num
@@ -32,7 +32,7 @@ class CompoundGenerator(ABC):
 
     @abstractmethod
     def prepare_job_inputs(
-        self, compounds: List[PreDockedCompound], num_to_process: int
+        self, compounds: List[Compound], num_to_process: int
     ) -> List[Tuple]:
         """Prepare job inputs for parallel processing."""
         pass
@@ -52,18 +52,18 @@ class CompoundGenerator(ABC):
         """Get the name of the operation for logging."""
         pass
 
-    def generate(self) -> List[PreDockedCompound]:
+    def generate(self) -> List[Compound]:
         """
         Generate new compounds using the specified operation.
 
         Returns:
-            List[PreDockedCompound]: List of new compounds.
+            List[PostDockedCompound]: List of new compounds.
 
         Note:
             Uses multiprocessing to generate compounds efficiently.
             Attempts to create unique compounds, avoiding duplicates.
         """
-        new_predock_cmpds: List[PreDockedCompound] = []
+        new_predock_cmpds: List[Compound] = []
         log_debug(
             f"Creating new compounds from selected compounds via {self.get_operation_name()}"
         )
@@ -118,8 +118,8 @@ class CompoundGenerator(ABC):
                     smiles_already_generated.add(child_lig_smile)
 
                     # Create and store new compound
-                    ligand_info = PreDockedCompound(
-                        smiles=child_lig_smile, name=new_lig_id
+                    ligand_info = Compound(
+                        smiles=child_lig_smile, id=new_lig_id
                     )
                     new_predock_cmpds.append(ligand_info)
 
