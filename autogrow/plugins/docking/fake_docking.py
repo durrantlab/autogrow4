@@ -129,7 +129,7 @@ class FakeDocking(DockingBase):
         """
         return [
             predocked_cmpd.to_post_docked_compound(
-                random.uniform(-12, -8), predocked_cmpd.sdf_3d_path or ""
+                random.uniform(-12, -8), predocked_cmpd.sdf_path or ""
             )
             for predocked_cmpd in predocked_cmpds
         ]

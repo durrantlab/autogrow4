@@ -154,9 +154,9 @@ class RouletteSelector(SelectorBase):
         """
         if score_type == ScoreType.DIVERSITY:
             weight_scores = [
-                x.previous_diversity_score
+                x.diversity_score
                 for x in predock_cmpds
-                if x.previous_diversity_score is not None
+                if x.diversity_score is not None
             ]
             # adjust by squaring the number to make the discrpency larger and
             # invert by dividing 1/x^2 (because the more diverse a mol is the
@@ -165,9 +165,9 @@ class RouletteSelector(SelectorBase):
 
         elif ScoreType.DOCKING:
             weight_scores = [
-                x.previous_docking_score
+                x.docking_score
                 for x in predock_cmpds
-                if x.previous_docking_score is not None
+                if x.docking_score is not None
             ]
             # minimum is the most positive value from predock_cmpds the more
             # negative the docking score the better the dock

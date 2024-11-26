@@ -224,7 +224,7 @@ def populate_generation(
 
     # Remove those that failed to convert
     full_gen_predock_cmpds = [
-        x for x in full_gen_predock_cmpds if x.sdf_3d_path is not None
+        x for x in full_gen_predock_cmpds if x.sdf_path is not None
     ]
 
     return full_gen_smi_file, full_gen_predock_cmpds
@@ -1008,7 +1008,7 @@ def _make_pass_through_list(
 
     # check if ligands_which_passed_filters have docking scores
     has_dock_score = all(
-        x.previous_docking_score is not None for x in ligs_that_passed_filters
+        x.docking_score is not None for x in ligs_that_passed_filters
     )
     # try:
     #     temp = [float(x[-2]) for x in ligands_which_passed_filters]

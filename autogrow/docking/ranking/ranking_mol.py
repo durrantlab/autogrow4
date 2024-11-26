@@ -195,7 +195,7 @@ def _process_ligand_scores_from_prev_gen(
 
         # NOTE: Here it must be converted to a PostDockedCompound
         assert (
-            lig_data.previous_docking_score is not None
+            lig_data.docking_score is not None
         ), "lig_data.previous_docking_score is None"
 
         # TODO: Nervous that additional_info = "". Not sure what to put there.
@@ -204,7 +204,7 @@ def _process_ligand_scores_from_prev_gen(
             id=lig.name,
             short_id=lig.name,
             additional_info="",
-            docking_score=lig_data.previous_docking_score,
+            docking_score=lig_data.docking_score,
             diversity_score=None,
         )
         pass_through_data.append(lig_info_remove_diversity_info)
@@ -255,8 +255,8 @@ def get_predockcmpds_from_smi_file(infile: str) -> List[PreDockedCompound]:
                 smiles=postDockedCompound.smiles, name=postDockedCompound.id
             )
             if len(parts) > 2:
-                compoundInfo.previous_docking_score = postDockedCompound.docking_score
-                compoundInfo.previous_diversity_score = (
+                compoundInfo.docking_score = postDockedCompound.docking_score
+                compoundInfo.diversity_score = (
                     postDockedCompound.diversity_score
                 )
             predock_cmpds.append(compoundInfo)

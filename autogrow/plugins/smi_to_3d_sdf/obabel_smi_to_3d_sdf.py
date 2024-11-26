@@ -150,6 +150,6 @@ class ObabelSmiTo3DSDF(SmiTo3DSdfBase):
                     )
                     continue
 
-            predock_cmpd.sdf_3d_path = out_file
+            predock_cmpd.sdf_path = out_file
 
         return predock_cmpds

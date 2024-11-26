@@ -162,18 +162,18 @@ class VinaLikeDocking(DockingBase):
         vina_out_convert_cmds = []
 
         for predocked_cmpd in predocked_cmpds:
-            if predocked_cmpd.sdf_3d_path is None:
+            if predocked_cmpd.sdf_path is None:
                 log_warning(
                     f"Skipping {predocked_cmpd.name} because sdf_3d_path is None"
                 )
                 vina_out_files.append(None)
                 continue
 
-            lig_pdbqt_filename = f"{predocked_cmpd.sdf_3d_path}.pdbqt"
+            lig_pdbqt_filename = f"{predocked_cmpd.sdf_path}.pdbqt"
 
             # Get commands to convert ligand to pdbqt
             cmd = obabel_convert_cmd(
-                predocked_cmpd.sdf_3d_path,
+                predocked_cmpd.sdf_path,
                 lig_pdbqt_filename,
                 self.params["obabel_path"],
             )

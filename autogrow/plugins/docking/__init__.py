@@ -102,9 +102,9 @@ class DockingPluginManager(PluginManagerBase):
 
         # Sanity check: Make sure each output sdf file contains only one model.
         for sdf_filename in [
-            c.docked_sdf_path
+            c.sdf_path
             for c in post_docked_cmpds
-            if c.docked_sdf_path is not None
+            if c.sdf_path is not None
         ]:
             with open(sdf_filename, "r") as f:
                 orig_sdf_content = f.read()

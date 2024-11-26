@@ -137,7 +137,7 @@ class SmiTo3DSdfPluginManager(PluginManagerBase):
 
         # Validate that the sdf_3d_path property is populated
         for cmpd in resp:
-            if cmpd.sdf_3d_path is None:
+            if cmpd.sdf_path is None:
                 raise Exception(
                     "ERROR! Your SmiTo3DSdf plugin must populate the sdf_3d_path property of each PreDockedCompound."
                 )
