@@ -100,6 +100,12 @@ class DockingPluginManager(PluginManagerBase):
                 f"Docked molecule {post_docked_cmpd.smiles}. Score: {post_docked_cmpd.docking_score:.2f}"
             )
 
+        # # Sanity check: Make sure each output sdf file exists (should be the
+        # # docked pose) and that it belongs to the correct generation.
+        # import pdb ;pdb.set_trace()
+        # TODO: THIS
+
+
         # Sanity check: Make sure each output sdf file contains only one model.
         for sdf_filename in [
             c.sdf_path

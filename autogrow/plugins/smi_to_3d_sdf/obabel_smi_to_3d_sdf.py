@@ -99,7 +99,7 @@ class ObabelSmiTo3DSDF(SmiTo3DSdfBase):
             - This method uses OpenBabel with the '--gen3d' and '--p 7.4'
               options.
             - If the conversion fails for a compound, a warning is logged and
-              the compound's sdf_3d_path is not set.
+              the compound's sdf_path is not set.
             - The method assumes that a ShellParallelizer plugin is available
               for parallel execution of OpenBabel commands.
         """

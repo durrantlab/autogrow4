@@ -64,7 +64,7 @@ class SmiTo3DSdfBase(PluginBase):
 
         Returns:
             List[PostDockedCompound]: Updated list of compounds with 3D SDF
-                paths (must populate sdf_3d_path properties of each
+                paths (must populate sdf_path properties of each
                 PostDockedCompound).
         """
         pass
@@ -135,11 +135,11 @@ class SmiTo3DSdfPluginManager(PluginManagerBase):
 
         resp = smi_to_sdf_converter.run(**kwargs)
 
-        # Validate that the sdf_3d_path property is populated
+        # Validate that the sdf_path property is populated
         for cmpd in resp:
             if cmpd.sdf_path is None:
                 raise Exception(
-                    "ERROR! Your SmiTo3DSdf plugin must populate the sdf_3d_path property of each PostDockedCompound."
+                    "ERROR! Your SmiTo3DSdf plugin must populate the sdf_path property of each PostDockedCompound."
                 )
 
         return resp

@@ -63,11 +63,6 @@ class MutationBase(PluginBase):
                 - [2] Optional[str]: Name of the complementary molecule used (if
                                      any), or None for single-reactant reactions
             Returns None if the mutation fails.
-
-        Note:
-            TODO: The 'existing_smiles' parameter mentioned in the original
-            docstring is not present in the method signature. Subclasses should
-            handle duplicate prevention if necessary.
         """
         pass
 

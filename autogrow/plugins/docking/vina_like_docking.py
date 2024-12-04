@@ -164,7 +164,7 @@ class VinaLikeDocking(DockingBase):
         for predocked_cmpd in predocked_cmpds:
             if predocked_cmpd.sdf_path is None:
                 log_warning(
-                    f"Skipping {predocked_cmpd.id} because sdf_3d_path is None"
+                    f"Skipping {predocked_cmpd.id} because sdf_path is None"
                 )
                 vina_out_files.append(None)
                 continue
