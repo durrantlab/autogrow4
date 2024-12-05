@@ -36,11 +36,11 @@ class SmiTo3DSdfBase(PluginBase):
 
         Args:
             **kwargs: Arbitrary keyword arguments. Expected keys:
-                - predock_cmpds (List[PostDockedCompound]): Compounds to convert.
+                - predock_cmpds (List[Compound]): Compounds to convert.
                 - pwd (str): Working directory path.
 
         Returns:
-            List[PostDockedCompound]: Updated list of compounds with 3D SDF
+            List[Compound]: Updated list of compounds with 3D SDF
                 paths.
         """
         pwd = kwargs["pwd"]
@@ -58,14 +58,14 @@ class SmiTo3DSdfBase(PluginBase):
         This method must be implemented by subclasses.
 
         Args:
-            predock_cmpds (List[PostDockedCompound]): List of compounds to
+            predock_cmpds (List[Compound]): List of compounds to
                 convert.
             pwd (str): Working directory path.
 
         Returns:
-            List[PostDockedCompound]: Updated list of compounds with 3D SDF
+            List[Compound]: Updated list of compounds with 3D SDF
                 paths (must populate sdf_path properties of each
-                PostDockedCompound).
+                Compound).
         """
         pass
 
@@ -102,7 +102,7 @@ class SmiTo3DSdfPluginManager(PluginManagerBase):
                 plugin.
 
         Returns:
-            List[PostDockedCompound]: Updated list of compounds with 3D SDF
+            List[Compound]: Updated list of compounds with 3D SDF
                 paths.
 
         Raises:
@@ -139,7 +139,7 @@ class SmiTo3DSdfPluginManager(PluginManagerBase):
         for cmpd in resp:
             if cmpd.sdf_path is None:
                 raise Exception(
-                    "ERROR! Your SmiTo3DSdf plugin must populate the sdf_path property of each PostDockedCompound."
+                    "ERROR! Your SmiTo3DSdf plugin must populate the sdf_path property of each Compound."
                 )
 
         return resp

@@ -69,16 +69,13 @@ class RouletteSelector(SelectorBase):
         pass
 
     def run_selector(
-        self,
-        predock_cmpds: List[Compound],
-        num_to_choose: int,
-        score_type: ScoreType,
+        self, predock_cmpds: List[Compound], num_to_choose: int, score_type: ScoreType,
     ) -> List[Compound]:
         """
         Select compounds using weighted roulette selection without replacement.
 
         Args:
-            predock_cmpds (List[PostDockedCompound]): A list of all compounds
+            predock_cmpds (List[Compound]): A list of all compounds
                 from the previous generation.
             num_to_choose (int): The number of compounds to select based on
                 their score.
@@ -86,7 +83,7 @@ class RouletteSelector(SelectorBase):
                 "diversity" scores for weighting.
 
         Returns:
-            List[PostDockedCompound]: List of selected compounds.
+            List[Compound]: List of selected compounds.
 
         Raises:
             Exception: If predock_cmpds is not a list or is empty.
@@ -135,7 +132,7 @@ class RouletteSelector(SelectorBase):
         higher scores are better).
 
         Args:
-            predock_cmpds (List[PostDockedCompound]): A list of all compounds
+            predock_cmpds (List[Compound]): A list of all compounds
                 from the previous generation.
             score_type (ScoreType): Specifies whether to use "docking" or
                 "diversity" scores.
@@ -165,9 +162,7 @@ class RouletteSelector(SelectorBase):
 
         elif ScoreType.DOCKING:
             weight_scores = [
-                x.docking_score
-                for x in predock_cmpds
-                if x.docking_score is not None
+                x.docking_score for x in predock_cmpds if x.docking_score is not None
             ]
             # minimum is the most positive value from predock_cmpds the more
             # negative the docking score the better the dock

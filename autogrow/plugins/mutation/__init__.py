@@ -9,6 +9,7 @@ from abc import ABC, abstractmethod
 from argparse import ArgumentParser
 from typing import Dict, List, Optional, Tuple, Union, cast
 
+from autogrow.compound_changed_tracker import track_compound_changes
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
 from autogrow.types import Compound
 from autogrow.utils.logging import LogLevel, log_debug, log_warning
@@ -33,7 +34,7 @@ class MutationBase(PluginBase):
         Run the mutation plugin with provided arguments.
 
         Args:
-            **kwargs: Arbitrary keyword arguments. Must include 'predock_cmpd'.
+            **kwargs: Arbitrary keyword arguments. Must include 'cmpd'.
 
         Returns:
             Optional[Tuple[str, int, Union[str, None]]]: A tuple containing:
@@ -43,17 +44,17 @@ class MutationBase(PluginBase):
                                      any), or None for single-reactant reactions
             Returns None if the mutation fails.
         """
-        return self.run_mutation(kwargs["predock_cmpd"])
+        return self.run_mutation(kwargs["cmpd"])
 
     @abstractmethod
     def run_mutation(
-        self, predock_cmpd: Compound
+        self, cmpd: Compound
     ) -> Optional[Tuple[str, int, Union[str, None]]]:
         """
         Abstract method to be implemented by each mutation plugin.
 
         Args:
-            predock_cmpd (PostDockedCompound): The PostDockedCompound of the
+            cmpd (Compound): The Compound of the
                 parent molecule to be mutated.
 
         Returns:
@@ -70,13 +71,15 @@ class MutationBase(PluginBase):
 class MutationPluginManager(PluginManagerBase):
     """Manager class for handling multiple mutation plugins."""
 
-    def execute(self, **kwargs) -> Optional[Tuple[str, int, Union[str, None]]]:
+    def execute(
+        self, **kwargs
+    ) -> Optional[Tuple[str, int, Union[str, None], List[Compound]]]:
         """
         Execute a randomly selected mutation plugin with the provided arguments.
 
         Args:
             **kwargs: A dictionary of arguments to pass to the plugin. Must
-                include 'predock_cmpd'.
+                include 'cmpd'.
 
         Returns:
             Optional[Tuple[str, int, Union[str, None]]]: A tuple containing:
@@ -84,6 +87,7 @@ class MutationPluginManager(PluginManagerBase):
                 - [1] int: ID number of the reaction used
                 - [2] Optional[str]: Name of the complementary molecule used (if
                                      any), or None for single-reactant reactions
+                - [3] List[Compound]: List of parent compounds (one in this case)
             Returns None if no mutations are selected or if the mutation fails.
 
         Note:
@@ -106,6 +110,11 @@ class MutationPluginManager(PluginManagerBase):
         resp = mutation.run(**kwargs)
 
         if resp is not None:
-            log_debug(f'{mutation.name}: {kwargs["predock_cmpd"].smiles} => {resp[0]}')
+            log_debug(f'{mutation.name}: {kwargs["cmpd"].smiles} => {resp[0]}')
+
+        # NOTE: Need to add back in the cmpd to the return tuple (for
+        # bookkeeping)
+
+        resp = None if resp is None else (resp[0], resp[1], resp[2], [kwargs["cmpd"]])
 
         return resp

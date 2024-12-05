@@ -20,13 +20,13 @@ class SelectorBase(PluginBase):
 
     Args:
         **kwargs: Dictionary containing:
-            predock_cmpds (List[PostDockedCompound]): Available compounds to
+            predock_cmpds (List[Compound]): Available compounds to
                 select from
             score_type (ScoreType): Type of score to use for selection
             num_to_choose (int): Number of compounds to select
 
     Returns:
-        List[PostDockedCompound]: Selected compounds
+        List[Compound]: Selected compounds
     """
 
     def run(self, **kwargs) -> List[Compound]:
@@ -43,23 +43,20 @@ class SelectorBase(PluginBase):
 
     @abstractmethod
     def run_selector(
-        self,
-        predock_cmpds: List[Compound],
-        num_to_choose: int,
-        score_type: ScoreType,
+        self, predock_cmpds: List[Compound], num_to_choose: int, score_type: ScoreType,
     ) -> List[Compound]:
         """Abstract method for implementing selector-specific compound
         selection logic.
 
         Args:
-            predock_cmpds (List[PostDockedCompound]): Available compounds to
+            predock_cmpds (List[Compound]): Available compounds to
                 select from
             num_to_choose (int): Number of compounds to select
             score_type (ScoreType): Type of score to use for selection (docking
                 or diversity)
 
         Returns:
-            List[PostDockedCompound]: Selected compounds
+            List[Compound]: Selected compounds
         """
         pass
 
@@ -73,12 +70,12 @@ class SelectorPluginManager(PluginManagerBase):
 
         Args:
             **kwargs: Dictionary containing:
-                predock_cmpds (List[PostDockedCompound]): Available compounds
+                predock_cmpds (List[Compound]): Available compounds
                 num_seed_dock_fitness (int): Number to choose by docking score
                 num_seed_diversity (int): Number to choose by diversity score
 
         Returns:
-            List[PostDockedCompound]: Combined list of compounds selected by both
+            List[Compound]: Combined list of compounds selected by both
                 docking and diversity scores
 
         Raises:

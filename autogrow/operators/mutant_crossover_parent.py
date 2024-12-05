@@ -1,10 +1,22 @@
 from abc import ABC, abstractmethod
 import copy
+from dataclasses import dataclass
 import random
 from typing import Callable, Dict, List, Any, Tuple, Set, Optional
 
 from autogrow.types import Compound
 from autogrow.utils.logging import LogLevel, log_debug, log_warning
+
+
+@dataclass
+class CommonParallelResponse:
+    """Common response for parallel processing operations."""
+
+    child_smiles: str
+    parent_cmpds: List[Compound]
+    reaction_id: Optional[str] = None
+    parent_lig_id: Optional[str] = None
+    comp_mol_id: Optional[str] = None
 
 
 class CompoundGenerator(ABC):
@@ -22,7 +34,7 @@ class CompoundGenerator(ABC):
         self.generation_num = generation_num
         self.procs_per_node = procs_per_node
         self.num_compounds = num_compounds
-        self.predock_cmpds = predock_cmpds
+        self.cmpds = predock_cmpds
         self.operation_params = self.prepare_params()
 
     @abstractmethod
@@ -43,7 +55,7 @@ class CompoundGenerator(ABC):
         pass
 
     @abstractmethod
-    def make_compound_id(self, result: Tuple) -> str:
+    def make_compound_id(self, result: CommonParallelResponse) -> str:
         """Generate a unique compound ID."""
         pass
 
@@ -52,61 +64,62 @@ class CompoundGenerator(ABC):
         """Get the name of the operation for logging."""
         pass
 
+    @abstractmethod
+    def get_operation_desc(self, result: CommonParallelResponse) -> str:
+        """Get a description of the operation."""
+        pass
+
+    @abstractmethod
+    def get_formatted_respose(self, results: Tuple) -> CommonParallelResponse:
+        """Get a formatted response for the operation."""
+        pass
+
     def generate(self) -> List[Compound]:
         """
         Generate new compounds using the specified operation.
 
         Returns:
-            List[PostDockedCompound]: List of new compounds.
+            List[Compound]: List of new compounds.
 
         Note:
             Uses multiprocessing to generate compounds efficiently.
             Attempts to create unique compounds, avoiding duplicates.
         """
-        new_predock_cmpds: List[Compound] = []
+        new_cmpds: List[Compound] = []
         log_debug(
             f"Creating new compounds from selected compounds via {self.get_operation_name()}"
         )
 
         with LogLevel():
-            predock_cmpds_queue = copy.deepcopy(self.predock_cmpds)
+            cmpds_queue = copy.deepcopy(self.cmpds)
 
             smiles_already_generated = set()
             ids_already_generated = set()
             attempts_to_fill_queue = 0
 
-            while (
-                len(new_predock_cmpds) < self.num_compounds
-                and attempts_to_fill_queue < 10
-            ):
+            while len(new_cmpds) < self.num_compounds and attempts_to_fill_queue < 10:
                 attempts_to_fill_queue += 1
-                random.shuffle(predock_cmpds_queue)
+                random.shuffle(cmpds_queue)
 
                 # Prepare job inputs
                 buffer_num = attempts_to_fill_queue * 2
-                num_to_process = (
-                    self.num_compounds - len(new_predock_cmpds) + buffer_num
-                )
+                num_to_process = self.num_compounds - len(new_cmpds) + buffer_num
                 num_to_process = max(num_to_process, self.procs_per_node)
 
-                job_input_list = self.prepare_job_inputs(
-                    predock_cmpds_queue, num_to_process
-                )
+                job_input_list = self.prepare_job_inputs(cmpds_queue, num_to_process)
 
                 # Run parallel operation
                 results = self.params["parallelizer"].run(
                     tuple(job_input_list), self.get_parallel_function()
                 )
 
-                # Process results
-                results = [x for x in results if x is not None]
-
-                for result in results:
-                    if result is None:
+                for idx, res in enumerate(results):
+                    if res is None:
                         continue
 
-                    child_lig_smile = result[0]
-                    if child_lig_smile in smiles_already_generated:
+                    result = self.get_formatted_respose(res)
+
+                    if result.child_smiles in smiles_already_generated:
                         continue
 
                     # Generate unique ID
@@ -115,23 +128,42 @@ class CompoundGenerator(ABC):
                         new_lig_id = self.make_compound_id(result)
 
                     ids_already_generated.add(new_lig_id)
-                    smiles_already_generated.add(child_lig_smile)
+                    smiles_already_generated.add(result.child_smiles)
 
                     # Create and store new compound
+                    desc = self.get_operation_desc(result)
+
+                    # Update history. If there is only one parent, just append.
+                    # If there are multiple parents, append lists containing
+                    # each lineage.
+                    if sum(len(p.history) for p in result.parent_cmpds) == 0:
+                        # Parents have no history. So start of a new history.
+                        updated_history = [desc]
+                    elif len(result.parent_cmpds) == 1:
+                        # Likely mutation. Only one parent, so just extend history.
+                        updated_history = result.parent_cmpds[0].history[:] + [desc]
+                    else:
+                        # Likely crossover. Multiple parents, so extend each history.
+                        updated_history = [
+                            p.history[:] for p in result.parent_cmpds
+                        ] + [desc]
+
                     ligand_info = Compound(
-                        smiles=child_lig_smile, id=new_lig_id
+                        smiles=result.child_smiles,
+                        id=new_lig_id,
+                        history=updated_history,
                     )
-                    new_predock_cmpds.append(ligand_info)
+                    new_cmpds.append(ligand_info)
 
                 # Replenish queue if needed
-                if not predock_cmpds_queue:
-                    predock_cmpds_queue = copy.deepcopy(self.predock_cmpds)
-                    random.shuffle(predock_cmpds_queue)
+                if not cmpds_queue:
+                    cmpds_queue = copy.deepcopy(self.cmpds)
+                    random.shuffle(cmpds_queue)
 
-            if len(new_predock_cmpds) < self.num_compounds:
+            if len(new_cmpds) < self.num_compounds:
                 log_warning(
-                    f"Only able to create {len(new_predock_cmpds)} of {self.num_compounds} "
+                    f"Only able to create {len(new_cmpds)} of {self.num_compounds} "
                     f"requested {self.get_operation_name()}s."
                 )
 
-            return new_predock_cmpds
+            return new_cmpds

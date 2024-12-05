@@ -89,9 +89,9 @@ class MergeMCS(CrossoverBase):
         Run the main script for SmileMerge.
 
         Args:
-            predock_cmpd1 (PostDockedCompound): PostDockedCompound of the first
+            predock_cmpd1 (Compound): Compound of the first
                 ligand.
-            predock_cmpd2 (PostDockedCompound):PostDockedCompound of the second
+            predock_cmpd2 (Compound):Compound of the second
                 ligand.
 
         Returns:

@@ -74,19 +74,19 @@ class FakeSmiTo3DSDF(SmiTo3DSdfBase):
         """
         Simulate the conversion of SMILES representations to 3D SDF files.
 
-        This method takes a list of PostDockedCompound objects containing SMILES
+        This method takes a list of Compound objects containing SMILES
         strings and creates fake 3D SDF files. Instead of actual 3D conversion,
         it creates placeholder files with a simple string content.
 
         Args:
-            predock_cmpds (List[PostDockedCompound]): A list of PostDockedCompound
+            predock_cmpds (List[Compound]): A list of Compound
                 objects, each containing a SMILES string and other compound
                 information.
             pwd (str): The path to the working directory where fake SDF files
                 will be created.
 
         Returns:
-            List[PostDockedCompound]: The input list of PostDockedCompound
+            List[Compound]: The input list of Compound
                 objects, updated with the paths to the generated fake 3D SDF
                 files.
 
@@ -96,9 +96,9 @@ class FakeSmiTo3DSDF(SmiTo3DSdfBase):
             - The generated SDF files contain only the string "fake 3D SDF
               file".
         """
-        for cmpd_idx, predock_cmpd in enumerate(predock_cmpds):
+        for cmpd_idx, cmpd in enumerate(predock_cmpds):
             out_file = f"{pwd}compound{cmpd_idx}.sdf"
-            predock_cmpd.sdf_path = out_file
+            cmpd.sdf_path = out_file
 
             with open(out_file, "w") as f:
                 f.write("fake 3D SDF file")

@@ -33,7 +33,7 @@ def run_docking_common(
         current_gen_int (int): Current generation number.
         cur_gen_dir (str): Directory for the current generation.
         smiles_file_new_gen (str): Filename containing new population molecules.
-        new_gen_predock_cmpds (List[PostDockedCompound]): List of PostDockedCompound
+        new_gen_predock_cmpds (List[Compound]): List of Compound
             objects for the new generation.
 
     Returns:
@@ -51,9 +51,7 @@ def run_docking_common(
     post_docked_compounds = [x for x in post_docked_compounds if x is not None]
 
     # Remove those not associated with a docked sdf file
-    post_docked_compounds = [
-        x for x in post_docked_compounds if x.sdf_path is not None
-    ]
+    post_docked_compounds = [x for x in post_docked_compounds if x.sdf_path is not None]
 
     return rank_and_save_output_smi(
         cur_gen_dir, current_gen_int, smiles_file_new_gen, post_docked_compounds, params

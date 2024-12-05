@@ -121,9 +121,7 @@ def get_number_heavy_atoms(smiles_str: Optional[str]) -> Optional[int]:
     return num_heavy_atoms
 
 
-def score_as_lig_efficiency(
-    list_of_lig_info: Compound,
-) -> Optional[Compound]:
+def score_as_lig_efficiency(list_of_lig_info: Compound,) -> Optional[Compound]:
     """
     Determine the ligand efficiency and set it to be the code.
 

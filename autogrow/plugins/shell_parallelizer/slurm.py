@@ -12,6 +12,7 @@ import string
 import hashlib
 import time
 
+
 class Slurm(ShellParallelizerBase):
     """A plugin that uses Slurm array jobs to execute shell commands in parallel.
     
@@ -47,7 +48,7 @@ class Slurm(ShellParallelizerBase):
                     action="store_true",
                     default=False,
                     help="Wait for the slurm job to complete. If this parameter is not given, AutoGrow4 will submit slurm jobs as needed and exit after each submission. You will have to restart AutoGrow4 after each slurm job finishes to continue.",
-                )
+                ),
             ],
         )
 
@@ -129,9 +130,9 @@ class Slurm(ShellParallelizerBase):
 
             while not os.path.exists(completion_file):
                 time.sleep(5)
-            
+
             return self._collect_results(commands_file, cache_dir, prefix)
-        
+
         # Not supposed to wait for slurm.
 
         # Exit program with message

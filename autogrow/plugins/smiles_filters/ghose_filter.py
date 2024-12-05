@@ -50,7 +50,7 @@ class GhoseFilter(SmilesFilterBase):
         hydrogens against the total number of atoms.
     """
 
-    def run_filter(self, predock_cmpd: Compound) -> bool:
+    def run_filter(self, cmpd: Compound) -> bool:
         """
         Run the Ghose filter on a given molecule.
 
@@ -59,7 +59,7 @@ class GhoseFilter(SmilesFilterBase):
         refractivity, and molar LogP.
 
         Args:
-            predock_cmpd (PostDockedCompound): A PostDockedCompound to be tested.
+            cmpd (Compound): A Compound to be tested.
 
         Returns:
             bool: True if the molecule passes the filter; False if it fails.
@@ -69,7 +69,7 @@ class GhoseFilter(SmilesFilterBase):
             to it before applying the filter. This ensures that hydrogens are
             counted in the total atom count without affecting other filters.
         """
-        mol = self.predock_cmpd_to_rdkit_mol(predock_cmpd)
+        mol = self.predock_cmpd_to_rdkit_mol(cmpd)
         if mol is None:
             return False
 

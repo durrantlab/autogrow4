@@ -53,7 +53,7 @@ class MozziconacciFilter(SmilesFilterBase):
     Web, March (2003).
     """
 
-    def run_filter(self, predock_cmpd: Compound) -> bool:
+    def run_filter(self, cmpd: Compound) -> bool:
         """
         Run the Mozziconacci filter on a given molecule.
 
@@ -62,13 +62,13 @@ class MozziconacciFilter(SmilesFilterBase):
         bonds, rings, oxygens, nitrogens, and halogens.
 
         Args:
-            predock_cmpd (PostDockedCompound): A PostDockedCompound to be tested.
+            cmpd (Compound): A Compound to be tested.
 
         Returns:
             bool: True if the molecule passes all filter criteria, False
                 otherwise.
         """
-        mol = self.predock_cmpd_to_rdkit_mol(predock_cmpd)
+        mol = self.predock_cmpd_to_rdkit_mol(cmpd)
         if mol is None:
             return False
 

@@ -134,9 +134,7 @@ class VINA(ParentScoring):
 
         return self.merge_smile_info_w_affinity_info(lig_info_vals)
 
-    def merge_smile_info_w_affinity_info(
-        self, lig_info: List
-    ) -> Optional[Compound]:
+    def merge_smile_info_w_affinity_info(self, lig_info: List) -> Optional[Compound]:
         """
         From the info in self.smiles_dict get that info and merge that with
         the affinity info

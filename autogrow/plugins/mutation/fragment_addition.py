@@ -126,7 +126,7 @@ class FragmentAddition(MutationBase):
         self._load_rxn_data()
 
     def run_mutation(
-        self, predock_cmpd: Compound
+        self, cmpd: Compound
     ) -> Optional[Tuple[str, int, Union[str, None]]]:
         """
         Run the mutation on the parent molecule.
@@ -138,26 +138,26 @@ class FragmentAddition(MutationBase):
         If none work, we return None.
 
         Args:
-            predock_cmpd (PostDockedCompound): PostDockedCompound of a molecule to
-                be reacted.
+            cmpd (Compound): Compound of a molecule to be reacted.
 
         Returns:
-            Optional[Tuple[str, int, Union[str, None]]]: A tuple containing the
-                reaction product SMILES, the id_number of the reaction as found
-                in the reaction_dict, and the id for the complementary mol
-                (None if it was a single reactant reaction).
+            Optional[Tuple[str, int, Union[str, None], str]]: A tuple containing
+                the reaction product SMILES, the id_number of the reaction as
+                found in the reaction_dict, and the id for the complementary
+                mol. (None if it was a single reactant reaction).
             Returns None if all reactions failed or input failed to convert to
                 a sanitizable rdkit mol.
         """
+
         # Prepare the molecule
-        mol_data = self._prepare_mol(predock_cmpd.smiles)
+        mol_data = self._prepare_mol(cmpd.smiles)
         if mol_data is None:
             return None
-        mol, mol_reprotanated, mol_deprotanated, list_subs_within_mol = mol_data
+        mol, mol_reprotanated, mol_deprotanated, list_react_grps_in_mol = mol_data
 
         # Try reactions on the molecule
         reaction_result = self._try_reactions(
-            mol_reprotanated, mol_deprotanated, list_subs_within_mol
+            mol_reprotanated, mol_deprotanated, list_react_grps_in_mol
         )
 
         if reaction_result is None:
@@ -198,7 +198,7 @@ class FragmentAddition(MutationBase):
         # List of already predicted smiles (to make sure no duplicates)
         # TODO: Think more about this. Needs to be only once, but if here, it will be with every reaction.
         # Now called from setup, so only once, but think more about implementation.
-        # existing_smiles: List[PostDockedCompound],
+        # existing_smiles: List[Compound],
         # self.existing_smiles = [
         #     x.smiles for x in existing_smiles
         # ]
@@ -906,7 +906,7 @@ class FragmentAddition(MutationBase):
         # code in execute_crossover.py.
         assert self.plugin_managers is not None, "Plugin managers not set"
 
-        # TODO: Filter accepts a list of PostDockedCompound. So we need to
+        # TODO: Filter accepts a list of Compound. So we need to
         # convert smiles string to that just for the purpose of filtering.
         tmp_predock_cmpd = Compound(smiles=reaction_product_smiles, id="tmp")
 

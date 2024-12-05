@@ -109,9 +109,7 @@ class FakeDocking(DockingBase):
         """
         pass
 
-    def run_docking(
-        self, predocked_cmpds: List[Compound]
-    ) -> List[Compound]:
+    def run_docking(self, predocked_cmpds: List[Compound]) -> List[Compound]:
         """
         Perform fake docking on a list of compounds.
 
@@ -119,11 +117,11 @@ class FakeDocking(DockingBase):
         without performing actual docking calculations.
 
         Args:
-            predocked_cmpds (List[PostDockedCompound]): A list of
-                PostDockedCompound objects to be "docked".
+            predocked_cmpds (List[Compound]): A list of
+                Compound objects to be "docked".
 
         Returns:
-            List[PostDockedCompound]: A list of PostDockedCompound objects,
+            List[Compound]: A list of Compound objects,
             each containing a random score between -12 and -8, and the original
             3D SDF file path.
         """
@@ -132,4 +130,3 @@ class FakeDocking(DockingBase):
             predocked_cmpd.sdf_path = predocked_cmpd.sdf_path or ""
 
         return predocked_cmpds
-
