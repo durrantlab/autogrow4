@@ -197,7 +197,7 @@ class CrossoverGenerator(CompoundGenerator):
 
     def get_operation_desc(self, result: CommonParallelResponse) -> str:
         """Get a description of the operation."""
-        return f"{result.parent_cmpds[0].smiles} + {result.parent_cmpds[1].smiles} => {result.child_smiles} ({self.get_operation_name()})"
+        return f"{result.parent_cmpds[0].smiles} + {result.parent_cmpds[1].smiles} => {result.child_smiles}"
 
     def get_formatted_respose(self, results: Tuple) -> CommonParallelResponse:
         """Get a formatted response for the operation."""

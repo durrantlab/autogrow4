@@ -136,23 +136,24 @@ class CompoundGenerator(ABC):
                     # Update history. If there is only one parent, just append.
                     # If there are multiple parents, append lists containing
                     # each lineage.
-                    if sum(len(p.history) for p in result.parent_cmpds) == 0:
+                    if sum(len(p._history) for p in result.parent_cmpds) == 0:
                         # Parents have no history. So start of a new history.
-                        updated_history = [desc]
+                        updated_history = []
                     elif len(result.parent_cmpds) == 1:
                         # Likely mutation. Only one parent, so just extend history.
-                        updated_history = result.parent_cmpds[0].history[:] + [desc]
+                        updated_history = result.parent_cmpds[0]._history[:]
                     else:
                         # Likely crossover. Multiple parents, so extend each history.
                         updated_history = [
-                            p.history[:] for p in result.parent_cmpds
-                        ] + [desc]
+                            p._history[:] for p in result.parent_cmpds
+                        ]
 
                     ligand_info = Compound(
                         smiles=result.child_smiles,
                         id=new_lig_id,
-                        history=updated_history,
+                        _history=updated_history,
                     )
+                    ligand_info.add_history(self.get_operation_name().upper(), desc)
                     new_cmpds.append(ligand_info)
 
                 # Replenish queue if needed

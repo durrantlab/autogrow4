@@ -55,7 +55,7 @@ class Compound:  # Get new id when you figure out what context this is used in
     mol: Optional[Chem.Mol] = None
     fp: Optional[Any] = None
     sdf_path: Optional[str] = None
-    history: List[Any] = field(default_factory=list)
+    _history: List[Any] = field(default_factory=list)
 
     # fitness_score: float  # Like -8.439
     # diversity_score: Optional[float] = None
@@ -63,7 +63,7 @@ class Compound:  # Get new id when you figure out what context this is used in
 
     @property
     def tsv_line(self) -> str:
-        return f"{self.smiles}\t{self.id}\t{self.docking_score}\t{self.diversity_score}\t{self.sdf_path}\t{self.additional_info}\t{json.dumps(self.history)}\n"
+        return f"{self.smiles}\t{self.id}\t{self.docking_score}\t{self.diversity_score}\t{self.sdf_path}\t{self.additional_info}\t{json.dumps(self._history)}\n"
 
     @staticmethod
     def from_tsv_line(tsv_line: str) -> "Compound":
@@ -78,7 +78,7 @@ class Compound:  # Get new id when you figure out what context this is used in
         if len(prts) > 5:
             cmpd.additional_info = prts[5]
         if len(prts) > 6:
-            cmpd.history = json.loads(prts[6])
+            cmpd._history = json.loads(prts[6])
         return cmpd
 
     def get_score_by_type(self, score_type: ScoreType) -> float:
@@ -106,3 +106,6 @@ class Compound:  # Get new id when you figure out what context this is used in
                 return self.diversity_score
             raise ValueError("No diversity score available")
         raise ValueError("Invalid score type")
+    
+    def add_history(self, label: str, history: str):
+        self._history.append(f"{label}: {history}")

@@ -95,8 +95,8 @@ class SelectorPluginManager(PluginManagerBase):
         # Get the selector plugin to use
         selector = cast(SelectorBase, self.plugins[selectors[0]])
 
-        docking_fitness_smiles_list: List[Compound] = []
-        diversity_smile_list: List[Compound] = []
+        docking_fitness_cmpd_list: List[Compound] = []
+        diversity_cmpd_list: List[Compound] = []
 
         # Select the molecules based on the docking score
         num_predock_cmpds = len(kwargs["predock_cmpds"])
@@ -106,12 +106,18 @@ class SelectorPluginManager(PluginManagerBase):
                 f"{selector.name}: Selecting {num_to_choose} compounds by docking score from {num_predock_cmpds} available compounds"
             )
             with LogLevel():
-                docking_fitness_smiles_list = selector.run(
+                docking_fitness_cmpd_list = selector.run(
                     **{
                         "predock_cmpds": kwargs["predock_cmpds"],
                         "num_to_choose": num_to_choose,
                         "score_type": ScoreType.DOCKING,
                     }
+                )
+
+            for cmpd in docking_fitness_cmpd_list:
+                cmpd.add_history(
+                    "SELECTOR",
+                    f"Selected {cmpd.smiles} due to its docking score: {cmpd.get_score_by_type(ScoreType.DOCKING):.2f}"
                 )
 
         # Select the molecules based on the diversity score
@@ -122,7 +128,7 @@ class SelectorPluginManager(PluginManagerBase):
             )
 
             with LogLevel():
-                diversity_smile_list = selector.run(
+                diversity_cmpd_list = selector.run(
                     **{
                         "predock_cmpds": kwargs["predock_cmpds"],
                         "num_to_choose": num_to_choose,
@@ -130,24 +136,33 @@ class SelectorPluginManager(PluginManagerBase):
                     }
                 )
 
+            for cmpd in diversity_cmpd_list:
+                cmpd.add_history(
+                    "SELECTOR",
+                    f"Selected {cmpd.smiles} due to its diversity score: {cmpd.get_score_by_type(ScoreType.DIVERSITY):.2f}"
+                )
+
         # Calculate the average docking score of the
         # docking_fitness_smiles_list.
         avg_docking_score = sum(
-            x.get_score_by_type(ScoreType.DOCKING) for x in docking_fitness_smiles_list
-        ) / len(docking_fitness_smiles_list)
+            x.get_score_by_type(ScoreType.DOCKING) for x in docking_fitness_cmpd_list
+        ) / len(docking_fitness_cmpd_list)
         if avg_docking_score > 0:
             log_warning(
                 f"Average docking score of selected compounds, +{avg_docking_score:.2f}, was greater than 0. Are you sure the docking plugin is correctly assigning lower (more negative) scores to better compounds?"
             )
 
         # Combine the two lists
-        docking_diversity_list = list(docking_fitness_smiles_list)
-        docking_diversity_list.extend(diversity_smile_list)
+        selected_cmpd_list = list(docking_fitness_cmpd_list)
+        selected_cmpd_list.extend(diversity_cmpd_list)
+
+        # Keep only compounds that are unique
+        selected_cmpd_list = list({x.smiles: x for x in selected_cmpd_list}.values())
 
         # Shuffle the list to prevent bias
-        random.shuffle(docking_diversity_list)
+        random.shuffle(selected_cmpd_list)
 
-        return docking_diversity_list
+        return selected_cmpd_list
 
         # # Finalize the list
         # return selector.finalize_composite_docking_diversity_list(
