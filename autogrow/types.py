@@ -108,4 +108,4 @@ class Compound:  # Get new id when you figure out what context this is used in
         raise ValueError("Invalid score type")
     
     def add_history(self, label: str, history: str):
-        self._history.append(f"{label}: {history}")
+        self._history.append(f"{label.upper()}: {history}")
