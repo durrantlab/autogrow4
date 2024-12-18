@@ -45,8 +45,8 @@ class SelectorBase(PluginBase):
     def run_selector(
         self, predock_cmpds: List[Compound], num_to_choose: int, score_type: ScoreType,
     ) -> List[Compound]:
-        """Abstract method for implementing selector-specific compound
-        selection logic.
+        """
+        Abstract method to implement selector-specific compound selection logic.
 
         Args:
             predock_cmpds (List[Compound]): Available compounds to
@@ -62,8 +62,11 @@ class SelectorBase(PluginBase):
 
 
 class SelectorPluginManager(PluginManagerBase):
+    """Plugin manager for selector plugins in the AutoGrow system."""
+
     def execute(self, **kwargs) -> List[Compound]:
-        """Execute selector plugin to choose compounds based on scores.
+        """
+        Execute selector plugin to choose compounds based on scores.
 
         Runs the selected plugin to choose compounds based on both docking and
         diversity scores. Combines the selected compounds into a single list.

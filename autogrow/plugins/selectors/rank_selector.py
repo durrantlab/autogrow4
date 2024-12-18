@@ -30,8 +30,7 @@ from autogrow.utils.logging import log_debug
 
 class RankSelector(SelectorBase):
     """
-    A selector plugin that chooses compounds based on their rank in a specified
-    score.
+    Selector plugin that chooses compounds per their rank in a specified score.
 
     This selector is non-redundant and selects the top-ranked compounds up to
     the specified number. It's not recommended for small runs where the number

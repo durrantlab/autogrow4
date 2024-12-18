@@ -26,6 +26,12 @@ class MutationGenerator(CompoundGenerator):
     """Handles mutation-specific compound generation."""
 
     def prepare_params(self) -> Dict[str, Any]:
+        """
+        Prepare operation-specific parameters.
+        
+        Returns:
+            Dict[str, Any]: Dictionary containing the mutation plugin manager.
+        """
         mutation_plugin_manager = plugin_managers.Mutation
         mutation_plugin_manager.setup_plugins()
         return {"plugin_manager": mutation_plugin_manager}
@@ -33,15 +39,41 @@ class MutationGenerator(CompoundGenerator):
     def prepare_job_inputs(
         self, compounds: List[Compound], num_to_process: int
     ) -> List[Tuple]:
+        """
+        Prepare job inputs for parallel processing.
+
+        Args:
+            compounds (List[Compound]): List of compounds to mutate.
+            num_to_process (int): Number of compounds to mutate.
+
+        Returns:
+            List[Tuple]: List of tuples containing the compound to mutate and the
+                mutation plugin manager.
+        """
         return [
             (compounds[i % len(compounds)], self.operation_params["plugin_manager"])
             for i in range(num_to_process)
         ]
 
     def get_parallel_function(self) -> Callable:
+        """
+        Get the function to run in parallel.
+        
+        Returns:
+            Callable: Function to run in parallel.
+        """
         return _run_mutation_for_multithread
 
     def make_compound_id(self, result: CommonParallelResponse) -> str:
+        """
+        Generate a unique compound ID.
+        
+        Args:
+            result (CommonParallelResponse): The result of the mutation operation.
+            
+        Returns:
+            str: Unique compound ID.
+        """
         # _, reaction_id_number, zinc_id_comp_mol, _, parent_lig_id = result
         # ('[N-]=[N+]=Nc1ccc(N=[N+]=N)c2c(O)cccc12', '22', None, [Compound(smiles='N=[N+]=Nc1ccc(Cl)c2cccc(O)c12', id='naphthalene_43', additional_info='', docking_score=None, diversity_score=None, mol=None, fp=None, sdf_path=None, history=[])], 'naphthalene_43')
 
@@ -53,6 +85,12 @@ class MutationGenerator(CompoundGenerator):
         return f"({parent_lig_id}+{result.comp_mol_id})Gen_{self.generation_num}_Mutant_{result.reaction_id}_{random_id_num}"
 
     def get_operation_name(self) -> str:
+        """
+        Get the name of the operation.
+        
+        Returns:
+            str: The name of the operation.
+        """
         return "mutation"
 
     def get_operation_desc(self, result: CommonParallelResponse) -> str:
@@ -74,7 +112,7 @@ def _run_mutation_for_multithread(
     cmpd: Compound, mutation_obj: MutationPluginManager
 ) -> Optional[Tuple[str, int, Union[str, None]]]:
     """
-    Performs a single mutation operation on a Compound.
+    Perform a single mutation operation on a Compound.
 
     This function is designed to be used in a multithreaded context, allowing
     for parallel processing of mutations.

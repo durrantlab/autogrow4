@@ -30,6 +30,16 @@ class CompoundGenerator(ABC):
         num_compounds: int,
         predock_cmpds: List[Compound],
     ):
+        """
+        Initialize the compound generator.
+
+        Args:
+            params (Dict[str, Any]): Parameters for the operation.
+            generation_num (int): The generation number.
+            procs_per_node (int): Number of processes per node.
+            num_compounds (int): Number of compounds to generate.
+            predock_cmpds (List[Compound]): List of compounds to use as parents.
+        """
         self.params = params
         self.generation_num = generation_num
         self.procs_per_node = procs_per_node
@@ -46,22 +56,49 @@ class CompoundGenerator(ABC):
     def prepare_job_inputs(
         self, compounds: List[Compound], num_to_process: int
     ) -> List[Tuple]:
-        """Prepare job inputs for parallel processing."""
+        """
+        Prepare job inputs for parallel processing.
+        
+        Args:
+            compounds (List[Compound]): List of compounds to process.
+            num_to_process (int): Number of compounds to process.
+            
+        Returns:
+            List[Tuple]: List of tuples containing the compound to process.
+        """
         pass
 
     @abstractmethod
     def get_parallel_function(self) -> Callable:
-        """Get the function to run in parallel."""
+        """
+        Get the function to run in parallel.
+        
+        Returns:
+            Callable: Function to run in parallel.
+        """
         pass
 
     @abstractmethod
     def make_compound_id(self, result: CommonParallelResponse) -> str:
-        """Generate a unique compound ID."""
+        """
+        Generate a unique compound ID.
+        
+        Args:
+            result (CommonParallelResponse): The result of the operation.
+            
+        Returns:
+            str: Unique compound ID.
+        """
         pass
 
     @abstractmethod
     def get_operation_name(self) -> str:
-        """Get the name of the operation for logging."""
+        """
+        Get the name of the operation.
+        
+        Returns:
+            str: The name of the operation.
+        """
         pass
 
     @abstractmethod

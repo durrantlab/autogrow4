@@ -32,10 +32,7 @@ from autogrow.plugins.plugin_manager_instances import plugin_managers
 
 
 class FragmentAddition(MutationBase):
-    """
-    A mutation plugin that adds fragments to existing molecules using specified
-    reaction libraries.
-    """
+    """Plugin that dds fragments to existing mols using reaction libraries."""
 
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
         """
@@ -142,7 +139,6 @@ class FragmentAddition(MutationBase):
             Returns None if all reactions failed or input failed to convert to
                 a sanitizable rdkit mol.
         """
-
         # Prepare the molecule
         mol_data = self._prepare_mol(cmpd.smiles)
         if mol_data is None:
@@ -170,9 +166,7 @@ class FragmentAddition(MutationBase):
         )
 
     def _load_rxn_data(self):
-        """
-        Load the reaction data, if it hasn't been previously loaded.
-        """
+        """Load the reaction data, if it hasn't been previously loaded."""
         rxn_library_path = self.params["rxn_library_path"]
 
         if not hasattr(self, "reaction_dict"):
@@ -299,7 +293,7 @@ class FragmentAddition(MutationBase):
         )
 
     def _load_functional_grps(self, rxn_library_path: str) -> Dict[str, str]:
-        """
+        r"""
         Load the functional groups required for the respective reactions.
 
         This retrieves a dictionary of all functional groups required for the
@@ -630,8 +624,7 @@ class FragmentAddition(MutationBase):
         list_subs_within_mol: List[str],
     ) -> Optional[Tuple[str, int, Optional[str]]]:
         """
-        Try to perform the reaction specified in a_reaction_dict on the
-        molecule.
+        Try to perform the reaction specified in a_reaction_dict on the mol.
 
         Args:
             a_reaction_dict (Dict[str, Any]): The reaction to try.

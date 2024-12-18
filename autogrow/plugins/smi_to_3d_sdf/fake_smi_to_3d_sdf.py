@@ -24,8 +24,7 @@ class FakeSmiTo3DSDF(SmiTo3DSdfBase):
 
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
         """
-        Add command-line arguments specific to the Fake SMILES to 3D SDF
-        converter.
+        Add command-line args specific to the Fake SMILES to 3D SDF converter.
 
         This method defines the command-line arguments that can be used to
         configure the Fake SMILES to 3D SDF converter.

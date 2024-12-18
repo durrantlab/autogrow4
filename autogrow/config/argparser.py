@@ -1,5 +1,5 @@
 """
-AutoGrow Configuration and Command-Line Argument Parsing Module
+AutoGrow Configuration and Command-Line Argument Parsing Module.
 
 This module provides functionality for setting up and parsing command-line
 arguments for the AutoGrow program, an automated drug optimization and

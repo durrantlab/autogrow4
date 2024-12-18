@@ -9,7 +9,8 @@ from typing import Any, Dict, List
 
 
 def validate_params(params: Dict[str, Any]) -> None:
-    """Validates required input parameters and files.
+    """
+    Validate required input parameters and files.
 
     Checks for presence of all required parameters and verifies that specified
     input files exist with correct formats. Required parameters include receptor
@@ -57,7 +58,8 @@ def validate_params(params: Dict[str, Any]) -> None:
 
 
 def _throw_missing_params_error(missing_params: List[str]) -> None:
-    """Raises error with details about missing required parameters.
+    """
+    Raise an error with details about missing required parameters.
 
     Generates a detailed error message listing all missing required parameters
     and instructions for getting help with parameter usage.
@@ -84,7 +86,8 @@ def _throw_missing_params_error(missing_params: List[str]) -> None:
 def _check_file_exists(
     pname: str, ext: str, file_desc: str, params: Dict[str, Any]
 ) -> None:
-    """Verifies existence and format of required input files.
+    """
+    Verify existence and format of required input files.
 
     Args:
         pname (str): Parameter name for file path in params dictionary

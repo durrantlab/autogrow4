@@ -1,14 +1,18 @@
 """
-Developers script for merging robust_rxns and click_chem_rxns
-into all_rxns... This script renumbers a rxn_libraries numbering
+Merges robust_rxns and click_chem_rxns into all_rxns.
+
+Developers script for merging. This script renumbers a rxn_libraries numbering.
 """
 import sys
 
 
 def renumber_file(old_path: str, new_path: str, new_rxn_num: int):
     """
-    This is a developers tool to renumber a rxn_library_path .json file
-        Must provide the following:
+    Renumber a rxn_library_path .json file.
+    
+    This is a developers tool.
+
+    Must provide the following:
         1) old_path to original .json rxn_library_path file
         2) new_path to output renumbered .json rxn_library_path file
         3) new_rxn_num: number to reindex the 1st reaction to:

@@ -1,5 +1,4 @@
-"""Data structures for managing compounds throughout the AutoGrow docking
-pipeline.
+"""Data structures for managing compounds throughout the AutoGrow docking pipeline.
 
 Defines classes representing compounds before and after docking, with utilities
 for converting between different representations and handling scoring
@@ -62,10 +61,25 @@ class Compound:  # Get new id when you figure out what context this is used in
 
     @property
     def tsv_line(self) -> str:
+        """
+        Return a tab-separated string representation of the compound.
+        
+        Returns:
+            str: A tab-separated string representation of the compound.
+        """
         return f"{self.smiles}\t{self.id}\t{self.docking_score}\t{self.diversity_score}\t{self.sdf_path}\t{self.additional_info}\t{json.dumps(self._history)}\n"
 
     @staticmethod
     def from_tsv_line(tsv_line: str) -> "Compound":
+        """
+        Create a Compound object from a tab-separated string.
+
+        Args:
+            tsv_line (str): A tab-separated string representation of a compound.
+
+        Returns:
+            Compound: A Compound object created from the input string.
+        """
         prts = tsv_line.replace("    ", "\t").strip().split("\t")
         cmpd = Compound(smiles=prts[0], id=prts[1])
         if len(prts) > 2:
@@ -81,7 +95,7 @@ class Compound:  # Get new id when you figure out what context this is used in
         return cmpd
 
     def get_score_by_type(self, score_type: ScoreType) -> float:
-        """Retrieves a previous score of the specified type.
+        """Retrieve a previous score of the specified type.
 
         Args:
             score_type (ScoreType): Type of score to retrieve (DOCKING or
@@ -107,4 +121,11 @@ class Compound:  # Get new id when you figure out what context this is used in
         raise ValueError("Invalid score type")
 
     def add_history(self, label: str, history: str):
+        """
+        Add a history entry to the compound.
+
+        Args:
+            label (str): A label for the history entry.
+            history (str): The history entry to add.
+        """
         self._history.append(f"{label.upper()}: {history}")

@@ -1,6 +1,4 @@
-"""
-Plugin implementation of chemistry toolkit interface.
-"""
+"""Plugin implementation of chemistry toolkit interface."""
 from typing import Any, Dict, List, Optional, Tuple, Type, cast
 from abc import abstractmethod
 from autogrow.config.argparser import ArgumentVars
@@ -77,7 +75,6 @@ class ChemToolkitBase(PluginBase):
                 response should be an object with a property "name" that maps to
                 a string, e.g., "SANITIZE_NONE". See rdkit documentation.
         """
-
         # NOTE: Second response must be object with property "name" that maps to
         # a string, e.g., "SANITIZE_NONE". See rdkit documentation.
         pass
@@ -274,16 +271,6 @@ class ChemToolkitBase(PluginBase):
         pass
 
     @abstractmethod
-    def get_bonds(self, atom: Any) -> List[Any]:
-        """Get bonds for atom."""
-        pass
-
-    @abstractmethod
-    def get_bond_type_as_double(self, bond: Any) -> float:
-        """Get bond type as double value."""
-        pass
-
-    @abstractmethod
     def get_num_atoms(self, mol: Any) -> int:
         """Get number of atoms in molecule."""
         pass
@@ -350,6 +337,13 @@ class ChemToolkitPluginManager(PluginManagerBase):
     """Plugin manager for chemistry toolkits."""
 
     def __init__(self, plugin_base_class: Type[PluginBase]):
+        """
+        Initialize the plugin manager.
+        
+        Args:
+            plugin_base_class (Type[PluginBase]): The base class for plugins
+                managed by this manager.
+        """
         super().__init__(plugin_base_class)
         self._toolkit = None
 
@@ -367,11 +361,11 @@ class ChemToolkitPluginManager(PluginManagerBase):
 
     def on_plugin_manager_setup_done(self):
         """
-            Perform any initialization tasks for the plugin manager.
+        Perform any initialization tasks for the plugin manager.
 
-            This method is called once during initialization of the plugin manager.
-            Children can overwrite it.
-            """
+        This method is called once during initialization of the plugin manager.
+        Children can overwrite it.
+        """
         # Just access the property to trigger loading
         _ = self.toolkit
 

@@ -220,8 +220,7 @@ def _make_anchor_to_bonds_and_type_for_frag(
 
 def _make_dict_all_atoms_iso_to_idx_dict(mol: Any) -> Dict[int, int]:
     """
-    Make a dictionary of every atom in a molecule with Iso as the key and the
-    Idx as its value.
+    Make a dict of every atom in a mol with Iso as key and the Idx as value.
 
     Args:
         mol (rdkit.Chem.rdchem.Mol): An RDKit molecule.
@@ -248,8 +247,7 @@ def _unpack_lists_of_atoms_and_bond_type(
     core_merg_iso_to_idx_dict: Dict[int, int],
 ) -> Tuple[List[int], List[Any]]:
     """
-    Iterate through all atoms which will be bound to the anchor and unpackage
-    all the bond types in a list.
+    Iterate through atoms that will be bound to anchor and unpackage bond types.
 
     Args:
         anchor_to_connection_dict (Dict[int, List[List[Union[int, 

@@ -24,7 +24,7 @@ def run_docking_common(
     params: Dict[str, Any],
 ) -> str:
     """
-    Runs common docking operations for all docking programs.
+    Run common docking operations for all docking programs.
 
     This function handles the docking process, including running the docking
     simulation, processing results, and ranking the docked compounds.

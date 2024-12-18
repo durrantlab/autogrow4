@@ -133,7 +133,7 @@ def check_cyclic_breaks(
     Tuple[Any, Tuple[List[int], List[int], List[int]], bool], Tuple[None, None, None],
 ]:
     """
-    Checks for and fixes cyclic breaks in the common core.
+    Check for and fixes cyclic breaks in the common core.
 
     This function identifies cyclic breaks in the common core and fixes them by
     removing problematic atoms. It also handles resulting fragmentation issues.
@@ -258,7 +258,7 @@ def check_cyclic_breaks(
 
 def ringbreak_frag_handling(new_core: Any, mcs_ringbreak_idx: List[int]) -> List[int]:
     """
-    Handles ringbreaks and fragmentation in the core molecule.
+    Handle ringbreaks and fragmentation in the core molecule.
 
     This function processes the core molecule after cyclic break resolution,
     handling any resulting fragmentation by keeping only the largest fragment.
@@ -335,7 +335,7 @@ def find_biggest_frag(
     frag_mols_obj: Tuple[Any, ...]
 ) -> Tuple[Tuple[Any, ...], Union[int, None]]:
     """
-    Identifies the largest fragment in a set of molecular fragments.
+    Identify the largest fragment in a set of molecular fragments.
 
     Args:
         frag_mols_obj (Tuple[rdkit.Chem.rdchem.Mol, ...]): A tuple containing
@@ -365,7 +365,7 @@ def find_biggest_frag(
 
 def remove_iso_labels(mol: Any, list_of_idx_to_remove: List[int]) -> None:
     """
-    Removes isotope labels from specified atoms in a molecule.
+    Remove isotope labels from specified atoms in a molecule.
 
     Args:
         mol (rdkit.Chem.rdchem.Mol): The RDKit molecule to modify.
@@ -380,7 +380,7 @@ def remove_iso_labels(mol: Any, list_of_idx_to_remove: List[int]) -> None:
 
 def add_r_atom_isolabels(mol1: Any, mol2: Any) -> None:
     """
-    Adds isotope labels to R-group atoms in two molecules.
+    Add isotope labels to R-group atoms in two molecules.
 
     Labels the first atom in each R-group with its index + 1000 for mol1 and
     + 2000 for mol2. These labels are used to differentiate R-groups later.
@@ -409,7 +409,7 @@ def pick_mcs_alignment(
     mol1: Any, mol2: Any, common_core: Any,
 ) -> Optional[Tuple[Tuple[int, ...], Tuple[int, ...], Tuple[int, ...]]]:
     """
-    Selects an alignment for two molecules based on their common substructure.
+    Select an alignment for two molecules based on their common substructure.
 
     This function finds all matches of the common substructure in both
     molecules and randomly selects one alignment for future atom numbering.
@@ -466,7 +466,7 @@ def add_mcs_isolabels(
     picked_alignment: Tuple[Tuple[int, ...], Tuple[int, ...], Tuple[int, ...]],
 ) -> Tuple[List[int], List[int], List[int]]:
     """
-    Adds isotope labels to atoms in two molecules and their common core.
+    Add isotope labels to atoms in two molecules and their common core.
 
     This function modifies atoms in mol1, mol2, and the common_core to have
     consistent isotope labels based on the common_core atom indices.

@@ -11,7 +11,7 @@ import autogrow.utils.mol_object_handling as MOH
 
 class SmilesFilterBase(PluginBase):
     """
-    This is a script containing all of the filters for drug likeliness
+    This is a script containing all of the filters for drug likeliness.
 
     Filters for orally bio-available drugs:
         1) Lipinski
@@ -96,6 +96,8 @@ class SmilesFilterBase(PluginBase):
 
 
 class SmilesFilterPluginManager(PluginManagerBase):
+    """Manages and executes filter plugins in the autogrow framework."""
+
     def execute(self, **kwargs) -> List:
         """
         Run the plugin with provided arguments.
@@ -122,6 +124,8 @@ class SmilesFilterPluginManager(PluginManagerBase):
 
     def _run_all_selected_filters(self, cmpd: Compound) -> bool:
         """
+        Determine if mol passes filters.
+
         Iterate through all of the filters specified by the user for a single
         molecule. returns True if the mol passes all the chosen filters. returns
         False if the mol fails any of the filters.

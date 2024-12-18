@@ -1,6 +1,5 @@
 """
-This module defines base classes for docking plugins and manages their
-execution.
+Defines base classes for docking plugins and manages their execution.
 
 It includes abstract base classes for docking plugins and a plugin manager for
 handling docking operations. The module also provides functionality for ranking

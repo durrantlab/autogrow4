@@ -34,7 +34,7 @@ def populate_generation(
     params: Dict[str, Any], generation_num: int, cur_gen_dir: str
 ) -> Tuple[str, List[Compound]]:
     """
-    Populates a new generation of ligands through mutation, crossover, and elitism.
+    Populate a new generation of ligands through mutation, crossover, and elitism.
 
     This function orchestrates the entire process of creating a new generation,
     including mutation, crossover, elite selection, and file management.
@@ -227,7 +227,7 @@ def _generate_compounds(
     compound_gen_cls: Type[CompoundGenerator],
 ) -> List[Compound]:
     """
-    Generates new compounds (mutations or crossovers) for the current generation.
+    Generate new compounds (mutations or crossovers) for the current generation.
 
     This function creates new compounds based on the seed list from the
     previous generation, using either mutation or crossover operations.
@@ -449,7 +449,7 @@ def _get_elite_cmpds_prev_gen(
     generation_num: int,
 ) -> List[Compound]:
     """
-    Selects elite compounds from the previous generation to advance.
+    Select elite compounds from the previous generation to advance.
 
     This function handles the selection of top-performing compounds from the
     previous generation to be carried forward without modification.
@@ -569,10 +569,12 @@ def _save_smiles_files(
 #############
 def _test_source_smiles_convert(test_args):
     """
-    Attempts to convert a SMILES string to an rdkit.Chem.rdchem.Mol object.
+    Attempt to convert a SMILES string to an rdkit.Chem.rdchem.Mol object.
+
     This function is done in a try statement to handle bad SMILES strings that
     are incapable of being converted. It also checks that the SMILES string is
     able to be sanitized.
+
     Args:
         test_args (dict): Dictionary containing:
             smile_info (Compound): The compound to test
@@ -690,8 +692,7 @@ def _report_removed_compound_info(smile_str, printout, smile_id):
 
 def _get_cmpds_prev_gen(params: Dict[str, Any], generation_num: int) -> List[Compound]:
     """
-    Get the source compounds list from the previous generation of the source
-    compound list
+    Get source compounds list from previous generation's source compound list.
 
     This also filters the list to ensure mols can be imported to RDKit and
     that they pass the drug-likliness filters.
@@ -885,8 +886,7 @@ def _make_seed_list(
 
 def _get_seed_pop_sizes(params: Dict[str, Any], gen_num: int) -> Tuple[int, int]:
     """
-    Determines how many molecules will be chosen to seed a generation based on
-    their docking score and diversity score.
+    Determine num molecules to seed generation based on docking/diversity score.
 
     Args:
         params (Dict[str, Any]): A dictionary of all user variables.
@@ -939,8 +939,10 @@ def _make_pass_through_list(
     gen_num: int,
 ) -> List[Compound]:
     """
-    Determines the elite ligands to advance from the previous generation without
-    being altered into the next generation.
+    Determine the elite ligands to advance.
+     
+    Advances from the previous generation without being altered into the next
+    generation.
 
     Args:
         params (Dict[str, Any]): A dictionary of all user variables.

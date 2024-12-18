@@ -15,8 +15,7 @@ from autogrow.plugins.plugin_manager_instances import plugin_managers
 
 def handle_dicts_and_select_b_groups(mol_1: Any, mol_2: Any, mcs_mol: Any):
     """
-    Create necessary dictionaries, mappings, and select ligands for the final
-    molecule.
+    Create necessary dicts, mappings, and select ligands for the final molecule.
 
     Args:
         mol_1 (Chem.rdchem.Mol): RDKit mol for ligand 1.
@@ -91,10 +90,12 @@ def handle_dicts_and_select_b_groups(mol_1: Any, mol_2: Any, mcs_mol: Any):
 
 def _mol_handling_of_fragmenting_labeling_and_indexing(mol, mcs_mol, lig_number):
     """
-    This takes an rdkit mol for a ligand and 1 for the mcs_mol. It fragments
-    the ligand by replacing the MCS. and it determines which anchors are in
-    each fragment. These fragments are our R-groups and the assignment of
-    anchors. is how we determine which R-group goes where relative to the MCS.
+    Take an rdkit mol for a ligand and 1 for the mcs_mol.
+    
+    It fragments the ligand by replacing the MCS. and it determines which
+    anchors are in each fragment. These fragments are our R-groups and the
+    assignment of anchors. is how we determine which R-group goes where relative
+    to the MCS.
 
     lig_number  int    is the number of the ligand that is mol
                        ie if mol is mol_1 lig_number = 1
@@ -234,8 +235,9 @@ def _check_replace_mol(mol_1, mol_2, mcs_mol):
 
 def _r_group_list(mol, core_mol):
     """
-    Find all R-groups by replacing the atoms in the ligand that make up the
-    common core with nothing.
+    Find all R-groups.
+     
+    Replaces the atoms in the ligand that make up the common core with nothing.
 
     This fragments the ligand and from those fragments we are able to determine
     what our R-groups are. For any common core atom which touched the fragment,

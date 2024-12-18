@@ -24,7 +24,7 @@ from autogrow.plugins.plugin_manager_instances import plugin_managers
 
 
 def main(params: Optional[Dict[str, Any]] = None) -> None:
-    """Executes the main AutoGrow workflow.
+    """Execute the main AutoGrow workflow.
 
     Orchestrates the genetic algorithm process including population generation,
     molecular docking, and optional plotting. Handles initialization, logging of

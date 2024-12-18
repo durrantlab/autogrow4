@@ -1,6 +1,5 @@
 """
-This module contains the Mapping class used for mapping most common
-substructure (MCS) when combining two molecules.
+The Mapping class to map most common substructure when combining two molecules.
 
 The Mapping class handles the selection of B-groups for anchors in the MCS,
 which is crucial for determining the structure of child molecules in ligand
@@ -166,7 +165,6 @@ class Mapping(object):
             i (int): An integer representing the isolabel for an anchor/node/i
                 atom to be removed from the b_to_is and b in i_to_bs dicts.
         """
-
         bs_to_modify = self._locate_b(i)
         for b in bs_to_modify:
             self.b_to_is[b].remove(i)
@@ -175,8 +173,9 @@ class Mapping(object):
     #
     def _chose_b_from_i(self, i: int) -> Union[str, None]:
         """
-        Choose a B-group for a given anchor atom. Makes the decision which B-group
-        will be chosen for a specific i.
+        Choose a B-group for a given anchor atom.
+        
+        Makes the decision which B-group will be chosen for a specific i.
 
         Current implementation is that there are no null choice options. i.e.
         if an anchor has only 1 option to pick from then it must pick that
@@ -402,8 +401,7 @@ def run_mapping(
     b_dict: Dict[str, List[int]], i_dict: Dict[int, List[str]]
 ) -> List[str]:
     """
-    Run the mapping process to determine which B-groups to append in
-    SmileMerge.
+    Run the mapping to determine which B-groups to append in SmileMerge.
 
     This runs the mapping class which can determine which B-groups/R-groups we
     will append in SmileMerge.

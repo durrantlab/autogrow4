@@ -28,7 +28,7 @@ import autogrow.utils.mol_object_handling as MOH
 
 def _test_for_mcs(params: Dict[str, Any], mol_1: Any, mol_2: Any) -> Optional[Any]:
     """
-    Finds the Most Common Substructure (MCS) between two molecules.
+    Find the Most Common Substructure (MCS) between two molecules.
 
     Args:
         params (Dict[str, Any]): User parameters governing the MCS search.
@@ -43,7 +43,6 @@ def _test_for_mcs(params: Dict[str, Any], mol_1: Any, mol_2: Any) -> Optional[An
         - Recommended to use with molecules that have H's removed.
         - Implicit H's are recognized as part of MCS.
     """
-
     # Get chemtoolkit
     chemtoolkit = plugin_managers.ChemToolkit.toolkit
 
@@ -80,7 +79,7 @@ def _find_sufficiently_similar_cmpd(
     params: Dict[str, Any], predock_cmpds: List[Compound], query_predock_cmpd: Compound,
 ) -> Optional[Compound]:
     """
-    Selects a random molecule with satisfactory MCS to the given ligand.
+    Select a random molecule with satisfactory MCS to the given ligand.
 
     Args:
         params (Dict[str, Any]): User parameters governing the selection.
@@ -129,7 +128,7 @@ def _find_sufficiently_similar_cmpd(
 
 def _convert_mol_from_smiles(smiles: str) -> Union[Any, bool, None]:
     """
-    Converts a SMILES string to an RDKit molecule object.
+    Convert a SMILES string to an RDKit molecule object.
 
     Args:
         smiles (str): SMILES string of the molecule.
@@ -159,11 +158,28 @@ class CrossoverGenerator(CompoundGenerator):
     """Handles crossover-specific compound generation."""
 
     def prepare_params(self) -> Dict[str, Any]:
+        """
+        Prepare the parameters for the operation.
+        
+        Returns:
+            Dict[str, Any]: The parameters for the operation.
+        """
         return {k: v for k, v in self.params.items() if k != "parallelizer"}
 
     def prepare_job_inputs(
         self, compounds: List[Compound], num_to_process: int
     ) -> List[Tuple]:
+        """
+        Prepare the inputs for the parallel job.
+        
+        Args:
+            compounds (List[Compound]): List of compounds to process.
+            num_to_process (int): Number of compounds to process.
+            
+        Returns:
+            List[Tuple]: A list of tuples containing the operation parameters,
+            compound, and available compounds.
+        """
         # Create a working copy for popping compounds
         working_compounds = compounds.copy()
         # Keep the original list intact for pairing
@@ -179,15 +195,36 @@ class CrossoverGenerator(CompoundGenerator):
         ]
 
     def get_parallel_function(self) -> Callable:
+        """
+        Get the parallel function to execute.
+
+        Returns:
+            Callable: The parallel function to execute.
+        """
         return _do_crossovers_smiles_merge
 
     def make_compound_id(self, result: CommonParallelResponse) -> str:
+        """
+        Make a compound ID for the generated compound.
+
+        Args:
+            result (CommonParallelResponse): The result of the operation.
+
+        Returns:
+            str: The generated compound ID.
+        """
         parent1_id = result.parent_cmpds[0].id.split(")")[-1]
         parent2_id = result.parent_cmpds[1].id.split(")")[-1]
         random_id_num = random.randint(100, 1000000)
         return f"({parent1_id}+{parent2_id})Gen_{self.generation_num}_Cross_{random_id_num}"
 
     def get_operation_name(self) -> str:
+        """
+        Get the name of the operation.
+        
+        Returns:
+            str: The name of the operation.
+        """
         return "crossover"
 
     def get_operation_desc(self, result: CommonParallelResponse) -> str:
@@ -240,7 +277,7 @@ def _do_crossovers_smiles_merge(
     all_predock_cmpds: List[Compound],
 ) -> Optional[Tuple[str, Compound, Compound]]:
     """
-    Performs a crossover operation between two ligands.
+    Perform a crossover operation between two ligands.
 
     Args:
         params (Dict[str, Any]): User parameters governing the process.

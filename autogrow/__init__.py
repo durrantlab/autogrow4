@@ -17,7 +17,7 @@ __version__ = "4.0.3"
 
 
 def program_info() -> str:
-    """Gets program version and citation information for AutoGrow.
+    """Get program version and citation information for AutoGrow.
 
     Returns:
         str: A formatted string containing the AutoGrow version number and

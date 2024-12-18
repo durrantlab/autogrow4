@@ -139,7 +139,6 @@ class RDKitToolkit(ChemToolkitBase):
 
     def remove_atoms(self, mol: Any, atoms_to_remove: List[int]) -> Any:
         """Remove atoms from molecule."""
-
         atoms_to_remove.sort(reverse=True)
         em1 = Chem.EditableMol(mol)
         for atom in atoms_to_remove:

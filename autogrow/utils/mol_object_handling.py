@@ -80,7 +80,8 @@ def check_sanitization(mol):
 
 
 def handleHs(mol, protanate_step):
-    """Controls hydrogen atom handling in molecules.
+    """
+    Control hydrogen atom handling in molecules.
 
     Sanitizes the molecule and manages explicit/implicit hydrogens based on the
     protanation parameter.
@@ -118,7 +119,8 @@ def handleHs(mol, protanate_step):
 
 
 def try_deprotanation(sanitized_mol):
-    """Removes non-explicit hydrogens from a sanitized molecule.
+    """
+    Remove non-explicit hydrogens from a sanitized molecule.
 
     Args:
         sanitized_mol (rdkit.Chem.rdchem.Mol): Sanitized molecule to deprotonate
@@ -137,7 +139,8 @@ def try_deprotanation(sanitized_mol):
 
 
 def try_reprotanation(sanitized_deprotanated_mol):
-    """Adds implicit hydrogens to a sanitized, deprotonated molecule.
+    """
+    Add implicit hydrogens to a sanitized, deprotonated molecule.
 
     Args:
         sanitized_deprotanated_mol (rdkit.Chem.rdchem.Mol): Sanitized and
@@ -159,7 +162,8 @@ def try_reprotanation(sanitized_deprotanated_mol):
 
 
 def remove_atoms(mol, list_of_idx_to_remove: List[int]):
-    """Removes specified atoms from a molecule.
+    """
+    Remove specified atoms from a molecule.
 
     Uses RDKit's EditableMol class to remove atoms from the molecule based on
     their indices.
@@ -190,7 +194,8 @@ def remove_atoms(mol, list_of_idx_to_remove: List[int]):
 
 
 def nitrogen_charge_adjustment(mol: Any):
-    """Adjusts formal charges on four-bonded nitrogen atoms.
+    """
+    Adjust formal charges on four-bonded nitrogen atoms.
 
     Corrects for cases where nitrogen atoms have four bonds but lack the
     required positive formal charge. Skips aromatic nitrogens.
@@ -237,7 +242,8 @@ def nitrogen_charge_adjustment(mol: Any):
 
 
 def check_for_unassigned_atom(mol):
-    """Checks for presence of unassigned atoms (atomic number 0).
+    """
+    Check for presence of unassigned atoms (atomic number 0).
 
     Identifies if the molecule contains any atoms marked as '*' in SMILES
     notation.
@@ -266,7 +272,8 @@ def check_for_unassigned_atom(mol):
 
 
 def handle_frag_check(mol):
-    """Processes molecules with multiple fragments.
+    """
+    Process molecules with multiple fragments.
 
     If the molecule contains multiple fragments, returns the largest fragment
     after checking for unassigned atoms.

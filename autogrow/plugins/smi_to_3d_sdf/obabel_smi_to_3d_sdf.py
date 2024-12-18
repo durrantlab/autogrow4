@@ -25,8 +25,7 @@ class ObabelSmiTo3DSDF(SmiTo3DSdfBase):
 
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
         """
-        Add command-line arguments specific to the OpenBabel SMILES to 3D SDF
-        converter.
+        Add command-line args specific to the Obabel SMILES to 3D SDF converter.
 
         This method defines the command-line arguments that can be used to
         configure the OpenBabel SMILES to 3D SDF converter.
@@ -51,8 +50,7 @@ class ObabelSmiTo3DSDF(SmiTo3DSdfBase):
 
     def validate(self, params: dict):
         """
-        Validate the arguments provided for the OpenBabel SMILES to 3D SDF
-        converter.
+        Validate the args provided for the OpenBabel SMILES to 3D SDF converter.
 
         This method checks if the required 'obabel_path' parameter is provided.
 
@@ -71,8 +69,7 @@ class ObabelSmiTo3DSDF(SmiTo3DSdfBase):
         self, predock_cmpds: List[Compound], pwd: str
     ) -> List[Compound]:
         """
-        Convert a list of SMILES representations to 3D SDF files using
-        OpenBabel.
+        Convert a list of SMILES to 3D SDF files using OpenBabel.
 
         This method takes a list of Compound objects containing SMILES
         strings and converts them to 3D SDF files using OpenBabel. The

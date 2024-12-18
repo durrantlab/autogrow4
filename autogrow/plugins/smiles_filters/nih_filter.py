@@ -22,8 +22,7 @@ from autogrow.config.argparser import ArgumentVars
 
 class NIHFilter(SmilesFilterBase):
     """
-    Implements the NIH filter for removing ligands with undesirable functional
-    groups.
+    Implements NIH filter for removing ligands with bad functional groups.
 
     This class uses the NIH screening filter to eliminate ligands with
     undesirable functional groups. It relies on the RDKit predefined
@@ -36,9 +35,7 @@ class NIHFilter(SmilesFilterBase):
     """
 
     def __init__(self) -> None:
-        """
-        Initialize the NIH filter by loading the required filters.
-        """
+        """Initialize the NIH filter by loading the required filters."""
         self._filters = None  # Don't load filters in __init__
 
     @property

@@ -144,7 +144,6 @@ def _process_ligand_scores_from_prev_gen(
     Note:
         This method modifies the smiles_list in place.
     """
-
     # CHECKED: smiles_list is of type List[Compound] here.
 
     print("Getting ligand scores from the previous generation")
@@ -206,7 +205,7 @@ def _process_ligand_scores_from_prev_gen(
 
 def get_predockcmpds_from_smi_file(infile: str) -> List[Compound]:
     """
-    Reads and processes a .smi file into a list of Compound objects.
+    Read and process a .smi file into a list of Compound objects.
 
     The .smi file must follow this format for each line:
     SMILES<tab>ID[<tab>optional_info...]<tab>docking_score<tab>diversity_score
@@ -245,7 +244,7 @@ def convert_usable_list_to_lig_dict(
     predock_cmpds: List[Compound],
 ) -> Optional[Dict[str, Compound]]:
     """
-    Converts a list of Compound objects to a dictionary.
+    Convert a list of Compound objects to a dictionary.
 
     Args:
         predock_cmpds (List[Compound]): List of Compound
@@ -279,7 +278,7 @@ def convert_usable_list_to_lig_dict(
 ##### Called in the docking class ######
 def calc_diversity_scores(postDockedCompoundInfos: List[Compound],) -> List[Compound]:
     """
-    Calculates diversity scores for a list of Compound objects.
+    Calculate diversity scores for a list of Compound objects.
 
     This function computes Morgan Fingerprints for each molecule and calculates
     pairwise Dice Similarity scores (1.0 meanas a perfect match, 0.0 means no

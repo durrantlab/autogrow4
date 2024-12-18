@@ -33,9 +33,7 @@ class BRENKFilter(SmilesFilterBase):
     """
 
     def __init__(self) -> None:
-        """
-        Initialize the BRENKFilter by loading the BRENK filters.
-        """
+        """Initialize the BRENKFilter by loading the BRENK filters."""
         self._filter = None  # Don't load filter in __init__
 
     @property

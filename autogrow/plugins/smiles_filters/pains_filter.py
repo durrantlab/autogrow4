@@ -40,9 +40,7 @@ class PAINSFilter(SmilesFilterBase):
     """
 
     def __init__(self) -> None:
-        """
-        Initialize the PAINS filter by loading the required filters.
-        """
+        """Initialize the PAINS filter by loading the required filters."""
         self._filters_list = None  # Don't load filters in __init__
 
     @property

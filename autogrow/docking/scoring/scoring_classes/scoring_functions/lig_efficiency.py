@@ -1,5 +1,6 @@
 """
 This script contains the class LigEfficiency.
+
 This is used to rescore a fitness metric by the number of non-hydrogen atoms.
 """
 import __future__
@@ -15,8 +16,7 @@ from autogrow.plugins.plugin_manager_instances import plugin_managers
 
 class LigEfficiency(VINA):
     """
-    This will Score a given ligand for its binding affinity based on VINA or
-    QuickVina02 type docking.
+    Scores a given ligand for its binding affinity per VINA, QuickVina02, etc.
 
     This inherits many functions from the vina scoring function. The only
     difference is that this scoring function uses the ligand efficiency
@@ -35,7 +35,7 @@ class LigEfficiency(VINA):
         test_boot: bool = True,
     ) -> None:
         """
-        This will take params and a list of smiles.
+        Initialize the class with the given parameters.
 
         Inputs:
         :param dict params: Dictionary of User variables
@@ -53,11 +53,9 @@ class LigEfficiency(VINA):
         self, file_path: str, lig_info: Compound
     ) -> Optional[Compound]:
         """
-        This function will simply add a ligand efficiency score to the end of
-        the lig_info list and return said list.
+        Add ligand efficiency score to end of lig_info list and return the list.
 
         The last value of the lig_info list must be a float.
-
 
         Inputs:
         :param str file_path: the path to the file to be scored
@@ -86,8 +84,7 @@ class LigEfficiency(VINA):
 
 def get_number_heavy_atoms(smiles_str: Optional[str]) -> Optional[int]:
     """
-    Get the number of non Hydrogens in a SMILE
-
+    Get the number of non Hydrogens in a SMILES string.
 
     Inputs:
     :param str smiles_str: a str representing a molecule

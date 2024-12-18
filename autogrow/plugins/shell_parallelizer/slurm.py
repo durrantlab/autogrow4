@@ -22,6 +22,14 @@ class Slurm(ShellParallelizerBase):
     """
 
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+        """
+        Add arguments for the Slurm shell parallelizer plugin.
+        
+        Returns:
+            Tuple[str, List[ArgumentVars]]: A tuple containing the plugin
+                category name and a list of ArgumentVars for the plugin's specific
+                arguments.
+        """
         return (
             "Slurm Shell Parallelizer",
             [
@@ -94,7 +102,6 @@ class Slurm(ShellParallelizerBase):
             If the number of CPUs cannot be determined, it defaults to using a
             single processor and logs a warning.
         """
-
         # Get the current generation directory
         cache_dir = self.params["cur_gen_dir"]
 

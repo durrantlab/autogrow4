@@ -9,7 +9,8 @@ from autogrow.validation.validate_params import validate_params
 
 
 def validate_all(params: dict) -> None:
-    """Validates all AutoGrow requirements before execution.
+    """
+    Validate all AutoGrow requirements before execution.
 
     Performs complete validation of AutoGrow setup by checking:
     1. Parameter values and types via validate_params()
@@ -31,7 +32,8 @@ def validate_all(params: dict) -> None:
 
 
 def _check_for_required_inputs(input_params):
-    """Validates and processes required input parameters for AutoGrow.
+    """
+    Validate and process required input parameters for AutoGrow.
 
     Verifies the presence of all required parameters, sets defaults for missing
     values, and validates file paths. Handles parameters for generation seeding,

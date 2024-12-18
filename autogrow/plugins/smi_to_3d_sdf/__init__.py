@@ -1,6 +1,5 @@
 """
-Defines base classes and plugin manager for SMILES to 3D SDF conversion in
-AutoGrow.
+Defines base classes and plugin manager for SMILES to 3D SDF conversion.
 
 This module provides the SmiTo3DSdfBase abstract base class and
 SmiTo3DSdfPluginManager for managing SMILES to 3D SDF conversion plugins.
