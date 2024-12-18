@@ -9,7 +9,7 @@ import __future__
 
 import os
 from typing import Any, Dict, List, Optional
-from autogrow.plugins.plugin_managers import plugin_managers
+from autogrow.plugins.plugin_manager_instances import plugin_managers
 from autogrow.types import Compound, Compound, ScoreType
 import autogrow.utils.mol_object_handling as MOH
 import autogrow.docking.ranking.ranking_mol as Ranking
@@ -349,7 +349,9 @@ def calc_diversity_scores(postDockedCompoundInfos: List[Compound],) -> List[Comp
             print("noneitem in molecules_list in calc_diversity_scores")
 
     for postDockedCompoundInfo in postDockedCompoundInfosToKeep:
-        fp = chemtoolkit.get_morgan_fingerprint(postDockedCompoundInfo.mol, 10, use_features=True)
+        fp = chemtoolkit.get_morgan_fingerprint(
+            postDockedCompoundInfo.mol, 10, use_features=True
+        )
         postDockedCompoundInfo.fp = fp
 
     for i in range(len(postDockedCompoundInfosToKeep)):

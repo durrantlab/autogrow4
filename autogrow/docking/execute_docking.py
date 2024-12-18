@@ -10,7 +10,7 @@ import __future__
 
 from typing import Any, Dict, List, cast
 from autogrow.docking.ranking.ranking_mol import rank_and_save_output_smi
-from autogrow.plugins.plugin_managers import plugin_managers
+from autogrow.plugins.plugin_manager_instances import plugin_managers
 from autogrow.plugins.docking import DockingPluginManager
 from autogrow.types import Compound
 from autogrow.utils.logging import LogLevel, log_info

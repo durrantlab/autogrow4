@@ -6,14 +6,9 @@ import __future__
 from typing import Any, Dict, List, Optional
 
 from autogrow.types import Compound
-import rdkit  # type: ignore
-import rdkit.Chem as Chem  # type: ignore
-
-# Disable the unnecessary RDKit warnings
-rdkit.RDLogger.DisableLog("rdApp.*")
-
 from autogrow.docking.scoring.scoring_classes.parent_scoring_class import ParentScoring
 from autogrow.docking.scoring.scoring_classes.scoring_functions.vina import VINA
+from autogrow.plugins.plugin_manager_instances import plugin_managers
 
 # TODO: Not used anywhere, but good stuff here!
 
@@ -104,18 +99,20 @@ def get_number_heavy_atoms(smiles_str: Optional[str]) -> Optional[int]:
         return None
     # easiest nearly everything should get through
 
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
+
     try:
-        mol = Chem.MolFromSmiles(smiles_str, sanitize=False)
+        mol = chemtoolkit.mol_from_smiles(smiles_str, sanitize=False)
     except Exception:
         mol = None
 
     if mol is None:
         return None
 
-    atom_list = mol.GetAtoms()
+    atom_list = chemtoolkit.get_atoms(mol)
     num_heavy_atoms = 0
     for atom in atom_list:
-        if atom.GetAtomicNum() != 1:
+        if chemtoolkit.get_atomic_num(atom) != 1:
             num_heavy_atoms = num_heavy_atoms + 1
 
     return num_heavy_atoms

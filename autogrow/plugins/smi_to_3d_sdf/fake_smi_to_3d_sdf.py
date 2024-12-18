@@ -7,17 +7,9 @@ SMILES representations to 3D SDF files for testing purposes.
 import __future__
 
 from autogrow.plugins.smi_to_3d_sdf import SmiTo3DSdfBase
-from autogrow.plugins.smiles_filters import SmilesFilterBase
 from autogrow.types import Compound
-from autogrow.utils.logging import log_warning
-from autogrow.utils.obabel import obabel_convert
-import rdkit  # type: ignore
-from rdkit import Chem  # type: ignore
-from rdkit.Chem import FilterCatalog  # type: ignore
-from rdkit.Chem.FilterCatalog import FilterCatalogParams  # type: ignore
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 from autogrow.config.argparser import ArgumentVars
-import os
 
 
 class FakeSmiTo3DSDF(SmiTo3DSdfBase):

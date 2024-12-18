@@ -14,7 +14,6 @@ import __future__
 
 from autogrow.plugins.smiles_filters import SmilesFilterBase
 from autogrow.types import Compound
-from autogrow.plugins.plugin_managers import plugin_managers
 
 
 from typing import Any, List, Tuple
@@ -40,7 +39,14 @@ class NIHFilter(SmilesFilterBase):
         """
         Initialize the NIH filter by loading the required filters.
         """
-        self.filters = self.get_filters()
+        self._filters = None  # Don't load filters in __init__
+
+    @property
+    def filters(self):
+        """Lazy load filters only when needed."""
+        if self._filters is None:
+            self._filters = self.get_filters()
+        return self._filters
 
     def get_filters(self) -> Any:
         """
@@ -49,9 +55,10 @@ class NIHFilter(SmilesFilterBase):
         Returns:
             FilterCatalog.FilterCatalog: A set of RDKit NIH Filters.
         """
-        chemtoolkit = plugin_managers.ChemToolkit.toolkit
         # TODO: Seems like this won't work for OpenEye.
-        return chemtoolkit.get_nih_filter()
+        from autogrow.plugins.plugin_manager_instances import plugin_managers
+
+        return plugin_managers.ChemToolkit.toolkit.get_nih_filter()
 
     def run_filter(self, cmpd: Compound) -> bool:
         """

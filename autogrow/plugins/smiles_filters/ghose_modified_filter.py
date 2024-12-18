@@ -29,7 +29,8 @@ from autogrow.types import Compound
 
 from typing import List, Tuple
 from autogrow.config.argparser import ArgumentVars
-from autogrow.plugins.plugin_managers import plugin_managers
+from autogrow.plugins.plugin_manager_instances import plugin_managers
+
 
 class GhoseModifiedFilter(SmilesFilterBase):
     """
@@ -78,7 +79,7 @@ class GhoseModifiedFilter(SmilesFilterBase):
         mol = self.cmpd_to_rdkit_mol(cmpd)
         if mol is None:
             return False
-        
+
         chemtoolkit = plugin_managers.ChemToolkit.toolkit
 
         copy_mol = copy.deepcopy(mol)
@@ -87,7 +88,7 @@ class GhoseModifiedFilter(SmilesFilterBase):
         if (exact_mwt < 160) or (exact_mwt > 500):
             return False
 
-        num_atoms = copy_mol.GetNumAtoms()
+        num_atoms = chemtoolkit.get_num_atoms(copy_mol)
         if (num_atoms < 20) or (num_atoms > 70):
             return False
 

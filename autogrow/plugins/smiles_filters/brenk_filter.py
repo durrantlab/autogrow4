@@ -18,7 +18,6 @@ from autogrow.plugins.smiles_filters import SmilesFilterBase
 from autogrow.types import Compound
 from typing import Any, List, Tuple
 from autogrow.config.argparser import ArgumentVars
-from autogrow.plugins.plugin_managers import plugin_managers
 
 
 class BRENKFilter(SmilesFilterBase):
@@ -37,7 +36,14 @@ class BRENKFilter(SmilesFilterBase):
         """
         Initialize the BRENKFilter by loading the BRENK filters.
         """
-        self.filters = self.get_filters()
+        self._filter = None  # Don't load filter in __init__
+
+    @property
+    def filters(self):
+        """Lazy load filter only when needed."""
+        if self._filter is None:
+            self._filter = self.get_filters()
+        return self._filter
 
     def get_filters(self) -> Any:
         """
@@ -47,8 +53,9 @@ class BRENKFilter(SmilesFilterBase):
             FilterCatalog.FilterCatalog: A set of RDKit BRENK filters.
         """
         # Make a list of the BRENK filter.
-        chemtoolkit = plugin_managers.ChemToolkit.toolkit
-        return chemtoolkit.get_brenk_filter()
+        from autogrow.plugins.plugin_manager_instances import plugin_managers
+
+        return plugin_managers.ChemToolkit.toolkit.get_brenk_filter()
 
     def run_filter(self, cmpd: Compound) -> bool:
         """

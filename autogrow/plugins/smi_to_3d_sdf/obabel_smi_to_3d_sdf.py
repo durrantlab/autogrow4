@@ -6,17 +6,11 @@ SMILES representations of compounds to 3D SDF files.
 """
 import __future__
 
-# from autogrow.plugins.plugin_managers import plugin_managers
 from autogrow.plugins.smi_to_3d_sdf import SmiTo3DSdfBase
-from autogrow.plugins.smiles_filters import SmilesFilterBase
 from autogrow.types import Compound
 from autogrow.utils.logging import log_warning
-from autogrow.utils.obabel import obabel_convert, obabel_convert_cmd
-import rdkit  # type: ignore
-from rdkit import Chem  # type: ignore
-from rdkit.Chem import FilterCatalog  # type: ignore
-from rdkit.Chem.FilterCatalog import FilterCatalogParams  # type: ignore
-from typing import List, Optional, Tuple
+from autogrow.utils.obabel import obabel_convert_cmd
+from typing import List, Tuple
 from autogrow.config.argparser import ArgumentVars
 import os
 

@@ -25,7 +25,7 @@ from autogrow.plugins.smiles_filters import SmilesFilterBase
 from autogrow.types import Compound
 from typing import List, Tuple
 from autogrow.config.argparser import ArgumentVars
-from autogrow.plugins.plugin_managers import plugin_managers
+from autogrow.plugins.plugin_manager_instances import plugin_managers
 
 
 class LipinskiLenientFilter(SmilesFilterBase):
@@ -73,7 +73,7 @@ class LipinskiLenientFilter(SmilesFilterBase):
         mol = self.cmpd_to_rdkit_mol(cmpd)
         if mol is None:
             return False
-        
+
         chemtoolkit = plugin_managers.ChemToolkit.toolkit
 
         violation_counter = 0

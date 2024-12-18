@@ -6,18 +6,12 @@ This module provides the SmiTo3DSdfBase abstract base class and
 SmiTo3DSdfPluginManager for managing SMILES to 3D SDF conversion plugins.
 """
 
-from abc import ABC, abstractmethod
-from argparse import ArgumentParser
+from abc import abstractmethod
 import os
-from typing import Dict, List, Optional, Tuple, Union, cast
+from typing import List, cast
 
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
 from autogrow.types import Compound
-from autogrow.utils.logging import LogLevel, log_info
-from rdkit import Chem  # type: ignore
-from rdkit.Chem.MolStandardize import rdMolStandardize  # type: ignore
-import copy
-import glob
 
 from autogrow.plugins.plugin_base import PluginBase
 

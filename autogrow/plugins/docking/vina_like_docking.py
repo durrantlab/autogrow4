@@ -13,7 +13,6 @@ Classes:
 import __future__
 import os
 
-# from autogrow.plugins.plugin_managers import plugin_managers
 from autogrow.plugins.docking import DockingBase
 from typing import List, Tuple
 from autogrow.config.argparser import ArgumentVars

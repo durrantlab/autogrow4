@@ -20,6 +20,7 @@ from autogrow.operators.populate_generation import populate_generation
 from autogrow.plugins.plugin_managers import setup_plugin_managers
 from autogrow.summary import generate_summary_html, generate_summary_txt
 from autogrow.utils.logging import LogLevel, create_logger, log_info, log_warning
+from autogrow.plugins.plugin_manager_instances import plugin_managers
 
 
 def main(params: Optional[Dict[str, Any]] = None) -> None:
@@ -52,6 +53,12 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
 
     # Setup all plugin managers
     setup_plugin_managers(params)
+
+    # Now toolkit should be initialized
+    chemtoolkit = plugin_managers.ChemToolkit
+    if chemtoolkit is None or chemtoolkit.toolkit is None:
+        raise RuntimeError("Chemistry toolkit not properly initialized")
+    params["chemtoolkit"] = chemtoolkit.toolkit
 
     printout = f"\n(RE)STARTING AUTOGROW 4.0: {str(datetime.datetime.now())}\n"
 

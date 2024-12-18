@@ -20,7 +20,6 @@ import os
 from typing import Any, Dict, List, Optional, Tuple, Union
 from autogrow.config.argparser import ArgumentVars
 
-# from autogrow.plugins.plugin_managers import plugin_managers
 from autogrow.plugins.mutation import MutationBase
 from autogrow.types import Compound
 from autogrow.utils.logging import log_debug, log_warning
@@ -29,7 +28,7 @@ import random
 import glob
 
 import autogrow.utils.mol_object_handling as MOH
-from autogrow.plugins.plugin_managers import plugin_managers
+from autogrow.plugins.plugin_manager_instances import plugin_managers
 
 
 class FragmentAddition(MutationBase):
@@ -660,7 +659,7 @@ class FragmentAddition(MutationBase):
             # Reaction doesn't contain a functional group found in the
             # reactant molecule. So lets move on to the next reaction
             return None
-        
+
         chemtoolkit = plugin_managers.ChemToolkit.toolkit
 
         # Determine whether to react using the protanated or
@@ -688,10 +687,7 @@ class FragmentAddition(MutationBase):
             )
 
     def _try_single_reactant_reaction(
-        self,
-        rxn: Any,
-        mol_to_use: Any,
-        a_reaction_dict: Dict[str, Any],
+        self, rxn: Any, mol_to_use: Any, a_reaction_dict: Dict[str, Any],
     ) -> Optional[Tuple[str, int, Optional[str]]]:
         """
         Try a single reactant reaction.

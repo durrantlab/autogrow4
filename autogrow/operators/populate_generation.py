@@ -15,7 +15,7 @@ import sys
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 from autogrow.operators.mutant_crossover_parent import CompoundGenerator
-from autogrow.plugins.plugin_managers import plugin_managers
+from autogrow.plugins.plugin_manager_instances import plugin_managers
 from autogrow.types import Compound
 from autogrow.utils.caching import CacheManager
 from autogrow.utils.logging import LogLevel, log_info, log_warning
@@ -567,27 +567,24 @@ def _save_smiles_files(
 #############
 # Get seeds
 #############
-def _test_source_smiles_convert(smile_info: Compound,) -> Union[Compound, str]:
+def _test_source_smiles_convert(test_args):
     """
     Attempts to convert a SMILES string to an rdkit.Chem.rdchem.Mol object.
-
     This function is done in a try statement to handle bad SMILES strings that
     are incapable of being converted. It also checks that the SMILES string is
     able to be sanitized.
-
     Args:
-        smile_info (Compound): A Compound object containing
-            the SMILES of a ligand, its ID, and potentially additional
-            information about the ligand.
+        test_args (dict): Dictionary containing:
+            smile_info (Compound): The compound to test
+            chemtoolkit: The initialized chemistry toolkit
 
     Returns:
         Union[Compound, str]: If it passed the test, it returns the
-            Compound object. If it failed to convert, it returns an
-            error message string. This passes out to prevent MPI print issues.
+         Compound object. If it failed to convert, it returns an
+         error message string. This passes out to prevent MPI print issues.
     """
-
-    # Get chemtoolkit
-    chemtoolkit = plugin_managers.ChemToolkit.toolkit
+    smile_info = test_args["smile_info"]
+    chemtoolkit = test_args["chemtoolkit"]
 
     if smile_info is None or not smile_info:
         printout = (
@@ -595,15 +592,6 @@ def _test_source_smiles_convert(smile_info: Compound,) -> Union[Compound, str]:
             + "entry in source compound list.\n"
         )
         return f"{printout}\tRemoving: {smile_info}"
-
-    # TODO: JDD: What was this? Never understood, so commented out
-    # if len(smile_info) == 1:
-    #     printout = (
-    #         "REMOVING SMILES FROM SOURCE LIST: Unformatted or blank "
-    #         + "entry in source compound list.\n"
-    #     )
-    #     printout += f"\tRemoving: {smile_info}"
-    #     return printout
 
     # separate out SMILES str and ID
     smile_str = smile_info.smiles
@@ -648,21 +636,20 @@ def _test_source_smiles_convert(smile_info: Compound,) -> Union[Compound, str]:
     # will try protanating and Deprotanating the mol. If it can't handle that
     # We reject it as many functions will require this sort of manipulation.
     # More advanced sanitization issues will also be removed in this step
-    # mol = Chem.MolFromSmiles(str(smile_str), sanitize=False)  # type: ignore
     mol = chemtoolkit.mol_from_smiles(str(smile_str), sanitize=False)
     mol = MOH.handleHs(
         mol, True
     )  # TODO: Probably not compatible with open babel implementation of chem toolkit! Will need to reconsider.
-
     if mol is None:
         printout = "REMOVING SMILES FROM SOURCE LIST: SMILES string failed \
-                    to be protanated or deprotanated.\n"
+            to be protanated or deprotanated.\n"
         printout = (
             printout
             + "\t This is often an issue with valence and sanitization "
             + "issues with the SMILES string."
         )
         return _report_removed_compound_info(smile_str, printout, smile_id)
+
     # Check there are no * which are atoms with atomic number=0
     mol = MOH.check_for_unassigned_atom(mol)
     if mol is None:
@@ -671,11 +658,12 @@ def _test_source_smiles_convert(smile_info: Compound,) -> Union[Compound, str]:
             + "an unassigned atom type labeled as *.\n"
         )
         return _report_removed_compound_info(smile_str, printout, smile_id)
-    # Check for fragments.
-    if len(chemtoolkit.get_mol_frags(mol, as_mols=True, sanitize_frags=False)) != 1:  # type: ignore
 
+    # Check for fragments.
+    if len(chemtoolkit.get_mol_frags(mol, as_mols=True, sanitize_frags=False)) != 1:
         printout = "REMOVING SMILES FROM SOURCE LIST: SMILES string was fragmented.\n"
         return _report_removed_compound_info(smile_str, printout, smile_id)
+
     # the ligand is good enough to use throughout the program!
     return smile_info
 
@@ -725,9 +713,9 @@ def _get_cmpds_prev_gen(params: Dict[str, Any], generation_num: int) -> List[Com
         f"{params['output_directory']}generation_0{os.sep}generation_0_ranked.smi"
     )
     if generation_num == 0:
-        predock_cmpds = _get_source_compounds_or_raise(params)
+        cmpds = _get_source_compounds_or_raise(params)
     elif generation_num == 1 and os.path.exists(source_file_gen_0) is False:
-        predock_cmpds = _get_source_compounds_or_raise(params)
+        cmpds = _get_source_compounds_or_raise(params)
     else:
         source_file = (
             params["output_directory"]
@@ -735,34 +723,37 @@ def _get_cmpds_prev_gen(params: Dict[str, Any], generation_num: int) -> List[Com
         )
         if os.path.exists(source_file) is False:
             _handle_no_ligands_found("\tCheck formatting or if file has been moved.\n")
-        predock_cmpds = Ranking.get_predockcmpds_from_smi_file(source_file)
+        cmpds = Ranking.get_predockcmpds_from_smi_file(source_file)
 
-        if len(predock_cmpds) == 0:
+        if len(cmpds) == 0:
             _handle_no_ligands_found("\tCheck formatting or if file has been moved. \n")
-    # Test that every SMILES in the predock_cmpds is a valid SMILES
-    # which will import and Sanitize in RDKit. SMILES will be excluded if they
-    # are fragmented, contain atoms with no atomic number (*), or do not
-    # sanitize
-    job_input = tuple((i,) for i in predock_cmpds)
 
-    predock_cmpds: List[Compound] = params["parallelizer"].run(
+    # Test that every SMILES in the predock_cmpds is a valid SMILES which will
+    # import and Sanitize in RDKit. SMILES will be excluded if they are
+    # fragmented, contain atoms with no atomic number (*), or do not sanitize
+    job_input = tuple(
+        ({"smile_info": i, "chemtoolkit": params["chemtoolkit"]},) for i in cmpds
+    )
+
+    cmpds: List[Compound] = params["parallelizer"].run(
         job_input, _test_source_smiles_convert
     )
-    predock_cmpds = [x for x in predock_cmpds if x is not None]
-    print_errors = [x for x in predock_cmpds if type(x) is str]
-    predock_cmpds = [x for x in predock_cmpds if type(x) is Compound]
+
+    cmpds = [x for x in cmpds if x is not None]
+    print_errors = [x for x in cmpds if type(x) is str]
+    cmpds = [x for x in cmpds if type(x) is Compound]
+
     for x in print_errors:
         print(x)
 
-    if not predock_cmpds:
+    if not cmpds:
         _raise_exception_with_message(
             "\nThere were no ligands in source compound or previous \
             generation which could sanitize.\n"
         )
 
-    random.shuffle(predock_cmpds)
-
-    return predock_cmpds
+    random.shuffle(cmpds)
+    return cmpds
 
 
 def _raise_exception_with_message(arg0):

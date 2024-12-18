@@ -5,16 +5,12 @@ This module defines the base classes for mutation plugins and a plugin manager
 for handling multiple mutation plugins. It includes abstract methods that must
 be implemented by specific mutation plugins.
 """
-from abc import ABC, abstractmethod
-from argparse import ArgumentParser
-from typing import Dict, List, Optional, Tuple, Union, cast
+from abc import abstractmethod
+from typing import List, Optional, Tuple, Union, cast
 
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
 from autogrow.types import Compound
-from autogrow.utils.logging import LogLevel, log_debug, log_warning
-from rdkit import Chem  # type: ignore
-from rdkit.Chem.MolStandardize import rdMolStandardize  # type: ignore
-import copy
+from autogrow.utils.logging import log_debug, log_warning
 import random
 
 from autogrow.plugins.plugin_base import PluginBase

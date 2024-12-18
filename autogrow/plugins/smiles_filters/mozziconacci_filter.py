@@ -23,7 +23,7 @@ from autogrow.plugins.smiles_filters import SmilesFilterBase
 from autogrow.types import Compound
 from typing import List, Tuple
 from autogrow.config.argparser import ArgumentVars
-from autogrow.plugins.plugin_managers import plugin_managers
+from autogrow.plugins.plugin_manager_instances import plugin_managers
 
 
 class MozziconacciFilter(SmilesFilterBase):
@@ -66,21 +66,27 @@ class MozziconacciFilter(SmilesFilterBase):
         mol = self.cmpd_to_rdkit_mol(cmpd)
         if mol is None:
             return False
-        
+
         chemtoolkit = plugin_managers.ChemToolkit.toolkit
 
         halogen = chemtoolkit.mol_from_smarts("[*;#9,#17,#35,#53,#85]")
-        number_of_halogens = len(mol.GetSubstructMatches(halogen, maxMatches=8))
+        number_of_halogens = len(
+            chemtoolkit.get_substruct_matches(mol, halogen, max_matches=8)
+        )
         if number_of_halogens > 7:
             return False
 
         oxygen = chemtoolkit.mol_from_smarts("[#8]")
-        number_of_oxygens = len(mol.GetSubstructMatches(oxygen, maxMatches=2))
+        number_of_oxygens = len(
+            chemtoolkit.get_substruct_matches(mol, oxygen, max_matches=2)
+        )
         if number_of_oxygens < 1:
             return False
 
         nitrogen = chemtoolkit.mol_from_smarts("[#7]")
-        number_of_nitrogen = len(mol.GetSubstructMatches(nitrogen, maxMatches=2))
+        number_of_nitrogen = len(
+            chemtoolkit.get_substruct_matches(mol, nitrogen, max_matches=2)
+        )
         if number_of_nitrogen < 1:
             return False
 

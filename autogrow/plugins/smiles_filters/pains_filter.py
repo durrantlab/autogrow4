@@ -20,7 +20,7 @@ from typing import Any, List, Tuple
 from autogrow.config.argparser import ArgumentVars
 from autogrow.plugins.smiles_filters import SmilesFilterBase
 from autogrow.types import Compound
-from autogrow.plugins.plugin_managers import plugin_managers
+
 
 class PAINSFilter(SmilesFilterBase):
     """
@@ -43,7 +43,14 @@ class PAINSFilter(SmilesFilterBase):
         """
         Initialize the PAINS filter by loading the required filters.
         """
-        self.filters_list = self.get_filters_list()
+        self._filters_list = None  # Don't load filters in __init__
+
+    @property
+    def filters_list(self):
+        """Lazy load filters only when needed."""
+        if self._filters_list is None:
+            self._filters_list = self.get_filters_list()
+        return self._filters_list
 
     def get_filters_list(self) -> List[Any]:
         """
@@ -58,14 +65,14 @@ class PAINSFilter(SmilesFilterBase):
         # doesn't specify this explicitly we have included all 4 of the PAINS
         # FilterCatalogs for precaution.
 
-        chemtoolkit = plugin_managers.ChemToolkit.toolkit
-
         # TODO: This is going to have to be reworked for OpenEye
+        from autogrow.plugins.plugin_manager_instances import plugin_managers
+
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
         return [
             chemtoolkit.get_pains_a_filter(),
             chemtoolkit.get_pains_b_filter(),
             chemtoolkit.get_pains_c_filter(),
-            chemtoolkit.get_pains_filter(),
         ]
 
     def run_filter(self, cmpd: Compound) -> bool:

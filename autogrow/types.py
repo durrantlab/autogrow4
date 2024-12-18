@@ -7,8 +7,7 @@ information.
 """
 
 from dataclasses import dataclass, field
-from typing import Any, List, Optional, Type
-from rdkit import Chem  # type: ignore
+from typing import Any, List, Optional
 from enum import Enum
 import json
 
@@ -52,7 +51,7 @@ class Compound:  # Get new id when you figure out what context this is used in
     additional_info: str = ""  # Like naphthalene_22__1
     docking_score: Optional[float] = None  # Like -8.439
     diversity_score: Optional[float] = None
-    mol: Optional[Chem.Mol] = None
+    mol: Optional[Any] = None
     fp: Optional[Any] = None
     sdf_path: Optional[str] = None
     _history: List[Any] = field(default_factory=list)

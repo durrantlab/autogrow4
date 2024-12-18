@@ -16,7 +16,7 @@ from autogrow.operators.mutant_crossover_parent import (
     CommonParallelResponse,
     CompoundGenerator,
 )
-from autogrow.plugins.plugin_managers import plugin_managers
+from autogrow.plugins.plugin_manager_instances import plugin_managers
 from autogrow.plugins.crossover import CrossoverPluginManager
 from autogrow.types import Compound
 from autogrow.utils.logging import LogLevel, log_debug, log_warning
@@ -57,7 +57,7 @@ def _test_for_mcs(params: Dict[str, Any], mol_1: Any, mol_2: Any) -> Optional[An
             match_valences=False,
             ring_matches_ring_only=True,
             complete_rings_only=False,
-            timeout=time_timeout
+            timeout=time_timeout,
         )
     except Exception:
         return None

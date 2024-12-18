@@ -3,7 +3,7 @@ from typing import Any, List, Optional, cast
 
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
 from autogrow.types import Compound
-from autogrow.plugins.plugin_managers import plugin_managers
+from autogrow.plugins.plugin_manager_instances import plugin_managers
 
 from autogrow.plugins.plugin_base import PluginBase
 import autogrow.utils.mol_object_handling as MOH
@@ -66,7 +66,7 @@ class SmilesFilterBase(PluginBase):
         """Validate the provided arguments."""
         pass
 
-    def predock_cmpd_to_rdkit_mol(self, cmpd: Compound) -> Optional[Any]:
+    def cmpd_to_rdkit_mol(self, cmpd: Compound) -> Optional[Any]:
         """
         Convert a Compound object to an RDKit molecule object.
 

@@ -1,7 +1,7 @@
 """
 Plugin implementation of chemistry toolkit interface.
 """
-from typing import Any, Dict, List, Optional, Tuple, cast
+from typing import Any, Dict, List, Optional, Tuple, Type, cast
 from abc import abstractmethod
 from autogrow.config.argparser import ArgumentVars
 from autogrow.plugins.plugin_base import PluginBase
@@ -48,7 +48,9 @@ class ChemToolkitBase(PluginBase):
         pass
 
     @abstractmethod
-    def mol_to_smiles(self, mol: Any, isomeric_smiles: bool = True) -> str:
+    def mol_to_smiles(
+        self, mol: Any, canonical: bool = True, isomeric_smiles: bool = True
+    ) -> str:
         """Convert molecule to SMILES."""
         pass
 
@@ -110,7 +112,9 @@ class ChemToolkitBase(PluginBase):
         pass
 
     @abstractmethod
-    def get_morgan_fingerprint(self, mol: Any, radius: int, use_features: bool = False) -> Any:
+    def get_morgan_fingerprint(
+        self, mol: Any, radius: int, use_features: bool = False
+    ) -> Any:
         """Generate Morgan fingerprints."""
         pass
 
@@ -203,7 +207,7 @@ class ChemToolkitBase(PluginBase):
     def lipinski_num_h_donors(self, mol: Any) -> int:
         """Get number of H donors."""
         pass
-    
+
     @abstractmethod
     def lipinski_num_h_acceptors(self, mol: Any) -> int:
         """Get number of H acceptors."""
@@ -224,10 +228,142 @@ class ChemToolkitBase(PluginBase):
         """Get Crippen MR."""
         pass
 
+    @abstractmethod
+    def renumber_atoms(self, mol: Any, full_tuple_order: List[int]) -> Any:
+        """Renumber atoms."""
+        pass
+
+    @abstractmethod
+    def replace_core(
+        self,
+        mol: Any,
+        core: Any,
+        label_by_index: bool = False,
+        replace_dummies: bool = True,
+        require_dummy_match: bool = False,
+    ) -> Any:
+        """Replace core."""
+        pass
+
+    @abstractmethod
+    def get_editable_mol(self, mol: Any) -> Any:
+        """Get editable molecule."""
+        pass
+
+    @abstractmethod
+    def combine_mols(self, mol1: Any, mol2: Any) -> Any:
+        """Combine mols.
+        
+        NOTE: mol1 may need to be editable. Not certain.
+        """
+        pass
+
+    @abstractmethod
+    def get_noneditable_mol(self, mol: Any) -> Any:
+        """Get non-editable molecule."""
+        pass
+
+    @abstractmethod
+    def get_atoms(self, mol: Any) -> List[Any]:
+        """Get atoms from molecule."""
+        pass
+
+    @abstractmethod
+    def get_atomic_num(self, atom: Any) -> int:
+        """Get atomic number."""
+        pass
+
+    @abstractmethod
+    def get_bonds(self, atom: Any) -> List[Any]:
+        """Get bonds for atom."""
+        pass
+
+    @abstractmethod
+    def get_bond_type_as_double(self, bond: Any) -> float:
+        """Get bond type as double value."""
+        pass
+
+    @abstractmethod
+    def get_num_atoms(self, mol: Any) -> int:
+        """Get number of atoms in molecule."""
+        pass
+
+    @abstractmethod
+    def set_atom_map_num(self, atom: Any, num: int) -> None:
+        """Set atom map number."""
+        pass
+
+    @abstractmethod
+    def get_isotope(self, atom: Any) -> int:
+        """Get isotope."""
+        pass
+
+    @abstractmethod
+    def set_isotope(self, atom: Any, isotope: int) -> None:
+        """Set isotope."""
+        pass
+
+    @abstractmethod
+    def get_atom_with_idx(self, mol: Any, idx: int) -> Any:
+        """Get atom with index."""
+        pass
+
+    @abstractmethod
+    def get_neighbors(self, atom: Any) -> List[Any]:
+        """Get neighbors."""
+        pass
+
+    @abstractmethod
+    def get_idx(self, atom: Any) -> int:
+        """Get index."""
+        pass
+
+    @abstractmethod
+    def get_neighbors(self, atom: Any) -> List[Any]:
+        """Get neighbors."""
+        pass
+
+    @abstractmethod
+    def get_substruct_matches(
+        self, mol: Any, query: Any, uniquify: bool = True, max_matches: int = 1000
+    ) -> List[List[int]]:
+        """Get substructure matches."""
+        pass
+
+    @abstractmethod
+    def get_bond_between_atoms(self, mol: Any, atom1_idx: int, atom2_idx: int) -> Any:
+        """Get bond between atoms."""
+        pass
+
+    @abstractmethod
+    def get_bond_type(self, bond: Any) -> Any:
+        """Get bond type."""
+        pass
+
+    @abstractmethod
+    def is_in_ring(self, atom: Any) -> bool:
+        """Check if atom is in ring."""
+        pass
 
 
 class ChemToolkitPluginManager(PluginManagerBase):
     """Plugin manager for chemistry toolkits."""
+
+    def __init__(self, plugin_base_class: Type[PluginBase]):
+        super().__init__(plugin_base_class)
+        self._toolkit = None
+
+    @property
+    def toolkit(self):
+        """Lazy load the toolkit."""
+        if self._toolkit is None:
+            toolkits = self.get_selected_plugins_from_params()
+            if not toolkits:
+                raise Exception("Must specify a chemistry toolkit!")
+            if len(toolkits) > 1:
+                raise Exception("Can only use one chemistry toolkit at a time!")
+            self._toolkit = cast(ChemToolkitBase, self.plugins[toolkits[0]])
+        return self._toolkit
 
     def on_plugin_manager_setup_done(self):
         """
@@ -236,14 +372,8 @@ class ChemToolkitPluginManager(PluginManagerBase):
             This method is called once during initialization of the plugin manager.
             Children can overwrite it.
             """
-        toolkits = self.get_selected_plugins_from_params()
-        if not toolkits:
-            raise Exception("Must specify a chemistry toolkit!")
-        if len(toolkits) > 1:
-            raise Exception("Can only use one chemistry toolkit at a time!")
-
-        # This is so the plugin methods can be accessed directly. Cast as ChemToolkitBase
-        self.toolkit = cast(ChemToolkitBase, self.plugins[toolkits[0]])
+        # Just access the property to trigger loading
+        _ = self.toolkit
 
     def execute(self, **kwargs) -> Any:
         """Execute selected chemistry toolkit method."""

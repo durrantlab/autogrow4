@@ -26,7 +26,8 @@ fragments. It is adapted from Gypsum-DL
 ##### MolObjectHandling.py
 import __future__
 from typing import Any, List
-from autogrow.plugins.plugin_managers import plugin_managers
+from autogrow.plugins.plugin_manager_instances import plugin_managers
+
 
 def check_sanitization(mol):
     """Sanitizes an RDKit molecule and fixes common valence errors.
@@ -47,15 +48,12 @@ def check_sanitization(mol):
     """
     if mol is None:
         return None
-    
+
     chemtoolkit = plugin_managers.ChemToolkit.toolkit
 
     # easiest nearly everything should get through
     try:
-        mol, sanitize_msg = chemtoolkit.sanitize_mol(
-            mol,
-            catch_errors=True,
-        )
+        mol, sanitize_msg = chemtoolkit.sanitize_mol(mol, catch_errors=True,)
 
     except Exception:
         return None
@@ -66,23 +64,14 @@ def check_sanitization(mol):
     # try to fix the nitrogen (common problem that 4 bonded Nitrogens improperly lose their + charges)
     mol = nitrogen_charge_adjustment(mol)
 
-    mol, _ = chemtoolkit.sanitize_mol(
-        mol,
-        catch_errors=True,
-    )
-    mol, sanitize_msg = chemtoolkit.sanitize_mol(
-        mol,
-        catch_errors=True,
-    )
+    mol, _ = chemtoolkit.sanitize_mol(mol, catch_errors=True,)
+    mol, sanitize_msg = chemtoolkit.sanitize_mol(mol, catch_errors=True,)
     if sanitize_msg.name == "SANITIZE_NONE":
         return mol
 
     # run a  sanitation Filter 1 more time incase something slipped through
     # ie. if there are any forms of sanition which fail ie. KEKULIZE then return None
-    mol, sanitize_msg = chemtoolkit.sanitize_mol(
-        mol,
-        catch_errors=True,
-    )
+    mol, sanitize_msg = chemtoolkit.sanitize_mol(mol, catch_errors=True,)
 
     if sanitize_msg.name != "SANITIZE_NONE":
         return None
@@ -191,7 +180,7 @@ def remove_atoms(mol, list_of_idx_to_remove: List[int]):
         atoms_to_remove.sort(reverse=True)
     except Exception:
         return None
-    
+
     chemtoolkit = plugin_managers.ChemToolkit.toolkit
 
     try:
@@ -220,14 +209,20 @@ def nitrogen_charge_adjustment(mol: Any):
     if mol is None:
         return None
     # makes sure its an rdkit obj
+
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
+
     try:
-        atoms = mol.GetAtoms()
+        atoms = chemtoolkit.get_atoms(mol)
     except Exception:
         return None
 
     for atom in atoms:
-        if atom.GetAtomicNum() == 7:
-            bonds = [bond.GetBondTypeAsDouble() for bond in atom.GetBonds()]
+        if chemtoolkit.get_atomic_num(atom) == 7:
+            bonds = [
+                chemtoolkit.get_bond_type_as_double(bond)
+                for bond in chemtoolkit.get_bonds(atom)
+            ]
             # If aromatic skip as we do not want assume the charge.
             if 1.5 in bonds:
                 continue
@@ -237,7 +232,7 @@ def nitrogen_charge_adjustment(mol: Any):
 
             # Check if the octet is filled
             if num_bond_sums == 4.0:
-                atom.SetFormalCharge(+1)
+                chemtoolkit.set_formal_charge(atom, +1)
     return mol
 
 
@@ -257,13 +252,15 @@ def check_for_unassigned_atom(mol):
     if mol is None:
         return None
 
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
+
     try:
-        atoms = mol.GetAtoms()
+        atoms = chemtoolkit.get_atoms(mol)
     except Exception:
         return None
 
     for atom in atoms:
-        if atom.GetAtomicNum() == 0:
+        if chemtoolkit.get_atomic_num(atom) == 0:
             return None
     return mol
 
@@ -283,7 +280,7 @@ def handle_frag_check(mol):
     """
     if mol is None:
         return None
-    
+
     chemtoolkit = plugin_managers.ChemToolkit.toolkit
 
     try:
@@ -303,7 +300,7 @@ def handle_frag_check(mol):
             frag_index = frag_index + 1
             continue
 
-        num_atoms = frag.GetNumAtoms()
+        num_atoms = chemtoolkit.get_num_atoms(frag)
         frag_info = [frag_index, num_atoms]
         frag_info_list.append(frag_info)
         frag_index = frag_index + 1
