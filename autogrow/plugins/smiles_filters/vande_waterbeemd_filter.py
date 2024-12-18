@@ -19,14 +19,7 @@ from typing import List, Tuple
 from autogrow.config.argparser import ArgumentVars
 from autogrow.plugins.smiles_filters import SmilesFilterBase
 from autogrow.types import Compound
-import rdkit  # type: ignore
-import rdkit.Chem as Chem  # type: ignore
-import rdkit.Chem.MolSurf as MolSurf  # type: ignore
-import rdkit.Chem.Descriptors as Descriptors  # type: ignore
-
-# Disable the unnecessary RDKit warnings
-rdkit.RDLogger.DisableLog("rdApp.*")
-
+from autogrow.plugins.plugin_managers import plugin_managers
 
 class VandeWaterbeemdFilter(SmilesFilterBase):
     """
@@ -61,14 +54,16 @@ class VandeWaterbeemdFilter(SmilesFilterBase):
             bool: True if the molecule passes all filter criteria (MW < 450
                 dalton and PSA < 90 A^2), False otherwise.
         """
-        mol = self.predock_cmpd_to_rdkit_mol(cmpd)
+        mol = self.cmpd_to_rdkit_mol(cmpd)
         if mol is None:
             return False
+        
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
 
-        exact_mwt = Descriptors.ExactMolWt(mol)
+        exact_mwt = chemtoolkit.descriptors_exact_mol_wt(mol)
         if exact_mwt >= 450:
             return False
-        psa = MolSurf.TPSA(mol)
+        psa = chemtoolkit.molsurf_tpsa(mol)
         if psa >= 90:
             return False
 

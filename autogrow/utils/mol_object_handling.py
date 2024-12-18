@@ -4,9 +4,6 @@ This module provides functions for sanitizing RDKit molecules, handling
 hydrogens, removing atoms, adjusting nitrogen charges, and managing molecular
 fragments. It is adapted from Gypsum-DL
 (https://github.com/durrantlab/gypsum_dl).
-
-Note:
-    RDKit warnings are disabled by default via RDLogger.DisableLog("rdApp.*").
 """
 
 # Copyright 2018 Jacob D. Durrant
@@ -28,15 +25,8 @@ Note:
 
 ##### MolObjectHandling.py
 import __future__
-
-import rdkit  # type: ignore
-from rdkit import Chem  # type: ignore
-
-# Disable the unnecessary RDKit warnings
-from rdkit import RDLogger  # type: ignore
-
-RDLogger.DisableLog("rdApp.*")
-
+from typing import Any, List
+from autogrow.plugins.plugin_managers import plugin_managers
 
 def check_sanitization(mol):
     """Sanitizes an RDKit molecule and fixes common valence errors.
@@ -57,46 +47,47 @@ def check_sanitization(mol):
     """
     if mol is None:
         return None
+    
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
 
     # easiest nearly everything should get through
     try:
-        sanitize_string = Chem.SanitizeMol(
+        mol, sanitize_msg = chemtoolkit.sanitize_mol(
             mol,
-            sanitizeOps=rdkit.Chem.rdmolops.SanitizeFlags.SANITIZE_ALL,
-            catchErrors=True,
+            catch_errors=True,
         )
+
     except Exception:
         return None
 
-    if sanitize_string.name == "SANITIZE_NONE":
+    if sanitize_msg.name == "SANITIZE_NONE":
         return mol
-    else:
-        # try to fix the nitrogen (common problem that 4 bonded Nitrogens improperly lose their + charges)
-        mol = nitrogen_charge_adjustment(mol)
-        Chem.SanitizeMol(
-            mol,
-            sanitizeOps=rdkit.Chem.rdmolops.SanitizeFlags.SANITIZE_ALL,
-            catchErrors=True,
-        )
-        sanitize_string = Chem.SanitizeMol(
-            mol,
-            sanitizeOps=rdkit.Chem.rdmolops.SanitizeFlags.SANITIZE_ALL,
-            catchErrors=True,
-        )
-        if sanitize_string.name == "SANITIZE_NONE":
-            return mol
+
+    # try to fix the nitrogen (common problem that 4 bonded Nitrogens improperly lose their + charges)
+    mol = nitrogen_charge_adjustment(mol)
+
+    mol, _ = chemtoolkit.sanitize_mol(
+        mol,
+        catch_errors=True,
+    )
+    mol, sanitize_msg = chemtoolkit.sanitize_mol(
+        mol,
+        catch_errors=True,
+    )
+    if sanitize_msg.name == "SANITIZE_NONE":
+        return mol
 
     # run a  sanitation Filter 1 more time incase something slipped through
     # ie. if there are any forms of sanition which fail ie. KEKULIZE then return None
-    sanitize_string = Chem.SanitizeMol(
+    mol, sanitize_msg = chemtoolkit.sanitize_mol(
         mol,
-        sanitizeOps=rdkit.Chem.rdmolops.SanitizeFlags.SANITIZE_ALL,
-        catchErrors=True,
+        catch_errors=True,
     )
-    if sanitize_string.name != "SANITIZE_NONE":
+
+    if sanitize_msg.name != "SANITIZE_NONE":
         return None
-    else:
-        return mol
+
+    return mol
 
 
 def handleHs(mol, protanate_step):
@@ -148,7 +139,8 @@ def try_deprotanation(sanitized_mol):
             or None if process fails
     """
     try:
-        mol = Chem.RemoveHs(sanitized_mol, sanitize=False)
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
+        mol = chemtoolkit.remove_hs(sanitized_mol, sanitize=False)
     except Exception:
         return None
 
@@ -166,17 +158,18 @@ def try_reprotanation(sanitized_deprotanated_mol):
         rdkit.Chem.rdchem.Mol: Molecule with implicit hydrogens added and
             re-sanitized, or None if process fails
     """
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
     if sanitized_deprotanated_mol is None:
         return None
     try:
-        mol = Chem.AddHs(sanitized_deprotanated_mol)
+        mol = chemtoolkit.add_hs(sanitized_deprotanated_mol)
     except Exception:
         mol = None
 
     return check_sanitization(mol)
 
 
-def remove_atoms(mol, list_of_idx_to_remove):
+def remove_atoms(mol, list_of_idx_to_remove: List[int]):
     """Removes specified atoms from a molecule.
 
     Uses RDKit's EditableMol class to remove atoms from the molecule based on
@@ -194,24 +187,20 @@ def remove_atoms(mol, list_of_idx_to_remove):
         return None
 
     try:
-        atomsToRemove = list_of_idx_to_remove
-        atomsToRemove.sort(reverse=True)
+        atoms_to_remove = list_of_idx_to_remove
+        atoms_to_remove.sort(reverse=True)
     except Exception:
         return None
+    
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
 
     try:
-        em1 = Chem.EditableMol(mol)
-        for atom in atomsToRemove:
-            em1.RemoveAtom(atom)
-
-        new_mol = em1.GetMol()
-
-        return new_mol
+        return chemtoolkit.remove_atoms(mol, atoms_to_remove)
     except Exception:
         return None
 
 
-def nitrogen_charge_adjustment(mol: rdkit.Chem.rdchem.Mol):
+def nitrogen_charge_adjustment(mol: Any):
     """Adjusts formal charges on four-bonded nitrogen atoms.
 
     Corrects for cases where nitrogen atoms have four bonds but lack the
@@ -294,9 +283,11 @@ def handle_frag_check(mol):
     """
     if mol is None:
         return None
+    
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
 
     try:
-        frags = Chem.GetMolFrags(mol, asMols=True, sanitizeFrags=False)
+        frags = chemtoolkit.get_mol_frags(mol, as_mols=True, sanitize_frags=False)
     except Exception:
         return None
 

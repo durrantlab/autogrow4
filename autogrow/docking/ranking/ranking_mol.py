@@ -9,16 +9,8 @@ import __future__
 
 import os
 from typing import Any, Dict, List, Optional
-
+from autogrow.plugins.plugin_managers import plugin_managers
 from autogrow.types import Compound, Compound, ScoreType
-import rdkit  # type: ignore
-import rdkit.Chem as Chem  # type: ignore
-from rdkit.Chem.rdMolDescriptors import GetMorganFingerprint  # type: ignore
-from rdkit import DataStructs  # type: ignore
-
-# Disable the unnecessary RDKit warnings
-rdkit.RDLogger.DisableLog("rdApp.*")
-
 import autogrow.utils.mol_object_handling as MOH
 import autogrow.docking.ranking.ranking_mol as Ranking
 
@@ -312,13 +304,14 @@ def calc_diversity_scores(postDockedCompoundInfos: List[Compound],) -> List[Comp
         - Uses Morgan Fingerprints with radius 10 and feature-based encoding.
     """
     postDockedCompoundInfosToKeep: List[Compound] = []
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
 
     for postDockedCompoundInfo in postDockedCompoundInfos:
         if postDockedCompoundInfo is not None:
             smile = postDockedCompoundInfo.smiles
             # name = pair[1]
             try:
-                mol = Chem.MolFromSmiles(smile, sanitize=False)
+                mol = chemtoolkit.mol_from_smiles(smile, sanitize=False)
             except Exception:
                 mol = None
 
@@ -330,14 +323,14 @@ def calc_diversity_scores(postDockedCompoundInfos: List[Compound],) -> List[Comp
                                     def calc_diversity_scores"
                 )
 
-            mol = MOH.check_sanitization(mol)
+            mol = MOH.check_sanitization(mol)  # TODO: Will likely fail if OpenEye
             if mol is None:
                 raise AssertionError(
                     "mol in list failed to sanitize. Issue in Ranking.py \
                                         def calc_diversity_scores"
                 )
 
-            mol = MOH.try_deprotanation(mol)
+            mol = MOH.try_deprotanation(mol)  # TODO: Will likely fail if OpenEye
             if mol is None:
                 raise AssertionError(
                     "mol in list failed to sanitize. Issue in Ranking.py \
@@ -356,7 +349,7 @@ def calc_diversity_scores(postDockedCompoundInfos: List[Compound],) -> List[Comp
             print("noneitem in molecules_list in calc_diversity_scores")
 
     for postDockedCompoundInfo in postDockedCompoundInfosToKeep:
-        fp = GetMorganFingerprint(postDockedCompoundInfo.mol, 10, useFeatures=True)
+        fp = chemtoolkit.get_morgan_fingerprint(postDockedCompoundInfo.mol, 10, use_features=True)
         postDockedCompoundInfo.fp = fp
 
     for i in range(len(postDockedCompoundInfosToKeep)):
@@ -367,7 +360,7 @@ def calc_diversity_scores(postDockedCompoundInfos: List[Compound],) -> List[Comp
                 # number the more diverse it is. The sum of all of these gives
                 # the distance from the normal. The smaller the number means
                 # the more distant
-                diversity_score = diversity_score + DataStructs.DiceSimilarity(
+                diversity_score = diversity_score + chemtoolkit.dice_similarity(
                     postDockedCompoundInfosToKeep[i].fp,
                     postDockedCompoundInfosToKeep[j].fp,
                 )

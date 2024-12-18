@@ -14,12 +14,10 @@ import __future__
 
 from autogrow.plugins.smiles_filters import SmilesFilterBase
 from autogrow.types import Compound
-import rdkit  # type: ignore
-from rdkit.Chem import FilterCatalog  # type: ignore
-from rdkit.Chem.FilterCatalog import FilterCatalogParams  # type: ignore
+from autogrow.plugins.plugin_managers import plugin_managers
 
 
-from typing import List, Tuple
+from typing import Any, List, Tuple
 from autogrow.config.argparser import ArgumentVars
 
 
@@ -44,18 +42,16 @@ class NIHFilter(SmilesFilterBase):
         """
         self.filters = self.get_filters()
 
-    def get_filters(self) -> FilterCatalog.FilterCatalog:
+    def get_filters(self) -> Any:
         """
         Load and return the NIH filters.
 
         Returns:
             FilterCatalog.FilterCatalog: A set of RDKit NIH Filters.
         """
-        # Make a list of the NIH filter.
-        params = FilterCatalogParams()
-        params.AddCatalog(FilterCatalogParams.FilterCatalogs.NIH)
-        # This is our set of all the NIH filters
-        return FilterCatalog.FilterCatalog(params)
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
+        # TODO: Seems like this won't work for OpenEye.
+        return chemtoolkit.get_nih_filter()
 
     def run_filter(self, cmpd: Compound) -> bool:
         """
@@ -78,7 +74,7 @@ class NIHFilter(SmilesFilterBase):
         # If the mol matches a mol in the filter list. we return a False (as it
         # failed the filter). if No matches are found to filter list this will
         # return a True as it Passed the filter.
-        mol = self.predock_cmpd_to_rdkit_mol(cmpd)
+        mol = self.cmpd_to_rdkit_mol(cmpd)
         if mol is None:
             return False
 

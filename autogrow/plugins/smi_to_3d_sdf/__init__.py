@@ -141,9 +141,6 @@ class SmiTo3DSdfPluginManager(PluginManagerBase):
                 raise Exception(
                     "ERROR! Your SmiTo3DSdf plugin must populate the sdf_path property of each Compound."
                 )
-            cmpd.add_history(
-                "CONVERSION",
-                f"Converted {cmpd.smiles} to 3D SDF file"
-            )
+            cmpd.add_history("CONVERSION", f"Converted {cmpd.smiles} to 3D SDF file")
 
         return resp

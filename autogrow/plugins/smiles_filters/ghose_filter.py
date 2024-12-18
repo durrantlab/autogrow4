@@ -25,17 +25,9 @@ import copy
 
 from autogrow.plugins.smiles_filters import SmilesFilterBase
 from autogrow.types import Compound
-import rdkit  # type: ignore
-import rdkit.Chem as Chem  # type: ignore
-import rdkit.Chem.Lipinski as Lipinski  # type: ignore
-import rdkit.Chem.Crippen as Crippen  # type: ignore
-import rdkit.Chem.Descriptors as Descriptors  # type: ignore
 from typing import List, Tuple
 from autogrow.config.argparser import ArgumentVars
-
-# Disable the unnecessary RDKit warnings
-rdkit.RDLogger.DisableLog("rdApp.*")
-
+from autogrow.plugins.plugin_managers import plugin_managers
 
 class GhoseFilter(SmilesFilterBase):
     """
@@ -69,16 +61,18 @@ class GhoseFilter(SmilesFilterBase):
             to it before applying the filter. This ensures that hydrogens are
             counted in the total atom count without affecting other filters.
         """
-        mol = self.predock_cmpd_to_rdkit_mol(cmpd)
+        mol = self.cmpd_to_rdkit_mol(cmpd)
         if mol is None:
             return False
+        
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
 
         # Make a copy of the mol so we can AddHs without affecting other filters
         # number of atoms is altered by the presence/absence of hydrogens.
         # Our Ghose filter counts hydrogenss towards atom count
         copy_mol = copy.deepcopy(mol)
-        copy_mol = Chem.AddHs(copy_mol)
-        exact_mwt = Descriptors.ExactMolWt(copy_mol)
+        copy_mol = chemtoolkit.add_hs(copy_mol)
+        exact_mwt = chemtoolkit.descriptors_exact_mol_wt(copy_mol)
         if (exact_mwt < 160) or (exact_mwt > 480):
             return False
 
@@ -87,12 +81,12 @@ class GhoseFilter(SmilesFilterBase):
             return False
 
         # molar Refractivity
-        MolMR = Crippen.MolMR(copy_mol)
+        MolMR = chemtoolkit.crippen_mol_mr(copy_mol)
         if (MolMR < 40) or (MolMR > 130):
             return False
 
         # molar LogP
-        mol_log_p = Crippen.MolLogP(copy_mol)
+        mol_log_p = chemtoolkit.crippen_mol_log_p(copy_mol)
         if (mol_log_p < -0.4) or (mol_log_p > 5.6):
             return False
 

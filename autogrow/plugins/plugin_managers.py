@@ -9,8 +9,9 @@ A single global instance of PluginManagers is created and maintained to provide
 consistent access to all plugin managers throughout the application.
 """
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Dict
+from typing import Any, Dict
 
+from autogrow.plugins.chem_toolkit import ChemToolkitBase, ChemToolkitPluginManager
 from autogrow.plugins.crossover import CrossoverBase, CrossoverPluginManager
 from autogrow.plugins.docking import DockingBase, DockingPluginManager
 from autogrow.plugins.mutation import MutationBase, MutationPluginManager
@@ -44,6 +45,7 @@ class PluginManagers:
     ShellParallelizer: ShellParallelizerPluginManager = ShellParallelizerPluginManager(
         ShellParallelizerBase
     )
+    ChemToolkit: ChemToolkitPluginManager = ChemToolkitPluginManager(ChemToolkitBase)
 
 
 plugin_managers = PluginManagers()

@@ -9,7 +9,6 @@ from abc import ABC, abstractmethod
 from argparse import ArgumentParser
 from typing import Dict, List, Optional, Tuple, Union, cast
 
-from autogrow.compound_changed_tracker import track_compound_changes
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
 from autogrow.types import Compound
 from autogrow.utils.logging import LogLevel, log_debug, log_warning

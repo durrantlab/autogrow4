@@ -106,6 +106,6 @@ class Compound:  # Get new id when you figure out what context this is used in
                 return self.diversity_score
             raise ValueError("No diversity score available")
         raise ValueError("Invalid score type")
-    
+
     def add_history(self, label: str, history: str):
         self._history.append(f"{label.upper()}: {history}")

@@ -22,7 +22,7 @@ class PluginBase(ABC):
             managers.
     """
 
-    def onInit(self):
+    def on_init(self):
         """
         Initialization method that can be overwritten by child classes.
         """

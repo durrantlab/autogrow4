@@ -24,17 +24,12 @@ from autogrow.config.argparser import ArgumentVars
 from autogrow.plugins.mutation import MutationBase
 from autogrow.types import Compound
 from autogrow.utils.logging import log_debug, log_warning
-import rdkit  # type: ignore
-from rdkit import Chem  # type: ignore
-from rdkit.Chem import AllChem  # type: ignore
 import copy
 import random
 import glob
 
 import autogrow.utils.mol_object_handling as MOH
-
-# Disable the unnecessary RDKit warnings
-rdkit.RDLogger.DisableLog("rdApp.*")
+from autogrow.plugins.plugin_managers import plugin_managers
 
 
 class FragmentAddition(MutationBase):
@@ -492,7 +487,7 @@ class FragmentAddition(MutationBase):
 
     def _prepare_mol(
         self, ligand_smiles: str
-    ) -> Optional[Tuple[Chem.Mol, Chem.Mol, Chem.Mol, List[str]]]:
+    ) -> Optional[Tuple[Any, Any, Any, List[str]]]:
         """
         Prepare the molecule for reaction.
 
@@ -505,8 +500,9 @@ class FragmentAddition(MutationBase):
                 deprotanated molecule, and a list of functional groups within
                 the molecule. Returns None if preparation fails.
         """
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
         try:
-            mol = Chem.MolFromSmiles(
+            mol = chemtoolkit.mol_from_smiles(
                 ligand_smiles, sanitize=False
             )  # This is the input molecule which serves as the parent molecule
         except Exception:
@@ -542,8 +538,8 @@ class FragmentAddition(MutationBase):
 
     def _try_reactions(
         self,
-        mol_reprotanated: Chem.Mol,
-        mol_deprotanated: Chem.Mol,
+        mol_reprotanated: Any,
+        mol_deprotanated: Any,
         list_subs_within_mol: List[str],
     ) -> Optional[Tuple[str, int, Optional[str]]]:
         """
@@ -579,7 +575,7 @@ class FragmentAddition(MutationBase):
         return None
 
     def _identify_functional_grps(
-        self, mol_deprotanated: Chem.Mol, mol_reprotanated: Chem.Mol
+        self, mol_deprotanated: Any, mol_reprotanated: Any
     ) -> List[str]:
         """
         Identify functional groups present in a molecule.
@@ -602,8 +598,10 @@ class FragmentAddition(MutationBase):
         list_subs_within_mol = []
         functional_group_dict = self.functional_group_dict
 
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
+
         for key in list(functional_group_dict.keys()):
-            substructure = Chem.MolFromSmarts(functional_group_dict[key])
+            substructure = chemtoolkit.mol_from_smarts(functional_group_dict[key])
             if mol_reprotanated.HasSubstructMatch(substructure):
                 list_subs_within_mol.append(key)
             elif mol_deprotanated.HasSubstructMatch(substructure):
@@ -628,8 +626,8 @@ class FragmentAddition(MutationBase):
     def _try_reaction(
         self,
         a_reaction_dict: Dict[str, Any],
-        mol_deprotanated: Chem.Mol,
-        mol_reprotanated: Chem.Mol,
+        mol_deprotanated: Any,
+        mol_reprotanated: Any,
         list_subs_within_mol: List[str],
     ) -> Optional[Tuple[str, int, Optional[str]]]:
         """
@@ -662,10 +660,12 @@ class FragmentAddition(MutationBase):
             # Reaction doesn't contain a functional group found in the
             # reactant molecule. So lets move on to the next reaction
             return None
+        
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
 
         # Determine whether to react using the protanated or
         # deprotanated form of the ligand
-        substructure = Chem.MolFromSmarts(
+        substructure = chemtoolkit.mol_from_smarts(
             self.functional_group_dict[fun_groups_in_rxn[contains_group]]
         )
 
@@ -675,7 +675,7 @@ class FragmentAddition(MutationBase):
             mol_to_use = copy.deepcopy(mol_reprotanated)
         substructure = None
 
-        rxn = AllChem.ReactionFromSmarts(str(a_reaction_dict["reaction_string"]))
+        rxn = chemtoolkit.reaction_from_smarts(str(a_reaction_dict["reaction_string"]))
         rxn.Initialize()
 
         # if the reaction requires only a single reactant we will attempt
@@ -689,8 +689,8 @@ class FragmentAddition(MutationBase):
 
     def _try_single_reactant_reaction(
         self,
-        rxn: AllChem.ChemicalReaction,
-        mol_to_use: Chem.Mol,
+        rxn: Any,
+        mol_to_use: Any,
         a_reaction_dict: Dict[str, Any],
     ) -> Optional[Tuple[str, int, Optional[str]]]:
         """
@@ -729,8 +729,8 @@ class FragmentAddition(MutationBase):
 
     def _try_multi_reactant_reaction(
         self,
-        rxn: AllChem.ChemicalReaction,
-        mol_to_use: Chem.Mol,
+        rxn: Any,
+        mol_to_use: Any,
         a_reaction_dict: Dict[str, Any],
         contains_group: int,
     ) -> Optional[Tuple[str, int, Optional[str]]]:
@@ -752,6 +752,8 @@ class FragmentAddition(MutationBase):
         fun_groups_in_rxn = a_reaction_dict["functional_groups"]
         list_reactant_mols = []
         comp_mol_id = []
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
+
         for i in range(len(fun_groups_in_rxn)):
             if i == contains_group:
                 # This is where the molecule goes
@@ -763,7 +765,7 @@ class FragmentAddition(MutationBase):
                 functional_group_name = str(a_reaction_dict["functional_groups"][i])
 
                 # Determine the substructure
-                substructure = Chem.MolFromSmarts(
+                substructure = chemtoolkit.mol_from_smarts(
                     self.functional_group_dict[fun_groups_in_rxn[i]]
                 )
 
@@ -782,7 +784,7 @@ class FragmentAddition(MutationBase):
                     comp_smiles = comp_molecule[0]
 
                     # Check if this is a sanitizable molecule
-                    comp_mol = Chem.MolFromSmiles(comp_smiles, sanitize=False)
+                    comp_mol = chemtoolkit.mol_from_smiles(comp_smiles, sanitize=False)
                     # Try sanitizing, which is necessary later
                     comp_mol = MOH.check_sanitization(comp_mol)
 
@@ -886,9 +888,11 @@ class FragmentAddition(MutationBase):
         if reaction_product is None:
             return None
 
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
+
         # Check if product SMILE has been made before
-        reaction_product_smiles: str = Chem.MolToSmiles(
-            reaction_product, isomericSmiles=True
+        reaction_product_smiles: str = chemtoolkit.mol_to_smiles(
+            reaction_product, isomeric_smiles=True
         )
 
         # NOTE: I think duplicate smiles are eliminated in the function that

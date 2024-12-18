@@ -60,6 +60,15 @@ class PluginManagerBase(ABC):
         # Initially loads all plugins
         self.plugins = self.load_plugins()
 
+    def on_plugin_manager_setup_done(self):
+        """
+        Perform any initialization tasks for the plugin manager.
+
+        This method is called once during initialization of the plugin manager.
+        Children can overwrite it.
+        """
+        pass
+
     @property
     def name(self) -> str:
         """
@@ -102,6 +111,8 @@ class PluginManagerBase(ABC):
         for plugin in self.plugins.values():
             # This also sets params on the plugin.
             plugin._validate(params, plugin_managers)
+
+        self.on_plugin_manager_setup_done()
 
     def setup_plugins(self, **kwargs):
         """
@@ -163,7 +174,7 @@ class PluginManagerBase(ABC):
                                 and obj is not self.plugin_base_class
                             ):
                                 plugins[name] = obj()
-                                plugins[name].onInit()
+                                plugins[name].on_init()
 
                                 title, args = plugins[name].add_arguments()
                                 register_argparse_group(title, args)

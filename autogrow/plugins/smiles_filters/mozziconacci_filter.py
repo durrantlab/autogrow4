@@ -21,14 +21,9 @@ import __future__
 
 from autogrow.plugins.smiles_filters import SmilesFilterBase
 from autogrow.types import Compound
-import rdkit  # type: ignore
-import rdkit.Chem as Chem  # type: ignore
-import rdkit.Chem.Lipinski as Lipinski  # type: ignore
 from typing import List, Tuple
 from autogrow.config.argparser import ArgumentVars
-
-# Disable the unnecessary RDKit warnings
-rdkit.RDLogger.DisableLog("rdApp.*")
+from autogrow.plugins.plugin_managers import plugin_managers
 
 
 class MozziconacciFilter(SmilesFilterBase):
@@ -68,30 +63,32 @@ class MozziconacciFilter(SmilesFilterBase):
             bool: True if the molecule passes all filter criteria, False
                 otherwise.
         """
-        mol = self.predock_cmpd_to_rdkit_mol(cmpd)
+        mol = self.cmpd_to_rdkit_mol(cmpd)
         if mol is None:
             return False
+        
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
 
-        halogen = Chem.MolFromSmarts("[*;#9,#17,#35,#53,#85]")
+        halogen = chemtoolkit.mol_from_smarts("[*;#9,#17,#35,#53,#85]")
         number_of_halogens = len(mol.GetSubstructMatches(halogen, maxMatches=8))
         if number_of_halogens > 7:
             return False
 
-        oxygen = Chem.MolFromSmarts("[#8]")
+        oxygen = chemtoolkit.mol_from_smarts("[#8]")
         number_of_oxygens = len(mol.GetSubstructMatches(oxygen, maxMatches=2))
         if number_of_oxygens < 1:
             return False
 
-        nitrogen = Chem.MolFromSmarts("[#7]")
+        nitrogen = chemtoolkit.mol_from_smarts("[#7]")
         number_of_nitrogen = len(mol.GetSubstructMatches(nitrogen, maxMatches=2))
         if number_of_nitrogen < 1:
             return False
 
-        num_rotatable_bonds = Lipinski.NumRotatableBonds(mol)
+        num_rotatable_bonds = chemtoolkit.lipinski_num_rotatable_bonds(mol)
         if num_rotatable_bonds > 15:
             return False
 
-        ring_count = Chem.rdmolops.GetSSSR(mol)
+        ring_count = chemtoolkit.rdmolops_get_sssr(mol)
         if ring_count > 6:
             return False
 

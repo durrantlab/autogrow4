@@ -117,7 +117,7 @@ class SelectorPluginManager(PluginManagerBase):
             for cmpd in docking_fitness_cmpd_list:
                 cmpd.add_history(
                     "SELECTOR",
-                    f"Selected {cmpd.smiles} due to its docking score: {cmpd.get_score_by_type(ScoreType.DOCKING):.2f}"
+                    f"Selected {cmpd.smiles} due to its docking score: {cmpd.get_score_by_type(ScoreType.DOCKING):.2f}",
                 )
 
         # Select the molecules based on the diversity score
@@ -139,7 +139,7 @@ class SelectorPluginManager(PluginManagerBase):
             for cmpd in diversity_cmpd_list:
                 cmpd.add_history(
                     "SELECTOR",
-                    f"Selected {cmpd.smiles} due to its diversity score: {cmpd.get_score_by_type(ScoreType.DIVERSITY):.2f}"
+                    f"Selected {cmpd.smiles} due to its diversity score: {cmpd.get_score_by_type(ScoreType.DIVERSITY):.2f}",
                 )
 
         # Calculate the average docking score of the

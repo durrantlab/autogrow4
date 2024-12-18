@@ -19,11 +19,6 @@ from autogrow.plugins.plugin_managers import plugin_managers
 from autogrow.types import Compound
 from autogrow.utils.caching import CacheManager
 from autogrow.utils.logging import LogLevel, log_info, log_warning
-import rdkit  # type: ignore
-import rdkit.Chem as Chem  # type: ignore
-
-# Disable the unnecessary RDKit warnings
-rdkit.RDLogger.DisableLog("rdApp.*")  # type: ignore
 
 import autogrow.docking.ranking.ranking_mol as Ranking
 import autogrow.operators.execute_mutations as Mutation
@@ -590,6 +585,10 @@ def _test_source_smiles_convert(smile_info: Compound,) -> Union[Compound, str]:
             Compound object. If it failed to convert, it returns an
             error message string. This passes out to prevent MPI print issues.
     """
+
+    # Get chemtoolkit
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
+
     if smile_info is None or not smile_info:
         printout = (
             "REMOVING SMILES FROM SOURCE LIST: Blank "
@@ -621,7 +620,7 @@ def _test_source_smiles_convert(smile_info: Compound,) -> Union[Compound, str]:
     # Try importing it into RDKit with Sanitization off. Tests for errors in
     # having the wrong data type
     try:
-        mol = Chem.MolFromSmiles(str(smile_str), sanitize=False)  # type: ignore
+        mol = chemtoolkit.mol_from_smiles(str(smile_str), sanitize=False)
     except Exception:
         printout = (
             "REMOVING SMILES FROM SOURCE LIST: SMILES string failed "
@@ -635,7 +634,7 @@ def _test_source_smiles_convert(smile_info: Compound,) -> Union[Compound, str]:
     # someones source compound list Although the MOH.check_sanitization will
     # do that. try sanitizing, which is necessary later
     try:
-        Chem.SanitizeMol(mol)  # type: ignore
+        mol, _ = chemtoolkit.sanitize_mol(mol)
     except Exception:
         printout = (
             "REMOVING SMILES FROM SOURCE LIST: SMILES "
@@ -649,8 +648,11 @@ def _test_source_smiles_convert(smile_info: Compound,) -> Union[Compound, str]:
     # will try protanating and Deprotanating the mol. If it can't handle that
     # We reject it as many functions will require this sort of manipulation.
     # More advanced sanitization issues will also be removed in this step
-    mol = Chem.MolFromSmiles(str(smile_str), sanitize=False)  # type: ignore
-    mol = MOH.handleHs(mol, True)
+    # mol = Chem.MolFromSmiles(str(smile_str), sanitize=False)  # type: ignore
+    mol = chemtoolkit.mol_from_smiles(str(smile_str), sanitize=False)
+    mol = MOH.handleHs(
+        mol, True
+    )  # TODO: Probably not compatible with open babel implementation of chem toolkit! Will need to reconsider.
 
     if mol is None:
         printout = "REMOVING SMILES FROM SOURCE LIST: SMILES string failed \
@@ -670,7 +672,7 @@ def _test_source_smiles_convert(smile_info: Compound,) -> Union[Compound, str]:
         )
         return _report_removed_compound_info(smile_str, printout, smile_id)
     # Check for fragments.
-    if len(Chem.GetMolFrags(mol, asMols=True, sanitizeFrags=False)) != 1:  # type: ignore
+    if len(chemtoolkit.get_mol_frags(mol, as_mols=True, sanitize_frags=False)) != 1:  # type: ignore
 
         printout = "REMOVING SMILES FROM SOURCE LIST: SMILES string was fragmented.\n"
         return _report_removed_compound_info(smile_str, printout, smile_id)

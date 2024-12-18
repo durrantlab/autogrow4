@@ -20,23 +20,13 @@ from autogrow.plugins.plugin_managers import plugin_managers
 from autogrow.plugins.crossover import CrossoverPluginManager
 from autogrow.types import Compound
 from autogrow.utils.logging import LogLevel, log_debug, log_warning
-import rdkit  # type: ignore
-from rdkit import Chem  # type: ignore
-from rdkit.Chem import rdFMCS  # type: ignore
-
-# Disable the unnecessary RDKit warnings
-rdkit.RDLogger.DisableLog("rdApp.*")
-
-
 import autogrow.utils.mol_object_handling as MOH
 
 # TODO: Lots of this code is specific to the MCS crossover. But that code should
 # all be in the appropriate plugin, not here in this generic function.
 
 
-def _test_for_mcs(
-    params: Dict[str, Any], mol_1: rdkit.Chem.rdchem.Mol, mol_2: rdkit.Chem.rdchem.Mol
-) -> Optional[rdkit.Chem.rdFMCS.MCSResult]:
+def _test_for_mcs(params: Dict[str, Any], mol_1: Any, mol_2: Any) -> Optional[Any]:
     """
     Finds the Most Common Substructure (MCS) between two molecules.
 
@@ -53,17 +43,21 @@ def _test_for_mcs(
         - Recommended to use with molecules that have H's removed.
         - Implicit H's are recognized as part of MCS.
     """
+
+    # Get chemtoolkit
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
+
     mols = [mol_1, mol_2]
     time_timeout = params["max_time_mcs_prescreen"]
     min_number_atoms_matched = params["min_atom_match_mcs"]
 
     try:
-        result = rdFMCS.FindMCS(
+        result = chemtoolkit.find_mcs(
             mols,
-            matchValences=False,
-            ringMatchesRingOnly=True,
-            completeRingsOnly=False,
-            timeout=time_timeout,
+            match_valences=False,
+            ring_matches_ring_only=True,
+            complete_rings_only=False,
+            timeout=time_timeout
         )
     except Exception:
         return None
@@ -133,7 +127,7 @@ def _find_sufficiently_similar_cmpd(
     return None
 
 
-def _convert_mol_from_smiles(smiles: str) -> Union[rdkit.Chem.rdchem.Mol, bool, None]:
+def _convert_mol_from_smiles(smiles: str) -> Union[Any, bool, None]:
     """
     Converts a SMILES string to an RDKit molecule object.
 
@@ -148,15 +142,16 @@ def _convert_mol_from_smiles(smiles: str) -> Union[rdkit.Chem.rdchem.Mol, bool, 
         The function also sanitizes and deprotonates the molecule.
     """
     try:
-        mol = Chem.MolFromSmiles(smiles, sanitize=False)
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
+        mol = chemtoolkit.mol_from_smiles(smiles, sanitize=False)
     except Exception:
         return None
 
-    mol = MOH.check_sanitization(mol)
+    mol = MOH.check_sanitization(mol)  # TODO: Probably won't work with open eye
     if mol is None:
         return None
 
-    mol = MOH.try_deprotanation(mol)
+    mol = MOH.try_deprotanation(mol)  # TODO: Probably won't work with open eye
     return False if mol is None else mol
 
 

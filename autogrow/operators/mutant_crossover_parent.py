@@ -144,9 +144,7 @@ class CompoundGenerator(ABC):
                         updated_history = result.parent_cmpds[0]._history[:]
                     else:
                         # Likely crossover. Multiple parents, so extend each history.
-                        updated_history = [
-                            p._history[:] for p in result.parent_cmpds
-                        ]
+                        updated_history = [p._history[:] for p in result.parent_cmpds]
 
                     ligand_info = Compound(
                         smiles=result.child_smiles,
