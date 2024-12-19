@@ -31,7 +31,10 @@ python run_autogrow.py \
     --PythonMultiprocessing \
     --slurm_template_file tmp.txt \
     --parallel_exec_path /opt/homebrew/bin/parallel \
-    --RDKitToolkit
+    --RDKitToolkit \
+    --SubstructureFilter \
+    --substructure_smiles "SO"
+    
 
     # --PythonMultiprocessing
     

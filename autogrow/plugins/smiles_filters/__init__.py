@@ -6,6 +6,7 @@ from autogrow.types import Compound
 from autogrow.plugins.plugin_manager_instances import plugin_managers
 
 from autogrow.plugins.plugin_base import PluginBase
+from autogrow.utils.logging import log_warning
 import autogrow.utils.mol_object_handling as MOH
 
 
@@ -145,7 +146,7 @@ class SmilesFilterPluginManager(PluginManagerBase):
             filter_function = plugin.run
             if not filter_function(cmpd=cmpd):
                 filters_failed = filters_failed + 1
-                print(f"Failed {plugin_name} filter: {cmpd.smiles}")
+                log_warning(f"Failed {plugin_name} filter: {cmpd.smiles}")
 
         if filters_failed == 0:
             return True
