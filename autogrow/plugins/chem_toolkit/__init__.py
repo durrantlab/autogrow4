@@ -9,28 +9,6 @@ from autogrow.plugins.plugin_manager_base import PluginManagerBase
 class ChemToolkitBase(PluginBase):
     """Abstract base class for chemistry toolkit plugins."""
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
-        """Add command line arguments for this plugin type."""
-        return (
-            "Chemistry Toolkit Settings",
-            [
-                ArgumentVars(
-                    name="rdkit",
-                    default=True,
-                    type=bool,
-                    help="Use RDKit chemistry toolkit",
-                    action="store_true",
-                ),
-                ArgumentVars(
-                    name="openeye",
-                    default=False,
-                    type=bool,
-                    help="Use OpenEye chemistry toolkit",
-                    action="store_true",
-                ),
-            ],
-        )
-
     def validate(self, params: dict):
         """Validate plugin parameters."""
         pass
@@ -261,16 +239,6 @@ class ChemToolkitBase(PluginBase):
         pass
 
     @abstractmethod
-    def get_atoms(self, mol: Any) -> List[Any]:
-        """Get atoms from molecule."""
-        pass
-
-    @abstractmethod
-    def get_atomic_num(self, atom: Any) -> int:
-        """Get atomic number."""
-        pass
-
-    @abstractmethod
     def get_num_atoms(self, mol: Any) -> int:
         """Get number of atoms in molecule."""
         pass
@@ -303,11 +271,6 @@ class ChemToolkitBase(PluginBase):
     @abstractmethod
     def get_idx(self, atom: Any) -> int:
         """Get index."""
-        pass
-
-    @abstractmethod
-    def get_neighbors(self, atom: Any) -> List[Any]:
-        """Get neighbors."""
         pass
 
     @abstractmethod
