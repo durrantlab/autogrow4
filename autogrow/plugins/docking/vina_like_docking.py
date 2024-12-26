@@ -260,12 +260,12 @@ class VinaLikeDocking(DockingBase):
 
         receptor_pdbqt_file = f'{params["receptor_path"]}qt'
         torun = (
-            f'{params["vina_like_executable"]} '
+            f'"{params["vina_like_executable"]}" '
             f'--center_x {params["center_x"]} --center_y {params["center_y"]} --center_z {params["center_z"]} '
             f'--size_x {params["size_x"]} --size_y {params["size_y"]} --size_z {params["size_z"]} '
-            f"--receptor {receptor_pdbqt_file} "
-            f"--ligand {lig_pdbqt_filename} "
-            f"--out {lig_pdbqt_filename}.vina --cpu 1"
+            f'--receptor "{receptor_pdbqt_file}" '
+            f'--ligand "{lig_pdbqt_filename}" '
+            f'--out "{lig_pdbqt_filename}.vina" --cpu 1'
         )
 
         # Add optional user variables additional variable
@@ -283,7 +283,8 @@ class VinaLikeDocking(DockingBase):
             torun = f"{torun} --num_modes " + str(int(params["docking_num_modes"]))
 
         # Add output line MUST ALWAYS INCLUDE THIS LINE
-        torun = f"{torun} >>{lig_pdbqt_filename}_docking_output.txt  2>>{lig_pdbqt_filename}_docking_output.txt"
+        torun = f'{torun} >>"{lig_pdbqt_filename}_docking_output.txt"  2>>"{lig_pdbqt_filename}_docking_output.txt"' \
+            if os.name != "nt" else f'{torun} > "{lig_pdbqt_filename}_docking_output.txt" 2>&1'
 
         return torun
 
