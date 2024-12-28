@@ -55,6 +55,9 @@ def run_docking_common(
         x for x in post_docked_compounds if x.sdf_path is not None
     ]
 
+    post_docked_compounds = plugin_managers.PoseFilter.run(receptor_path=docking_plugin_manager.params["receptor_path"],
+                                                           docked_cmpds=post_docked_compounds)
+
     return rank_and_save_output_smi(
         cur_gen_dir, current_gen_int, smiles_file_new_gen, post_docked_compounds, params
     )

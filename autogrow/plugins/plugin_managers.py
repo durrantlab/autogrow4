@@ -21,6 +21,7 @@ from autogrow.plugins.shell_parallelizer import (
 )
 from autogrow.plugins.smi_to_3d_sdf import SmiTo3DSdfBase, SmiTo3DSdfPluginManager
 from autogrow.plugins.smiles_filters import SmilesFilterBase, SmilesFilterPluginManager
+from autogrow.plugins.pose_filters import PoseFilterBase, PoseFilterPluginManager
 
 
 @dataclass
@@ -43,6 +44,9 @@ class PluginManagers:
     SmiTo3DSdf: SmiTo3DSdfPluginManager = SmiTo3DSdfPluginManager(SmiTo3DSdfBase)
     ShellParallelizer: ShellParallelizerPluginManager = ShellParallelizerPluginManager(
         ShellParallelizerBase
+    )
+    PoseFilter: PoseFilterPluginManager = PoseFilterPluginManager(
+        PoseFilterBase
     )
 
 
