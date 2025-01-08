@@ -29,7 +29,8 @@ class CacheManager:
     """
 
     def __init__(self, label: str, cache_dir: str):
-        """Initializes a new cache manager instance.
+        """
+        Initialize a new cache manager instance.
 
         Args:
             label (str): Identifier used in the cache filename
@@ -45,7 +46,8 @@ class CacheManager:
         self.data: Any = None
 
     def _get_cache_filename(self) -> str:
-        """Constructs the full path to the cache file.
+        """
+        Construct the full path to the cache file.
 
         Returns:
             str: Absolute path to the cache file
@@ -53,7 +55,8 @@ class CacheManager:
         return os.path.join(self.cache_dir, f"{self.label}_results_cache.pkl")
 
     def _load_from_cache(self) -> Optional[Any]:
-        """Attempts to load cached data from disk.
+        """
+        Attempt to load cached data from disk.
 
         If the cache file exists, loads and returns its contents. Logs the
         loading operation at INFO level.
@@ -73,7 +76,8 @@ class CacheManager:
             return c
 
     def _save_to_cache(self) -> None:
-        """Saves the current data to the cache file if it doesn't already exist.
+        """
+        Save the current data to the cache file if it doesn't already exist.
 
         Only saves if there is data to save (self.data is not None) and the
         cache doesn't already exist. Logs the save operation at DEBUG level.

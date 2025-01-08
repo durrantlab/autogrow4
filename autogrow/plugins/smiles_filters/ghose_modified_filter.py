@@ -26,16 +26,10 @@ import copy
 
 from autogrow.plugins.smiles_filters import SmilesFilterBase
 from autogrow.types import Compound
-import rdkit  # type: ignore
-import rdkit.Chem as Chem  # type: ignore
-import rdkit.Chem.Lipinski as Lipinski  # type: ignore
-import rdkit.Chem.Crippen as Crippen  # type: ignore
-import rdkit.Chem.Descriptors as Descriptors  # type: ignore
+
 from typing import List, Tuple
 from autogrow.config.argparser import ArgumentVars
-
-# Disable the unnecessary RDKit warnings
-rdkit.RDLogger.DisableLog("rdApp.*")
+from autogrow.plugins.plugin_manager_instances import plugin_managers
 
 
 class GhoseModifiedFilter(SmilesFilterBase):
@@ -63,7 +57,7 @@ class GhoseModifiedFilter(SmilesFilterBase):
     1 (1999), pp. 55-68
     """
 
-    def run_filter(self, predock_cmpd: Compound) -> bool:
+    def run_filter(self, cmpd: Compound) -> bool:
         """
         Run the modified Ghose filter on a given molecule.
 
@@ -76,33 +70,35 @@ class GhoseModifiedFilter(SmilesFilterBase):
         atoms.
 
         Args:
-            predock_cmpd (PostDockedCompound): A PostDockedCompound to be tested.
+            cmpd (Compound): A Compound to be tested.
 
         Returns:
             bool: True if the molecule passes all filter criteria, False
                 otherwise.
         """
-        mol = self.predock_cmpd_to_rdkit_mol(predock_cmpd)
+        mol = self.cmpd_to_rdkit_mol(cmpd)
         if mol is None:
             return False
 
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
+
         copy_mol = copy.deepcopy(mol)
-        copy_mol = Chem.AddHs(copy_mol)
-        exact_mwt = Descriptors.ExactMolWt(copy_mol)
+        copy_mol = chemtoolkit.add_hs(copy_mol)
+        exact_mwt = chemtoolkit.descriptors_exact_mol_wt(copy_mol)
         if (exact_mwt < 160) or (exact_mwt > 500):
             return False
 
-        num_atoms = copy_mol.GetNumAtoms()
+        num_atoms = chemtoolkit.get_num_atoms(copy_mol)
         if (num_atoms < 20) or (num_atoms > 70):
             return False
 
         # molar Refractivity
-        MolMR = Crippen.MolMR(copy_mol)
+        MolMR = chemtoolkit.crippen_mol_mr(copy_mol)
         if (MolMR < 40) or (MolMR > 130):
             return False
 
         # molar LogP
-        mol_log_p = Crippen.MolLogP(copy_mol)
+        mol_log_p = chemtoolkit.crippen_mol_log_p(copy_mol)
         if (mol_log_p < -0.4) or (mol_log_p > 5.6):
             return False
 

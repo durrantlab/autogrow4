@@ -1,5 +1,6 @@
 """
 This script contains the class VINA.
+
 This is used to score Vina type docking such as QuickVina2 and Vina
 """
 import __future__
@@ -14,11 +15,9 @@ from autogrow.types import Compound, Compound
 
 class VINA(ParentScoring):
     """
-    This will Score a given ligand for its binding affinity based on VINA or
-    QuickVina02 type docking.
+    Score a given ligand for its binding affinity using VINA, QuickVina02, etc.
 
-    Inputs:
-    :param class ParentFilter: a parent class to initialize off of.
+    Inputs: :param class ParentFilter: a parent class to initialize off of.
     """
 
     def __init__(
@@ -28,7 +27,7 @@ class VINA(ParentScoring):
         test_boot: bool = True,
     ) -> None:
         """
-        This will take params and a list of smiles.
+        Initialize the class with the given parameters.
 
         Inputs:
         :param dict params: Dictionary of User variables
@@ -47,8 +46,9 @@ class VINA(ParentScoring):
     #######################
     def find_files_to_score(self, file_path: str) -> List[str]:
         """
-        Find all files of the appropriate file format within the dir. For this
-        class its .pdbqt.vina files.
+        Find all files of the appropriate file format within the dir.
+        
+        For this class its .pdbqt.vina files.
 
         ALL SCORING FUNCTIONS MUST HAVE THIS FUNCTION.
 
@@ -64,8 +64,10 @@ class VINA(ParentScoring):
 
     def run_rescoring(self, vina_output_file: str) -> str:
         """
-        This is not applicable but is kept because the other rescoring
-        functions require this function.
+        Ignore this function.
+        
+        It is not applicable but is kept because the other rescoring functions
+        require this function.
 
         Inputs:
         :param str vina_output_file: Path to a vina output file to be rescored
@@ -78,7 +80,7 @@ class VINA(ParentScoring):
 
     def run_scoring(self, file_path: str) -> Optional[Compound]:
         """
-        Get all relevant scoring info and return as a list
+        Get all relevant scoring info and return as a list.
 
         This is required for all Scoring Functions. Additional manipulations
         may go here but there are none for this script..
@@ -134,12 +136,9 @@ class VINA(ParentScoring):
 
         return self.merge_smile_info_w_affinity_info(lig_info_vals)
 
-    def merge_smile_info_w_affinity_info(
-        self, lig_info: List
-    ) -> Optional[Compound]:
+    def merge_smile_info_w_affinity_info(self, lig_info: List) -> Optional[Compound]:
         """
-        From the info in self.smiles_dict get that info and merge that with
-        the affinity info
+        Get info from self.smiles_dict get and merge that with affinity info.
 
         This will also replace the original SMILES string with that of the
         SMILES string in the PDB which conservers stereoChem

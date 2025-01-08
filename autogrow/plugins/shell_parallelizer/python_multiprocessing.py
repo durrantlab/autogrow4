@@ -1,6 +1,5 @@
 """
-Implements a parallel execution plugin for AutoGrow using Python's
-multiprocessing.
+Implements parallel execution plugin using Python's multiprocessing.
 
 This module provides a PythonMultiprocessing class that uses Python's
 multiprocessing module to run shell commands in parallel, improving performance
@@ -19,8 +18,7 @@ from autogrow.utils.logging import log_warning
 
 class PythonMultiprocessing(ShellParallelizerBase):
     """
-    A plugin that uses Python's multiprocessing to execute shell commands in
-    parallel.
+    A plugin that uses Python's multiprocessing to execute commands in parallel.
 
     This plugin extends ShellParallelizerBase to provide parallel execution
     capabilities using Python's built-in multiprocessing module.
@@ -28,8 +26,7 @@ class PythonMultiprocessing(ShellParallelizerBase):
 
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
         """
-        Add command-line arguments specific to the Python Multiprocessing
-        Plugin.
+        Add command-line arguments specific to Python Multiprocessing Plugin.
 
         This method defines the command-line arguments that can be used to
         configure the Python Multiprocessing Plugin.

@@ -19,18 +19,22 @@ python run_autogrow.py \
     --MergeMCS \
     --top_mols_to_seed_next_generation 5 \
     --diversity_seed_depreciation_per_gen 1 \
-    --num_generations 2 \
+    --num_generations 5 \
     --procs_per_node 3 \
     --FragmentAddition \
     --rxn_library_path ./autogrow/plugins/mutation/reaction_libraries/all_rxns \
-    --VinaLikeDocking \
+    --FakeDocking \
     --docking_exhaustiveness 1 \
     --RankSelector \
     --multithread_mode serial \
-    --ObabelSmiTo3DSDF \
+    --FakeSmiTo3DSDF \
     --PythonMultiprocessing \
     --slurm_template_file tmp.txt \
-    --parallel_exec_path /opt/homebrew/bin/parallel
+    --parallel_exec_path /opt/homebrew/bin/parallel \
+    --RDKitToolkit \
+    --SubstructureFilter \
+    --substructure_smiles "SO"
+    
 
     # --PythonMultiprocessing
     

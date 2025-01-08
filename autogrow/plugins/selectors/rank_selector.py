@@ -30,8 +30,7 @@ from autogrow.utils.logging import log_debug
 
 class RankSelector(SelectorBase):
     """
-    A selector plugin that chooses compounds based on their rank in a specified
-    score.
+    Selector plugin that chooses compounds per their rank in a specified score.
 
     This selector is non-redundant and selects the top-ranked compounds up to
     the specified number. It's not recommended for small runs where the number
@@ -72,10 +71,7 @@ class RankSelector(SelectorBase):
         pass
 
     def run_selector(
-        self,
-        predock_cmpds: List[Compound],
-        num_to_choose: int,
-        score_type: ScoreType,
+        self, predock_cmpds: List[Compound], num_to_choose: int, score_type: ScoreType,
     ) -> List[Compound]:
         """
         Select compounds based on their rank in the specified score.
@@ -84,14 +80,14 @@ class RankSelector(SelectorBase):
         removing any redundancies in the process.
 
         Args:
-            predock_cmpds (List[PostDockedCompound]): A list of all compounds
+            predock_cmpds (List[Compound]): A list of all compounds
                 from the previous generation.
             num_to_choose (int): The number of compounds to select.
             score_type (ScoreType): The type of score to use for ranking (e.g.,
                 docking or diversity).
 
         Returns:
-            List[PostDockedCompound]: A list of selected compounds.
+            List[Compound]: A list of selected compounds.
 
         Raises:
             Exception: If predock_cmpds is not a list, is empty, or if there are
@@ -111,9 +107,7 @@ class RankSelector(SelectorBase):
 
         # Sort by chosen idx property
         sorted_list = sorted(
-            predock_cmpds,
-            key=lambda x: x.get_score_by_type(score_type),
-            reverse=False,
+            predock_cmpds, key=lambda x: x.get_score_by_type(score_type), reverse=False,
         )
 
         # sorted_list = sorted(
@@ -166,9 +160,9 @@ class RankSelector(SelectorBase):
 
         top_choice_smiles_in_order: List[Compound] = []
         for i in range(num_to_choose):
-            predock_cmpd = sorted_list[i]
-            top_choice_smiles_in_order.append(predock_cmpd)
-            scre = predock_cmpd.get_score_by_type(score_type)
-            log_debug(f"{predock_cmpd.smiles} ({predock_cmpd.id}): score {scre:.2f}")
+            cmpd = sorted_list[i]
+            top_choice_smiles_in_order.append(cmpd)
+            scre = cmpd.get_score_by_type(score_type)
+            log_debug(f"{cmpd.smiles} ({cmpd.id}): score {scre:.2f}")
 
         return top_choice_smiles_in_order

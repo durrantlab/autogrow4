@@ -11,7 +11,7 @@
 # from autogrow.docking.scoring.scoring_classes.scoring_functions.lig_efficiency import (
 #     LigEfficiency,
 # )
-# from autogrow.types import PostDockedCompound, PostDockedCompound
+# from autogrow.types import Compound, Compound
 
 
 # def pick_run_class_dict(scoring_choice: str) -> type:
@@ -36,7 +36,7 @@
 # ############
 # def run_scoring_common(
 #     params: Dict[str, Any], smiles_file: str, folder_to_search: str
-# ) -> List[PostDockedCompound]:
+# ) -> List[Compound]:
 #     # TODO: Not currently used, but good stuff in here to consider.
 #     """
 #     This section runs the functions common to all scoring functions.
@@ -112,7 +112,7 @@
 
 #     # Format for list_of_raw_data must be [lig_id_shortname, any_details,
 #     # fitness_score_to_use]
-#     lig_data: List[PostDockedCompound] = params["parallelizer"].run(
+#     lig_data: List[Compound] = params["parallelizer"].run(
 #         job_input_files_to_score, score_files_multithread
 #     )
 
@@ -122,7 +122,7 @@
 #     lig_dict = make_lig_score_dict(lig_data)
 
 #     # Convert Dictionary to the final list form
-#     list_of_smiles_with_scores: List[PostDockedCompound] = []
+#     list_of_smiles_with_scores: List[Compound] = []
 #     for key in lig_dict:
 
 #         lig_info = lig_dict[key]
@@ -211,8 +211,8 @@
 
 
 # def make_lig_score_dict(
-#     list_of_list_of_lig_data: List[PostDockedCompound],
-# ) -> Dict[str, PostDockedCompound]:
+#     list_of_list_of_lig_data: List[Compound],
+# ) -> Dict[str, Compound]:
 #     """
 #     Given a list of ligands with the scoring data make a dictionary.
 
@@ -233,7 +233,7 @@
 #         a given ligand, this will reduce down multiple confirmations to a single
 #         ligand with the most negative fitness score.
 #     """
-#     lig_dict: Dict[str, PostDockedCompound] = {}
+#     lig_dict: Dict[str, Compound] = {}
 #     for lig in list_of_list_of_lig_data:
 #         if lig is None:
 #             continue
@@ -264,7 +264,7 @@
 #     file_path: str,
 #     rescore_lig_efficiency: bool,
 #     lig_eff_scoring: Optional[LigEfficiency],
-# ) -> Optional[PostDockedCompound]:
+# ) -> Optional[Compound]:
 #     # TODO: I think not used, but could be good stuff here.
 #     """
 #     Run the scoring of a single molecule.
@@ -297,7 +297,7 @@
 # ############
 
 
-# def make_dict_of_smiles(smiles_file: str) -> Dict[str, PostDockedCompound]:
+# def make_dict_of_smiles(smiles_file: str) -> Dict[str, Compound]:
 #     """
 #     This will take a .smi file and make a dictionary with all of the info
 #     about the smiles. This list won't have scores yet but will have all of the
@@ -311,7 +311,7 @@
 #     Returns:
 #     :return dict smiles_dict: a list of ligand info before docking
 #     """
-#     smiles_dict: Dict[str, PostDockedCompound] = {}
+#     smiles_dict: Dict[str, Compound] = {}
 #     # load smile file and convert to list with index
 #     with open(smiles_file, "r") as smi:
 
@@ -333,7 +333,7 @@
 
 #             assert lig_name_short is not None, "lig_name_short is None"
 
-#             smiles_dict[lig_name_short] = PostDockedCompound(
+#             smiles_dict[lig_name_short] = Compound(
 #                 smiles=split_line[0], name=split_line[1]
 #             )
 

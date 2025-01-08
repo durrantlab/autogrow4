@@ -26,8 +26,8 @@ class CrossoverBase(PluginBase):
 
         Args:
             **kwargs: Arbitrary keyword arguments including:
-                predock_cmpd1 (str): PostDockedCompound of the first ligand.
-                predock_cmpd2 (str): PostDockedCompound of the second ligand.
+                predock_cmpd1 (str): Compound of the first ligand.
+                predock_cmpd2 (str): Compound of the second ligand.
 
         Returns:
             Optional[str]: The SMILES string of the crossed-over molecule, or None
@@ -45,9 +45,9 @@ class CrossoverBase(PluginBase):
         This method needs to be implemented in each subclass.
 
         Args:
-            predock_cmpd1 (PostDockedCompound): PostDockedCompound of the first
+            predock_cmpd1 (Compound): Compound of the first
                 ligand.
-            predock_cmpd2 (PostDockedCompound):PostDockedCompound of the second
+            predock_cmpd2 (Compound):Compound of the second
                 ligand.
 
         Returns:

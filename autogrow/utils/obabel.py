@@ -11,7 +11,8 @@ from autogrow.utils.logging import log_warning
 def obabel_convert_cmd(
     in_file: str, out_file: str, obabel_path: str, extra_params: str = ""
 ) -> str:
-    """Constructs an OpenBabel conversion command string.
+    """
+    Construct an OpenBabel conversion command string.
 
     Creates a shell command for OpenBabel to convert between molecular file
     formats. Handles special cases like 'vina' extension and supports additional
@@ -52,7 +53,7 @@ def obabel_convert_cmd(
 def obabel_convert(
     in_file: str, out_file: str, obabel_path: str, extra_params: str = ""
 ) -> bool:
-    """Executes an OpenBabel conversion between file formats.
+    """Execute an OpenBabel conversion between file formats.
 
     Attempts to convert a molecular file from one format to another using
     OpenBabel. Validates the conversion by checking the output file exists and

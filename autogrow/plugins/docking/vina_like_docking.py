@@ -13,7 +13,6 @@ Classes:
 import __future__
 import os
 
-# from autogrow.plugins.plugin_managers import plugin_managers
 from autogrow.plugins.docking import DockingBase
 from typing import List, Tuple
 from autogrow.config.argparser import ArgumentVars
@@ -123,9 +122,7 @@ class VinaLikeDocking(DockingBase):
                 f"obabel_path must be defined in the params to use {self.name}"
             )
 
-    def run_docking(
-        self, predocked_cmpds: List[Compound]
-    ) -> List[Compound]:
+    def run_docking(self, predocked_cmpds: List[Compound]) -> List[Compound]:
         """
         Run docking using Vina-like software on a list of compounds.
 
@@ -133,11 +130,11 @@ class VinaLikeDocking(DockingBase):
         processes docking results for multiple compounds in parallel.
 
         Args:
-            predocked_cmpds (List[PostDockedCompound]): A list of
-                PostDockedCompound objects to be docked.
+            predocked_cmpds (List[Compound]): A list of
+                Compound objects to be docked.
 
         Returns:
-            List[PostDockedCompound]: A list of PostDockedCompound objects,
+            List[Compound]: A list of Compound objects,
             each containing the docking score and the path to the docked
             (posed) SDF file.
         """
@@ -163,9 +160,7 @@ class VinaLikeDocking(DockingBase):
 
         for predocked_cmpd in predocked_cmpds:
             if predocked_cmpd.sdf_path is None:
-                log_warning(
-                    f"Skipping {predocked_cmpd.id} because sdf_path is None"
-                )
+                log_warning(f"Skipping {predocked_cmpd.id} because sdf_path is None")
                 vina_out_files.append(None)
                 continue
 
@@ -173,9 +168,7 @@ class VinaLikeDocking(DockingBase):
 
             # Get commands to convert ligand to pdbqt
             cmd = obabel_convert_cmd(
-                predocked_cmpd.sdf_path,
-                lig_pdbqt_filename,
-                self.params["obabel_path"],
+                predocked_cmpd.sdf_path, lig_pdbqt_filename, self.params["obabel_path"],
             )
             lig_convert_cmds.append(cmd)
 

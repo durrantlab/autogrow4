@@ -16,13 +16,10 @@ Libraries and for Their Exclusion in Bioassays. J Med Chem 53 (2010) 2719D40.
 doi:10.1021/jm901137j.
 """
 import __future__
-from typing import List, Tuple
+from typing import Any, List, Tuple
 from autogrow.config.argparser import ArgumentVars
 from autogrow.plugins.smiles_filters import SmilesFilterBase
 from autogrow.types import Compound
-import rdkit  # type: ignore
-from rdkit.Chem import FilterCatalog  # type: ignore
-from rdkit.Chem.FilterCatalog import FilterCatalogParams  # type: ignore
 
 
 class PAINSFilter(SmilesFilterBase):
@@ -43,12 +40,17 @@ class PAINSFilter(SmilesFilterBase):
     """
 
     def __init__(self) -> None:
-        """
-        Initialize the PAINS filter by loading the required filters.
-        """
-        self.filters_list = self.get_filters_list()
+        """Initialize the PAINS filter by loading the required filters."""
+        self._filters_list = None  # Don't load filters in __init__
 
-    def get_filters_list(self) -> List[FilterCatalog.FilterCatalog]:
+    @property
+    def filters_list(self):
+        """Lazy load filters only when needed."""
+        if self._filters_list is None:
+            self._filters_list = self.get_filters_list()
+        return self._filters_list
+
+    def get_filters_list(self) -> List[Any]:
         """
         Load and return the list of PAINS filters.
 
@@ -60,24 +62,18 @@ class PAINSFilter(SmilesFilterBase):
         # PAINS_A,PAINS_B, and PAINS_C, but because RDKit documentation
         # doesn't specify this explicitly we have included all 4 of the PAINS
         # FilterCatalogs for precaution.
-        params_PAINS_A = FilterCatalogParams()
-        params_PAINS_A.AddCatalog(FilterCatalogParams.FilterCatalogs.PAINS_A)
-        params_PAINS_B = FilterCatalogParams()
-        params_PAINS_B.AddCatalog(FilterCatalogParams.FilterCatalogs.PAINS_B)
-        params_PAINS_C = FilterCatalogParams()
-        params_PAINS_C.AddCatalog(FilterCatalogParams.FilterCatalogs.PAINS_C)
-        params_PAINS = FilterCatalogParams()
-        params_PAINS.AddCatalog(FilterCatalogParams.FilterCatalogs.PAINS)
 
-        params_list = [params_PAINS_A, params_PAINS_B, params_PAINS_C, params_PAINS]
-        filters_list = []
-        for param in params_list:
-            filtr = FilterCatalog.FilterCatalog(param)
-            filters_list.append(filtr)
+        # TODO: This is going to have to be reworked for OpenEye
+        from autogrow.plugins.plugin_manager_instances import plugin_managers
 
-        return filters_list
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
+        return [
+            chemtoolkit.get_pains_a_filter(),
+            chemtoolkit.get_pains_b_filter(),
+            chemtoolkit.get_pains_c_filter(),
+        ]
 
-    def run_filter(self, predock_cmpd: Compound) -> bool:
+    def run_filter(self, cmpd: Compound) -> bool:
         """
         Run the PAINS filter on a given molecule.
 
@@ -89,13 +85,13 @@ class PAINSFilter(SmilesFilterBase):
         http://rdkit.blogspot.com/2016/04/changes-in-201603-release-filtercatalog.html
 
         Args:
-            predock_cmpd (PostDockedCompound): A PostDockedCompound to be tested.
+            cmpd (Compound): A Compound to be tested.
 
         Returns:
             bool: True if the molecule passes all PAINS filters (no matches
                 found in any filter list), False otherwise.
         """
-        mol = self.predock_cmpd_to_rdkit_mol(predock_cmpd)
+        mol = self.cmpd_to_rdkit_mol(cmpd)
         if mol is None:
             return False
 

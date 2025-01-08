@@ -17,8 +17,6 @@
 # https://github.com/durrantlab/gypsum_dl/blob/1.2.1/gypsum_dl/Parallelizer.py
 
 """
-Parallelizer.py
-
 Abstract parallel computation utility.
 
 The "parallelizer" object exposes a simple map interface that takes a function
@@ -53,7 +51,8 @@ class Parallelizer(object):
     """
 
     def __init__(self, mode=None, num_procs=None):
-        """Initializes parallelizer and configures specific multiprocessing class.
+        """
+        Initialize parallelizer and configures specific multiprocessing class.
 
         Args:
             mode (str, optional): Multiprocess mode to use ('serial',
@@ -90,7 +89,8 @@ class Parallelizer(object):
             self.num_procs = num_procs
 
     def run(self, args, func, num_procs=None, mode=None):
-        """Runs a task in parallel across the system.
+        """
+        Run a task in parallel across the system.
 
         Args:
             args (list): List of tuples/lists, each containing all parameters
@@ -152,7 +152,8 @@ class Parallelizer(object):
             return _multi_threading(args, 1, func)
 
     def _compute_nodes(self, mode=None):
-        """Computes available compute nodes for selected mode.
+        """
+        Compute available compute nodes for selected mode.
 
         For multiprocessing, returns number of available cores. For serial mode,
         returns 1.
@@ -171,7 +172,7 @@ class Parallelizer(object):
 
     def return_node(self):
         """
-        Returns the number of "compute nodes" according to the selected mode.
+        Return the number of "compute nodes" according to the selected mode.
 
         For multiprocessing this is the number of available cores
         For serial, this value is 1
@@ -182,7 +183,8 @@ class Parallelizer(object):
 
 
 def _multi_threading(inputs, num_procs, task_name):
-    """Executes parallel processing using multiprocessing.
+    """
+    Execute parallel processing using multiprocessing.
 
     If num_procs is 1, executes tasks serially. Otherwise distributes tasks
     across specified number of processors.
@@ -230,7 +232,8 @@ def _multi_threading(inputs, num_procs, task_name):
 
 
 def _(input: multiprocessing.Queue, output: multiprocessing.Queue):
-    """Worker function for parallel processing.
+    """
+    Worker function for parallel processing.
 
     Continuously processes jobs from input queue until receiving 'STOP' signal.
 
@@ -248,7 +251,8 @@ def _(input: multiprocessing.Queue, output: multiprocessing.Queue):
 
 
 def _check_and_format_inputs_to_list_of_tuples(args):
-    """Validates and formats input arguments list.
+    """
+    Validate and format input arguments list.
 
     Args:
         args (list): List of input arguments. All items must be the same type
@@ -286,7 +290,8 @@ def _check_and_format_inputs_to_list_of_tuples(args):
 
 
 def _count_processors(num_inputs, num_procs):
-    """Determines appropriate number of processors to use.
+    """
+    Determine appropriate number of processors to use.
 
     If num_procs <= 0, automatically determines count using multiprocessing.
     Reduces processor count if it exceeds number of inputs.
@@ -311,7 +316,8 @@ def _count_processors(num_inputs, num_procs):
 
 
 def _start_processes(inputs, num_procs):
-    """Creates and manages multiprocessing queues and worker processes.
+    """
+    Create and manage multiprocessing queues and worker processes.
 
     Creates input and output queues, starts worker processes, collects results,
     and sends stop signals to workers.

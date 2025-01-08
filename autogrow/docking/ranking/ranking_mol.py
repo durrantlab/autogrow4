@@ -9,16 +9,8 @@ import __future__
 
 import os
 from typing import Any, Dict, List, Optional
-
+from autogrow.plugins.plugin_manager_instances import plugin_managers
 from autogrow.types import Compound, Compound, ScoreType
-import rdkit  # type: ignore
-import rdkit.Chem as Chem  # type: ignore
-from rdkit.Chem.rdMolDescriptors import GetMorganFingerprint  # type: ignore
-from rdkit import DataStructs  # type: ignore
-
-# Disable the unnecessary RDKit warnings
-rdkit.RDLogger.DisableLog("rdApp.*")
-
 import autogrow.utils.mol_object_handling as MOH
 import autogrow.docking.ranking.ranking_mol as Ranking
 
@@ -42,8 +34,8 @@ def rank_and_save_output_smi(
             (zero-indexed).
         smiles_file (str): File path for the file with the ligands for the
             generation (a .smi file).
-        postDockedCompoundInfos (List[PostDockedCompound]): List of
-            PostDockedCompound objects containing docking results.
+        postDockedCompoundInfos (List[Compound]): List of
+            Compound objects containing docking results.
         params (Dict[str, Optional[str]]): Dictionary of parameters.
 
     Returns:
@@ -62,8 +54,8 @@ def rank_and_save_output_smi(
     # )
 
     # Before ranking these we need to handle Pass-Through ligands from the last
-    # generation 
-    # 
+    # generation
+    #
     # current_gen_int==1: dock all ligands from the last generation so all of
     # the pass-through lig are already in the PDB's folder thus they should be
     # accounted for in smiles_list
@@ -143,7 +135,7 @@ def _process_ligand_scores_from_prev_gen(
             previous generation.
         current_generation_dir (str): Path to the current generation directory.
         current_gen_int (int): The current generation number.
-        smiles_list (List[PostDockedCompound]): List of PostDockedCompound
+        smiles_list (List[Compound]): List of Compound
             objects to be updated.
 
     Raises:
@@ -152,8 +144,7 @@ def _process_ligand_scores_from_prev_gen(
     Note:
         This method modifies the smiles_list in place.
     """
-
-    # CHECKED: smiles_list is of type List[PostDockedCompound] here.
+    # CHECKED: smiles_list is of type List[Compound] here.
 
     print("Getting ligand scores from the previous generation")
 
@@ -169,7 +160,7 @@ def _process_ligand_scores_from_prev_gen(
     prev_gen_data_list = Ranking.get_predockcmpds_from_smi_file(
         ranked_smi_file_prev_gen
     )
-    # CHECKED: prev_gen_data_list of type List[PostDockedCompound] here.
+    # CHECKED: prev_gen_data_list of type List[Compound] here.
 
     # Get the list of pass through ligands
     current_gen_pass_through_smi = (
@@ -179,22 +170,22 @@ def _process_ligand_scores_from_prev_gen(
     pass_through_list = Ranking.get_predockcmpds_from_smi_file(
         current_gen_pass_through_smi
     )
-    # CHECKED: pass_through_list is of type List[PostDockedCompound] here.
+    # CHECKED: pass_through_list is of type List[Compound] here.
 
     # Convert lists to searchable Dictionaries.
     prev_gen_data_dict = Ranking.convert_usable_list_to_lig_dict(prev_gen_data_list)
-    # CHECKED: prev_gen_data_dict is of type Dict[str, PostDockedCompound] here.
+    # CHECKED: prev_gen_data_dict is of type Dict[str, Compound] here.
 
     assert prev_gen_data_dict is not None, "prev_gen_data_dict is None"
 
     pass_through_data: List[Compound] = []
     for lig in pass_through_list:
-        # CHECKED: lig is of type PostDockedCompound here.
+        # CHECKED: lig is of type Compound here.
 
         lig_data = prev_gen_data_dict[str(lig.smiles + lig.id)]
-        # CHECKED: lig_data is of type PostDockedCompound here.
+        # CHECKED: lig_data is of type Compound here.
 
-        # NOTE: Here it must be converted to a PostDockedCompound
+        # NOTE: Here it must be converted to a Compound
         assert (
             lig_data.docking_score is not None
         ), "lig_data.previous_docking_score is None"
@@ -214,7 +205,7 @@ def _process_ligand_scores_from_prev_gen(
 
 def get_predockcmpds_from_smi_file(infile: str) -> List[Compound]:
     """
-    Reads and processes a .smi file into a list of PostDockedCompound objects.
+    Read and process a .smi file into a list of Compound objects.
 
     The .smi file must follow this format for each line:
     SMILES<tab>ID[<tab>optional_info...]<tab>docking_score<tab>diversity_score
@@ -223,7 +214,7 @@ def get_predockcmpds_from_smi_file(infile: str) -> List[Compound]:
         infile (str): Path to the formatted .smi file to be read.
 
     Returns:
-        List[PostDockedCompound]: List of PostDockedCompound objects with
+        List[Compound]: List of Compound objects with
         information from the .smi file.
 
     Raises:
@@ -253,15 +244,15 @@ def convert_usable_list_to_lig_dict(
     predock_cmpds: List[Compound],
 ) -> Optional[Dict[str, Compound]]:
     """
-    Converts a list of PostDockedCompound objects to a dictionary.
+    Convert a list of Compound objects to a dictionary.
 
     Args:
-        predock_cmpds (List[PostDockedCompound]): List of PostDockedCompound
+        predock_cmpds (List[Compound]): List of Compound
         objects.
 
     Returns:
-        Optional[Dict[str, PostDockedCompound]]: Dictionary with keys as
-        'SMILES+ID' and values as PostDockedCompound objects. Returns None if
+        Optional[Dict[str, Compound]]: Dictionary with keys as
+        'SMILES+ID' and values as Compound objects. Returns None if
         input is not a list.
 
     Note:
@@ -272,24 +263,22 @@ def convert_usable_list_to_lig_dict(
         return None
 
     usable_dict_of_predock_cmpds: Dict[str, Compound] = {}
-    for predock_cmpd in predock_cmpds:
-        key = predock_cmpd.smiles + predock_cmpd.id
+    for cmpd in predock_cmpds:
+        key = cmpd.smiles + cmpd.id
         if key in usable_dict_of_predock_cmpds and usable_dict_of_predock_cmpds[
             key
-        ].get_score_by_type(ScoreType.DOCKING) < predock_cmpd.get_score_by_type(
+        ].get_score_by_type(ScoreType.DOCKING) < cmpd.get_score_by_type(
             ScoreType.DOCKING
         ):
             continue
-        usable_dict_of_predock_cmpds[key] = predock_cmpd
+        usable_dict_of_predock_cmpds[key] = cmpd
     return usable_dict_of_predock_cmpds
 
 
 ##### Called in the docking class ######
-def calc_diversity_scores(
-    postDockedCompoundInfos: List[Compound],
-) -> List[Compound]:
+def calc_diversity_scores(postDockedCompoundInfos: List[Compound],) -> List[Compound]:
     """
-    Calculates diversity scores for a list of PostDockedCompound objects.
+    Calculate diversity scores for a list of Compound objects.
 
     This function computes Morgan Fingerprints for each molecule and calculates
     pairwise Dice Similarity scores (1.0 meanas a perfect match, 0.0 means no
@@ -298,11 +287,11 @@ def calc_diversity_scores(
     similarity between molecules.
 
     Args:
-        postDockedCompoundInfos (List[PostDockedCompound]): List of
-        PostDockedCompound objects to process.
+        postDockedCompoundInfos (List[Compound]): List of
+        Compound objects to process.
 
     Returns:
-        List[PostDockedCompound]: Input list with updated diversity scores and
+        List[Compound]: Input list with updated diversity scores and
         fingerprints.
 
     Raises:
@@ -314,13 +303,14 @@ def calc_diversity_scores(
         - Uses Morgan Fingerprints with radius 10 and feature-based encoding.
     """
     postDockedCompoundInfosToKeep: List[Compound] = []
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
 
     for postDockedCompoundInfo in postDockedCompoundInfos:
         if postDockedCompoundInfo is not None:
             smile = postDockedCompoundInfo.smiles
             # name = pair[1]
             try:
-                mol = Chem.MolFromSmiles(smile, sanitize=False)
+                mol = chemtoolkit.mol_from_smiles(smile, sanitize=False)
             except Exception:
                 mol = None
 
@@ -332,14 +322,14 @@ def calc_diversity_scores(
                                     def calc_diversity_scores"
                 )
 
-            mol = MOH.check_sanitization(mol)
+            mol = MOH.check_sanitization(mol)  # TODO: Will likely fail if OpenEye
             if mol is None:
                 raise AssertionError(
                     "mol in list failed to sanitize. Issue in Ranking.py \
                                         def calc_diversity_scores"
                 )
 
-            mol = MOH.try_deprotanation(mol)
+            mol = MOH.try_deprotanation(mol)  # TODO: Will likely fail if OpenEye
             if mol is None:
                 raise AssertionError(
                     "mol in list failed to sanitize. Issue in Ranking.py \
@@ -358,7 +348,9 @@ def calc_diversity_scores(
             print("noneitem in molecules_list in calc_diversity_scores")
 
     for postDockedCompoundInfo in postDockedCompoundInfosToKeep:
-        fp = GetMorganFingerprint(postDockedCompoundInfo.mol, 10, useFeatures=True)
+        fp = chemtoolkit.get_morgan_fingerprint(
+            postDockedCompoundInfo.mol, 10, use_features=True
+        )
         postDockedCompoundInfo.fp = fp
 
     for i in range(len(postDockedCompoundInfosToKeep)):
@@ -369,7 +361,7 @@ def calc_diversity_scores(
                 # number the more diverse it is. The sum of all of these gives
                 # the distance from the normal. The smaller the number means
                 # the more distant
-                diversity_score = diversity_score + DataStructs.DiceSimilarity(
+                diversity_score = diversity_score + chemtoolkit.dice_similarity(
                     postDockedCompoundInfosToKeep[i].fp,
                     postDockedCompoundInfosToKeep[j].fp,
                 )

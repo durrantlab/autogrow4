@@ -1,5 +1,6 @@
 """
 This script holds the parent class for scoring/rescoring.
+
 This is used as the basis for all scoring/rescoring classes.
 """
 import __future__
@@ -10,13 +11,11 @@ from autogrow.types import Compound
 
 
 class ParentScoring(ABC):
-    """
-    This is a script containing all of the scoring functions.
-    """
+    """This is a script containing all of the scoring functions."""
 
     def get_name(self) -> str:
         """
-        Returns the current class name.
+        Return the current class name.
 
         Returns:
         :returns: str self.__class__.__name__: the current class name.

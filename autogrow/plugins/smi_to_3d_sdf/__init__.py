@@ -1,23 +1,16 @@
 """
-Defines base classes and plugin manager for SMILES to 3D SDF conversion in
-AutoGrow.
+Defines base classes and plugin manager for SMILES to 3D SDF conversion.
 
 This module provides the SmiTo3DSdfBase abstract base class and
 SmiTo3DSdfPluginManager for managing SMILES to 3D SDF conversion plugins.
 """
 
-from abc import ABC, abstractmethod
-from argparse import ArgumentParser
+from abc import abstractmethod
 import os
-from typing import Dict, List, Optional, Tuple, Union, cast
+from typing import List, cast
 
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
 from autogrow.types import Compound
-from autogrow.utils.logging import LogLevel, log_info
-from rdkit import Chem  # type: ignore
-from rdkit.Chem.MolStandardize import rdMolStandardize  # type: ignore
-import copy
-import glob
 
 from autogrow.plugins.plugin_base import PluginBase
 
@@ -36,11 +29,11 @@ class SmiTo3DSdfBase(PluginBase):
 
         Args:
             **kwargs: Arbitrary keyword arguments. Expected keys:
-                - predock_cmpds (List[PostDockedCompound]): Compounds to convert.
+                - predock_cmpds (List[Compound]): Compounds to convert.
                 - pwd (str): Working directory path.
 
         Returns:
-            List[PostDockedCompound]: Updated list of compounds with 3D SDF
+            List[Compound]: Updated list of compounds with 3D SDF
                 paths.
         """
         pwd = kwargs["pwd"]
@@ -58,14 +51,14 @@ class SmiTo3DSdfBase(PluginBase):
         This method must be implemented by subclasses.
 
         Args:
-            predock_cmpds (List[PostDockedCompound]): List of compounds to
+            predock_cmpds (List[Compound]): List of compounds to
                 convert.
             pwd (str): Working directory path.
 
         Returns:
-            List[PostDockedCompound]: Updated list of compounds with 3D SDF
+            List[Compound]: Updated list of compounds with 3D SDF
                 paths (must populate sdf_path properties of each
-                PostDockedCompound).
+                Compound).
         """
         pass
 
@@ -102,7 +95,7 @@ class SmiTo3DSdfPluginManager(PluginManagerBase):
                 plugin.
 
         Returns:
-            List[PostDockedCompound]: Updated list of compounds with 3D SDF
+            List[Compound]: Updated list of compounds with 3D SDF
                 paths.
 
         Raises:
@@ -139,7 +132,8 @@ class SmiTo3DSdfPluginManager(PluginManagerBase):
         for cmpd in resp:
             if cmpd.sdf_path is None:
                 raise Exception(
-                    "ERROR! Your SmiTo3DSdf plugin must populate the sdf_path property of each PostDockedCompound."
+                    "ERROR! Your SmiTo3DSdf plugin must populate the sdf_path property of each Compound."
                 )
+            cmpd.add_history("CONVERSION", f"Converted {cmpd.smiles} to 3D SDF file")
 
         return resp
