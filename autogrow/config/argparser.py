@@ -189,18 +189,19 @@ def get_user_params() -> Dict[str, Any]:
 
     if "json" in args_dict and args_dict["json"] is not None:
         # If there's a --json parameter, load all parameters from that file,
-        # ignoring the command line.
+        # only using them if they are not specified at the command line.
         new_args_dict = json.load(open(args_dict["json"]))
         new_args_dict = convert_json_params_from_unicode(new_args_dict)
         print(
-            "WARNING: Loaded parameters from JSON file. Ignoring other parameters specified at the command line."
+            "WARNING: Loaded parameters from JSON file will be only used if they are not specified at the command line."
         )
-    else:
-        # No --json, so process using command line
+        for k, v in new_args_dict.items():
+            if k is not args_dict or args_dict[k] is None:
+                args_dict[k] = v
 
-        # copying args_dict so we can delete out of while iterating through the
-        # original args_dict
-        new_args_dict = copy.deepcopy(args_dict)
+    # copying args_dict so we can delete out of while iterating through the
+    # original args_dict
+    new_args_dict = copy.deepcopy(args_dict)
 
     # Remove any None values from the dictionary
     new_args_dict = {k: v for k, v in new_args_dict.items() if v is not None}

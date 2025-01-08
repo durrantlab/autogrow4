@@ -15,6 +15,7 @@ from autogrow.plugins.chem_toolkit import ChemToolkitBase, ChemToolkitPluginMana
 from autogrow.plugins.crossover import CrossoverBase, CrossoverPluginManager
 from autogrow.plugins.docking import DockingBase, DockingPluginManager
 from autogrow.plugins.mutation import MutationBase, MutationPluginManager
+from autogrow.plugins.pose_filters import PoseFilterBase, PoseFilterPluginManager
 from autogrow.plugins.selectors import SelectorBase, SelectorPluginManager
 from autogrow.plugins.shell_parallelizer import (
     ShellParallelizerBase,
@@ -46,6 +47,9 @@ class PluginManagers:
     SmiTo3DSdf: SmiTo3DSdfPluginManager = SmiTo3DSdfPluginManager(SmiTo3DSdfBase)
     ShellParallelizer: ShellParallelizerPluginManager = ShellParallelizerPluginManager(
         ShellParallelizerBase
+    )
+    PoseFilter: PoseFilterPluginManager = PoseFilterPluginManager(
+        PoseFilterBase
     )
 
 

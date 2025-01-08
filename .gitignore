@@ -15,3 +15,11 @@ docker/temp_user_files
 docker/temp_user_files/*
 docs/build
 docs/source
+/.idea/.gitignore
+/.idea/11.Autogrow4.iml
+/.idea/deployment.xml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/inspectionProfiles/profiles_settings.xml
+/.idea/inspectionProfiles/Project_Default.xml
+/.idea/vcs.xml
