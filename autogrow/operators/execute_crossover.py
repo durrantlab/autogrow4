@@ -12,30 +12,23 @@ import random
 import copy
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union, cast
 
-from autogrow.operators.mutant_crossover_parent import CompoundGenerator
-from autogrow.plugins.plugin_managers import plugin_managers
+from autogrow.operators.mutant_crossover_parent import (
+    CommonParallelResponse,
+    CompoundGenerator,
+)
+from autogrow.plugins.plugin_manager_instances import plugin_managers
 from autogrow.plugins.crossover import CrossoverPluginManager
 from autogrow.types import Compound
 from autogrow.utils.logging import LogLevel, log_debug, log_warning
-import rdkit  # type: ignore
-from rdkit import Chem  # type: ignore
-from rdkit.Chem import rdFMCS  # type: ignore
-
-# Disable the unnecessary RDKit warnings
-rdkit.RDLogger.DisableLog("rdApp.*")
-
-
 import autogrow.utils.mol_object_handling as MOH
 
 # TODO: Lots of this code is specific to the MCS crossover. But that code should
 # all be in the appropriate plugin, not here in this generic function.
 
 
-def _test_for_mcs(
-    params: Dict[str, Any], mol_1: rdkit.Chem.rdchem.Mol, mol_2: rdkit.Chem.rdchem.Mol
-) -> Optional[rdkit.Chem.rdFMCS.MCSResult]:
+def _test_for_mcs(params: Dict[str, Any], mol_1: Any, mol_2: Any) -> Optional[Any]:
     """
-    Finds the Most Common Substructure (MCS) between two molecules.
+    Find the Most Common Substructure (MCS) between two molecules.
 
     Args:
         params (Dict[str, Any]): User parameters governing the MCS search.
@@ -50,16 +43,19 @@ def _test_for_mcs(
         - Recommended to use with molecules that have H's removed.
         - Implicit H's are recognized as part of MCS.
     """
+    # Get chemtoolkit
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
+
     mols = [mol_1, mol_2]
     time_timeout = params["max_time_mcs_prescreen"]
     min_number_atoms_matched = params["min_atom_match_mcs"]
 
     try:
-        result = rdFMCS.FindMCS(
+        result = chemtoolkit.find_mcs(
             mols,
-            matchValences=False,
-            ringMatchesRingOnly=True,
-            completeRingsOnly=False,
+            match_valences=False,
+            ring_matches_ring_only=True,
+            complete_rings_only=False,
             timeout=time_timeout,
         )
     except Exception:
@@ -80,20 +76,18 @@ def _test_for_mcs(
 
 
 def _find_sufficiently_similar_cmpd(
-    params: Dict[str, Any],
-    predock_cmpds: List[Compound],
-    query_predock_cmpd: Compound,
+    params: Dict[str, Any], predock_cmpds: List[Compound], query_predock_cmpd: Compound,
 ) -> Optional[Compound]:
     """
-    Selects a random molecule with satisfactory MCS to the given ligand.
+    Select a random molecule with satisfactory MCS to the given ligand.
 
     Args:
         params (Dict[str, Any]): User parameters governing the selection.
-        predock_cmpds (List[PostDockedCompound]): List of ligands to choose from.
-        query_predock_cmpd (PostDockedCompound): The reference (query) ligand.
+        predock_cmpds (List[Compound]): List of ligands to choose from.
+        query_predock_cmpd (Compound): The reference (query) ligand.
 
     Returns:
-        Optional[PostDockedCompound]: A suitable second ligand if found,
+        Optional[Compound]: A suitable second ligand if found,
         None otherwise.
     """
     count = 0
@@ -132,9 +126,9 @@ def _find_sufficiently_similar_cmpd(
     return None
 
 
-def _convert_mol_from_smiles(smiles: str) -> Union[rdkit.Chem.rdchem.Mol, bool, None]:
+def _convert_mol_from_smiles(smiles: str) -> Union[Any, bool, None]:
     """
-    Converts a SMILES string to an RDKit molecule object.
+    Convert a SMILES string to an RDKit molecule object.
 
     Args:
         smiles (str): SMILES string of the molecule.
@@ -147,15 +141,16 @@ def _convert_mol_from_smiles(smiles: str) -> Union[rdkit.Chem.rdchem.Mol, bool, 
         The function also sanitizes and deprotonates the molecule.
     """
     try:
-        mol = Chem.MolFromSmiles(smiles, sanitize=False)
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
+        mol = chemtoolkit.mol_from_smiles(smiles, sanitize=False)
     except Exception:
         return None
 
-    mol = MOH.check_sanitization(mol)
+    mol = MOH.check_sanitization(mol)  # TODO: Probably won't work with open eye
     if mol is None:
         return None
 
-    mol = MOH.try_deprotanation(mol)
+    mol = MOH.try_deprotanation(mol)  # TODO: Probably won't work with open eye
     return False if mol is None else mol
 
 
@@ -163,11 +158,28 @@ class CrossoverGenerator(CompoundGenerator):
     """Handles crossover-specific compound generation."""
 
     def prepare_params(self) -> Dict[str, Any]:
+        """
+        Prepare the parameters for the operation.
+        
+        Returns:
+            Dict[str, Any]: The parameters for the operation.
+        """
         return {k: v for k, v in self.params.items() if k != "parallelizer"}
 
     def prepare_job_inputs(
         self, compounds: List[Compound], num_to_process: int
     ) -> List[Tuple]:
+        """
+        Prepare the inputs for the parallel job.
+        
+        Args:
+            compounds (List[Compound]): List of compounds to process.
+            num_to_process (int): Number of compounds to process.
+            
+        Returns:
+            List[Tuple]: A list of tuples containing the operation parameters,
+            compound, and available compounds.
+        """
         # Create a working copy for popping compounds
         working_compounds = compounds.copy()
         # Keep the original list intact for pairing
@@ -183,34 +195,69 @@ class CrossoverGenerator(CompoundGenerator):
         ]
 
     def get_parallel_function(self) -> Callable:
+        """
+        Get the parallel function to execute.
+
+        Returns:
+            Callable: The parallel function to execute.
+        """
         return _do_crossovers_smiles_merge
 
-    def make_compound_id(self, result: Tuple) -> str:
-        _, parent1, parent2 = result
-        parent1_id = parent1.id.split(")")[-1]
-        parent2_id = parent2.id.split(")")[-1]
+    def make_compound_id(self, result: CommonParallelResponse) -> str:
+        """
+        Make a compound ID for the generated compound.
+
+        Args:
+            result (CommonParallelResponse): The result of the operation.
+
+        Returns:
+            str: The generated compound ID.
+        """
+        parent1_id = result.parent_cmpds[0].id.split(")")[-1]
+        parent2_id = result.parent_cmpds[1].id.split(")")[-1]
         random_id_num = random.randint(100, 1000000)
         return f"({parent1_id}+{parent2_id})Gen_{self.generation_num}_Cross_{random_id_num}"
 
     def get_operation_name(self) -> str:
+        """
+        Get the name of the operation.
+        
+        Returns:
+            str: The name of the operation.
+        """
         return "crossover"
+
+    def get_operation_desc(self, result: CommonParallelResponse) -> str:
+        """Get a description of the operation."""
+        return f"{result.parent_cmpds[0].smiles} + {result.parent_cmpds[1].smiles} => {result.child_smiles}"
+
+    def get_formatted_respose(self, results: Tuple) -> CommonParallelResponse:
+        """Get a formatted response for the operation."""
+        # (
+        #     '[N-]=[N+]=NCCOc1c(C#CC(=O)[O-])ccc2ccccc12',
+        #     Compound(smiles='[N-]=[N+]=NCCOc1cccc2ccccc12', id='naphthalene_112', additional_info='', docking_score=None, diversity_score=None, mol=None, fp=None, sdf_path=None, history=[]),
+        #     Compound(smiles='O=C([O-])C#Cc1ccc2ccccc2c1', id='naphthalene_85', additional_info='', docking_score=None, diversity_score=None, mol=None, fp=None, sdf_path=None, history=[]))
+
+        return CommonParallelResponse(
+            child_smiles=results[0], parent_cmpds=[results[1], results[2]]
+        )
 
 
 # def _find_similar_cmpd(
 #     params: Dict[str, Any],
-#     ligands_list: List[PostDockedCompound],
-#     lig1_smile_pair: PostDockedCompound,
-# ) -> Optional[PostDockedCompound]:
+#     ligands_list: List[Compound],
+#     lig1_smile_pair: Compound,
+# ) -> Optional[Compound]:
 #     """
 #     Finds a molecule with sufficient shared structure to the given ligand.
 
 #     Args:
 #         params (Dict[str, Any]): User parameters governing the process.
-#         ligands_list (List[PostDockedCompound]): List of ligands to choose from.
-#         ligand1_pair (PostDockedCompound): The reference ligand.
+#         ligands_list (List[Compound]): List of ligands to choose from.
+#         ligand1_pair (Compound): The reference ligand.
 
 #     Returns:
-#         Optional[PostDockedCompound]: A suitable second ligand if found, None otherwise.
+#         Optional[Compound]: A suitable second ligand if found, None otherwise.
 #     """
 #     ligand_1_string = lig1_smile_pair.smiles
 
@@ -230,15 +277,15 @@ def _do_crossovers_smiles_merge(
     all_predock_cmpds: List[Compound],
 ) -> Optional[Tuple[str, Compound, Compound]]:
     """
-    Performs a crossover operation between two ligands.
+    Perform a crossover operation between two ligands.
 
     Args:
         params (Dict[str, Any]): User parameters governing the process.
-        lig1_predock_cmpd (PostDockedCompound): Information for the first ligand.
-        all_predock_cmpds (List[PostDockedCompound]): List of all seed ligands.
+        lig1_predock_cmpd (Compound): Information for the first ligand.
+        all_predock_cmpds (List[Compound]): List of all seed ligands.
 
     Returns:
-        Optional[Tuple[str, PostDockedCompound, PostDockedCompound]]: 
+        Optional[Tuple[str, Compound, Compound]]: 
         Tuple containing new ligand SMILES and parent ligand information,
         or None if crossover fails.
 

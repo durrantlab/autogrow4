@@ -10,7 +10,7 @@ import __future__
 
 from typing import Any, Dict, List, cast
 from autogrow.docking.ranking.ranking_mol import rank_and_save_output_smi
-from autogrow.plugins.plugin_managers import plugin_managers
+from autogrow.plugins.plugin_manager_instances import plugin_managers
 from autogrow.plugins.docking import DockingPluginManager
 from autogrow.types import Compound
 from autogrow.utils.logging import LogLevel, log_info
@@ -24,7 +24,7 @@ def run_docking_common(
     params: Dict[str, Any],
 ) -> str:
     """
-    Runs common docking operations for all docking programs.
+    Run common docking operations for all docking programs.
 
     This function handles the docking process, including running the docking
     simulation, processing results, and ranking the docked compounds.
@@ -33,7 +33,7 @@ def run_docking_common(
         current_gen_int (int): Current generation number.
         cur_gen_dir (str): Directory for the current generation.
         smiles_file_new_gen (str): Filename containing new population molecules.
-        new_gen_predock_cmpds (List[PostDockedCompound]): List of PostDockedCompound
+        new_gen_predock_cmpds (List[Compound]): List of Compound
             objects for the new generation.
 
     Returns:
@@ -51,9 +51,7 @@ def run_docking_common(
     post_docked_compounds = [x for x in post_docked_compounds if x is not None]
 
     # Remove those not associated with a docked sdf file
-    post_docked_compounds = [
-        x for x in post_docked_compounds if x.sdf_path is not None
-    ]
+    post_docked_compounds = [x for x in post_docked_compounds if x.sdf_path is not None]
 
     post_docked_compounds = plugin_managers.PoseFilter.run(receptor_path=docking_plugin_manager.params["receptor_path"],
                                                            docked_cmpds=post_docked_compounds)

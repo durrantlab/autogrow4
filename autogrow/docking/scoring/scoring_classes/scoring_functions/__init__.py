@@ -1,5 +1,6 @@
 """
-This imports all of the filters within the filter_children_classes file.
+Import all of the filters within the filter_children_classes file.
+
 This is very important as the filters will not work if this doesn't exist.
 
 This is a dynamic and modular way of doing these imports.
@@ -7,6 +8,7 @@ This is a dynamic and modular way of doing these imports.
 Code is taken from:
 https://stackoverflow.com/questions/1057431/how-to-load-all-modules-in-a-folder
 """
+# TODO: Actually used? Not sure.
 from os.path import dirname, basename, isfile
 import glob
 

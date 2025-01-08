@@ -1,27 +1,22 @@
 """
 This script contains the class LigEfficiency.
+
 This is used to rescore a fitness metric by the number of non-hydrogen atoms.
 """
 import __future__
 from typing import Any, Dict, List, Optional
 
 from autogrow.types import Compound
-import rdkit  # type: ignore
-import rdkit.Chem as Chem  # type: ignore
-
-# Disable the unnecessary RDKit warnings
-rdkit.RDLogger.DisableLog("rdApp.*")
-
 from autogrow.docking.scoring.scoring_classes.parent_scoring_class import ParentScoring
 from autogrow.docking.scoring.scoring_classes.scoring_functions.vina import VINA
+from autogrow.plugins.plugin_manager_instances import plugin_managers
 
 # TODO: Not used anywhere, but good stuff here!
 
 
 class LigEfficiency(VINA):
     """
-    This will Score a given ligand for its binding affinity based on VINA or
-    QuickVina02 type docking.
+    Scores a given ligand for its binding affinity per VINA, QuickVina02, etc.
 
     This inherits many functions from the vina scoring function. The only
     difference is that this scoring function uses the ligand efficiency
@@ -40,7 +35,7 @@ class LigEfficiency(VINA):
         test_boot: bool = True,
     ) -> None:
         """
-        This will take params and a list of smiles.
+        Initialize the class with the given parameters.
 
         Inputs:
         :param dict params: Dictionary of User variables
@@ -58,11 +53,9 @@ class LigEfficiency(VINA):
         self, file_path: str, lig_info: Compound
     ) -> Optional[Compound]:
         """
-        This function will simply add a ligand efficiency score to the end of
-        the lig_info list and return said list.
+        Add ligand efficiency score to end of lig_info list and return the list.
 
         The last value of the lig_info list must be a float.
-
 
         Inputs:
         :param str file_path: the path to the file to be scored
@@ -91,8 +84,7 @@ class LigEfficiency(VINA):
 
 def get_number_heavy_atoms(smiles_str: Optional[str]) -> Optional[int]:
     """
-    Get the number of non Hydrogens in a SMILE
-
+    Get the number of non Hydrogens in a SMILES string.
 
     Inputs:
     :param str smiles_str: a str representing a molecule
@@ -104,26 +96,26 @@ def get_number_heavy_atoms(smiles_str: Optional[str]) -> Optional[int]:
         return None
     # easiest nearly everything should get through
 
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
+
     try:
-        mol = Chem.MolFromSmiles(smiles_str, sanitize=False)
+        mol = chemtoolkit.mol_from_smiles(smiles_str, sanitize=False)
     except Exception:
         mol = None
 
     if mol is None:
         return None
 
-    atom_list = mol.GetAtoms()
+    atom_list = chemtoolkit.get_atoms(mol)
     num_heavy_atoms = 0
     for atom in atom_list:
-        if atom.GetAtomicNum() != 1:
+        if chemtoolkit.get_atomic_num(atom) != 1:
             num_heavy_atoms = num_heavy_atoms + 1
 
     return num_heavy_atoms
 
 
-def score_as_lig_efficiency(
-    list_of_lig_info: Compound,
-) -> Optional[Compound]:
+def score_as_lig_efficiency(list_of_lig_info: Compound,) -> Optional[Compound]:
     """
     Determine the ligand efficiency and set it to be the code.
 

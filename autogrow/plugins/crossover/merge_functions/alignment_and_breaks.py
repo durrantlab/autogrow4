@@ -3,26 +3,16 @@ import __future__
 
 import random
 import copy
-from typing import List, Optional, Tuple, Union
-
-import rdkit  # type: ignore
-from rdkit import Chem  # type: ignore
-
-# Disable the unnecessary RDKit warnings
-rdkit.RDLogger.DisableLog("rdApp.*")
-
+from typing import Any, List, Optional, Tuple, Union
 import autogrow.utils.mol_object_handling as MOH
+from autogrow.plugins.plugin_manager_instances import plugin_managers
 
 
 # handle_mcs_alignments_labeling_and_cyclicbreaks
 def handle_mcs_align_labeling_and_cyclicbreaks(
-    mol1: rdkit.Chem.rdchem.Mol,
-    mol2: rdkit.Chem.rdchem.Mol,
-    mcs_mol: rdkit.Chem.rdchem.Mol,
+    mol1: Any, mol2: Any, mcs_mol: Any,
 ) -> Tuple[
-    Optional[rdkit.Chem.rdchem.Mol],
-    Optional[rdkit.Chem.rdchem.Mol],
-    Optional[rdkit.Chem.rdchem.Mol],
+    Optional[Any], Optional[Any], Optional[Any],
 ]:
     """
     Aligns molecules, labels atoms, and handles cyclic breaks.
@@ -48,17 +38,19 @@ def handle_mcs_align_labeling_and_cyclicbreaks(
             - mcs_mol: The MCS molecule, isolabeled and without breaks, or None
               if it fails.
     """
-    if type(mol1) is not rdkit.Chem.rdchem.Mol:
-        return None, None, None
-    if type(mol2) is not rdkit.Chem.rdchem.Mol:
-        return None, None, None
-    if type(mcs_mol) is not rdkit.Chem.rdchem.Mol:
-        return None, None, None
+    # if type(mol1) is not rdkit.Chem.rdchem.Mol:
+    #     return None, None, None
+    # if type(mol2) is not rdkit.Chem.rdchem.Mol:
+    #     return None, None, None
+    # if type(mcs_mol) is not rdkit.Chem.rdchem.Mol:
+    #     return None, None, None
 
     # Set Alignment, Isotope label, and Handle breaks
     picked_alignment = pick_mcs_alignment(mol1, mol2, mcs_mol)
     if picked_alignment is None:
         return None, None, None
+
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
 
     # Isotope label the MCS core
     index_tuple = add_mcs_isolabels(mol1, mol2, mcs_mol, picked_alignment)
@@ -94,7 +86,9 @@ def handle_mcs_align_labeling_and_cyclicbreaks(
         return None, None, None
 
     # Check for any additional fragmentation issues
-    confirm_no_frag = Chem.GetMolFrags(mcs_mol, asMols=True, sanitizeFrags=False)
+    confirm_no_frag = chemtoolkit.get_mol_frags(
+        mcs_mol, as_mols=True, sanitize_frags=False
+    )
     if len(confirm_no_frag) != 1:
         return None, None, None
 
@@ -106,7 +100,6 @@ def handle_mcs_align_labeling_and_cyclicbreaks(
     mol2 = renumber_to_mcs(mol2, tuple(new_indexes[1]))
 
     # Add correct isolabels to the core atoms. requires 1 final fake alignment
-    # tuple of range(len(mcs_mol.GetNumAtoms()))
     final_alignment = (
         tuple(new_indexes[2]),
         tuple(new_indexes[2]),
@@ -133,15 +126,14 @@ def handle_mcs_align_labeling_and_cyclicbreaks(
 
 def check_cyclic_breaks(
     alignment_tuple: Tuple[List[int], List[int], List[int]],
-    mol1: rdkit.Chem.rdchem.Mol,
-    mol2: rdkit.Chem.rdchem.Mol,
-    core: rdkit.Chem.rdchem.Mol,
+    mol1: Any,
+    mol2: Any,
+    core: Any,
 ) -> Union[
-    Tuple[rdkit.Chem.rdchem.Mol, Tuple[List[int], List[int], List[int]], bool],
-    Tuple[None, None, None],
+    Tuple[Any, Tuple[List[int], List[int], List[int]], bool], Tuple[None, None, None],
 ]:
     """
-    Checks for and fixes cyclic breaks in the common core.
+    Check for and fixes cyclic breaks in the common core.
 
     This function identifies cyclic breaks in the common core and fixes them by
     removing problematic atoms. It also handles resulting fragmentation issues.
@@ -163,25 +155,27 @@ def check_cyclic_breaks(
             If unsuccessful:
                 - A tuple of three None values.
     """
-    if type(mol1) is not rdkit.Chem.rdchem.Mol:
-        return None, None, None
-    if type(mol2) is not rdkit.Chem.rdchem.Mol:
-        return None, None, None
-    if type(core) is not rdkit.Chem.rdchem.Mol:
-        return None, None, None
+    # if type(mol1) is not rdkit.Chem.rdchem.Mol:
+    #     return None, None, None
+    # if type(mol2) is not rdkit.Chem.rdchem.Mol:
+    #     return None, None, None
+    # if type(core) is not rdkit.Chem.rdchem.Mol:
+    #     return None, None, None
+
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
 
     mcs_ringbreak_idx = []
     mol1_ringbreak_idx = []
     mol2_ringbreak_idx = []
     for l1, l2, c1 in zip(alignment_tuple[0], alignment_tuple[1], alignment_tuple[2]):
-        atom1 = mol1.GetAtomWithIdx(l1)
-        atom2 = mol2.GetAtomWithIdx(l2)
-        atom_c = core.GetAtomWithIdx(c1)
+        atom1 = chemtoolkit.get_atom_with_idx(mol1, l1)
+        atom2 = chemtoolkit.get_atom_with_idx(mol2, l2)
+        atom_c = chemtoolkit.get_atom_with_idx(core, c1)
 
         # ring breaks can occur when an atom in either lig is a ring atom
         # but the common substructure has that as a non-ring atom
-        if atom_c.IsInRing() is False and (
-            atom1.IsInRing() is True or atom2.IsInRing() is True
+        if chemtoolkit.is_in_ring(atom_c) is False and (
+            chemtoolkit.is_in_ring(atom1) is True or chemtoolkit.is_in_ring(atom2) is True
         ):
             mcs_ringbreak_idx.append(l1)
             mol1_ringbreak_idx.append(l2)
@@ -262,11 +256,9 @@ def check_cyclic_breaks(
     return core, alignment_tuple, did_a_ring_break
 
 
-def ringbreak_frag_handling(
-    new_core: rdkit.Chem.rdchem.Mol, mcs_ringbreak_idx: List[int]
-) -> List[int]:
+def ringbreak_frag_handling(new_core: Any, mcs_ringbreak_idx: List[int]) -> List[int]:
     """
-    Handles ringbreaks and fragmentation in the core molecule.
+    Handle ringbreaks and fragmentation in the core molecule.
 
     This function processes the core molecule after cyclic break resolution,
     handling any resulting fragmentation by keeping only the largest fragment.
@@ -285,8 +277,11 @@ def ringbreak_frag_handling(
     # Check for fragmentation, if core is fragmented than additional
     # processing is required to find the largest frag and to then reassign the
     # indexes in the ligs and core
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
 
-    check_fragmentation = Chem.GetMolFrags(new_core, asMols=True, sanitizeFrags=False)
+    check_fragmentation = chemtoolkit.get_mol_frags(
+        new_core, as_mols=True, sanitize_frags=False
+    )
     num_frag_len = len(check_fragmentation)
     iso_core_frag_list = copy.deepcopy(mcs_ringbreak_idx)
 
@@ -304,6 +299,8 @@ def _process_fragments_exclude_largest(check_fragmentation, iso_core_frag_list):
 
     # the core is now the largest fragment
     core = check_fragmentation[largest_frag_index_num]
+
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
 
     # make a list without the largest fragment
     list_frag_mols = []
@@ -324,8 +321,8 @@ def _process_fragments_exclude_largest(check_fragmentation, iso_core_frag_list):
 
         # get all atom idx's (for the original unaltered common_core) in
         # the frag based on the Iso-labels we added before
-        for atoms in frag.GetAtoms():
-            index_val = atoms.GetIsotope() - 10000
+        for atom in chemtoolkit.get_atoms(frag):
+            index_val = chemtoolkit.get_isotope(atom) - 10000
             iso_core_frag_list.append(index_val)
 
     # Remove redundancy
@@ -335,10 +332,10 @@ def _process_fragments_exclude_largest(check_fragmentation, iso_core_frag_list):
 
 
 def find_biggest_frag(
-    frag_mols_obj: Tuple[rdkit.Chem.rdchem.Mol, ...]
-) -> Tuple[Tuple[rdkit.Chem.rdchem.Mol, ...], Union[int, None]]:
+    frag_mols_obj: Tuple[Any, ...]
+) -> Tuple[Tuple[Any, ...], Union[int, None]]:
     """
-    Identifies the largest fragment in a set of molecular fragments.
+    Identify the largest fragment in a set of molecular fragments.
 
     Args:
         frag_mols_obj (Tuple[rdkit.Chem.rdchem.Mol, ...]): A tuple containing
@@ -355,36 +352,35 @@ def find_biggest_frag(
     idx_of_max = None
     num_atoms_max = None
 
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
+
     for i in range(len(frag_mols_obj)):
         frag = frag_mols_obj[i]
-        atom_count = frag.GetNumAtoms()
+        atom_count = chemtoolkit.get_num_atoms(frag)
         if num_atoms_max is None or num_atoms_max < atom_count:
             idx_of_max = i
             num_atoms_max = atom_count
     return frag_mols_obj, idx_of_max
 
 
-def remove_iso_labels(
-    mol: rdkit.Chem.rdchem.Mol, list_of_idx_to_remove: List[int]
-) -> None:
+def remove_iso_labels(mol: Any, list_of_idx_to_remove: List[int]) -> None:
     """
-    Removes isotope labels from specified atoms in a molecule.
+    Remove isotope labels from specified atoms in a molecule.
 
     Args:
         mol (rdkit.Chem.rdchem.Mol): The RDKit molecule to modify.
         list_of_idx_to_remove (List[int]): A list of atom indices for which to
             remove isotope labels.
     """
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
     for i in list_of_idx_to_remove:
-        atom = mol.GetAtomWithIdx(i)
-        atom.SetIsotope(0)
+        atom = chemtoolkit.get_atom_with_idx(mol, i)
+        chemtoolkit.set_isotope(atom, 0)
 
 
-def add_r_atom_isolabels(
-    mol1: rdkit.Chem.rdchem.Mol, mol2: rdkit.Chem.rdchem.Mol
-) -> None:
+def add_r_atom_isolabels(mol1: Any, mol2: Any) -> None:
     """
-    Adds isotope labels to R-group atoms in two molecules.
+    Add isotope labels to R-group atoms in two molecules.
 
     Labels the first atom in each R-group with its index + 1000 for mol1 and
     + 2000 for mol2. These labels are used to differentiate R-groups later.
@@ -393,27 +389,27 @@ def add_r_atom_isolabels(
         mol1 (rdkit.Chem.rdchem.Mol): The first RDKit molecule to label.
         mol2 (rdkit.Chem.rdchem.Mol): The second RDKit molecule to label.
     """
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
+
     # isotope label mol1
-    for atom in mol1.GetAtoms():
-        if atom.GetIsotope() < 9999:
-            atom_iso = atom.GetIdx() + 1000
-            atom.SetIsotope(atom_iso)
+    for atom in chemtoolkit.get_atoms(mol1):
+        if chemtoolkit.get_isotope(atom) < 9999:
+            atom_iso = chemtoolkit.get_idx(atom) + 1000
+            chemtoolkit.set_isotope(atom, atom_iso)
 
     # isotope label mol2
-    for atom in mol2.GetAtoms():
-        if atom.GetIsotope() < 9999:
-            atom_iso = atom.GetIdx() + 2000
-            atom.SetIsotope(atom_iso)
+    for atom in chemtoolkit.get_atoms(mol2):
+        if chemtoolkit.get_isotope(atom) < 9999:
+            atom_iso = chemtoolkit.get_idx(atom) + 2000
+            chemtoolkit.set_isotope(atom, atom_iso)
 
 
 # alignment and labeling
 def pick_mcs_alignment(
-    mol1: rdkit.Chem.rdchem.Mol,
-    mol2: rdkit.Chem.rdchem.Mol,
-    common_core: rdkit.Chem.rdchem.Mol,
+    mol1: Any, mol2: Any, common_core: Any,
 ) -> Optional[Tuple[Tuple[int, ...], Tuple[int, ...], Tuple[int, ...]]]:
     """
-    Selects an alignment for two molecules based on their common substructure.
+    Select an alignment for two molecules based on their common substructure.
 
     This function finds all matches of the common substructure in both
     molecules and randomly selects one alignment for future atom numbering.
@@ -431,11 +427,12 @@ def pick_mcs_alignment(
             no valid alignment is found.
     """
     # Get the substructure match for the MCS within each ligand
-    mol1_match_idx = mol1.GetSubstructMatches(
-        common_core, uniquify=False, maxMatches=10
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
+    mol1_match_idx = chemtoolkit.get_substruct_matches(
+        mol1, common_core, uniquify=False, max_matches=10
     )
-    mol2_match_idx = mol2.GetSubstructMatches(
-        common_core, uniquify=False, maxMatches=10
+    mol2_match_idx = chemtoolkit.get_substruct_matches(
+        mol2, common_core, uniquify=False, max_matches=10
     )
 
     all_drug_pairings = []
@@ -456,19 +453,20 @@ def pick_mcs_alignment(
     alignment_choice = random.choice(all_drug_pairings)
 
     # add the common_core atom idx to the tuple
-    substruc_idx = tuple(list(range(len(common_core.GetAtoms()))))
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
+    substruc_idx = tuple(list(range(len(chemtoolkit.get_atoms(common_core)))))
     return alignment_choice[0], alignment_choice[1], substruc_idx
 
 
 ###### Index and convert Ligs w isotope labels
 def add_mcs_isolabels(
-    mol1: rdkit.Chem.rdchem.Mol,
-    mol2: rdkit.Chem.rdchem.Mol,
-    common_core: rdkit.Chem.rdchem.Mol,
+    mol1: Any,
+    mol2: Any,
+    common_core: Any,
     picked_alignment: Tuple[Tuple[int, ...], Tuple[int, ...], Tuple[int, ...]],
 ) -> Tuple[List[int], List[int], List[int]]:
     """
-    Adds isotope labels to atoms in two molecules and their common core.
+    Add isotope labels to atoms in two molecules and their common core.
 
     This function modifies atoms in mol1, mol2, and the common_core to have
     consistent isotope labels based on the common_core atom indices.
@@ -487,26 +485,26 @@ def add_mcs_isolabels(
             lists containing the new isotope labels (as indices) for the atoms
             in mol1, mol2, and common_core.
     """
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
+
     i = 0
     index_list = []
     for lig1, lig2, c1 in zip(
         picked_alignment[0], picked_alignment[1], picked_alignment[2]
     ):
-        atom1 = mol1.GetAtomWithIdx(lig1)
-        atom2 = mol2.GetAtomWithIdx(lig2)
-        atom_c = common_core.GetAtomWithIdx(c1)
+        atom1 = chemtoolkit.get_atom_with_idx(mol1, lig1)
+        atom2 = chemtoolkit.get_atom_with_idx(mol2, lig2)
+        atom_c = chemtoolkit.get_atom_with_idx(common_core, c1)
 
-        atom1.SetIsotope(10000 + i)
-        atom2.SetIsotope(10000 + i)
-        atom_c.SetIsotope(10000 + i)
+        chemtoolkit.set_isotope(atom1, 10000 + i)
+        chemtoolkit.set_isotope(atom2, 10000 + i)
+        chemtoolkit.set_isotope(atom_c, 10000 + i)
         index_list.append(i)
         i = i + 1
     return index_list, index_list, index_list
 
 
-def renumber_to_mcs(
-    mol: rdkit.Chem.rdchem.Mol, tuple_order_list: Tuple[int, ...]
-) -> rdkit.Chem.rdchem.Mol:
+def renumber_to_mcs(mol: Any, tuple_order_list: Tuple[int, ...]) -> Any:
     """
     Renumbers atom indices in a molecule to match the MCS ordering.
 
@@ -525,12 +523,14 @@ def renumber_to_mcs(
     # make a tuple the same length as the mol the beggining needs to be the
     # same as the aligment numbering to the MCS and there can be no redundancy
     # in the tuple.
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
+
     full_tuple_order = list(tuple_order_list)
     num = 0
-    while num < len(mol.GetAtoms()):
+    while num < len(chemtoolkit.get_atoms(mol)):
         if num not in full_tuple_order:
             full_tuple_order.append(num)
         num += 1
     # reorder the Idx's of the mol to the full_tuple_order
-    mol = Chem.RenumberAtoms(mol, full_tuple_order)
+    mol = chemtoolkit.renumber_atoms(mol, full_tuple_order)
     return mol

@@ -6,17 +6,11 @@ SMILES representations of compounds to 3D SDF files.
 """
 import __future__
 
-# from autogrow.plugins.plugin_managers import plugin_managers
 from autogrow.plugins.smi_to_3d_sdf import SmiTo3DSdfBase
-from autogrow.plugins.smiles_filters import SmilesFilterBase
 from autogrow.types import Compound
 from autogrow.utils.logging import log_warning
-from autogrow.utils.obabel import obabel_convert, obabel_convert_cmd
-import rdkit  # type: ignore
-from rdkit import Chem  # type: ignore
-from rdkit.Chem import FilterCatalog  # type: ignore
-from rdkit.Chem.FilterCatalog import FilterCatalogParams  # type: ignore
-from typing import List, Optional, Tuple
+from autogrow.utils.obabel import obabel_convert_cmd
+from typing import List, Tuple
 from autogrow.config.argparser import ArgumentVars
 import os
 
@@ -31,8 +25,7 @@ class ObabelSmiTo3DSDF(SmiTo3DSdfBase):
 
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
         """
-        Add command-line arguments specific to the OpenBabel SMILES to 3D SDF
-        converter.
+        Add command-line args specific to the Obabel SMILES to 3D SDF converter.
 
         This method defines the command-line arguments that can be used to
         configure the OpenBabel SMILES to 3D SDF converter.
@@ -57,8 +50,7 @@ class ObabelSmiTo3DSDF(SmiTo3DSdfBase):
 
     def validate(self, params: dict):
         """
-        Validate the arguments provided for the OpenBabel SMILES to 3D SDF
-        converter.
+        Validate the args provided for the OpenBabel SMILES to 3D SDF converter.
 
         This method checks if the required 'obabel_path' parameter is provided.
 
@@ -77,22 +69,21 @@ class ObabelSmiTo3DSDF(SmiTo3DSdfBase):
         self, predock_cmpds: List[Compound], pwd: str
     ) -> List[Compound]:
         """
-        Convert a list of SMILES representations to 3D SDF files using
-        OpenBabel.
+        Convert a list of SMILES to 3D SDF files using OpenBabel.
 
-        This method takes a list of PostDockedCompound objects containing SMILES
+        This method takes a list of Compound objects containing SMILES
         strings and converts them to 3D SDF files using OpenBabel. The
         conversion is done in parallel using a shell parallelizer plugin.
 
         Args:
-            predock_cmpds (List[PostDockedCompound]): A list of PostDockedCompound
+            predock_cmpds (List[Compound]): A list of Compound
                 objects, each containing a SMILES string and other compound
                 information.
             pwd (str): The path to the working directory where temporary files
             will be created.
 
         Returns:
-            List[PostDockedCompound]: The input list of PostDockedCompound
+            List[Compound]: The input list of Compound
                 objects, updated with the paths to the generated 3D SDF files.
 
         Note:
@@ -109,14 +100,14 @@ class ObabelSmiTo3DSDF(SmiTo3DSdfBase):
 
         cmds = []
         out_files = []
-        for cmpd_idx, predock_cmpd in enumerate(predock_cmpds):
+        for cmpd_idx, cmpd in enumerate(predock_cmpds):
             base_file = f"{pwd}compound{cmpd_idx}"
             in_file = f"{base_file}.smi"
             out_file = f"{base_file}.sdf"
             obabel_path = self.params["obabel_path"]
 
             with open(in_file, "w") as f:
-                f.write(predock_cmpd.smiles)
+                f.write(cmpd.smiles)
 
             cmd = obabel_convert_cmd(
                 in_file, out_file, obabel_path, extra_params="--gen3d --p 7.4"
@@ -133,12 +124,12 @@ class ObabelSmiTo3DSDF(SmiTo3DSdfBase):
         ), "Shell parallelizer is None"
         self.plugin_managers.ShellParallelizer.run(cmds=cmds)
 
-        for cmpd_idx, predock_cmpd in enumerate(predock_cmpds):
+        for cmpd_idx, cmpd in enumerate(predock_cmpds):
             out_file = out_files[cmpd_idx]
 
             if not os.path.exists(out_file):
                 log_warning(
-                    f"Could not convert smiles to 3D SDF with obabel: {predock_cmpd.smiles}"
+                    f"Could not convert smiles to 3D SDF with obabel: {cmpd.smiles}"
                 )
                 continue
 
@@ -146,10 +137,10 @@ class ObabelSmiTo3DSDF(SmiTo3DSdfBase):
                 content = f.read().strip()
                 if content == "":
                     log_warning(
-                        f"Could not convert smiles to 3D SDF with obabel: {predock_cmpd.smiles}"
+                        f"Could not convert smiles to 3D SDF with obabel: {cmpd.smiles}"
                     )
                     continue
 
-            predock_cmpd.sdf_path = out_file
+            cmpd.sdf_path = out_file
 
         return predock_cmpds

@@ -1,5 +1,5 @@
 """
-Multiprocessing Configuration Module
+Multiprocessing Configuration Module.
 
 This module handles the configuration of multiprocessing settings for AutoGrow.
 """

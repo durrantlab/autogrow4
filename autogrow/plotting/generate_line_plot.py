@@ -306,7 +306,7 @@ def run_plotter(
         + int(params["number_of_crossovers"])
         + int(params["number_elitism_advance_from_previous_gen"])
     )
-    number_of_conf_per_lig = "0" # Commenting out because no longer defined. str(params["max_variants_per_compound"])
+    number_of_conf_per_lig = "0"  # Commenting out because no longer defined. str(params["max_variants_per_compound"])
 
     # Get Customizations
     title_of_figure = f"{scoring_type} Scores for {receptor_name} using {docking_type}"

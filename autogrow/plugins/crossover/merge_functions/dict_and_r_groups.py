@@ -8,23 +8,14 @@ crossover operations.
 import __future__
 
 import copy
-from typing import Dict, List
-
-import rdkit  # type: ignore
-from rdkit import Chem  # type: ignore
-
-# Disable the unnecessary RDKit warnings
-rdkit.RDLogger.DisableLog("rdApp.*")
-
+from typing import Any, Dict, List
 import autogrow.plugins.crossover.merge_functions.mapping_class as mapping_class
+from autogrow.plugins.plugin_manager_instances import plugin_managers
 
 
-def handle_dicts_and_select_b_groups(
-    mol_1: Chem.rdchem.Mol, mol_2: Chem.rdchem.Mol, mcs_mol: Chem.rdchem.Mol
-):
+def handle_dicts_and_select_b_groups(mol_1: Any, mol_2: Any, mcs_mol: Any):
     """
-    Create necessary dictionaries, mappings, and select ligands for the final
-    molecule.
+    Create necessary dicts, mappings, and select ligands for the final molecule.
 
     Args:
         mol_1 (Chem.rdchem.Mol): RDKit mol for ligand 1.
@@ -99,10 +90,12 @@ def handle_dicts_and_select_b_groups(
 
 def _mol_handling_of_fragmenting_labeling_and_indexing(mol, mcs_mol, lig_number):
     """
-    This takes an rdkit mol for a ligand and 1 for the mcs_mol. It fragments
-    the ligand by replacing the MCS. and it determines which anchors are in
-    each fragment. These fragments are our R-groups and the assignment of
-    anchors. is how we determine which R-group goes where relative to the MCS.
+    Take an rdkit mol for a ligand and 1 for the mcs_mol.
+    
+    It fragments the ligand by replacing the MCS. and it determines which
+    anchors are in each fragment. These fragments are our R-groups and the
+    assignment of anchors. is how we determine which R-group goes where relative
+    to the MCS.
 
     lig_number  int    is the number of the ligand that is mol
                        ie if mol is mol_1 lig_number = 1
@@ -155,12 +148,16 @@ def _mol_handling_of_fragmenting_labeling_and_indexing(mol, mcs_mol, lig_number)
         # replace_core failed to handle fragments"
         return None, None, None
 
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
+
     # MAKE NEW MOL FRAGS FROM LABELED replace_core
-    mol_frags = Chem.GetMolFrags(replace_core, asMols=True, sanitizeFrags=False)
+    mol_frags = chemtoolkit.get_mol_frags(
+        replace_core, as_mols=True, sanitize_frags=False
+    )
     list_r_groups = []
     i = 0
     while i < len(mol_frags):
-        val = Chem.MolToSmiles(mol_frags[i], isomericSmiles=True)
+        val = chemtoolkit.mol_to_smiles(mol_frags[i], isomeric_smiles=True)
         list_r_groups.append(val)
         i += 1
 
@@ -238,8 +235,9 @@ def _check_replace_mol(mol_1, mol_2, mcs_mol):
 
 def _r_group_list(mol, core_mol):
     """
-    Find all R-groups by replacing the atoms in the ligand that make up the
-    common core with nothing.
+    Find all R-groups.
+     
+    Replaces the atoms in the ligand that make up the common core with nothing.
 
     This fragments the ligand and from those fragments we are able to determine
     what our R-groups are. For any common core atom which touched the fragment,
@@ -260,11 +258,16 @@ def _r_group_list(mol, core_mol):
     """
     # This returns all the mol frags for a particular compound against the
     # core molecule
-    replace_core_mol = Chem.ReplaceCore(
-        mol, core_mol, labelByIndex=True, replaceDummies=True, requireDummyMatch=False
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
+    replace_core_mol = chemtoolkit.replace_core(
+        mol,
+        core_mol,
+        label_by_index=True,
+        replace_dummies=True,
+        require_dummy_match=False,
     )
 
-    if len(replace_core_mol.GetAtoms()) == 0:
+    if len(chemtoolkit.get_atoms(replace_core_mol)) == 0:
         # This means that the mol either did not contain the core_mol or the
         # core_mol is the same mol as the mol. ie) if mol_string
         # ="[10000N-]=[10001N+]=[10002N][10003CH]1[10004O][10005CH]([10006CH2][10007OH])[10008CH]([10013OH])[10009CH]([10012OH])[10010CH]1[10011OH]"
@@ -304,23 +307,25 @@ def _replace_core_mol_dummy_atoms(mol, mcs, replace_core_mol):
 
         resulting replace_core = '[10003*][2004CH]1[2005NH2+][2006CH2][2007CH]([2008OH])[2009CH]([2010OH])[2011CH]1[2012OH]'
     """
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
+
     replace_core_mol_original = copy.deepcopy(replace_core_mol)
     anchor_dict = {}
     anchor_to_set_dict = {}
-    for atom in replace_core_mol.GetAtoms():
-        if atom.GetAtomicNum() == 0:
-            anchor_iso = atom.GetIsotope() + 10000
-            neighbors = atom.GetNeighbors()
-            tmp = [n_atom.GetIsotope() for n_atom in neighbors]
+    for atom in chemtoolkit.get_atoms(replace_core_mol):
+        if chemtoolkit.get_atomic_num(atom) == 0:
+            anchor_iso = chemtoolkit.get_isotope(atom) + 10000
+            neighbors = chemtoolkit.get_neighbors(atom)
+            tmp = [chemtoolkit.get_isotope(n_atom) for n_atom in neighbors]
             anchor_dict[anchor_iso] = tmp
 
-            anchor_to_set_dict[atom.GetIdx()] = anchor_iso
+            anchor_to_set_dict[chemtoolkit.get_idx(atom)] = anchor_iso
 
     for idx in list(anchor_to_set_dict.keys()):
 
-        atom = replace_core_mol.GetAtomWithIdx(idx)
+        atom = chemtoolkit.get_atom_with_idx(replace_core_mol, idx)
         anchor_iso = anchor_to_set_dict[idx]
-        atom.SetIsotope(anchor_iso)
+        chemtoolkit.set_isotope(atom, anchor_iso)
 
     return replace_core_mol
 
@@ -343,6 +348,7 @@ def _r_groups_dict(mol_frags, lig_number_for_multiplier):
                 ([1018H])[1016c](:[2*])[1017H]', '1R2':'[3*][1024C]([1026H])
                 ([1027H])[1023N]=[1022N+]=[1021N-]', '1R3':'[4*][1025O][1029H]'}
     """
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
     num_frags = len(mol_frags)
     r_chain_dictionary = {}
     r_smiles_dictionary = {}
@@ -350,13 +356,13 @@ def _r_groups_dict(mol_frags, lig_number_for_multiplier):
     for i in range(num_frags):
         frag = mol_frags[i]
         r_list_temp = []
-        r_list_smiles = Chem.MolToSmiles(frag, isomericSmiles=True)
+        r_list_smiles = chemtoolkit.mol_to_smiles(frag, isomeric_smiles=True)
         lig_num_r_r_num = f"{k}R{i + 1}"
-        for atoms in frag.GetAtoms():
-            iso = atoms.GetIsotope()
+        for atoms in chemtoolkit.get_atoms(frag):
+            iso = chemtoolkit.get_isotope(atoms)
             if 3000 > iso > 100:
                 r_list_temp.append(iso - (1000 * k))
-                atoms.SetIsotope(0)
+                chemtoolkit.set_isotope(atoms, 0)
             if iso > 3000:
                 name = f"I{iso - 10000}"
                 r_list_temp.append(iso)
@@ -496,30 +502,32 @@ def _get_atoms_touch_mcs(mol):
         dict: Dictionary with core atom isotope labels as keys and lists of 
             touching non-core atom indices as values.
     """
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
+
     mcs_touches = {}
-    all_atoms = mol.GetAtoms()
+    all_atoms = chemtoolkit.get_atoms(mol)
 
     for atom in all_atoms:
         # find all atoms in the mol which are also in the Core using iso
         # labels
 
-        iso = atom.GetIsotope()
+        iso = chemtoolkit.get_isotope(atom)
         if iso > 9999:
             # then its a core atom
-            neighbors = atom.GetNeighbors()
+            neighbors = chemtoolkit.get_neighbors(atom)
             values = []
 
             for neighbor_atom in neighbors:
                 # compile list of the Indexes of all neighbor of the atom
-                Idx_neighbor = neighbor_atom.GetIdx()
+                Idx_neighbor = chemtoolkit.get_idx(neighbor_atom)
 
                 # Select for only neighbors which are not in the core using
                 # iso
-                iso_neighbor_x = neighbor_atom.GetIsotope()
+                iso_neighbor_x = chemtoolkit.get_isotope(neighbor_atom)
                 if iso_neighbor_x < 9999:
                     # Then this is an atom which is not in the core but
                     # touches the core
-                    idx_of_neighbor = neighbor_atom.GetIdx()
+                    idx_of_neighbor = chemtoolkit.get_idx(neighbor_atom)
                     values.append(idx_of_neighbor)
                     mcs_touches[iso] = values
 

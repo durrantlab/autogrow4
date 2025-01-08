@@ -15,15 +15,10 @@ import sys
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 from autogrow.operators.mutant_crossover_parent import CompoundGenerator
-from autogrow.plugins.plugin_managers import plugin_managers
+from autogrow.plugins.plugin_manager_instances import plugin_managers
 from autogrow.types import Compound
 from autogrow.utils.caching import CacheManager
 from autogrow.utils.logging import LogLevel, log_info, log_warning
-import rdkit  # type: ignore
-import rdkit.Chem as Chem  # type: ignore
-
-# Disable the unnecessary RDKit warnings
-rdkit.RDLogger.DisableLog("rdApp.*")  # type: ignore
 
 import autogrow.docking.ranking.ranking_mol as Ranking
 import autogrow.operators.execute_mutations as Mutation
@@ -39,7 +34,7 @@ def populate_generation(
     params: Dict[str, Any], generation_num: int, cur_gen_dir: str
 ) -> Tuple[str, List[Compound]]:
     """
-    Populates a new generation of ligands through mutation, crossover, and elitism.
+    Populate a new generation of ligands through mutation, crossover, and elitism.
 
     This function orchestrates the entire process of creating a new generation,
     including mutation, crossover, elite selection, and file management.
@@ -50,9 +45,9 @@ def populate_generation(
         cur_gen_dir (str): Directory for the current generation.
 
     Returns:
-        Tuple[str, List[PostDockedCompound]]: A tuple containing:
+        Tuple[str, List[Compound]]: A tuple containing:
             - The name of the .smi file containing the new population.
-            - A list of PostDockedCompound objects representing the new population.
+            - A list of Compound objects representing the new population.
 
     Raises:
         AssertionError: If the population fails to make enough compounds.
@@ -165,25 +160,21 @@ def populate_generation(
 
     # Build new_gen_smis and full_gen_smis
     # TODO: Need to understand why these two are separate.
-    new_gen_predock_cmpds: List[
-        Compound
-    ] = mut_predock_cmpds + cross_predock_cmpds
+    new_gen_predock_cmpds: List[Compound] = mut_predock_cmpds + cross_predock_cmpds
 
-    full_gen_predock_cmpds: List[
-        Compound
-    ] = mut_predock_cmpds + cross_predock_cmpds
+    full_gen_cmpds: List[Compound] = mut_predock_cmpds + cross_predock_cmpds
 
     if generation_num != 1:
         # Doesn't append to the new_generation_smiles_list
-        full_gen_predock_cmpds.extend(iter(elite_predock_cmpds))
+        full_gen_cmpds.extend(iter(elite_predock_cmpds))
     else:
         for i in elite_predock_cmpds:
             new_gen_predock_cmpds.append(i)
-            full_gen_predock_cmpds.append(i)
+            full_gen_cmpds.append(i)
 
-    if len(full_gen_predock_cmpds) < total_num_desired_new_ligands:
+    if len(full_gen_cmpds) < total_num_desired_new_ligands:
         log_warning(
-            f"Only {len(full_gen_predock_cmpds)} compounds were generated, but {total_num_desired_new_ligands} were requested."
+            f"Only {len(full_gen_cmpds)} compounds were generated, but {total_num_desired_new_ligands} were requested."
             " It may be that (1) the source compounds are not diverse enough, (2) there are too few seed compounds, (3) the seed molecules lack the similarity for crossover, or (4) the seed molecules lack the functional groups for mutation."
         )
         # print("We needed ", total_num_desired_new_ligands)
@@ -203,11 +194,7 @@ def populate_generation(
         smiles_to_convert_file,
         new_gen_folder_path,
     ) = _save_smiles_files(
-        params,
-        generation_num,
-        full_gen_predock_cmpds,
-        new_gen_predock_cmpds,
-        "_to_convert",
+        params, generation_num, full_gen_cmpds, new_gen_predock_cmpds, "_to_convert",
     )
 
     # Convert SMILES to .sdf using Gypsum and convert .sdf to .pdb with RDKit
@@ -216,18 +203,16 @@ def populate_generation(
     # in it.
     log_info("Converting SMILES to 3D SDF files")
     with LogLevel():
-        full_gen_predock_cmpds = plugin_managers.SmiTo3DSdf.run(
-            predock_cmpds=full_gen_predock_cmpds,
+        full_gen_cmpds = plugin_managers.SmiTo3DSdf.run(
+            predock_cmpds=full_gen_cmpds,
             pwd=new_gen_folder_path,
             cache_dir=cur_gen_dir,
         )
 
     # Remove those that failed to convert
-    full_gen_predock_cmpds = [
-        x for x in full_gen_predock_cmpds if x.sdf_path is not None
-    ]
+    full_gen_cmpds = [x for x in full_gen_cmpds if x.sdf_path is not None]
 
-    return full_gen_smi_file, full_gen_predock_cmpds
+    return full_gen_smi_file, full_gen_cmpds
 
 
 def _generate_compounds(
@@ -242,7 +227,7 @@ def _generate_compounds(
     compound_gen_cls: Type[CompoundGenerator],
 ) -> List[Compound]:
     """
-    Generates new compounds (mutations or crossovers) for the current generation.
+    Generate new compounds (mutations or crossovers) for the current generation.
 
     This function creates new compounds based on the seed list from the
     previous generation, using either mutation or crossover operations.
@@ -253,13 +238,13 @@ def _generate_compounds(
         num_compounds (int): Number of compounds to generate.
         num_seed_diversity (int): Number of seed molecules chosen for diversity.
         num_seed_dock_fitness (int): Number of seed molecules chosen for docking fitness.
-        src_cmpds (List[PostDockedCompound]): Source compounds from previous generation.
+        src_cmpds (List[Compound]): Source compounds from previous generation.
         procs_per_node (int): Number of processors for parallel processing.
         compound_type (str): Type of generation ("mutation" or "crossover").
         compound_gen_cls (CompoundGenerator): CompoundGenerator class to use.
 
     Returns:
-        List[PostDockedCompound]: List of newly generated compounds.
+        List[Compound]: List of newly generated compounds.
 
     Raises:
         Exception: If insufficient compounds are generated.
@@ -314,9 +299,9 @@ def _generate_compounds(
 #     num_mutations: int,
 #     num_seed_diversity: int,
 #     num_seed_dock_fitness: int,
-#     src_cmpds: List[PostDockedCompound],
+#     src_cmpds: List[Compound],
 #     procs_per_node: int
-# ) -> List[PostDockedCompound]:
+# ) -> List[Compound]:
 #     """
 #     Generates mutations for the current generation.
 
@@ -329,11 +314,11 @@ def _generate_compounds(
 #         num_mutations (int): Number of mutations to generate.
 #         num_seed_diversity (int): Number of seed molecules chosen for diversity.
 #         num_seed_dock_fitness (int): Number of seed molecules chosen for docking fitness.
-#         src_cmpds (List[PostDockedCompound]): Source compounds from previous generation.
+#         src_cmpds (List[Compound]): Source compounds from previous generation.
 #         procs_per_node (int): Number of processors for parallel processing.
 
 #     Returns:
-#         List[PostDockedCompound]: List of newly generated mutant compounds.
+#         List[Compound]: List of newly generated mutant compounds.
 
 #     Raises:
 #         Exception: If insufficient mutants are generated.
@@ -364,7 +349,7 @@ def _generate_compounds(
 #     new_mutants = [x for x in new_mutants if x is not None]
 
 #     # List of SMILES from mutation
-#     new_mutation_smiles_list: List[PostDockedCompound] = []
+#     new_mutation_smiles_list: List[Compound] = []
 
 #     for i in new_mutants:
 #         new_mutation_smiles_list.append(i)
@@ -388,9 +373,9 @@ def _generate_compounds(
 #     num_crossovers: int,
 #     num_seed_diversity: int,
 #     num_seed_dock_fitness: int,
-#     src_cmpds: List[PostDockedCompound],
+#     src_cmpds: List[Compound],
 #     procs_per_node: int,
-# ) -> List[PostDockedCompound]:
+# ) -> List[Compound]:
 #     """
 #     Generates crossovers for the current generation.
 
@@ -403,11 +388,11 @@ def _generate_compounds(
 #         num_crossovers (int): Number of crossovers to generate.
 #         num_seed_diversity (int): Number of seed molecules chosen for diversity.
 #         num_seed_dock_fitness (int): Number of seed molecules chosen for docking fitness.
-#         src_cmpds (List[PostDockedCompound]): Source compounds from previous generation.
+#         src_cmpds (List[Compound]): Source compounds from previous generation.
 #         procs_per_node (int): Number of processors for parallel processing.
 
 #     Returns:
-#         List[PostDockedCompound]: List of newly generated crossover compounds.
+#         List[Compound]: List of newly generated crossover compounds.
 
 #     Raises:
 #         Exception: If insufficient crossovers are generated.
@@ -439,7 +424,7 @@ def _generate_compounds(
 #     new_crossovers = [x for x in new_crossovers if x is not None]
 
 #     # List of SMILES from crossover
-#     new_crossover_smiles_list: List[PostDockedCompound] = []
+#     new_crossover_smiles_list: List[Compound] = []
 
 #     for i in new_crossovers:
 #         new_crossover_smiles_list.append(i)
@@ -464,19 +449,19 @@ def _get_elite_cmpds_prev_gen(
     generation_num: int,
 ) -> List[Compound]:
     """
-    Selects elite compounds from the previous generation to advance.
+    Select elite compounds from the previous generation to advance.
 
     This function handles the selection of top-performing compounds from the
     previous generation to be carried forward without modification.
 
     Args:
         params (Dict[str, Any]): User parameters.
-        src_cmpds (List[PostDockedCompound]): Source compounds from previous generation.
+        src_cmpds (List[Compound]): Source compounds from previous generation.
         num_elite_prev_gen (int): Number of elite compounds to select.
         generation_num (int): Current generation number.
 
     Returns:
-        List[PostDockedCompound]: List of selected elite compounds.
+        List[Compound]: List of selected elite compounds.
 
     Raises:
         Exception: If selection process fails or insufficient compounds are available.
@@ -528,9 +513,9 @@ def _save_smiles_files(
     Args:
         params (Dict[str, Any]): User parameters for output paths.
         generation_num (int): Current generation number.
-        full_gen_smis (List[PostDockedCompound]): Full list of compounds for 
+        full_gen_smis (List[Compound]): Full list of compounds for 
             the generation.
-        new_gen_smis (List[PostDockedCompound]): List of new compounds for 
+        new_gen_smis (List[Compound]): List of new compounds for 
             conversion.
         suffix (Optional[str]): Suffix to append to the file name.
 
@@ -564,7 +549,7 @@ def _save_smiles_files(
 #     Args:
 #         arg0 (int): Number of compounds that should have been generated.
 #         arg1 (str): Descriptor of the compounds (e.g., 'mutants' or 'crossovers').
-#         arg2 (List[PostDockedCompound]): List of generated compounds.
+#         arg2 (List[Compound]): List of generated compounds.
 #         arg3 (str): Error message to raise if there are insufficient compounds.
 
 #     Raises:
@@ -582,41 +567,33 @@ def _save_smiles_files(
 #############
 # Get seeds
 #############
-def _test_source_smiles_convert(
-    smile_info: Compound,
-) -> Union[Compound, str]:
+def _test_source_smiles_convert(test_args):
     """
-    Attempts to convert a SMILES string to an rdkit.Chem.rdchem.Mol object.
+    Attempt to convert a SMILES string to an rdkit.Chem.rdchem.Mol object.
 
     This function is done in a try statement to handle bad SMILES strings that
     are incapable of being converted. It also checks that the SMILES string is
     able to be sanitized.
 
     Args:
-        smile_info (PostDockedCompound): A PostDockedCompound object containing
-            the SMILES of a ligand, its ID, and potentially additional
-            information about the ligand.
+        test_args (dict): Dictionary containing:
+            smile_info (Compound): The compound to test
+            chemtoolkit: The initialized chemistry toolkit
 
     Returns:
-        Union[PostDockedCompound, str]: If it passed the test, it returns the
-            PostDockedCompound object. If it failed to convert, it returns an
-            error message string. This passes out to prevent MPI print issues.
+        Union[Compound, str]: If it passed the test, it returns the
+         Compound object. If it failed to convert, it returns an
+         error message string. This passes out to prevent MPI print issues.
     """
+    smile_info = test_args["smile_info"]
+    chemtoolkit = test_args["chemtoolkit"]
+
     if smile_info is None or not smile_info:
         printout = (
             "REMOVING SMILES FROM SOURCE LIST: Blank "
             + "entry in source compound list.\n"
         )
         return f"{printout}\tRemoving: {smile_info}"
-
-    # TODO: JDD: What was this? Never understood, so commented out
-    # if len(smile_info) == 1:
-    #     printout = (
-    #         "REMOVING SMILES FROM SOURCE LIST: Unformatted or blank "
-    #         + "entry in source compound list.\n"
-    #     )
-    #     printout += f"\tRemoving: {smile_info}"
-    #     return printout
 
     # separate out SMILES str and ID
     smile_str = smile_info.smiles
@@ -633,7 +610,7 @@ def _test_source_smiles_convert(
     # Try importing it into RDKit with Sanitization off. Tests for errors in
     # having the wrong data type
     try:
-        mol = Chem.MolFromSmiles(str(smile_str), sanitize=False)  # type: ignore
+        mol = chemtoolkit.mol_from_smiles(str(smile_str), sanitize=False)
     except Exception:
         printout = (
             "REMOVING SMILES FROM SOURCE LIST: SMILES string failed "
@@ -647,7 +624,7 @@ def _test_source_smiles_convert(
     # someones source compound list Although the MOH.check_sanitization will
     # do that. try sanitizing, which is necessary later
     try:
-        Chem.SanitizeMol(mol)  # type: ignore
+        mol, _ = chemtoolkit.sanitize_mol(mol)
     except Exception:
         printout = (
             "REMOVING SMILES FROM SOURCE LIST: SMILES "
@@ -661,18 +638,20 @@ def _test_source_smiles_convert(
     # will try protanating and Deprotanating the mol. If it can't handle that
     # We reject it as many functions will require this sort of manipulation.
     # More advanced sanitization issues will also be removed in this step
-    mol = Chem.MolFromSmiles(str(smile_str), sanitize=False)  # type: ignore
-    mol = MOH.handleHs(mol, True)
-
+    mol = chemtoolkit.mol_from_smiles(str(smile_str), sanitize=False)
+    mol = MOH.handleHs(
+        mol, True
+    )  # TODO: Probably not compatible with open babel implementation of chem toolkit! Will need to reconsider.
     if mol is None:
         printout = "REMOVING SMILES FROM SOURCE LIST: SMILES string failed \
-                    to be protanated or deprotanated.\n"
+            to be protanated or deprotanated.\n"
         printout = (
             printout
             + "\t This is often an issue with valence and sanitization "
             + "issues with the SMILES string."
         )
         return _report_removed_compound_info(smile_str, printout, smile_id)
+
     # Check there are no * which are atoms with atomic number=0
     mol = MOH.check_for_unassigned_atom(mol)
     if mol is None:
@@ -681,11 +660,12 @@ def _test_source_smiles_convert(
             + "an unassigned atom type labeled as *.\n"
         )
         return _report_removed_compound_info(smile_str, printout, smile_id)
-    # Check for fragments.
-    if len(Chem.GetMolFrags(mol, asMols=True, sanitizeFrags=False)) != 1:  # type: ignore
 
+    # Check for fragments.
+    if len(chemtoolkit.get_mol_frags(mol, as_mols=True, sanitize_frags=False)) != 1:
         printout = "REMOVING SMILES FROM SOURCE LIST: SMILES string was fragmented.\n"
         return _report_removed_compound_info(smile_str, printout, smile_id)
+
     # the ligand is good enough to use throughout the program!
     return smile_info
 
@@ -710,12 +690,9 @@ def _report_removed_compound_info(smile_str, printout, smile_id):
     return printout
 
 
-def _get_cmpds_prev_gen(
-    params: Dict[str, Any], generation_num: int
-) -> List[Compound]:
+def _get_cmpds_prev_gen(params: Dict[str, Any], generation_num: int) -> List[Compound]:
     """
-    Get the source compounds list from the previous generation of the source
-    compound list
+    Get source compounds list from previous generation's source compound list.
 
     This also filters the list to ensure mols can be imported to RDKit and
     that they pass the drug-likliness filters.
@@ -737,9 +714,9 @@ def _get_cmpds_prev_gen(
         f"{params['output_directory']}generation_0{os.sep}generation_0_ranked.smi"
     )
     if generation_num == 0:
-        predock_cmpds = _get_source_compounds_or_raise(params)
+        cmpds = _get_source_compounds_or_raise(params)
     elif generation_num == 1 and os.path.exists(source_file_gen_0) is False:
-        predock_cmpds = _get_source_compounds_or_raise(params)
+        cmpds = _get_source_compounds_or_raise(params)
     else:
         source_file = (
             params["output_directory"]
@@ -747,34 +724,37 @@ def _get_cmpds_prev_gen(
         )
         if os.path.exists(source_file) is False:
             _handle_no_ligands_found("\tCheck formatting or if file has been moved.\n")
-        predock_cmpds = Ranking.get_predockcmpds_from_smi_file(source_file)
+        cmpds = Ranking.get_predockcmpds_from_smi_file(source_file)
 
-        if len(predock_cmpds) == 0:
+        if len(cmpds) == 0:
             _handle_no_ligands_found("\tCheck formatting or if file has been moved. \n")
-    # Test that every SMILES in the predock_cmpds is a valid SMILES
-    # which will import and Sanitize in RDKit. SMILES will be excluded if they
-    # are fragmented, contain atoms with no atomic number (*), or do not
-    # sanitize
-    job_input = tuple((i,) for i in predock_cmpds)
 
-    predock_cmpds: List[Compound] = params["parallelizer"].run(
+    # Test that every SMILES in the predock_cmpds is a valid SMILES which will
+    # import and Sanitize in RDKit. SMILES will be excluded if they are
+    # fragmented, contain atoms with no atomic number (*), or do not sanitize
+    job_input = tuple(
+        ({"smile_info": i, "chemtoolkit": params["chemtoolkit"]},) for i in cmpds
+    )
+
+    cmpds: List[Compound] = params["parallelizer"].run(
         job_input, _test_source_smiles_convert
     )
-    predock_cmpds = [x for x in predock_cmpds if x is not None]
-    print_errors = [x for x in predock_cmpds if type(x) is str]
-    predock_cmpds = [x for x in predock_cmpds if type(x) is Compound]
+
+    cmpds = [x for x in cmpds if x is not None]
+    print_errors = [x for x in cmpds if type(x) is str]
+    cmpds = [x for x in cmpds if type(x) is Compound]
+
     for x in print_errors:
         print(x)
 
-    if not predock_cmpds:
+    if not cmpds:
         _raise_exception_with_message(
             "\nThere were no ligands in source compound or previous \
             generation which could sanitize.\n"
         )
 
-    random.shuffle(predock_cmpds)
-
-    return predock_cmpds
+    random.shuffle(cmpds)
+    return cmpds
 
 
 def _raise_exception_with_message(arg0):
@@ -807,7 +787,7 @@ def _get_source_compounds_or_raise(params) -> List[Compound]:
             compound file path.
 
     Returns:
-        List[PostDockedCompound]: List of source compounds.
+        List[Compound]: List of source compounds.
 
     Raises:
         Exception: If no ligands are found in the source compound file.
@@ -860,7 +840,7 @@ def _make_seed_list(
     Get the starting compound list for running the Mutation and Crossovers.
 
     Args:
-        source_compounds_list (List[PostDockedCompound]): A list with SMILES
+        source_compounds_list (List[Compound]): A list with SMILES
             strings, names, and information about the smiles from either the
             previous generation or the source compound list.
         generation_num (int): The integer of the current generation.
@@ -870,7 +850,7 @@ def _make_seed_list(
             from elite selection by docking score.
 
     Returns:
-        List[PostDockedCompound]: A list with SMILES strings, names, and
+        List[Compound]: A list with SMILES strings, names, and
             information about the smiles which will be used to seed the next
             generation.
     """
@@ -906,8 +886,7 @@ def _make_seed_list(
 
 def _get_seed_pop_sizes(params: Dict[str, Any], gen_num: int) -> Tuple[int, int]:
     """
-    Determines how many molecules will be chosen to seed a generation based on
-    their docking score and diversity score.
+    Determine num molecules to seed generation based on docking/diversity score.
 
     Args:
         params (Dict[str, Any]): A dictionary of all user variables.
@@ -960,12 +939,14 @@ def _make_pass_through_list(
     gen_num: int,
 ) -> List[Compound]:
     """
-    Determines the elite ligands to advance from the previous generation without
-    being altered into the next generation.
+    Determine the elite ligands to advance.
+     
+    Advances from the previous generation without being altered into the next
+    generation.
 
     Args:
         params (Dict[str, Any]): A dictionary of all user variables.
-        predock_cmpd_from_prev_gen (List[PostDockedCompound]): List of SMILES
+        predock_cmpd_from_prev_gen (List[Compound]): List of SMILES
             from the last generation chosen to seed the list of molecules to
             advance to the next generation without modification via elitism.
         num_elite_prev_gen (int): The number of molecules to advance from the
@@ -973,7 +954,7 @@ def _make_pass_through_list(
         gen_num (int): The integer of the current generation.
 
     Returns:
-        List[PostDockedCompound]: A list of ligands which should
+        List[Compound]: A list of ligands which should
             advance into the new generation without modifications, via elitism
             from the last generation.
     """
@@ -1007,9 +988,7 @@ def _make_pass_through_list(
     )
 
     # check if ligands_which_passed_filters have docking scores
-    has_dock_score = all(
-        x.docking_score is not None for x in ligs_that_passed_filters
-    )
+    has_dock_score = all(x.docking_score is not None for x in ligs_that_passed_filters)
     # try:
     #     temp = [float(x[-2]) for x in ligands_which_passed_filters]
     #     has_dock_score = True
@@ -1072,7 +1051,7 @@ def _save_generation_smi(
     Args:
         output_directory (str): Directory for saving the generation files.
         generation_num (int): Current generation number.
-        formatted_smile_list (List[PostDockedCompound]): List of compounds to save.
+        formatted_smile_list (List[Compound]): List of compounds to save.
         nomenclature_tag (Optional[str]): Tag to append to the file name. If 
             None, no tag is added.
 
@@ -1122,7 +1101,7 @@ def _save_ligand_list(
     Args:
         output_directory (str): Directory to save the generation files.
         generation_num (int): The current generation number.
-        chosen_ligands (List[PostDockedCompound]): The list of ligands to save 
+        chosen_ligands (List[Compound]): The list of ligands to save 
             for the next generation.
         nomenclature_tag (str): Description of the ligand list, such as 
             'Mutation', 'Crossover', 'Previous_Gen_choice', or 'seeding'.

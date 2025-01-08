@@ -1,6 +1,5 @@
 """
-This module defines base classes for docking plugins and manages their
-execution.
+Defines base classes for docking plugins and manages their execution.
 
 It includes abstract base classes for docking plugins and a plugin manager for
 handling docking operations. The module also provides functionality for ranking
@@ -32,24 +31,22 @@ class DockingBase(PluginBase):
             **kwargs: Keyword arguments to be passed to run_docking method.
 
         Returns:
-            List[PostDockedCompound]: A list of PostDockedCompound objects
+            List[Compound]: A list of Compound objects
             containing docking results.
         """
         return self.run_docking(predocked_cmpds=kwargs["predocked_cmpds"])
 
     @abstractmethod
-    def run_docking(
-        self, predocked_cmpds: List[Compound]
-    ) -> List[Compound]:
+    def run_docking(self, predocked_cmpds: List[Compound]) -> List[Compound]:
         """
         Abstract method to be implemented by each docking plugin.
 
         Args:
-            predocked_cmpds (List[PostDockedCompound]): A list of PostDockedCompound
+            predocked_cmpds (List[Compound]): A list of Compound
                 objects to be docked.
 
         Returns:
-            List[PostDockedCompound]: A list of PostDockedCompound objects, each
+            List[Compound]: A list of Compound objects, each
             containing the score and a docked (posed) SDF file.
         """
         # raise NotImplementedError("run_dock() not implemented")
@@ -72,7 +69,7 @@ class DockingPluginManager(PluginManagerBase):
             **kwargs: A dictionary of arguments to pass to the plugin.
 
         Returns:
-            List[PostDockedCompound]: A list of PostDockedCompound objects, each
+            List[Compound]: A list of Compound objects, each
             containing the score and a docked (posed) SDF file.
 
         Raises:
@@ -99,18 +96,19 @@ class DockingPluginManager(PluginManagerBase):
             log_debug(
                 f"Docked molecule {post_docked_cmpd.smiles}. Score: {post_docked_cmpd.docking_score:.2f}"
             )
+            post_docked_cmpd.add_history(
+                "DOCKING",
+                f"{post_docked_cmpd.smiles} docked with score {post_docked_cmpd.docking_score:.2f}",
+            )
 
         # # Sanity check: Make sure each output sdf file exists (should be the
         # # docked pose) and that it belongs to the correct generation.
         # import pdb ;pdb.set_trace()
         # TODO: THIS
 
-
         # Sanity check: Make sure each output sdf file contains only one model.
         for sdf_filename in [
-            c.sdf_path
-            for c in post_docked_cmpds
-            if c.sdf_path is not None
+            c.sdf_path for c in post_docked_cmpds if c.sdf_path is not None
         ]:
             with open(sdf_filename, "r") as f:
                 orig_sdf_content = f.read()

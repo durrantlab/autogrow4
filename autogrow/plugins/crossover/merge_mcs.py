@@ -1,21 +1,15 @@
 """Module for Maximum Common Substructure (MCS) based crossover in AutoGrow."""
 
-from typing import List, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 from autogrow.config.argparser import ArgumentVars
 from autogrow.plugins.crossover import CrossoverBase
 from autogrow.types import Compound
 import autogrow.utils.mol_object_handling as MOH
 from autogrow.utils.logging import log_debug
-import rdkit  # type: ignore
-from rdkit import Chem  # type: ignore
-from rdkit.Chem import AllChem  # type: ignore
-from rdkit.Chem import rdFMCS  # type: ignore
 import autogrow.plugins.crossover.merge_functions.alignment_and_breaks as AnB
 import autogrow.plugins.crossover.merge_functions.dict_and_r_groups as DnR
 import autogrow.plugins.crossover.merge_functions.merge_w_core as MWC
-
-# Disable the unnecessary RDKit warnings
-rdkit.RDLogger.DisableLog("rdApp.*")
+from autogrow.plugins.plugin_manager_instances import plugin_managers
 
 
 class MergeMCS(CrossoverBase):
@@ -89,9 +83,9 @@ class MergeMCS(CrossoverBase):
         Run the main script for SmileMerge.
 
         Args:
-            predock_cmpd1 (PostDockedCompound): PostDockedCompound of the first
+            predock_cmpd1 (Compound): Compound of the first
                 ligand.
-            predock_cmpd2 (PostDockedCompound):PostDockedCompound of the second
+            predock_cmpd2 (Compound):Compound of the second
                 ligand.
 
         Returns:
@@ -107,8 +101,10 @@ class MergeMCS(CrossoverBase):
         # lig_string_2 = "C# CCOc1ccc2ccccc2c1CO"
         # lig_string_1 = "C1 = CC = CC = C1"
         # Sanitize
-        mol1 = Chem.MolFromSmiles(predock_cmpd1.smiles, sanitize=False)
-        mol2 = Chem.MolFromSmiles(predock_cmpd2.smiles, sanitize=False)
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
+
+        mol1 = chemtoolkit.mol_from_smiles(predock_cmpd1.smiles, sanitize=False)
+        mol2 = chemtoolkit.mol_from_smiles(predock_cmpd2.smiles, sanitize=False)
 
         # Sanitize, deprotanate, and reprotanate both molecules
         mol1 = MOH.check_sanitization(mol1)
@@ -130,11 +126,11 @@ class MergeMCS(CrossoverBase):
 
         # Use the below mcs_H function for Most Common Substructure searching.
         # This will prevent broken rings.
-        mcs_results = rdFMCS.FindMCS(
+        mcs_results = chemtoolkit.find_mcs(
             mols,
-            matchValences=False,
-            ringMatchesRingOnly=True,
-            completeRingsOnly=False,
+            match_valences=False,
+            ring_matches_ring_only=True,
+            complete_rings_only=False,
             timeout=self.params["max_time_mcs_thorough"],
         )
 
@@ -146,7 +142,7 @@ class MergeMCS(CrossoverBase):
             return None
 
         ### Convert mcs_res from into usable and referable forms
-        mcs_mol = Chem.MolFromSmarts(mcs_results.smartsString)
+        mcs_mol = chemtoolkit.mol_from_smarts(mcs_results.smartsString)
 
         # handle_mcs_align_labeling_and_cyclicbreaks
         mol1, mol2, mcs_mol = AnB.handle_mcs_align_labeling_and_cyclicbreaks(
@@ -175,12 +171,12 @@ class MergeMCS(CrossoverBase):
             return None
 
         # Log the merge
-        ligand_new_mol_copy = Chem.RWMol(ligand_new_mol)
-        for atom in ligand_new_mol_copy.GetAtoms():
-            atom.SetAtomMapNum(0)
-        ligand_new_mol_copy = Chem.Mol(ligand_new_mol_copy)
-        clean_smiles = AllChem.MolToSmiles(
-            ligand_new_mol_copy, canonical=True, isomericSmiles=False
+        ligand_new_mol_copy = chemtoolkit.get_editable_mol(ligand_new_mol)
+        for atom in chemtoolkit.get_atoms(ligand_new_mol_copy):
+            chemtoolkit.set_atom_map_num(atom, 0)
+        ligand_new_mol_copy = chemtoolkit.get_noneditable_mol(ligand_new_mol_copy)
+        clean_smiles = chemtoolkit.mol_to_smiles(
+            ligand_new_mol_copy, canonical=True, isomeric_smiles=False
         )
         log_debug(
             f"Merge by MCS: {predock_cmpd1.smiles} + {predock_cmpd2.smiles} => {clean_smiles}"
@@ -190,9 +186,7 @@ class MergeMCS(CrossoverBase):
         # or None if processing fails
         return self._process_ligand_new_mol(ligand_new_mol)
 
-    def _process_ligand_new_mol(
-        self, ligand_new_mol: rdkit.Chem.rdchem.Mol
-    ) -> Optional[str]:
+    def _process_ligand_new_mol(self, ligand_new_mol: Any) -> Optional[str]:
         """
         Process the new ligand molecule.
 
@@ -212,6 +206,8 @@ class MergeMCS(CrossoverBase):
         if ligand_new_mol is None:
             return None
 
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
+
         # REMOVE ALL THE ISOTOPES IN THE NEW MOLECULE
         ligand_new_mol_final = MWC.remove_all_isolabels(ligand_new_mol)
 
@@ -230,4 +226,4 @@ class MergeMCS(CrossoverBase):
         if ligand_new_mol is None:
             return None
 
-        return Chem.MolToSmiles(ligand_new_mol, isomericSmiles=True)
+        return chemtoolkit.mol_to_smiles(ligand_new_mol, isomeric_smiles=True)

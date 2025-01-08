@@ -9,11 +9,13 @@ A single global instance of PluginManagers is created and maintained to provide
 consistent access to all plugin managers throughout the application.
 """
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Dict
+from typing import Any, Dict
 
+from autogrow.plugins.chem_toolkit import ChemToolkitBase, ChemToolkitPluginManager
 from autogrow.plugins.crossover import CrossoverBase, CrossoverPluginManager
 from autogrow.plugins.docking import DockingBase, DockingPluginManager
 from autogrow.plugins.mutation import MutationBase, MutationPluginManager
+from autogrow.plugins.pose_filters import PoseFilterBase, PoseFilterPluginManager
 from autogrow.plugins.selectors import SelectorBase, SelectorPluginManager
 from autogrow.plugins.shell_parallelizer import (
     ShellParallelizerBase,
@@ -21,7 +23,7 @@ from autogrow.plugins.shell_parallelizer import (
 )
 from autogrow.plugins.smi_to_3d_sdf import SmiTo3DSdfBase, SmiTo3DSdfPluginManager
 from autogrow.plugins.smiles_filters import SmilesFilterBase, SmilesFilterPluginManager
-from autogrow.plugins.pose_filters import PoseFilterBase, PoseFilterPluginManager
+from autogrow.plugins.plugin_manager_instances import plugin_managers
 
 
 @dataclass
@@ -34,6 +36,7 @@ class PluginManagers:
     instance of each type of plugin manager.
     """
 
+    ChemToolkit: ChemToolkitPluginManager = ChemToolkitPluginManager(ChemToolkitBase)
     SmilesFilter: SmilesFilterPluginManager = SmilesFilterPluginManager(
         SmilesFilterBase
     )
@@ -50,9 +53,6 @@ class PluginManagers:
     )
 
 
-plugin_managers = PluginManagers()
-
-
 def setup_plugin_managers(params: Dict[str, Any]):
     """
     Set up all plugin managers with the provided parameters.
@@ -66,6 +66,22 @@ def setup_plugin_managers(params: Dict[str, Any]):
         params (Dict[str, Any]): Configuration parameters for all plugin
             managers.
     """
-    # Iterate through all plugin managers in the PluginManagers class and setup each one
+    plugin_managers.ChemToolkit = ChemToolkitPluginManager(ChemToolkitBase)
+    plugin_managers.ChemToolkit.setup_plugin_manager(params, plugin_managers)
+
+    # Initialize others after ChemToolkit
+    plugin_managers.SmilesFilter = SmilesFilterPluginManager(SmilesFilterBase)
+    plugin_managers.Selector = SelectorPluginManager(SelectorBase)
+    plugin_managers.Docking = DockingPluginManager(DockingBase)
+    plugin_managers.Mutation = MutationPluginManager(MutationBase)
+    plugin_managers.Crossover = CrossoverPluginManager(CrossoverBase)
+    plugin_managers.SmiTo3DSdf = SmiTo3DSdfPluginManager(SmiTo3DSdfBase)
+    plugin_managers.ShellParallelizer = ShellParallelizerPluginManager(
+        ShellParallelizerBase
+    )
+
+    # Setup all plugin managers
     for name, plugin_manager in PluginManagers.__annotations__.items():
-        getattr(plugin_managers, name).setup_plugin_manager(params, plugin_managers)
+        # Skip ChemToolkit since we already set it up
+        if name != "ChemToolkit":
+            getattr(plugin_managers, name).setup_plugin_manager(params, plugin_managers)

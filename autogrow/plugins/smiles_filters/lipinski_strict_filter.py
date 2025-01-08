@@ -20,16 +20,9 @@ import __future__
 
 from autogrow.plugins.smiles_filters import SmilesFilterBase
 from autogrow.types import Compound
-import rdkit  # type: ignore
-import rdkit.Chem as Chem  # type: ignore
-import rdkit.Chem.Lipinski as Lipinski  # type: ignore
-import rdkit.Chem.Crippen as Crippen  # type: ignore
-import rdkit.Chem.Descriptors as Descriptors  # type: ignore
 from typing import List, Tuple
 from autogrow.config.argparser import ArgumentVars
-
-# Disable the unnecessary RDKit warnings
-rdkit.RDLogger.DisableLog("rdApp.*")
+from autogrow.plugins.plugin_manager_instances import plugin_managers
 
 
 class LipinskiStrictFilter(SmilesFilterBase):
@@ -55,7 +48,7 @@ class LipinskiStrictFilter(SmilesFilterBase):
     Delivery Reviews, 46 (2001), pp. 3-26
     """
 
-    def run_filter(self, predock_cmpd: Compound) -> bool:
+    def run_filter(self, cmpd: Compound) -> bool:
         """
         Run the Strict Lipinski filter on a given molecule.
 
@@ -68,7 +61,7 @@ class LipinskiStrictFilter(SmilesFilterBase):
         requirements.
 
         Args:
-            predock_cmpd (PostDockedCompound): A PostDockedCompound to be tested.
+            cmpd (Compound): A Compound to be tested.
 
         Returns:
             bool: True if the molecule passes all filter criteria, False
@@ -79,23 +72,25 @@ class LipinskiStrictFilter(SmilesFilterBase):
         permeability in drug discovery and development settings Advanced Drug
         Delivery Reviews, 46 (2001), pp. 3-26
         """
-        mol = self.predock_cmpd_to_rdkit_mol(predock_cmpd)
+        mol = self.cmpd_to_rdkit_mol(cmpd)
         if mol is None:
             return False
 
-        exact_mwt = Descriptors.ExactMolWt(mol)
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
+
+        exact_mwt = chemtoolkit.descriptors_exact_mol_wt(mol)
         if exact_mwt > 500:
             return False
 
-        num_hydrogen_bond_donors = Lipinski.NumHDonors(mol)
+        num_hydrogen_bond_donors = chemtoolkit.lipinski_num_h_donors(mol)
         if num_hydrogen_bond_donors > 5:
             return False
 
-        num_hydrogen_bond_acceptors = Lipinski.NumHAcceptors(mol)
+        num_hydrogen_bond_acceptors = chemtoolkit.lipinski_num_h_acceptors(mol)
         if num_hydrogen_bond_acceptors > 10:
             return False
 
-        mol_log_p = Crippen.MolLogP(mol)
+        mol_log_p = chemtoolkit.crippen_mol_log_p(mol)
         if mol_log_p > 5:
             return False
 

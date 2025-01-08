@@ -12,6 +12,7 @@ import string
 import hashlib
 import time
 
+
 class Slurm(ShellParallelizerBase):
     """A plugin that uses Slurm array jobs to execute shell commands in parallel.
     
@@ -21,6 +22,14 @@ class Slurm(ShellParallelizerBase):
     """
 
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+        """
+        Add arguments for the Slurm shell parallelizer plugin.
+        
+        Returns:
+            Tuple[str, List[ArgumentVars]]: A tuple containing the plugin
+                category name and a list of ArgumentVars for the plugin's specific
+                arguments.
+        """
         return (
             "Slurm Shell Parallelizer",
             [
@@ -47,7 +56,7 @@ class Slurm(ShellParallelizerBase):
                     action="store_true",
                     default=False,
                     help="Wait for the slurm job to complete. If this parameter is not given, AutoGrow4 will submit slurm jobs as needed and exit after each submission. You will have to restart AutoGrow4 after each slurm job finishes to continue.",
-                )
+                ),
             ],
         )
 
@@ -93,7 +102,6 @@ class Slurm(ShellParallelizerBase):
             If the number of CPUs cannot be determined, it defaults to using a
             single processor and logs a warning.
         """
-
         # Get the current generation directory
         cache_dir = self.params["cur_gen_dir"]
 
@@ -129,9 +137,9 @@ class Slurm(ShellParallelizerBase):
 
             while not os.path.exists(completion_file):
                 time.sleep(5)
-            
+
             return self._collect_results(commands_file, cache_dir, prefix)
-        
+
         # Not supposed to wait for slurm.
 
         # Exit program with message
@@ -172,19 +180,39 @@ class Slurm(ShellParallelizerBase):
             # Add array job logic
             f.write(
                 """
+# Input parameters (to be replaced)
+commands_file="%COMMANDS_FILE%"
+cache_dir="%CACHE_DIR%"
+completion_dir="${cache_dir}/completion"
+completion_file="%COMPLETION_FILE%"
+out_path="%CACHE_DIR%/output_${SLURM_ARRAY_TASK_ID}.txt"
+error_path="%CACHE_DIR%/error_${SLURM_ARRAY_TASK_ID}.txt"
+
+# Create completion directory if it doesn't exist
+mkdir -p "${completion_dir}"
+
 # Get command for this array task
 CMD=$(sed -n "${SLURM_ARRAY_TASK_ID}p" "${commands_file}")
 
-# Create output directory for this task
-OUT_DIR="${cache_dir}"
-
 # Run command and capture output
-cd "${OUT_DIR}"
+cd "${cache_dir}"
 eval "${CMD}" > ${out_path} 2> ${error_path}
 
-# Last task creates completion file
+# Create a completion marker for this task
+touch "${completion_dir}/task_${SLURM_ARRAY_TASK_ID}"
+
+# If this is the last task, check if all other tasks are complete
 if [ "${SLURM_ARRAY_TASK_ID}" -eq "${SLURM_ARRAY_TASK_MAX}" ]; then
+    # Wait for all completion markers
+    while [ $(ls "${completion_dir}/task_"* 2>/dev/null | wc -l) -lt ${SLURM_ARRAY_TASK_MAX} ]; do
+        sleep 10
+    done
+    
+    # Once all tasks are complete, create the final completion file
     touch "${completion_file}"
+    
+    # Clean up completion markers
+    rm -rf "${completion_dir}"
 fi
 """.replace(
                     "${commands_file}", commands_file

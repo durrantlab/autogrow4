@@ -1,8 +1,8 @@
 """
 Molecular docking interfaces and implementations.
 
-This package provides abstractions and implementations for molecular docking
-functionality, including:
+Provides abstractions and implementations for molecular docking functionality,
+including:
 
 - Common docking operations
 - Docking with various backend engines

@@ -19,7 +19,7 @@ INDENT = " "
 
 
 def create_logger(level: int, file_path: str = "log.txt"):
-    """Creates and configures a logger with specified level and file path.
+    """Create and configure a logger with specified level and file path.
 
     Sets up a global logger with a StreamHandler and basic configuration. The
     logger is named "autogrow" and will output to both console and file.
@@ -68,6 +68,16 @@ class CustomFormatter(logging.Formatter):
     """
 
     def __init__(self, fmt=None, datefmt=None, style="%"):
+        """
+        Initialize the formatter with the specified format and date format.
+        
+        Args:
+            fmt (str, optional): Message format string. Defaults to
+                timestamp-level-message format
+            datefmt (str, optional): Date format string. Defaults to ISO-like
+                format
+            style (str, optional): Style of format string. Defaults to "%"
+        """
         if fmt is None:
             fmt = "%(asctime)s - %(levelname)s - %(message)s"
         if datefmt is None:
@@ -82,13 +92,23 @@ class CustomFormatter(logging.Formatter):
         }
 
     def format(self, record):
+        """
+        Format the log record with the custom level name.
+        
+        Args:
+            record (logging.LogRecord): The log record to format
+        
+        Returns:
+            str: The formatted log message
+        """
         # Replace the levelname with our custom string
         record.levelname = self.level_strings.get(record.levelno, record.levelname)
         return super().format(record)
 
 
 def set_log_tab_level(tab_count: int):
-    """Sets the indentation level for log messages.
+    """
+    Set the indentation level for log messages.
 
     Configures a new formatter with the specified indentation level and applies
     it to the global handler.
@@ -114,7 +134,7 @@ def set_log_tab_level(tab_count: int):
 
 
 def wrap_msg(msg: str) -> List[str]:
-    """Wraps a message to fit within the maximum line length.
+    """Wrap a message to fit within the maximum line length.
 
     Args:
         msg (str): The message to wrap
@@ -157,7 +177,7 @@ def decrease_log_tab_level():
 
 
 def log_info(msg: str):
-    """Logs a message at INFO level with proper indentation and line wrapping.
+    """Log a message at INFO level with proper indentation and line wrapping.
 
     Writes the message to both the logger (if configured) and the log file. Long
     messages are wrapped to fit MAX_MSG_LINE_LENGTH, with subsequent lines
@@ -186,7 +206,7 @@ def log_info(msg: str):
 
 
 def log_debug(msg: str):
-    """Logs a message at DEBUG level with proper indentation and line wrapping.
+    """Log a message at DEBUG level with proper indentation and line wrapping.
 
     Writes the message to both the logger (if configured) and the log file. Long
     messages are wrapped to fit MAX_MSG_LINE_LENGTH, with subsequent lines
@@ -213,8 +233,8 @@ def log_debug(msg: str):
 
 
 def log_warning(msg: str):
-    """Logs a message at WARNING level with proper indentation and line
-    wrapping.
+    """
+    Log a message at WARNING level with proper indentation and line wrapping.
 
     Writes the message to both the logger (if configured) and the log file. Long
     messages are wrapped to fit MAX_MSG_LINE_LENGTH, with subsequent lines
@@ -285,11 +305,13 @@ class WithoutLogging:
     """
 
     def __init__(self):
+        """Initialize context manager by storing the original logging state."""
         self.original_logging_class = logging.getLoggerClass()
         self.original_get_logger = logging.getLogger
 
     def disabled_getLogger(self, name=None):
-        """Returns a disabled logger instance.
+        """
+        Get a disabled logger instance.
 
         Args:
             name (str, optional): Name for the logger. Defaults to None
@@ -302,9 +324,7 @@ class WithoutLogging:
         return logger
 
     def __enter__(self):
-        """
-        Disable all existing and future loggers when entering the context.
-        """
+        """Disable all existing and future loggers when entering the context."""
         # Disable all existing loggers
         for logger in logging.Logger.manager.loggerDict.values():
             if isinstance(logger, logging.Logger):
@@ -324,9 +344,7 @@ class WithoutLogging:
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        """
-        Restore logging functionality when exiting the context.
-        """
+        """Restore logging functionality when exiting the context."""
         # Re-enable all loggers
         for logger in logging.Logger.manager.loggerDict.values():
             if isinstance(logger, logging.Logger):

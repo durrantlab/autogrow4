@@ -82,10 +82,7 @@ class TournamentSelector(SelectorBase):
             )
 
     def run_selector(
-        self,
-        predock_cmpds: List[Compound],
-        num_to_choose: int,
-        score_type: ScoreType,
+        self, predock_cmpds: List[Compound], num_to_choose: int, score_type: ScoreType,
     ) -> List[Compound]:
         """
         Select compounds using tournament selection without replacement.
@@ -95,7 +92,7 @@ class TournamentSelector(SelectorBase):
         best-scoring compound wins the tournament.
 
         Args:
-            predock_cmpds (List[PostDockedCompound]): A list of all compounds
+            predock_cmpds (List[Compound]): A list of all compounds
                 from the previous generation.
             num_to_choose (int): The number of compounds to select (also the
                 number of tournaments to run).
@@ -103,7 +100,7 @@ class TournamentSelector(SelectorBase):
                 "diversity" scores for selection.
 
         Returns:
-            List[PostDockedCompound]: List of selected compounds.
+            List[Compound]: List of selected compounds.
 
         Raises:
             Exception: If predock_cmpds is not a list or is empty.
@@ -161,7 +158,7 @@ class TournamentSelector(SelectorBase):
         and returns the best-scoring compound from this subset.
 
         Args:
-            list_of_ligands (List[PostDockedCompound]): The list of all compounds
+            list_of_ligands (List[Compound]): The list of all compounds
                 to select from.
             num_per_tourn (int): The number of compounds to include in the
                 tournament.
@@ -169,7 +166,7 @@ class TournamentSelector(SelectorBase):
                 "diversity" scores for selection.
 
         Returns:
-            PostDockedCompound: The winning compound from the tournament.
+            Compound: The winning compound from the tournament.
         """
         num_ligands = len(list_of_ligands)
 

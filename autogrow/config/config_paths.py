@@ -1,5 +1,5 @@
 """
-Path Configuration Module for AutoGrow
+Path Configuration Module for AutoGrow.
 
 This module handles the configuration of file and directory paths for the
 AutoGrow program, ensuring proper path formatting and directory creation.

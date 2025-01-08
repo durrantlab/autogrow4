@@ -1,20 +1,18 @@
-from abc import ABC, abstractmethod
-from argparse import ArgumentParser
-from typing import Dict, List, Optional, Tuple, Union, cast
+from abc import abstractmethod
+from typing import Any, List, Optional, cast
 
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
 from autogrow.types import Compound
-from rdkit import Chem  # type: ignore
-from rdkit.Chem.MolStandardize import rdMolStandardize  # type: ignore
-import copy
+from autogrow.plugins.plugin_manager_instances import plugin_managers
 
 from autogrow.plugins.plugin_base import PluginBase
+from autogrow.utils.logging import log_warning
 import autogrow.utils.mol_object_handling as MOH
 
 
 class SmilesFilterBase(PluginBase):
     """
-    This is a script containing all of the filters for drug likeliness
+    This is a script containing all of the filters for drug likeliness.
 
     Filters for orally bio-available drugs:
         1) Lipinski
@@ -43,22 +41,22 @@ class SmilesFilterBase(PluginBase):
 
         Args:
             **kwargs: Keyword arguments containing filter parameters, must
-                include: predock_cmpd (PostDockedCompound): The molecule to be
+                include: cmpd (Compound): The molecule to be
                 filtered
 
         Returns:
             bool: True if the molecule passes the filter criteria, False
                 otherwise
         """
-        return self.run_filter(kwargs["predock_cmpd"])
+        return self.run_filter(kwargs["cmpd"])
 
     @abstractmethod
-    def run_filter(self, predock_cmpd: Compound) -> bool:
+    def run_filter(self, cmpd: Compound) -> bool:
         """
         run_filter is needs to be implemented in each class.
 
         Inputs:
-        :param PostDockedCompound predock_cmpd: a molecule to filter
+        :param Compound cmpd: a molecule to filter
 
         Returns:
         :returns: bool: True if the molecule passes the filter, False if it fails
@@ -69,20 +67,19 @@ class SmilesFilterBase(PluginBase):
         """Validate the provided arguments."""
         pass
 
-    def predock_cmpd_to_rdkit_mol(
-        self, predock_cmpd: Compound
-    ) -> Optional[Chem.Mol]:
+    def cmpd_to_rdkit_mol(self, cmpd: Compound) -> Optional[Any]:
         """
-        Convert a PostDockedCompound object to an RDKit molecule object.
+        Convert a Compound object to an RDKit molecule object.
 
         Args:
-            predock_cmpd (PostDockedCompound): The PostDockedCompound object to
+            cmpd (Compound): The Compound object to
                 convert.
 
         Returns:
             Optional[Chem.Mol]: The RDKit molecule object. None if fails.
         """
-        mol = Chem.MolFromSmiles(predock_cmpd.smiles, sanitize=False)
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
+        mol = chemtoolkit.mol_from_smiles(cmpd.smiles, sanitize=False)
         # try sanitizing, which is necessary later
         mol = MOH.check_sanitization(mol)
         if mol is None:
@@ -100,6 +97,8 @@ class SmilesFilterBase(PluginBase):
 
 
 class SmilesFilterPluginManager(PluginManagerBase):
+    """Manages and executes filter plugins in the autogrow framework."""
+
     def execute(self, **kwargs) -> List:
         """
         Run the plugin with provided arguments.
@@ -116,22 +115,24 @@ class SmilesFilterPluginManager(PluginManagerBase):
 
         # Run filter on a single smiles string.
         passed_cmpds: List[Compound] = []
-        for predock_cmpd in kwargs["predock_cmpds"]:
+        for cmpd in kwargs["predock_cmpds"]:
             # run through the filters
-            passed = self._run_all_selected_filters(predock_cmpd)
+            passed = self._run_all_selected_filters(cmpd)
             if passed:
-                passed_cmpds.append(predock_cmpd)
+                passed_cmpds.append(cmpd)
 
         return passed_cmpds
 
-    def _run_all_selected_filters(self, predock_cmpd: Compound) -> bool:
+    def _run_all_selected_filters(self, cmpd: Compound) -> bool:
         """
+        Determine if mol passes filters.
+
         Iterate through all of the filters specified by the user for a single
         molecule. returns True if the mol passes all the chosen filters. returns
         False if the mol fails any of the filters.
 
         Inputs:
-        :param PostDockedCompound predock_cmpd: An rdkit mol object to be tested
+        :param Compound cmpd: An rdkit mol object to be tested
             if it passes the filters
 
         Returns:
@@ -143,9 +144,9 @@ class SmilesFilterPluginManager(PluginManagerBase):
             # mol_copy = copy.deepcopy(mol)
             plugin = cast(SmilesFilterBase, self.plugins[plugin_name])
             filter_function = plugin.run
-            if not filter_function(predock_cmpd=predock_cmpd):
+            if not filter_function(cmpd=cmpd):
                 filters_failed = filters_failed + 1
-                print(f"Failed {plugin_name} filter: {predock_cmpd.smiles}")
+                log_warning(f"Failed {plugin_name} filter: {cmpd.smiles}")
 
         if filters_failed == 0:
             return True
