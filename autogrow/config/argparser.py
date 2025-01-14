@@ -26,7 +26,7 @@ Note:
 import argparse
 import copy
 import json
-from typing import Any, Dict, List, Optional, Tuple, Type, TYPE_CHECKING
+from typing import Any, Dict
 
 from autogrow.config import setup_params
 from autogrow.config.json_config_utils import (
@@ -34,17 +34,8 @@ from autogrow.config.json_config_utils import (
     save_vars_as_json,
 )
 from autogrow.config.argument_vars import plugin_arg_groups_to_add
+from autogrow.plugins.registry_base import PluginManagerRegistry
 from autogrow.validation import validate_all
-
-from autogrow.plugins.chem_toolkit import ChemToolkitBase, ChemToolkitPluginManager
-from autogrow.plugins.crossover import CrossoverBase, CrossoverPluginManager
-from autogrow.plugins.docking import DockingBase, DockingPluginManager
-from autogrow.plugins.mutation import MutationBase, MutationPluginManager
-from autogrow.plugins.pose_filters import PoseFilterBase, PoseFilterPluginManager
-from autogrow.plugins.selectors import SelectorBase, SelectorPluginManager
-from autogrow.plugins.shell_parallelizer import ShellParallelizerBase, ShellParallelizerPluginManager
-from autogrow.plugins.smi_to_3d_sdf import SmiTo3DSdfBase, SmiTo3DSdfPluginManager
-from autogrow.plugins.smiles_filters import SmilesFilterBase, SmilesFilterPluginManager
 
 parser = argparse.ArgumentParser(
     description="AutoGrow: An automated drug optimization and generation tool."
@@ -65,17 +56,7 @@ def get_user_params() -> Dict[str, Any]:
     global parser
 
     # Create plugin manager instances but don't register arguments yet
-    plugin_managers = [
-        ChemToolkitPluginManager(ChemToolkitBase),
-        SmilesFilterPluginManager(SmilesFilterBase),
-        SelectorPluginManager(SelectorBase), 
-        DockingPluginManager(DockingBase),
-        MutationPluginManager(MutationBase),
-        CrossoverPluginManager(CrossoverBase),
-        SmiTo3DSdfPluginManager(SmiTo3DSdfBase),
-        ShellParallelizerPluginManager(ShellParallelizerBase),
-        PoseFilterPluginManager(PoseFilterBase)
-    ]
+    plugin_managers = PluginManagerRegistry.get_all_plugin_managers()
     
     # Register arguments once
     for plugin_manager in plugin_managers:
