@@ -13,10 +13,14 @@ from autogrow.plugins.smi_to_3d_sdf import SmiTo3DSdfPluginManager, SmiTo3DSdfBa
 from autogrow.plugins.shell_parallelizer import ShellParallelizerPluginManager, ShellParallelizerBase
 from autogrow.plugins.pose_filters import PoseFilterPluginManager, PoseFilterBase
 
+# TODO: I bet it would be possible to autogenerate this list through dynamic
+# imports. Good to investigate.
+
 # The definitive list of all plugin types
 PLUGIN_TYPES = [
     # ChemToolkit must be first as others depend on it
     ("ChemToolkit", ChemToolkitPluginManager, ChemToolkitBase),
+
     ("SmilesFilter", SmilesFilterPluginManager, SmilesFilterBase),
     ("Selector", SelectorPluginManager, SelectorBase),
     ("Docking", DockingPluginManager, DockingBase),
