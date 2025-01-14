@@ -15,8 +15,21 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class PluginManagers:
-    """Container class for all plugin managers in the AutoGrow system."""
+class PluginManagerRegistry:
+    """Global registry providing access to initialized AutoGrow plugin managers.
+    
+    This class serves as a centralized registry storing references to all initialized
+    plugin managers. It provides a singleton-style access point that any part of the 
+    system can import to access plugin functionality without creating circular imports.
+    
+    The actual creation and initialization of plugin managers is handled by 
+    PluginManagerFactory - this class only stores references to the initialized
+    instances. This separation allows plugins to access other plugins through this
+    registry without importing their implementation details.
+    
+    The global instance of this registry is created as 'plugin_managers' in this
+    module and should be imported by other modules needing access to plugins.
+    """
 
     SmilesFilter: Optional["SmilesFilterPluginManager"] = None
     Selector: Optional["SelectorPluginManager"] = None
@@ -28,4 +41,4 @@ class PluginManagers:
     ChemToolkit: Optional["ChemToolkitPluginManager"] = None
     PoseFilter: Optional["PoseFilterPluginManager"] = None
 
-plugin_managers = PluginManagers()
+plugin_managers = PluginManagerRegistry()

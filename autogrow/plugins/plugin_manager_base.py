@@ -28,7 +28,7 @@ from autogrow.plugins.plugin_base import PluginBase
 from autogrow.utils.caching import CacheManager
 
 if TYPE_CHECKING:
-    from autogrow.plugins.plugin_managers import PluginManagers
+    from autogrow.plugins.plugin_manager_instances import PluginManagerRegistry
 
 
 class PluginManagerBase(ABC):
@@ -80,7 +80,7 @@ class PluginManagerBase(ABC):
         return self.__class__.__name__
 
     def setup_plugin_manager(
-        self, params: dict, plugin_managers: Optional["PluginManagers"] = None,
+        self, params: dict, plugin_managers: Optional["PluginManagerRegistry"] = None,
     ):
         """
         Set up the plugin manager with provided parameters.
@@ -90,7 +90,7 @@ class PluginManagerBase(ABC):
         Args:
             params (dict): Dictionary of parameters to set up the plugin
                 manager.
-            plugin_managers (Optional[PluginManagers]): PluginManagers object
+            plugin_managers (Optional[PluginManagerRegistry]): PluginManagers object
                 containing all plugin managers. Used to access plugins from
                 within other plugins to avoid circular imports.
         """

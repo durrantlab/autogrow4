@@ -23,17 +23,21 @@ from autogrow.plugins.shell_parallelizer import (
 )
 from autogrow.plugins.smi_to_3d_sdf import SmiTo3DSdfBase, SmiTo3DSdfPluginManager
 from autogrow.plugins.smiles_filters import SmilesFilterBase, SmilesFilterPluginManager
-from autogrow.plugins.plugin_manager_instances import plugin_managers
+from autogrow.plugins.plugin_manager_instances import PluginManagerRegistry, plugin_managers
 
 
 @dataclass
-class PluginManagers:
-    """
-    Container class for all plugin managers in the AutoGrow system.
+class PluginManagerFactory:
+    """Factory class for creating and initializing AutoGrow plugin managers.
+    
+    This class serves as the factory that instantiates and configures all plugin 
+    managers in the system. It creates fresh instances of each plugin manager type 
+    (ChemToolkit, SmilesFilter, etc.) and handles their initialization and setup.
 
-    This class serves as a central point of access for all plugin managers,
-    making it easy to coordinate their setup and usage. It maintains one
-    instance of each type of plugin manager.
+    The factory creates plugin managers but does not store global references to them - 
+    that is handled by the PluginManagerRegistry. This separation avoids circular
+    dependencies since plugins can access other plugins through the registry without
+    importing the factory directly.
     """
 
     ChemToolkit: ChemToolkitPluginManager = ChemToolkitPluginManager(ChemToolkitBase)
@@ -54,18 +58,32 @@ class PluginManagers:
 
 
 def setup_plugin_managers(params: Dict[str, Any]):
-    """
-    Set up all plugin managers with the provided parameters.
-
-    This function iterates through all plugin managers defined in the
-    PluginManagers class and sets up each one with the provided parameters. Each
-    manager is initialized with access to all other managers to enable
-    inter-plugin coordination.
-
+    """Set up all plugin managers with the provided parameters.
+    
+    This function creates and initializes all plugin managers through the factory,
+    then populates the global registry with references to them.
+    
     Args:
-        params (Dict[str, Any]): Configuration parameters for all plugin
-            managers.
+        params (Dict[str, Any]): Configuration parameters for all plugin managers.
+    
+    Raises:
+        AssertionError: If the factory and registry classes have mismatched attributes
     """
+    # First verify that factory and registry have matching attributes
+    factory_attrs = set(PluginManagerFactory.__annotations__.keys())
+    registry_attrs = set(PluginManagerRegistry.__annotations__.keys())
+    
+    if factory_attrs != registry_attrs:
+        extra_in_factory = factory_attrs - registry_attrs
+        extra_in_registry = registry_attrs - factory_attrs
+        msg = "Plugin manager factory and registry have mismatched attributes.\n"
+        if extra_in_factory:
+            msg += f"Attributes in factory but not registry: {extra_in_factory}\n"
+        if extra_in_registry:
+            msg += f"Attributes in registry but not factory: {extra_in_registry}"
+        raise AssertionError(msg)
+
+    # Create instances manually since order matters (ChemToolkit must be first)
     plugin_managers.ChemToolkit = ChemToolkitPluginManager(ChemToolkitBase)
     plugin_managers.ChemToolkit.setup_plugin_manager(params, plugin_managers)
 
@@ -79,9 +97,11 @@ def setup_plugin_managers(params: Dict[str, Any]):
     plugin_managers.ShellParallelizer = ShellParallelizerPluginManager(
         ShellParallelizerBase
     )
+    plugin_managers.PoseFilter = PoseFilterPluginManager(PoseFilterBase)
 
     # Setup all plugin managers
-    for name, plugin_manager in PluginManagers.__annotations__.items():
-        # Skip ChemToolkit since we already set it up
-        if name != "ChemToolkit":
-            getattr(plugin_managers, name).setup_plugin_manager(params, plugin_managers)
+    for name in PluginManagerRegistry.__annotations__.keys():
+        if name != "ChemToolkit":  # Skip since we already set it up
+            plugin_manager = getattr(plugin_managers, name)
+            if plugin_manager is not None:
+                plugin_manager.setup_plugin_manager(params, plugin_managers)
