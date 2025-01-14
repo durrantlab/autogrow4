@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import Optional, TYPE_CHECKING
 
+from autogrow.plugins.pose_filters import PoseFilterPluginManager
+
 if TYPE_CHECKING:
     from autogrow.plugins.chem_toolkit import ChemToolkitPluginManager
     from autogrow.plugins.crossover import CrossoverPluginManager
@@ -24,6 +26,6 @@ class PluginManagers:
     SmiTo3DSdf: Optional["SmiTo3DSdfPluginManager"] = None
     ShellParallelizer: Optional["ShellParallelizerPluginManager"] = None
     ChemToolkit: Optional["ChemToolkitPluginManager"] = None
-
+    PoseFilter: Optional["PoseFilterPluginManager"] = None
 
 plugin_managers = PluginManagers()

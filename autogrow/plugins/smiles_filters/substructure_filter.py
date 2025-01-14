@@ -47,6 +47,7 @@ class SubstructureFilter(SmilesFilterBase):
             raise ValueError("Must provide --substructure_smiles parameter")
 
         # Verify the SMILES can be converted to a valid molecule
+        assert self.plugin_managers is not None, "Plugin managers not set"
         chemtoolkit = self.plugin_managers.ChemToolkit.toolkit
         query_mol = chemtoolkit.mol_from_smarts(params["substructure_smiles"])
         if query_mol is None:
@@ -71,6 +72,7 @@ class SubstructureFilter(SmilesFilterBase):
             return False
             
         # Use the chemistry toolkit to do substructure matching
+        assert self.plugin_managers is not None, "Plugin managers not set"
         chemtoolkit = self.plugin_managers.ChemToolkit.toolkit
         matches = chemtoolkit.get_substruct_matches(mol, self.query_mol)
         
