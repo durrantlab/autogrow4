@@ -18,7 +18,7 @@ import contextlib
 import json
 import os
 from typing import Any, Dict, List, Optional, Tuple, Union
-from autogrow.config.argparser import ArgumentVars
+from autogrow.config.argument_vars import ArgumentVars
 
 from autogrow.plugins.mutation import MutationBase
 from autogrow.types import Compound

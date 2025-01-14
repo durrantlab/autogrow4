@@ -22,7 +22,7 @@ import importlib
 import inspect
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Type, TYPE_CHECKING
-from autogrow.config.argparser import register_argparse_group
+from autogrow.config.argument_vars import register_argparse_group
 from autogrow.plugins.plugin_base import PluginBase
 
 from autogrow.utils.caching import CacheManager
@@ -47,6 +47,8 @@ class PluginManagerBase(ABC):
             plugins.
     """
 
+    plugin_base_class: Optional[Type[PluginBase]] = None  # Class variable for the base plugin class
+
     def __init__(self, plugin_base_class: Type[PluginBase]):
         """
         Initialize the plugin manager.
@@ -56,10 +58,59 @@ class PluginManagerBase(ABC):
                 managed by this manager.
         """
         self.plugin_base_class = plugin_base_class
-
-        # Initially loads all plugins
+        self.__class__.plugin_base_class = plugin_base_class
+        # Load plugins but don't register arguments
         self.plugins = self.load_plugins()
 
+    @classmethod
+    def register_plugin_arguments(cls) -> None:
+        """Register command-line arguments for all plugins of this type.
+        
+        This class method discovers and registers arguments for all plugins without 
+        requiring full plugin manager instantiation. It should be called during
+        argument parsing setup.
+        
+        Args:
+            plugin_base_class: Base class for the type of plugins to discover
+        """
+        if cls.plugin_base_class is None:
+            raise ValueError(f"plugin_base_class not set for {cls.__name__}")
+        
+        plugin_directory = os.path.dirname(os.path.abspath(__file__))
+        # Get the package name by removing the last component of the module path
+        package_name = cls.__module__.rsplit(".", 1)[0]
+        
+        processed_modules = set()  # Keep track of processed modules
+        
+        for root, dirs, files in os.walk(plugin_directory):
+            for file in files:
+                if file.endswith(".py") and file != "__init__.py":
+                    # Calculate the relative path to build the module name
+                    rel_path = os.path.relpath(root, plugin_directory)
+                    # Build the full module name
+                    if rel_path == ".":
+                        module_name = f"{package_name}.{file[:-3]}"
+                    else:
+                        module_name = f"{package_name}.{rel_path.replace(os.path.sep, '.')}.{file[:-3]}"
+                    
+                    # Skip if we've already processed this module
+                    if module_name in processed_modules:
+                        continue
+                    processed_modules.add(module_name)
+                    
+                    try:
+                        module = importlib.import_module(module_name)
+                        for name, obj in inspect.getmembers(module):
+                            if (inspect.isclass(obj) 
+                                and issubclass(obj, cls.plugin_base_class)
+                                and obj is not cls.plugin_base_class):
+                                # Create an instance and register its arguments
+                                plugin = obj()
+                                title, args = plugin.add_arguments()
+                                register_argparse_group(title, args)
+                    except ImportError as e:
+                        print(f"Failed to import {module_name}: {e}")
+                        
     def on_plugin_manager_setup_done(self):
         """
         Perform any initialization tasks for the plugin manager.
@@ -137,7 +188,11 @@ class PluginManagerBase(ABC):
             Optional[List[str]]: List of plugins to load, or None to load all
             plugins. Child classes should override this method.
         """
-        # Get the keys taht self.plugins and self.params have in common.
+        # For debugging
+        print("Available plugins:", list(self.plugins.keys()))
+        print("Parameters:", list(self.params.keys()))
+        print("Common keys:", set(self.plugins.keys()) & set(self.params.keys()))
+        
         keys_in_common = set(self.plugins.keys()) & set(self.params.keys())
         return [key for key in keys_in_common if self.params[key]]
 
@@ -151,38 +206,29 @@ class PluginManagerBase(ABC):
         """
         plugins: Dict[str, PluginBase] = {}
         plugin_directory = os.path.dirname(os.path.abspath(__file__))
-        # Get the package name
         package_name = self.__class__.__module__.rsplit(".", 1)[0]
-
+        
         for root, dirs, files in os.walk(plugin_directory):
             for file in files:
                 if file.endswith(".py") and file != "__init__.py":
-                    # Calculate the relative path from the plugin directory
                     rel_path = os.path.relpath(root, plugin_directory)
-                    # Construct the module name relative to the package
                     if rel_path == ".":
                         module_name = f"{package_name}.{file[:-3]}"
                     else:
                         module_name = f"{package_name}.{rel_path.replace(os.path.sep, '.')}.{file[:-3]}"
-
                     try:
                         module = importlib.import_module(module_name)
                         for name, obj in inspect.getmembers(module):
-                            if (
-                                inspect.isclass(obj)
+                            if (inspect.isclass(obj)
                                 and issubclass(obj, self.plugin_base_class)
-                                and obj is not self.plugin_base_class
-                            ):
-                                plugins[name] = obj()
-                                plugins[name].on_init()
-
-                                title, args = plugins[name].add_arguments()
-                                register_argparse_group(title, args)
-
+                                and obj is not self.plugin_base_class):
+                                plugin = obj()
+                                plugin.on_init()
+                                plugins[name] = plugin
                     except ImportError as e:
                         print(f"Failed to import {module_name}: {e}")
-
         return plugins
+
 
     def run(self, cache_dir: Optional[str] = None, **kwargs) -> Any:
         """

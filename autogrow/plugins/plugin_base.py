@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from argparse import ArgumentParser
 from typing import TYPE_CHECKING, Any, List, Optional, Tuple
 
-from autogrow.config.argparser import ArgumentVars
+from autogrow.config.argument_vars import ArgumentVars
 
 if TYPE_CHECKING:
     from autogrow.plugins.plugin_manager_instances import PluginManagerRegistry

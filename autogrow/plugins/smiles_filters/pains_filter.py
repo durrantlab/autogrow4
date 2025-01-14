@@ -17,7 +17,7 @@ doi:10.1021/jm901137j.
 """
 import __future__
 from typing import Any, List, Tuple
-from autogrow.config.argparser import ArgumentVars
+from autogrow.config.argument_vars import ArgumentVars
 from autogrow.plugins.smiles_filters import SmilesFilterBase
 from autogrow.types import Compound
 

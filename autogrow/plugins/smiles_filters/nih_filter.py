@@ -17,7 +17,7 @@ from autogrow.types import Compound
 
 
 from typing import Any, List, Tuple
-from autogrow.config.argparser import ArgumentVars
+from autogrow.config.argument_vars import ArgumentVars
 
 
 class NIHFilter(SmilesFilterBase):

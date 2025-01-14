@@ -12,7 +12,7 @@ import glob
 import os
 import random
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
-from autogrow.config.argparser import ArgumentVars
+from autogrow.config.argument_vars import ArgumentVars
 from autogrow.plugins.plugin_base import PluginBase
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
 from autogrow.types import Compound, Compound, ScoreType

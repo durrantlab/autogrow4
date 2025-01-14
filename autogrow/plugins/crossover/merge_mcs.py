@@ -1,7 +1,7 @@
 """Module for Maximum Common Substructure (MCS) based crossover in AutoGrow."""
 
 from typing import Any, List, Optional, Tuple
-from autogrow.config.argparser import ArgumentVars
+from autogrow.config.argument_vars import ArgumentVars
 from autogrow.plugins.crossover import CrossoverBase
 from autogrow.types import Compound
 import autogrow.utils.mol_object_handling as MOH

@@ -16,7 +16,7 @@ Shape, and H-Bonding Descriptors. Journal of Drug Targeting (1998), 6(2),
 """
 import __future__
 from typing import List, Tuple
-from autogrow.config.argparser import ArgumentVars
+from autogrow.config.argument_vars import ArgumentVars
 from autogrow.plugins.smiles_filters import SmilesFilterBase
 from autogrow.types import Compound
 from autogrow.plugins.plugin_manager_instances import plugin_managers
