@@ -44,12 +44,15 @@ class PluginManagerRegistry:
             self._managers[name] = manager_class(base_class)
 
         # Then setup ChemToolkit first
+        assert self._managers["ChemToolkit"] is not None, "ChemToolkit not initialized"
         self._managers["ChemToolkit"].setup_plugin_manager(params, self)
 
         # Then setup all others
         for name, _, _ in self.get_plugin_types():
             if name != "ChemToolkit":
-                self._managers[name].setup_plugin_manager(params, self)
+                plugin_mang = self._managers[name]
+                assert plugin_mang is not None, f"{name} not initialized"
+                plugin_mang.setup_plugin_manager(params, self)
 
     @classmethod
     def get_all_plugin_managers(cls) -> List[PluginManagerBase]:

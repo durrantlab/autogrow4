@@ -28,8 +28,7 @@ from autogrow.plugins.plugin_base import PluginBase
 from autogrow.utils.caching import CacheManager
 
 if TYPE_CHECKING:
-    from autogrow.plugins.plugin_manager_instances import PluginManagerRegistry
-
+    from autogrow.plugins.registry_base import PluginManagerRegistry
 
 class PluginManagerBase(ABC):
     """
@@ -219,6 +218,7 @@ class PluginManagerBase(ABC):
                     try:
                         module = importlib.import_module(module_name)
                         for name, obj in inspect.getmembers(module):
+                            assert self.plugin_base_class is not None, "plugin_base_class not set"
                             if (inspect.isclass(obj)
                                 and issubclass(obj, self.plugin_base_class)
                                 and obj is not self.plugin_base_class):

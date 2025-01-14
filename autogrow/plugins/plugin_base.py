@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, List, Optional, Tuple
 from autogrow.config.argument_vars import ArgumentVars
 
 if TYPE_CHECKING:
-    from autogrow.plugins.plugin_manager_instances import PluginManagerRegistry
+    from autogrow.plugins.registry_base import PluginManagerRegistry
 
 
 class PluginBase(ABC):
