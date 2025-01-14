@@ -19,7 +19,7 @@ from typing import List, Tuple
 from autogrow.config.argument_vars import ArgumentVars
 from autogrow.plugins.smiles_filters import SmilesFilterBase
 from autogrow.types import Compound
-from autogrow.plugins.plugin_manager_instances import plugin_managers
+from autogrow.plugins.registry_base import plugin_managers
 
 
 class VandeWaterbeemdFilter(SmilesFilterBase):

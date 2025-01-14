@@ -51,7 +51,7 @@ class BRENKFilter(SmilesFilterBase):
             FilterCatalog.FilterCatalog: A set of RDKit BRENK filters.
         """
         # Make a list of the BRENK filter.
-        from autogrow.plugins.plugin_manager_instances import plugin_managers
+        from autogrow.plugins.registry_base import plugin_managers
 
         return plugin_managers.ChemToolkit.toolkit.get_brenk_filter()
 

@@ -9,7 +9,7 @@ from autogrow.utils.logging import log_debug
 import autogrow.plugins.crossover.merge_functions.alignment_and_breaks as AnB
 import autogrow.plugins.crossover.merge_functions.dict_and_r_groups as DnR
 import autogrow.plugins.crossover.merge_functions.merge_w_core as MWC
-from autogrow.plugins.plugin_manager_instances import plugin_managers
+from autogrow.plugins.registry_base import plugin_managers
 
 
 class MergeMCS(CrossoverBase):

@@ -26,7 +26,7 @@ fragments. It is adapted from Gypsum-DL
 ##### MolObjectHandling.py
 import __future__
 from typing import Any, List
-from autogrow.plugins.plugin_manager_instances import plugin_managers
+from autogrow.plugins.registry_base import plugin_managers
 
 
 def check_sanitization(mol):

@@ -28,7 +28,7 @@ import random
 import glob
 
 import autogrow.utils.mol_object_handling as MOH
-from autogrow.plugins.plugin_manager_instances import plugin_managers
+from autogrow.plugins.registry_base import plugin_managers
 
 
 class FragmentAddition(MutationBase):

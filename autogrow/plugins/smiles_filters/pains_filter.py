@@ -64,7 +64,7 @@ class PAINSFilter(SmilesFilterBase):
         # FilterCatalogs for precaution.
 
         # TODO: This is going to have to be reworked for OpenEye
-        from autogrow.plugins.plugin_manager_instances import plugin_managers
+        from autogrow.plugins.registry_base import plugin_managers
 
         chemtoolkit = plugin_managers.ChemToolkit.toolkit
         return [

@@ -10,7 +10,7 @@ import __future__
 import copy
 from typing import Any, Dict, List
 import autogrow.plugins.crossover.merge_functions.mapping_class as mapping_class
-from autogrow.plugins.plugin_manager_instances import plugin_managers
+from autogrow.plugins.registry_base import plugin_managers
 
 
 def handle_dicts_and_select_b_groups(mol_1: Any, mol_2: Any, mcs_mol: Any):
