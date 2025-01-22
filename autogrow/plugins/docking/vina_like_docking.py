@@ -15,7 +15,7 @@ import os
 
 from autogrow.plugins.docking import DockingBase
 from typing import List, Tuple
-from autogrow.config.argparser import ArgumentVars
+from autogrow.config.argument_vars import ArgumentVars
 from autogrow.types import Compound, Compound
 from autogrow.utils.logging import log_warning
 from autogrow.utils.obabel import obabel_convert, obabel_convert_cmd

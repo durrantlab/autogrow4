@@ -9,7 +9,7 @@ import __future__
 
 import os
 from typing import Any, Dict, List, Optional
-from autogrow.plugins.plugin_manager_instances import plugin_managers
+from autogrow.plugins.registry_base import plugin_managers
 from autogrow.types import Compound, Compound, ScoreType
 import autogrow.utils.mol_object_handling as MOH
 import autogrow.docking.ranking.ranking_mol as Ranking

@@ -1,7 +1,7 @@
 """Plugin for filtering compounds based on a required substructure."""
 from typing import List, Optional, Tuple
 
-from autogrow.config.argparser import ArgumentVars
+from autogrow.config.argument_vars import ArgumentVars
 from autogrow.plugins.smiles_filters import SmilesFilterBase
 from autogrow.types import Compound
 
@@ -47,6 +47,8 @@ class SubstructureFilter(SmilesFilterBase):
             raise ValueError("Must provide --substructure_smiles parameter")
 
         # Verify the SMILES can be converted to a valid molecule
+        assert self.plugin_managers is not None, "Plugin managers not set"
+        assert self.plugin_managers.ChemToolkit is not None, "ChemToolkit not set"
         chemtoolkit = self.plugin_managers.ChemToolkit.toolkit
         query_mol = chemtoolkit.mol_from_smarts(params["substructure_smiles"])
         if query_mol is None:
@@ -71,6 +73,8 @@ class SubstructureFilter(SmilesFilterBase):
             return False
             
         # Use the chemistry toolkit to do substructure matching
+        assert self.plugin_managers is not None, "Plugin managers not set"
+        assert self.plugin_managers.ChemToolkit is not None, "ChemToolkit not set"
         chemtoolkit = self.plugin_managers.ChemToolkit.toolkit
         matches = chemtoolkit.get_substruct_matches(mol, self.query_mol)
         
