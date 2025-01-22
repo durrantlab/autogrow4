@@ -15,7 +15,7 @@ import sys
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 from autogrow.operators.mutant_crossover_parent import CompoundGenerator
-from autogrow.plugins.plugin_manager_instances import plugin_managers
+from autogrow.plugins.registry_base import plugin_managers
 from autogrow.types import Compound
 from autogrow.utils.caching import CacheManager
 from autogrow.utils.logging import LogLevel, log_info, log_warning

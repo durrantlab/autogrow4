@@ -17,7 +17,7 @@ from autogrow.types import Compound
 
 
 from typing import Any, List, Tuple
-from autogrow.config.argparser import ArgumentVars
+from autogrow.config.argument_vars import ArgumentVars
 
 
 class NIHFilter(SmilesFilterBase):
@@ -53,7 +53,7 @@ class NIHFilter(SmilesFilterBase):
             FilterCatalog.FilterCatalog: A set of RDKit NIH Filters.
         """
         # TODO: Seems like this won't work for OpenEye.
-        from autogrow.plugins.plugin_manager_instances import plugin_managers
+        from autogrow.plugins.registry_base import plugin_managers
 
         return plugin_managers.ChemToolkit.toolkit.get_nih_filter()
 

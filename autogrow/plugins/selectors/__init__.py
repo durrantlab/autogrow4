@@ -8,7 +8,7 @@ be implemented by specific selector plugins.
 from abc import abstractmethod
 import random
 from typing import Any, List, Optional, Tuple, cast
-from autogrow.config.argparser import ArgumentVars
+from autogrow.config.argument_vars import ArgumentVars
 from autogrow.plugins.plugin_base import PluginBase
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
 from autogrow.types import Compound, ScoreType

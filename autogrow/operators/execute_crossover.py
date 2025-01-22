@@ -16,7 +16,7 @@ from autogrow.operators.mutant_crossover_parent import (
     CommonParallelResponse,
     CompoundGenerator,
 )
-from autogrow.plugins.plugin_manager_instances import plugin_managers
+from autogrow.plugins.registry_base import plugin_managers
 from autogrow.plugins.crossover import CrossoverPluginManager
 from autogrow.types import Compound
 from autogrow.utils.logging import LogLevel, log_debug, log_warning

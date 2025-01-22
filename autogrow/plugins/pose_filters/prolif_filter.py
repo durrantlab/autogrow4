@@ -14,7 +14,7 @@ import rdkit  # type: ignore
 import rdkit.Chem as Chem  # type: ignore
 import rdkit.Chem.Descriptors as Descriptors  # type: ignore
 from typing import List, Tuple
-from autogrow.config.argparser import ArgumentVars
+from autogrow.config.argument_vars import ArgumentVars
 
 # Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog("rdApp.*")

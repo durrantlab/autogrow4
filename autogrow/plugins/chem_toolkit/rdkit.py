@@ -1,6 +1,6 @@
 """RDKit implementation of chemistry toolkit plugin."""
 from typing import Any, Dict, List, Tuple
-from autogrow.config.argparser import ArgumentVars
+from autogrow.config.argument_vars import ArgumentVars
 from autogrow.plugins.chem_toolkit import ChemToolkitBase
 
 import rdkit

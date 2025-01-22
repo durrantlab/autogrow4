@@ -9,7 +9,7 @@ import __future__
 from autogrow.plugins.smi_to_3d_sdf import SmiTo3DSdfBase
 from autogrow.types import Compound
 from typing import List, Tuple
-from autogrow.config.argparser import ArgumentVars
+from autogrow.config.argument_vars import ArgumentVars
 
 
 class FakeSmiTo3DSDF(SmiTo3DSdfBase):

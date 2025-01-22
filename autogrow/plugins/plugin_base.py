@@ -2,10 +2,10 @@ from abc import ABC, abstractmethod
 from argparse import ArgumentParser
 from typing import TYPE_CHECKING, Any, List, Optional, Tuple
 
-from autogrow.config.argparser import ArgumentVars
+from autogrow.config.argument_vars import ArgumentVars
 
 if TYPE_CHECKING:
-    from autogrow.plugins.plugin_managers import PluginManagers
+    from autogrow.plugins.registry_base import PluginManagerRegistry
 
 
 class PluginBase(ABC):
@@ -44,14 +44,14 @@ class PluginBase(ABC):
         pass
 
     def _validate(
-        self, params: dict, plugin_managers: Optional["PluginManagers"] = None,
+        self, params: dict, plugin_managers: Optional["PluginManagerRegistry"] = None,
     ):
         """
         Validate the provided arguments. This is called by the plugin manager.
 
         Args:
             params (dict): A dictionary of parameters to validate.
-            plugin_managers (Optional[PluginManagers]): Reference to the plugin
+            plugin_managers (Optional[PluginManagerRegistry]): Reference to the plugin
                 managers.
         """
         self.params = params

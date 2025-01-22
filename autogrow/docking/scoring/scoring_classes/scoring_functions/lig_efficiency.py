@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional
 from autogrow.types import Compound
 from autogrow.docking.scoring.scoring_classes.parent_scoring_class import ParentScoring
 from autogrow.docking.scoring.scoring_classes.scoring_functions.vina import VINA
-from autogrow.plugins.plugin_manager_instances import plugin_managers
+from autogrow.plugins.registry_base import plugin_managers
 
 # TODO: Not used anywhere, but good stuff here!
 

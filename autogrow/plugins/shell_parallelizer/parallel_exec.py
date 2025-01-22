@@ -6,7 +6,7 @@ shell commands in parallel, improving performance for multi-core systems.
 """
 
 from typing import List, Tuple
-from autogrow.config.argparser import ArgumentVars
+from autogrow.config.argument_vars import ArgumentVars
 from autogrow.plugins.shell_parallelizer import ShellCmdResult, ShellParallelizerBase
 import subprocess
 import os

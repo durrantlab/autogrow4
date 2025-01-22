@@ -11,7 +11,7 @@ from autogrow.types import Compound
 from autogrow.utils.logging import log_warning
 from autogrow.utils.obabel import obabel_convert_cmd
 from typing import List, Tuple
-from autogrow.config.argparser import ArgumentVars
+from autogrow.config.argument_vars import ArgumentVars
 import os
 
 

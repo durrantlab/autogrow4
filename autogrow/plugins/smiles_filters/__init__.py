@@ -3,7 +3,7 @@ from typing import Any, List, Optional, cast
 
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
 from autogrow.types import Compound
-from autogrow.plugins.plugin_manager_instances import plugin_managers
+from autogrow.plugins.registry_base import plugin_managers
 
 from autogrow.plugins.plugin_base import PluginBase
 from autogrow.utils.logging import log_warning

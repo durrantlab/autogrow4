@@ -5,7 +5,7 @@ import random
 import copy
 from typing import Any, List, Optional, Tuple, Union
 import autogrow.utils.mol_object_handling as MOH
-from autogrow.plugins.plugin_manager_instances import plugin_managers
+from autogrow.plugins.registry_base import plugin_managers
 
 
 # handle_mcs_alignments_labeling_and_cyclicbreaks

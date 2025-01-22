@@ -12,8 +12,6 @@ The module also supports dynamic addition of argument groups through a plugin
 system, allowing for extensibility of the command-line interface.
 
 Key components:
-- ArgumentVars: A dataclass for defining argument properties
-- register_argparse_group: A function for plugins to register new argument groups
 - get_user_params: The main function for parsing and processing user parameters
 
 The module uses argparse for command-line parsing and supports loading
@@ -27,64 +25,21 @@ Note:
 """
 import argparse
 import copy
-from dataclasses import dataclass
 import json
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any, Dict
 
 from autogrow.config import setup_params
 from autogrow.config.json_config_utils import (
     convert_json_params_from_unicode,
     save_vars_as_json,
 )
+from autogrow.config.argument_vars import plugin_arg_groups_to_add
+from autogrow.plugins.registry_base import PluginManagerRegistry
 from autogrow.validation import validate_all
 
 parser = argparse.ArgumentParser(
     description="AutoGrow: An automated drug optimization and generation tool."
 )
-
-plugin_arg_groups_to_add = []
-
-
-@dataclass
-class ArgumentVars:
-    """
-    A data class to represent argument variables for command-line parsing.
-
-    This class is used to define the properties of command-line arguments,
-    which can be used to dynamically add arguments to the ArgumentParser.
-
-    Attributes:
-        name (str): The name of the argument.
-        default (Any): The default value of the argument.
-        help (str): The help text describing the argument.
-        type (Optional[Type]): The expected type of the argument value.
-            Defaults to None.
-        action (Optional[str]): The action to be taken when the argument is
-            encountered. Defaults to None.
-    """
-
-    name: str
-    default: Any
-    help: str
-    type: Optional[Type] = None
-    action: Optional[str] = None
-
-
-def register_argparse_group(title: str, arg_vars: List[ArgumentVars]):
-    """
-    Register an argument group with its associated arguments.
-
-    This function is used by plugins to add their own argument groups and
-    arguments to the main parser.
-
-    Args:
-        title (str): The title of the argument group.
-        arg_vars (List[ArgumentVars]): A list of ArgumentVars objects
-            representing the arguments to be added to the group.
-    """
-    global plugin_arg_groups_to_add
-    plugin_arg_groups_to_add.append((title, arg_vars))
-
 
 def get_user_params() -> Dict[str, Any]:
     """
@@ -99,7 +54,13 @@ def get_user_params() -> Dict[str, Any]:
         user parameters.
     """
     global parser
-    global plugin_arg_groups_to_add
+
+    # Create plugin manager instances but don't register arguments yet
+    plugin_managers = PluginManagerRegistry.get_all_plugin_managers()
+    
+    # Register arguments once
+    for plugin_manager in plugin_managers:
+        plugin_manager.register_plugin_arguments()
 
     # General Settings
     general = parser.add_argument_group(

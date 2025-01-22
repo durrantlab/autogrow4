@@ -1,7 +1,6 @@
 """Plugin implementation of chemistry toolkit interface."""
 from typing import Any, Dict, List, Optional, Tuple, Type, cast
 from abc import abstractmethod
-from autogrow.config.argparser import ArgumentVars
 from autogrow.plugins.plugin_base import PluginBase
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
 

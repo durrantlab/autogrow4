@@ -17,10 +17,9 @@ from autogrow import program_info
 from autogrow.config.argparser import get_user_params
 import autogrow.docking.execute_docking as DockingClass
 from autogrow.operators.populate_generation import populate_generation
-from autogrow.plugins.plugin_managers import setup_plugin_managers
 from autogrow.summary import generate_summary_html, generate_summary_txt
 from autogrow.utils.logging import LogLevel, create_logger, log_info, log_warning
-from autogrow.plugins.plugin_manager_instances import plugin_managers
+from autogrow.plugins.registry_base import plugin_managers
 
 
 def main(params: Optional[Dict[str, Any]] = None) -> None:
@@ -52,7 +51,7 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
         params = get_user_params()
 
     # Setup all plugin managers
-    setup_plugin_managers(params)
+    plugin_managers.setup_plugin_managers(params)
 
     # Now toolkit should be initialized
     chemtoolkit = plugin_managers.ChemToolkit

@@ -9,7 +9,7 @@ import __future__
 import copy
 from typing import Any, Dict, List, Optional, Tuple, Union
 import autogrow.utils.mol_object_handling as MOH
-from autogrow.plugins.plugin_manager_instances import plugin_managers
+from autogrow.plugins.registry_base import plugin_managers
 
 
 # HANDLE THE MERGING OF THE R-groups and the MCS And cleanup
