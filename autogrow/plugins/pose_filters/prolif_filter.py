@@ -29,34 +29,30 @@ class ProLIFFilter(PoseFilterBase):
 
     ProLIF library is available at https://github.com/chemosim-lab/ProLIF
     """
+    fingerprints = prolif.Fingerprint(["Hydrophobic", "HBDonor", "HBAcceptor", "PiStacking", "Anionic",
+                                       "Cationic", "CationPi", "PiCation"])
 
-    def run_filter(self, receptor, docked_cmpd) -> bool:
+    def run_filter(self, **kwargs) -> bool:
         """
-        Run the ProLIF filter on a given molecule against given receptor.
+        Run the ProLIF filter on a given molecule against a given receptor.
 
         This method calculates interaction fingerprints using the ProLIF library against a given receptor to determine
-         if a docked molecule has at least interaction regarding a given receptor. It checks Hydrophobic, HBDonor,
+         if a docked molecule has at least one interaction regarding a given receptor. It checks Hydrophobic, HBDonor,
          HBAcceptor, PiStacking, Anionic, Cationic, CationPi, and PiCation interactions.
 
         Args:
-            receptor: A rdkit object representing the receptor
-            docked_cmpd: A rdkit object representing the docked molecule
+        **kwargs:a dictionary of arguments to pass to the plugin. It must contain the path to the
+        receptor (receptor_path), a list containing Compound objects that represent docked molecules, and a
+        dictionary containing the input parameters specified at the command line
 
         Returns:
             bool: True if the molecule passes the filter (allows up to one
-                violation), False otherwise.
+                violation), otherwise, False
         """
-        fp = prolif.Fingerprint(
-            ["Hydrophobic", "HBDonor", "HBAcceptor", "PiStacking", "Anionic", "Cationic", "CationPi", "PiCation"])
-
         try:
-            prot = prolif.Molecule.from_rdkit(receptor)
-            lig = prolif.Molecule.from_rdkit(docked_cmpd)
-            ifp = fp.generate(lig, prot, metadata=True)
-            df = prolif.to_dataframe({0: ifp}, fp.interactions)
-
+            _, df = self._compute_interaction_fingerprints(kwargs["receptor"], kwargs["docked_cmpd"])
             return df.size > 0
-        except Exception as e:
+        except:
             return False
 
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
@@ -82,3 +78,14 @@ class ProLIFFilter(PoseFilterBase):
                 )
             ],
         )
+
+    def _compute_interaction_fingerprints(self, receptor, docked_cmpd):
+        try:
+            prot = prolif.Molecule.from_rdkit(receptor)
+            lig = prolif.Molecule.from_rdkit(docked_cmpd)
+            ifp = self.fingerprints.generate(lig, prot, metadata=True)
+            df = prolif.to_dataframe({0: ifp}, self.fingerprints.interactions)
+
+            return ifp, df
+        except:
+            return None, None
