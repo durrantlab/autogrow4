@@ -30,6 +30,7 @@ from autogrow.utils.caching import CacheManager
 if TYPE_CHECKING:
     from autogrow.plugins.registry_base import PluginManagerRegistry
 
+
 class PluginManagerBase(ABC):
     """
     Abstract base class for plugin managers in the AutoGrow system.
@@ -100,9 +101,10 @@ class PluginManagerBase(ABC):
                     try:
                         module = importlib.import_module(module_name)
                         for name, obj in inspect.getmembers(module):
-                            if (inspect.isclass(obj) 
-                                and issubclass(obj, cls.plugin_base_class)
-                                and obj is not cls.plugin_base_class):
+                            if (inspect.isclass(obj)
+                                    and issubclass(obj, cls.plugin_base_class)
+                                    and obj is not cls.plugin_base_class
+                                    and not PluginManagerBase.is_abstract(obj)):
                                 # Create an instance and register its arguments
                                 plugin = obj()
                                 title, args = plugin.add_arguments()
@@ -220,8 +222,9 @@ class PluginManagerBase(ABC):
                         for name, obj in inspect.getmembers(module):
                             assert self.plugin_base_class is not None, "plugin_base_class not set"
                             if (inspect.isclass(obj)
-                                and issubclass(obj, self.plugin_base_class)
-                                and obj is not self.plugin_base_class):
+                                    and issubclass(obj, self.plugin_base_class)
+                                    and obj is not self.plugin_base_class
+                                    and not PluginManagerBase.is_abstract(obj)):
                                 plugin = obj()
                                 plugin.on_init()
                                 plugins[name] = plugin
@@ -229,6 +232,9 @@ class PluginManagerBase(ABC):
                         print(f"Failed to import {module_name}: {e}")
         return plugins
 
+    @staticmethod
+    def is_abstract(cls):
+        return bool(getattr(cls, '__abstractmethods__', False))
 
     def run(self, cache_dir: Optional[str] = None, **kwargs) -> Any:
         """
