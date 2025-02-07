@@ -25,9 +25,11 @@ class ArgumentVars:
     type: Optional[Type] = None
     action: Optional[str] = None
 
+
 # Storage for plugin argument groups that need to be added
 plugin_arg_groups_to_add = []
 registered_args: Set[str] = set()  # Keep track of registered argument names
+
 
 def register_argparse_group(title: str, arg_vars: List[ArgumentVars]):
     """Register an argument group with its associated arguments.
