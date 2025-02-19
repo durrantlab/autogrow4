@@ -56,6 +56,8 @@ def run_docking_common(
     post_docked_compounds = plugin_managers.PoseFilter.run(docking_plugin_manager_params=docking_plugin_manager.params,
                                                            docked_cmpds=post_docked_compounds)
 
+    post_docked_compounds = plugin_managers.Rescoring.run(docked_cmpds=post_docked_compounds)
+
     return rank_and_save_output_smi(
         cur_gen_dir, current_gen_int, smiles_file_new_gen, post_docked_compounds, params
     )

@@ -43,7 +43,13 @@ __all__ = [
     "MetalAcceptor",
     "VdWContact",
 ]
-# VDWRADII = {symbol.capitalize(): radius for symbol, radius in vdwradii.items()}
+vdwradii = {'AA': 1.85, 'AG': 1.72, 'AL': 1.84, 'AR': 1.88, 'AT': 2.02, 'AU': 1.66, 'B': 1.92, 'BA': 2.68, 'BE': 1.53,
+            'BI': 2.07, 'BR': 1.85, 'C': 1.7, 'CA': 2.31, 'CD': 1.58, 'CL': 1.75, 'CS': 3.43, 'CU': 1.4, 'F': 1.47,
+            'FR': 3.48, 'GA': 1.87, 'GE': 2.11, 'H': 1.1, 'HE': 1.4, 'HH': 1.55, 'I': 1.98, 'IN': 1.93, 'K': 2.75,
+            'KR': 2.02, 'LI': 1.82, 'MG': 1.73, 'N': 1.55, 'NA': 2.27, 'NE': 1.54, 'NI': 1.63, 'O': 1.52, 'P': 1.8,
+            'PB': 2.02, 'PD': 1.63, 'PO': 1.97, 'PT': 1.75, 'RA': 2.83, 'RN': 2.2, 'RR': 3.03, 'S': 1.8, 'SB': 2.06,
+            'SE': 1.9, 'SI': 2.1, 'SN': 2.17, 'SR': 2.49, 'TE': 2.06, 'TL': 1.96, 'U': 1.86, 'XE': 2.16, 'ZN': 1.39}
+VDWRADII = {symbol.capitalize(): radius for symbol, radius in vdwradii.items()}
 
 
 class Hydrophobic(Distance):
@@ -457,7 +463,7 @@ class VdWContact(Interaction):
         else:
             raise ValueError("`tolerance` must be 0 or positive")
         self._vdw_cache = {}
-        # self.vdwradii = {**VDWRADII, **vdwradii} if vdwradii else VDWRADII
+        self.vdwradii = {**VDWRADII, **vdwradii} if vdwradii else VDWRADII
 
     def detect(self, ligand, residue):
         lxyz = ligand.GetConformer()
