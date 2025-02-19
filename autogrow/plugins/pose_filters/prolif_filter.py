@@ -29,8 +29,7 @@ class ProLIFFilter(PoseFilterBase):
 
     ProLIF library is available at https://github.com/chemosim-lab/ProLIF
     """
-    fingerprints = prolif.Fingerprint(["Hydrophobic", "HBDonor", "HBAcceptor", "PiStacking", "Anionic",
-                                       "Cationic", "CationPi", "PiCation"])
+    fingerprints = None
 
     def run_filter(self, **kwargs) -> bool:
         """
@@ -49,11 +48,20 @@ class ProLIFFilter(PoseFilterBase):
             bool: True if the molecule passes the filter (allows up to one
                 violation), otherwise, False
         """
-        try:
-            _, df = self._compute_interaction_fingerprints(kwargs["receptor"], kwargs["docked_cmpd"])
-            return df.size > 0
-        except:
-            return False
+        specific_interactions = kwargs["docking_plugin_manager_params"][self.name].split(',')
+        if "all" in specific_interactions and len(specific_interactions) > 1:
+            raise Exception("If the 'all' value is specified for the '--ProLIFFilter' argument, then no other specific "
+                            "interation must be given.")
+
+        if self.fingerprints is None:
+            if "all" in specific_interactions:
+                self.fingerprints = prolif.Fingerprint(["Hydrophobic", "HBDonor", "HBAcceptor", "PiStacking", "Anionic",
+                                                        "Cationic", "CationPi", "PiCation"])
+            else:
+                self.fingerprints = prolif.Fingerprint(specific_interactions)
+
+        _, df = self._compute_interaction_fingerprints(kwargs["receptor"], kwargs["docked_cmpd"])
+        return df.size > 0 if df is not None else False
 
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
         """
@@ -72,9 +80,14 @@ class ProLIFFilter(PoseFilterBase):
             [
                 ArgumentVars(
                     name=self.name,
-                    action="store_true",
+                    type=str,
                     default=False,
-                    help="ProLIF interaction fingerprints.",
+                    help="Comma-separated list containing the types of interactions to be considered, which can be: "
+                         "Hydrophobic, HBDonor, HBAcceptor, PiStacking, Anionic, Cationic, CationPi, PiCation, and "
+                         "VdWContact. For example, the argument in the command line --ProLIFFilter VdWContact,"
+                         "Hydrophobic will only consider VdWContact and Hydrophobic interactions between a receptor "
+                         "and a docked compound. additionally, it can be specified the 'all' value to indicate all the "
+                         "previous interactions will be consider.",
                 )
             ],
         )

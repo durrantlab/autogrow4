@@ -50,8 +50,9 @@ class SpecificInteractionFilter(ProLIFFilter):
             for column_name in df.columns:
                 if specific_interaction in column_name[2]:
                     for specific_site in specific_sites:
-                        if specific_site in column_name[1]:
-                            counter = counter + 1
+                        neg_flag = "!" in specific_site
+                        if specific_site in (column_name[1] if not neg_flag else "!" + column_name[1]):
+                            counter = counter + (0 if neg_flag else 1)
                             break
             return counter == len(specific_sites)
         except:
