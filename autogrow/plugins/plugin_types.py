@@ -12,6 +12,7 @@ from autogrow.plugins.crossover import CrossoverPluginManager, CrossoverBase
 from autogrow.plugins.smi_to_3d_sdf import SmiTo3DSdfPluginManager, SmiTo3DSdfBase
 from autogrow.plugins.shell_parallelizer import ShellParallelizerPluginManager, ShellParallelizerBase
 from autogrow.plugins.pose_filters import PoseFilterPluginManager, PoseFilterBase
+from autogrow.plugins.rescoring import RescoringPluginManager, RescoringBase
 
 # TODO: I bet it would be possible to autogenerate this list through dynamic
 # imports. Good to investigate.
@@ -29,4 +30,5 @@ PLUGIN_TYPES = [
     ("SmiTo3DSdf", SmiTo3DSdfPluginManager, SmiTo3DSdfBase),
     ("ShellParallelizer", ShellParallelizerPluginManager, ShellParallelizerBase),
     ("PoseFilter", PoseFilterPluginManager, PoseFilterBase),
+    ("Rescoring", RescoringPluginManager, RescoringBase),
 ]
