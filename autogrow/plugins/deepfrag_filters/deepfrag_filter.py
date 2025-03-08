@@ -7,13 +7,12 @@ import rdkit
 import rdkit.Chem as Chem
 from rdkit.Chem import rdFMCS
 from rdkit.Geometry import Point3D
-from typing import List, Tuple, cast
+from typing import List, Tuple
 from autogrow.types import Compound
 from autogrow.plugins.plugin_base import PluginBase
 import copy
 from abc import abstractmethod
 from autogrow.config.argument_vars import ArgumentVars
-from autogrow.deepfrag_integration.DeepFragIntegration import DeepFragBase
 from scipy.spatial.distance import cosine
 
 # Disable the unnecessary RDKit warnings
@@ -44,19 +43,18 @@ class DeepFragFilterBase(PluginBase):
         compounds = kwargs["compounds"]
         cutoff = kwargs["input_params"][self.name]
         receptor = kwargs["input_params"]["receptor_path"]
-        concrete_deepfrag = cast(DeepFragBase, self.get_concrete_deepfrag())
 
         final_compound_list = []
         for compound in compounds:
             passed_filter = False
             if len(compound.parent_3D_mols) == 1:
                 parent_mol, branching_points, fragment_mols = self.__get_substructure_and_branching_points(compound.parent_3D_mols[0], compound)
-                passed_filter = self.__compute_cosine_similarity(concrete_deepfrag, receptor, parent_mol, branching_points, fragment_mols) >= cutoff
+                passed_filter = self.__compute_cosine_similarity(receptor, parent_mol, branching_points, fragment_mols) >= cutoff
             elif len(compound.parent_3D_mols) == 2:
                 parent_mol, branching_points_0, fragment_mols_0 = self.__get_substructure_and_branching_points(compound.parent_3D_mols[0], compound)
                 parent_mol, branching_points_1, fragment_mols_1 = self.__get_substructure_and_branching_points(compound.parent_3D_mols[1], compound)
-                similarity_0 = self.__compute_cosine_similarity(concrete_deepfrag, receptor, parent_mol, branching_points_0, fragment_mols_0)
-                similarity_1 = self.__compute_cosine_similarity(concrete_deepfrag, receptor, parent_mol, branching_points_1, fragment_mols_1)
+                similarity_0 = self.__compute_cosine_similarity(receptor, parent_mol, branching_points_0, fragment_mols_0)
+                similarity_1 = self.__compute_cosine_similarity(receptor, parent_mol, branching_points_1, fragment_mols_1)
                 passed_filter = similarity_0 >= cutoff or similarity_1 >= cutoff
 
             compound.mol_3D = None
@@ -68,7 +66,11 @@ class DeepFragFilterBase(PluginBase):
         return compounds
 
     @abstractmethod
-    def get_concrete_deepfrag(self):
+    def get_prediction_for_parent_receptor(self, parent_mol, receptor, branching_point):
+        pass
+
+    @abstractmethod
+    def get_fingerprints_for_fragment(self, fragment):
         pass
 
     def validate(self, params: dict):
@@ -101,7 +103,7 @@ class DeepFragFilterBase(PluginBase):
             ],
         )
 
-    def __compute_cosine_similarity(self, concrete_deepfrag, receptor, parent_mol, branching_points, fragment_mols):
+    def __compute_cosine_similarity(self, receptor, parent_mol, branching_points, fragment_mols):
         if branching_points is None and fragment_mols is None:
             return 0
 
@@ -111,8 +113,8 @@ class DeepFragFilterBase(PluginBase):
             fragment_mol = fragment_mols[idx]
             branching_point = branching_points[idx]
 
-            fps_receptor_parent = concrete_deepfrag.get_prediction_for_parent_receptor(parent_mol, receptor, branching_point).tolist()
-            fps_fragment = concrete_deepfrag.get_fingerprints_for_fragment(fragment_mol).tolist()
+            fps_receptor_parent = self.get_prediction_for_parent_receptor(parent_mol, receptor, branching_point).tolist()
+            fps_fragment = self.get_fingerprints_for_fragment(fragment_mol).tolist()
 
             similarity = similarity + (1 - cosine(fps_receptor_parent, fps_fragment))
 
@@ -127,6 +129,8 @@ class DeepFragFilterBase(PluginBase):
         try:
             child = Chem.RemoveHs(child)
         except:
+            # this exception is due to the fact that the .sdf file wrote after
+            # docking cannot be read successfully.
             return None, None, None
         child_atoms_amount = child.GetNumAtoms()
 
@@ -185,7 +189,7 @@ class DeepFragFilterBase(PluginBase):
                 break
 
         # Ensure that the list of fragments to be returned is in the same order of the branching points
-        if len(list_fragment_mols) > 1:
+        if len(list_fragment_mols) > 0:
             c_list_fragment_mols = list_fragment_mols
             c_branching_points = branching_points
             list_fragment_mols = []
@@ -199,6 +203,7 @@ class DeepFragFilterBase(PluginBase):
                         del list_fragment_idxs[pos]
                         break
 
+        assert len(branching_points) == len(list_fragment_mols)
         return list_fragment_mols, branching_points
 
     def __get_branching_points(self, mol):
