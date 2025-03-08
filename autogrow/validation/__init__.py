@@ -165,8 +165,9 @@ def _check_for_required_inputs(input_params):
             "source_compound_file can not be found. \
             File must be a tab delineated .smi file."
         )
-    if ".smi" not in input_params["source_compound_file"]:
+    if ".smi" not in input_params["source_compound_file"] and \
+            ".sdf" not in input_params["source_compound_file"]:
         raise NotImplementedError(
             "source_compound_file must be a \
-            tab delineated .smi file."
+            tab delineated .smi file, or a .sdf file."
         )

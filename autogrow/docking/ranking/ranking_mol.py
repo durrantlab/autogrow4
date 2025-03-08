@@ -10,9 +10,10 @@ import __future__
 import os
 from typing import Any, Dict, List, Optional
 from autogrow.plugins.registry_base import plugin_managers
-from autogrow.types import Compound, Compound, ScoreType
+from autogrow.types import Compound, ScoreType
 import autogrow.utils.mol_object_handling as MOH
 import autogrow.docking.ranking.ranking_mol as Ranking
+from rdkit import Chem
 
 
 def rank_and_save_output_smi(
@@ -236,6 +237,42 @@ def get_predockcmpds_from_smi_file(infile: str) -> List[Compound]:
         for line in smiles_file:
             compoundInfo = Compound.from_tsv_line(line)
             predock_cmpds.append(compoundInfo)
+
+    if len(plugin_managers.DeepFragFilter.plugins) > 0:
+        for docked_cmpd in predock_cmpds:
+            docked_cmpd.read_3D_structure_sdf()
+        predock_cmpds = [x for x in predock_cmpds if x.mol_3D is not None]
+
+    return predock_cmpds
+
+
+def get_predockcmpds_from_sdf_file(infile: str) -> List[Compound]:
+    """
+    Read and process a .sdf file into a list of Compound objects.
+
+    The .sdf file must have the name of each compound.
+
+    Args:
+        infile (str): Path to the formatted .sdf file to be read.
+
+    Returns:
+        List[Compound]: List of Compound objects with
+        information from the .sdf file.
+
+    Raises:
+        Exception: If the input file does not exist.
+    """
+    predock_cmpds: List[Compound] = []
+
+    if os.path.exists(infile) is False:
+        print(f"\nFile of Source compounds does not exist: {infile}\n")
+        raise Exception("File of Source compounds does not exist")
+
+    r = Chem.SDMolSupplier(infile)
+    for compound in r:
+        compoundInfo = Compound.from_rdkit_object(compound)
+        predock_cmpds.append(compoundInfo)
+    r.reset()
 
     return predock_cmpds
 
