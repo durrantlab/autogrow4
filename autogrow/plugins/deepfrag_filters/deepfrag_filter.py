@@ -14,6 +14,7 @@ import copy
 from abc import abstractmethod
 from autogrow.config.argument_vars import ArgumentVars
 from scipy.spatial.distance import cosine
+from autogrow.utils.logging import log_debug
 
 # Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog("rdApp.*")
@@ -62,6 +63,10 @@ class DeepFragFilterBase(PluginBase):
 
             if passed_filter:
                 final_compound_list.append(compound)
+            else:
+                log_debug(
+                    f"Docked molecule {compound.id} with smiles string {compound.smiles} did not fulfill with the similarity criterion using DeepFrag"
+                )
 
         return final_compound_list
 
