@@ -15,6 +15,9 @@ docker/temp_user_files
 docker/temp_user_files/*
 docs/build
 docs/source
+deepfrag/*
+collagen/*
+apps/*
 /.idea/.gitignore
 /.idea/11.Autogrow4.iml
 /.idea/deployment.xml
