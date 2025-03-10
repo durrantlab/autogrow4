@@ -63,7 +63,7 @@ class DeepFragFilterBase(PluginBase):
             if passed_filter:
                 final_compound_list.append(compound)
 
-        return compounds
+        return final_compound_list
 
     @abstractmethod
     def get_prediction_for_parent_receptor(self, parent_mol, receptor, branching_point):
@@ -104,7 +104,7 @@ class DeepFragFilterBase(PluginBase):
         )
 
     def __compute_cosine_similarity(self, receptor, parent_mol, branching_points, fragment_mols):
-        if branching_points is None and fragment_mols is None:
+        if parent_mol is None or receptor is None or branching_points is None or fragment_mols is None:
             return 0
 
         assert len(branching_points) == len(fragment_mols)
@@ -118,7 +118,8 @@ class DeepFragFilterBase(PluginBase):
 
             similarity = similarity + (1 - cosine(fps_receptor_parent, fps_fragment))
 
-        return similarity / len(branching_points)
+        similarity = similarity / len(branching_points)
+        return similarity
 
     def __get_substructure_and_branching_points(self, parent, predocked_cmpd):
         parent = Chem.RemoveHs(parent)

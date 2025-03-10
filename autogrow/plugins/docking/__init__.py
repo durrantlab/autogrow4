@@ -7,7 +7,6 @@ and saving docked compounds.
 """
 
 from abc import abstractmethod
-import os
 from typing import List, cast
 from autogrow.plugins.plugin_base import PluginBase
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
@@ -93,13 +92,18 @@ class DockingPluginManager(PluginManagerBase):
         post_docked_cmpds = docking.run(**kwargs)
 
         for post_docked_cmpd in post_docked_cmpds:
-            log_debug(
-                f"Docked molecule {post_docked_cmpd.smiles}. Score: {post_docked_cmpd.docking_score:.2f}"
-            )
-            post_docked_cmpd.add_history(
-                "DOCKING",
-                f"{post_docked_cmpd.smiles} docked with score {post_docked_cmpd.docking_score:.2f}",
-            )
+            try:
+                log_debug(
+                    f"Docked molecule {post_docked_cmpd.smiles}. Score: {post_docked_cmpd.docking_score: .2f}"
+                )
+                post_docked_cmpd.add_history(
+                    "DOCKING",
+                    f"{post_docked_cmpd.smiles} docked with score {post_docked_cmpd.docking_score: .2f}",
+                )
+            except:
+                log_debug(
+                    f"Docked molecule {post_docked_cmpd.smiles} has 'docking_score' attribute as None (Null)"
+                )
 
         # # Sanity check: Make sure each output sdf file exists (should be the
         # # docked pose) and that it belongs to the correct generation.
