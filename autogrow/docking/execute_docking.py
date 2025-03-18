@@ -41,10 +41,6 @@ def run_docking_common(
     """
     docking_plugin_manager = cast(DockingPluginManager, plugin_managers.Docking)
 
-    log_info("Filtering out using DeepFrag filter")
-    new_gen_predock_cmpds = plugin_managers.DeepFragFilter.run(input_params=docking_plugin_manager.params,
-                                                               compounds=new_gen_predock_cmpds)
-
     log_info("Starting docking")
     with LogLevel():
         post_docked_compounds = docking_plugin_manager.run(
