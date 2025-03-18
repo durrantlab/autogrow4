@@ -3,7 +3,7 @@ import copy
 from dataclasses import dataclass
 import random
 from typing import Callable, Dict, List, Any, Tuple, Set, Optional
-
+from autogrow.plugins.registry_base import plugin_managers
 from autogrow.types import Compound
 from autogrow.utils.logging import LogLevel, log_debug, log_warning
 
@@ -183,9 +183,14 @@ class CompoundGenerator(ABC):
                         # Likely crossover. Multiple parents, so extend each history.
                         updated_history = [p._history[:] for p in result.parent_cmpds]
 
+                    parent_3D_mols = None
+                    if len(plugin_managers.DeepFragFilter.plugins) > 0:
+                        parent_3D_mols = [parent.mol_3D for parent in result.parent_cmpds]
+
                     ligand_info = Compound(
                         smiles=result.child_smiles,
                         id=new_lig_id,
+                        parent_3D_mols=parent_3D_mols,
                         _history=updated_history,
                     )
                     ligand_info.add_history(self.get_operation_name().upper(), desc)

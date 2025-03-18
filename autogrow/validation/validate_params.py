@@ -46,9 +46,17 @@ def validate_params(params: Dict[str, Any]) -> None:
 
     # Check receptor_path and source_compound_file exist
     _check_file_exists("receptor_path", "pdb", ".PDB file", params)
-    _check_file_exists(
-        "source_compound_file", "smi", "tab delineated .smi file", params
-    )
+    try:
+        _check_file_exists(
+            "source_compound_file", "smi", "tab delineated .smi file", params
+        )
+    except Exception as e1:
+        try:
+            _check_file_exists(
+                "source_compound_file", "sdf", ".smi file containing crystallography structures", params
+            )
+        except Exception as e2:
+            raise NotImplementedError(e1.__str__() + " or\n " + e2.__str__())
 
     if os.path.isdir(params["output_directory"]) is False:
         raise NotImplementedError(

@@ -68,7 +68,9 @@ class RescoringPluginManager(PluginManagerBase):
         """
         rescoring_methods = self.get_selected_plugins_from_params()
 
-        if len(rescoring_methods) > 1:
+        if len(rescoring_methods) == 0:
+            return kwargs["docked_cmpds"]
+        elif len(rescoring_methods) > 1:
             raise Exception(
                 f"Only one re-scoring method can be selected at a time! You selected {rescoring_methods}"
             )

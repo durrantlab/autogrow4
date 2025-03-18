@@ -130,15 +130,16 @@ class RankSelector(SelectorBase):
         del sorted_list
         del temp_list_info
         if len(new_sorted_list) < num_to_choose:
+            num_to_choose = len(new_sorted_list)
             # TODO: Should not raise an exception, but rather return the available ligands
-            raise Exception(
-                "Asked for {} but only {} availabe to chose from \
-                There are more ligands to chose to seed the list than ligands to select from. \
-                Please lower the top_mols_to_seed_next_generation and/or \
-                diversity_mols_to_seed_first_generation".format(
-                    num_to_choose, len(new_sorted_list)
-                )
-            )
+            # raise Exception(
+            #     "Asked for {} but only {} availabe to chose from \
+            #     There are more ligands to chose to seed the list than ligands to select from. \
+            #     Please lower the top_mols_to_seed_next_generation and/or \
+            #     diversity_mols_to_seed_first_generation".format(
+            #         num_to_choose, len(new_sorted_list)
+            #     )
+            # )
 
         new_sorted_list = sorted(
             new_sorted_list,
