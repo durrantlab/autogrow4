@@ -147,7 +147,7 @@ class FragmentAddition(MutationBase):
 
         # Try reactions on the molecule
         reaction_result = self._try_reactions(
-            mol_reprotanated, mol_deprotanated, list_react_grps_in_mol
+            mol_reprotanated, mol_deprotanated, list_react_grps_in_mol, cmpd
         )
 
         if reaction_result is None:
@@ -534,6 +534,7 @@ class FragmentAddition(MutationBase):
         mol_reprotanated: Any,
         mol_deprotanated: Any,
         list_subs_within_mol: List[str],
+        parent_info: Compound,
     ) -> Optional[Tuple[str, int, Optional[str]]]:
         """
         Try reactions on the molecule.
@@ -561,6 +562,7 @@ class FragmentAddition(MutationBase):
                 mol_deprotanated,
                 mol_reprotanated,
                 list_subs_within_mol,
+                parent_info,
             )
             if result is not None:
                 return result
@@ -622,6 +624,7 @@ class FragmentAddition(MutationBase):
         mol_deprotanated: Any,
         mol_reprotanated: Any,
         list_subs_within_mol: List[str],
+        parent_info: Compound,
     ) -> Optional[Tuple[str, int, Optional[str]]]:
         """
         Try to perform the reaction specified in a_reaction_dict on the mol.
@@ -673,14 +676,14 @@ class FragmentAddition(MutationBase):
         # if the reaction requires only a single reactant we will attempt
         # to run the reaction
         if a_reaction_dict["num_reactants"] == 1:
-            return self._try_single_reactant_reaction(rxn, mol_to_use, a_reaction_dict)
+            return self._try_single_reactant_reaction(rxn, mol_to_use, a_reaction_dict, parent_info)
         else:
             return self._try_multi_reactant_reaction(
-                rxn, mol_to_use, a_reaction_dict, contains_group,
+                rxn, mol_to_use, a_reaction_dict, contains_group, parent_info
             )
 
     def _try_single_reactant_reaction(
-        self, rxn: Any, mol_to_use: Any, a_reaction_dict: Dict[str, Any],
+        self, rxn: Any, mol_to_use: Any, a_reaction_dict: Dict[str, Any], parent_info: Compound
     ) -> Optional[Tuple[str, int, Optional[str]]]:
         """
         Try a single reactant reaction.
@@ -710,7 +713,7 @@ class FragmentAddition(MutationBase):
             if reaction_products_list:
                 for reaction_product in reaction_products_list:
                     # Filter and check the product is valid
-                    reaction_product_smiles = self._validate_product(reaction_product)
+                    reaction_product_smiles = self._validate_product(reaction_product, parent_info)
                     if reaction_product_smiles is not None:
                         reaction_id_number = a_reaction_dict["RXN_NUM"]
                         return reaction_product_smiles, reaction_id_number, None
@@ -722,6 +725,7 @@ class FragmentAddition(MutationBase):
         mol_to_use: Any,
         a_reaction_dict: Dict[str, Any],
         contains_group: int,
+        parent_info: Compound,
     ) -> Optional[Tuple[str, int, Optional[str]]]:
         """
         Try a multi-reactant reaction.
@@ -818,7 +822,7 @@ class FragmentAddition(MutationBase):
         if reaction_products_list:
             for reaction_product in reaction_products_list:
                 # Filter and check if the product is valid
-                reaction_product_smiles = self._validate_product(reaction_product)
+                reaction_product_smiles = self._validate_product(reaction_product, parent_info)
                 if reaction_product_smiles is not None:
                     reaction_id_number = a_reaction_dict["RXN_NUM"]
                     if len(comp_mol_id) == 1:
@@ -832,7 +836,7 @@ class FragmentAddition(MutationBase):
                     )
         return None
 
-    def _validate_product(self, reaction_product):
+    def _validate_product(self, reaction_product, parent_info):
         """
         Validate the reaction product.
 
@@ -907,6 +911,13 @@ class FragmentAddition(MutationBase):
             len(self.plugin_managers.SmilesFilter.run(predock_cmpds=[tmp_predock_cmpd]))
             > 0
         )
+        if passed_filter and len(plugin_managers.DeepFragFilter.plugins) > 0:
+            tmp_predock_cmpd.parent_3D_mols = [parent_info.mol_3D]
+            passed_filter = (
+                    len(plugin_managers.DeepFragFilter.run(input_params=plugin_managers.DeepFragFilter.params,
+                                                           compounds=[tmp_predock_cmpd]))
+                    > 0
+            )
 
         return reaction_product_smiles if passed_filter else None
 

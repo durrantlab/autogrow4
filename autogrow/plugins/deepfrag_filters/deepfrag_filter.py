@@ -252,13 +252,6 @@ class DeepFragFilterBase(PluginBase):
 
                     attachment_bonds.append((child_atom_idx, neighbor_idx))
 
-        for atom in rwmol.GetAtoms():
-            atom_idx = atom.GetIdx()
-            if atom_idx in child_to_mcs_map:
-                atom.SetProp("is_mcs", "yes")
-            else:
-                atom.SetProp("is_mcs", "no")
-
         # Create dummy atoms at attachment points
         dummy_atoms = []
         for child_atom_idx, neighbor_idx in attachment_bonds:

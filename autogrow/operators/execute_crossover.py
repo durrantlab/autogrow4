@@ -328,12 +328,19 @@ def _do_crossovers_smiles_merge(
             tmp_predock_cmpd = Compound(smiles=ligand_new_smiles, id="tmp")
 
             # Filter Here
-            pass_or_not = (
+            passed_filter = (
                 len(plugin_managers.SmilesFilter.run(predock_cmpds=[tmp_predock_cmpd]))
                 > 0
             )
+            if passed_filter and len(plugin_managers.DeepFragFilter.plugins) > 0:
+                tmp_predock_cmpd.parent_3D_mols = [lig1_predock_cmpd.mol_3D, lig2_predock_cmpd.mol_3D]
+                passed_filter = (
+                        len(plugin_managers.DeepFragFilter.run(input_params=crossover_manager.params,
+                                                               compounds=[tmp_predock_cmpd]))
+                        > 0
+                )
 
-            if not pass_or_not:
+            if not passed_filter:
                 counter += 1
             else:
                 return (ligand_new_smiles, lig1_predock_cmpd, lig2_predock_cmpd)
