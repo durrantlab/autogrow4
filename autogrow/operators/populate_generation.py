@@ -794,7 +794,11 @@ def _get_source_compounds_or_raise(params) -> List[Compound]:
     """
     # This will be the full length list of starting molecules as the seed
     source_file = str(params["source_compound_file"])
-    result = Ranking.get_predockcmpds_from_smi_file(source_file)
+    if ".smi" in source_file:
+        result = Ranking.get_predockcmpds_from_smi_file(source_file)
+    # it is .sdf file
+    else:
+        result = Ranking.get_predockcmpds_from_sdf_file(source_file)
 
     if len(result) == 0:
         print(
@@ -1020,6 +1024,11 @@ def _make_pass_through_list(
             0,  # 0 means no diversity
             num_elite_prev_gen,  # But yes based on docking score
         )
+
+    if len(plugin_managers.DeepFragFilter.plugins) > 0:
+        for lig in ligs_to_advance:
+            lig.parent_3D_mols = [lig.mol_3D]
+            lig.mol_3D = None
 
     if len(ligs_to_advance) < num_elite_prev_gen:
         log_warning(

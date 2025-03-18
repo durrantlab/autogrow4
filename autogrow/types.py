@@ -9,6 +9,7 @@ from dataclasses import dataclass, field
 from typing import Any, List, Optional
 from enum import Enum
 import json
+from rdkit import Chem
 
 
 class ScoreType(Enum):
@@ -41,6 +42,7 @@ class Compound:  # Get new id when you figure out what context this is used in
         diversity_score (Optional[float]): Score representing structural
             uniqueness.
         mol (Optional[Chem.Mol]): RDKit molecule object.
+        parent_3D_mols (Optional[Chem.Mol]): RDKit molecule object.
         fp (Optional[Any]): Molecular fingerprint.
         sdf_path (Optional[str]): Path to docked structure SDF file.
     """
@@ -51,6 +53,8 @@ class Compound:  # Get new id when you figure out what context this is used in
     docking_score: Optional[float] = None  # Like -8.439
     diversity_score: Optional[float] = None
     mol: Optional[Any] = None
+    mol_3D: Optional[Any] = None
+    parent_3D_mols: List[Optional[Any]] = None
     fp: Optional[Any] = None
     sdf_path: Optional[str] = None
     _history: List[Any] = field(default_factory=list)
@@ -94,6 +98,22 @@ class Compound:  # Get new id when you figure out what context this is used in
             cmpd._history = json.loads(prts[6])
         return cmpd
 
+    @staticmethod
+    def from_rdkit_object(rdkit_mol) -> "Compound":
+        """
+        Create a Compound object from a RDKit object.
+
+        Args:
+            rdkit_mol (str): RDKit Mol.
+
+        Returns:
+            Compound: A Compound object created from the RDKit object.
+        """
+        cmpd = Compound(smiles=Chem.MolToSmiles(rdkit_mol, isomericSmiles=False),
+                        id=rdkit_mol.GetProp('_Name'))
+        cmpd.mol_3D = rdkit_mol
+        return cmpd
+
     def get_score_by_type(self, score_type: ScoreType) -> float:
         """Retrieve a previous score of the specified type.
 
@@ -129,3 +149,15 @@ class Compound:  # Get new id when you figure out what context this is used in
             history (str): The history entry to add.
         """
         self._history.append(f"{label.upper()}: {history}")
+
+    def read_3D_structure_sdf(self):
+        """
+        Return the RDKit object representing the 3D structure of the compound.
+        """
+        try:
+            reader = Chem.SDMolSupplier(self.sdf_path)
+            for compound in reader:
+                self.mol_3D = compound
+                break
+        except:
+            self.mol_3D = None

@@ -59,6 +59,11 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
         raise RuntimeError("Chemistry toolkit not properly initialized")
     params["chemtoolkit"] = chemtoolkit.toolkit
 
+    source_compound_file = params["source_compound_file"]
+    if len(plugin_managers.DeepFragFilter.plugins) > 0 and not source_compound_file.endswith(".sdf"):
+        raise RuntimeError("To use a DeepFrag filter, a .sdf file containing crystallography structures "
+                           "should be provided as input.")
+
     printout = f"\n(RE)STARTING AUTOGROW 4.0: {str(datetime.datetime.now())}\n"
 
     printout += program_info()
