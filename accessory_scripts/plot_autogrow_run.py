@@ -23,6 +23,8 @@ from rdkit import Chem
 from rdkit.Chem.rdMolDescriptors import GetMorganFingerprint
 from rdkit.Chem import Lipinski
 from rdkit import DataStructs
+import prolif
+import numpy as np
 
 
 def read_smi_file(source_file: str):
@@ -81,6 +83,75 @@ def calc_diversity_scores(reference_comp, new_comps):
             similarity_values.append(diversity_score)
 
     return similarity_values
+
+
+def calc_interaction_fp_per_generation(params: Dict[str, Any], infolder: str, interactions: List[str]):
+    """
+    Calculate percent of interaction types per generation.
+
+    Args:
+    :param dict params: dict of user variables which will govern how the
+        program runs.
+    :param str infolder: Path to the folder containing all generation folders.
+    :param str interactions: List of interaction types to calculate.
+
+    Returns:
+        np.array: percent of interaction types per generation.
+        list: list containing labels of the rows
+        list: list containing labels of the columns
+    """
+    receptor = Chem.MolFromPDBFile(params["receptor_path"], sanitize=True)
+    fingerprints = prolif.Fingerprint(interactions)
+
+    all_interactions = []
+    number_interactions_per_gen = {}
+    num_compounds_per_generation = {}
+    for gen_folder in os.listdir(infolder):
+        if os.path.isdir(os.path.join(infolder, gen_folder)):
+            gen_folder_name = infolder + os.sep + gen_folder + os.sep
+            rank_file = glob.glob(f"{gen_folder_name}*_ranked.smi")[0]
+            gen_num = os.path.basename(rank_file).split("_")[1]
+            num_compounds_per_generation[gen_num] = 0
+
+            with open(rank_file, "r") as f:
+                for line in f:
+                    line = line.replace("\n", "")
+                    parts = line.split(
+                        "\t"
+                    )  # split line into parts separated by 5-spaces
+
+                    docked_comp_path = [parts[i] for i in range(len(parts))][4]
+                    if docked_comp_path != "None":
+                        num_compounds_per_generation[gen_num] = num_compounds_per_generation[gen_num] + 1
+                        docked_comp = read_sdf_file(docked_comp_path)[0]
+                        prot = prolif.Molecule.from_rdkit(receptor)
+                        lig = prolif.Molecule.from_rdkit(docked_comp)
+                        ifp = fingerprints.generate(lig, prot, metadata=True)
+                        df = prolif.to_dataframe({0: ifp}, fingerprints.interactions)
+
+                        for column_name in df.columns:
+                            interaction = column_name[1].split(".")[0] + "_" + column_name[2]
+                            if interaction not in number_interactions_per_gen:
+                                number_interactions_per_gen[interaction] = {}
+                                all_interactions.append(interaction)
+                            if gen_num not in number_interactions_per_gen[interaction]:
+                                number_interactions_per_gen[interaction][gen_num] = 0
+                            number_interactions_per_gen[interaction][gen_num] = \
+                                number_interactions_per_gen[interaction][gen_num] + 1
+
+    all_generations = []
+    result_matrix = np.zeros((len(num_compounds_per_generation), len(all_interactions)))
+    for gen_num in range(len(num_compounds_per_generation)):
+        all_generations.append(f"generation_{gen_num + 1}")
+        for interaction_num in range(len(all_interactions)):
+            interaction = all_interactions[interaction_num]
+            if str(gen_num + 1) in number_interactions_per_gen[interaction]:
+                percent_of_interactions = number_interactions_per_gen[interaction][str(gen_num + 1)]
+                percent_of_interactions = round(float(percent_of_interactions /
+                                                      num_compounds_per_generation[str(gen_num + 1)]), 2)
+                result_matrix[gen_num, interaction_num] = percent_of_interactions
+
+    return result_matrix, all_generations, all_interactions
 
 
 def calc_diversity_scores_per_generation(infolder: str):
@@ -436,16 +507,15 @@ def make_graph(dictionary: Dict[str, Union[float, str]]) -> Tuple[Optional[List[
     list_of_scores = []
     # print(dictionary)
 
-    for key, score in dictionary.items():
+    for gen in range(len(dictionary)):
+        key = "generation_" + str(gen + 1)
+        score = dictionary[key]
+
         # print(key)
         list_of_gen_names.append(key)
-
         list_of_scores.append(score)
 
-        gen = key.replace("generation_", "")
-
-        gen = int(gen)
-        list_generations.append(gen)
+        list_generations.append(gen + 1)
         list_of_gen_names.append(key)
 
     for i in list_of_scores:
@@ -620,6 +690,39 @@ def run_plotter(
     plt.savefig(outfile, bbox_inches="tight", format=params["outfile_format"], dpi=1000)
 
 
+def run_heatmap(
+        params: Dict[str, Any],
+        outfile: str,
+        result_matrix,
+        x_label_list,
+        y_label_list,
+        title_of_figure
+) -> None:
+    fig, ax = plt.subplots()
+    ax.imshow(result_matrix, cmap="Blues")
+
+    # Show all ticks and label them with the respective list entries
+    ax.set_xticks(range(len(x_label_list)), labels=x_label_list, rotation=45, ha="right", rotation_mode="anchor",
+                  size="x-small")
+    ax.set_yticks(range(len(y_label_list)), labels=y_label_list, size="x-small")
+
+    # Loop over data dimensions and create text annotations.
+    for i in range(len(y_label_list)):
+        for j in range(len(x_label_list)):
+            value = result_matrix[i, j]
+            if value == 0.0:
+                text = "0"
+            elif value == 1.0:
+                text = "1"
+            else:
+                text = "." + str(result_matrix[i, j]).split(".")[1]
+
+            ax.text(j, i, text, ha="center", va="center", color="black", size="xx-small")
+
+    ax.set_title(title_of_figure, size="small")
+    plt.savefig(outfile, bbox_inches="tight", format=params["outfile_format"], dpi=1000)
+
+
 def print_data_table(infolder: str, ligand_efficiency: bool) -> Dict[str, Any]:
     """
     This function takes a folder of an Autogrow Run and a list of all folders
@@ -745,6 +848,27 @@ def generate_figures(params: Dict[str, Any]) -> None:
                 key_start_with="compound",
                 x_label="New compounds (ID) sorted from the highest to lowest affinity",
                 y_label="Ligand efficiency")
+
+    interactions = ["Hydrophobic", "HBDonor", "HBAcceptor", "PiStacking", "Anionic", "Cationic", "CationPi", "PiCation"]
+    result_matrix, y_label_list, x_label_list = calc_interaction_fp_per_generation(params, infolder, interactions)
+    run_heatmap(params,
+                outfile + os.sep + "heatmap_of_all_interactions_for_every_generation." + params["outfile_format"],
+                result_matrix,
+                x_label_list,
+                y_label_list,
+                "Analysis of Interactions")
+
+    for interaction in interactions:
+        pos_for_interaction = [i for i in range(len(x_label_list)) if interaction in x_label_list[i]]
+        if len(pos_for_interaction) > 0:
+            result_matrix_c = result_matrix[:, pos_for_interaction]
+            x_label_list_c = [x_label_list[i] for i in pos_for_interaction]
+            run_heatmap(params,
+                        outfile + os.sep + f"heatmap_of_{interaction}_interactions_for_every_generation." + params["outfile_format"],
+                        result_matrix_c,
+                        x_label_list_c,
+                        y_label_list,
+                        f"Analysis of {interaction} Interactions")
 
 
 def retrieve_vars_dict(autogrow_vars_json: str) -> Dict[str, Any]:
