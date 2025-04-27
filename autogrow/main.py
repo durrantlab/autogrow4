@@ -20,6 +20,22 @@ from autogrow.operators.populate_generation import populate_generation
 from autogrow.summary import generate_summary_html, generate_summary_txt
 from autogrow.utils.logging import LogLevel, create_logger, log_info, log_warning
 from autogrow.plugins.registry_base import plugin_managers
+from autogrow.operators.populate_generation import _get_source_compounds_or_raise
+
+
+def dock_input_compounds(params: Optional[Dict[str, Any]]) -> None:
+    cur_gen_dir = f"{params['output_directory']}generation_{0}_input_compounds{os.sep}"
+    os.makedirs(cur_gen_dir, exist_ok=True)
+    smi_new_gen_path = f"{cur_gen_dir}{os.sep}generation_0_input_compounds.smi"
+    source_cmpds = _get_source_compounds_or_raise(params)
+    source_cmpds = plugin_managers.SmiTo3DSdf.run(
+        predock_cmpds=source_cmpds,
+        pwd=cur_gen_dir,
+        cache_dir=cur_gen_dir,
+    )
+    DockingClass.run_docking_common(
+        0, cur_gen_dir, smi_new_gen_path, source_cmpds, params
+    )
 
 
 def main(params: Optional[Dict[str, Any]] = None) -> None:
@@ -158,3 +174,6 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
     with LogLevel():
         log_info(f"AutoGrow4 run started at:   {start_time}")
         log_info(f"AutoGrow4 run completed at: {str(datetime.datetime.now())}")
+
+    log_info("Docking input compounds for further analysis")
+    dock_input_compounds(params)
