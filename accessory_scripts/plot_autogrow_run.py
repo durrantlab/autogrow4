@@ -416,7 +416,8 @@ def get_score_list_per_gen(infolder: str, ligand_efficiency: bool) -> Dict[str, 
 
                         choice_list = [parts[i] for i in range(len(parts))]
                         gen_list.append(float(choice_list[2]) if not ligand_efficiency else float(
-                            choice_list[2]) / Lipinski.HeavyAtomCount(Chem.MolFromSmiles(choice_list[0])))
+                            choice_list[2]) / Lipinski.HeavyAtomCount(Chem.MolFromSmiles(
+                                choice_list[0], sanitize=False)))
 
                 gen_num = os.path.basename(rank_file).split("_")[1]
                 gen_name = f"generation_{gen_num}"
@@ -463,7 +464,7 @@ def get_average_score_per_gen(infolder: str, ligand_efficiency: bool) -> Dict[st
                             if not ligand_efficiency \
                             else gen_affinity_sum + (float(choice_list[2]) /
                                                      Lipinski.HeavyAtomCount(
-                                                         Chem.MolFromSmiles(choice_list[0])))
+                                                         Chem.MolFromSmiles(choice_list[0], sanitize=False)))
                         num_lines_counter = num_lines_counter + 1.0
 
                 gen_affinity_average = gen_affinity_sum / num_lines_counter
@@ -528,7 +529,7 @@ def get_average_top_score_per_gen(infolder: str, top_score_per_gen: int, ligand_
                                 if not ligand_efficiency \
                                 else gen_affinity_sum + (float(choice_list[2]) /
                                                          Lipinski.HeavyAtomCount(
-                                                             Chem.MolFromSmiles(choice_list[0])))
+                                                             Chem.MolFromSmiles(choice_list[0], sanitize=False)))
 
                         gen_affinity_average = gen_affinity_sum / top_score_per_gen
 
