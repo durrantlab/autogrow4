@@ -65,28 +65,30 @@ def rank_and_save_output_smi(
     # smiles_list
 
     # Only add these when we haven't already redocked the ligand
-    if current_gen_int != 0:
-        # Go to previous generation folder
-        prev_gen_num = str(current_gen_int - 1)
-        run_folder = params["output_directory"]
-        previous_gen_folder = f"{run_folder}generation_{prev_gen_num}{os.sep}"
-        ranked_smi_file_prev_gen = (
-            f"{previous_gen_folder}generation_{prev_gen_num}_ranked.smi"
-        )
+    # TODO: Discuss with Jacob why to do this? This code leads to get compounds from the previous generation that are included in the current generation
+    # if current_gen_int != 0:
+    #     # Go to previous generation folder
+    #     prev_gen_num = str(current_gen_int - 1)
+    #     run_folder = params["output_directory"]
+    #     previous_gen_folder = f"{run_folder}generation_{prev_gen_num}{os.sep}"
+    #     ranked_smi_file_prev_gen = (
+    #         f"{previous_gen_folder}generation_{prev_gen_num}_ranked.smi"
+    #     )
+    #
+    #     # Also check sometimes Generation 1 won't have a previous
+    #     # generation to do this with and sometimes it will
+    #     if (
+    #         current_gen_int != 1
+    #         or os.path.exists(ranked_smi_file_prev_gen) is not False
+    #     ):
+    #         # Shouldn't happen but to be safe.
+    #         _process_ligand_scores_from_prev_gen(
+    #             ranked_smi_file_prev_gen,
+    #             current_generation_dir,
+    #             current_gen_int,
+    #             postDockedCompoundInfos,
+    #         )
 
-        # Also check sometimes Generation 1 won't have a previous
-        # generation to do this with and sometimes it will
-        if (
-            current_gen_int != 1
-            or os.path.exists(ranked_smi_file_prev_gen) is not False
-        ):
-            # Shouldn't happen but to be safe.
-            _process_ligand_scores_from_prev_gen(
-                ranked_smi_file_prev_gen,
-                current_generation_dir,
-                current_gen_int,
-                postDockedCompoundInfos,
-            )
     # Output format of the .smi file will be: SMILES    Full_lig_name
     # shorthandname   ...AnyCustominfo... Fitness_metric  diversity
     # Normally the docking score is the fitness metric but if we use a
