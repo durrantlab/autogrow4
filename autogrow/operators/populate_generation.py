@@ -31,7 +31,7 @@ import autogrow.utils.mol_object_handling as MOH
 
 
 def populate_generation(
-    params: Dict[str, Any], generation_num: int, cur_gen_dir: str
+    params: Dict[str, Any], generation_num: int, cur_gen_dir: str, smiles_already_generated: set,
 ) -> Tuple[str, List[Compound]]:
     """
     Populate a new generation of ligands through mutation, crossover, and elitism.
@@ -43,6 +43,7 @@ def populate_generation(
         params (Dict[str, Any]): Dictionary of all user variables.
         generation_num (int): The current generation number.
         cur_gen_dir (str): Directory for the current generation.
+        smiles_already_generated (set): Set of SMILES already generated
 
     Returns:
         Tuple[str, List[Compound]]: A tuple containing:
@@ -104,6 +105,7 @@ def populate_generation(
                         procs_per_node,
                         "mutation",
                         Mutation.MutationGenerator,
+                        smiles_already_generated
                     )
                 else:
                     log_warning("No mutations made, per user settings")
@@ -130,6 +132,7 @@ def populate_generation(
                         procs_per_node,
                         "crossover",
                         Crossover.CrossoverGenerator,
+                        smiles_already_generated,
                     )
                 else:
                     log_warning("No crossovers made, per user settings")
@@ -225,6 +228,7 @@ def _generate_compounds(
     procs_per_node: int,
     compound_type: str,
     compound_gen_cls: Type[CompoundGenerator],
+    smiles_already_generated: set,
 ) -> List[Compound]:
     """
     Generate new compounds (mutations or crossovers) for the current generation.
@@ -269,7 +273,7 @@ def _generate_compounds(
     # Make all compounds
     new_compounds = compound_gen_cls(
         params, generation_num, procs_per_node, num_compounds, seed_list
-    ).generate()
+    ).generate(smiles_already_generated)
 
     # Remove Nones
     new_compounds = [x for x in new_compounds if x is not None]

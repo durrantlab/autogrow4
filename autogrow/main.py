@@ -116,6 +116,7 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
     # 2)  Docking which handles converting from PDBs to Docking specific
     #     formats and running the actual Docking simulations
     # 3)  Ranking the generation based on the Docking scores
+    smiles_already_generated = set()
     for gen_num in range(start_gen_num, num_gens_to_make + 1):
         sys.stdout.flush()
 
@@ -126,7 +127,7 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
 
         with LogLevel():
             smi_new_gen_path, new_gen_cmpds = populate_generation(
-                params, gen_num, cur_gen_dir
+                params, gen_num, cur_gen_dir, smiles_already_generated
             )
             sys.stdout.flush()
 
