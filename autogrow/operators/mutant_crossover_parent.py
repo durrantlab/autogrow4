@@ -111,9 +111,12 @@ class CompoundGenerator(ABC):
         """Get a formatted response for the operation."""
         pass
 
-    def generate(self) -> List[Compound]:
+    def generate(self, smiles_already_generated) -> List[Compound]:
         """
         Generate new compounds using the specified operation.
+
+        Args:
+            smiles_already_generated (set): Set of SMILES already generated.
 
         Returns:
             List[Compound]: List of new compounds.
@@ -130,7 +133,6 @@ class CompoundGenerator(ABC):
         with LogLevel():
             cmpds_queue = copy.deepcopy(self.cmpds)
 
-            smiles_already_generated = set()
             ids_already_generated = set()
             attempts_to_fill_queue = 0
 
