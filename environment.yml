@@ -5,34 +5,36 @@ channels:
 
 dependencies:
   - python=3.9
-  - anaconda::flake8=4.0.1
-  - conda-forge::mypy=0.812
-  - anaconda::pytest=7.1.2
-  - anaconda::numpy=1.22.3
-  - numba::numba=0.56.4
-  - conda-forge::prody=2.2.0
-  - pytorch::pytorch=1.11.0=py3.9_cuda11.3_cudnn8_0
-  - pytorch::torchvision=0.12.0=py39_cu113
-  - pytorch::torchaudio=0.11.0=py39_cu113
-  - conda-forge::pytorch-lightning=1.7.1
-  - anaconda::scipy=1.11.4
-  - anaconda::pandas=1.4.4
-  - conda-forge::rdkit=2024.03
-  - conda-forge::k3d=2.15.2
-  - conda-forge::py3dmol=2.4.0
-  - anaconda::h5py=3.7.0
-  - anaconda::scikit-learn=1.5.1
-  - conda-forge::torchinfo=1.8.0
-  - conda-forge::wandb=0.15.8
-  - pyg::pyg
-  - anaconda::filelock=3.13.1
-  - conda-forge::regex
-  - conda-forge::sacremoses=0.0.53
-  - conda-forge::sentencepiece=0.2.0
-  - conda-forge::tokenizers=0.20.0
-  - conda-forge::torchmetrics=0.11.0
-  - anaconda::pip
+  - pip=24.0
   - pip:
+      - flake8==4.0.1
+      - mypy==0.812
+      - pytest==7.1.2
+      - numpy==1.22.3
+      - numba==0.56.4
+      - ProDy==2.2.0
+      - --extra-index-url https://download.pytorch.org/whl/cu113
+      - torch==1.11.0+cu113
+      - torchvision==0.12.0+cu113
+      - torchaudio==0.11.0
+      - pytorch-lightning==1.7.1
+      - scipy==1.11.4
+      - pandas==1.4.4
+      - rdkit==2024.3.6
+      - k3d==2.15.2
+      - py3Dmol==2.4.0
+      - h5py==3.7.0
+      - scikit-learn==1.5.1
+      - torchinfo==1.8.0
+      - wandb==0.15.8      -
+      - -f https://data.pyg.org/whl/torch-1.11.0+cu113.html
+      - torch_geometric
+      - filelock==3.13.1
+      - regex
+      - sacremoses==0.0.53
+      - sentencepiece==0.2.0
+      - tokenizers==0.20.0
+      - torchmetrics==0.11.0
       - Fancy-aggregations
       - wget
       - fair-esm
