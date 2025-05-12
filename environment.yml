@@ -20,7 +20,7 @@ dependencies:
       - pytorch-lightning==1.7.1
       - scipy==1.11.4
       - pandas==1.4.4
-      - rdkit==2024.3.6
+      - rdkit==2024.3.1
       - k3d==2.15.2
       - py3Dmol==2.4.0
       - h5py==3.7.0
