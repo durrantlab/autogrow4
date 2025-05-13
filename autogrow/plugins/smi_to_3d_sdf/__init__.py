@@ -11,7 +11,7 @@ from typing import List, cast
 
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
 from autogrow.types import Compound
-
+from autogrow.utils.logging import log_warning
 from autogrow.plugins.plugin_base import PluginBase
 
 
@@ -127,13 +127,17 @@ class SmiTo3DSdfPluginManager(PluginManagerBase):
         #     )
 
         resp = smi_to_sdf_converter.run(**kwargs)
+        resp_final = []
 
         # Validate that the sdf_path property is populated
         for cmpd in resp:
             if cmpd.sdf_path is None:
-                raise Exception(
-                    "ERROR! Your SmiTo3DSdf plugin must populate the sdf_path property of each Compound."
-                )
-            cmpd.add_history("CONVERSION", f"Converted {cmpd.smiles} to 3D SDF file")
+                log_warning("ERROR! Your SmiTo3DSdf plugin must populate the sdf_path property of each Compound.")
+                # raise Exception(
+                #     "ERROR! Your SmiTo3DSdf plugin must populate the sdf_path property of each Compound."
+                # )
+            else:
+                cmpd.add_history("CONVERSION", f"Converted {cmpd.smiles} to 3D SDF file")
+                resp_final.append(cmpd)
 
-        return resp
+        return resp_final
