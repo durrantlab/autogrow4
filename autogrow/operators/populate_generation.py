@@ -32,7 +32,7 @@ import autogrow.utils.mol_object_handling as MOH
 
 def populate_generation(
     params: Dict[str, Any], generation_num: int, cur_gen_dir: str, smiles_already_generated: set,
-) -> Tuple[str, List[Compound]]:
+) -> Tuple[str, List[Compound], List[Compound]]:
     """
     Populate a new generation of ligands through mutation, crossover, and elitism.
 
@@ -49,6 +49,7 @@ def populate_generation(
         Tuple[str, List[Compound]]: A tuple containing:
             - The name of the .smi file containing the new population.
             - A list of Compound objects representing the new population.
+            - A list of Compound objects representing the elite compounds.
 
     Raises:
         AssertionError: If the population fails to make enough compounds.
@@ -162,9 +163,7 @@ def populate_generation(
         log_info(f"Identified {len(elite_predock_cmpds)} elite compounds")
 
     # Build new_gen_smis and full_gen_smis
-    # TODO: Need to understand why these two are separate.
     new_gen_predock_cmpds: List[Compound] = mut_predock_cmpds + cross_predock_cmpds
-
     full_gen_cmpds: List[Compound] = mut_predock_cmpds + cross_predock_cmpds
 
     if generation_num != 1:
@@ -178,18 +177,10 @@ def populate_generation(
     if len(full_gen_cmpds) < total_num_desired_new_ligands:
         log_warning(
             f"Only {len(full_gen_cmpds)} compounds were generated, but {total_num_desired_new_ligands} were requested."
-            " It may be that (1) the source compounds are not diverse enough, (2) there are too few seed compounds, (3) the seed molecules lack the similarity for crossover, or (4) the seed molecules lack the functional groups for mutation."
+            " It may be that (1) the source compounds are not diverse enough, (2) there are too few seed compounds,"
+            " (3) the seed molecules lack the similarity for crossover, or (4) the seed molecules lack the functional"
+            " groups for mutation."
         )
-        # print("We needed ", total_num_desired_new_ligands)
-        # print("We made ", len(full_gen_predock_cmpds))
-        # print(
-        #     "Population failed to make enough mutants or crossovers... "
-        #     "Errors could include not enough diversity, too few seeds to "
-        #     "the generation, the seed mols are unable to cross-over due "
-        #     "to lack of similarity, or all of the seed lack functional groups "
-        #     "for performing reactions"
-        # )
-        # assert False
 
     # Save the full generation and the SMILES to convert
     (
@@ -201,21 +192,20 @@ def populate_generation(
     )
 
     # Convert SMILES to .sdf using Gypsum and convert .sdf to .pdb with RDKit
-
     # Note that smiles_to_convert_file is a single with with many smi files
     # in it.
     log_info("Converting SMILES to 3D SDF files")
     with LogLevel():
-        full_gen_cmpds = plugin_managers.SmiTo3DSdf.run(
-            predock_cmpds=full_gen_cmpds,
+        new_gen_predock_cmpds = plugin_managers.SmiTo3DSdf.run(
+            predock_cmpds=new_gen_predock_cmpds,
             pwd=new_gen_folder_path,
             cache_dir=cur_gen_dir,
         )
 
     # Remove those that failed to convert
-    full_gen_cmpds = [x for x in full_gen_cmpds if x.sdf_path is not None]
+    new_gen_predock_cmpds = [x for x in new_gen_predock_cmpds if x.sdf_path is not None]
 
-    return full_gen_smi_file, full_gen_cmpds
+    return full_gen_smi_file, new_gen_predock_cmpds, (elite_predock_cmpds if generation_num > 1 else [])
 
 
 def _generate_compounds(

@@ -34,7 +34,7 @@ def dock_input_compounds(params: Optional[Dict[str, Any]]) -> None:
         cache_dir=cur_gen_dir,
     )
     DockingClass.run_docking_common(
-        0, cur_gen_dir, smi_new_gen_path, source_cmpds, params
+        0, cur_gen_dir, smi_new_gen_path, source_cmpds, [], params
     )
 
 
@@ -126,7 +126,7 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
         log_info(f"Creating generation {gen_num}")
 
         with LogLevel():
-            smi_new_gen_path, new_gen_cmpds = populate_generation(
+            smi_new_gen_path, new_gen_cmpds, elite_cmpds = populate_generation(
                 params, gen_num, cur_gen_dir, smiles_already_generated
             )
             sys.stdout.flush()
@@ -139,11 +139,11 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
                                     or all of the seed lack functional groups for performing reactions."
                 )
 
-            # Run file conversions of PDB to docking specific file type and
+            # Run file conversions of PDB to docking a specific file type and
             # Begin Docking unweighted_ranked_smile_file is the file name
             # where the unweighted ranked but score .smi file resides
-            unweighted_ranked_smile_file = DockingClass.run_docking_common(
-                gen_num, cur_gen_dir, smi_new_gen_path, new_gen_cmpds, params
+            DockingClass.run_docking_common(
+                gen_num, cur_gen_dir, smi_new_gen_path, new_gen_cmpds, elite_cmpds, params
             )
 
         sys.stdout.flush()
