@@ -12,7 +12,7 @@ import multiprocessing
 import os
 import sys
 from typing import Any, Dict, Optional
-
+from accessory_scripts.plot_autogrow_run import main as plot_autogrow_run
 from autogrow import program_info
 from autogrow.config.argparser import get_user_params
 import autogrow.docking.execute_docking as DockingClass
@@ -178,3 +178,13 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
 
     log_info("Docking input compounds for further analysis")
     dock_input_compounds(params)
+
+    log_info("Generating graphics to interpret results.")
+    graphic_output_dir = f"{params['output_directory']}graphics{os.sep}"
+    os.mkdir(graphic_output_dir)
+    plot_args = {
+        "infolder": params["output_directory"],
+        "outfile": graphic_output_dir,
+        "outfile_format": "png"
+    }
+    plot_autogrow_run(**plot_args)
