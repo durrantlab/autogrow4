@@ -111,7 +111,7 @@ def calc_interaction_fp_per_generation(params: Dict[str, Any], infolder: str, in
     number_interactions_per_gen = {}
     num_compounds_per_generation = {}
     for gen_folder in os.listdir(infolder):
-        if os.path.isdir(os.path.join(infolder, gen_folder)):
+        if "generation" in gen_folder and os.path.isdir(os.path.join(infolder, gen_folder)):
             gen_folder_name = infolder + os.sep + gen_folder + os.sep
             rank_file = glob.glob(f"{gen_folder_name}*_ranked.smi")[0]
             gen_num = os.path.basename(rank_file).split("_")[1]
@@ -175,7 +175,7 @@ def generate_tSNE_scatterplot(infolder: str, params: Dict[str, Any], outfile: st
     label_list = []
     result_matrix = []
     for gen_folder in os.listdir(infolder):
-        if os.path.isdir(os.path.join(infolder, gen_folder)):
+        if "generation" in gen_folder and os.path.isdir(os.path.join(infolder, gen_folder)):
             gen_folder_name = infolder + os.sep + gen_folder + os.sep
             rank_file = glob.glob(f"{gen_folder_name}*_ranked.smi")[0]
             gen_num = os.path.basename(rank_file).split("_")[1]
@@ -248,7 +248,7 @@ def calc_diversity_scores_per_generation(infolder: str):
     """
     average_dict = {}
     for gen_folder in os.listdir(infolder):
-        if os.path.isdir(os.path.join(infolder, gen_folder)):
+        if "generation" in gen_folder and os.path.isdir(os.path.join(infolder, gen_folder)):
             gen_folder_name = infolder + os.sep + gen_folder + os.sep
             rank_file = glob.glob(f"{gen_folder_name}*_ranked.smi")[0]
             gen_num = os.path.basename(rank_file).split("_")[1]
@@ -1104,7 +1104,25 @@ def _parse_plot_reference_lines(inputs: Dict[str, Any]) -> None:
     inputs["plot_reference_lines"] = new_ref_lines
 
 
-def main():
+def main(**kwargs):
+    # copying ARGSDICT so we can delete out of while iterating through the
+    # original ARGSDICT
+    INPUTS = copy.deepcopy(kwargs)
+
+    for k, v in kwargs.items():
+        if v is None:
+            del INPUTS[k]
+
+    USER_VARS = process_inputs(INPUTS)
+
+    generate_figures(USER_VARS, True)
+
+    print(f'FINISHED {USER_VARS["outfile"]}')
+
+    print("finished")
+
+
+if __name__ == "__main__":
     PARSER = argparse.ArgumentParser()
 
     # Get needed info
@@ -1115,7 +1133,7 @@ def main():
         required=False,
         default=None,
         help="Path to folder to output files. It will be created if does not exist. \
-        If not provide it will be placed in the infolder/data_line_plot.svg",
+            If not provide it will be placed in the infolder/data_line_plot.svg",
     )
     PARSER.add_argument(
         "--outfile_format",
@@ -1131,39 +1149,20 @@ def main():
         metavar="param.infolder",
         required=True,
         help="Path to input folder containing the AutoGrow run. This should be the \
-            top folder which contains the vars.json file.",
+                top folder which contains the vars.json file.",
     )
     PARSER.add_argument(
         "--plot_reference_lines",
         default=None,
         help="This will be a list of lists, with each sublist being a different \
-            dotted-line reference to plot. For each sublist the order of \
-            information should be: [name, value, matplotlib_color] \
-            For example a [['Olaparib score',-12.8,'y'],['Niraparib score',-10.7,'k']] \
-            will add horizontal dotted lines at -12.8 (yellow) and -10.7 (black) \
-            with Olaparib and Niraparib added to the legend. \
-            Spaces must be within quotes and not be between variables. \
-            matplotlib colors can be found with mcolors.get_named_colors_mapping().keys()",
+                dotted-line reference to plot. For each sublist the order of \
+                information should be: [name, value, matplotlib_color] \
+                For example a [['Olaparib score',-12.8,'y'],['Niraparib score',-10.7,'k']] \
+                will add horizontal dotted lines at -12.8 (yellow) and -10.7 (black) \
+                with Olaparib and Niraparib added to the legend. \
+                Spaces must be within quotes and not be between variables. \
+                matplotlib colors can be found with mcolors.get_named_colors_mapping().keys()",
     )
 
-    ARGSDICT = vars(PARSER.parse_args())
-
-    # copying ARGSDICT so we can delete out of while iterating through the
-    # original ARGSDICT
-    INPUTS = copy.deepcopy(ARGSDICT)
-
-    for k, v in ARGSDICT.items():
-        if v is None:
-            del INPUTS[k]
-
-    USER_VARS = process_inputs(INPUTS)
-
-    generate_figures(USER_VARS, True)
-
-    print(f'FINISHED {USER_VARS["outfile"]}')
-
-    print("finished")
-
-
-if __name__ == "__main__":
-    main()
+    kwargs = vars(PARSER.parse_args())
+    main(**kwargs)
