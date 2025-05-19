@@ -36,25 +36,22 @@ We strongly recommend running AutoGrow4 via Docker using
 
 ## Dependencies Notes
 
-AutoGrow4 version 4.0.1 has been tested with the following dependencies:
+The Python dependencies used in AutoGrow4 version 4.0.1 are specified in the 
+environment.yml file.
 
-```python
->>> rdkit.__version__
-'2020.03.1'
->>> numpy.__version__
-'1.18.1'
->>> scipy.__version__
-'1.4.1'
->>> matplotlib.__version__
-'3.2.1'
->>> func_timeout.__version__
-'4.3.5'
-```
+## Python environment configuration via conda
 
-If you are unable to run AutoGrow4, please try running AutoGrow4 in a python
-environment with these specific dependencies. Alternatively, the Docker
-version of AutoGrow4 automatically installs dependencies that are verified to
-work with AutoGrow4. If you discover that AutoGrow4 is no longer compatible
+We provide the steps to create a Python environment from an environment.yml file 
+using conda:
+
+1. conda env create -f environment.yml
+2. conda activate Autogrow4
+3. conda env list
+
+AutoGrow4 version 4.0.1 has been run both on Mac, Linux, and Windows platforms. 
+If you are unable to run AutoGrow4, we alternatively provide a Docker-containerized 
+version of AutoGrow4, which automatically installs dependencies that are verified to
+work with. If you discover that AutoGrow4 is no longer compatible
 with current library releases, please contact us, and we will attempt to
 correct the code.
 
