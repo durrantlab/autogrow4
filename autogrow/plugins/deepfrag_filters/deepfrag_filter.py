@@ -42,6 +42,7 @@ class DeepFragFilterBase(PluginBase):
 
     cpu = False
     apply_on_crossover = False
+    fps_fragment_cache = {}
 
     def run(self, **kwargs) -> List[Compound]:
         """
@@ -61,6 +62,7 @@ class DeepFragFilterBase(PluginBase):
         receptor = kwargs["input_params"]["receptor_path"]
 
         final_compound_list = []
+        passed_filter = True
         for compound in compounds:
             if len(compound.parent_3D_mols) == 1:
                 mcs_mol, _, fragments = self.__find_mcs_and_fragments(compound.parent_3D_mols[0], Chem.MolFromSmiles(compound.smiles))
@@ -373,8 +375,14 @@ class DeepFragFilterBase(PluginBase):
             fragment_smiles = fragment_info['fragment_smiles']
             branching_point = fragment_info['coordinates']
 
+            # No cache because this calculation depends on the receptor and a specific branching point,
+            # and it is strange that a branching point can be used twice in the same or different molecules
             fps_receptor_parent = self.get_prediction_for_parent_receptor(parent_mol, receptor, branching_point).tolist()
-            fps_fragment = self.get_fingerprints_for_fragment(Chem.MolFromSmiles(fragment_smiles)).tolist()
+
+            fps_fragment = self.fps_fragment_cache.get(fragment_smiles)
+            if fps_fragment is None:
+                fps_fragment = self.get_fingerprints_for_fragment(Chem.MolFromSmiles(fragment_smiles)).tolist()
+                self.fps_fragment_cache[fragment_smiles] = fps_fragment
 
             similarity = similarity + (1 - cosine(fps_receptor_parent, fps_fragment))
 
