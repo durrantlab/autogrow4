@@ -61,7 +61,6 @@ class DeepFragFilterRDKit(DeepFragFilterBase):
            Numpy array containing the DeepFrag fingerprints.
         """
         voxel_params = VoxelParamsDefault.DeepFrag
-        device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
         # Load the receptor
         if self.recep is None:
@@ -87,11 +86,11 @@ class DeepFragFilterRDKit(DeepFragFilterBase):
             rot = rand_rot()
 
             voxel = self.recep.voxelize(
-                voxel_params, cpu=device, center=center, rot=rot
+                voxel_params, cpu=self.cpu, center=center, rot=rot
             )
             voxel = lig.voxelize(
                 voxel_params, tensor=voxel, layer_offset=voxel_params.receptor_featurizer.size(), is_receptor=False,
-                cpu=device, center=center, rot=rot
+                cpu=self.cpu, center=center, rot=rot
             )
 
             fps.append(model.forward(voxel))
