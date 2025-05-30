@@ -13,6 +13,10 @@ from abc import abstractmethod
 from autogrow.config.argument_vars import ArgumentVars
 from scipy.spatial.distance import cosine
 from autogrow.utils.logging import log_debug
+import os
+import wget
+import sys
+import torch
 
 # Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog("rdApp.*")
@@ -25,6 +29,19 @@ class DeepFragFilterBase(PluginBase):
     This class defines the interface for DeepFrag plugins and provides a common
     run method that calls the abstract run_deepfrag_filter method.
     """
+
+    url_by_in_house_model = {
+        "all_best": "https://durrantlab.pitt.edu/apps/deepfrag2/models/all_best.ckpt",
+        "gte_4_acid_best": "https://durrantlab.pitt.edu/apps/deepfrag2/models/gte_4_acid_best.ckpt",
+        "gte_4_aliphatic_best": "https://durrantlab.pitt.edu/apps/deepfrag2/models/gte_4_aliphatic_best.ckpt",
+        "gte_4_aromatic_best": "https://durrantlab.pitt.edu/apps/deepfrag2/models/gte_4_aromatic_best.ckpt",
+        "gte_4_base_best": "https://durrantlab.pitt.edu/apps/deepfrag2/models/gte_4_base_best.ckpt",
+        "gte_4_best": "https://durrantlab.pitt.edu/apps/deepfrag2/models/gte_4_best.ckpt",
+        "lte_3_best": "https://durrantlab.pitt.edu/apps/deepfrag2/models/lte_3_best.ckpt",
+    }
+
+    cpu = False
+    apply_on_crossover = False
 
     def run(self, **kwargs) -> List[Compound]:
         """
@@ -49,7 +66,7 @@ class DeepFragFilterBase(PluginBase):
                 mcs_mol, _, fragments = self.__find_mcs_and_fragments(compound.parent_3D_mols[0], Chem.MolFromSmiles(compound.smiles))
                 similarity = self.__compute_cosine_similarity(receptor, mcs_mol, fragments)
                 passed_filter = similarity >= cutoff
-            elif len(compound.parent_3D_mols) == 2:
+            elif self.apply_on_crossover and len(compound.parent_3D_mols) == 2:
                 mcs_mol, _, fragments = self.__find_mcs_and_fragments(compound.parent_3D_mols[0], Chem.MolFromSmiles(compound.smiles))
                 similarity_0 = self.__compute_cosine_similarity(receptor, mcs_mol, fragments)
                 mcs_mol, _, fragments = self.__find_mcs_and_fragments(compound.parent_3D_mols[1], Chem.MolFromSmiles(compound.smiles))
@@ -78,7 +95,17 @@ class DeepFragFilterBase(PluginBase):
 
     def validate(self, params: dict):
         """Validate the provided arguments."""
-        pass
+        self.cpu = bool(params["cpu"]) or not torch.cuda.is_available()
+        self.apply_on_crossover = bool(params["DeepFragFilterForCrossover"])
+
+        df_model = params["DeepFragModel"]
+        if df_model in self.url_by_in_house_model:
+            df_model = self.download_deepfrag_ckpt(df_model + ".ckpt", self.url_by_in_house_model[df_model])
+            params["DeepFragModel"] = df_model
+
+        if not os.path.exists(df_model):
+            raise Exception(f"DeepFrag model {df_model} is not an in-house model, or does not exist in "
+                            f"the path specified.")
 
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
         """
@@ -102,6 +129,12 @@ class DeepFragFilterBase(PluginBase):
                     help="An value representing the cosine similarity value to be "
                          "considered as cutoff in order to a molecule pass the filter or "
                          "not",
+                ),
+                ArgumentVars(
+                    name="DeepFragFilterForCrossover",
+                    action="store_true",
+                    default=False,
+                    help="Apply a DeepFrag filter on the new compounds obtained by crossover",
                 )
             ],
         )
@@ -347,3 +380,38 @@ class DeepFragFilterBase(PluginBase):
 
         similarity = (similarity / len(fragments)) if len(fragments) > 0 else 1
         return similarity
+
+    def download_deepfrag_ckpt(self, deepfrag_model_ckpt, deepfrag_model_url):
+        """Download an in-house DeepFrag model checkpoint."""
+
+        current_directory = os.getcwd() + os.sep + "deepfrag_models"
+        if not os.path.exists(current_directory):
+            os.makedirs(current_directory, exist_ok=True)
+
+        deepfrag_model_path = current_directory + os.sep + deepfrag_model_ckpt
+        if not os.path.exists(deepfrag_model_path):
+            print("Starting download of the DeepFrag model: ", deepfrag_model_ckpt)
+            wget.download(
+                deepfrag_model_url,
+                deepfrag_model_path,
+                self.bar_progress,
+            )
+
+        return deepfrag_model_path
+
+    def bar_progress(self, current: float, total: float, width=80):
+        """Progress bar for downloading Molbert model.
+
+        Args:
+            current (float): Current progress.
+            total (float): Total progress.
+            width (int, optional): Width of the progress bar. Defaults to 80.
+        """
+        progress_message = "Downloading DeepFrag model: %d%% [%d / %d] bytes" % (
+            current / total * 100,
+            current,
+            total,
+        )
+        # Don't use print() as it will print in new line every time.
+        sys.stdout.write("\r" + progress_message)
+        sys.stdout.flush()
