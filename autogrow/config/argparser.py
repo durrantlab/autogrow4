@@ -41,6 +41,7 @@ parser = argparse.ArgumentParser(
     description="AutoGrow: An automated drug optimization and generation tool."
 )
 
+
 def get_user_params() -> Dict[str, Any]:
     """
     Parse command-line arguments and return a dictionary of user parameters.
@@ -221,6 +222,12 @@ def _add_general_params(parser: argparse._ArgumentGroup):
         help="Determine what style \
         multithreading: multithreading or serial. serial will override \
         procs_per_node and force it to be on a single processor.",
+    )
+    parser.add_argument(
+        "--cpu",
+        action="store_true",
+        default=False,
+        help="To use cpu instead of gpu when using a DeepFrag model.",
     )
 
 

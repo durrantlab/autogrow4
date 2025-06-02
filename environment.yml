@@ -1,10 +1,11 @@
-name: Autogrow2
+name: Autogrow4
 
 channels:
   - nodefaults
 
 dependencies:
   - python=3.9
+  - conda-forge::cudatoolkit=11.3.1
   - pip=24.0
   - pip:
       - flake8==4.0.1
@@ -12,9 +13,10 @@ dependencies:
       - pytest==7.1.2
       - numpy==1.23.5
       - numba==0.56.4
-      - ProDy==2.2.0
-      - torch==1.11.0
-      - torchvision==0.12.0
+      - ProDy==2.4.1
+      - --extra-index-url https://download.pytorch.org/whl/cu113
+      - torch==1.11.0+cu113
+      - torchvision==0.12.0+cu113
       - torchaudio==0.11.0
       - pytorch-lightning==1.7.1
       - scipy==1.11.4
@@ -26,7 +28,7 @@ dependencies:
       - scikit-learn==1.5.1
       - torchinfo==1.8.0
       - wandb==0.15.8
-      - torch_geometric
+      - torch_geometric -f https://data.pyg.org/whl/torch-1.11.0+cu113.html
       - filelock==3.13.1
       - regex
       - sacremoses==0.0.53
