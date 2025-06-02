@@ -1,4 +1,4 @@
-name: Autogrow2
+name: Autogrow4
 
 channels:
   - nodefaults
@@ -28,8 +28,7 @@ dependencies:
       - scikit-learn==1.5.1
       - torchinfo==1.8.0
       - wandb==0.15.8
-      - -f https://data.pyg.org/whl/torch-1.11.0+cu113.html
-      - torch_geometric
+      - torch_geometric -f https://data.pyg.org/whl/torch-1.11.0+cu113.html
       - filelock==3.13.1
       - regex
       - sacremoses==0.0.53
