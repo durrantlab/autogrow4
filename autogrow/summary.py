@@ -19,6 +19,7 @@ def generate_summary_html(output_dir: str) -> None:
     all_generations = []
     generation_dirs = sorted(glob.glob(os.path.join(output_dir, "generation_*")))
 
+    all_smiles = set()
     for gen_dir in generation_dirs:
         gen_file = os.path.join(gen_dir, f"{os.path.basename(gen_dir)}_ranked.smi")
         if not os.path.exists(gen_file):
@@ -28,13 +29,15 @@ def generate_summary_html(output_dir: str) -> None:
         with open(gen_file, "r") as f:
             for line in f:
                 cmpd = Compound.from_tsv_line(line)
-                generation_data.append(
-                    {
-                        "smiles": cmpd.smiles,
-                        "id": cmpd.id,
-                        "docking_score": cmpd.docking_score,
-                    }
-                )
+                if cmpd.smiles not in all_smiles:
+                    all_smiles.add(cmpd.smiles)
+                    generation_data.append(
+                        {
+                            "smiles": cmpd.smiles,
+                            "id": cmpd.id,
+                            "docking_score": cmpd.docking_score,
+                        }
+                    )
         all_generations.append(generation_data)
 
     # Calculate global min/max scores and bin configuration
@@ -403,6 +406,7 @@ def generate_summary_txt(output_dir: str) -> None:
     compounds_with_sdf = 0
     compounds_with_valid_sdf = 0
 
+    all_smiles = set()
     for gen_dir in generation_dirs:
         gen_file = os.path.join(gen_dir, f"{os.path.basename(gen_dir)}_ranked.smi")
         if not os.path.exists(gen_file):
@@ -414,6 +418,9 @@ def generate_summary_txt(output_dir: str) -> None:
                 total_lines += 1
 
                 cmpd = Compound.from_tsv_line(line)
+                if cmpd.smiles in all_smiles:
+                    continue
+                all_smiles.add(cmpd.smiles)
 
                 # parts = line.strip().split("\t")
 
