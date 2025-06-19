@@ -205,7 +205,6 @@ def _add_general_params(parser: argparse._ArgumentGroup):
         help="Name of a json file containing all parameters. \
         Overrides other arguments.",
     )
-
     # processors and multithread mode
     parser.add_argument(
         "--procs_per_node",
@@ -222,6 +221,13 @@ def _add_general_params(parser: argparse._ArgumentGroup):
         help="Determine what style \
         multithreading: multithreading or serial. serial will override \
         procs_per_node and force it to be on a single processor.",
+    )
+    # for postprocessing
+    parser.add_argument(
+        "--process_generation_0",
+        action="store_true",
+        default=False,
+        help="This is to use the information of the reference compounds in the processing of results.",
     )
 
 
