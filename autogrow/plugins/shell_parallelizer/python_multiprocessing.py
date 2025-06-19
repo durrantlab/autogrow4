@@ -11,9 +11,6 @@ from autogrow.config.argument_vars import ArgumentVars
 from autogrow.plugins.shell_parallelizer import ShellCmdResult, ShellParallelizerBase
 import multiprocessing
 import subprocess
-import os
-
-from autogrow.utils.logging import log_warning
 
 
 class PythonMultiprocessing(ShellParallelizerBase):
@@ -23,6 +20,8 @@ class PythonMultiprocessing(ShellParallelizerBase):
     This plugin extends ShellParallelizerBase to provide parallel execution
     capabilities using Python's built-in multiprocessing module.
     """
+
+    number_procs = -1
 
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
         """
@@ -66,7 +65,9 @@ class PythonMultiprocessing(ShellParallelizerBase):
             params (dict): A dictionary of parameters provided to the plugin.
                 Not used in the current implementation.
         """
-        pass
+        self.number_procs = int(params["procs_per_node"])
+        if self.number_procs == -1:
+            self.number_procs = self.get_nprocs_to_use(self.number_procs)
 
     def run_cmd(self, cmd: str) -> ShellCmdResult:
         """
@@ -90,7 +91,7 @@ class PythonMultiprocessing(ShellParallelizerBase):
         return ShellCmdResult(cmd=cmd, return_code=return_code, output=output + error)
 
     def run_cmds_in_parallel(
-        self, cmds: List[str], nprocs: int = -1
+        self, cmds: List[str]
     ) -> List[ShellCmdResult]:
         """
         Run a list of shell commands in parallel using Python's multiprocessing.
@@ -101,8 +102,6 @@ class PythonMultiprocessing(ShellParallelizerBase):
 
         Args:
             cmds (List[str]): A list of shell commands to run in parallel.
-            nprocs (int, optional): The number of processors to use. Defaults
-                to -1 (use all available).
 
         Returns:
             List[ShellCmdResult]: A list of ShellCmdResult objects, one for
@@ -112,14 +111,13 @@ class PythonMultiprocessing(ShellParallelizerBase):
             If the number of CPUs cannot be determined, it defaults to using a
             single processor and logs a warning.
         """
-        if nprocs == -1:
-            if os.cpu_count() is None:
-                nprocs = 1
-                log_warning("Could not determine the number of CPUs. Defaulting to 1.")
-            else:
-                nprocs = os.cpu_count()  # type: ignore
 
-        with multiprocessing.Pool(processes=nprocs) as pool:
-            results = pool.map(self.run_cmd, cmds)
+        results = []
+        if self.number_procs == 1:
+            for cmd in cmds:
+                results.append(self.run_cmd(cmd))
+        else:
+            with multiprocessing.Pool(processes=self.number_procs) as pool:
+                results = pool.map(self.run_cmd, cmds)
 
         return results

@@ -7,24 +7,24 @@ import __future__
 import rdkit
 import logging
 import numpy as np
-from apps.deepfrag.model import DeepFragModel
-from collagen.core.voxelization.voxelizer import VoxelParamsDefault
 from autogrow.config.argument_vars import ArgumentVars
 from typing import List, Tuple
 from autogrow.plugins.deepfrag_filters.deepfrag_filter_base import DeepFragFilterBase
 import os
 import wget
 import sys
-import torch
 
 # Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog("rdApp.*")
 
 try:
+    import torch
     import prody
     from io import StringIO
     from collagen.util import rand_rot
     from collagen.core.molecules.mol import Mol
+    from apps.deepfrag.model import DeepFragModel
+    from collagen.core.voxelization.voxelizer import VoxelParamsDefault
 
     numba_logger = logging.getLogger("numba")
     numba_logger.setLevel(logging.WARNING)
@@ -57,7 +57,7 @@ class DeepFragFilter(DeepFragFilterBase):
         """Validate the provided arguments."""
         super().validate(params)
 
-        self.cpu = bool(params["cpu"]) or not torch.cuda.is_available()
+        self.cpu = bool(params["DeepFragOnCPU"]) or not torch.cuda.is_available()
 
         if "DeepFragModel" not in params:
             raise Exception("The path of a DeepFrag model should be given as input using"
@@ -141,6 +141,12 @@ class DeepFragFilter(DeepFragFilterBase):
                     type=str,
                     default=None,
                     help="path to the DeepFrag model that is .ckpt file",
+                ),
+                ArgumentVars(
+                    name="DeepFragOnCPU",
+                    action="store_true",
+                    default=False,
+                    help="Use CPU to run DeepFrag.",
                 )
             ],
         )
