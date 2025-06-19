@@ -11,8 +11,6 @@ from autogrow.plugins.shell_parallelizer import ShellCmdResult, ShellParallelize
 import subprocess
 import os
 
-from autogrow.utils.logging import log_warning
-
 
 class ParallelExec(ShellParallelizerBase):
     """
@@ -97,7 +95,7 @@ class ParallelExec(ShellParallelizerBase):
         return ShellCmdResult(cmd=cmd, return_code=return_code, output=output + error)
 
     def run_cmds_in_parallel(
-        self, cmds: List[str], nprocs: int = -1
+        self, cmds: List[str]
     ) -> List[ShellCmdResult]:
         """
         Run a single shell command and return its output.
@@ -114,7 +112,7 @@ class ParallelExec(ShellParallelizerBase):
             ShellCmdResult: An object containing the command, return code,
                 and output (stdout and stderr combined).
         """
-        nprocs = self.get_nprocs_to_use(nprocs)
+        nprocs = self.get_nprocs_to_use(-1)
 
         # Create a temporary file to store commands
         with open("commands.txt", "w") as f:

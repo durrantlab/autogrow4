@@ -105,13 +105,13 @@ class DeepFragFilterBase(PluginBase):
                     default=False,
                     help="An value representing the cosine similarity value to be "
                          "considered as cutoff in order to a molecule pass the filter or "
-                         "not",
+                         "not.",
                 ),
                 ArgumentVars(
                     name="DeepFragFilterForCrossover",
                     action="store_true",
                     default=False,
-                    help="Apply a DeepFrag filter on the new compounds obtained by crossover",
+                    help="Apply a DeepFrag filter on the new compounds obtained by crossover.",
                 )
             ],
         )

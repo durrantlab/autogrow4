@@ -212,7 +212,7 @@ def _add_general_params(parser: argparse._ArgumentGroup):
         "-p",
         type=int,
         metavar="N",
-        default=1,
+        default=-1,
         help="Number of processors to use for parallel calculations. Set to -1 for all available CPUs.",
     )
     parser.add_argument(
@@ -222,12 +222,6 @@ def _add_general_params(parser: argparse._ArgumentGroup):
         help="Determine what style \
         multithreading: multithreading or serial. serial will override \
         procs_per_node and force it to be on a single processor.",
-    )
-    parser.add_argument(
-        "--cpu",
-        action="store_true",
-        default=False,
-        help="To use cpu instead of gpu when using a DeepFrag model.",
     )
 
 

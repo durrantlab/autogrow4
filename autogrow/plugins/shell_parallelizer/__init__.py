@@ -8,16 +8,10 @@ parallelization plugins.
 
 from abc import abstractmethod
 from dataclasses import dataclass
-import glob
 import os
-import random
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
-from autogrow.config.argument_vars import ArgumentVars
+from typing import List, cast
 from autogrow.plugins.plugin_base import PluginBase
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
-from autogrow.types import Compound, Compound, ScoreType
-import autogrow.docking.scoring.execute_scoring_mol as Scoring
-import autogrow.docking.ranking.ranking_mol as Ranking
 from autogrow.utils.logging import log_debug, log_warning
 
 
@@ -58,12 +52,11 @@ class ShellParallelizerBase(PluginBase):
             List[ShellCmdResult]: A list of ShellCmdResult objects for each
                 command.
         """
-        nprocs = kwargs.get("nprocs", -1)
-        return self.run_cmds_in_parallel(cmds=kwargs["cmds"], nprocs=nprocs)
+        return self.run_cmds_in_parallel(cmds=kwargs["cmds"])
 
     @abstractmethod
     def run_cmds_in_parallel(
-        self, cmds: List[str], nprocs: int = -1
+        self, cmds: List[str]
     ) -> List[ShellCmdResult]:
         """
         Run a list of shell commands in parallel.
