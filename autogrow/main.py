@@ -176,8 +176,9 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
         log_info(f"AutoGrow4 run started at:   {start_time}")
         log_info(f"AutoGrow4 run completed at: {str(datetime.datetime.now())}")
 
-    log_info("Docking input compounds for further analysis")
-    dock_input_compounds(params)
+    if bool(params["process_generation_0"]):
+        log_info("Docking input compounds for further analysis")
+        dock_input_compounds(params)
 
     log_info("Generating graphics to interpret results.")
     graphic_output_dir = f"{params['output_directory']}graphics{os.sep}"
@@ -185,6 +186,7 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
     plot_args = {
         "infolder": params["output_directory"],
         "outfile": graphic_output_dir,
-        "outfile_format": "png"
+        "outfile_format": "png",
+        "process_generation_0": params["process_generation_0"]
     }
     plot_autogrow_run(**plot_args)
