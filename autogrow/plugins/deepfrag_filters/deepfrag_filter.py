@@ -74,6 +74,8 @@ class DeepFragFilter(DeepFragFilterBase):
 
         self.ckpt_filename = params["DeepFragModel"]
         self.model = DeepFragModel.load_from_checkpoint(self.ckpt_filename)
+        if not self.cpu:
+            self.model = self.model.to(torch.device('cuda'))
         self.model.eval()
 
     def get_prediction_for_parent_receptor(self, parent_mol, receptor, branching_point):
@@ -118,6 +120,9 @@ class DeepFragFilter(DeepFragFilterBase):
                 voxel_params, tensor=voxel, layer_offset=voxel_params.receptor_featurizer.size(), is_receptor=False,
                 cpu=self.cpu, center=center, rot=rot
             )
+
+            if not self.cpu:
+                voxel = voxel.to(torch.device('cuda'))
 
             fps.append(self.model.forward(voxel))
 
