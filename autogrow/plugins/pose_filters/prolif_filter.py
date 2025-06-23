@@ -13,7 +13,7 @@ import prolif
 import rdkit  # type: ignore
 import rdkit.Chem as Chem  # type: ignore
 import rdkit.Chem.Descriptors as Descriptors  # type: ignore
-from typing import List, Tuple
+from typing import Any, List, Tuple
 from autogrow.config.argument_vars import ArgumentVars
 
 # Disable the unnecessary RDKit warnings
@@ -35,14 +35,18 @@ class ProLIFFilter(PoseFilterBase):
         """
         Run the ProLIF filter on a given molecule against a given receptor.
 
-        This method calculates interaction fingerprints using the ProLIF library against a given receptor to determine
-         if a docked molecule has at least one interaction regarding a given receptor. It checks Hydrophobic, HBDonor,
-         HBAcceptor, PiStacking, Anionic, Cationic, CationPi, and PiCation interactions.
+        This method calculates interaction fingerprints using the ProLIF library
+        against a given receptor to determine if a docked molecule has at least
+        one interaction regarding a given receptor. It checks Hydrophobic,
+        HBDonor, HBAcceptor, PiStacking, Anionic, Cationic, CationPi, and
+        PiCation interactions.
 
         Args:
-        **kwargs:a dictionary of arguments to pass to the plugin. It must contain the path to the
-        receptor (receptor_path), a list containing Compound objects that represent docked molecules, and a
-        dictionary containing the input parameters specified at the command line
+        **kwargs: a dictionary of arguments to pass to the plugin. It must
+            contain a rdkit.Chem.rdchem.Mol of the receptor (receptor), a
+            rdkit.Chem.rdchem.Mol of the docked molecule (docked_cmpd), and a
+            dictionary of the input parameters specified at the command line
+            (docking_plugin_manager_params)
 
         Returns:
             bool: True if the molecule passes the filter (allows up to one
@@ -92,7 +96,17 @@ class ProLIFFilter(PoseFilterBase):
             ],
         )
 
-    def _compute_interaction_fingerprints(self, receptor, docked_cmpd):
+    def _compute_interaction_fingerprints(self, receptor: Chem.Mol, docked_cmpd: Chem.Mol) -> Tuple[Any, Any]:
+        """
+        Compute interaction fingerprints for a given receptor and docked compound.
+
+        Args:
+            receptor (Chem.Mol): The receptor molecule.
+            docked_cmpd (Chem.Mol): The docked compound molecule.
+        Returns:
+            Tuple[prolif.Fingerprint, DataFrame]: A tuple containing the
+                interaction fingerprint and a DataFrame with interaction data.
+        """
         try:
             prot = prolif.Molecule.from_rdkit(receptor)
             lig = prolif.Molecule.from_rdkit(docked_cmpd)
@@ -100,5 +114,5 @@ class ProLIFFilter(PoseFilterBase):
             df = prolif.to_dataframe({0: ifp}, self.fingerprints.interactions)
 
             return ifp, df
-        except:
+        except Exception as e:
             return None, None

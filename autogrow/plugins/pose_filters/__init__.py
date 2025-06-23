@@ -68,7 +68,7 @@ class PoseFilterPluginManager(PluginManagerBase):
 
         # Run filter on a single smiles string.
         passed_cmpds: List[Compound] = []
-        receptor = Chem.MolFromPDBFile(kwargs["docking_plugin_manager_params"]["receptor_path"], sanitize=True)
+        receptor = Chem.MolFromPDBFile(kwargs["docking_plugin_manager_params"]["receptor_path"], removeHs=False, sanitize=True)
         for docked_cmpd in kwargs["docked_cmpds"]:
             # run through the filters
             passed = self._run_all_selected_filters(receptor, docked_cmpd, kwargs["docking_plugin_manager_params"])
@@ -91,7 +91,7 @@ class PoseFilterPluginManager(PluginManagerBase):
         returns bool: True if the mol passes all the filters. False if the mol
             fails any filters.
         """
-        r = Chem.SDMolSupplier(docked_cmpd.sdf_path)
+        r = Chem.SDMolSupplier(docked_cmpd.sdf_path, removeHs=False)
         for lig in r:
             docked_cmpd_mol = lig
             break
@@ -100,6 +100,7 @@ class PoseFilterPluginManager(PluginManagerBase):
         filters_failed = 0
         for plugin_name in self.plugins:
             # mol_copy = copy.deepcopy(mol)
+
             plugin = cast(PoseFilterBase, self.plugins[plugin_name])
             filter_function = plugin.run
             if not filter_function(receptor=receptor, docked_cmpd=docked_cmpd_mol,
