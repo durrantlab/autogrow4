@@ -55,6 +55,8 @@ def populate_generation(
         AssertionError: If the population fails to make enough compounds.
     """
     procs_per_node = int(params["procs_per_node"])
+    if procs_per_node == -1:
+        procs_per_node = os.cpu_count()
 
     # This is a little hacky, but we need to pass the current generation
     # directory to the plugins. It's easier to do this by setting it in the
