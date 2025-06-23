@@ -180,10 +180,21 @@ class VinaLikeDocking(DockingBase):
             vina_out_file = f"{lig_pdbqt_filename}.vina"
             vina_out_files.append(vina_out_file)
 
-            # Also get the docked compound as an SDF file
+            # Also get the docked compound as an SDF file. It is important that
+            # all hydrogens be added so prolif filters work. It was challenging
+            # to get open babel to add all hydrogens in this case. But I found
+            # that first saving to a PDB file and then converting to SDF with -p
+            # 7.4 worked well.
+
+            docked_pdb_intermediate = f"{vina_out_file}.pdb"
+            cmd = obabel_convert_cmd(
+                vina_out_file, docked_pdb_intermediate, self.params["obabel_path"]
+            )
+            vina_out_convert_cmds.append(cmd)
+
             docked_sdf = f"{vina_out_file}.sdf"
             cmd = obabel_convert_cmd(
-                vina_out_file, docked_sdf, self.params["obabel_path"],
+                docked_pdb_intermediate, docked_sdf, self.params["obabel_path"], "-p 7.4"
             )
             vina_out_convert_cmds.append(cmd)
 
@@ -192,9 +203,11 @@ class VinaLikeDocking(DockingBase):
         assert (
             self.plugin_managers.ShellParallelizer is not None
         ), "Shell parallelizer is None"
+        
+        # TODO: Need to specify nprocs?
         self.plugin_managers.ShellParallelizer.run(
             cmds=lig_convert_cmds
-        )  # TODO: Need to specify nprocs?
+        )
 
         # Dock the ligands
         self.plugin_managers.ShellParallelizer.run(
@@ -202,9 +215,10 @@ class VinaLikeDocking(DockingBase):
         )  # TODO: Need to specify nprocs?
 
         # Convert the docked ligands to SDF format
+        # TODO: Need to specify nprocs?
         self.plugin_managers.ShellParallelizer.run(
             cmds=vina_out_convert_cmds
-        )  # TODO: Need to specify nprocs?
+        )
 
         for predocked_cmpd, vina_out_file in zip(predocked_cmpds, vina_out_files):
             if vina_out_file is None or not os.path.exists(vina_out_file):

@@ -51,6 +51,9 @@ def run_docking_common(
         )
         post_docked_compounds = post_docked_compounds + elite_cmpds
 
+    # import pdb; pdb.set_trace()
+
+
     # Remove those that failed to convert
     post_docked_compounds = [x for x in post_docked_compounds if x is not None]
 
@@ -58,7 +61,6 @@ def run_docking_common(
     post_docked_compounds = [x for x in post_docked_compounds if x.sdf_path is not None and x.docking_score is not None]
 
     # Filter based on pose (e.g., ProLIF filters)
-    import pdb; pdb.set_trace()
     post_docked_compounds = plugin_managers.PoseFilter.run(docking_plugin_manager_params=docking_plugin_manager.params,
                                                            docked_cmpds=post_docked_compounds)
 
