@@ -30,7 +30,7 @@ try:
     numba_logger.setLevel(logging.WARNING)
     prody.LOGGER._logger.disabled = True
 except:
-    raise Exception("DeepFrag environment is not installed to be used")
+    print("DeepFrag environment is not installed. DeepFrag filters will not be available.")
 
 
 class DeepFragFilter(DeepFragFilterBase):
