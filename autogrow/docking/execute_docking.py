@@ -57,9 +57,12 @@ def run_docking_common(
     # Remove those not associated with a docked sdf file
     post_docked_compounds = [x for x in post_docked_compounds if x.sdf_path is not None and x.docking_score is not None]
 
+    # Filter based on pose (e.g., ProLIF filters)
+    import pdb; pdb.set_trace()
     post_docked_compounds = plugin_managers.PoseFilter.run(docking_plugin_manager_params=docking_plugin_manager.params,
                                                            docked_cmpds=post_docked_compounds)
 
+    # Rescore docked poses
     post_docked_compounds = plugin_managers.Rescoring.run(docked_cmpds=post_docked_compounds)
 
     return rank_and_save_output_smi(

@@ -25,11 +25,20 @@ class SubstructureFilter(SmilesFilterBase):
                     help="Filter compounds based on a required substructure.",
                 ),
                 ArgumentVars(
-                    name="--substructure_smiles",
-                    help="SMILES string of required substructure. Compounds will only "
+                    name="--substructure_smiles",  # Note actually SMARTS string
+                    help="SMARTS string of required substructure. Compounds will only "
                          "pass if they contain this substructure. Used with the " + self.name + " plugin.",
                     type=str,
                     default=None
+                ),
+                ArgumentVars(
+                    name="--exclude_substructure",  # NOTE: Untested
+                    action="store_true",
+                    default=False,
+                    help="Flag to exclude compounds containing the substructures specified via --substructure_smiles. "
+                    "Used with the "
+                    + self.name
+                    + " plugin.",
                 ),
             ]
         )
@@ -57,6 +66,7 @@ class SubstructureFilter(SmilesFilterBase):
             )
         
         self.query_mol = query_mol
+        self.exclude_substructure = params.get("exclude_substructure", False)
 
     def run_filter(self, cmpd: Compound) -> bool:
         """Check if compound contains the required substructure.
@@ -71,12 +81,11 @@ class SubstructureFilter(SmilesFilterBase):
         mol = self.cmpd_to_rdkit_mol(cmpd)
         if mol is None:
             return False
-            
+
         # Use the chemistry toolkit to do substructure matching
         assert self.plugin_managers is not None, "Plugin managers not set"
         assert self.plugin_managers.ChemToolkit is not None, "ChemToolkit not set"
         chemtoolkit = self.plugin_managers.ChemToolkit.toolkit
         matches = chemtoolkit.get_substruct_matches(mol, self.query_mol)
-        
-        # Return True if any matches found
-        return len(matches) > 0
+
+        return len(matches) == 0 if self.exclude_substructure else len(matches) > 0
