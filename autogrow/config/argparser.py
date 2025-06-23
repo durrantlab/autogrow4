@@ -205,14 +205,13 @@ def _add_general_params(parser: argparse._ArgumentGroup):
         help="Name of a json file containing all parameters. \
         Overrides other arguments.",
     )
-
     # processors and multithread mode
     parser.add_argument(
         "--procs_per_node",
         "-p",
         type=int,
         metavar="N",
-        default=1,
+        default=-1,
         help="Number of processors to use for parallel calculations. Set to -1 for all available CPUs.",
     )
     parser.add_argument(
@@ -223,11 +222,12 @@ def _add_general_params(parser: argparse._ArgumentGroup):
         multithreading: multithreading or serial. serial will override \
         procs_per_node and force it to be on a single processor.",
     )
+    # for postprocessing
     parser.add_argument(
-        "--cpu",
+        "--process_generation_0",
         action="store_true",
         default=False,
-        help="To use cpu instead of gpu when using a DeepFrag model.",
+        help="This is to use the information of the reference compounds in the processing of results.",
     )
 
 

@@ -80,7 +80,7 @@ class Slurm(ShellParallelizerBase):
             )
 
     def run_cmds_in_parallel(
-        self, cmds: List[str], nprocs: int = -1
+        self, cmds: List[str]
     ) -> List[ShellCmdResult]:
         """
         Run a list of shell commands in parallel using Python's multiprocessing.

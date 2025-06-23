@@ -7,24 +7,24 @@ import __future__
 import rdkit
 import logging
 import numpy as np
-from apps.deepfrag.model import DeepFragModel
-from collagen.core.voxelization.voxelizer import VoxelParamsDefault
 from autogrow.config.argument_vars import ArgumentVars
 from typing import List, Tuple
 from autogrow.plugins.deepfrag_filters.deepfrag_filter_base import DeepFragFilterBase
 import os
 import wget
 import sys
-import torch
 
 # Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog("rdApp.*")
 
 try:
+    import torch
     import prody
     from io import StringIO
     from collagen.util import rand_rot
     from collagen.core.molecules.mol import Mol
+    from apps.deepfrag.model import DeepFragModel
+    from collagen.core.voxelization.voxelizer import VoxelParamsDefault
 
     numba_logger = logging.getLogger("numba")
     numba_logger.setLevel(logging.WARNING)
@@ -57,7 +57,7 @@ class DeepFragFilter(DeepFragFilterBase):
         """Validate the provided arguments."""
         super().validate(params)
 
-        self.cpu = bool(params["cpu"]) or not torch.cuda.is_available()
+        self.cpu = bool(params["DeepFragOnCPU"]) or not torch.cuda.is_available()
 
         if "DeepFragModel" not in params:
             raise Exception("The path of a DeepFrag model should be given as input using"
@@ -74,6 +74,8 @@ class DeepFragFilter(DeepFragFilterBase):
 
         self.ckpt_filename = params["DeepFragModel"]
         self.model = DeepFragModel.load_from_checkpoint(self.ckpt_filename)
+        if not self.cpu:
+            self.model = self.model.to(torch.device('cuda'))
         self.model.eval()
 
     def get_prediction_for_parent_receptor(self, parent_mol, receptor, branching_point):
@@ -119,6 +121,9 @@ class DeepFragFilter(DeepFragFilterBase):
                 cpu=self.cpu, center=center, rot=rot
             )
 
+            if not self.cpu:
+                voxel = voxel.to(torch.device('cuda'))
+
             fps.append(self.model.forward(voxel))
 
         avg_over_ckpts_of_avgs = torch.mean(torch.stack(fps), dim=0)
@@ -141,6 +146,12 @@ class DeepFragFilter(DeepFragFilterBase):
                     type=str,
                     default=None,
                     help="path to the DeepFrag model that is .ckpt file",
+                ),
+                ArgumentVars(
+                    name="DeepFragOnCPU",
+                    action="store_true",
+                    default=False,
+                    help="Use CPU to run DeepFrag.",
                 )
             ],
         )
