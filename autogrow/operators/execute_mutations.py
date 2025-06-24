@@ -130,5 +130,8 @@ def _run_mutation_for_multithread(
         This function is a wrapper around the mutation object's run method,
         making it suitable for use in multiprocessing contexts.
     """
+    # print("cmpd", cmpd)
+    # print("mutation_obj", mutation_obj)
+    # print("===" * 20)
     resp = mutation_obj.run(cmpd=cmpd)
     return None if resp is None else tuple(list(resp) + [cmpd.id])

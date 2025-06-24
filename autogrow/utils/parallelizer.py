@@ -22,7 +22,7 @@ Abstract parallel computation utility.
 The "parallelizer" object exposes a simple map interface that takes a function
 and a list of arguments and returns the result of applying the function to
 each argument. Internally, the parallelizer class can determine what parallel
-capabilities are present on a system and automatically pick between 
+capabilities are present on a system and automatically pick between
 "multiprocessing" or "serial" in order to speed up the map operation. This
 approach simplifies development and allows the same program to run on a laptop
 or a high-performance computer cluster, utilizing the full resources of each
@@ -232,24 +232,23 @@ def _multi_threading(inputs, num_procs, task_name):
     return results
 
 
-def _(input: multiprocessing.Queue, output: multiprocessing.Queue):
+def _worker(input_q: multiprocessing.Queue, output_q: multiprocessing.Queue):
     """
     Worker function for parallel processing.
 
     Continuously processes jobs from input queue until receiving 'STOP' signal.
 
     Args:
-        input (multiprocessing.Queue): Queue containing (sequence, job) pairs.
-            Jobs consist of (function, arguments) pairs.
-        output (multiprocessing.Queue): Queue for storing (sequence, result)
-            pairs
+        input_q (multiprocessing.Queue): Queue containing (sequence, job)
+            pairs. Jobs consist of (function, arguments) pairs.
+        output_q (multiprocessing.Queue): Queue for storing (sequence, result)
+            pairs.
     """
-    for seq, job in iter(input.get, "STOP"):
+    for seq, job in iter(input_q.get, "STOP"):
         func, args = job
         result = func(*args)
         ret_val = (seq, result)
-        output.put(ret_val)
-
+        output_q.put(ret_val)
 
 def _check_and_format_inputs_to_list_of_tuples(args):
     """
@@ -340,8 +339,7 @@ def _start_processes(inputs, num_procs):
 
     # Start worker processes
     for _ in range(num_procs):
-        multiprocessing.Process(target=_, args=(task_queue, done_queue)).start()
-
+        multiprocessing.Process(target=_worker, args=(task_queue, done_queue)).start()
     results = [done_queue.get() for _ in range(len(inputs))]
     # Tell child processes to stop
     for _ in range(num_procs):
