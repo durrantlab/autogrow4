@@ -178,6 +178,10 @@ class ChemToolkitBase(PluginBase):
         pass
 
     @abstractmethod
+    def lipinski_heavy_atom_count(self, mol: Any) -> int:
+        """Get number of heavy atoms."""
+        pass
+    @abstractmethod
     def lipinski_num_h_donors(self, mol: Any) -> int:
         """Get number of H donors."""
         pass

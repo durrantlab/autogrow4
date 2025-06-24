@@ -190,6 +190,10 @@ class RDKitToolkit(ChemToolkitBase):
         params.AddCatalog(FilterCatalogParams.FilterCatalogs.BRENK)
         return FilterCatalog.FilterCatalog(params)
 
+    def lipinski_heavy_atom_count(self, mol: Any) -> int:
+        """Get number of heavy atoms."""
+        return Lipinski.HeavyAtomCount(mol)
+
     def lipinski_num_rotatable_bonds(self, mol: Any) -> int:
         """Get number of rotatable bonds."""
         return Lipinski.NumRotatableBonds(mol)
