@@ -210,9 +210,10 @@ class VinaLikeDocking(DockingBase):
         )
 
         # Dock the ligands
+        # TODO: Need to specify nprocs?
         self.plugin_managers.ShellParallelizer.run(
             cmds=lig_dock_cmds
-        )  # TODO: Need to specify nprocs?
+        )
 
         # Convert the docked ligands to SDF format
         # TODO: Need to specify nprocs?

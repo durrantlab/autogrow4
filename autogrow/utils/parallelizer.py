@@ -144,6 +144,7 @@ class Parallelizer(object):
                 f"changing mode from {mode} to {self.mode} for development purpose"
             )
             print(printout)
+
         # compute
         if mode == "multiprocessing":
             return _multi_threading(args, num_procs, func)

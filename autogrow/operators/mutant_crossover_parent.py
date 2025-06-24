@@ -148,6 +148,7 @@ class CompoundGenerator(ABC):
                 job_input_list = self.prepare_job_inputs(cmpds_queue, num_to_process)
 
                 # Run parallel operation
+                import pdb; pdb.set_trace()
                 results = self.params["parallelizer"].run(
                     tuple(job_input_list), self.get_parallel_function()
                 )
