@@ -29,8 +29,8 @@ try:
     numba_logger = logging.getLogger("numba")
     numba_logger.setLevel(logging.WARNING)
     prody.LOGGER._logger.disabled = True
-except:
-    print("DeepFrag environment is not installed. DeepFrag filters will not be available.")
+except ImportError as e:
+    print("DeepFrag environment (e.g., torch, prody) is not installed. DeepFrag filters will not be available. " + str(e) + "\n")
 
 
 class DeepFragFilter(DeepFragFilterBase):
@@ -165,7 +165,7 @@ class DeepFragFilter(DeepFragFilterBase):
 
         deepfrag_model_path = current_directory + os.sep + deepfrag_model_ckpt
         if not os.path.exists(deepfrag_model_path):
-            print("Starting download of the DeepFrag model: ", deepfrag_model_ckpt)
+            print(f"Starting download of the DeepFrag model ({deepfrag_model_url} --> {deepfrag_model_path}): {deepfrag_model_ckpt}")
             wget.download(
                 deepfrag_model_url,
                 deepfrag_model_path,

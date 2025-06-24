@@ -154,9 +154,7 @@ def populate_generation(
     # Docking unweighted_ranked_smile_file is the file name where the unweighted
     # ranked but score .smi file resides
     elite_cmpds = elite_predock_cmpds if generation_num > 1 else []
-    post_docked_compounds = DockingClass.run_docking_common(
-        generation_num, cur_gen_dir, full_gen_smi_file, new_gen_predock_cmpds, elite_cmpds, params
-    )
+    post_docked_compounds = DockingClass.run_docking_common(cur_gen_dir, new_gen_predock_cmpds)
 
     # Filter based on pose (e.g., ProLIF filters). TODO: Why the need for
     # DockingPluginManager here? Doesn't seem like pose should be intrinsic to
@@ -172,7 +170,7 @@ def populate_generation(
 
     # Filename of the unweighted-ranked SMILES with their docking scores.
     return Ranking.rank_and_save_output_smi(
-        cur_gen_dir, generation_num, full_gen_smi_file, post_docked_compounds, params
+        cur_gen_dir, generation_num, full_gen_smi_file, post_docked_compounds + elite_cmpds, params
     )
 
 def _get_subpop_sizes(generation_num: int, params: Dict[str, Any]) -> Tuple[int, int, int]:

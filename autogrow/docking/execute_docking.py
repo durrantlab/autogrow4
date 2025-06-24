@@ -17,12 +17,8 @@ from autogrow.utils.logging import LogLevel, log_info
 
 
 def run_docking_common(
-    current_gen_int: int,
     cur_gen_dir: str,
-    smiles_file_new_gen: str,
     new_gen_predock_cmpds: List[Compound],
-    elite_cmpds: List[Compound],
-    params: Dict[str, Any],
 ) -> str:
     """
     Run common docking operations for all docking programs.
@@ -31,13 +27,9 @@ def run_docking_common(
     simulation, processing results, and ranking the docked compounds.
 
     Args:
-        current_gen_int (int): Current generation number.
         cur_gen_dir (str): Directory for the current generation.
-        smiles_file_new_gen (str): Filename containing new population molecules.
         new_gen_predock_cmpds (List[Compound]): List of Compound
             objects for the new generation.
-        elite_cmpds (List[Compound]): List of Compound objects belonging to the
-            previous generation that were elected as elite compounds.
 
     Returns:
         str: Filename of the unweighted-ranked SMILES with their docking scores.
@@ -49,10 +41,7 @@ def run_docking_common(
         post_docked_compounds = docking_plugin_manager.run(
             predocked_cmpds=new_gen_predock_cmpds, cache_dir=cur_gen_dir
         )
-        post_docked_compounds = post_docked_compounds + elite_cmpds
-
-    # import pdb; pdb.set_trace()
-
+        post_docked_compounds = post_docked_compounds
 
     # Remove those that failed to convert
     post_docked_compounds = [x for x in post_docked_compounds if x is not None]
