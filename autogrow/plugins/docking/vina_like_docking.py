@@ -187,16 +187,15 @@ class VinaLikeDocking(DockingBase):
             # 7.4 worked well.
 
             docked_pdb_intermediate = f"{vina_out_file}.pdb"
-            cmd = obabel_convert_cmd(
+            cmd1 = obabel_convert_cmd(
                 vina_out_file, docked_pdb_intermediate, self.params["obabel_path"]
             )
-            vina_out_convert_cmds.append(cmd)
 
             docked_sdf = f"{vina_out_file}.sdf"
-            cmd = obabel_convert_cmd(
+            cmd2 = obabel_convert_cmd(
                 docked_pdb_intermediate, docked_sdf, self.params["obabel_path"], "-p 7.4"
             )
-            vina_out_convert_cmds.append(cmd)
+            vina_out_convert_cmds.append(f"{cmd1}; {cmd2}")
 
         # Convert the ligands to PDBQT format
         assert self.plugin_managers is not None, "Plugin managers is None"
