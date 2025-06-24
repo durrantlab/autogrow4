@@ -101,8 +101,15 @@ class VinaLikeDocking(DockingBase):
                     name="docking_num_modes",
                     default=9,
                     type=int,
-                    help=" maximum number of binding modes to generate in docking. \
+                    help="maximum number of binding modes to generate in docking. \
                     See docking software for settings. ",
+                ),
+                ArgumentVars(
+                    name="docking_nprocs",
+                    type=int,
+                    default=1,
+                    help="number of processors to use for docking (default is 1, \
+                    which is best when using multithread_mode=multithreading).",
                 ),
             ],
         )
@@ -121,6 +128,9 @@ class VinaLikeDocking(DockingBase):
             raise ValueError(
                 f"obabel_path must be defined in the params to use {self.name}"
             )
+        if "docking_nprocs" in params and params["docking_nprocs"] == -1:
+            # If -1, set to number of processors available
+            params["docking_nprocs"] = os.cpu_count()
 
     def run_docking(self, predocked_cmpds: List[Compound]) -> List[Compound]:
         """
@@ -272,7 +282,7 @@ class VinaLikeDocking(DockingBase):
             f'--size_x {params["size_x"]} --size_y {params["size_y"]} --size_z {params["size_z"]} '
             f'--receptor "{receptor_pdbqt_file}" '
             f'--ligand "{lig_pdbqt_filename}" '
-            f'--out "{lig_pdbqt_filename}.vina" --cpu 1'
+            f'--out "{lig_pdbqt_filename}.vina" --cpu {params["docking_nprocs"]}'
         )
 
         # Add optional user variables additional variable
