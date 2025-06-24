@@ -29,9 +29,10 @@ class DeepFragFilterRDKit(DeepFragFilter):
         Returns:
            Numpy array containing the binary fingerprints calculated with RDKit library.
         """
-        try:
-            fp = Chem.rdmolops.RDKFingerprint(fragment, maxPath=10, fpSize=2048)
-            n_fp = list(map(int, list(fp.ToBitString())))
-            return np.array(n_fp)
-        except:
-            return np.zeros(2048)
+        fp = Chem.rdmolops.RDKFingerprint(fragment, maxPath=10, fpSize=2048)
+        n_fp = list(map(int, list(fp.ToBitString())))
+        return np.array(n_fp)
+
+        # try:
+        # except:
+        #     return np.zeros(2048)
