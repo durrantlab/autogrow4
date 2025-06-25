@@ -713,7 +713,7 @@ def run_score_plotter(
 
     scoring_type = params["vina_like_executable"]
     if "vina" in str(scoring_type):
-        y_label = "Docking Affinity (kcal/mol)" if not ligand_efficiency else "Ligand Efficiency"
+        y_label = "Docking Score" if not ligand_efficiency else "Ligand Efficiency"
     else:
         y_label = "Fitness Score" if not ligand_efficiency else "Ligand Efficiency"
     plt.ylabel(y_label, fontweight="semibold")
@@ -902,41 +902,41 @@ def generate_figures(params: Dict[str, Any], analyze_gen_0: bool) -> None:
 
     dict_of_averages = print_data_table(infolder, False)
     run_score_plotter(params, dict_of_averages,
-                      outfile + os.sep + "plotter_by_generation_for_docking_scores." + params["outfile_format"],
+                      outfile + os.sep + "plotter_by_generation_for_scores." + params["outfile_format"],
                       ligand_efficiency=False,
                       analyze_gen_0=analyze_gen_0, exist_gen_0=exist_gen_0)
 
-    dict_of_averages = print_data_table(infolder, True)
-    run_score_plotter(params, dict_of_averages,
-                      outfile + os.sep + "plotter_by_generation_for_ligand_efficiencies." + params["outfile_format"],
-                      ligand_efficiency=True,
-                      analyze_gen_0=analyze_gen_0, exist_gen_0=exist_gen_0)
+    # dict_of_averages = print_data_table(infolder, True)
+    # run_score_plotter(params, dict_of_averages,
+    #                   outfile + os.sep + "plotter_by_generation_for_ligand_efficiencies." + params["outfile_format"],
+    #                   ligand_efficiency=True,
+    #                   analyze_gen_0=analyze_gen_0, exist_gen_0=exist_gen_0)
 
     dict_of_score_lists = get_score_list_per_gen(infolder, False)
     scoring_type = params["vina_like_executable"]
     if "vina" in str(scoring_type):
-        x_label = "Docking Affinity (kcal/mol)"
+        x_label = "Docking Score"
     else:
         x_label = "Fitness Score"
     receptor_name = os.path.basename(params["receptor_path"])
     run_boxplot(params, dict_of_score_lists,
-                outfile + os.sep + "boxplot_by_generation_for_docking_scores." + params["outfile_format"],
+                outfile + os.sep + "boxplot_by_generation_for_scores." + params["outfile_format"],
                 key_start_with="generation",
                 x_label=x_label,
                 y_label="Number of Generations",
                 title_of_figure="Docking Scores for " + receptor_name,
                 analyze_gen_0=analyze_gen_0, exist_gen_0=exist_gen_0)
 
-    dict_of_score_lists = get_score_list_per_gen(infolder, True)
-    x_label = "Ligand Efficiency"
-    receptor_name = os.path.basename(params["receptor_path"])
-    run_boxplot(params, dict_of_score_lists,
-                outfile + os.sep + "boxplot_by_generation_for_ligand_efficiencies." + params["outfile_format"],
-                key_start_with="generation",
-                x_label=x_label,
-                y_label="Number of Generations",
-                title_of_figure="Ligand_efficiencies for " + receptor_name,
-                analyze_gen_0=analyze_gen_0, exist_gen_0=exist_gen_0)
+    # dict_of_score_lists = get_score_list_per_gen(infolder, True)
+    # x_label = "Ligand Efficiency"
+    # receptor_name = os.path.basename(params["receptor_path"])
+    # run_boxplot(params, dict_of_score_lists,
+    #             outfile + os.sep + "boxplot_by_generation_for_ligand_efficiencies." + params["outfile_format"],
+    #             key_start_with="generation",
+    #             x_label=x_label,
+    #             y_label="Number of Generations",
+    #             title_of_figure="Ligand_efficiencies for " + receptor_name,
+    #             analyze_gen_0=analyze_gen_0, exist_gen_0=exist_gen_0)
 
     source_file = str(params["source_compound_file"])
     if exist_gen_0:
@@ -963,13 +963,13 @@ def generate_figures(params: Dict[str, Any], analyze_gen_0: bool) -> None:
                     x_label="New compounds (ID) sorted from the highest to lowest affinity",
                     y_label="Average similarity")
 
-    dict_of_efficiency_lists = get_efficiency_per_generated_comp(infolder)
-    run_plotter(params, dict_of_efficiency_lists,
-                outfile + os.sep + "plotter_of_ligand_efficiency_for_every_new_compound." + params[
-                    "outfile_format"],
-                key_start_with="compound",
-                x_label="New compounds (ID) sorted from the highest to lowest affinity",
-                y_label="Ligand efficiency")
+    # dict_of_efficiency_lists = get_efficiency_per_generated_comp(infolder)
+    # run_plotter(params, dict_of_efficiency_lists,
+    #             outfile + os.sep + "plotter_of_ligand_efficiency_for_every_new_compound." + params[
+    #                 "outfile_format"],
+    #             key_start_with="compound",
+    #             x_label="New compounds (ID) sorted from the highest to lowest affinity",
+    #             y_label="Ligand efficiency")
 
     generate_tSNE_scatterplot(infolder=infolder,
                               outfile=outfile + os.sep + "tsne_for_input_and_new_compounds." + params["outfile_format"],

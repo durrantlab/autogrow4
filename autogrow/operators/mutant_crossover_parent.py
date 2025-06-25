@@ -151,53 +151,46 @@ class CompoundGenerator(ABC):
                 results = self.params["parallelizer"].run(
                     tuple(job_input_list), self.get_parallel_function()
                 )
-
-                for idx, res in enumerate(results):
-                    if res is None:
+                for idx, res_list in enumerate(results):
+                    if res_list is None:
                         continue
-
-                    result = self.get_formatted_respose(res)
-
-                    if result.child_smiles in smiles_already_generated:
-                        continue
-
-                    # Generate unique ID
-                    new_lig_id = ""
-                    while new_lig_id in ids_already_generated or not new_lig_id:
-                        new_lig_id = self.make_compound_id(result)
-
-                    ids_already_generated.add(new_lig_id)
-                    smiles_already_generated.add(result.child_smiles)
-
-                    # Create and store new compound
-                    desc = self.get_operation_desc(result)
-
-                    # Update history. If there is only one parent, just append.
-                    # If there are multiple parents, append lists containing
-                    # each lineage.
-                    if sum(len(p._history) for p in result.parent_cmpds) == 0:
-                        # Parents have no history. So start of a new history.
-                        updated_history = []
-                    elif len(result.parent_cmpds) == 1:
-                        # Likely mutation. Only one parent, so just extend history.
-                        updated_history = result.parent_cmpds[0]._history[:]
-                    else:
-                        # Likely crossover. Multiple parents, so extend each history.
-                        updated_history = [p._history[:] for p in result.parent_cmpds]
-
-                    parent_3D_mols = None
-                    if len(plugin_managers.DeepFragFilter.plugins) > 0:
-                        parent_3D_mols = [parent.mol_3D for parent in result.parent_cmpds]
-
-                    ligand_info = Compound(
-                        smiles=result.child_smiles,
-                        id=new_lig_id,
-                        parent_3D_mols=parent_3D_mols,
-                        _history=updated_history,
-                    )
-                    ligand_info.add_history(self.get_operation_name().upper(), desc)
-                    new_cmpds.append(ligand_info)
-
+                    for res in res_list:
+                        if res is None:
+                            continue
+                        result = self.get_formatted_respose(res)
+                        if result.child_smiles in smiles_already_generated:
+                            continue
+                        # Generate unique ID
+                        new_lig_id = ""
+                        while new_lig_id in ids_already_generated or not new_lig_id:
+                            new_lig_id = self.make_compound_id(result)
+                        ids_already_generated.add(new_lig_id)
+                        smiles_already_generated.add(result.child_smiles)
+                        # Create and store new compound
+                        desc = self.get_operation_desc(result)
+                        # Update history. If there is only one parent, just append.
+                        # If there are multiple parents, append lists containing
+                        # each lineage.
+                        if sum(len(p._history) for p in result.parent_cmpds) == 0:
+                            # Parents have no history. So start of a new history.
+                            updated_history = []
+                        elif len(result.parent_cmpds) == 1:
+                            # Likely mutation. Only one parent, so just extend history.
+                            updated_history = result.parent_cmpds[0]._history[:]
+                        else:
+                            # Likely crossover. Multiple parents, so extend each history.
+                            updated_history = [p._history[:] for p in result.parent_cmpds]
+                        parent_3D_mols = None
+                        if len(plugin_managers.DeepFragFilter.plugins) > 0:
+                            parent_3D_mols = [parent.mol_3D for parent in result.parent_cmpds]
+                        ligand_info = Compound(
+                            smiles=result.child_smiles,
+                            id=new_lig_id,
+                            parent_3D_mols=parent_3D_mols,
+                            _history=updated_history,
+                        )
+                        ligand_info.add_history(self.get_operation_name().upper(), desc)
+                        new_cmpds.append(ligand_info)
                 # Replenish queue if needed
                 if not cmpds_queue:
                     cmpds_queue = copy.deepcopy(self.cmpds)

@@ -4,7 +4,7 @@ Multiprocessing Configuration Module.
 This module handles the configuration of multiprocessing settings for AutoGrow.
 """
 from typing import Any, Dict
-
+import os
 
 def config_multiprocessing(params: Dict[str, Any]) -> Dict[str, Any]:
     """
@@ -27,6 +27,10 @@ def config_multiprocessing(params: Dict[str, Any]) -> Dict[str, Any]:
         If multithread_mode is set to "serial", the procs_per_node is
         forcibly set to 1, regardless of the user's input.
     """
+    params["procs_per_node"] = int(params["procs_per_node"])
+    if params["procs_per_node"] == -1:
+        params["procs_per_node"] = os.cpu_count()
+
     # Handle Serial overriding procs_per_node
     # serial fixes it to 1 processor
     if params["multithread_mode"].lower() == "serial":

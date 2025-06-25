@@ -80,4 +80,16 @@ class RescoringPluginManager(PluginManagerBase):
             RescoringBase, self.plugins[rescoring_methods[0]]
         )
 
-        return rescoring_method.run(**kwargs)
+        rescores = rescoring_method.run(**kwargs)
+
+        for idx, compound in enumerate(kwargs["docked_cmpds"]):
+            original_score = compound.docking_score
+            new_score = rescores[idx]
+
+            compound.docking_score = new_score
+            compound.add_history(
+                "LIGAND_EFFICIENCY",
+                f"Original docking score: {original_score:.3f}. New score (ligand efficiency): {new_score:.3f}",
+            )
+        return kwargs["docked_cmpds"]
+

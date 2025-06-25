@@ -55,7 +55,7 @@ class SpecificInteractionFilter(ProLIFFilter):
                             counter = counter + (0 if neg_flag else 1)
                             break
             return counter == len(specific_sites)
-        except:
+        except Exception as e:
             return False
 
     @abstractmethod

@@ -190,9 +190,9 @@ class PluginManagerBase(ABC):
             plugins. Child classes should override this method.
         """
         # For debugging
-        print("Available plugins:", list(self.plugins.keys()))
-        print("Parameters:", list(self.params.keys()))
-        print("Common keys:", set(self.plugins.keys()) & set(self.params.keys()))
+        # print("Available plugins:", list(self.plugins.keys()))
+        # print("Parameters:", list(self.params.keys()))
+        # print("Common keys:", set(self.plugins.keys()) & set(self.params.keys()))
         
         keys_in_common = set(self.plugins.keys()) & set(self.params.keys())
         return [key for key in keys_in_common if self.params[key]]

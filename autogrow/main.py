@@ -100,11 +100,11 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
     start_gen_num = 1
     if start_gen_num > num_gens_to_make:
         log_warning(
-            "This simulation has already been completed to the user defined number \
+            "This AutoGrow4 run has already been completed to the user defined number \
                 of generations. Please check your user variables."
         )
         raise Exception(
-            "This simulation has already been completed to the user defined number \
+            "This AutoGrow4 run has already been completed to the user defined number \
                 of generations. Please check your user variables."
         )
 
@@ -126,25 +126,10 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
         log_info(f"Creating generation {gen_num}")
 
         with LogLevel():
-            smi_new_gen_path, new_gen_cmpds, elite_cmpds = populate_generation(
+            populate_generation(
                 params, gen_num, cur_gen_dir, smiles_already_generated
             )
-            sys.stdout.flush()
 
-            if new_gen_cmpds is None:
-                raise ValueError(
-                    "Population failed to make enough mutants or crossovers... \
-                                    Errors could include not enough diversity, too few seeds to the generation, \
-                                    the seed mols are unable to cross-over due to lack of similarity,\
-                                    or all of the seed lack functional groups for performing reactions."
-                )
-
-            # Run file conversions of PDB to docking a specific file type and
-            # Begin Docking unweighted_ranked_smile_file is the file name
-            # where the unweighted ranked but score .smi file resides
-            DockingClass.run_docking_common(
-                gen_num, cur_gen_dir, smi_new_gen_path, new_gen_cmpds, elite_cmpds, params
-            )
 
         sys.stdout.flush()
 
