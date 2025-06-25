@@ -23,8 +23,7 @@ class MutationBase(PluginBase):
     This abstract class defines the interface that all mutation plugins must
     implement. It inherits from PluginBase and adds mutation-specific methods.
     """
-
-    def run(self, **kwargs) -> Optional[Tuple[str, int, Union[str, None]]]:
+    def run(self, **kwargs) -> Optional[List[Tuple[str, int, Union[str, None]]]]:
         """
         Run the mutation plugin with provided arguments.
 
@@ -32,11 +31,12 @@ class MutationBase(PluginBase):
             **kwargs: Arbitrary keyword arguments. Must include 'cmpd'.
 
         Returns:
-            Optional[Tuple[str, int, Union[str, None]]]: A tuple containing:
+            Optional[List[Tuple[str, int, Union[str, None]]]]: A list of tuples,
+                each containing:
                 - [0] str: SMILES string of the mutated molecule
                 - [1] int: ID number of the reaction used
                 - [2] Optional[str]: Name of the complementary molecule used (if
-                                     any), or None for single-reactant reactions
+                                        any), or None for single-reactant reactions
             Returns None if the mutation fails.
         """
         return self.run_mutation(kwargs["cmpd"])
@@ -44,7 +44,7 @@ class MutationBase(PluginBase):
     @abstractmethod
     def run_mutation(
         self, cmpd: Compound
-    ) -> Optional[Tuple[str, int, Union[str, None]]]:
+    ) -> Optional[List[Tuple[str, int, Union[str, None]]]]:
         """
         Abstract method to be implemented by each mutation plugin.
 
@@ -53,11 +53,12 @@ class MutationBase(PluginBase):
                 parent molecule to be mutated.
 
         Returns:
-            Optional[Tuple[str, int, Union[str, None]]]: A tuple containing:
+            Optional[List[Tuple[str, int, Union[str, None]]]]: A list of tuples,
+                each containing:
                 - [0] str: SMILES string of the mutated molecule
                 - [1] int: ID number of the reaction used
                 - [2] Optional[str]: Name of the complementary molecule used (if
-                                     any), or None for single-reactant reactions
+                                        any), or None for single-reactant reactions
             Returns None if the mutation fails.
         """
         pass
@@ -68,7 +69,7 @@ class MutationPluginManager(PluginManagerBase):
 
     def execute(
         self, **kwargs
-    ) -> Optional[Tuple[str, int, Union[str, None], List[Compound]]]:
+    ) -> Optional[List[Tuple[str, int, Union[str, None], List[Compound]]]]:
         """
         Execute a randomly selected mutation plugin with the provided arguments.
 
@@ -77,11 +78,12 @@ class MutationPluginManager(PluginManagerBase):
                 include 'cmpd'.
 
         Returns:
-            Optional[Tuple[str, int, Union[str, None]]]: A tuple containing:
+            Optional[List[Tuple[str, int, Union[str, None], List[Compound]]]]: A list
+            of tuples, each containing:
                 - [0] str: SMILES string of the mutated molecule
                 - [1] int: ID number of the reaction used
                 - [2] Optional[str]: Name of the complementary molecule used (if
-                                     any), or None for single-reactant reactions
+                                        any), or None for single-reactant reactions
                 - [3] List[Compound]: List of parent compounds (one in this case)
             Returns None if no mutations are selected or if the mutation fails.
 
@@ -101,15 +103,15 @@ class MutationPluginManager(PluginManagerBase):
         mutation_name = random.choice(mutation_names)
 
         mutation = cast(MutationBase, self.plugins[mutation_name])
-
-        resp = mutation.run(**kwargs)
-
-        if resp is not None:
+        resps = mutation.run(**kwargs)
+        if resps is None:
+            return None
+        final_resps = []
+        for resp in resps:
             log_debug(f'{mutation.name}: {kwargs["cmpd"].smiles} => {resp[0]}')
-
-        # NOTE: Need to add back in the cmpd to the return tuple (for
-        # bookkeeping)
-
-        resp = None if resp is None else (resp[0], resp[1], resp[2], [kwargs["cmpd"]])
-
-        return resp
+            # NOTE: Need to add back in the cmpd to the return tuple (for
+            # bookkeeping)
+            final_resp = None if resp is None else (resp[0], resp[1], resp[2], [kwargs["cmpd"]])
+            if final_resp is not None:
+                final_resps.append(final_resp)
+        return final_resps if final_resps else None

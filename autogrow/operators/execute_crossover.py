@@ -275,7 +275,7 @@ def _do_crossovers_smiles_merge(
     params: Dict[str, Any],
     lig1_predock_cmpd: Compound,
     all_predock_cmpds: List[Compound],
-) -> Optional[Tuple[str, Compound, Compound]]:
+) -> Optional[List[Tuple[str, Compound, Compound]]]:
     """
     Perform a crossover operation between two ligands.
 
@@ -285,10 +285,9 @@ def _do_crossovers_smiles_merge(
         all_predock_cmpds (List[Compound]): List of all seed ligands.
 
     Returns:
-        Optional[Tuple[str, Compound, Compound]]: 
-        Tuple containing new ligand SMILES and parent ligand information,
-        or None if crossover fails.
-
+        Optional[List[Tuple[str, Compound, Compound]]]:
+        List with a single tuple containing new ligand SMILES and parent ligand
+        information, or None if crossover fails.
     Note:
         Attempts crossover up to 3 times before giving up.
     """
@@ -336,12 +335,12 @@ def _do_crossovers_smiles_merge(
                 tmp_predock_cmpd.parent_3D_mols = [lig1_predock_cmpd.mol_3D, lig2_predock_cmpd.mol_3D]
                 passed_filter = (
                         len(plugin_managers.DeepFragFilter.run(input_params=crossover_manager.params,
-                                                               compounds=[tmp_predock_cmpd]))
+                                                                        compounds=[tmp_predock_cmpd]))
                         > 0
                 )
 
             if not passed_filter:
                 counter += 1
             else:
-                return (ligand_new_smiles, lig1_predock_cmpd, lig2_predock_cmpd)
+                return [(ligand_new_smiles, lig1_predock_cmpd, lig2_predock_cmpd)]
     return None

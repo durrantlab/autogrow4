@@ -415,7 +415,12 @@ def _add_ga_params(parser: argparse._ArgumentGroup):
         default=2,
         help="Each gen diversity_mols_to_seed_first_generation will decrease this amount",
     )
-
+    parser.add_argument(
+        "--mutants_per_batch",
+        type=int,
+        default=1,
+        help="For each mutation, generate this many new molecules. Use higher numbers for better DeepFrag caching.",
+    )
 
 def _add_conversion_params(parser: argparse._ArgumentGroup):
     """

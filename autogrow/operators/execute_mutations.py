@@ -50,9 +50,13 @@ class MutationGenerator(CompoundGenerator):
             List[Tuple]: List of tuples containing the compound to mutate and the
                 mutation plugin manager.
         """
+        mutants_per_batch = self.params.get("mutants_per_batch", 1)
+        if mutants_per_batch <= 0:
+            mutants_per_batch = 1
+        num_jobs = (num_to_process + mutants_per_batch - 1) // mutants_per_batch
         return [
             (compounds[i % len(compounds)], self.operation_params["plugin_manager"])
-            for i in range(num_to_process)
+            for i in range(num_jobs)
         ]
 
     def get_parallel_function(self) -> Callable:
@@ -110,7 +114,7 @@ class MutationGenerator(CompoundGenerator):
 
 def _run_mutation_for_multithread(
     cmpd: Compound, mutation_obj: MutationPluginManager
-) -> Optional[Tuple[str, int, Union[str, None]]]:
+) -> Optional[List[Tuple[str, int, Union[str, None], List[Compound], str]]]:
     """
     Perform a single mutation operation on a Compound.
 
@@ -122,10 +126,10 @@ def _run_mutation_for_multithread(
         mutation_obj (MutationPluginManager): Mutation object to perform the mutation.
 
     Returns:
-        Optional[Tuple[str, int, Union[str, None]]]: Tuple containing the mutated SMILES
-        string, reaction ID, and complementary molecule ID (if any), or None if
-        the mutation fails.
-
+        Optional[List[Tuple[str, int, Union[str, None], List[Compound], str]]]:
+        A list of tuples, each containing the mutated SMILES string, reaction ID,
+        complementary molecule ID (if any), parent compound list, and parent
+        compound ID, or None if the mutation fails.
     Note:
         This function is a wrapper around the mutation object's run method,
         making it suitable for use in multiprocessing contexts.
@@ -133,5 +137,11 @@ def _run_mutation_for_multithread(
     # print("cmpd", cmpd)
     # print("mutation_obj", mutation_obj)
     # print("===" * 20)
-    resp = mutation_obj.run(cmpd=cmpd)
-    return None if resp is None else tuple(list(resp) + [cmpd.id])
+    resps = mutation_obj.run(cmpd=cmpd)
+    if resps is None:
+        return None
+    final_resps = []
+    for resp in resps:
+        # resp is a 4-tuple: (smiles, reaction_id, comp_mol_id, [parent_cmpd])
+        final_resps.append(tuple(list(resp) + [cmpd.id]))
+    return final_resps
