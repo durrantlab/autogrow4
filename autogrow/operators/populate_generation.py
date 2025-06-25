@@ -12,9 +12,10 @@ import os
 import random
 import copy
 import sys
-from typing import Any, Dict, List, Optional, Tuple, Type, Union
+from typing import Any, Dict, List, Optional, Tuple, Type, Union, cast
 
 from autogrow.operators.mutant_crossover_parent import CompoundGenerator
+from autogrow.plugins.docking import DockingPluginManager
 from autogrow.plugins.registry_base import plugin_managers
 from autogrow.types import Compound
 from autogrow.utils.caching import CacheManager
@@ -24,15 +25,15 @@ import autogrow.docking.ranking.ranking_mol as Ranking
 import autogrow.operators.execute_mutations as Mutation
 import autogrow.operators.execute_crossover as Crossover
 import autogrow.utils.mol_object_handling as MOH
+import autogrow.docking.execute_docking as DockingClass
 
 #############
 # Main run Autogrow operators to make a generation
 #############
 
-
 def populate_generation(
     params: Dict[str, Any], generation_num: int, cur_gen_dir: str, smiles_already_generated: set,
-) -> Tuple[str, List[Compound], List[Compound]]:
+) -> None:
     """
     Populate a new generation of ligands through mutation, crossover, and elitism.
 
@@ -46,23 +47,146 @@ def populate_generation(
         smiles_already_generated (set): Set of SMILES already generated
 
     Returns:
-        Tuple[str, List[Compound]]: A tuple containing:
-            - The name of the .smi file containing the new population.
-            - A list of Compound objects representing the new population.
-            - A list of Compound objects representing the elite compounds.
+        None
 
     Raises:
         AssertionError: If the population fails to make enough compounds.
     """
-    procs_per_node = int(params["procs_per_node"])
-    if procs_per_node == -1:
-        procs_per_node = os.cpu_count()
-
     # This is a little hacky, but we need to pass the current generation
     # directory to the plugins. It's easier to do this by setting it in the
     # params dict than as a separate argument to plugin.run() methods.
     params["cur_gen_dir"] = cur_gen_dir
 
+    # Get the number of crossovers, mutations, and elite compounds to generate
+    num_crossovers, num_mutations, num_elite_prev_gen = _get_subpop_sizes(
+        generation_num, params
+    )
+
+    # Get the source compound list
+    src_cmpds = _get_cmpds_prev_gen(params, generation_num)
+
+    # Get the number of seed compounds for new-compound generation (diversity
+    # and docking fitness)
+    num_seed_diversity, num_seed_dock_fitness = _get_seed_pop_sizes(
+        params, generation_num
+    )
+
+    # Total population size of this generation
+    total_num_desired_new_ligands = num_crossovers + num_mutations + num_elite_prev_gen
+
+    # Make the mutations
+    mut_predock_cmpds = _make_mutations(
+        cur_gen_dir,
+        params,
+        generation_num,
+        num_mutations,
+        num_seed_diversity,
+        num_seed_dock_fitness,
+        src_cmpds,
+        params["procs_per_node"],
+        smiles_already_generated,
+    )
+
+    # Make the crossovers
+    cross_predock_cmpds = _make_crossovers(
+        cur_gen_dir,
+        params,
+        generation_num,
+        num_crossovers,
+        num_seed_diversity,
+        num_seed_dock_fitness,
+        src_cmpds,
+        params["procs_per_node"],
+        smiles_already_generated,
+    )
+
+    # Advance elite compounds from the previous generation
+    elite_predock_cmpds = _advance_elite_cmpds(
+        params,
+        generation_num,
+        cur_gen_dir,
+        src_cmpds,
+        num_elite_prev_gen,
+    )
+
+    # Build new_gen_smis and full_gen_smis. `new_gen_predock_cmpds` are the
+    # compounds that must be docked. `full_gen_cmpds` are all the compounds of
+    # this generation, both those from previous generations (no need to redo)
+    # and the new ones for this generation.
+    new_gen_predock_cmpds: List[Compound] = mut_predock_cmpds + cross_predock_cmpds
+    full_gen_cmpds: List[Compound] = mut_predock_cmpds + cross_predock_cmpds + elite_predock_cmpds
+
+    if generation_num == 1:
+        # For the first generation, we need to add the elite compounds to
+        # `new_gen_predock_cmpds` since they need to be docked.
+        new_gen_predock_cmpds.extend(iter(elite_predock_cmpds))
+
+    if len(full_gen_cmpds) < total_num_desired_new_ligands:
+        log_warning(
+            f"Only {len(full_gen_cmpds)} compounds were generated, but {total_num_desired_new_ligands} were requested."
+            " It may be that (1) the source compounds are not diverse enough, (2) there are too few seed compounds,"
+            " (3) the seed molecules lack the similarity for crossover, or (4) the seed molecules lack the functional"
+            " groups for mutation."
+        )
+
+    # Save the full generation and the SMILES to convert
+    (
+        full_gen_smi_file,
+        smiles_to_convert_file,
+        new_gen_folder_path,
+    ) = _save_smiles_files(
+        params, generation_num, full_gen_cmpds, new_gen_predock_cmpds, "_to_convert",
+    )
+
+    new_gen_predock_cmpds = _convert_to_3d(
+        new_gen_predock_cmpds, cur_gen_dir, new_gen_folder_path,
+    )
+
+    if new_gen_predock_cmpds is None:
+        raise ValueError(
+            "Population failed to make enough mutants or crossovers... \
+                            Errors could include not enough diversity, too few seeds to the generation, \
+                            the seed mols are unable to cross-over due to lack of similarity,\
+                            or all of the seed lack functional groups for performing reactions."
+        )
+
+    # Run file conversions of PDB to docking a specific file type and Begin
+    # Docking unweighted_ranked_smile_file is the file name where the unweighted
+    # ranked but score .smi file resides
+    elite_cmpds = elite_predock_cmpds if generation_num > 1 else []
+    post_docked_compounds = DockingClass.run_docking_common(cur_gen_dir, new_gen_predock_cmpds)
+
+    # Filter based on pose (e.g., ProLIF filters). TODO: Why the need for
+    # DockingPluginManager here? Doesn't seem like pose should be intrinsic to
+    # docking.
+    docking_plugin_manager = cast(DockingPluginManager, plugin_managers.Docking)
+    post_docked_compounds = plugin_managers.PoseFilter.run(
+        docking_plugin_manager_params=docking_plugin_manager.params,
+        docked_cmpds=post_docked_compounds
+    )
+
+    # Rescore docked poses
+    post_docked_compounds = plugin_managers.Rescoring.run(docked_cmpds=post_docked_compounds)
+
+    # Filename of the unweighted-ranked SMILES with their docking scores.
+    return Ranking.rank_and_save_output_smi(
+        cur_gen_dir, generation_num, full_gen_smi_file, post_docked_compounds + elite_cmpds, params
+    )
+
+def _get_subpop_sizes(generation_num: int, params: Dict[str, Any]) -> Tuple[int, int, int]:
+    """
+    Determine the number of crossovers, mutations, and elite compounds to
+    generate based on the generation number and user parameters.
+    
+    Args:
+        generation_num (int): The current generation number.
+        params (Dict[str, Any]): Dictionary of all user parameters.
+    Returns:
+        Tuple[int, int, int]: A tuple containing:
+            - Number of crossovers to generate.
+            - Number of mutations to generate.
+            - Number of elite compounds to advance from the previous generation.
+    """
     # Determine which generation it is and how many mutations and crossovers to make
     if generation_num == 1:
         # If 1st generation
@@ -80,16 +204,30 @@ def populate_generation(
         num_mutations = params["number_of_mutants"]
         num_elite_prev_gen = params["number_elitism_advance_from_previous_gen"]
 
-    # Get the source compound list
-    src_cmpds = _get_cmpds_prev_gen(params, generation_num)
+    return num_crossovers, num_mutations, num_elite_prev_gen
 
-    num_seed_diversity, num_seed_dock_fitness = _get_seed_pop_sizes(
-        params, generation_num
-    )
+def _make_mutations(cur_gen_dir: str, params: Dict[str, Any], generation_num: int,
+                    num_mutations: int, num_seed_diversity: int,
+                    num_seed_dock_fitness: int, src_cmpds: List[Compound],
+                    procs_per_node: int, smiles_already_generated: set) -> List[Compound]:
+    """
+    Generate mutations for the current generation.
+    This function creates mutant compounds based on the seed list from the
+    previous generation, using the specified reaction library.
 
-    # Total population size of this generation
-    total_num_desired_new_ligands = num_crossovers + num_mutations + num_elite_prev_gen
-
+    Args:
+        cur_gen_dir (str): Directory for the current generation.
+        params (Dict[str, Any]): User parameters governing the mutation process.
+        generation_num (int): Current generation number.
+        num_mutations (int): Number of mutations to generate.
+        num_seed_diversity (int): Number of seed molecules chosen for diversity.
+        num_seed_dock_fitness (int): Number of seed molecules chosen for docking fitness.
+        src_cmpds (List[Compound]): Source compounds from previous generation.
+        procs_per_node (int): Number of processors for parallel processing.
+        smiles_already_generated (set): Set of SMILES already generated.
+    Returns:
+        List[Compound]: List of newly generated mutant compounds.
+    """
     # Generate mutations
     log_info("Creating mutant compounds")
     with LogLevel():
@@ -115,7 +253,32 @@ def populate_generation(
                     mut_predock_cmpds: List[Compound] = []
                 cache.data = mut_predock_cmpds
         log_info(f"Created {len(mut_predock_cmpds)} mutant compounds")
+    return mut_predock_cmpds
 
+def _make_crossovers(
+    cur_gen_dir: str, params: Dict[str, Any], generation_num: int,
+    num_crossovers: int, num_seed_diversity: int,
+    num_seed_dock_fitness: int, src_cmpds: List[Compound],
+    procs_per_node: int, smiles_already_generated: set,
+) -> List[Compound]:
+    """Generate crossovers for the current generation.
+    This function creates crossover compounds based on the seed list from the
+    previous generation, using the specified reaction library.
+
+    Args:
+        cur_gen_dir (str): Directory for the current generation.
+        params (Dict[str, Any]): User parameters governing the crossover process.
+        generation_num (int): Current generation number.
+        num_crossovers (int): Number of crossovers to generate.
+        num_seed_diversity (int): Number of seed molecules chosen for diversity.
+        num_seed_dock_fitness (int): Number of seed molecules chosen for docking fitness.
+        src_cmpds (List[Compound]): Source compounds from previous generation.
+        procs_per_node (int): Number of processors for parallel processing.
+        smiles_already_generated (set): Set of SMILES already generated.
+
+    Returns:
+        List[Compound]: List of newly generated crossover compounds.
+    """
     # Generate crossovers
     log_info("Creating crossover compounds")
 
@@ -143,7 +306,28 @@ def populate_generation(
                 cache.data = cross_predock_cmpds
 
         log_info(f"Created {len(cross_predock_cmpds)} crossover compounds")
+    return cross_predock_cmpds
 
+def _advance_elite_cmpds(
+    params: Dict[str, Any], generation_num: int, cur_gen_dir: str,
+    src_cmpds: List[Compound], num_elite_prev_gen: int,
+) -> List[Compound]:
+    """
+    Identify and advance elite compounds from the previous generation.
+
+    This function selects top-performing compounds from the previous generation
+    to be carried forward without modification.
+
+    Args:
+        params (Dict[str, Any]): User parameters.
+        generation_num (int): Current generation number.
+        cur_gen_dir (str): Directory for the current generation.
+        src_cmpds (List[Compound]): Source compounds from previous generation.
+        num_elite_prev_gen (int): Number of elite compounds to select.
+
+    Returns:
+        List[Compound]: List of selected elite compounds.
+    """
     # Get ligands from previous generation
     log_info("Identifying elite compounds to advance, without mutation or crossover")
     with LogLevel():
@@ -164,35 +348,26 @@ def populate_generation(
                 cache.data = elite_predock_cmpds
         log_info(f"Identified {len(elite_predock_cmpds)} elite compounds")
 
-    # Build new_gen_smis and full_gen_smis
-    new_gen_predock_cmpds: List[Compound] = mut_predock_cmpds + cross_predock_cmpds
-    full_gen_cmpds: List[Compound] = mut_predock_cmpds + cross_predock_cmpds
+    return elite_predock_cmpds
 
-    if generation_num != 1:
-        # Doesn't append to the new_generation_smiles_list
-        full_gen_cmpds.extend(iter(elite_predock_cmpds))
-    else:
-        for i in elite_predock_cmpds:
-            new_gen_predock_cmpds.append(i)
-            full_gen_cmpds.append(i)
+def _convert_to_3d(
+    new_gen_predock_cmpds: List[Compound], cur_gen_dir: str,
+    new_gen_folder_path: str,
+) -> List[Compound]:
+    """Convert SMILES to 3D SDF files using Gypsum and RDKit.
+    This function takes a list of compounds in SMILES format and converts them
+    to 3D SDF files using Gypsum for 3D generation and RDKit for conversion.
 
-    if len(full_gen_cmpds) < total_num_desired_new_ligands:
-        log_warning(
-            f"Only {len(full_gen_cmpds)} compounds were generated, but {total_num_desired_new_ligands} were requested."
-            " It may be that (1) the source compounds are not diverse enough, (2) there are too few seed compounds,"
-            " (3) the seed molecules lack the similarity for crossover, or (4) the seed molecules lack the functional"
-            " groups for mutation."
-        )
+    Args:
+        new_gen_predock_cmpds (List[Compound]): List of compounds to convert.
+        cur_gen_dir (str): Directory for the current generation.
+        new_gen_folder_path (str): Path to the folder where new generation files
+            are stored.
 
-    # Save the full generation and the SMILES to convert
-    (
-        full_gen_smi_file,
-        smiles_to_convert_file,
-        new_gen_folder_path,
-    ) = _save_smiles_files(
-        params, generation_num, full_gen_cmpds, new_gen_predock_cmpds, "_to_convert",
-    )
-
+    Returns:
+        List[Compound]: List of compounds with updated SDF paths after
+            conversion.
+    """
     # Convert SMILES to .sdf using Gypsum and convert .sdf to .pdb with RDKit
     # Note that smiles_to_convert_file is a single with with many smi files
     # in it.
@@ -207,7 +382,9 @@ def populate_generation(
     # Remove those that failed to convert
     new_gen_predock_cmpds = [x for x in new_gen_predock_cmpds if x.sdf_path is not None]
 
-    return full_gen_smi_file, new_gen_predock_cmpds, (elite_predock_cmpds if generation_num > 1 else [])
+    sys.stdout.flush()
+
+    return new_gen_predock_cmpds
 
 
 def _generate_compounds(

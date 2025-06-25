@@ -13,6 +13,8 @@ from autogrow.plugins.deepfrag_filters.deepfrag_filter_base import DeepFragFilte
 import os
 import wget
 import sys
+from rdkit import Chem
+from autogrow.utils.logging import log_info
 
 # Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog("rdApp.*")
@@ -29,8 +31,8 @@ try:
     numba_logger = logging.getLogger("numba")
     numba_logger.setLevel(logging.WARNING)
     prody.LOGGER._logger.disabled = True
-except:
-    raise Exception("DeepFrag environment is not installed to be used")
+except ImportError as e:
+    print("DeepFrag environment (e.g., torch, prody) is not installed. DeepFrag filters will not be available. " + str(e) + "\n")
 
 
 class DeepFragFilter(DeepFragFilterBase):
@@ -52,6 +54,7 @@ class DeepFragFilter(DeepFragFilterBase):
     model = None
     ckpt_filename = None
     cpu = False
+    cached_deepfrag_results = {}
 
     def validate(self, params: dict):
         """Validate the provided arguments."""
@@ -90,19 +93,32 @@ class DeepFragFilter(DeepFragFilterBase):
         Returns:
            Numpy array containing the DeepFrag fingerprints.
         """
+
+        # The receptor doesn't change, so the parent molecule and the branching
+        # point alone unique identify this DeepFrag prediction. We need to
+        # generate a hash.
+        hash_str = f"{Chem.MolToPDBBlock(parent_mol)} {round(branching_point.x, 3)} {round(branching_point.y, 3)} {round(branching_point.z, 3)}"
+
+        if hash_str in self.cached_deepfrag_results:
+            # If the result is cached, return it
+            log_info(f"Using cached DeepFrag result.")
+            return self.cached_deepfrag_results[hash_str]
+
+        # Convert the branching point to a numpy array
+        center = np.array([branching_point.x, branching_point.y, branching_point.z])
+
+        # Load the ligand
+        lig = Mol.from_rdkit(parent_mol, strict=False)
+
         voxel_params = VoxelParamsDefault.DeepFrag
 
-        # Load the receptor
+        # Load the receptor. Note that it is loaded only once (first time, when
+        # self.recep is still None)
         if self.recep is None:
             with open(receptor, "r") as f:
                 m = prody.parsePDBStream(StringIO(f.read()), model=1)
             prody_mol = m.select("all")
             self.recep = Mol.from_prody(prody_mol)
-
-        center = np.array([branching_point.x, branching_point.y, branching_point.z])
-
-        # Load the ligand
-        lig = Mol.from_rdkit(parent_mol, strict=False)
 
         print(f"Using checkpoint {self.ckpt_filename}")
 
@@ -113,6 +129,8 @@ class DeepFragFilter(DeepFragFilterBase):
             # Random rotations, unless debugging voxels
             rot = rand_rot()
 
+            # NOTE: the receptor voxel cannot be cached because of the random
+            # rotation applied.
             voxel = self.recep.voxelize(
                 voxel_params, cpu=self.cpu, center=center, rot=rot
             )
@@ -127,7 +145,12 @@ class DeepFragFilter(DeepFragFilterBase):
             fps.append(self.model.forward(voxel))
 
         avg_over_ckpts_of_avgs = torch.mean(torch.stack(fps), dim=0)
-        return avg_over_ckpts_of_avgs.cpu().detach().numpy()[0]
+        result = avg_over_ckpts_of_avgs.cpu().detach().numpy()[0]
+
+        # Cache the result for future use
+        self.cached_deepfrag_results[hash_str] = result
+
+        return result
 
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
         return (
@@ -165,7 +188,7 @@ class DeepFragFilter(DeepFragFilterBase):
 
         deepfrag_model_path = current_directory + os.sep + deepfrag_model_ckpt
         if not os.path.exists(deepfrag_model_path):
-            print("Starting download of the DeepFrag model: ", deepfrag_model_ckpt)
+            print(f"Starting download of the DeepFrag model ({deepfrag_model_url} --> {deepfrag_model_path}): {deepfrag_model_ckpt}")
             wget.download(
                 deepfrag_model_url,
                 deepfrag_model_path,

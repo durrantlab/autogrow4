@@ -101,8 +101,15 @@ class VinaLikeDocking(DockingBase):
                     name="docking_num_modes",
                     default=9,
                     type=int,
-                    help=" maximum number of binding modes to generate in docking. \
+                    help="maximum number of binding modes to generate in docking. \
                     See docking software for settings. ",
+                ),
+                ArgumentVars(
+                    name="docking_nprocs",
+                    type=int,
+                    default=1,
+                    help="number of processors to use for docking (default is 1, \
+                    which is best when using multithread_mode=multithreading).",
                 ),
             ],
         )
@@ -121,6 +128,9 @@ class VinaLikeDocking(DockingBase):
             raise ValueError(
                 f"obabel_path must be defined in the params to use {self.name}"
             )
+        if "docking_nprocs" in params and params["docking_nprocs"] == -1:
+            # If -1, set to number of processors available
+            params["docking_nprocs"] = os.cpu_count()
 
     def run_docking(self, predocked_cmpds: List[Compound]) -> List[Compound]:
         """
@@ -180,31 +190,45 @@ class VinaLikeDocking(DockingBase):
             vina_out_file = f"{lig_pdbqt_filename}.vina"
             vina_out_files.append(vina_out_file)
 
-            # Also get the docked compound as an SDF file
-            docked_sdf = f"{vina_out_file}.sdf"
-            cmd = obabel_convert_cmd(
-                vina_out_file, docked_sdf, self.params["obabel_path"],
+            # Also get the docked compound as an SDF file. It is important that
+            # all hydrogens be added so prolif filters work. It was challenging
+            # to get open babel to add all hydrogens in this case. But I found
+            # that first saving to a PDB file and then converting to SDF with -p
+            # 7.4 worked well.
+
+            docked_pdb_intermediate = f"{vina_out_file}.pdb"
+            cmd1 = obabel_convert_cmd(
+                vina_out_file, docked_pdb_intermediate, self.params["obabel_path"]
             )
-            vina_out_convert_cmds.append(cmd)
+
+            docked_sdf = f"{vina_out_file}.sdf"
+            cmd2 = obabel_convert_cmd(
+                docked_pdb_intermediate, docked_sdf, self.params["obabel_path"], "-p 7.4"
+            )
+            vina_out_convert_cmds.append(f"{cmd1}; {cmd2}")
 
         # Convert the ligands to PDBQT format
         assert self.plugin_managers is not None, "Plugin managers is None"
         assert (
             self.plugin_managers.ShellParallelizer is not None
         ), "Shell parallelizer is None"
+        
+        # TODO: Need to specify nprocs?
         self.plugin_managers.ShellParallelizer.run(
             cmds=lig_convert_cmds
-        )  # TODO: Need to specify nprocs?
+        )
 
         # Dock the ligands
+        # TODO: Need to specify nprocs?
         self.plugin_managers.ShellParallelizer.run(
             cmds=lig_dock_cmds
-        )  # TODO: Need to specify nprocs?
+        )
 
         # Convert the docked ligands to SDF format
+        # TODO: Need to specify nprocs?
         self.plugin_managers.ShellParallelizer.run(
             cmds=vina_out_convert_cmds
-        )  # TODO: Need to specify nprocs?
+        )
 
         for predocked_cmpd, vina_out_file in zip(predocked_cmpds, vina_out_files):
             if vina_out_file is None or not os.path.exists(vina_out_file):
@@ -258,7 +282,7 @@ class VinaLikeDocking(DockingBase):
             f'--size_x {params["size_x"]} --size_y {params["size_y"]} --size_z {params["size_z"]} '
             f'--receptor "{receptor_pdbqt_file}" '
             f'--ligand "{lig_pdbqt_filename}" '
-            f'--out "{lig_pdbqt_filename}.vina" --cpu 1'
+            f'--out "{lig_pdbqt_filename}.vina" --cpu {params["docking_nprocs"]}'
         )
 
         # Add optional user variables additional variable

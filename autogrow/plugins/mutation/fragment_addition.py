@@ -118,7 +118,7 @@ class FragmentAddition(MutationBase):
 
     def run_mutation(
         self, cmpd: Compound
-    ) -> Optional[Tuple[str, int, Union[str, None]]]:
+    ) -> Optional[List[Tuple[str, int, Union[str, None]]]]:
         """
         Run the mutation on the parent molecule.
 
@@ -132,10 +132,10 @@ class FragmentAddition(MutationBase):
             cmpd (Compound): Compound of a molecule to be reacted.
 
         Returns:
-            Optional[Tuple[str, int, Union[str, None], str]]: A tuple containing
-                the reaction product SMILES, the id_number of the reaction as
-                found in the reaction_dict, and the id for the complementary
-                mol. (None if it was a single reactant reaction).
+            Optional[List[Tuple[str, int, Union[str, None]]]]: A list of tuples,
+                each containing the reaction product SMILES, the id_number of the
+                reaction as found in the reaction_dict, and the id for the
+                complementary mol. (None if it was a single reactant reaction).
             Returns None if all reactions failed or input failed to convert to
                 a sanitizable rdkit mol.
         """
@@ -149,21 +149,9 @@ class FragmentAddition(MutationBase):
         reaction_result = self._try_reactions(
             mol_reprotanated, mol_deprotanated, list_react_grps_in_mol, cmpd
         )
-
-        if reaction_result is None:
+        if not reaction_result:
             return None
-
-        (
-            reaction_product_smiles,
-            reaction_id_number,
-            zinc_database_comp_mol_names,
-        ) = reaction_result
-
-        return (
-            reaction_product_smiles,
-            reaction_id_number,
-            zinc_database_comp_mol_names,
-        )
+        return reaction_result
 
     def _load_rxn_data(self):
         """Load the reaction data, if it hasn't been previously loaded."""
@@ -535,7 +523,7 @@ class FragmentAddition(MutationBase):
         mol_deprotanated: Any,
         list_subs_within_mol: List[str],
         parent_info: Compound,
-    ) -> Optional[Tuple[str, int, Optional[str]]]:
+    ) -> Optional[List[Tuple[str, int, Optional[str]]]]:
         """
         Try reactions on the molecule.
 
@@ -546,10 +534,10 @@ class FragmentAddition(MutationBase):
                 the molecule.
 
         Returns:
-            Optional[Tuple[str, int, Optional[str]]]: A tuple containing the
-                reaction product SMILES, reaction ID number, and complementary
-                molecule name (if applicable). Returns None if all reactions
-                fail.
+            Optional[List[Tuple[str, int, Optional[str]]]]: A list of tuples, each
+                containing the reaction product SMILES, reaction ID number, and
+                complementary molecule name (if applicable). Returns None if all
+                reactions fail.
         """
         # Randomize the order of the list of reactions
         shuffled_reaction_list = self._shuffle_dict_keys(self.reaction_dict)
@@ -625,7 +613,7 @@ class FragmentAddition(MutationBase):
         mol_reprotanated: Any,
         list_subs_within_mol: List[str],
         parent_info: Compound,
-    ) -> Optional[Tuple[str, int, Optional[str]]]:
+    ) -> Optional[List[Tuple[str, int, Optional[str]]]]:
         """
         Try to perform the reaction specified in a_reaction_dict on the mol.
 
@@ -637,9 +625,10 @@ class FragmentAddition(MutationBase):
                 the molecule.
 
         Returns:
-            Optional[Tuple[str, int, Optional[str]]]: A tuple containing the
-                reaction product SMILES, reaction ID number, and complementary
-                molecule name (if applicable). Returns None if reaction fails.
+            Optional[List[Tuple[str, int, Optional[str]]]]: A list of tuples,
+                each containing the reaction product SMILES, reaction ID number, and
+                complementary molecule name (if applicable). Returns None if
+                reaction fails.
         """
         fun_groups_in_rxn = a_reaction_dict["functional_groups"]
         contains_group = None
@@ -684,7 +673,7 @@ class FragmentAddition(MutationBase):
 
     def _try_single_reactant_reaction(
         self, rxn: Any, mol_to_use: Any, a_reaction_dict: Dict[str, Any], parent_info: Compound
-    ) -> Optional[Tuple[str, int, Optional[str]]]:
+    ) -> Optional[List[Tuple[str, int, Optional[str]]]]:
         """
         Try a single reactant reaction.
 
@@ -694,10 +683,10 @@ class FragmentAddition(MutationBase):
             a_reaction_dict (Dict[str, Any]): The reaction dictionary.
 
         Returns:
-            Optional[Tuple[str, int, Optional[str]]]: A tuple containing the
-                reaction product SMILES, reaction ID number, and None (as
-                there's no complementary molecule). Returns None if reaction
-                fails.
+            Optional[List[Tuple[str, int, Optional[str]]]]: A list with a single
+                tuple containing the reaction product SMILES, reaction ID number,
+                and None (as there's no complementary molecule). Returns None if
+                reaction fails.
         """
         with contextlib.suppress(Exception):
             # if reaction works keep it
@@ -716,7 +705,7 @@ class FragmentAddition(MutationBase):
                     reaction_product_smiles = self._validate_product(reaction_product, parent_info)
                     if reaction_product_smiles is not None:
                         reaction_id_number = a_reaction_dict["RXN_NUM"]
-                        return reaction_product_smiles, reaction_id_number, None
+                        return [(reaction_product_smiles, reaction_id_number, None)]
         return None
 
     def _try_multi_reactant_reaction(
@@ -726,7 +715,7 @@ class FragmentAddition(MutationBase):
         a_reaction_dict: Dict[str, Any],
         contains_group: int,
         parent_info: Compound,
-    ) -> Optional[Tuple[str, int, Optional[str]]]:
+    ) -> Optional[List[Tuple[str, int, Optional[str]]]]:
         """
         Try a multi-reactant reaction.
 
@@ -738,103 +727,120 @@ class FragmentAddition(MutationBase):
                 that is in the molecule.
 
         Returns:
-            Optional[Tuple[str, int, Optional[str]]]: A tuple containing the
-                reaction product SMILES, reaction ID number, and complementary
-                molecule name(s). Returns None if reaction fails.
+            Optional[List[Tuple[str, int, Optional[str]]]]: A list of tuples,
+                each containing the reaction product SMILES, reaction ID number,
+                and complementary molecule name(s). Returns None if reaction
+                fails.
         """
-        fun_groups_in_rxn = a_reaction_dict["functional_groups"]
-        list_reactant_mols = []
-        comp_mol_id = []
+        mutants_per_batch = self.params.get("mutants_per_batch", 1)
+        products = []
         chemtoolkit = plugin_managers.ChemToolkit.toolkit
+        fun_groups_in_rxn = a_reaction_dict["functional_groups"]
 
-        for i in range(len(fun_groups_in_rxn)):
-            if i == contains_group:
-                # This is where the molecule goes
-                list_reactant_mols.append(mol_to_use)
-            else:
-                # for reactants which need to be taken from the
-                # complementary dictionary. Find the reactants
-                # functional group
-                functional_group_name = str(a_reaction_dict["functional_groups"][i])
-
-                # Determine the substructure
-                substructure = chemtoolkit.mol_from_smarts(
-                    self.functional_group_dict[fun_groups_in_rxn[i]]
-                )
-
-                # Let's give up to 100 tries to find a complementary molecule
-                for _ in range(100):
-                    # Find that group in the complementary dictionary.
-                    # comp_molecule = ["cccc", "ZINC123"]
-                    comp_molecule = self._get_random_complementary_mol(
-                        functional_group_name
-                    )
-
-                    # zinc_database name
-                    zinc_database_comp_mol_name = comp_molecule[1]
-
-                    # SMILES string of complementary molecule
-                    comp_smiles = comp_molecule[0]
-
-                    # Check if this is a sanitizable molecule
-                    comp_mol = chemtoolkit.mol_from_smiles(comp_smiles, sanitize=False)
-                    # Try sanitizing, which is necessary later
-                    comp_mol = MOH.check_sanitization(comp_mol)
-
-                    # Try with deprotanated molecule to recognize for the reaction
-                    comp_mol = MOH.try_deprotanation(comp_mol)
-                    if comp_mol is None:
-                        continue
-
-                    if comp_mol.HasSubstructMatch(substructure) is True:
-                        list_reactant_mols.append(comp_mol)
-                        comp_mol_id.append(zinc_database_comp_mol_name)
-                        break
-
-                    # Try with deprotanated molecule
-                    comp_mol = MOH.try_deprotanation(comp_mol)
-                    if comp_mol is None:
-                        continue
-
-                    if comp_mol.HasSubstructMatch(substructure) is True:
-                        list_reactant_mols.append(comp_mol)
-                        comp_mol_id.append(zinc_database_comp_mol_name)
-                        break
+        for _ in range(mutants_per_batch):
+            list_reactant_mols = []
+            comp_mol_id = []
+            reactants_found_for_this_mutant = True
+            for i in range(len(fun_groups_in_rxn)):
+                if i == contains_group:
+                    # This is where the molecule goes
+                    list_reactant_mols.append(mol_to_use)
                 else:
-                    # Could not find a complementary molecule
-                    return None
+                    # for reactants which need to be taken from the
+                    # complementary dictionary. Find the reactants functional
+                    # group
+                    functional_group_name = str(a_reaction_dict["functional_groups"][i])
 
-        # Convert list to tuple
-        tuple_reactant_mols = tuple(list_reactant_mols)
-
-        # Try to run reaction
-        try:
-            # If reaction works, keep it
-            reaction_products_list = [
-                x[0] for x in rxn.RunReactants(tuple_reactant_mols)
-            ]
-
-            # Randomly shuffle the list of products to avoid bias
-            random.shuffle(reaction_products_list)
-        except Exception:
-            return None
-
-        if reaction_products_list:
-            for reaction_product in reaction_products_list:
-                # Filter and check if the product is valid
-                reaction_product_smiles = self._validate_product(reaction_product, parent_info)
-                if reaction_product_smiles is not None:
-                    reaction_id_number = a_reaction_dict["RXN_NUM"]
-                    if len(comp_mol_id) == 1:
-                        zinc_database_comp_mol_names = comp_mol_id[0]
-                    else:
-                        zinc_database_comp_mol_names = "+".join(comp_mol_id)
-                    return (
-                        reaction_product_smiles,
-                        reaction_id_number,
-                        zinc_database_comp_mol_names,
+                    # Determine the substructure
+                    substructure = chemtoolkit.mol_from_smarts(
+                        self.functional_group_dict[fun_groups_in_rxn[i]]
                     )
-        return None
+                    found_comp_mol = False
+
+                    # Let's give up to 100 tries to find a complementary
+                    # molecule
+                    for _ in range(100):
+                        # Find that group in the complementary dictionary.
+                        # comp_molecule = ["cccc", "ZINC123"]
+                        comp_molecule = self._get_random_complementary_mol(
+                            functional_group_name
+                        )
+                        # zinc_database name
+                        zinc_database_comp_mol_name = comp_molecule[1]
+                        # SMILES string of complementary molecule
+                        comp_smiles = comp_molecule[0]
+                        # Check if this is a sanitizable molecule
+                        comp_mol = chemtoolkit.mol_from_smiles(
+                            comp_smiles, sanitize=False
+                        )
+                        # Try sanitizing, which is necessary later
+                        comp_mol = MOH.check_sanitization(comp_mol)
+                        if comp_mol is None:
+                            continue
+                        # Try with deprotanated molecule to recognize for the
+                        # reaction
+                        comp_mol_deprotanated = MOH.try_deprotanation(
+                            copy.deepcopy(comp_mol)
+                        )
+                        if (
+                            comp_mol_deprotanated is not None
+                            and comp_mol_deprotanated.HasSubstructMatch(substructure)
+                        ):
+                            list_reactant_mols.append(comp_mol_deprotanated)
+                            comp_mol_id.append(zinc_database_comp_mol_name)
+                            found_comp_mol = True
+                            break
+                        # Try with reprotanated molecule
+                        comp_mol_reprotanated = MOH.try_reprotanation(
+                            copy.deepcopy(comp_mol)
+                        )
+                        if (
+                            comp_mol_reprotanated is not None
+                            and comp_mol_reprotanated.HasSubstructMatch(substructure)
+                        ):
+                            list_reactant_mols.append(comp_mol_reprotanated)
+                            comp_mol_id.append(zinc_database_comp_mol_name)
+                            found_comp_mol = True
+                            break
+                    if not found_comp_mol:
+                        # Could not find a complementary molecule
+                        reactants_found_for_this_mutant = False
+                        break
+            if not reactants_found_for_this_mutant:
+                continue  # to next mutant in batch
+            # Convert list to tuple
+            tuple_reactant_mols = tuple(list_reactant_mols)
+            # Try to run reaction
+            try:
+                # If reaction works, keep it
+                reaction_products_list = [
+                    x[0] for x in rxn.RunReactants(tuple_reactant_mols)
+                ]
+                # Randomly shuffle the list of products to avoid bias
+                random.shuffle(reaction_products_list)
+            except Exception:
+                continue  # to next mutant in batch
+            if reaction_products_list:
+                for reaction_product in reaction_products_list:
+                    # Filter and check if the product is valid
+                    reaction_product_smiles = self._validate_product(
+                        reaction_product, parent_info
+                    )
+                    if reaction_product_smiles is not None:
+                        reaction_id_number = a_reaction_dict["RXN_NUM"]
+                        if len(comp_mol_id) == 1:
+                            zinc_database_comp_mol_names = comp_mol_id[0]
+                        else:
+                            zinc_database_comp_mol_names = "+".join(comp_mol_id)
+                        products.append(
+                            (
+                                reaction_product_smiles,
+                                reaction_id_number,
+                                zinc_database_comp_mol_names,
+                            )
+                        )
+                        break  # Move to the next mutant in the batch
+        return products if products else None
 
     def _validate_product(self, reaction_product, parent_info):
         """
