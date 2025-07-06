@@ -4,7 +4,7 @@ import numpy as np
 import math
 
 
-def generate_summary_html(output_dir: str) -> None:
+def generate_summary_html(output_dir: str):
     """
     Generate a standalone HTML visualization of AutoGrow4 results.
     
@@ -385,9 +385,10 @@ def generate_summary_html(output_dir: str) -> None:
         f.write(html_template)
 
     log_info(f"Summary HTML file saved to: {output_file}")
+    return output_file
 
 
-def generate_summary_txt(output_dir: str, order_by_docking: bool) -> None:
+def generate_summary_txt(output_dir: str, order_by_docking: bool):
     """Generate text-based summary of best compounds across all generations.
     
     Creates a ranked summary file containing the best compounds from all generations,
@@ -554,3 +555,5 @@ def generate_summary_txt(output_dir: str, order_by_docking: bool) -> None:
                     log_debug(
                         f"  SDF size: {os.path.getsize(compound['sdf_path'])} bytes"
                     )
+
+    return summary_tsv, summary_sdf
