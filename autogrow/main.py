@@ -130,38 +130,19 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
                 params, gen_num, cur_gen_dir, smiles_already_generated
             )
 
-
         sys.stdout.flush()
-
-    # if params["generate_plot"] is True:
-    #     matplotlib_is_callable = False
-    #     try:
-    #         import matplotlib  # type: ignore
-
-    #         matplotlib_is_callable = True
-    #     except Exception:
-    #         matplotlib_is_callable = False
-    #     if not matplotlib_is_callable:
-    #         print("Can not make figure as matplotlib is not installed")
-    #     else:
-    #         print("Plotting")
-    #         import autogrow.plotting.generate_line_plot as plot
-
-    #         plot.generate_figures(params)
-
-    sys.stdout.flush()
 
     log_info("Writing summary files")
     with LogLevel():
         generate_summary_html(params["output_directory"])
-        generate_summary_txt(params["output_directory"])
+        generate_summary_txt(params["output_directory"], not bool(params["LigandEfficiency"]))
 
     log_info("Run time")
     with LogLevel():
         log_info(f"AutoGrow4 run started at:   {start_time}")
         log_info(f"AutoGrow4 run completed at: {str(datetime.datetime.now())}")
 
-    if bool(params["process_generation_0"]):
+    if bool(params["process_input_compounds"]):
         log_info("Docking input compounds for further analysis")
         dock_input_compounds(params)
 
@@ -172,6 +153,6 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
         "infolder": params["output_directory"],
         "outfile": graphic_output_dir,
         "outfile_format": "png",
-        "process_generation_0": params["process_generation_0"]
+        "process_input_compounds": params["process_input_compounds"]
     }
     plot_autogrow_run(**plot_args)

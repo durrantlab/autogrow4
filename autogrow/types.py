@@ -10,6 +10,7 @@ from typing import Any, List, Optional
 from enum import Enum
 import json
 from rdkit import Chem
+from rdkit.Chem import Lipinski
 
 
 class ScoreType(Enum):
@@ -50,6 +51,7 @@ class Compound:  # Get new id when you figure out what context this is used in
     smiles: str
     id: str  # Like naphthalene_22
     additional_info: str = ""  # Like naphthalene_22__1
+    target_score: Optional[float] = None
     docking_score: Optional[float] = None  # Like -8.439
     diversity_score: Optional[float] = None
     mol: Optional[Any] = None
@@ -62,6 +64,14 @@ class Compound:  # Get new id when you figure out what context this is used in
     # fitness_score: float  # Like -8.439
     # diversity_score: Optional[float] = None
     # lig_efficieny: Optional[float] = None
+
+    def get_ligand_efficiency(self) -> float:
+        try:
+            mol = Chem.MolFromSmiles(self.smiles, sanitize=False)
+            num_heavy_atoms = Lipinski.HeavyAtomCount(mol)
+            return self.docking_score / num_heavy_atoms
+        except:
+            return 0.0
 
     @property
     def tsv_line(self) -> str:

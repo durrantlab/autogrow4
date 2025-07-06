@@ -19,7 +19,7 @@ from autogrow.utils.logging import LogLevel, log_info
 def run_docking_common(
     cur_gen_dir: str,
     new_gen_predock_cmpds: List[Compound],
-) -> str:
+) -> List[Compound]:
     """
     Run common docking operations for all docking programs.
 

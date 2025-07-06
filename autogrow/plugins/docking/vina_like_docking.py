@@ -166,7 +166,8 @@ class VinaLikeDocking(DockingBase):
         lig_convert_cmds = []
         lig_dock_cmds = []
         vina_out_files = []
-        vina_out_convert_cmds = []
+        vina_out_convert_cmds_1 = []
+        vina_out_convert_cmds_2 = []
 
         for predocked_cmpd in predocked_cmpds:
             if predocked_cmpd.sdf_path is None:
@@ -200,12 +201,13 @@ class VinaLikeDocking(DockingBase):
             cmd1 = obabel_convert_cmd(
                 vina_out_file, docked_pdb_intermediate, self.params["obabel_path"]
             )
+            vina_out_convert_cmds_1.append(cmd1)
 
             docked_sdf = f"{vina_out_file}.sdf"
             cmd2 = obabel_convert_cmd(
                 docked_pdb_intermediate, docked_sdf, self.params["obabel_path"], "-p 7.4"
             )
-            vina_out_convert_cmds.append(f"{cmd1}; {cmd2}")
+            vina_out_convert_cmds_2.append(cmd2)
 
         # Convert the ligands to PDBQT format
         assert self.plugin_managers is not None, "Plugin managers is None"
@@ -224,10 +226,16 @@ class VinaLikeDocking(DockingBase):
             cmds=lig_dock_cmds
         )
 
-        # Convert the docked ligands to SDF format
+        # First step to convert the docked ligands to SDF format
         # TODO: Need to specify nprocs?
         self.plugin_managers.ShellParallelizer.run(
-            cmds=vina_out_convert_cmds
+            cmds=vina_out_convert_cmds_1
+        )
+
+        # Second step to convert the docked ligands to SDF format
+        # TODO: Need to specify nprocs?
+        self.plugin_managers.ShellParallelizer.run(
+            cmds=vina_out_convert_cmds_2
         )
 
         for predocked_cmpd, vina_out_file in zip(predocked_cmpds, vina_out_files):
@@ -255,6 +263,7 @@ class VinaLikeDocking(DockingBase):
                     log_warning(f"Failed to parse docking score from {vina_out_file}")
 
             # TODO: Update a history in the future.
+            predocked_cmpd.target_score = score
             predocked_cmpd.docking_score = score
             predocked_cmpd.sdf_path = f"{vina_out_file}.sdf"
 
