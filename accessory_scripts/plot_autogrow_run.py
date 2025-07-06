@@ -163,7 +163,7 @@ def calc_interaction_fp_per_generation(params: Dict[str, Any], infolder: str, in
 
     all_generations = []
     result_matrix = np.zeros((len(num_compounds_per_generation), len(all_interactions)))
-    for gen_num_idx in range(len(num_compounds_per_generation) - (1 if analyze_gen_0 else 0)):
+    for gen_num_idx in range(len(num_compounds_per_generation)):
         gen_num = (gen_num_idx + 1) if not analyze_gen_0 else gen_num_idx
         all_generations.append(f"generation_{gen_num}")
         for interaction_num in range(len(all_interactions)):
@@ -907,6 +907,7 @@ def generate_figures(params: Dict[str, Any], analyze_gen_0: bool) -> None:
     outfile = params["outfile"]
 
     exist_gen_0 = exist_generation_0(infolder)
+    analyze_gen_0 = analyze_gen_0 if exist_gen_0 else False
 
     dict_of_averages = print_data_table(infolder, False)
     run_score_plotter(params, dict_of_averages,
@@ -979,9 +980,12 @@ def generate_figures(params: Dict[str, Any], analyze_gen_0: bool) -> None:
                 x_label="New compounds (ID) sorted from the highest to lowest affinity",
                 y_label="Ligand efficiency")
 
-    generate_tSNE_scatterplot(infolder=infolder,
-                              outfile=outfile + os.sep + "tsne_for_input_and_new_compounds." + params["outfile_format"],
-                              params=params, exist_gen_0=exist_gen_0)
+    try:
+        generate_tSNE_scatterplot(infolder=infolder,
+                                  outfile=outfile + os.sep + "tsne_for_input_and_new_compounds." + params["outfile_format"],
+                                  params=params, exist_gen_0=exist_gen_0)
+    except:
+        pass
 
     interactions = ["Hydrophobic", "HBDonor", "HBAcceptor", "PiStacking", "Anionic", "Cationic", "CationPi", "PiCation"]
     result_matrix, y_label_list, x_label_list = calc_interaction_fp_per_generation(params, infolder, interactions,
@@ -1159,7 +1163,6 @@ def main(**kwargs):
     generate_figures(USER_VARS, bool(USER_VARS["process_input_compounds"]))
 
     print(f'FINISHED {USER_VARS["outfile"]}')
-
     print("finished")
 
 
