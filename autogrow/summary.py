@@ -4,7 +4,7 @@ import numpy as np
 import math
 
 
-def generate_summary_html(output_dir: str) -> None:
+def generate_summary_html(output_dir: str):
     """
     Generate a standalone HTML visualization of AutoGrow4 results.
     
@@ -36,6 +36,7 @@ def generate_summary_html(output_dir: str) -> None:
                             "smiles": cmpd.smiles,
                             "id": cmpd.id,
                             "docking_score": cmpd.docking_score,
+                            "ligand_efficiency": cmpd.get_ligand_efficiency(),
                         }
                     )
         all_generations.append(generation_data)
@@ -136,6 +137,7 @@ def generate_summary_html(output_dir: str) -> None:
                                         <th>SMILES</th>
                                         <th>ID</th>
                                         <th>Docking Score</th>
+                                        <th>Ligand Efficiency</th>
                                     </tr>
                                 </thead>
                                 <tbody id="compoundsTable">
@@ -351,6 +353,7 @@ def generate_summary_html(output_dir: str) -> None:
                     </td>
                     <td class="text-truncate" style="max-width: 200px;">${{compound.id}}</td>
                     <td>${{compound.docking_score.toFixed(2)}}</td>
+                    <td>${{compound.ligand_efficiency.toFixed(2)}}</td>
                 </tr>
             `).join('');
 
@@ -382,9 +385,10 @@ def generate_summary_html(output_dir: str) -> None:
         f.write(html_template)
 
     log_info(f"Summary HTML file saved to: {output_file}")
+    return output_file
 
 
-def generate_summary_txt(output_dir: str) -> None:
+def generate_summary_txt(output_dir: str, order_by_docking: bool):
     """Generate text-based summary of best compounds across all generations.
     
     Creates a ranked summary file containing the best compounds from all generations,
@@ -432,6 +436,7 @@ def generate_summary_txt(output_dir: str) -> None:
                     "id": cmpd.id,
                     "docking_score": cmpd.docking_score,
                     "diversity_score": cmpd.diversity_score,
+                    "ligand_efficiency": cmpd.get_ligand_efficiency(),
                     "sdf_path": cmpd.sdf_path,
                     "generation": os.path.basename(gen_dir),
                 }
@@ -464,7 +469,10 @@ def generate_summary_txt(output_dir: str) -> None:
     log_debug(f"Compounds with valid SDF: {compounds_with_valid_sdf}")
 
     # Sort by docking score
-    all_compounds.sort(key=lambda x: x["docking_score"])
+    if order_by_docking:
+        all_compounds.sort(key=lambda x: x["docking_score"])
+    else:
+        all_compounds.sort(key=lambda x: x["ligand_efficiency"])
 
     # Create summary files
     summary_tsv = os.path.join(output_dir, "summary_ranked.tsv")
@@ -474,14 +482,14 @@ def generate_summary_txt(output_dir: str) -> None:
     with open(summary_tsv, "w") as f:
         # Write header
         f.write(
-            "Rank\tSMILES\tID\tDocking Score\tDiversity Score\tGeneration\tSDF Path\n"
+            "Rank\tSMILES\tID\tDocking Score\tDiversity Score\tLigand Efficiency\tGeneration\tSDF Path\n"
         )
 
         # Write compound data
         for i, compound in enumerate(all_compounds, 1):
             f.write(
                 f"{i}\t{compound['smiles']}\t{compound['id']}\t"
-                f"{compound['docking_score']}\t{compound['diversity_score']}\t"
+                f"{compound['docking_score']}\t{compound['diversity_score']}\t{compound['ligand_efficiency']}\t"
                 f"{compound['generation']}\t"
                 f"{compound['sdf_path'] or ''}\n"
             )
@@ -547,3 +555,5 @@ def generate_summary_txt(output_dir: str) -> None:
                     log_debug(
                         f"  SDF size: {os.path.getsize(compound['sdf_path'])} bytes"
                     )
+
+    return summary_tsv, summary_sdf

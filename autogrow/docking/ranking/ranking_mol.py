@@ -97,7 +97,7 @@ def rank_and_save_output_smi(
 
     # sort list by the affinity of each sublist (which is the last index
     # of sublist)
-    postDockedCompoundInfos.sort(key=lambda x: x.docking_score, reverse=False)
+    postDockedCompoundInfos.sort(key=lambda x: x.target_score, reverse=False)
 
     # score the diversity of each ligand compared to the rest of the
     # ligands in the group this adds on a float in the last column for the

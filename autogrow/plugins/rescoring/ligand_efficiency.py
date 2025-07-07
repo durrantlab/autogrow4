@@ -32,16 +32,8 @@ class LigandEfficiency(RescoringBase):
             the compounds.
         """
         rescores = []
-        chemtoolkit = plugin_managers.ChemToolkit.toolkit
         for compound in docked_cmpds:
-            if compound.docking_score is not None:
-                mol = chemtoolkit.mol_from_smiles(compound.smiles)
-                if mol is not None:
-                    heavy_atom_count = chemtoolkit.lipinski_heavy_atom_count(mol)
-                    if heavy_atom_count > 0:
-                        original_score = compound.docking_score
-                        new_score = original_score / heavy_atom_count
-                        rescores.append(new_score)
+            rescores.append(compound.get_ligand_efficiency())
         return rescores
 
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
