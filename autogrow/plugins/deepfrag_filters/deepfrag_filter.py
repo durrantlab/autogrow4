@@ -97,12 +97,16 @@ class DeepFragFilter(DeepFragFilterBase):
         # The receptor doesn't change, so the parent molecule and the branching
         # point alone unique identify this DeepFrag prediction. We need to
         # generate a hash.
-        hash_str = f"{Chem.MolToPDBBlock(parent_mol)} {round(branching_point.x, 3)} {round(branching_point.y, 3)} {round(branching_point.z, 3)}"
+        hash_str = None
+        try:
+            hash_str = f"{Chem.MolToPDBBlock(parent_mol)} {round(branching_point.x, 3)} {round(branching_point.y, 3)} {round(branching_point.z, 3)}"
 
-        if hash_str in self.cached_deepfrag_results:
-            # If the result is cached, return it
-            log_info(f"Using cached DeepFrag result.")
-            return self.cached_deepfrag_results[hash_str]
+            if hash_str in self.cached_deepfrag_results:
+                # If the result is cached, return it
+                log_info("Using cached DeepFrag result.")
+                return self.cached_deepfrag_results[hash_str]
+        except Exception as e:
+            log_info(f"Caching disabled for one DeepFrag prediction dur to error: {e}")
 
         # Convert the branching point to a numpy array
         center = np.array([branching_point.x, branching_point.y, branching_point.z])
@@ -148,7 +152,8 @@ class DeepFragFilter(DeepFragFilterBase):
         result = avg_over_ckpts_of_avgs.cpu().detach().numpy()[0]
 
         # Cache the result for future use
-        self.cached_deepfrag_results[hash_str] = result
+        if hash_str is not None:
+            self.cached_deepfrag_results[hash_str] = result
 
         return result
 
