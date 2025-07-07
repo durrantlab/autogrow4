@@ -4,6 +4,7 @@ fingerprints for receptor-parent pairs.
 """
 import __future__
 
+from autogrow.utils.logging import log_warning
 import rdkit
 import rdkit.Chem as Chem
 import numpy as np
@@ -29,10 +30,10 @@ class DeepFragFilterRDKit(DeepFragFilter):
         Returns:
            Numpy array containing the binary fingerprints calculated with RDKit library.
         """
-        fp = Chem.rdmolops.RDKFingerprint(fragment, maxPath=10, fpSize=2048)
-        n_fp = list(map(int, list(fp.ToBitString())))
-        return np.array(n_fp)
-
-        # try:
-        # except:
-        #     return np.zeros(2048)
+        try:
+            fp = Chem.rdmolops.RDKFingerprint(fragment, maxPath=10, fpSize=2048)
+            n_fp = list(map(int, list(fp.ToBitString())))
+            return np.array(n_fp)
+        except Exception as e:
+            log_warning(f"Error calculating RDKit fingerprint: {e}")
+            return np.zeros(2048)
