@@ -16,6 +16,7 @@ from accessory_scripts.plot_autogrow_run import main as plot_autogrow_run
 from autogrow import program_info
 from autogrow.config.argparser import get_user_params
 import autogrow.docking.execute_docking as DockingClass
+import autogrow.docking.ranking.ranking_mol as Ranking
 from autogrow.operators.populate_generation import populate_generation
 from autogrow.summary import generate_summary_html, generate_summary_txt
 from autogrow.utils.logging import LogLevel, create_logger, log_info, log_warning
@@ -33,8 +34,11 @@ def dock_input_compounds(params: Optional[Dict[str, Any]]) -> None:
         pwd=cur_gen_dir,
         cache_dir=cur_gen_dir,
     )
-    DockingClass.run_docking_common(
-        0, cur_gen_dir, smi_new_gen_path, source_cmpds, [], params
+    source_cmpds = DockingClass.run_docking_common(
+        cur_gen_dir, source_cmpds
+    )
+    Ranking.rank_and_save_output_smi(
+        cur_gen_dir, 0, smi_new_gen_path, source_cmpds, params
     )
 
 
@@ -124,54 +128,54 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
         cur_gen_dir = f"{params['output_directory']}generation_{gen_num}{os.sep}"
 
         log_info(f"Creating generation {gen_num}")
-
         with LogLevel():
             populate_generation(
                 params, gen_num, cur_gen_dir, smiles_already_generated
             )
 
+            log_info("Writing partial summary files")
+            with LogLevel():
+                html_summary = generate_summary_html(params["output_directory"])
+                summary_tsv, summary_sdf = generate_summary_txt(params["output_directory"], not bool(params["LigandEfficiency"]))
+
+            log_info(f"Generating graphics to interpret results until generation {gen_num}.")
+            graphic_output_dir = f"{params['output_directory']}graphics{os.sep}generation_{gen_num}{os.sep}"
+            os.makedirs(graphic_output_dir, exist_ok=True)
+            plot_args = {
+                "infolder": params["output_directory"],
+                "outfile": graphic_output_dir,
+                "outfile_format": "png",
+            }
+            plot_autogrow_run(**plot_args)
+            os.rename(html_summary, f"{graphic_output_dir}{os.sep}summary.html")
+            os.rename(summary_tsv, f"{graphic_output_dir}{os.sep}summary_tsv.tsv")
+            os.rename(summary_sdf, f"{graphic_output_dir}{os.sep}summary_sdf.sdf")
 
         sys.stdout.flush()
-
-    # if params["generate_plot"] is True:
-    #     matplotlib_is_callable = False
-    #     try:
-    #         import matplotlib  # type: ignore
-
-    #         matplotlib_is_callable = True
-    #     except Exception:
-    #         matplotlib_is_callable = False
-    #     if not matplotlib_is_callable:
-    #         print("Can not make figure as matplotlib is not installed")
-    #     else:
-    #         print("Plotting")
-    #         import autogrow.plotting.generate_line_plot as plot
-
-    #         plot.generate_figures(params)
-
-    sys.stdout.flush()
 
     log_info("Writing summary files")
     with LogLevel():
         generate_summary_html(params["output_directory"])
-        generate_summary_txt(params["output_directory"])
+        generate_summary_txt(params["output_directory"], not bool(params["LigandEfficiency"]))
 
     log_info("Run time")
     with LogLevel():
         log_info(f"AutoGrow4 run started at:   {start_time}")
         log_info(f"AutoGrow4 run completed at: {str(datetime.datetime.now())}")
 
-    if bool(params["process_generation_0"]):
+    # Generate the final graphics only when the 'process_input_compounds' parameter is True.
+    # Otherwise, the final graphics coincide with the graphics of the last generation in the 'graphics' directory.
+    if bool(params["process_input_compounds"]):
         log_info("Docking input compounds for further analysis")
         dock_input_compounds(params)
 
-    log_info("Generating graphics to interpret results.")
-    graphic_output_dir = f"{params['output_directory']}graphics{os.sep}"
-    os.mkdir(graphic_output_dir)
-    plot_args = {
-        "infolder": params["output_directory"],
-        "outfile": graphic_output_dir,
-        "outfile_format": "png",
-        "process_generation_0": params["process_generation_0"]
-    }
-    plot_autogrow_run(**plot_args)
+        log_info("Generating graphics to interpret results.")
+        graphic_output_dir = f"{params['output_directory']}graphics{os.sep}"
+        os.makedirs(graphic_output_dir, exist_ok=True)
+        plot_args = {
+            "infolder": params["output_directory"],
+            "outfile": graphic_output_dir,
+            "outfile_format": "png",
+            "process_input_compounds": "True"
+        }
+        plot_autogrow_run(**plot_args)

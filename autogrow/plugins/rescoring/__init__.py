@@ -86,10 +86,9 @@ class RescoringPluginManager(PluginManagerBase):
             original_score = compound.docking_score
             new_score = rescores[idx]
 
-            compound.docking_score = new_score
+            compound.target_score = new_score
             compound.add_history(
                 "LIGAND_EFFICIENCY",
                 f"Original docking score: {original_score:.3f}. New score (ligand efficiency): {new_score:.3f}",
             )
         return kwargs["docked_cmpds"]
-

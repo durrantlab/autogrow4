@@ -224,7 +224,7 @@ def _add_general_params(parser: argparse._ArgumentGroup):
     )
     # for postprocessing
     parser.add_argument(
-        "--process_generation_0",
+        "--process_input_compounds",
         action="store_true",
         default=False,
         help="This is to use the information of the reference compounds in the processing of results.",

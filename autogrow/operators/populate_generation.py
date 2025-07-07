@@ -31,6 +31,7 @@ import autogrow.docking.execute_docking as DockingClass
 # Main run Autogrow operators to make a generation
 #############
 
+
 def populate_generation(
     params: Dict[str, Any], generation_num: int, cur_gen_dir: str, smiles_already_generated: set,
 ) -> None:
@@ -167,11 +168,13 @@ def populate_generation(
 
     # Rescore docked poses
     post_docked_compounds = plugin_managers.Rescoring.run(docked_cmpds=post_docked_compounds)
+    elite_cmpds = plugin_managers.Rescoring.run(docked_cmpds=elite_cmpds)
 
     # Filename of the unweighted-ranked SMILES with their docking scores.
-    return Ranking.rank_and_save_output_smi(
+    Ranking.rank_and_save_output_smi(
         cur_gen_dir, generation_num, full_gen_smi_file, post_docked_compounds + elite_cmpds, params
     )
+
 
 def _get_subpop_sizes(generation_num: int, params: Dict[str, Any]) -> Tuple[int, int, int]:
     """
@@ -205,6 +208,7 @@ def _get_subpop_sizes(generation_num: int, params: Dict[str, Any]) -> Tuple[int,
         num_elite_prev_gen = params["number_elitism_advance_from_previous_gen"]
 
     return num_crossovers, num_mutations, num_elite_prev_gen
+
 
 def _make_mutations(cur_gen_dir: str, params: Dict[str, Any], generation_num: int,
                     num_mutations: int, num_seed_diversity: int,
@@ -254,6 +258,7 @@ def _make_mutations(cur_gen_dir: str, params: Dict[str, Any], generation_num: in
                 cache.data = mut_predock_cmpds
         log_info(f"Created {len(mut_predock_cmpds)} mutant compounds")
     return mut_predock_cmpds
+
 
 def _make_crossovers(
     cur_gen_dir: str, params: Dict[str, Any], generation_num: int,
@@ -308,6 +313,7 @@ def _make_crossovers(
         log_info(f"Created {len(cross_predock_cmpds)} crossover compounds")
     return cross_predock_cmpds
 
+
 def _advance_elite_cmpds(
     params: Dict[str, Any], generation_num: int, cur_gen_dir: str,
     src_cmpds: List[Compound], num_elite_prev_gen: int,
@@ -349,6 +355,7 @@ def _advance_elite_cmpds(
         log_info(f"Identified {len(elite_predock_cmpds)} elite compounds")
 
     return elite_predock_cmpds
+
 
 def _convert_to_3d(
     new_gen_predock_cmpds: List[Compound], cur_gen_dir: str,

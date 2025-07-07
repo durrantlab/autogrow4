@@ -163,7 +163,7 @@ def calc_interaction_fp_per_generation(params: Dict[str, Any], infolder: str, in
 
     all_generations = []
     result_matrix = np.zeros((len(num_compounds_per_generation), len(all_interactions)))
-    for gen_num_idx in range(len(num_compounds_per_generation) - (1 if not analyze_gen_0 else 0)):
+    for gen_num_idx in range(len(num_compounds_per_generation)):
         gen_num = (gen_num_idx + 1) if not analyze_gen_0 else gen_num_idx
         all_generations.append(f"generation_{gen_num}")
         for interaction_num in range(len(all_interactions)):
@@ -395,7 +395,9 @@ def get_efficiency_per_generated_comp(infolder: str) -> Dict[str, float]:
         if mol is None:
             average_similarity_dict["compound_" + str(i + 1)] = 0.0
         else:
-            efficiency = float(mol.GetProp('Docking_Score')) / Lipinski.HeavyAtomCount(mol)
+            docking_score = float(mol.GetProp('Docking_Score'))
+            num_heavy_atoms = Lipinski.HeavyAtomCount(mol)
+            efficiency = docking_score / num_heavy_atoms
             average_similarity_dict["compound_" + str(i + 1)] = efficiency
 
     return average_similarity_dict
@@ -433,9 +435,12 @@ def get_score_list_per_gen(infolder: str, ligand_efficiency: bool) -> Dict[str, 
                         )  # split line into parts separated by 4-spaces
 
                         choice_list = [parts[i] for i in range(len(parts))]
-                        gen_list.append(float(choice_list[2]) if not ligand_efficiency else float(
-                            choice_list[2]) / Lipinski.HeavyAtomCount(Chem.MolFromSmiles(
-                                choice_list[0], sanitize=False)))
+
+                        docking_score = float(choice_list[2])
+                        num_heavy_atoms = Lipinski.HeavyAtomCount(Chem.MolFromSmiles(choice_list[0], sanitize=False))
+                        ligand_efficiency_value = docking_score / num_heavy_atoms
+
+                        gen_list.append(docking_score if not ligand_efficiency else ligand_efficiency_value)
 
                 gen_num = os.path.basename(rank_file).split("_")[1]
                 gen_name = f"generation_{gen_num}"
@@ -478,11 +483,14 @@ def get_average_score_per_gen(infolder: str, ligand_efficiency: bool) -> Dict[st
                         )  # split line into parts separated by 4-spaces
 
                         choice_list = [parts[i] for i in range(len(parts))]
-                        gen_affinity_sum = gen_affinity_sum + float(choice_list[2]) \
+
+                        docking_score = float(choice_list[2])
+                        num_heavy_atoms = Lipinski.HeavyAtomCount(Chem.MolFromSmiles(choice_list[0], sanitize=False))
+                        ligand_efficiency_value = docking_score / num_heavy_atoms
+
+                        gen_affinity_sum = gen_affinity_sum + docking_score \
                             if not ligand_efficiency \
-                            else gen_affinity_sum + (float(choice_list[2]) /
-                                                     Lipinski.HeavyAtomCount(
-                                                         Chem.MolFromSmiles(choice_list[0], sanitize=False)))
+                            else gen_affinity_sum + ligand_efficiency_value
                         num_lines_counter = num_lines_counter + 1.0
 
                 gen_affinity_average = gen_affinity_sum / num_lines_counter
@@ -899,6 +907,7 @@ def generate_figures(params: Dict[str, Any], analyze_gen_0: bool) -> None:
     outfile = params["outfile"]
 
     exist_gen_0 = exist_generation_0(infolder)
+    analyze_gen_0 = analyze_gen_0 if exist_gen_0 else False
 
     dict_of_averages = print_data_table(infolder, False)
     run_score_plotter(params, dict_of_averages,
@@ -906,11 +915,11 @@ def generate_figures(params: Dict[str, Any], analyze_gen_0: bool) -> None:
                       ligand_efficiency=False,
                       analyze_gen_0=analyze_gen_0, exist_gen_0=exist_gen_0)
 
-    # dict_of_averages = print_data_table(infolder, True)
-    # run_score_plotter(params, dict_of_averages,
-    #                   outfile + os.sep + "plotter_by_generation_for_ligand_efficiencies." + params["outfile_format"],
-    #                   ligand_efficiency=True,
-    #                   analyze_gen_0=analyze_gen_0, exist_gen_0=exist_gen_0)
+    dict_of_averages = print_data_table(infolder, True)
+    run_score_plotter(params, dict_of_averages,
+                      outfile + os.sep + "plotter_by_generation_for_ligand_efficiencies." + params["outfile_format"],
+                      ligand_efficiency=True,
+                      analyze_gen_0=analyze_gen_0, exist_gen_0=exist_gen_0)
 
     dict_of_score_lists = get_score_list_per_gen(infolder, False)
     scoring_type = params["vina_like_executable"]
@@ -927,16 +936,16 @@ def generate_figures(params: Dict[str, Any], analyze_gen_0: bool) -> None:
                 title_of_figure="Docking Scores for " + receptor_name,
                 analyze_gen_0=analyze_gen_0, exist_gen_0=exist_gen_0)
 
-    # dict_of_score_lists = get_score_list_per_gen(infolder, True)
-    # x_label = "Ligand Efficiency"
-    # receptor_name = os.path.basename(params["receptor_path"])
-    # run_boxplot(params, dict_of_score_lists,
-    #             outfile + os.sep + "boxplot_by_generation_for_ligand_efficiencies." + params["outfile_format"],
-    #             key_start_with="generation",
-    #             x_label=x_label,
-    #             y_label="Number of Generations",
-    #             title_of_figure="Ligand_efficiencies for " + receptor_name,
-    #             analyze_gen_0=analyze_gen_0, exist_gen_0=exist_gen_0)
+    dict_of_score_lists = get_score_list_per_gen(infolder, True)
+    x_label = "Ligand Efficiency"
+    receptor_name = os.path.basename(params["receptor_path"])
+    run_boxplot(params, dict_of_score_lists,
+                outfile + os.sep + "boxplot_by_generation_for_ligand_efficiencies." + params["outfile_format"],
+                key_start_with="generation",
+                x_label=x_label,
+                y_label="Number of Generations",
+                title_of_figure="Ligand_efficiencies for " + receptor_name,
+                analyze_gen_0=analyze_gen_0, exist_gen_0=exist_gen_0)
 
     source_file = str(params["source_compound_file"])
     if exist_gen_0:
@@ -963,17 +972,20 @@ def generate_figures(params: Dict[str, Any], analyze_gen_0: bool) -> None:
                     x_label="New compounds (ID) sorted from the highest to lowest affinity",
                     y_label="Average similarity")
 
-    # dict_of_efficiency_lists = get_efficiency_per_generated_comp(infolder)
-    # run_plotter(params, dict_of_efficiency_lists,
-    #             outfile + os.sep + "plotter_of_ligand_efficiency_for_every_new_compound." + params[
-    #                 "outfile_format"],
-    #             key_start_with="compound",
-    #             x_label="New compounds (ID) sorted from the highest to lowest affinity",
-    #             y_label="Ligand efficiency")
+    dict_of_efficiency_lists = get_efficiency_per_generated_comp(infolder)
+    run_plotter(params, dict_of_efficiency_lists,
+                outfile + os.sep + "plotter_of_ligand_efficiency_for_every_new_compound." + params[
+                    "outfile_format"],
+                key_start_with="compound",
+                x_label="New compounds (ID) sorted from the highest to lowest affinity",
+                y_label="Ligand efficiency")
 
-    generate_tSNE_scatterplot(infolder=infolder,
-                              outfile=outfile + os.sep + "tsne_for_input_and_new_compounds." + params["outfile_format"],
-                              params=params, exist_gen_0=exist_gen_0)
+    try:
+        generate_tSNE_scatterplot(infolder=infolder,
+                                  outfile=outfile + os.sep + "tsne_for_input_and_new_compounds." + params["outfile_format"],
+                                  params=params, exist_gen_0=exist_gen_0)
+    except:
+        pass
 
     interactions = ["Hydrophobic", "HBDonor", "HBAcceptor", "PiStacking", "Anionic", "Cationic", "CationPi", "PiCation"]
     result_matrix, y_label_list, x_label_list = calc_interaction_fp_per_generation(params, infolder, interactions,
@@ -1148,10 +1160,9 @@ def main(**kwargs):
 
     USER_VARS = process_inputs(INPUTS)
 
-    generate_figures(USER_VARS, bool(USER_VARS["process_generation_0"]))
+    generate_figures(USER_VARS, bool(USER_VARS["process_input_compounds"]))
 
     print(f'FINISHED {USER_VARS["outfile"]}')
-
     print("finished")
 
 
@@ -1197,7 +1208,7 @@ if __name__ == "__main__":
                 matplotlib colors can be found with mcolors.get_named_colors_mapping().keys()",
     )
     PARSER.add_argument(
-        "--process_generation_0",
+        "--process_input_compounds",
         action="store_true",
         default=False,
         help="This is to use the information of the reference compounds in the processing of results",
