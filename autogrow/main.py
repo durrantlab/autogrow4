@@ -12,7 +12,7 @@ import multiprocessing
 import os
 import sys
 from typing import Any, Dict, Optional
-from accessory_scripts.plot_autogrow_run import main as plot_autogrow_run
+from autogrow.accessory_scripts.plot_autogrow_run import main as plot_autogrow_run
 from autogrow import program_info
 from autogrow.config.argparser import get_user_params
 import autogrow.docking.execute_docking as DockingClass

@@ -17,13 +17,13 @@ class ScoreType(Enum):
     """Enumeration of supported scoring types for compound evaluation.
 
     Attributes:
-        DOCKING: Represents docking scores (typically negative values where
+        FITNESS: Represents fitness scores (typically negative values where
             lower is better).
         DIVERSITY: Represents diversity scores used to maintain population
             variety.
     """
 
-    DOCKING = -2
+    FITNESS = -2
     DIVERSITY = -1
 
 
@@ -51,7 +51,7 @@ class Compound:  # Get new id when you figure out what context this is used in
     smiles: str
     id: str  # Like naphthalene_22
     additional_info: str = ""  # Like naphthalene_22__1
-    target_score: Optional[float] = None
+    fitness_score: Optional[float] = None  # Value that is optimized
     docking_score: Optional[float] = None  # Like -8.439
     diversity_score: Optional[float] = None
     mol: Optional[Any] = None
@@ -81,7 +81,7 @@ class Compound:  # Get new id when you figure out what context this is used in
         Returns:
             str: A tab-separated string representation of the compound.
         """
-        return f"{self.smiles}\t{self.id}\t{self.docking_score}\t{self.diversity_score}\t{self.sdf_path}\t{self.additional_info}\t{json.dumps(self._history)}\n"
+        return f"{self.smiles}\t{self.id}\t{self.fitness_score}\t{self.docking_score}\t{self.diversity_score}\t{self.sdf_path}\t{self.additional_info}\t{json.dumps(self._history)}\n"
 
     @staticmethod
     def from_tsv_line(tsv_line: str) -> "Compound":
@@ -97,15 +97,17 @@ class Compound:  # Get new id when you figure out what context this is used in
         prts = tsv_line.replace("    ", "\t").strip().split("\t")
         cmpd = Compound(smiles=prts[0], id=prts[1])
         if len(prts) > 2:
-            cmpd.docking_score = float(prts[2])
+            cmpd.fitness_score = float(prts[2]) if prts[2] != "None" else None
         if len(prts) > 3:
-            cmpd.diversity_score = float(prts[3])
+            cmpd.docking_score = float(prts[3]) if prts[3] != "None" else None
         if len(prts) > 4:
-            cmpd.sdf_path = prts[4]
+            cmpd.diversity_score = float(prts[4]) if prts[4] != "None" else None
         if len(prts) > 5:
-            cmpd.additional_info = prts[5]
+            cmpd.sdf_path = prts[5]
         if len(prts) > 6:
-            cmpd._history = json.loads(prts[6])
+            cmpd.additional_info = prts[6]
+        if len(prts) > 7:
+            cmpd._history = json.loads(prts[7])
         return cmpd
 
     @staticmethod
@@ -128,7 +130,7 @@ class Compound:  # Get new id when you figure out what context this is used in
         """Retrieve a previous score of the specified type.
 
         Args:
-            score_type (ScoreType): Type of score to retrieve (DOCKING or
+            score_type (ScoreType): Type of score to retrieve (FITNESS or
                 DIVERSITY).
 
         Returns:
@@ -138,11 +140,11 @@ class Compound:  # Get new id when you figure out what context this is used in
             ValueError: If the requested score is not available or score type is
                 invalid.
         """
-        if score_type == ScoreType.DOCKING:
+        if score_type == ScoreType.FITNESS:
             # NOTE: Used to be associated with index -2
-            if self.docking_score is not None:
-                return self.docking_score
-            raise ValueError("No docking score available")
+            if self.fitness_score is not None:
+                return self.fitness_score
+            raise ValueError("No fitness score available")
         if score_type == ScoreType.DIVERSITY:
             # NOTE: Used to be associated with index -1
             if self.diversity_score is not None:
