@@ -39,8 +39,8 @@ class FragmentAddition(MutationBase):
         Add command-line arguments required by the plugin.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing the plugin category
-                and a list of ArgumentVars.
+         Tuple[str, List[ArgumentVars]]: A tuple containing the plugin category
+          and a list of ArgumentVars.
         """
         built_in_libs = glob.glob(
             os.path.join(os.path.dirname(__file__), "reaction_libraries") + "/*"
@@ -72,6 +72,18 @@ class FragmentAddition(MutationBase):
                     default="all_rxns",
                     help=rxn_library_path_help,
                 ),
+                ArgumentVars(
+                    name="min_fragment_mol_weight",
+                    type=float,
+                    default=None,
+                    help=f"The minimum molecular weight of fragments to be used in reactions. If not specified, no minimum MW filter is applied. Used with the {self.name} plugin.",
+                ),
+                ArgumentVars(
+                    name="max_fragment_mol_weight",
+                    type=float,
+                    default=None,
+                    help=f"The maximum molecular weight of fragments to be used in reactions. If not specified, no maximum MW filter is applied. Used with the {self.name} plugin.",
+                ),
             ],
         )
 
@@ -80,10 +92,9 @@ class FragmentAddition(MutationBase):
         Validate the provided arguments.
 
         Args:
-            params (dict): A dictionary of parameters to validate.
-
+         params (dict): A dictionary of parameters to validate.
         Raises:
-            ValueError: If rxn_library_path is not provided or is invalid.
+         ValueError: If rxn_library_path is not provided or is invalid.
         """
         if "rxn_library_path" not in params:
             raise ValueError("rxn_library_path must be provided.")
@@ -102,6 +113,34 @@ class FragmentAddition(MutationBase):
                     "rxn_library_path is not a valid path. "
                     "Please provide a valid path to the reaction library."
                 )
+
+        min_mw = params.get("min_fragment_mol_weight")
+        max_mw = params.get("max_fragment_mol_weight")
+
+        if min_mw is not None:
+            try:
+                min_mw = float(min_mw)
+            except (ValueError, TypeError) as e:
+                raise ValueError(
+                    f"min_fragment_mol_weight must be a number. Got: '{min_mw}'"
+                ) from e
+            if min_mw < 0:
+                raise ValueError("min_fragment_mol_weight must be non-negative.")
+
+        if max_mw is not None:
+            try:
+                max_mw = float(max_mw)
+            except (ValueError, TypeError) as e:
+                raise ValueError(
+                    f"max_fragment_mol_weight must be a number. Got: '{max_mw}'"
+                ) from e
+            if max_mw < 0:
+                raise ValueError("max_fragment_mol_weight must be non-negative.")
+
+        if min_mw is not None and max_mw is not None and min_mw > max_mw:
+            raise ValueError(
+                "min_fragment_mol_weight cannot be greater than max_fragment_mol_weight."
+            )
 
     def setup(self, **kwargs):
         """
@@ -186,7 +225,7 @@ class FragmentAddition(MutationBase):
         Validate the reaction library data.
 
         Raises:
-            AssertionError: If any of the validation checks fail.
+         AssertionError: If any of the validation checks fail.
         """
         for key, val in self.reaction_dict.items():
             # Make sure these keys exist: ['reaction_name',
@@ -245,11 +284,12 @@ class FragmentAddition(MutationBase):
                 ), f"Functional group {group} is not a string"
 
                 # Also make sure the file exists
-                assert os.path.exists(
-                    self.complementary_mol_dict[group]
-                ), f"Complementary mol file {self.complementary_mol_dict[group]} not found"
-
-        # TODO: Could be more validation (for example of smi files in complementary_mol_dict)
+                assert (
+                    group in self.complementary_mol_dict
+                ), f"Complementary molecules for functional group {group} not loaded."
+                assert isinstance(
+                    self.complementary_mol_dict[group], list
+                ), f"Complementary molecules for {group} is not a list."
 
     def _load_rxn_lib(self, rxn_library_path: str) -> Dict[str, Dict[str, Any]]:
         """
@@ -320,30 +360,29 @@ class FragmentAddition(MutationBase):
         return self._reformat_rxn_dict(reaction_dict_raw)
 
     def _load_complementary_mols(
-        self, rxn_library_path: str  # , complementary_mols: str
-    ) -> Dict[str, str]:
+        self, rxn_library_path: str
+    ) -> Dict[str, List[List[str]]]:
         """
-        Load the complementary molecules for reactions.
-
+        Load and filter the complementary molecules for reactions.
         Based on user-controlled variables, this definition will retrieve a
         dictionary of molecules separated into classes by their functional
-        groups. The sorting of a .smi file into this should be handled in the
-        user parameter testing when autogrow is initially started.
-
+        groups. The molecules are filtered by molecular weight if specified.
         Args:
-            rxn_library_path (str): A string defining the choice of the reaction
-                library.
-
+         rxn_library_path (str): A string defining the choice of the reaction
+          library.
         Returns:
-            Dict[str, str]: A dictionary of complementary molecules where keys
-                are functional group names and values are paths to corresponding
-                .smi files.
-
+         Dict[str, List[List[str]]]: A dictionary of complementary molecules where
+          keys are functional group names and values are lists of [SMILES, ID]
+          pairs.
         Raises:
-            Exception: If any required .smi files are missing in the
-                complementary_mols directory.
+         Exception: If any required .smi files are missing in the
+          complementary_mols directory.
         """
-        complementary_mols = os.path.join(rxn_library_path, "complementary_mols")
+        min_mw = self.params.get("min_fragment_mol_weight")
+        max_mw = self.params.get("max_fragment_mol_weight")
+        perform_mw_filter = min_mw is not None or max_mw is not None
+
+        complementary_mols_dir = os.path.join(rxn_library_path, "complementary_mols")
 
         # script_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -388,17 +427,44 @@ class FragmentAddition(MutationBase):
 
         missing_smi_files = []
         complementary_mols_dict = {}
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
+
         for group in functional_groups:
-            filepath = f"{complementary_mols}{os.sep}{group}.smi"
-
-            if os.path.isfile(filepath) is True:
-                complementary_mols_dict[group] = filepath
-
-            else:
+            filepath = f"{complementary_mols_dir}{os.sep}{group}.smi"
+            if not os.path.isfile(filepath):
                 missing_smi_files.append(filepath)
-                print(
-                    f"Could not find the following .smi file for complementary  molecules for Mutation: {filepath}"
+                log_warning(
+                    f"Could not find the following .smi file for complementary molecules for Mutation: {filepath}"
                 )
+                continue
+
+            filtered_mols = []
+            with open(filepath, "r") as f:
+                for line in f:
+                    parts = line.strip().split()
+                    if len(parts) < 2:
+                        continue
+                    smiles, zinc_id = parts[0], parts[1]
+
+                    if perform_mw_filter:
+                        mol = chemtoolkit.mol_from_smiles(smiles, sanitize=True)
+                        if mol:
+                            mw = chemtoolkit.descriptors_exact_mol_wt(mol)
+                            passes_min = (min_mw is None) or (mw >= min_mw)
+                            passes_max = (max_mw is None) or (mw <= max_mw)
+                            if passes_min and passes_max:
+                                filtered_mols.append([smiles, zinc_id])
+                        # If mol is None, it's skipped, which is fine.
+                    else:
+                        # No filtering, just add the molecule
+                        filtered_mols.append([smiles, zinc_id])
+
+            if perform_mw_filter and not filtered_mols:
+                log_warning(
+                    f"No fragments for functional group '{group}' passed the MW filter (min: {min_mw}, max: {max_mw})."
+                )
+
+            complementary_mols_dict[group] = filtered_mols
 
         if missing_smi_files:
             raise Exception(
@@ -765,6 +831,10 @@ class FragmentAddition(MutationBase):
                         comp_molecule = self._get_random_complementary_mol(
                             functional_group_name
                         )
+                        if comp_molecule is None:
+                            # No fragments available for this group, so we can't form this mutant
+                            break
+
                         # zinc_database name
                         zinc_database_comp_mol_name = comp_molecule[1]
                         # SMILES string of complementary molecule
@@ -927,37 +997,21 @@ class FragmentAddition(MutationBase):
 
         return reaction_product_smiles if passed_filter else None
 
-    def _get_random_complementary_mol(self, functional_group: str) -> List[str]:
+    def _get_random_complementary_mol(
+        self, functional_group: str
+    ) -> Optional[List[str]]:
         """
         Get a random complementary molecule for a given functional group.
-
         Args:
-            functional_group (str): The functional group of the needed
-                complementary molecule for the reaction.
-
+         functional_group (str): The functional group of the needed
+          complementary molecule for the reaction.
         Returns:
-            List[str]: A list containing the SMILES string and name of the
-                randomly chosen complementary molecule.
+         Optional[List[str]]: A list containing the SMILES string and name of the
+          randomly chosen complementary molecule, or None if no fragments
+          are available for the given functional group.
         """
-        infile = self.complementary_mol_dict[functional_group]
-
-        with open(infile, "r") as f:
-            random_comp_mol_line = random.choice(f.readlines())
-            random_comp_mol_line = (
-                random_comp_mol_line.replace("\n", "")
-                .replace("\t", " ")
-                .replace("    ", " ")
-            )
-            for _ in range(10):
-                random_comp_mol_line.replace("  ", " ")
-            parts = random_comp_mol_line.split(
-                " "
-            )  # split line into parts separated by 4-spaces
-            # parts = [x for x in random_comp_mol_line.split(" ") if x!= ""]
-            # # split line into parts separated by 4-spaces
-
-            smile_list = parts[0]
-            zinc_name_list = parts[1]
-            random_comp_mol = [smile_list, zinc_name_list]
-
-        return random_comp_mol
+        fragment_list = self.complementary_mol_dict.get(functional_group)
+        if not fragment_list:
+            log_warning(f"No available fragments for functional group: {functional_group}")
+            return None
+        return random.choice(fragment_list)

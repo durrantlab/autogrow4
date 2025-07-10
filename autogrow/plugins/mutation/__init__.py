@@ -67,37 +67,6 @@ class MutationBase(PluginBase):
 class MutationPluginManager(PluginManagerBase):
     """Manager class for handling multiple mutation plugins."""
 
-    def setup_plugins(self, **kwargs):
-        """
-        Set up the mutation plugins and then filter their fragments.
-
-        This overrides the base method to add fragment filtering. It is assumed
-        that individual mutation plugins load their fragments in their `setup()`
-        method, and that these fragments are stored in a `self.fragments`
-        attribute as a list of RDKit Mol objects.
-        """
-        super().setup_plugins(**kwargs)
-
-        fragment_filter_manager = plugin_managers.FragmentFilter
-        if not fragment_filter_manager.plugins:
-            # log_debug("No fragment filters selected, skipping fragment filtering.")
-            return
-
-        log_debug("Applying fragment filters to mutation plugins.")
-        for plugin_name, plugin in self.plugins.items():
-            if hasattr(plugin, "fragments") and plugin.fragments:
-                original_count = len(plugin.fragments)
-
-                # Assuming plugin.fragments is a list of RDKit Mol objects
-                filtered_fragments = fragment_filter_manager.run(mols=plugin.fragments)
-
-                plugin.fragments = filtered_fragments
-
-                num_filtered = original_count - len(filtered_fragments)
-                if num_filtered > 0:
-                    log_debug(f"Filtered out {num_filtered} fragments from {plugin_name} "
-                              f"({original_count} -> {len(filtered_fragments)}).")
-
     def execute(
         self, **kwargs
     ) -> Optional[List[Tuple[str, int, Union[str, None], List[Compound]]]]:
