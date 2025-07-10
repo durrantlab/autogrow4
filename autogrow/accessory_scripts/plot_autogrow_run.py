@@ -519,23 +519,23 @@ def get_average_score_per_gen(infolder: str, ligand_efficiency: bool) -> Dict[st
         # Filter for compounds that have a docking score
         ranked_cmpds = [c for c in ranked_cmpds if c.docking_score is not None]
 
-HERE
+        if not ranked_cmpds:
+            continue
 
-        if len(ranked_cmpds) > 0:
-            gen_affinity_sum = 0.0
-            for cmpd in ranked_cmpds:
-                docking_score = cmpd.docking_score
-                num_heavy_atoms = Lipinski.HeavyAtomCount(
-                    Chem.MolFromSmiles(cmpd.smiles, sanitize=False)
-                )
-                ligand_efficiency_value = docking_score / num_heavy_atoms
-                gen_affinity_sum += (
-                    ligand_efficiency_value if ligand_efficiency else docking_score
-                )
-            gen_affinity_average = gen_affinity_sum / len(ranked_cmpds)
-            gen_num = get_gen_number_from_folder_name(gen_folder_name)
-            gen_name = f"generation_{gen_num}"
-            average_affinity_dict[gen_name] = gen_affinity_average
+        gen_affinity_sum = 0.0
+        for cmpd in ranked_cmpds:
+            docking_score = cmpd.docking_score
+            num_heavy_atoms = Lipinski.HeavyAtomCount(
+                Chem.MolFromSmiles(cmpd.smiles, sanitize=False)
+            )
+            ligand_efficiency_value = docking_score / num_heavy_atoms
+            gen_affinity_sum += (
+                ligand_efficiency_value if ligand_efficiency else docking_score
+            )
+        gen_affinity_average = gen_affinity_sum / len(ranked_cmpds)
+        gen_num = get_gen_number_from_folder_name(gen_folder_name)
+        gen_name = f"generation_{gen_num}"
+        average_affinity_dict[gen_name] = gen_affinity_average
 
             # TODO: Several of these old versions account for multiple ranked
             # files per generation. Does this actually happen? Good to check
@@ -606,6 +606,14 @@ def get_average_top_score_per_gen(infolder: str, top_score_per_gen: int, ligand_
         gen_folder_name = infolder + os.sep + gen_folder + os.sep
         ranked_cmpds = load_rank_file(gen_folder_name)
         gen_num = get_gen_number_from_folder_name(gen_folder_name)
+
+        # Filter for compounds that have a docking score and then sort
+        ranked_cmpds = [c for c in ranked_cmpds if c.docking_score is not None]
+        if ligand_efficiency:
+            ranked_cmpds.sort(key=lambda c: c.get_ligand_efficiency())
+        else:
+            ranked_cmpds.sort(key=lambda c: c.docking_score)
+
         num_lines = len(ranked_cmpds)
 
         if num_lines < top_score_per_gen:
@@ -618,9 +626,15 @@ def get_average_top_score_per_gen(infolder: str, top_score_per_gen: int, ligand_
 
 
         for cmpd in ranked_cmpds[:top_score_per_gen]:
-            lig_efficiency_val = (cmpd.docking_score / Lipinski.HeavyAtomCount(Chem.MolFromSmiles(cmpd.smiles, sanitize=False)))
-            gen_affinity_sum += (lig_efficiency_val if ligand_efficiency else cmpd.docking_score)
-
+            lig_efficiency_val = (
+                cmpd.docking_score
+                / Lipinski.HeavyAtomCount(
+                    Chem.MolFromSmiles(cmpd.smiles, sanitize=False)
+                )
+            )
+            gen_affinity_sum += (
+                lig_efficiency_val if ligand_efficiency else cmpd.docking_score
+            )
         gen_affinity_average = gen_affinity_sum / top_score_per_gen
 
         gen_name = f"generation_{gen_num}"
@@ -705,24 +719,22 @@ def make_graph(dictionary: Dict[str, Union[float, str]], analyze_gen_0: bool, ex
     :returns: list list_of_scores: list of averages for each generation;
         if a generation lacks ligands to generate the average it will return "N/A"
     """
-    list_generations = []
-    list_of_gen_names = []
-    list_of_scores = []
+    if any(val == "N/A" for val in dictionary.values()):
+        return None, None
 
-    for gen in range(len(dictionary) - (1 if exist_gen_0 and not analyze_gen_0 else 0)):
-        key = "generation_" + (str(gen + 1) if not analyze_gen_0 else str(gen))
-        score = dictionary[key]
+    sorted_keys = sorted(dictionary.keys(), key=lambda k: int(k.split("_")[1]))
 
-        # print(key)
-        list_of_gen_names.append(key)
-        list_of_scores.append(score)
+    if not analyze_gen_0 and exist_gen_0 and "generation_0" in sorted_keys:
+        sorted_keys.remove("generation_0")
 
-        list_generations.append((gen + 1) if not analyze_gen_0 else gen)
-        list_of_gen_names.append(key)
+    if not sorted_keys:
+        return [], []
 
-    for i in list_of_scores:
-        if i == "N/A":
-            return None, None
+    list_generations = [int(k.split("_")[1]) for k in sorted_keys]
+    list_of_scores = [dictionary[k] for k in sorted_keys]
+
+    if "N/A" in list_of_scores:
+        return None, None
 
     return list_generations, list_of_scores
 

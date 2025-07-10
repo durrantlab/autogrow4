@@ -99,9 +99,9 @@ class Compound:  # Get new id when you figure out what context this is used in
         if len(prts) > 2:
             cmpd.fitness_score = float(prts[2]) if prts[2] != "None" else None
         if len(prts) > 3:
-            cmpd.docking_score = float(prts[3])
+            cmpd.docking_score = float(prts[3]) if prts[3] != "None" else None
         if len(prts) > 4:
-            cmpd.diversity_score = float(prts[4])
+            cmpd.diversity_score = float(prts[4]) if prts[4] != "None" else None
         if len(prts) > 5:
             cmpd.sdf_path = prts[5]
         if len(prts) > 6:
