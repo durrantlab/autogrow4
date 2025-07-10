@@ -14,6 +14,7 @@ from autogrow.plugins.shell_parallelizer import ShellParallelizerPluginManager, 
 from autogrow.plugins.pose_filters import PoseFilterPluginManager, PoseFilterBase
 from autogrow.plugins.rescoring import RescoringPluginManager, RescoringBase
 from autogrow.plugins.deepfrag_filters import DeepFragFilterManager, DeepFragFilterBase
+from autogrow.plugins.fragment_filters import FragmentFilterPluginManager, FragmentFilterBase
 
 # TODO: I bet it would be possible to autogenerate this list through dynamic
 # imports. Good to investigate.
@@ -24,6 +25,7 @@ PLUGIN_TYPES = [
     ("ChemToolkit", ChemToolkitPluginManager, ChemToolkitBase),
 
     ("SmilesFilter", SmilesFilterPluginManager, SmilesFilterBase),
+    ("FragmentFilter", FragmentFilterPluginManager, FragmentFilterBase),
     ("Selector", SelectorPluginManager, SelectorBase),
     ("Docking", DockingPluginManager, DockingBase),
     ("Mutation", MutationPluginManager, MutationBase),
