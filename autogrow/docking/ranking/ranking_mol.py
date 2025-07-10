@@ -95,6 +95,12 @@ def rank_and_save_output_smi(
     # Custom metric than dock score gets moved to index -3 and the new
     # fitness metric gets -2
 
+    # If no rescoring was performed, target_score will be None. In that case,
+    # use docking_score for ranking.
+    for cmpd in postDockedCompoundInfos:
+        if cmpd.target_score is None:
+            cmpd.target_score = cmpd.docking_score
+
     # sort list by the affinity of each sublist (which is the last index
     # of sublist)
     postDockedCompoundInfos.sort(key=lambda x: x.target_score, reverse=False)
