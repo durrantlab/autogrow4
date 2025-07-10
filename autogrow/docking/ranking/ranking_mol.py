@@ -15,6 +15,8 @@ import autogrow.utils.mol_object_handling as MOH
 import autogrow.docking.ranking.ranking_mol as Ranking
 from rdkit import Chem
 
+from autogrow.utils.rank_file import save_rank_file
+
 
 def rank_and_save_output_smi(
     current_generation_dir: str,
@@ -95,15 +97,9 @@ def rank_and_save_output_smi(
     # Custom metric than dock score gets moved to index -3 and the new
     # fitness metric gets -2
 
-    # If no rescoring was performed, target_score will be None. In that case,
-    # use docking_score for ranking.
-    for cmpd in postDockedCompoundInfos:
-        if cmpd.target_score is None:
-            cmpd.target_score = cmpd.docking_score
-
     # sort list by the affinity of each sublist (which is the last index
     # of sublist)
-    postDockedCompoundInfos.sort(key=lambda x: x.target_score, reverse=False)
+    postDockedCompoundInfos.sort(key=lambda x: x.fitness_score, reverse=False)
 
     # score the diversity of each ligand compared to the rest of the
     # ligands in the group this adds on a float in the last column for the
@@ -116,13 +112,15 @@ def rank_and_save_output_smi(
 
     # save to a new output smiles file. ie. save to ranked_smiles_file
 
-    with open(output_ranked_smile_file, "w") as output:
-        for cmpdInf in postDockedCompoundInfos:
-            output.write(cmpdInf.tsv_line)
-            # sdf_path = "" if cmpdInf.sdf_path is None else cmpdInf.sdf_path
-            # sdf_basename = os.path.basename(sdf_path)
-            # output_line = f"{cmpdInf.smiles}\t{cmpdInf.id}\t{cmpdInf.additional_info}\t{cmpdInf.docking_score}\t{cmpdInf.diversity_score}\t{sdf_basename}\n"
-            # output.write(output_line)
+    save_rank_file(output_ranked_smile_file, postDockedCompoundInfos)
+
+    # with open(output_ranked_smile_file, "w") as output:
+    #     for cmpdInf in postDockedCompoundInfos:
+    #         output.write(cmpdInf.tsv_line)
+    #         # sdf_path = "" if cmpdInf.sdf_path is None else cmpdInf.sdf_path
+    #         # sdf_basename = os.path.basename(sdf_path)
+    #         # output_line = f"{cmpdInf.smiles}\t{cmpdInf.id}\t{cmpdInf.additional_info}\t{cmpdInf.docking_score}\t{cmpdInf.diversity_score}\t{sdf_basename}\n"
+    #         # output.write(output_line)
 
     return output_ranked_smile_file
 
@@ -205,6 +203,7 @@ def _process_ligand_scores_from_prev_gen(
             id=lig.id,
             additional_info="",
             docking_score=lig_data.docking_score,
+            fitness_score=lig_data.fitness_score,
             diversity_score=None,
         )
         pass_through_data.append(lig_info_remove_diversity_info)
@@ -234,6 +233,9 @@ def get_predockcmpds_from_smi_file(infile: str) -> List[Compound]:
           diversity_score if present.
         - Any fields between ID and docking_score are ignored but allowed.
     """
+    # NOTE: This is somewhat redundant with functions in rank_file.py, but let's
+    # keep separate for now.
+
     # IMPORT SMILES FROM THE PREVIOUS GENERATION
     predock_cmpds: List[Compound] = []
 
@@ -312,8 +314,8 @@ def convert_usable_list_to_lig_dict(
         key = cmpd.smiles + cmpd.id
         if key in usable_dict_of_predock_cmpds and usable_dict_of_predock_cmpds[
             key
-        ].get_score_by_type(ScoreType.DOCKING) < cmpd.get_score_by_type(
-            ScoreType.DOCKING
+        ].get_score_by_type(ScoreType.FITNESS) < cmpd.get_score_by_type(
+            ScoreType.FITNESS
         ):
             continue
         usable_dict_of_predock_cmpds[key] = cmpd

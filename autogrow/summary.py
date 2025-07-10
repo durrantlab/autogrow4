@@ -3,6 +3,8 @@ from autogrow.utils.logging import log_info
 import numpy as np
 import math
 
+from autogrow.utils.rank_file import load_rank_file
+
 
 def generate_summary_html(output_dir: str):
     """
@@ -21,24 +23,23 @@ def generate_summary_html(output_dir: str):
 
     all_smiles = set()
     for gen_dir in generation_dirs:
-        gen_file = os.path.join(gen_dir, f"{os.path.basename(gen_dir)}_ranked.smi")
-        if not os.path.exists(gen_file):
-            continue
+        ranked_cmpds = load_rank_file(gen_dir)
 
         generation_data = []
-        with open(gen_file, "r") as f:
-            for line in f:
-                cmpd = Compound.from_tsv_line(line)
-                if cmpd.smiles not in all_smiles:
-                    all_smiles.add(cmpd.smiles)
-                    generation_data.append(
-                        {
-                            "smiles": cmpd.smiles,
-                            "id": cmpd.id,
-                            "docking_score": cmpd.docking_score,
-                            "ligand_efficiency": cmpd.get_ligand_efficiency(),
-                        }
-                    )
+
+        for ranked_cmpd in ranked_cmpds:
+            if ranked_cmpd.smiles not in all_smiles:
+                all_smiles.add(ranked_cmpd.smiles)
+                # TODO: Add target_score to this html summary too eventually?
+                generation_data.append(
+                    {
+                        "smiles": ranked_cmpd.smiles,
+                        "id": ranked_cmpd.id,
+                        "docking_score": ranked_cmpd.docking_score,
+                        "ligand_efficiency": ranked_cmpd.get_ligand_efficiency(),
+                    }
+                )
+
         all_generations.append(generation_data)
 
     # Calculate global min/max scores and bin configuration
@@ -412,56 +413,53 @@ def generate_summary_txt(output_dir: str, order_by_docking: bool):
 
     all_smiles = set()
     for gen_dir in generation_dirs:
-        gen_file = os.path.join(gen_dir, f"{os.path.basename(gen_dir)}_ranked.smi")
-        if not os.path.exists(gen_file):
-            continue
-
+        ranked_cmpds = load_rank_file(gen_dir)
         log_debug(f"Processing generation directory: {gen_dir}")
-        with open(gen_file, "r") as f:
-            for line in f:
-                total_lines += 1
 
-                cmpd = Compound.from_tsv_line(line)
-                if cmpd.smiles in all_smiles:
-                    continue
-                all_smiles.add(cmpd.smiles)
+        for cmpd in ranked_cmpds:
+            total_lines += 1
 
-                # parts = line.strip().split("\t")
+            if cmpd.smiles in all_smiles:
+                continue
+            all_smiles.add(cmpd.smiles)
 
-                # From your example file, the format is:
-                # SMILES, ID, _, docking_score, diversity_score, sdf_path
-                # if len(parts) >= 6:  # Make sure we have all needed fields
-                compound = {
-                    "smiles": cmpd.smiles,
-                    "id": cmpd.id,
-                    "docking_score": cmpd.docking_score,
-                    "diversity_score": cmpd.diversity_score,
-                    "ligand_efficiency": cmpd.get_ligand_efficiency(),
-                    "sdf_path": cmpd.sdf_path,
-                    "generation": os.path.basename(gen_dir),
-                }
+            # parts = line.strip().split("\t")
 
-                # Verify SDF exists and is valid
-                if os.path.exists(compound["sdf_path"]):
-                    compounds_with_sdf += 1
-                    if os.path.getsize(compound["sdf_path"]) > 0:
-                        with open(compound["sdf_path"], "r") as test_f:
-                            content = test_f.read()
-                            if "$$$$" in content:  # Check if it's a valid SDF
-                                compounds_with_valid_sdf += 1
-                            else:
-                                log_warning(
-                                    f"Found SDF but it appears invalid: {compound['sdf_path']}"
-                                )
-                                compound["sdf_path"] = None
-                    else:
-                        log_warning(f"Found empty SDF file: {compound['sdf_path']}")
-                        compound["sdf_path"] = None
+            # From your example file, the format is:
+            # SMILES, ID, _, docking_score, diversity_score, sdf_path
+            # if len(parts) >= 6:  # Make sure we have all needed fields
+            # TODO: Good to add target_score eventually?
+            compound = {
+                "smiles": cmpd.smiles,
+                "id": cmpd.id,
+                "docking_score": cmpd.docking_score,
+                "diversity_score": cmpd.diversity_score,
+                "ligand_efficiency": cmpd.get_ligand_efficiency(),
+                "sdf_path": cmpd.sdf_path,
+                "generation": os.path.basename(gen_dir),
+            }
+
+            # Verify SDF exists and is valid
+            if os.path.exists(compound["sdf_path"]):
+                compounds_with_sdf += 1
+                if os.path.getsize(compound["sdf_path"]) > 0:
+                    with open(compound["sdf_path"], "r") as test_f:
+                        content = test_f.read()
+                        if "$$$$" in content:  # Check if it's a valid SDF
+                            compounds_with_valid_sdf += 1
+                        else:
+                            log_warning(
+                                f"Found SDF but it appears invalid: {compound['sdf_path']}"
+                            )
+                            compound["sdf_path"] = None
                 else:
-                    log_warning(f"SDF file not found: {compound['sdf_path']}")
+                    log_warning(f"Found empty SDF file: {compound['sdf_path']}")
                     compound["sdf_path"] = None
+            else:
+                log_warning(f"SDF file not found: {compound['sdf_path']}")
+                compound["sdf_path"] = None
 
-                all_compounds.append(compound)
+            all_compounds.append(compound)
 
     # Log debug info
     log_debug(f"Total lines processed: {total_lines}")

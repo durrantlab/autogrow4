@@ -263,7 +263,7 @@ class VinaLikeDocking(DockingBase):
                     log_warning(f"Failed to parse docking score from {vina_out_file}")
 
             # TODO: Update a history in the future.
-            predocked_cmpd.target_score = score
+            predocked_cmpd.fitness_score = score
             predocked_cmpd.docking_score = score
             predocked_cmpd.sdf_path = f"{vina_out_file}.sdf"
 
