@@ -24,6 +24,7 @@ from rdkit.Chem import AllChem
 from rdkit.Chem.rdMolDescriptors import GetMorganFingerprint
 from rdkit.Chem import Lipinski
 from rdkit import DataStructs
+from autogrow.utils.rank_file import get_gen_number_from_folder_name, load_rank_file
 import prolif
 import numpy as np
 import pandas as pd
@@ -131,35 +132,61 @@ def calc_interaction_fp_per_generation(params: Dict[str, Any], infolder: str, in
     for gen_folder in os.listdir(infolder):
         if "generation" in gen_folder and os.path.isdir(os.path.join(infolder, gen_folder)):
             gen_folder_name = infolder + os.sep + gen_folder + os.sep
-            rank_file = glob.glob(f"{gen_folder_name}*_ranked.smi")[0]
-            gen_num = os.path.basename(rank_file).split("_")[1]
+
+            ranked_cmpds = load_rank_file(gen_folder_name)
+            gen_num = get_gen_number_from_folder_name(gen_folder_name)
             num_compounds_per_generation[gen_num] = 0
 
-            with open(rank_file, "r") as f:
-                for line in f:
-                    line = line.replace("\n", "")
-                    parts = line.split(
-                        "\t"
-                    )  # split line into parts separated by 5-spaces
+            for ranked_cmpd in ranked_cmpds:
+                if ranked_cmpd.sdf_path == "None":
+                    continue
 
-                    docked_comp_path = [parts[i] for i in range(len(parts))][4]
-                    if docked_comp_path != "None":
-                        num_compounds_per_generation[gen_num] = num_compounds_per_generation[gen_num] + 1
-                        docked_comp = read_sdf_file(docked_comp_path)[0]
-                        prot = prolif.Molecule.from_rdkit(receptor)
-                        lig = prolif.Molecule.from_rdkit(docked_comp)
-                        ifp = fingerprints.generate(lig, prot, metadata=True)
-                        df = prolif.to_dataframe({0: ifp}, fingerprints.interactions)
+                num_compounds_per_generation[gen_num] += 1
+                docked_comp = read_sdf_file(ranked_cmpd.sdf_path)[0]
+                prot = prolif.Molecule.from_rdkit(receptor)
+                lig = prolif.Molecule.from_rdkit(docked_comp)
+                ifp = fingerprints.generate(lig, prot, metadata=True)
+                df = prolif.to_dataframe({0: ifp}, fingerprints.interactions)
 
-                        for column_name in df.columns:
-                            interaction = column_name[1].split(".")[0] + "_" + column_name[2]
-                            if interaction not in number_interactions_per_gen:
-                                number_interactions_per_gen[interaction] = {}
-                                all_interactions.append(interaction)
-                            if gen_num not in number_interactions_per_gen[interaction]:
-                                number_interactions_per_gen[interaction][gen_num] = 0
-                            number_interactions_per_gen[interaction][gen_num] = \
-                                number_interactions_per_gen[interaction][gen_num] + 1
+                for column_name in df.columns:
+                    interaction = column_name[1].split(".")[0] + "_" + column_name[2]
+                    if interaction not in number_interactions_per_gen:
+                        number_interactions_per_gen[interaction] = {}
+                        all_interactions.append(interaction)
+                    if gen_num not in number_interactions_per_gen[interaction]:
+                        number_interactions_per_gen[interaction][gen_num] = 0
+                    number_interactions_per_gen[interaction][gen_num] = \
+                        number_interactions_per_gen[interaction][gen_num] + 1
+
+            # rank_file = glob.glob(f"{gen_folder_name}*_ranked.smi")[0]
+            # gen_num = os.path.basename(rank_file).split("_")[1]
+            # num_compounds_per_generation[gen_num] = 0
+
+            # with open(rank_file, "r") as f:
+            #     for line in f:
+            #         line = line.replace("\n", "")
+
+            #         # split line into parts separated by 5-spaces
+            #         parts = line.split("\t")
+
+            #         docked_comp_path = [parts[i] for i in range(len(parts))][5]
+            #         if docked_comp_path != "None":
+            #             num_compounds_per_generation[gen_num] += 1
+            #             docked_comp = read_sdf_file(docked_comp_path)[0]
+            #             prot = prolif.Molecule.from_rdkit(receptor)
+            #             lig = prolif.Molecule.from_rdkit(docked_comp)
+            #             ifp = fingerprints.generate(lig, prot, metadata=True)
+            #             df = prolif.to_dataframe({0: ifp}, fingerprints.interactions)
+
+            #             for column_name in df.columns:
+            #                 interaction = column_name[1].split(".")[0] + "_" + column_name[2]
+            #                 if interaction not in number_interactions_per_gen:
+            #                     number_interactions_per_gen[interaction] = {}
+            #                     all_interactions.append(interaction)
+            #                 if gen_num not in number_interactions_per_gen[interaction]:
+            #                     number_interactions_per_gen[interaction][gen_num] = 0
+            #                 number_interactions_per_gen[interaction][gen_num] = \
+            #                     number_interactions_per_gen[interaction][gen_num] + 1
 
     all_generations = []
     result_matrix = np.zeros((len(num_compounds_per_generation), len(all_interactions)))
@@ -195,25 +222,18 @@ def generate_tSNE_scatterplot(infolder: str, params: Dict[str, Any], outfile: st
     for gen_folder in os.listdir(infolder):
         if "generation" in gen_folder and os.path.isdir(os.path.join(infolder, gen_folder)):
             gen_folder_name = infolder + os.sep + gen_folder + os.sep
-            rank_file = glob.glob(f"{gen_folder_name}*_ranked.smi")[0]
-            gen_num = os.path.basename(rank_file).split("_")[1]
 
-            new_comps = []
-            with open(rank_file, "r") as f:
-                for line in f:
-                    line = line.replace("\n", "")
-                    parts = line.split(
-                        "\t"
-                    )  # split line into parts separated by 4-spaces
+            ranked_cmpds = load_rank_file(gen_folder_name)
 
-                    choice_list = [parts[i] for i in range(len(parts))]
-                    new_comps.append(Chem.MolFromSmiles(choice_list[0]))
+            new_comps = [Chem.MolFromSmiles(cmpd.smiles) for cmpd in ranked_cmpds]
+            gen_num = get_gen_number_from_folder_name(gen_folder_name)
 
-                for mol in new_comps:
-                    if mol is not None:
-                        mol_fp = AllChem.GetMorganFingerprintAsBitVect(mol, radius=10, nBits=2048)
-                        result_matrix.append(list(mol_fp))
-                        label_list.append("generation_" + str(gen_num))
+            for mol in new_comps:
+                if mol is None:
+                    continue
+                mol_fp = AllChem.GetMorganFingerprintAsBitVect(mol, radius=10, nBits=2048)
+                result_matrix.append(list(mol_fp))
+                label_list.append(f"generation_{str(gen_num)}")
 
     result_matrix = np.array(result_matrix)
     tsne_model = TSNE(n_components=2, random_state=0)
@@ -268,37 +288,38 @@ def calc_diversity_scores_per_generation(infolder: str):
     for gen_folder in os.listdir(infolder):
         if "generation" in gen_folder and os.path.isdir(os.path.join(infolder, gen_folder)):
             gen_folder_name = infolder + os.sep + gen_folder + os.sep
-            rank_file = glob.glob(f"{gen_folder_name}*_ranked.smi")[0]
-            gen_num = os.path.basename(rank_file).split("_")[1]
 
-            new_comps = []
-            with open(rank_file, "r") as f:
-                for line in f:
-                    line = line.replace("\n", "")
-                    parts = line.split(
-                        "\t"
-                    )  # split line into parts separated by 4-spaces
+            ranked_cmpds = load_rank_file(gen_folder_name)
+            gen_num = get_gen_number_from_folder_name(gen_folder_name)
 
-                    choice_list = [parts[i] for i in range(len(parts))]
-                    new_comps.append(Chem.MolFromSmiles(choice_list[0]))
+            new_comps = [Chem.MolFromSmiles(cmpd.smiles) for cmpd in ranked_cmpds]
 
             similarity_values = []
             for i in range(len(new_comps)):
                 reference_comp = new_comps[i]
-                if reference_comp is not None:
-                    reference_comp_fp = GetMorganFingerprint(reference_comp, radius=10, useFeatures=True)
-                    for j in range(i + 1, len(new_comps)):
-                        mol = new_comps[j]
-                        if mol is not None:
-                            mol_fp = GetMorganFingerprint(mol, radius=10, useFeatures=True)
+                if reference_comp is None:
+                    continue
 
-                            # if DiceSimilarity=1.0 it is a perfect match, the smaller the number,
-                            # the more diverse it is.
-                            diversity_score = DataStructs.DiceSimilarity(reference_comp_fp, mol_fp)
-                            if diversity_score >= 0.9:
-                                print("Compounds " + str(i + 1) + " and " + str(j + 1) + " of the generation "
-                                      + str(gen_num) + " are similar in: " + str(diversity_score))
-                            similarity_values.append(diversity_score)
+                reference_comp_fp = GetMorganFingerprint(reference_comp, radius=10, useFeatures=True)
+                for j in range(i + 1, len(new_comps)):
+                    mol = new_comps[j]
+                    if mol is None:
+                        continue
+
+                    mol_fp = GetMorganFingerprint(mol, radius=10, useFeatures=True)
+
+                    # if DiceSimilarity=1.0 it is a perfect match, the smaller the number,
+                    # the more diverse it is.
+                    diversity_score = DataStructs.DiceSimilarity(reference_comp_fp, mol_fp)
+                    if diversity_score >= 0.9:
+                        print(
+                            (
+                                f"Compounds {str(i + 1)} and {str(j + 1)} of the generation {str(gen_num)}"
+                                + " are similar in: "
+                            )
+                            + str(diversity_score)
+                        )
+                    similarity_values.append(diversity_score)
 
             gen_name = f"generation_{gen_num}"
             average_dict[gen_name] = similarity_values
@@ -421,30 +442,49 @@ def get_score_list_per_gen(infolder: str, ligand_efficiency: bool) -> Dict[str, 
     """
     average_dict = {}
     for gen_folder in os.listdir(infolder):
-        if os.path.isdir(os.path.join(infolder, gen_folder)):
-            gen_folder_name = infolder + os.sep + gen_folder + os.sep
-            ranked_file = glob.glob(f"{gen_folder_name}*_ranked.smi")
+        if not os.path.isdir(os.path.join(infolder, gen_folder)):
+            continue
+        if not gen_folder.startswith("generation_"):
+            continue
 
-            for rank_file in ranked_file:
-                gen_list = []
-                with open(rank_file, "r") as f:
-                    for line in f:
-                        line = line.replace("\n", "")
-                        parts = line.split(
-                            "\t"
-                        )  # split line into parts separated by 4-spaces
+        gen_folder_name = infolder + os.sep + gen_folder + os.sep
 
-                        choice_list = [parts[i] for i in range(len(parts))]
 
-                        docking_score = float(choice_list[2])
-                        num_heavy_atoms = Lipinski.HeavyAtomCount(Chem.MolFromSmiles(choice_list[0], sanitize=False))
-                        ligand_efficiency_value = docking_score / num_heavy_atoms
+        ranked_cmpds = load_rank_file(gen_folder_name)
+        gen_list = []
 
-                        gen_list.append(docking_score if not ligand_efficiency else ligand_efficiency_value)
+        for cmpd in ranked_cmpds:
+            docking_score = cmpd.docking_score
+            num_heavy_atoms = Lipinski.HeavyAtomCount(Chem.MolFromSmiles(cmpd.smiles, sanitize=False))
+            ligand_efficiency_value = docking_score / num_heavy_atoms
 
-                gen_num = os.path.basename(rank_file).split("_")[1]
-                gen_name = f"generation_{gen_num}"
-                average_dict[gen_name] = gen_list
+            gen_list.append(docking_score if not ligand_efficiency else ligand_efficiency_value)
+
+        gen_num = get_gen_number_from_folder_name(gen_folder_name)
+        gen_name = f"generation_{gen_num}"
+        average_dict[gen_name] = gen_list
+
+        # ranked_file = glob.glob(f"{gen_folder_name}*_ranked.smi")
+
+        # for rank_file in ranked_file:
+        #     with open(rank_file, "r") as f:
+        #         for line in f:
+        #             line = line.replace("\n", "")
+        #             parts = line.split(
+        #                 "\t"
+        #             )  # split line into parts separated by 4-spaces
+
+        #             choice_list = [parts[i] for i in range(len(parts))]
+
+        #             docking_score = float(choice_list[2])
+        #             num_heavy_atoms = Lipinski.HeavyAtomCount(Chem.MolFromSmiles(choice_list[0], sanitize=False))
+        #             ligand_efficiency_value = docking_score / num_heavy_atoms
+
+        #             gen_list.append(docking_score if not ligand_efficiency else ligand_efficiency_value)
+
+        #     gen_num = os.path.basename(rank_file).split("_")[1]
+        #     gen_name = f"generation_{gen_num}"
+        #     average_dict[gen_name] = gen_list
 
     return average_dict
 
@@ -467,39 +507,68 @@ def get_average_score_per_gen(infolder: str, ligand_efficiency: bool) -> Dict[st
     """
     average_affinity_dict = {}
     for gen_folder in os.listdir(infolder):
-        if os.path.isdir(os.path.join(infolder, gen_folder)):
-            gen_folder_name = infolder + os.sep + gen_folder + os.sep
-            ranked_file = glob.glob(f"{gen_folder_name}*_ranked.smi")
+        if not os.path.isdir(os.path.join(infolder, gen_folder)):
+            continue
 
-            for rank_file in ranked_file:
-                # write as a tab delineated .smi file
-                with open(rank_file, "r") as f:
-                    gen_affinity_sum = 0.0
-                    num_lines_counter = 0.0
-                    for line in f:
-                        line = line.replace("\n", "")
-                        parts = line.split(
-                            "\t"
-                        )  # split line into parts separated by 4-spaces
+        if not gen_folder.startswith("generation_"):
+            continue
 
-                        choice_list = [parts[i] for i in range(len(parts))]
+        gen_folder_name = infolder + os.sep + gen_folder + os.sep
 
-                        docking_score = float(choice_list[2])
-                        num_heavy_atoms = Lipinski.HeavyAtomCount(Chem.MolFromSmiles(choice_list[0], sanitize=False))
-                        ligand_efficiency_value = docking_score / num_heavy_atoms
+        ranked_cmpds = load_rank_file(gen_folder_name)
 
-                        gen_affinity_sum = gen_affinity_sum + docking_score \
-                            if not ligand_efficiency \
-                            else gen_affinity_sum + ligand_efficiency_value
-                        num_lines_counter = num_lines_counter + 1.0
+        gen_affinity_sum = 0.0
+        num_lines_counter = 0.0
+        for cmpd in ranked_cmpds:
+            docking_score = cmpd.docking_score
+            num_heavy_atoms = Lipinski.HeavyAtomCount(Chem.MolFromSmiles(cmpd.smiles, sanitize=False))
+            ligand_efficiency_value = docking_score / num_heavy_atoms
 
-                gen_affinity_average = gen_affinity_sum / num_lines_counter
+            gen_affinity_sum = gen_affinity_sum + docking_score \
+                if not ligand_efficiency \
+                else gen_affinity_sum + ligand_efficiency_value
+            num_lines_counter = num_lines_counter + 1.0
 
-                gen_num = os.path.basename(rank_file).split("_")[1]
-                gen_name = f"generation_{gen_num}"
-                average_affinity_dict[gen_name] = gen_affinity_average
+        gen_affinity_average = gen_affinity_sum / num_lines_counter
+
+        gen_num = get_gen_number_from_folder_name(gen_folder_name)
+        gen_name = f"generation_{gen_num}"
+        average_affinity_dict[gen_name] = gen_affinity_average
+
+            # TODO: Several of these old versions account for multiple ranked
+            # files per generation. Does this actually happen? Good to check
+            # with Cesar.
+
+            # for rank_file in ranked_file:
+            #     # write as a tab delineated .smi file
+            #     with open(rank_file, "r") as f:
+            #         gen_affinity_sum = 0.0
+            #         num_lines_counter = 0.0
+            #         for line in f:
+            #             line = line.replace("\n", "")
+            #             parts = line.split(
+            #                 "\t"
+            #             )  # split line into parts separated by 4-spaces
+
+            #             choice_list = [parts[i] for i in range(len(parts))]
+
+            #             docking_score = float(choice_list[2])
+            #             num_heavy_atoms = Lipinski.HeavyAtomCount(Chem.MolFromSmiles(choice_list[0], sanitize=False))
+            #             ligand_efficiency_value = docking_score / num_heavy_atoms
+
+            #             gen_affinity_sum = gen_affinity_sum + docking_score \
+            #                 if not ligand_efficiency \
+            #                 else gen_affinity_sum + ligand_efficiency_value
+            #             num_lines_counter = num_lines_counter + 1.0
+
+            #     gen_affinity_average = gen_affinity_sum / num_lines_counter
+
+            #     gen_num = os.path.basename(rank_file).split("_")[1]
+            #     gen_name = f"generation_{gen_num}"
+            #     average_affinity_dict[gen_name] = gen_affinity_average
 
     print_gens(average_affinity_dict)
+
     return average_affinity_dict
 
 
@@ -526,47 +595,77 @@ def get_average_top_score_per_gen(infolder: str, top_score_per_gen: int, ligand_
     average_affinity_dict = {}
 
     for gen_folder in os.listdir(infolder):
-        if os.path.isdir(os.path.join(infolder, gen_folder)):
-            gen_folder_name = infolder + os.sep + gen_folder + os.sep
-            ranked_file = glob.glob(f"{gen_folder_name}*_ranked.smi")
+        if not os.path.isdir(os.path.join(infolder, gen_folder)):
+            continue
 
-            for rank_file in ranked_file:
-                # Check number of lines
-                num_lines = 0
-                with open(rank_file, "r") as rf:
-                    for _ in rf:
-                        num_lines = num_lines + 1
+        if not gen_folder.startswith("generation_"):
+            continue
 
-                if num_lines >= top_score_per_gen:
-                    # read as a tab delineated .smi file
-                    with open(rank_file, "r") as f:
-                        gen_affinity_sum = 0.0
+        gen_folder_name = infolder + os.sep + gen_folder + os.sep
+        ranked_cmpds = load_rank_file(gen_folder_name)
+        gen_num = get_gen_number_from_folder_name(gen_folder_name)
+        num_lines = len(ranked_cmpds)
 
-                        for i, line in enumerate(f.readlines()):
-                            if i >= top_score_per_gen:
-                                break
-                            line = line.replace("\n", "")
-                            parts = line.split(
-                                "\t"
-                            )  # split line into parts separated by 4-spaces
+        if num_lines < top_score_per_gen:
+            # If there are not enough lines, we will skip this generation
+            gen_name = f"generation_{gen_num}"
+            average_affinity_dict[gen_name] = "N/A"
+            continue
 
-                            choice_list = [parts[j] for j in range(len(parts))]
-                            gen_affinity_sum = gen_affinity_sum + float(choice_list[2]) \
-                                if not ligand_efficiency \
-                                else gen_affinity_sum + (float(choice_list[2]) /
-                                                         Lipinski.HeavyAtomCount(
-                                                             Chem.MolFromSmiles(choice_list[0], sanitize=False)))
+        gen_affinity_sum = 0.0
 
-                        gen_affinity_average = gen_affinity_sum / top_score_per_gen
+        for cmpd in ranked_cmpds:
+            gen_affinity_sum = gen_affinity_sum + cmpd.docking_score \
+                if not ligand_efficiency \
+                else gen_affinity_sum + (cmpd.docking_score /
+                                            Lipinski.HeavyAtomCount(
+                                                Chem.MolFromSmiles(cmpd.smiles, sanitize=False)))
 
-                        gen_num = os.path.basename(rank_file).split("_")[1]
-                        gen_name = f"generation_{gen_num}"
-                        average_affinity_dict[gen_name] = gen_affinity_average
+        gen_affinity_average = gen_affinity_sum / top_score_per_gen
 
-                else:
-                    gen_num = os.path.basename(rank_file).split("_")[1]
-                    gen_name = f"generation_{gen_num}"
-                    average_affinity_dict[gen_name] = "N/A"
+        gen_name = f"generation_{gen_num}"
+        average_affinity_dict[gen_name] = gen_affinity_average
+
+        # gen_folder_name = infolder + os.sep + gen_folder + os.sep
+        # ranked_file = glob.glob(f"{gen_folder_name}*_ranked.smi")
+
+        # for rank_file in ranked_file:
+        #     # Check number of lines
+        #     num_lines = 0
+        #     with open(rank_file, "r") as rf:
+        #         for _ in rf:
+        #             num_lines = num_lines + 1
+
+        #     if num_lines >= top_score_per_gen:
+        #         # read as a tab delineated .smi file
+        #         with open(rank_file, "r") as f:
+        #             gen_affinity_sum = 0.0
+
+        #             for i, line in enumerate(f.readlines()):
+        #                 if i >= top_score_per_gen:
+        #                     break
+        #                 line = line.replace("\n", "")
+        #                 parts = line.split(
+        #                     "\t"
+        #                 )  # split line into parts separated by 4-spaces
+
+        #                 choice_list = [parts[j] for j in range(len(parts))]
+        #                 gen_affinity_sum = gen_affinity_sum + float(choice_list[2]) \
+        #                     if not ligand_efficiency \
+        #                     else gen_affinity_sum + (float(choice_list[2]) /
+        #                                                 Lipinski.HeavyAtomCount(
+        #                                                     Chem.MolFromSmiles(choice_list[0], sanitize=False)))
+
+        #             gen_affinity_average = gen_affinity_sum / top_score_per_gen
+
+        #             gen_num = os.path.basename(rank_file).split("_")[1]
+        #             gen_name = f"generation_{gen_num}"
+        #             average_affinity_dict[gen_name] = gen_affinity_average
+
+        #     else:
+        #         gen_num = os.path.basename(rank_file).split("_")[1]
+        #         gen_name = f"generation_{gen_num}"
+        #         average_affinity_dict[gen_name] = "N/A"
 
     print_gens(average_affinity_dict)
     return average_affinity_dict

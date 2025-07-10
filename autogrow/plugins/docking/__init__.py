@@ -100,6 +100,10 @@ class DockingPluginManager(PluginManagerBase):
                     "DOCKING",
                     f"{post_docked_cmpd.smiles} docked with score {post_docked_cmpd.docking_score: .2f}",
                 )
+
+                # Initially, assume the fitness score is the docking score.
+                # Rescoring plugins may redefine fitness_score later.
+                post_docked_cmpd.fitness_score = post_docked_cmpd.docking_score
             except:
                 log_debug(
                     f"Docked molecule {post_docked_cmpd.smiles} has 'docking_score' attribute as None (Null)"

@@ -160,7 +160,7 @@ class RouletteSelector(SelectorBase):
             # smaller the number)
             adjusted = [(x ** -2) for x in weight_scores]
 
-        elif ScoreType.DOCKING:
+        elif ScoreType.FITNESS:
             weight_scores = [
                 x.docking_score for x in predock_cmpds if x.docking_score is not None
             ]
