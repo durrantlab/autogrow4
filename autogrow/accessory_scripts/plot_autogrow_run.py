@@ -516,24 +516,26 @@ def get_average_score_per_gen(infolder: str, ligand_efficiency: bool) -> Dict[st
         gen_folder_name = infolder + os.sep + gen_folder + os.sep
 
         ranked_cmpds = load_rank_file(gen_folder_name)
+        # Filter for compounds that have a docking score
+        ranked_cmpds = [c for c in ranked_cmpds if c.docking_score is not None]
 
-        gen_affinity_sum = 0.0
-        num_lines_counter = 0.0
-        for cmpd in ranked_cmpds:
-            docking_score = cmpd.docking_score
-            num_heavy_atoms = Lipinski.HeavyAtomCount(Chem.MolFromSmiles(cmpd.smiles, sanitize=False))
-            ligand_efficiency_value = docking_score / num_heavy_atoms
+HERE
 
-            gen_affinity_sum = gen_affinity_sum + docking_score \
-                if not ligand_efficiency \
-                else gen_affinity_sum + ligand_efficiency_value
-            num_lines_counter = num_lines_counter + 1.0
-
-        gen_affinity_average = gen_affinity_sum / num_lines_counter
-
-        gen_num = get_gen_number_from_folder_name(gen_folder_name)
-        gen_name = f"generation_{gen_num}"
-        average_affinity_dict[gen_name] = gen_affinity_average
+        if len(ranked_cmpds) > 0:
+            gen_affinity_sum = 0.0
+            for cmpd in ranked_cmpds:
+                docking_score = cmpd.docking_score
+                num_heavy_atoms = Lipinski.HeavyAtomCount(
+                    Chem.MolFromSmiles(cmpd.smiles, sanitize=False)
+                )
+                ligand_efficiency_value = docking_score / num_heavy_atoms
+                gen_affinity_sum += (
+                    ligand_efficiency_value if ligand_efficiency else docking_score
+                )
+            gen_affinity_average = gen_affinity_sum / len(ranked_cmpds)
+            gen_num = get_gen_number_from_folder_name(gen_folder_name)
+            gen_name = f"generation_{gen_num}"
+            average_affinity_dict[gen_name] = gen_affinity_average
 
             # TODO: Several of these old versions account for multiple ranked
             # files per generation. Does this actually happen? Good to check
@@ -614,12 +616,10 @@ def get_average_top_score_per_gen(infolder: str, top_score_per_gen: int, ligand_
 
         gen_affinity_sum = 0.0
 
-        for cmpd in ranked_cmpds:
-            gen_affinity_sum = gen_affinity_sum + cmpd.docking_score \
-                if not ligand_efficiency \
-                else gen_affinity_sum + (cmpd.docking_score /
-                                            Lipinski.HeavyAtomCount(
-                                                Chem.MolFromSmiles(cmpd.smiles, sanitize=False)))
+
+        for cmpd in ranked_cmpds[:top_score_per_gen]:
+            lig_efficiency_val = (cmpd.docking_score / Lipinski.HeavyAtomCount(Chem.MolFromSmiles(cmpd.smiles, sanitize=False)))
+            gen_affinity_sum += (lig_efficiency_val if ligand_efficiency else cmpd.docking_score)
 
         gen_affinity_average = gen_affinity_sum / top_score_per_gen
 
