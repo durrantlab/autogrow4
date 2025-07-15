@@ -1,10 +1,11 @@
-from abc import abstractmethod, ABC
-from typing import List, cast
+from abc import abstractmethod
+from typing import List, cast, Type
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
 from autogrow.types import Compound
 from rdkit import Chem  # type: ignore
 from rdkit.Chem.MolStandardize import rdMolStandardize  # type: ignore
 from autogrow.plugins.plugin_base import PluginBase
+from autogrow.utils.logging import log_warning
 
 
 class PoseFilterBase(PluginBase):
@@ -53,6 +54,12 @@ class PoseFilterBase(PluginBase):
 
 
 class PoseFilterPluginManager(PluginManagerBase):
+    """Manages and executes interaction-based filter plugins in the autogrow framework."""
+
+    def __init__(self, plugin_base_class: Type[PluginBase]):
+        self.setup_filter_logger_file = True
+        super().__init__(plugin_base_class)
+
     def execute(self, **kwargs) -> List:
         """
         Run the plugin with provided arguments.
@@ -92,6 +99,7 @@ class PoseFilterPluginManager(PluginManagerBase):
             fails any filters.
         """
         r = Chem.SDMolSupplier(docked_cmpd.sdf_path, removeHs=False)
+        docked_cmpd_mol = None
         for lig in r:
             docked_cmpd_mol = lig
             break
@@ -106,7 +114,8 @@ class PoseFilterPluginManager(PluginManagerBase):
             if not filter_function(receptor=receptor, docked_cmpd=docked_cmpd_mol,
                                    docking_plugin_manager_params=docking_plugin_manager_params):
                 filters_failed = filters_failed + 1
-                print(f"Failed {plugin_name} filter: {docked_cmpd.smiles}")
+                log_warning(f"Failed {plugin_name} filter: {docked_cmpd.smiles}")
+                self.filter_logger_file.info(f"Failed {plugin_name} filter: {docked_cmpd.smiles}")
 
         if filters_failed == 0:
             return True
