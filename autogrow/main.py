@@ -140,7 +140,7 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
             log_info("Writing partial summary files")
             with LogLevel():
                 html_summary = generate_summary_html(params["output_directory"])
-                summary_tsv, summary_sdf = generate_summary_txt(params["output_directory"], not bool(params["LigandEfficiency"]))
+                summary_tsv, summary_sdf = generate_summary_txt(params["output_directory"])
 
             log_info(f"Generating graphics to interpret results until generation {gen_num}.")
             graphic_output_dir = f"{params['output_directory']}graphics{os.sep}generation_{gen_num}{os.sep}"
@@ -160,7 +160,7 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
     log_info("Writing summary files")
     with LogLevel():
         generate_summary_html(params["output_directory"])
-        generate_summary_txt(params["output_directory"], not bool(params["LigandEfficiency"]))
+        generate_summary_txt(params["output_directory"])
 
     log_info("Run time")
     with LogLevel():
