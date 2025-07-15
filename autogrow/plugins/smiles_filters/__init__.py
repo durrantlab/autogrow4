@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import Any, List, Optional, cast
+from typing import Any, List, Optional, cast, Type
 
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
 from autogrow.types import Compound
@@ -97,7 +97,11 @@ class SmilesFilterBase(PluginBase):
 
 
 class SmilesFilterPluginManager(PluginManagerBase):
-    """Manages and executes filter plugins in the autogrow framework."""
+    """Manages and executes SMILES-based filter plugins in the autogrow framework."""
+
+    def __init__(self, plugin_base_class: Type[PluginBase]):
+        self.setup_filter_logger_file = True
+        super().__init__(plugin_base_class)
 
     def execute(self, **kwargs) -> List:
         """
@@ -147,6 +151,7 @@ class SmilesFilterPluginManager(PluginManagerBase):
             if not filter_function(cmpd=cmpd):
                 filters_failed = filters_failed + 1
                 log_warning(f"Failed {plugin_name} filter: {cmpd.smiles}")
+                self.filter_logger_file.info(f"Failed {plugin_name} filter: {cmpd.smiles}")
 
         if filters_failed == 0:
             return True

@@ -72,6 +72,7 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
 
     # Setup all plugin managers
     plugin_managers.setup_plugin_managers(params)
+    managers_dict = plugin_managers.get_managers_dict()
 
     # Now toolkit should be initialized
     chemtoolkit = plugin_managers.ChemToolkit
@@ -129,6 +130,9 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
 
         log_info(f"Creating generation {gen_num}")
         with LogLevel():
+            for manager in managers_dict.values():
+                manager.create_log_file(params, gen_num)
+
             populate_generation(
                 params, gen_num, cur_gen_dir, smiles_already_generated
             )
