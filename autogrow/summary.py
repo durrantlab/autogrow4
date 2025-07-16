@@ -37,6 +37,7 @@ def generate_summary_html(output_dir: str):
                         "id": ranked_cmpd.id,
                         "docking_score": ranked_cmpd.docking_score,
                         "ligand_efficiency": ranked_cmpd.get_ligand_efficiency(),
+                        "fitness_score": ranked_cmpd.fitness_score,
                     }
                 )
 
@@ -339,7 +340,7 @@ def generate_summary_html(output_dir: str):
             }});
             
             const topCompounds = generationData
-                .sort((a, b) => a.docking_score - b.docking_score)
+                .sort((a, b) => a.fitness_score - b.fitness_score)
                 .slice(0, topN);
 
             const tableHtml = topCompounds.map((compound, index) => `
@@ -389,7 +390,7 @@ def generate_summary_html(output_dir: str):
     return output_file
 
 
-def generate_summary_txt(output_dir: str, order_by_docking: bool):
+def generate_summary_txt(output_dir: str):
     """Generate text-based summary of best compounds across all generations.
     
     Creates a ranked summary file containing the best compounds from all generations,
@@ -435,6 +436,7 @@ def generate_summary_txt(output_dir: str, order_by_docking: bool):
                 "docking_score": cmpd.docking_score,
                 "diversity_score": cmpd.diversity_score,
                 "ligand_efficiency": cmpd.get_ligand_efficiency(),
+                "fitness_score": cmpd.fitness_score,
                 "sdf_path": cmpd.sdf_path,
                 "generation": os.path.basename(gen_dir),
             }
@@ -466,11 +468,8 @@ def generate_summary_txt(output_dir: str, order_by_docking: bool):
     log_debug(f"Compounds with SDF path: {compounds_with_sdf}")
     log_debug(f"Compounds with valid SDF: {compounds_with_valid_sdf}")
 
-    # Sort by docking score
-    if order_by_docking:
-        all_compounds.sort(key=lambda x: x["docking_score"])
-    else:
-        all_compounds.sort(key=lambda x: x["ligand_efficiency"])
+    # Sort by fitness score
+    all_compounds.sort(key=lambda x: x["fitness_score"])
 
     # Create summary files
     summary_tsv = os.path.join(output_dir, "summary_ranked.tsv")
@@ -519,6 +518,9 @@ def generate_summary_txt(output_dir: str, order_by_docking: bool):
                                 outfile.write(f">  <ID>\n{compound['id']}\n\n")
                                 outfile.write(
                                     f">  <Docking_Score>\n{compound['docking_score']}\n\n"
+                                )
+                                outfile.write(
+                                    f">  <Ligand_Efficiency>\n{compound['ligand_efficiency']}\n\n"
                                 )
                                 outfile.write(
                                     f">  <Diversity_Score>\n{compound['diversity_score']}\n\n"
