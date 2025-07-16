@@ -28,6 +28,10 @@ class DeepFragFilterBase(PluginBase):
 
     apply_on_crossover = False
     fps_fragment_cache = {}
+    filter_logger_file = None
+
+    def set_log_file(self, filter_logger_file):
+        self.filter_logger_file = filter_logger_file
 
     def run(self, **kwargs) -> List[Compound]:
         """
@@ -52,12 +56,13 @@ class DeepFragFilterBase(PluginBase):
             )
 
             final_compound_list = []
-            passed_filter = True
             for compound in compounds:
                 log_info(
                     f"Processing compound {compound.id} with smiles string {compound.smiles}"
                 )
                 with LogLevel():
+                    passed_filter = True
+                    similarity_str = None
                     if len(compound.parent_3D_mols) == 1:
                         mcs_mol, _, fragments = self.__find_mcs_and_fragments(compound.parent_3D_mols[0], Chem.MolFromSmiles(compound.smiles))
                         similarity = self.__compute_cosine_similarity(receptor, mcs_mol, fragments)
@@ -74,15 +79,17 @@ class DeepFragFilterBase(PluginBase):
                     compound.mol_3D = None
                     compound.parent_3D_mols = None
 
-                    if passed_filter:
-                        log_info(
-                            f"Docked molecule {compound.id} with smiles string {compound.smiles} passed the similarity criterion using DeepFrag: {similarity_str}"
-                        )
-                        final_compound_list.append(compound)
-                    else:
-                        log_info(
-                            f"Docked molecule {compound.id} with smiles string {compound.smiles} did not fulfill with the similarity criterion using DeepFrag: {similarity_str}"
-                        )
+                    # If False means that this filter is not applied on crossover
+                    if similarity_str is not None:
+                        if passed_filter:
+                            log_info(
+                                f"Docked molecule {compound.id} with smiles string {compound.smiles} passed the similarity criterion using DeepFrag: {similarity_str}"
+                            )
+                            final_compound_list.append(compound)
+                        else:
+                            mesg = f"Docked molecule {compound.id} with smiles string {compound.smiles} did not fulfill with the similarity criterion using DeepFrag: {similarity_str}"
+                            log_info(mesg)
+                            self.filter_logger_file.info(mesg)
 
         return final_compound_list
 
