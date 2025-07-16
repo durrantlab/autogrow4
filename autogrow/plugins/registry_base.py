@@ -1,7 +1,7 @@
-from dataclasses import dataclass
 from typing import Dict, List, Optional, Type, Tuple, Any
 from autogrow.plugins.plugin_base import PluginBase
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
+
 
 class PluginManagerRegistry:
     """Centralized registry for all plugin managers"""
@@ -9,6 +9,9 @@ class PluginManagerRegistry:
     def __init__(self):
         self._managers: Dict[str, Optional[PluginManagerBase]] = {}
         self._initialized = False
+
+    def get_managers_dict(self):
+        return self._managers
 
     def initialize(self):
         """Initialize the registry if not already done"""
@@ -61,6 +64,7 @@ class PluginManagerRegistry:
             manager_class(base_class)
             for _, manager_class, base_class in cls.get_plugin_types()
         ]
+
 
 # Create the global instance
 plugin_managers = PluginManagerRegistry()

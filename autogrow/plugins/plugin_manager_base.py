@@ -24,7 +24,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional, Type, TYPE_CHECKING
 from autogrow.config.argument_vars import register_argparse_group
 from autogrow.plugins.plugin_base import PluginBase
-
+import logging
 from autogrow.utils.caching import CacheManager
 
 if TYPE_CHECKING:
@@ -47,6 +47,9 @@ class PluginManagerBase(ABC):
             plugins.
     """
 
+    params = None
+    filter_logger_file = None
+    setup_filter_logger_file = False
     plugin_base_class: Optional[Type[PluginBase]] = None  # Class variable for the base plugin class
 
     def __init__(self, plugin_base_class: Type[PluginBase]):
@@ -61,6 +64,13 @@ class PluginManagerBase(ABC):
         self.__class__.plugin_base_class = plugin_base_class
         # Load plugins but don't register arguments
         self.plugins = self.load_plugins()
+        self.params = None
+        self.filter_logger_file = None
+        self.plugin_base_class = None
+
+    def create_log_file(self, params: dict, gen_num: int) -> None:
+        if self.setup_filter_logger_file and len(self.plugins) > 0:
+            self.create_filter_logger_file(params['output_directory'], str(gen_num) + "_" + type(self).__name__ + ".log")
 
     @classmethod
     def register_plugin_arguments(cls) -> None:
@@ -296,6 +306,17 @@ class PluginManagerBase(ABC):
         # Selects which plugin(s) to run and runs them. Defiend on child
         # classes.
         pass
+
+    # Function to create a logger
+    def create_filter_logger_file(self, working_dir, name):
+        os.makedirs(f"{working_dir}{os.sep}filter_loggers", exist_ok=True)
+        self.filter_logger_file = logging.getLogger(name)
+        self.filter_logger_file.setLevel(logging.DEBUG)
+        handler = logging.FileHandler(f"{working_dir}{os.sep}filter_loggers{os.sep}{name}")
+        # formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        # handler.setFormatter(formatter)
+        self.filter_logger_file.addHandler(handler)
+        return self.filter_logger_file
 
     # @abstractmethod
     # def load_from_cache(self, gen_dir: str) -> Optional[Any]:
