@@ -33,6 +33,7 @@ rdkit.RDLogger.DisableLog("rdApp.*")
 
 import support_scripts.Multiprocess as mp
 import support_scripts.mol_object_handling as MOH
+import gzip
 
 
 class SmilesClickChem:
@@ -440,8 +441,8 @@ class SmilesClickChem:
         elif os.path.isdir(complementary_mols) is False:
             raise Exception(
                 "complementary_mols is not a directory. It must be a \
-                    directory with .smi files containing SMILES specified by \
-                    functional groups.These .smi files must be named the same \
+                    directory with .smi.gz files containing SMILES specified by \
+                    functional groups. These .smi.gz files must be named the same \
                     as the files in the complementary_mols."
             )
 
@@ -452,20 +453,19 @@ class SmilesClickChem:
         missing_smi_files = []
         complementary_mols_dict = {}
         for group in functional_groups:
-            filepath = f"{complementary_mols}{os.sep}{group}.smi"
-
+            filepath = f"{complementary_mols}{os.sep}{group}.smi.gz"
             if os.path.isfile(filepath) is True:
                 complementary_mols_dict[group] = filepath
 
             else:
                 missing_smi_files.append(filepath)
                 print(
-                    f"Could not find the following .smi file for complementary  molecules for Mutation: {filepath}"
+                    f"Could not find the following .smi.gz file for complementary  molecules for Mutation: {filepath}"
                 )
 
         if missing_smi_files:
             raise Exception(
-                "The following .smi file for complementary molecules "
+                "The following .smi.gz file for complementary molecules "
                 + "for Mutation is missing: ",
                 missing_smi_files,
             )
@@ -511,7 +511,10 @@ def get_usable_format(infile):
         print(f"\nFile of Source compounds does not exist: {infile}\n")
         raise Exception("File of Source compounds does not exist")
 
-    with open(infile) as smiles_file:
+    open_func = gzip.open if infile.endswith(".gz") else open
+    mode = "rt" if infile.endswith(".gz") else "r"
+
+    with open_func(infile, mode) as smiles_file:
         for line in smiles_file:
             line = line.replace("\n", "")
             parts = line.split("\t")  # split line into parts separated by 4-spaces
