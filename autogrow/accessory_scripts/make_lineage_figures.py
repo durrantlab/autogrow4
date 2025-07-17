@@ -23,6 +23,7 @@ import rdkit  # type: ignore
 import rdkit.Chem as Chem  # type: ignore
 from rdkit.Chem import Draw, AllChem  # type: ignore
 from PIL import Image  # type: ignore
+import gzip
 
 # Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog("rdApp.*")
@@ -93,7 +94,10 @@ def get_usable_format(infile: str) -> List[List[str]]:
         print(f"\nFile of Source compounds does not exist: {infile}\n")
         raise Exception("File of Source compounds does not exist")
 
-    with open(infile) as smiles_file:
+    open_func = gzip.open if infile.endswith(".gz") else open
+    mode = "rt" if infile.endswith(".gz") else "r"
+
+    with open_func(infile, mode) as smiles_file:
         for line in smiles_file:
             line = line.replace("\n", "")
             parts = line.split("\t")  # split line into parts separated by 4-spaces
@@ -553,12 +557,11 @@ def make_comp_mol_dict(params: Dict[str, Any]) -> None:
     """
     # Add complementary mols from reactions
     # Only valid for autoclickchem rxns
-
-    comp_smi_list = glob.glob(params["complementary_mol_directory"] + os.sep + "*.smi")
+    comp_smi_list = glob.glob(params["complementary_mol_directory"] + os.sep + "*.smi.gz")
     if not comp_smi_list:
         raise Exception(
             (
-                "No .smi files found for complementary_mol_directory.\n"
+                "No .smi.gz files found for complementary_mol_directory.\n"
                 + f'please check: {params["complementary_mol_directory"]}'
             )
         )
@@ -988,18 +991,17 @@ def process_inputs(inputs: Dict[str, Any]) -> Dict[str, Any]:
                 provided path could not be found "
                 + ":\n\t{}".format(inputs["complementary_mol_directory"])
             )
-
-        if len(glob.glob(inputs["complementary_mol_directory"] + "*.smi")) == 0:
+        if len(glob.glob(inputs["complementary_mol_directory"] + "*.smi.gz")) == 0:
             sub_dir = (
                 inputs["complementary_mol_directory"]
                 + os.sep
                 + "complementary_mols"
                 + os.sep
             )
-            if len(glob.glob(sub_dir + "*.smi")) == 0:
+            if len(glob.glob(sub_dir + "*.smi.gz")) == 0:
                 raise Exception(
                     "Please provide path to complementary_mol_directory. "
-                    + "provided path had no .smi files: "
+                    + "provided path had no .smi.gz files: "
                     + "\n\t{}".format(inputs["complementary_mol_directory"])
                 )
             # They provided 1 directory up...

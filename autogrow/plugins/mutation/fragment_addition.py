@@ -29,6 +29,7 @@ import glob
 
 import autogrow.utils.mol_object_handling as MOH
 from autogrow.plugins.registry_base import plugin_managers
+import gzip
 
 
 class FragmentAddition(MutationBase):
@@ -375,7 +376,7 @@ class FragmentAddition(MutationBase):
           keys are functional group names and values are lists of [SMILES, ID]
           pairs.
         Raises:
-         Exception: If any required .smi files are missing in the
+         Exception: If any required .smi.gz files are missing in the
           complementary_mols directory.
         """
         min_mw = self.params.get("min_fragment_mol_weight")
@@ -430,30 +431,27 @@ class FragmentAddition(MutationBase):
         chemtoolkit = plugin_managers.ChemToolkit.toolkit
 
         for group in functional_groups:
-            filepath = f"{complementary_mols_dir}{os.sep}{group}.smi"
+            filepath = f"{complementary_mols_dir}{os.sep}{group}.smi.gz"
             if not os.path.isfile(filepath):
                 missing_smi_files.append(filepath)
                 log_warning(
-                    f"Could not find the following .smi file for complementary molecules for Mutation: {filepath}"
+                    f"Could not find the following .smi.gz file for complementary molecules for Mutation: {filepath}"
                 )
                 continue
 
             filtered_mols = []
-            with open(filepath, "r") as f:
+            with gzip.open(filepath, "rt") as f:
                 for line in f:
                     parts = line.strip().split()
-                    if len(parts) < 2:
+                    if len(parts) < 3:
                         continue
-                    smiles, zinc_id = parts[0], parts[1]
+                    smiles, zinc_id, mw = parts[0], parts[1], float(parts[2])
 
                     if perform_mw_filter:
-                        mol = chemtoolkit.mol_from_smiles(smiles, sanitize=True)
-                        if mol:
-                            mw = chemtoolkit.descriptors_exact_mol_wt(mol)
-                            passes_min = (min_mw is None) or (mw >= min_mw)
-                            passes_max = (max_mw is None) or (mw <= max_mw)
-                            if passes_min and passes_max:
-                                filtered_mols.append([smiles, zinc_id])
+                        passes_min = (min_mw is None) or (mw >= min_mw)
+                        passes_max = (max_mw is None) or (mw <= max_mw)
+                        if passes_min and passes_max:
+                            filtered_mols.append([smiles, zinc_id])
                         # If mol is None, it's skipped, which is fine.
                     else:
                         # No filtering, just add the molecule
@@ -468,7 +466,7 @@ class FragmentAddition(MutationBase):
 
         if missing_smi_files:
             raise Exception(
-                "The following .smi file for complementary molecules "
+                "The following .smi.gz file for complementary molecules "
                 + "for Mutation is missing: ",
                 missing_smi_files,
             )
