@@ -445,17 +445,17 @@ class FragmentAddition(MutationBase):
                     parts = line.strip().split()
                     if len(parts) < 3:
                         continue
-                    smiles, zinc_id, mw = parts[0], parts[1], float(parts[2])
+                    smiles, mol_id, mw = parts[0], f"CID-{parts[1]}", float(parts[2])
 
                     if perform_mw_filter:
                         passes_min = (min_mw is None) or (mw >= min_mw)
                         passes_max = (max_mw is None) or (mw <= max_mw)
                         if passes_min and passes_max:
-                            filtered_mols.append([smiles, zinc_id])
+                            filtered_mols.append([smiles, mol_id])
                         # If mol is None, it's skipped, which is fine.
                     else:
                         # No filtering, just add the molecule
-                        filtered_mols.append([smiles, zinc_id])
+                        filtered_mols.append([smiles, mol_id])
 
             if perform_mw_filter and not filtered_mols:
                 log_warning(
