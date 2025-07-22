@@ -10,7 +10,6 @@ from rdkit.Chem.Draw import rdMolDraw2D
 import os
 import sys
 
-
 # Assume reactions.json exists and is in the correct format
 with open("reactions.json", "r") as file:
     contents = file.read()
@@ -68,6 +67,7 @@ def clean_up_smiles(smiles: str) -> Optional[str]:
     smiles = smiles.replace("[CH]", "C")
     smiles = smiles.replace("[CH2-]", "C")
     smiles = smiles.replace("[C]", "C")
+    smiles = smiles.replace("[c]", "c")
     smiles = smiles.replace("[OH-]", "O")
     smiles = smiles.replace("[OH+]", "O")
     smiles = smiles.replace("[IH]", "I")  # Why this?
@@ -300,7 +300,7 @@ def save_reaction_visualization(reaction_name: str, forward_reactants: List[str]
                                   subImgSize=(200, 200), legends=legends, useSVG=False)
         # Save the PIL Image directly
         img.save(png_filename, "PNG")
-        print(f"Saved reaction visualization: {png_filename}")
+        # print(f"Saved reaction visualization: {png_filename}")
     except Exception as e:
         print(f"Failed to save PNG visualization {png_filename}: {e}")
         # Fallback to SVG if PNG fails

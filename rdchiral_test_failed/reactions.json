@@ -610,7 +610,7 @@
         "reaction_string": "[*:1]C(=O)-[O;R0]-C(=O)[*].[#7;$([#7;H3+,H2R0X1]-[#6]),$([#7&!H3;H1R1X3](:,-[#6R1]):,-[#6R1,#7R1]),$([#7&!H3;H2]-[#6]),$([#7&!H3;H0R1X2](:,-[#6R1;X3H1]):,-[#6R1X3H1]),$([#7&!H3;H0R1X2](:,-[#6R1;X3]):,-[#7R1X3]),$([#7&!H3;H1R0X3](-[#6])-[#6R0]):2]>>[*:1]C(=O)-[#7+0:2]",
         "TODO_remove_in_time": "[*:1]C(=O)-[#7+0:2]>>[*:1]C(=O)-[O;R0]-C(=O)C.[#7;$([#7;H3+,H2R0X1]-[#6]),$([#7&!H3;H1R1X3](:,-[#6R1]):,-[#6R1,#7R1]),$([#7&!H3;H2]-[#6]),$([#7&!H3;H0R1X2](:,-[#6R1;X3H1]):,-[#6R1X3H1]),$([#7&!H3;H0R1X2](:,-[#6R1;X3]):,-[#7R1X3]),$([#7&!H3;H1R0X3](-[#6])-[#6R0]):2]",
         "reverse_reaction_strings": [
-            "[*:1]C(=O)-[#7:2]>>[*:1]C(=O)-O-C(=O)C.[N:2]"
+            "[*:1]C(=O)-[#7+0:2]>>[*:1]C(=O)-[O;R0]-C(=O)C.[#7;$([#7;H3+,H2R0X1]-[#6]),$([#7&!H3;H1R1X3](:,-[#6R1]):,-[#6R1,#7R1]),$([#7&!H3;H2]-[#6]),$([#7&!H3;H0R1X2](:,-[#6R1;X3H1]):,-[#6R1X3H1]),$([#7&!H3;H0R1X2](:,-[#6R1;X3]):,-[#7R1X3]),$([#7&!H3;H1R0X3](-[#6])-[#6R0]):2]"
         ],
         "RXN_NUM": 26
     },
@@ -978,7 +978,7 @@
         ],
         "RXN_NUM": 42
     },
-    "43_thiazoleSKIP": {
+    "43_thiazole": {
         "reaction_name": "43_thiazole",
         "example_rxn_product": "Cc1nc(C)c(C)s1",
         "example_rxn_reactants": [
@@ -990,25 +990,17 @@
             "thioamide_robust"
         ],
         "group_smarts": [
-            "[#6]-[C&R0](=[O&D1])-[C&H1&R0](-[#6])-[*;#17,#35,#53]",
-            "[$([N&H2]-[C]=[S&D1,O&D1]),$([N&H1]=[C]-[SH1,OH1])]"
+            "[#6]-[C&R0](=[O&D1])-[C&H1&R0](-[#6])-[*;#17,#35,#53;D1]",
+            "[N&H2]-[C]=[S&D1]"
         ],
+        "note": "This new version doesn't account for tautomer of the thioamide. Caused rdkit to fail even in forward reaction. Not worth supporting.",
         "num_reactants": 2,
-        "OLD": "[c:1]2(-[#6:6]):[n:2]:[c:3]([*:6]):[s:4][c:5]([#6:7]):2>>[#6:6]-[C;R0:1](=[OD1])-[CH1;R0:5](-[#6:7])-[*;#17,#35,#53].[$([N&H2:2]-[C:3]([*:6])=[S&D1,O&D1:4]),$([N&H1:2]=[C:3]([*:6])-[SH1,OH1:4])]",
-        "reaction_string": "[#6:6]-[C;R0:1](=[OD1])-[CH1;R0:5](-[#6:7])-[*;#17,#35,#53].[$([N&H2:2]-[C:3]([*:6])=[S&D1,O&D1:4]),$([N&H1:2]=[C:3]([*:6])-[SH1,OH1:4])]>>[c:1]2(-[#6:6]):[n:2]:[c:3]([*:6]):[s:4][c:5]([#6:7]):2",
+        "OLD": "[c:1]2(-[#6:6]):[n:2]:[c:3]([*:6]):[s:4][c:5]([#6:7]):2>>[#6:6]-[C;R0:1](=[OD1])-[CH1;R0:5](-[#6:7])-[*;#17,#35,#53;D1].[$([N&H2:2]-[C:3]([*:6])=[S&D1,O&D1:4]),$([N&H1:2]=[C:3]([*:6])-[SH1,OH1:4])]",
+        "reaction_string": "[#6:6]-[C;R0:1](=[OD1])-[CH1;R0:5](-[#6:7])-[*;#17,#35,#53;D1].[NH2:2]-[C:3]=[SD1:4]>>[c:1]2(-[#6:6]):[n:2]:[c:3]:[s:4][c:5]([#6:7]):2",
         "reverse_reaction_strings": [
-            "[c:1]2(-[#6:6]):[n:2]:[c:3]([*:8]):[s:4][c:5]([#6:7]):2>>[#6:6]-[C;R0:1](=[OD1])-[CH1;R0:5](-[#6:7])-[Cl].[N&H2:2]-[C:3]([*:8])=[S&D1:4]",
-            "[c:1]2(-[#6:6]):[n:2]:[c:3]([*:8]):[s:4][c:5]([#6:7]):2>>[#6:6]-[C;R0:1](=[OD1])-[CH1;R0:5](-[#6:7])-[Cl].[N&H2:2]-[C:3]([*:8])=[O&D1:4]",
-            "[c:1]2(-[#6:6]):[n:2]:[c:3]([*:8]):[s:4][c:5]([#6:7]):2>>[#6:6]-[C;R0:1](=[OD1])-[CH1;R0:5](-[#6:7])-[Cl].[N&H1:2]=[C:3]([*:8])-[SH1:4]",
-            "[c:1]2(-[#6:6]):[n:2]:[c:3]([*:8]):[s:4][c:5]([#6:7]):2>>[#6:6]-[C;R0:1](=[OD1])-[CH1;R0:5](-[#6:7])-[Cl].[N&H1:2]=[C:3]([*:8])-[OH1:4]",
-            "[c:1]2(-[#6:6]):[n:2]:[c:3]([*:8]):[s:4][c:5]([#6:7]):2>>[#6:6]-[C;R0:1](=[OD1])-[CH1;R0:5](-[#6:7])-[Br].[N&H2:2]-[C:3]([*:8])=[S&D1:4]",
-            "[c:1]2(-[#6:6]):[n:2]:[c:3]([*:8]):[s:4][c:5]([#6:7]):2>>[#6:6]-[C;R0:1](=[OD1])-[CH1;R0:5](-[#6:7])-[Br].[N&H2:2]-[C:3]([*:8])=[O&D1:4]",
-            "[c:1]2(-[#6:6]):[n:2]:[c:3]([*:8]):[s:4][c:5]([#6:7]):2>>[#6:6]-[C;R0:1](=[OD1])-[CH1;R0:5](-[#6:7])-[Br].[N&H1:2]=[C:3]([*:8])-[SH1:4]",
-            "[c:1]2(-[#6:6]):[n:2]:[c:3]([*:8]):[s:4][c:5]([#6:7]):2>>[#6:6]-[C;R0:1](=[OD1])-[CH1;R0:5](-[#6:7])-[Br].[N&H1:2]=[C:3]([*:8])-[OH1:4]",
-            "[c:1]2(-[#6:6]):[n:2]:[c:3]([*:8]):[s:4][c:5]([#6:7]):2>>[#6:6]-[C;R0:1](=[OD1])-[CH1;R0:5](-[#6:7])-[I].[N&H2:2]-[C:3]([*:8])=[S&D1:4]",
-            "[c:1]2(-[#6:6]):[n:2]:[c:3]([*:8]):[s:4][c:5]([#6:7]):2>>[#6:6]-[C;R0:1](=[OD1])-[CH1;R0:5](-[#6:7])-[I].[N&H2:2]-[C:3]([*:8])=[O&D1:4]",
-            "[c:1]2(-[#6:6]):[n:2]:[c:3]([*:8]):[s:4][c:5]([#6:7]):2>>[#6:6]-[C;R0:1](=[OD1])-[CH1;R0:5](-[#6:7])-[I].[N&H1:2]=[C:3]([*:8])-[SH1:4]",
-            "[c:1]2(-[#6:6]):[n:2]:[c:3]([*:8]):[s:4][c:5]([#6:7]):2>>[#6:6]-[C;R0:1](=[OD1])-[CH1;R0:5](-[#6:7])-[I].[N&H1:2]=[C:3]([*:8])-[OH1:4]"
+            "[c:1]2(-[#6:6]):[n:2]:[c:3]:[s:4][c:5]([#6:7]):2>>[#6:6]-[C;R0:1](=[OD1])-[CH1;R0:5](-[#6:7])-[#17].[NH2:2]-[C:3]=[SD1:4]",
+            "[c:1]2(-[#6:6]):[n:2]:[c:3]:[s:4][c:5]([#6:7]):2>>[#6:6]-[C;R0:1](=[OD1])-[CH1;R0:5](-[#6:7])-[#35].[NH2:2]-[C:3]=[SD1:4]",
+            "[c:1]2(-[#6:6]):[n:2]:[c:3]:[s:4][c:5]([#6:7]):2>>[#6:6]-[C;R0:1](=[OD1])-[CH1;R0:5](-[#6:7])-[#53].[NH2:2]-[C:3]=[SD1:4]"
         ],
         "RXN_NUM": 43
     },
@@ -1063,7 +1055,7 @@
         ],
         "RXN_NUM": 45
     },
-    "46_tetrazole_connect_regioisomere_1_SKIP_PROGRESS": {
+    "46_tetrazole_connect_regioisomere_1": {
         "reaction_name": "46_tetrazole_connect_regioisomere_1",
         "example_rxn_product": "CC1=NN(C)N=N1",
         "example_rxn_reactants": [
@@ -1076,36 +1068,21 @@
         ],
         "group_smarts": [
             "[C&H0&$(C-[#6])]#[N&H0]",
-            "[C&A&!$(C=O)]-[*;#17,#35,#53]"
+            "[C&A&!$(C=O)]-[*;#17,#35,#53;D1]"
         ],
         "num_reactants": 2,
-        "reaction_string": "[CH0;$(C-[#6]):1]#[NH0:2].[C;A;!$(C=O):3]-[*;#17,#35,#53]>>[C:1]1=[N:2]-N(-[C:3])-N=N-1",
+        "reaction_string": "[CH0;$(C-[#6]):1]#[NH0:2].[C;A;!$(C=O):3]-[*;#17,#35,#53;D1]>>[C:1]1=[N:2]-N(-[C:3])-N=N-1",
         "reverse_reaction_strings": [
-            "[C:1]1=[N:2]-N(-[C:3])-N=N-1>>[C:1]#N.[C:3]-[Cl]",
-            "[C:1]1=[N:2]-N(-[C:3])-N=N-1>>[C:1]#N.[C:3]-[Br]",
-            "[C:1]1=[N:2]-N(-[C:3])-N=N-1>>[C:1]#N.[C:3]-[I]",
-            "[C:3]n1nnc(-[c:1])n1>>[c:1]#N.[C:3]-[Cl]",
-            "[C:3]n1nnc(-[c:1])n1>>[c:1]#N.[C:3]-[Br]",
-            "[C:3]n1nnc(-[c:1])n1>>[c:1]#N.[C:3]-[I]",
-            "[c:1]1nnc(-[C:3])n1>>[C:1]#N.[C:3]-[Cl]",
-            "[c:1]1nnc(-[C:3])n1>>[C:1]#N.[C:3]-[Br]",
-            "[c:1]1nnc(-[C:3])n1>>[C:1]#N.[C:3]-[I]",
-            "[C:3]n1nnn(-[c:1])1>>[c:1]#N.[C:3]-[Cl]",
-            "[C:3]n1nnn(-[c:1])1>>[c:1]#N.[C:3]-[Br]",
-            "[C:3]n1nnn(-[c:1])1>>[c:1]#N.[C:3]-[I]",
-            "[c:1]1nnn(-[C:3])1>>[C:1]#N.[C:3]-[Cl]",
-            "[c:1]1nnn(-[C:3])1>>[C:1]#N.[C:3]-[Br]",
-            "[c:1]1nnn(-[C:3])1>>[C:1]#N.[C:3]-[I]",
-            "[C:3]n1nc(-[c:1])nn1>>[c:1]#N.[C:3]-[Cl]",
-            "[C:3]n1nc(-[c:1])nn1>>[c:1]#N.[C:3]-[Br]",
-            "[C:3]n1nc(-[c:1])nn1>>[c:1]#N.[C:3]-[I]",
-            "[c:1]1nc(-[C:3])nn1>>[C:1]#N.[C:3]-[Cl]",
-            "[c:1]1nc(-[C:3])nn1>>[C:1]#N.[C:3]-[Br]",
-            "[c:1]1nc(-[C:3])nn1>>[C:1]#N.[C:3]-[I]"
+            "[C:1]1=[N:2]-N(-[C:3])-N=N-1>>[CH0;$(C-[#6]):1]#[NH0:2].[C;A;!$(C=O):3]-[Cl]",
+            "[c:1]1:[n:2]:[n](-[C:3]):[n]:[n]:1>>[CH0;$(C-[#6]):1]#[NH0:2].[C;A;!$(C=O):3]-[Cl]",
+            "[C:1]1=[N:2]-N(-[C:3])-N=N-1>>[CH0;$(C-[#6]):1]#[NH0:2].[C;A;!$(C=O):3]-[Br]",
+            "[c:1]1:[n:2]:[n](-[C:3]):[n]:[n]:1>>[CH0;$(C-[#6]):1]#[NH0:2].[C;A;!$(C=O):3]-[Br]",
+            "[C:1]1=[N:2]-N(-[C:3])-N=N-1>>[CH0;$(C-[#6]):1]#[NH0:2].[C;A;!$(C=O):3]-[I]",
+            "[c:1]1:[n:2]:[n](-[C:3]):[n]:[n]:1>>[CH0;$(C-[#6]):1]#[NH0:2].[C;A;!$(C=O):3]-[I]"
         ],
         "RXN_NUM": 46
     },
-    "47_tetrazole_connect_regioisomere_2SKIP": {
+    "47_tetrazole_connect_regioisomere_2": {
         "reaction_name": "47_tetrazole_connect_regioisomere_2",
         "example_rxn_product": "CC1=NN=NN1C",
         "example_rxn_reactants": [
@@ -1118,10 +1095,18 @@
         ],
         "group_smarts": [
             "[C&H0&$(C-[#6])]#[N&H0]",
-            "[C&A&!$(C=O)]-[*;#17,#35,#53]"
+            "[C&A&!$(C=O)]-[*;#17,#35,#53;D1]"
         ],
         "num_reactants": 2,
-        "reaction_string": "[CH0;$(C-[#6]):1]#[NH0:2].[C;A;!$(C=O):3]-[*;#17,#35,#53]>>[C:1]1=[N:2]-N=N-N-1(-[C:3])",
+        "reaction_string": "[CH0;$(C-[#6]):1]#[NH0:2].[C;A;!$(C=O):3]-[*;#17,#35,#53;D1]>>[C:1]1=[N:2]-N=N-N-1(-[C:3])",
+        "reverse_reaction_strings": [
+            "[C:1]1=[N:2]-N=N-N-1(-[C:3])>>[CH0;$(C-[#6]):1]#[NH0:2].[C;A;!$(C=O):3]-[Cl]",
+            "[c:1]1:[n:2]:[n]:[n]:[n]:1(-[C:3])>>[CH0;$(C-[#6]):1]#[NH0:2].[C;A;!$(C=O):3]-[Cl]",
+            "[C:1]1=[N:2]-N=N-N-1(-[C:3])>>[CH0;$(C-[#6]):1]#[NH0:2].[C;A;!$(C=O):3]-[Br]",
+            "[c:1]1:[n:2]:[n]:[n]:[n]:1(-[C:3])>>[CH0;$(C-[#6]):1]#[NH0:2].[C;A;!$(C=O):3]-[Br]",
+            "[C:1]1=[N:2]-N=N-N-1(-[C:3])>>[CH0;$(C-[#6]):1]#[NH0:2].[C;A;!$(C=O):3]-[I]",
+            "[c:1]1:[n:2]:[n]:[n]:[n]:1(-[C:3])>>[CH0;$(C-[#6]):1]#[NH0:2].[C;A;!$(C=O):3]-[I]"
+        ],
         "RXN_NUM": 47
     },
     "48_Huisgen_Cu_catalyzed_1_4_subst": {
@@ -1234,7 +1219,7 @@
         ],
         "RXN_NUM": 51
     },
-    "52_1_2_4_triazole_carboxylic_acid_ester_SKIP_CONSIDER_PREVIOUS_VERSION_SKIP_RXN_PRODUCT_MISSING_nH": {
+    "52_1_2_4_triazole_carboxylic_acid_ester": {
         "reaction_name": "52_1_2_4_triazole_carboxylic_acid_ester",
         "example_rxn_product": "CC1=NNC(C)=N1",
         "example_rxn_reactants": [
@@ -1250,15 +1235,18 @@
             "[C&H0&$(C-[#6])&R0](=[O&D1])-[#8;H1,$(O-[C&H3]),$(O-[C&H2]-[C&H3])]"
         ],
         "num_reactants": 2,
-        "reaction_string": "[CH0;$(C-[#6]):1]#[NH0:2].[CH0;$(C-[#6]);R0:5](=[OD1])-[#8;H1,$(O-[CH3]),$(O-[CH2]-[CH3])]>>[n:2]1[c:1]nn[c:5]1",
+        "debug_prereaction": [
+            "[C&H0&$(C-[#6])&R0:1](=[O&D1])-[#8;$(O-[C&H3]),$(O-[C&H2]-[C&H3])]>>[C&H0&$(C-[#6])&R0:1](=[O&D1])-[#8;H1]"
+        ],
+        "reaction_string": "[CH0;$(C-[#6]):1]#[NH0:2].[CH0;$(C-[#6]);R0:5](=[OD1])-[#8;H1,$(O-[CH3]),$(O-[CH2]-[CH3])]>>[n:2]1[c:1]n[nH][c:5]1",
         "reverse_reaction_strings": [
             "[N:2]1-[C:1]=N-N-[C:5]=1>>[CH0;$(C-[#6]):1]#[NH0:2].[CH0;$(C-[#6]);R0:5](=[OD1])-[#8;H1,$(O-[CH3]),$(O-[CH2]-[CH3])]",
             "[n:2]1[c:1]nn[c:5]1>>[CH0;$(C-[#6]):1]#[NH0:2].[CH0;$(C-[#6]);R0:5](=[OD1])-[#8;H1,$(O-[CH3]),$(O-[CH2]-[CH3])]"
         ],
         "RXN_NUM": 52
     },
-    "53_3_nitrile_pyridine_SKIP": {
-        "reaction_name": "53_3_nitrile_pyridine_SKIP",
+    "53_3_nitrile_pyridine": {
+        "reaction_name": "53_3_nitrile_pyridine",
         "example_rxn_product": "Cc1cc(C)c(C#N)c(O)n1",
         "example_rxn_reactants": [
             "CC(=O)CC(=O)C"
@@ -1267,12 +1255,12 @@
             "beta_dicarbonyl_robust"
         ],
         "group_smarts": [
-            "[#6&!$([#6](-C=O)-C=O)]-[C&H0](=[O&D1])-[C;H1&!$(C-[*&!#6])&!$(C-C(=O)O),H2]-[C&H0&R0](=[O&D1])-[#6&!$([#6](-C=O)-C=O)]"
+            "[#6&!$([#6](-C=O)-C=O)]-[C&H0&R0](=[O&D1])-[C;H1&!$(C-[*&!#6])&!$(C-C(=O)O),H2]-[C&H0&R0](=[O&D1])-[#6&!$([#6](-C=O)-C=O)]"
         ],
         "num_reactants": 1,
-        "reaction_string": "[#6;!$([#6](-C=O)-C=O):4]-[CH0:1](=[OD1])-[C;H1&!$(C-[*;!#6])&!$(C-C(=O)O),H2:2]-[CH0;R0:3](=[OD1])-[#6;!$([#6](-C=O)-C=O):5]>>[c:1]1(-[#6:4]):[c:2]:[c:3](-[#6:5]):n:c(-O):c(-C#N):1",
+        "reaction_string": "[#6;!$([#6](-C=O)-C=O):4]-[CH0;R0:1](=[OD1])-[C;H1&!$(C-[*;!#6])&!$(C-C(=O)O),H2:2]-[CH0;R0:3](=[OD1])-[#6;!$([#6](-C=O)-C=O):5]>>[c:1]1(-[#6:4]):[c:2]:[c:3](-[#6:5]):n:c(-O):c(-C#N):1",
         "reverse_reaction_strings": [
-            "[c:1]1(-[#6:4])[c:2][c:3](-[#6:5])[n][c](-O)[c](-C#N)[c]2[c]([c]1)oc[c]2>>[#6:4]-[CH0:1](=[OD1])-[C:2]-[CH0:3](=[OD1])-[#6:5]"
+            "[c:1]1(-[#6:4]):[c:2]:[c:3](-[#6:5]):n:c(-O):c(-C#N):1>>[#6;!$([#6](-C=O)-C=O):4]-[CH0;R0:1](=[OD1])-[C;H1&!$(C-[*;!#6])&!$(C-C(=O)O),H2:2]-[CH0;R0:3](=[OD1])-[#6;!$([#6](-C=O)-C=O):5]"
         ],
         "RXN_NUM": 53
     },
@@ -1343,7 +1331,7 @@
         ],
         "RXN_NUM": 56
     },
-    "57_Paal_Knorr_pyrroleSKIP_LOSSY": {
+    "57_Paal_Knorr_pyrrole": {
         "reaction_name": "57_Paal_Knorr_pyrrole",
         "example_rxn_product": "CC1=CC=C(C)N1C",
         "example_rxn_reactants": [
@@ -1355,20 +1343,18 @@
             "primary_amine_robust"
         ],
         "group_smarts": [
-            "[#6;!R]-[C&R0](=[O&D1])-[C;H1,H2]-[C;H1,H2]-C(=[O&D1])-[#6;!R]",
+            "[#6;!R]-[C&R0](=[O&D1])-[C;H1,H2;!R]-[C;H1,H2;!R]-C(=[O&D1])-[#6;!R]",
             "[N&H2&$(N-[C,N])&!$(NC=[O,S,N])&!$(N(-,:[#6])[#6])&!$(N~N~N)]"
         ],
         "num_reactants": 2,
-        "reaction_string": "[#6;!R:5]-[C;R0:1](=[OD1])-[C;H1,H2:2]-[C;H1,H2:3]-[C:4](=[OD1])-[#6;!R:6].[NH2;$(N-[C,N]);!$(NC=[O,S,N]);!$(N([#6])[#6]);!$(N~N~N):7]>>[C:1]1(-[#6:5])=[C:2]-[C:3]=[C:4](-[#6:6])-[N:7]-1",
+        "reaction_string": "[#6;!R:5]-[C;R0:1](=[OD1])-[C;H1,H2;!R:2]([*:8])-[C;H1,H2;!R:3]([*:9])-[C:4](=[OD1])-[#6;!R:6].[NH2;$(N-[C,N]);!$(NC=[O,S,N]);!$(N([#6])[#6]);!$(N~N~N):7]>>[C:1]1(-[#6:5])=[C:2]([*:8])-[C:3]([*:9])=[C:4](-[#6:6])-[N:7]-1",
         "reverse_reaction_strings": [
-            "[c:1]1(-[#6:5])[c:2;R1][c:3;R1][c:4](-[#6:6])[n:7]1>>[#6:5]-[C;R0:1](=[OD1])-[#6:2]-[#6:3]-[C:4](=[OD1])-[#6:6].[NH2;$(N-[C,N]);!$(NC=[O,S,N]);!$(N([#6])[#6]);!$(N~N~N):7]",
-            "[C:1]1(-[#6:5])=[C:2;R1]-[C:3;R1]=[C:4](-[#6:6])-[N:7]-1>>[#6:5]-[C;R0:1](=[OD1])-[#6:2]-[#6:3]-[C:4](=[OD1])-[#6:6].[NH2;$(N-[C,N]);!$(NC=[O,S,N]);!$(N([#6])[#6]);!$(N~N~N):7]",
-            "[c:1]1(-[#6:5])[c:2;R2][c:3;R2][c:4](-[#6:6])[n:7]1>>[#6:5]-[C;R0:1](=[OD1])-[#6:2]2-[#6:3]2-[C:4](=[OD1])-[#6:6].[NH2;$(N-[C,N]);!$(NC=[O,S,N]);!$(N([#6])[#6]);!$(N~N~N):7]",
-            "[C:1]1(-[#6:5])=[C:2;R2]-[C:3;R2]=[C:4](-[#6:6])-[N:7]-1>>[#6:5]-[C;R0:1](=[OD1])-[#6:2]2-[#6:3]2-[C:4](=[OD1])-[#6:6].[NH2;$(N-[C,N]);!$(NC=[O,S,N]);!$(N([#6])[#6]);!$(N~N~N):7]"
+            "[C:1]1(-[#6:5])=[C:2]([*:8])-[C:3]([*:9])=[C:4](-[#6:6])-[N:7]-1>>[#6;!R:5]-[C;R0:1](=[OD1])-[C;H1,H2;!R:2]([*:8])-[C;H1,H2;!R:3]([*:9])-[C:4](=[OD1])-[#6;!R:6].[NH2;$(N-[C,N]);!$(NC=[O,S,N]);!$(N([#6])[#6]);!$(N~N~N):7]",
+            "[c:1]1(-[#6:5]):[c:2]([*:8]):[c:3]([*:9]):[c:4](-[#6:6]):[n:7]:1>>[#6;!R:5]-[C;R0:1](=[OD1])-[C;H1,H2;!R:2]([*:8])-[C;H1,H2;!R:3]([*:9])-[C:4](=[OD1])-[#6;!R:6].[NH2;$(N-[C,N]);!$(NC=[O,S,N]);!$(N([#6])[#6]);!$(N~N~N):7]"
         ],
         "RXN_NUM": 57
     },
-    "58_triaryl_imidazole_SKIP_~": {
+    "58_triaryl_imidazole": {
         "reaction_name": "58_triaryl_imidazole",
         "example_rxn_product": "c1ccc(C2=NC(c3ccccc3)=C(c3ccccc3)N2)cc1",
         "example_rxn_reactants": [
@@ -1380,17 +1366,22 @@
             "aryl_aldehyde_robust"
         ],
         "group_smarts": [
-            "[C&$(C-c1ccccc1)](=[O&D1])-[C&D3&$(C-c1ccccc1)]~[O;D1,H1]",
+            "[C&!R&$(C-c1ccccc1)](=[O&D1])-[C&!R&D3&$(C-c1ccccc1)]~[O;D1,H1]",
             "c-[C&H1&R0]=[O&D1]"
         ],
         "num_reactants": 2,
-        "reaction_string": "[C;$(C-c1ccccc1):1](=[OD1])-[C;D3;$(C-c1ccccc1):2]~[O;D1,H1].[CH1;$(C-c):3]=[OD1]>>[C:1]1-N=[C:3]-[NH1]-[C:2]=1",
+        "reaction_string": "[C;!R;$(C-c1ccccc1):1](=[OD1])-[C;!R;D3;$(C-c1ccccc1):2]~[O;D1,H1].[CH1;$(C-c):3]=[OD1]>>[C:1]1-N=[C:3]-[NH1]-[C:2]=1",
         "reverse_reaction_strings": [
-            "[c,C:2]1~[c,C:1]~[n,N;H1]~[c,C:3]~[n,N]1>>[#6:1](=[O])-[#6:2]~[O].[#6:3]-[CH]=[O]"
+            "[C:1]1-N=[C:3]-[NH1]-[C:2]=1>>[C;$(C-c1ccccc1):1](=[OD1])-[C;D3;$(C-c1ccccc1):2][O;D1,H1].[CH1;$(C-c):3]=[OD1]",
+            "[C:1]1-N=[C:3]-[NH1]-[C:2]=1>>[C;$(C-c1ccccc1):1]([O;D1,H1])-[C;D3;$(C-c1ccccc1):2]=[OD1].[CH1;$(C-c):3]=[OD1]",
+            "[C:1]1-N=[C:3]-[NH1]-[C:2]=1>>[C;$(C-c1ccccc1):1](=[OD1])-[C;D3;$(C-c1ccccc1):2]=[OD1].[CH1;$(C-c):3]=[OD1]",
+            "[c:1]1:[n]:[c:3]:[n]:[c:2]:1>>[C;$(C-c1ccccc1):1](=[OD1])-[C;D3;$(C-c1ccccc1):2][O;D1,H1].[CH1;$(C-c):3]=[OD1]",
+            "[c:1]1:[n]:[c:3]:[n]:[c:2]:1>>[C;$(C-c1ccccc1):1]([O;D1,H1])-[C;D3;$(C-c1ccccc1):2]=[OD1].[CH1;$(C-c):3]=[OD1]",
+            "[c:1]1:[n]:[c:3]:[n]:[c:2]:1>>[C;$(C-c1ccccc1):1](=[OD1])-[C;D3;$(C-c1ccccc1):2]=[OD1].[CH1;$(C-c):3]=[OD1]"
         ],
         "RXN_NUM": 58
     },
-    "59_Fischer_indoleSKIP": {
+    "59_Fischer_indole": {
         "reaction_name": "59_Fischer_indole",
         "example_rxn_product": "CC1=C(C)c2ccccc2N1",
         "example_rxn_reactants": [
@@ -1403,16 +1394,17 @@
         ],
         "group_smarts": [
             "[N&H1&$(N-c1ccccc1)](-[N&H2])-c:[c&H1]",
-            "[C&$(C(-,:[#6])[#6])](=[O&D1])-[C&H2&$(C(-,:[#6])[#6])&!$(C(-,:C=O)C=O)]"
+            "[C&$(C(-,:[#6])[#6])](=[O&D1])-[C&!R;H2&$(C(-,:[#6])[#6])&!$(C(-,:C=O)C=O)]"
         ],
         "num_reactants": 2,
-        "reaction_string": "[NH1;$(N-c1ccccc1):1](-[NH2])-[c:5]:[cH1:4].[C;$(C([#6])[#6]):2](=[OD1])-[CH2;$(C([#6])[#6]);!$(C(C=O)C=O):3]>>[C:5]1-[N:1]-[C:2]=[C:3]-[C:4]:1",
+        "reaction_string": "[NH1;$(N-c1ccccc1):1](-[NH2])-[c:5]:[cH1:4].[C;$(C([#6])[#6]):2](=[OD1])-[CH2;!R;$(C([#6])[#6]);!$(C(C=O)C=O):3]>>[C:5]1-[N:1]-[C:2]=[C:3]-[C:4]:1",
         "reverse_reaction_strings": [
-            "[c,C:5]1[n,N:1][c,C:2][c,C:3][c,C:4]1>>[c:5]-[NH1:1]-[N;H2].[#6:3]-[C:2]=[O]"
+            "[C:5]1-[N:1]-[C:2]=[C:3]-[C:4]:1>>[NH1;$(N-c1ccccc1):1](-[NH2])-[c:5]:[cH1:4].[C;$(C([#6])[#6]):2](=[OD1])-[CH2;!R;$(C([#6])[#6]);!$(C(C=O)C=O):3]",
+            "[c:5]1:[n:1]:[c:2]:[c:3]:[c:4]:1>>[NH1;$(N-c1ccccc1):1](-[NH2])-[c:5]:[cH1:4].[C;$(C([#6])[#6]):2](=[OD1])-[CH2;!R;$(C([#6])[#6]);!$(C(C=O)C=O):3]"
         ],
         "RXN_NUM": 59
     },
-    "60_Friedlaender_chinoline_SKIP_CLOSE_NOT_QUITE": {
+    "60_Friedlaender_chinoline": {
         "reaction_name": "60_Friedlaender_chinoline",
         "example_rxn_product": "CC1=Cc2ccccc2-nc1C",
         "example_rxn_reactants": [
@@ -1425,18 +1417,18 @@
         ],
         "group_smarts": [
             "[N&H2&$(N-c1ccccc1)]-c:c-[C&H1]=[O&D1]",
-            "[C&$(C(-,:[#6])[#6])](=[O&D1])-[C&H2&$(C(-,:[#6])[#6])&!$(C(-,:C=O)C=O)]"
+            "[C&$(C(-,:[#6])[#6])](=[O&D1])-[C&!R;H2&$(C(-,:[#6])[#6])&!$(C(-,:C=O)C=O)]"
         ],
         "num_reactants": 2,
-        "reaction_string": "[NH2;$(N-c1ccccc1):1]-[c:2]:[c:3]-[CH1:4]=[OD1].[C;$(C([#6])[#6]):6](=[OD1])-[CH2;$(C([#6])[#6]);!$(C(C=O)C=O):5]>>[N:1]1-[c:2]:[c:3]-[C:4]=[C:5]-[C:6]:1",
+        "reaction_string": "[NH2;$(N-c1ccccc1):1]-[c:2]:[c:3]-[CH1:4]=[OD1].[C;!R;$(C([#6])[#6]):6](=[OD1])-[CH2;$(C([#6])[#6]);!$(C(C=O)C=O):5]>>[N:1]1-[c:2]:[c:3]-[C:4]=[C:5]-[C:6]:1",
         "reverse_reaction_strings": [
-            "[N:1]1-[c:2]:[c:3]-[C:4]=[C:5]-[C:6]:1>>[NH2;$(N-c1ccccc1):1]-[c:2]:[c:3]-[CH1:4]=[OD1].[C;$(C([#6])[#6]):6](=[OD1])-[CH2;$(C([#6])[#6]);!$(C(C=O)C=O):5]",
-            "[n:1]1[c:2][c:3][c:4][c:5][c:6]1>>[NH2;$(N-c1ccccc1):1]-[c:2]:[c:3]-[CH1:4]=[OD1].[C;$(C([#6])[#6]):6](=[OD1])-[CH2;$(C([#6])[#6]);!$(C(C=O)C=O):5]"
+            "[N:1]1-[c:2]:[c:3]-[C:4]=[C:5]-[C:6]:1>>[NH2;$(N-c1ccccc1):1]-[c:2]:[c:3]-[CH1:4]=[OD1].[C;!R;$(C([#6])[#6]):6](=[OD1])-[CH2;$(C([#6])[#6]);!$(C(C=O)C=O):5]",
+            "[n:1]1[c:2][c:3][c:4][c:5][c:6]1>>[NH2;$(N-c1ccccc1):1]-[c:2]:[c:3]-[CH1:4]=[OD1].[C;!R;$(C([#6])[#6]):6](=[OD1])-[CH2;$(C([#6])[#6]);!$(C(C=O)C=O):5]"
         ],
         "RXN_NUM": 60
     },
-    "61_benzofuran_SKIP": {
-        "reaction_name": "61_benzofuran_SKIP",
+    "61_benzofuran": {
+        "reaction_name": "61_benzofuran",
         "example_rxn_product": "CC1=Cc2ccccc2O1",
         "example_rxn_reactants": [
             "c1cc(I)c(O)cc1",
@@ -1453,12 +1445,14 @@
         "num_reactants": 2,
         "reaction_string": "[*;Br,I;$(*c1ccccc1)]-[c:1]:[c:2]-[OH1:3].[CH1:5]#[C;$(C-[#6]):4]>>[c:1]1:[c:2]-[O:3]-[C:4]=[C:5]-1",
         "reverse_reaction_strings": [
-            "[c:1]1:[c:2]:[o:3]:[c:4]:[c:5]-1>>[Br]-[c:1]:[c:2]-[OH1:3].[CH1:5]#[C;$(C-[#6]):4]",
-            "[c:1]1:[c:2]:[o:3]:[c:4]:[c:5]-1>>[I]-[c:1]:[c:2]-[OH1:3].[CH1:5]#[C;$(C-[#6]):4]"
+            "[c:6]1[c:7][c:8][c:3]2[c:4]([c:5]1)cc([*:1])[o:2]2>>[c:3]1([OH:2])[c:8][c:7][c:6][c:5][c:4]([Br])1.C#C[*:1]",
+            "[c:6]1[c:7][c:8][c:3]2[c:4]([c:5]1)cc([*:1])[o:2]2>>[c:3]1([OH:2])[c:8][c:7][c:6][c:5][c:4]([I])1.C#C[*:1]",
+            "[C:6]1=[C:7]-[C:8]=[C:3]2-[C:4]([C:5]=1)-[C]=[C]([*:1])-[O:2]-2>>[c:3]1([OH:2])[c:8][c:7][c:6][c:5][c:4]([Br])1.C#C[*:1]",
+            "[C:6]1=[C:7]-[C:8]=[C:3]2-[C:4]([C:5]=1)-[C]=[C]([*:1])-[O:2]-2>>[c:3]1([OH:2])[c:8][c:7][c:6][c:5][c:4]([I])1.C#C[*:1]"
         ],
         "RXN_NUM": 61
     },
-    "62_benzothiopheneSKIP": {
+    "62_benzothiophene": {
         "reaction_name": "62_benzothiophene",
         "example_rxn_product": "CC1=Cc2ccccc2S1",
         "example_rxn_reactants": [
@@ -1475,10 +1469,15 @@
         ],
         "num_reactants": 2,
         "reaction_string": "[*;Br,I;$(*c1ccccc1)]-[c:1]:[c:2]-[SD2:3]-[CH3].[CH1:5]#[C;$(C-[#6]):4]>>[c:1]1:[c:2]-[S:3]-[C:4]=[C:5]-1",
-        "reverse_reaction_strings": [],
+        "reverse_reaction_strings": [
+            "[c:6]1[c:7][c:8][c:3]2[c:4]([c:5]1)cc([*:1])[s:2]2>>[c:3]1([S:2]C)[c:8][c:7][c:6][c:5][c:4]([Br])1.C#C[*:1]",
+            "[c:6]1[c:7][c:8][c:3]2[c:4]([c:5]1)cc([*:1])[s:2]2>>[c:3]1([S:2]C)[c:8][c:7][c:6][c:5][c:4]([I])1.C#C[*:1]",
+            "[C:6]1=[C:7]-[C:8]=[C:3]2-[C:4]([C:5]=1)-[C]=[C]([*:1])-[S:2]-2>>[c:3]1([S:2]C)[c:8][c:7][c:6][c:5][c:4]([Br])1.C#C[*:1]",
+            "[C:6]1=[C:7]-[C:8]=[C:3]2-[C:4]([C:5]=1)-[C]=[C]([*:1])-[S:2]-2>>[c:3]1([S:2]C)[c:8][c:7][c:6][c:5][c:4]([I])1.C#C[*:1]"
+        ],
         "RXN_NUM": 62
     },
-    "63_indoleSKIP": {
+    "63_indole": {
         "reaction_name": "63_indole",
         "example_rxn_product": "CC1=Cc2ccccc2N1",
         "example_rxn_reactants": [
@@ -1495,6 +1494,12 @@
         ],
         "num_reactants": 2,
         "reaction_string": "[*;Br,I;$(*c1ccccc1)]-[c:1]:[c:2]-[NH2:3].[CH1:5]#[C;$(C-[#6]):4]>>[c:1]1:[c:2]-[N:3]-[C:4]=[C:5]-1",
+        "reverse_reaction_strings": [
+            "[c:6]1[c:7][c:8][c:3]2[c:4]([c:5]1)cc([*:1])[n:2]2>>[c:3]1([N:2])[c:8][c:7][c:6][c:5][c:4]([Br])1.C#C[*:1]",
+            "[c:6]1[c:7][c:8][c:3]2[c:4]([c:5]1)cc([*:1])[n:2]2>>[c:3]1([N:2])[c:8][c:7][c:6][c:5][c:4]([I])1.C#C[*:1]",
+            "[C:6]1=[C:7]-[C:8]=[C:3]2-[C:4]([C:5]=1)-[C]=[C]([*:1])-[N:2]-2>>[c:3]1([N:2])[c:8][c:7][c:6][c:5][c:4]([Br])1.C#C[*:1]",
+            "[C:6]1=[C:7]-[C:8]=[C:3]2-[C:4]([C:5]=1)-[C]=[C]([*:1])-[N:2]-2>>[c:3]1([N:2])[c:8][c:7][c:6][c:5][c:4]([I])1.C#C[*:1]"
+        ],
         "RXN_NUM": 63
     },
     "64_oxadiazole": {
@@ -1519,7 +1524,7 @@
         ],
         "RXN_NUM": 64
     },
-    "65_Williamson_etherSKIP": {
+    "65_Williamson_ether": {
         "reaction_name": "65_Williamson_ether",
         "example_rxn_product": "CCOCC",
         "example_rxn_reactants": [
@@ -1565,7 +1570,7 @@
         ],
         "RXN_NUM": 66
     },
-    "67_SuzukiSKIP": {
+    "67_Suzuki": {
         "reaction_name": "67_Suzuki",
         "example_rxn_product": "c1ccc(-c2ccccc2)cc1",
         "example_rxn_reactants": [
@@ -1577,19 +1582,24 @@
             "aryl_halide_type_1_robust"
         ],
         "group_smarts": [
-            "[#6&H0&D3&$([#6](~[#6])~[#6])]B(-,:O)O",
-            "[#6&H0&D3&$([#6](~[#6])~[#6])][Cl,Br,I;D1]"
+            "[c]B([O;!R])([O;!R])",
+            "[c][Cl,Br,I;D1]"
         ],
         "num_reactants": 2,
-        "reaction_string": "[#6;H0;D3;$([#6](~[#6])~[#6]):1]B(O)O.[#6;H0;D3;$([#6](~[#6])~[#6]):2][Cl,Br,I;D1]>>[#6:2][#6:1]",
-        "reverse_reaction_strings": [
-            "[#6:2][#6:1]>>[#6;H0;D3;$([#6](~[#6])~[#6]):1]B(O)O.[#6;H0;D3;$([#6](~[#6])~[#6]):2][Cl]",
-            "[#6:2][#6:1]>>[#6;H0;D3;$([#6](~[#6])~[#6]):1]B(O)O.[#6;H0;D3;$([#6](~[#6])~[#6]):2][Br]",
-            "[#6:2][#6:1]>>[#6;H0;D3;$([#6](~[#6])~[#6]):1]B(O)O.[#6;H0;D3;$([#6](~[#6])~[#6]):2][I]"
+        "debug_prereaction": [
+            "[c:1]B([#8;!H1;!-])[#8;!H1;!-]>>[c:1]B(O)O",
+            "[c:1]B([#8;!H1;!-])[OH,O-]>>[c:1]B(O)O"
         ],
+        "reaction_string": "[c:1]B([O;!R])[O;!R].[c:2][Cl,Br,I;D1]>>[#6:2][#6:1]",
+        "reverse_reaction_strings": [
+            "[c:1]-[c:2]>>[c:1]B(O)O.[c:2][Cl]",
+            "[c:1]-[c:2]>>[c:1]B(O)O.[c:2][Br]",
+            "[c:1]-[c:2]>>[c:1]B(O)O.[c:2][I]"
+        ],
+        "note": "Boronic esters are converted to boronic acids via debug_prereaction to eliminate lossiness. The chemistry supports cyclic boronic esters, but not this reaction. The problem is structures like CC(=O)Nc1c2c(ccc1O)B(O)OC2",
         "RXN_NUM": 67
     },
-    "68_piperidine_indole_SKIP_STRUGGLED": {
+    "68_piperidine_indole": {
         "reaction_name": "68_piperidine_indole",
         "example_rxn_product": "C1=C(c2c[nH]c3ccccc23)CCNC1",
         "example_rxn_reactants": [
@@ -1605,10 +1615,12 @@
             "O=C1[#6&H2][#6&H2][N][#6&H2][#6&H2]1"
         ],
         "num_reactants": 2,
-        "reaction_string": "[c;H1:3]1:[c:4]:[c:5]:[c;H1:6]:[c:7]2:[nH:8]:[c:9]:[c;H1:1]:[c:2]:1:2.O=[C:10]1[#6;H2:11][#6;H2:12][N][#6;H2][#6;H2]1>>[#6;H2:12]3[#6;H1:11]=[C:10]([c:1]1:[c:9]:[n:8]:[c:7]2:[c:6]:[c:5]:[c:4]:[c:3]:[c:2]:1:2)[#6;H2:15][#6;H2:14][N:13]3",
+        "reaction_string_old": "[c;H1:3]1:[c:4]:[c:5]:[c;H1:6]:[c:7]2:[nH:8]:[c:9]:[c;H1:1]:[c:2]:1:2.O=[C:10]1[#6;H2:11][#6;H2:12][N][#6;H2][#6;H2]1>>[#6;H2:12]3[#6;H1:11]=[C:10]([c:1]1:[c:9]:[n:8]:[c:7]2:[c:6]:[c:5]:[c:4]:[c:3]:[c:2]:1:2)[#6;H2:15][#6;H2:14][N:13]3",
+        "reaction_string":             "[c;H1:3]1:[c:4]:[c:5]:[c;H1:6]:[c:7]2:[nH:8]:[c:9]:[c;H1:1]:[c:2]:1:2.O=[C:10]1[#6;H2:11][#6;H2:12][N:13][#6;H2:14][#6;H2:15]1>>[#6;H2:12]3[#6;H1:11]=[C:10]([c:1]1:[c:9]:[n:8]:[c:7]2:[c:6]:[c:5]:[c:4]:[c:3]:[c:2]:1:2)[#6;H2:15][#6;H2:14][N:13]3",
         "reverse_reaction_strings": [
-            "[#6H2:10]-[n:8]>>[#6H2:10].[nH:8]"
+            "[N:10]1[C:11][C:12][C:13](=[C:14][C:15]1)[c:2]2[c:3]3[c:4]([nH:1][c:5]2)[c:6][c:7][c:8]([c:9]3)>>[N:10]1[C:11][C:12][C:13](=O)([C:14][C:15]1).[c:2]2[c:3]3[c:4]([nH:1][c:5]2)[c:6][c:7][c:8]([c:9]3)"
         ],
+        "tmp": "BrN1CCC(=CC1)c2c3c([nH]c2I)cc(F)c(c3)Cl",
         "RXN_NUM": 68
     },
     "69_Negishi": {
@@ -1961,7 +1973,7 @@
         ],
         "RXN_NUM": 83
     },
-    "84_sulfon_amide_SKIP": {
+    "84_sulfon_amide": {
         "reaction_name": "84_sulfon_amide",
         "example_rxn_product": "CCNS(C)(=O)=O",
         "example_rxn_reactants": [
@@ -1973,15 +1985,20 @@
             "primary_or_secondary_amine_type_2_robust"
         ],
         "group_smarts": [
-            "[S&$(S(=O)(=O)[C,N])]O",
+            "[S&$(S(=O)(=O)[C,N])][O;!R]",
             "[N&$(NC)&!$(N=*)&!$([N&-])&!$(N#*)&!$([N&D3])&!$([N&D4])&!$(N[c,O])&!$(N[C,S]=[S,O,N])]"
         ],
         "num_reactants": 2,
-        "reaction_string": "[S;$(S(=O)(=O)[C,N]):1][O].[N;$(NC);!$(N=*);!$([N-]);!$(N#*);!$([ND3]);!$([ND4]);!$(N[c,O]);!$(N[C,S]=[S,O,N]):2]>>[S:1][N+0:2]",
-        "reverse_reaction_strings": [
-            "[S:1][N+0:2]>>[S;$(S(=O)(=O)[C,N]):1][O].[N;$(NC);!$(N=*);!$([N-]);!$(N#*);!$([ND3]);!$([ND4]);!$(N[c,O]);!$(N[C,S]=[S,O,N]):2]",
-            "[C:3][S:1][N+0:2]>>[S:1]1[O][C:3]C1.[N;$(NC);!$(N=*);!$([N-]);!$(N#*);!$([ND3]);!$([ND4]);!$(N[c,O]);!$(N[C,S]=[S,O,N]):2]"
+        "debug_prereaction": [
+            "[C,N:1][S:2](=[O:3])(=[O:4])-[O]>>[*:1][S:2](=[O:3])(=[O:4])O[Cl]"
         ],
+        "reaction_string": "[S;$(S(=O)(=O)[C,N]):1][O;!R].[N;$(NC);!$(N=*);!$([N-]);!$(N#*);!$([ND3]);!$([ND4]);!$(N[c,O]);!$(N[C,S]=[S,O,N]):2]>>[S:1][N+0:2]",
+        "reverse_reaction_strings": [
+            "[C,N:1][S:2](=[O:3])(=[O:4])-[N;H2:5]>>[*:1][S:2](=[O:3])(=[O:4])O[Cl].[NH2:5]",
+            "[C,N:1][S:2](=[O:3])(=[O:4])-[N;H1:5]>>[*:1][S:2](=[O:3])(=[O:4])O[Cl].[NH:5]",
+            "[C,N:1][S:2](=[O:3])(=[O:4])-[N;H0:5]>>[*:1][S:2](=[O:3])(=[O:4])O[Cl].[N:5]"
+        ],
+        "note": "Reverses sulfonamide formation by breaking S-N bonds in sulfonyl compounds back to sulfonyl chlorides and amines. Patterns are specific to sulfonamide products.",
         "RXN_NUM": 84
     },
     "85_N_arylation_heterocyclesSKIP": {
@@ -2054,7 +2071,7 @@
         ],
         "RXN_NUM": 87
     },
-    "88_imidazoleSKIP": {
+    "88_imidazole_SKIP": {
         "reaction_name": "88_imidazole",
         "example_rxn_product": "CNC1=NC(C)=C(C)N1",
         "example_rxn_reactants": [
@@ -2072,6 +2089,9 @@
         "num_reactants": 2,
         "reaction_string": "[C;$(C([#6])[#6;!$([#6]Br)]):4](=[OD1])[CH;$(C([#6])[#6]):5]Br.[#7;H2:3][C;$(C(=N)(N)[c,#7]):2]=[#7;H1;D1:1]>>[C:4]1=[CH0:5][NH:3][C:2]=[N:1]1",
         "reverse_reaction_strings": [
+            "[#6:1]c1nc([N,c:3])[nH]c1[#6:2]>>[#6:1]C(=O)C(Br)[#6:2].C(=N)(N)[*:3]"
+        ],
+        "old": [
             "[c:4]1[c:5][nH:3][c:2][n:1]1>>[C:4](=O)[C:5]Br.[NH2:3][C:2]=[NH:1]",
             "[c:4]1[n:1][c:2][nH:3][c:5]1>>[C:4](=O)[C:5]Br.[NH2:3][C:2]=[NH:1]",
             "[c:2]1[n:1][c:4][c:5][nH:3]1>>[C:4](=O)[C:5]Br.[NH2:3][C:2]=[NH:1]"
