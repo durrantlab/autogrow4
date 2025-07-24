@@ -85,6 +85,9 @@ def clean_up_smiles(smiles: str) -> Optional[str]:
     smiles = smiles.replace("[Cl+]", "Cl")
     smiles = smiles.replace("[Br+]", "Br")
     smiles = smiles.replace("[I+]", "I")
+
+    # Strange tetrazole resonance structure I see in some SMILES
+    smiles = smiles.replace("C2=N[N+]=NN2", "C2=NN=NN2")
     # Add more replacements if needed
 
     # Also, smiles should be canonicalized

@@ -17,7 +17,7 @@
         "num_reactants": 2,
         "reaction_string": "[CR1;H2,H1X4,H0X4:1]1[O;X2][CR1;H2,H1X4,H0X4:2]1.[#6;+0&$([CR0,R1X3,R1X4])&!$([#6](=,-[OR0,SR0])[OR0]):3]-[OR0;H1,-]>>O[C:1][C:2]O-[#6:3]",
         "reverse_reaction_strings": [
-            "O[C:1][C:2]O-[#6:3]>>[CR1;H2,H1X4,H0X4:1]1[O;X2][CR1;H2,H1X4,H0X4:2]1.[#6;+0&$([CR0,R1X3,R1X4])&!$([#6](=,-[OR0,SR0])[OR0]):3]-[OR0;H1,-]"
+            "O[C:1][C:2]O-[#6:3]>>[C:1]1O[C:2]1.[#6:3]O"
         ],
         "RXN_NUM": 1
     },
@@ -39,7 +39,7 @@
         "num_reactants": 2,
         "reaction_string": "[CR1;H2,H1X4,H0X4:1]1[O;X2][CR1;H2,H1X4,H0X4:2]1.[#6&$([CR0,R1X3,R1X4])&!$([#6](=,-[OR0,SR0])[SR0;X1]):3]-[SR0;v2;H1,-]>>O[C:1][C:2]S-[#6:3]",
         "reverse_reaction_strings": [
-            "O[C:1][C:2]S-[#6:3]>>[CR1;H2,H1X4,H0X4:1]1[O;X2][CR1;H2,H1X4,H0X4:2]1.[#6&$([CR0,R1X3,R1X4])&!$([#6](=,-[OR0,SR0])[SR0]):3]-[SR0;v2;H1,-]"
+            "O[C:1][C:2]S-[#6:3]>>[C:1]1O[C:2]1.[#6:3]S"
         ],
         "RXN_NUM": 2
     },
@@ -58,7 +58,7 @@
         "num_reactants": 1,
         "reaction_string": "[CR0;X3,X2H1,X1H2:1]=[CR0;X3,X2H1,X1H2:2]>>[C:1]1O[C:2]1",
         "reverse_reaction_strings": [
-            "[C:1]1O[C:2]1>>[CR0;X3,X2H1,X1H2:1]=[CR0;X3,X2H1,X1H2:2]"
+            "[C:1]1O[C:2]1>>[C:1]=[C:2]"
         ],
         "RXN_NUM": 3
     },
@@ -80,8 +80,8 @@
         "num_reactants": 2,
         "reaction_string": "[*:1]S(=O)(=O)-AZIDE_SEARCH.[C:2]-[$([CX3R0]([S;H1;X2])=[OX1]),$([CX3R0]([O;H1,X1])=[SX1])]>>[*:1]S(=O)(=O)N-C([C:2])=O",
         "reverse_reaction_strings": [
-            "[*:1]S(=O)(=O)N-C([C:2])=O>>[*:1]S(=O)(=O)-N=[N+]=[N-].[C:2]-[CX3R0]([S;H1;X2])=[OX1]",
-            "[*:1]S(=O)(=O)N-C([C:2])=O>>[*:1]S(=O)(=O)-N=[N+]=[N-].[C:2]-[CX3R0]([O;H1,X1])=[SX1]"
+            "[*:1]S(=O)(=O)N-C([C:2])=O>>[*:1]S(=O)(=O)-N=[N+]=[N-].[C:2]C(S)=O",
+            "[*:1]S(=O)(=O)N-C([C:2])=O>>[*:1]S(=O)(=O)-N=[N+]=[N-].[C:2]C(O)=S"
         ],
         "RXN_NUM": 4
     },
@@ -588,7 +588,7 @@
         ],
         "RXN_NUM": 25
     },
-    "26_Acid_Anhydride_Noncyclic_and_Amine_SKIP": {
+    "26_Acid_Anhydride_Noncyclic_and_Amine": {
         "reaction_name": "26_Acid_Anhydride_Noncyclic_and_Amine",
         "example_rxn_product": "O=C1CN(C(=O)C2CCCCC2)C(=O)O1",
         "example_rxn_reactants": [
@@ -610,7 +610,8 @@
         "reaction_string": "[*:1]C(=O)-[O;R0]-C(=O)[*].[#7;$([#7;H3+,H2R0X1]-[#6]),$([#7&!H3;H1R1X3](:,-[#6R1]):,-[#6R1,#7R1]),$([#7&!H3;H2]-[#6]),$([#7&!H3;H0R1X2](:,-[#6R1;X3H1]):,-[#6R1X3H1]),$([#7&!H3;H0R1X2](:,-[#6R1;X3]):,-[#7R1X3]),$([#7&!H3;H1R0X3](-[#6])-[#6R0]):2]>>[*:1]C(=O)-[#7+0:2]",
         "TODO_remove_in_time": "[*:1]C(=O)-[#7+0:2]>>[*:1]C(=O)-[O;R0]-C(=O)C.[#7;$([#7;H3+,H2R0X1]-[#6]),$([#7&!H3;H1R1X3](:,-[#6R1]):,-[#6R1,#7R1]),$([#7&!H3;H2]-[#6]),$([#7&!H3;H0R1X2](:,-[#6R1;X3H1]):,-[#6R1X3H1]),$([#7&!H3;H0R1X2](:,-[#6R1;X3]):,-[#7R1X3]),$([#7&!H3;H1R0X3](-[#6])-[#6R0]):2]",
         "reverse_reaction_strings": [
-            "[*:1]C(=O)-[#7+0:2]>>[*:1]C(=O)-[O;R0]-C(=O)C.[#7;$([#7;H3+,H2R0X1]-[#6]),$([#7&!H3;H1R1X3](:,-[#6R1]):,-[#6R1,#7R1]),$([#7&!H3;H2]-[#6]),$([#7&!H3;H0R1X2](:,-[#6R1;X3H1]):,-[#6R1X3H1]),$([#7&!H3;H0R1X2](:,-[#6R1;X3]):,-[#7R1X3]),$([#7&!H3;H1R0X3](-[#6])-[#6R0]):2]"
+            "[*:1]C(=O)-[#7+0:2]>>[*:1]C(=O)-[O;R0]-C(=O)C.[#7;$([#7;H3+,H2R0X1]-[#6]),$([#7&!H3;H1R1X3](:,-[#6R1]):,-[#6R1,#7R1]),$([#7&!H3;H2]-[#6]),$([#7&!H3;H0R1X2](:,-[#6R1;X3H1]):,-[#6R1X3H1]),$([#7&!H3;H0R1X2](:,-[#6R1;X3]):,-[#7R1X3]),$([#7&!H3;H1R0X3](-[#6])-[#6R0]):2]",
+            "[*:1]C(=O)-[n:2]>>[*:1]C(=O)-[O;R0]-C(=O)C.[nH:2]"
         ],
         "RXN_NUM": 26
     },
@@ -1004,7 +1005,7 @@
         ],
         "RXN_NUM": 43
     },
-    "44_Niementowski_quinazolineSKIP": {
+    "44_Niementowski_quinazoline": {
         "reaction_name": "44_Niementowski_quinazoline",
         "example_rxn_product": "O=C1NC=Nc2ccccc21",
         "example_rxn_reactants": [
@@ -1022,7 +1023,7 @@
         "num_reactants": 2,
         "reaction_string": "[c:1](-[C;$(C-c1ccccc1):2](=[OD1:3])-[OH1]):[c:4](-[NH2:5]).[N;!H0;!$(N-N);!$(N-C=N);!$(N(-C=O)-C=O):6]-[C;H1,$(C-[#6]):7]=[OD1]>>[c:4]2:[c:1]-[C:2](=[O:3])-[N:6]-[C:7]=[N:5]-2",
         "reverse_reaction_strings": [
-            "[c:4]2:[c:1]-[C:2](=[O:3])-[N:6]-[C:7]=[N:5]-2>>[c:1](-[C:2](=[OD1:3])-[OH1]):[c:4](-[NH2:5]).[NH1,NH2:6]-[C:7]=[OD1]"
+            "[c:5]1[n:9][c:10]2[c:11]([c:8]([n:6]1)=[O:7])[c:1][c:2][c:3][c:4]2>>O=[C:5][N:6].[c:11]1([C:8](=[O:7])O)[c:1][c:2][c:3][c:4][c:10]1[N:9]"
         ],
         "RXN_NUM": 44
     },
@@ -1549,7 +1550,7 @@
         "RXN_NUM": 65
     },
     "66_reductive_amination": {
-        "reaction_name": "66_reductive_amination_SKIP_MIGHT_BE_HARD_TO_REVERSE",
+        "reaction_name": "66_reductive_amination",
         "example_rxn_product": "CCNC",
         "example_rxn_reactants": [
             "CC(=O)",
@@ -1616,7 +1617,7 @@
         ],
         "num_reactants": 2,
         "reaction_string_old": "[c;H1:3]1:[c:4]:[c:5]:[c;H1:6]:[c:7]2:[nH:8]:[c:9]:[c;H1:1]:[c:2]:1:2.O=[C:10]1[#6;H2:11][#6;H2:12][N][#6;H2][#6;H2]1>>[#6;H2:12]3[#6;H1:11]=[C:10]([c:1]1:[c:9]:[n:8]:[c:7]2:[c:6]:[c:5]:[c:4]:[c:3]:[c:2]:1:2)[#6;H2:15][#6;H2:14][N:13]3",
-        "reaction_string":             "[c;H1:3]1:[c:4]:[c:5]:[c;H1:6]:[c:7]2:[nH:8]:[c:9]:[c;H1:1]:[c:2]:1:2.O=[C:10]1[#6;H2:11][#6;H2:12][N:13][#6;H2:14][#6;H2:15]1>>[#6;H2:12]3[#6;H1:11]=[C:10]([c:1]1:[c:9]:[n:8]:[c:7]2:[c:6]:[c:5]:[c:4]:[c:3]:[c:2]:1:2)[#6;H2:15][#6;H2:14][N:13]3",
+        "reaction_string": "[c;H1:3]1:[c:4]:[c:5]:[c;H1:6]:[c:7]2:[nH:8]:[c:9]:[c;H1:1]:[c:2]:1:2.O=[C:10]1[#6;H2:11][#6;H2:12][N:13][#6;H2:14][#6;H2:15]1>>[#6;H2:12]3[#6;H1:11]=[C:10]([c:1]1:[c:9]:[n:8]:[c:7]2:[c:6]:[c:5]:[c:4]:[c:3]:[c:2]:1:2)[#6;H2:15][#6;H2:14][N:13]3",
         "reverse_reaction_strings": [
             "[N:10]1[C:11][C:12][C:13](=[C:14][C:15]1)[c:2]2[c:3]3[c:4]([nH:1][c:5]2)[c:6][c:7][c:8]([c:9]3)>>[N:10]1[C:11][C:12][C:13](=O)([C:14][C:15]1).[c:2]2[c:3]3[c:4]([nH:1][c:5]2)[c:6][c:7][c:8]([c:9]3)"
         ],
@@ -1719,7 +1720,7 @@
         ],
         "RXN_NUM": 72
     },
-    "73_Mitsunobu_tetrazole_1_SKIP_I_THINK_~_BAD": {
+    "73_Mitsunobu_tetrazole_1": {
         "reaction_name": "73_Mitsunobu_tetrazole_1",
         "example_rxn_product": "CC(C)n1cnnn1",
         "example_rxn_reactants": [
@@ -1732,17 +1733,17 @@
         ],
         "group_smarts": [
             "[C;H1&$(C(-,:[#6])[#6]),H2&$(C[#6])][O&H1]",
-            "[#7&H1]1~[#7]~[#7]~[#7]~[#6]~1"
+            "[#7&H1]1~[#7&H0&D2]~[#7&H0&D2]~[#7&H0&D2]~[#6]~1"
         ],
         "num_reactants": 2,
-        "reaction_string": "[C;H1&$(C([#6])[#6]),H2&$(C[#6]):1][OH1].[#7H1:2]1~[#7:3]~[#7:4]~[#7:5]~[#6:6]~1>>[C:1][#7:2]1:[#7:3]:[#7:4]:[#7:5]:[#6:6]:1",
-        "TODO_remove_old_in_time": "[C:1][#7:2]1:[#7:3]:[#7:4]:[#7:5]:[#6:6]:1>>[C;H1&$(C([#6])[#6]),H2&$(C[#6]):1][OH1].[#7H1:2]1~[#7:3]~[#7:4]~[#7:5]~[#6:6]~1",
+        "reaction_string": "[C;H1&$(C([#6])[#6]),H2&$(C[#6]):1][OH1].[#7H1:2]1~[#7;H0;D2:3]~[#7;H0;D2:4]~[#7;H0;D2:5]~[#6:6]~1>>[C:1][#7:2]1:[#7:3]:[#7:4]:[#7:5]:[#6:6]:1",
+        "TODO_remove_old_in_time": "[C:1][#7:2]1:[#7:3]:[#7:4]:[#7:5]:[#6:6]:1>>[C;H1&$(C([#6])[#6]),H2&$(C[#6]):1][OH1].[#7H1:2]1~[#7;H0;D2:3]~[#7;H0;D2:4]~[#7;H0;D2:5]~[#6:6]~1",
         "reverse_reaction_strings": [
             "[C:1][#7:2]1:[#7:3]:[#7:4]:[#7:5]:[#6:6]:1>>[C;H1&$(C([#6])[#6]),H2&$(C[#6]):1][OH1].[nH:2]1~[#7:3]~[#7:4]~[#7:5]~[#6:6]~1"
         ],
         "RXN_NUM": 73
     },
-    "74_Mitsunobu_tetrazole_2_SKIP": {
+    "74_Mitsunobu_tetrazole_2": {
         "reaction_name": "74_Mitsunobu_tetrazole_2",
         "example_rxn_product": "CC(C)n1ncnn1",
         "example_rxn_reactants": [
@@ -1755,16 +1756,16 @@
         ],
         "group_smarts": [
             "[C;H1&$(C(-,:[#6])[#6]),H2&$(C[#6])][O&H1]",
-            "[#7&H1]1~[#7]~[#7]~[#7]~[#6]~1"
+            "[#7&H1]1~[#7&H0&D2]~[#7&H0&D2]~[#7&H0&D2]~[#6]~1"
         ],
         "num_reactants": 2,
-        "reaction_string": "[C;H1&$(C([#6])[#6]),H2&$(C[#6]):1][OH1].[#7H1:2]1~[#7:3]~[#7:4]~[#7:5]~[#6:6]~1>>[#7H0:2]1:[#7:3]:[#7H0:4]([C:1]):[#7:5]:[#6:6]:1",
+        "reaction_string": "[C;H1&$(C([#6])[#6]),H2&$(C[#6]):1][OH1].[#7H1:2]1~[#7;H0;D2:3]~[#7;H0;D2:4]~[#7;H0;D2:5]~[#6:6]~1>>[#7H0:2]1:[#7:3]:[#7H0:4]([C:1]):[#7:5]:[#6:6]:1",
         "reverse_reaction_strings": [
-            "[#7H0:2]1:[#7:3]:[#7H0:4]([C:1]):[#7:5]:[#6:6]:1>>[C;H1&$(C([#6])[#6]),H2&$(C[#6]):1][OH1].[#7H1:2]1~[#7:3]~[#7:4]~[#7:5]~[#6:6]~1"
+            "[#7H0:2]1:[#7:3]:[#7H0:4]([C:1]):[#7:5]:[#6:6]:1>>[C;H1&$(C([#6])[#6]),H2&$(C[#6]):1][OH1].[nH:2]1:[n:3]:[n:4]:[n:5]:[c:6]:1"
         ],
         "RXN_NUM": 74
     },
-    "75_Mitsunobu_tetrazole_3_SKIP": {
+    "75_Mitsunobu_tetrazole_3": {
         "reaction_name": "75_Mitsunobu_tetrazole_3",
         "example_rxn_product": "CC(C)n1cnnn1",
         "example_rxn_reactants": [
@@ -1777,16 +1778,16 @@
         ],
         "group_smarts": [
             "[C;H1&$(C(-,:[#6])[#6]),H2&$(C[#6])][O&H1]",
-            "[#7]1~[#7]~[#7&H1]~[#7]~[#6]~1"
+            "[#7&H0&D2]1~[#7&H0&D2]~[#7&H1]~[#7&H0&D2]~[#6]~1"
         ],
         "num_reactants": 2,
-        "reaction_string": "[C;H1&$(C([#6])[#6]),H2&$(C[#6]):1][OH1].[#7:2]1~[#7:3]~[#7H1:4]~[#7:5]~[#6:6]~1>>[C:1][#7H0:2]1:[#7:3]:[#7H0:4]:[#7:5]:[#6:6]:1",
+        "reaction_string": "[C;H1&$(C([#6])[#6]),H2&$(C[#6]):1][OH1].[#7;H0;D2:2]1~[#7;H0;D2:3]~[#7H1:4]~[#7;H0;D2:5]~[#6:6]~1>>[C:1][#7H0:2]1:[#7:3]:[#7H0:4]:[#7:5]:[#6:6]:1",
         "reverse_reaction_strings": [
-            "[C:1][#7H0:2]1:[#7:3]:[#7H0:4]:[#7:5]:[#6:6]:1>>[C:1][OH1].[#7H1:2]1:[#7:3]:[#7H0:4]:[#7:5]:[#6:6]:1"
+            "[C:1][#7H0:2]1:[#7:3]:[#7H0:4]:[#7:5]:[#6:6]:1>>[C;H1&$(C([#6])[#6]),H2&$(C[#6]):1][OH1].[n:2]1:[n:3]:[nH:4]:[n:5]:[c:6]:1"
         ],
         "RXN_NUM": 75
     },
-    "76_Mitsunobu_tetrazole_4_SKIP": {
+    "76_Mitsunobu_tetrazole_4": {
         "reaction_name": "76_Mitsunobu_tetrazole_4",
         "example_rxn_product": "CC(C)n1ncnn1",
         "example_rxn_reactants": [
@@ -1799,10 +1800,13 @@
         ],
         "group_smarts": [
             "[C;H1&$(C(-,:[#6])[#6]),H2&$(C[#6])][O&H1]",
-            "[#7]1~[#7]~[#7&H1]~[#7]~[#6]~1"
+            "[#7&H0&D2]1~[#7&H0&D2]~[#7&H1]~[#7&H0&D2]~[#6]~1"
         ],
         "num_reactants": 2,
-        "reaction_string": "[C;H1&$(C([#6])[#6]),H2&$(C[#6]):1][OH1].[#7:2]1~[#7:3]~[#7H1:4]~[#7:5]~[#6:6]~1>>[#7:2]1:[#7:3]:[#7:4]([C:1]):[#7:5]:[#6:6]:1",
+        "reaction_string": "[C;H1&$(C([#6])[#6]),H2&$(C[#6]):1][OH1].[#7;H0;D2:2]1~[#7;H0;D2:3]~[#7H1:4]~[#7;H0;D2:5]~[#6:6]~1>>[#7:2]1:[#7:3]:[#7:4]([C:1]):[#7:5]:[#6:6]:1",
+        "reverse_reaction_strings": [
+            "[#7:2]1:[#7:3]:[#7:4]([C:1]):[#7:5]:[#6:6]:1>>[C;H1&$(C([#6])[#6]),H2&$(C[#6]):1][OH1].[n:2]1:[n:3]:[nH:4]:[n:5]:[c:6]:1"
+        ],
         "RXN_NUM": 76
     },
     "77_Heck_terminal_vinyl": {
@@ -2001,7 +2005,7 @@
         "note": "Reverses sulfonamide formation by breaking S-N bonds in sulfonyl compounds back to sulfonyl chlorides and amines. Patterns are specific to sulfonamide products.",
         "RXN_NUM": 84
     },
-    "85_N_arylation_heterocyclesSKIP": {
+    "85_N_arylation_heterocycles": {
         "reaction_name": "85_N_arylation_heterocycles",
         "example_rxn_product": "c1ccc(n2ccnc2)cc1",
         "example_rxn_reactants": [
@@ -2013,11 +2017,15 @@
             "5_mem_aryl_w_NH_max2N_robust"
         ],
         "group_smarts": [
-            "cB(-,:O)O",
+            "c[B&D3](-,:O)O",
             "[n&H1&+0&r5&!$(n[#6]=[O,S,N])&!$(n~n~n)&!$(n~n~c~n)&!$(n~c~n~n)]"
         ],
         "num_reactants": 2,
-        "reaction_string": "[c:1]B(O)O.[nH1;+0;r5;!$(n[#6]=[O,S,N]);!$(n~n~n);!$(n~n~c~n);!$(n~c~n~n):2]>>[c:1][n:2]",
+        "debug_prereaction": [
+            "[c:1]B([#8;!H1;!-])[#8;!H1;!-]>>[c:1]B(O)O",
+            "[c:1]B([#8;!H1;!-])[OH,O-]>>[c:1]B(O)O"
+        ],
+        "reaction_string": "[c:1][B;D3](O)O.[nH1;+0;r5;!$(n[#6]=[O,S,N]);!$(n~n~n);!$(n~n~c~n);!$(n~c~n~n):2]>>[c:1][n:2]",
         "reverse_reaction_strings": [
             "[c:1][n:2]>>[c:1]B(O)O.[nH1;+0;r5;!$(n[#6]=[O,S,N]);!$(n~n~n);!$(n~n~c~n);!$(n~c~n~n):2]"
         ],
@@ -2071,7 +2079,7 @@
         ],
         "RXN_NUM": 87
     },
-    "88_imidazole_SKIP": {
+    "88_imidazole_SKIP_SHOULD_WORK_WHEN_UPDATE_REACTANTS": {
         "reaction_name": "88_imidazole",
         "example_rxn_product": "CNC1=NC(C)=C(C)N1",
         "example_rxn_reactants": [
@@ -2083,22 +2091,20 @@
             "amidine_robust"
         ],
         "group_smarts": [
-            "[C&$(C(-,:[#6])[#6&!$([#6]Br)])](=[O&D1])[C&H1&$(C(-,:[#6])[#6])]Br",
+            "[C&!R&$(C(-,:[#6])[#6&!$([#6]Br)])](=[O&D1])[C&!R&H1&$(C(-,:[#6])[#6])]Br",
             "[#7&H2][C&$(C(=N)(-,:N)[c,#7])]=[#7&H1&D1]"
         ],
+        "note": "There is nothing in the original SMARTS string from https://pubs.acs.org/doi/suppl/10.1021/ci200379p/suppl_file/ci200379p_si_002.pdf to prevent the R1 and R2 groups of the alpha_halo_ketone_robust from being in a ring, but I prohibit this this via the functional groups definitions (!R) because the reverse reaction can produce products that, though correct when visualized, have incorrect rdkit-assigned aromaticity to some atoms. For example, apply [c:4]1[c:5][nH:3][c:2][n:1]1>>[C;$(C([#6])[#6;!$([#6]Br)]):4](=[OD1])[CH;$(C([#6])[#6]):5]Br.[#7;H2:3][C;$(C(=N)(N)[c,#7]):2]=[#7;H1;D1:1] to CC(C)c1ccc2[nH]c(-c3ccnnc3Sc3nncs3)nc2c(=O)c1. Very complicated.",
         "num_reactants": 2,
         "reaction_string": "[C;$(C([#6])[#6;!$([#6]Br)]):4](=[OD1])[CH;$(C([#6])[#6]):5]Br.[#7;H2:3][C;$(C(=N)(N)[c,#7]):2]=[#7;H1;D1:1]>>[C:4]1=[CH0:5][NH:3][C:2]=[N:1]1",
         "reverse_reaction_strings": [
-            "[#6:1]c1nc([N,c:3])[nH]c1[#6:2]>>[#6:1]C(=O)C(Br)[#6:2].C(=N)(N)[*:3]"
-        ],
-        "old": [
-            "[c:4]1[c:5][nH:3][c:2][n:1]1>>[C:4](=O)[C:5]Br.[NH2:3][C:2]=[NH:1]",
-            "[c:4]1[n:1][c:2][nH:3][c:5]1>>[C:4](=O)[C:5]Br.[NH2:3][C:2]=[NH:1]",
-            "[c:2]1[n:1][c:4][c:5][nH:3]1>>[C:4](=O)[C:5]Br.[NH2:3][C:2]=[NH:1]"
+            "[C:4]1=[C:5][nH:3][c:2][n:1]1>>[C;$(C([#6])[#6;!$([#6]Br)]):4](=[OD1])[CH;$(C([#6])[#6]):5]Br.[#7;H2:3][C;$(C(=N)(N)[c,#7]):2]=[#7;H1;D1:1]",
+            "[c:4]1[c:5][nH:3][c:2][n:1]1>>[C;$(C([#6])[#6;!$([#6]Br)]):4](=[OD1])[CH;$(C([#6])[#6]):5]Br.[#7;H2:3][C;$(C(=N)(N)[c,#7]):2]=[#7;H1;D1:1]",
+            "[c:4]1[c:5]2[c][c][c](=O)[c]2[nH:3][c:2][n:1]1>>[C;$(C([#6])[#6;!$([#6]Br)]):4](=[OD1])[CH;$(C([#6])[#6]):5]Br.[#7;H2:3][C;$(C(=N)(N)[c,#7]):2]=[#7;H1;D1:1]"
         ],
         "RXN_NUM": 88
     },
-    "89_decarboxylative_couplingSKIP": {
+    "89_decarboxylative_coupling": {
         "reaction_name": "89_decarboxylative_coupling",
         "example_rxn_product": "O=[N+]([O-])c1ccccc1c1ccccc1",
         "example_rxn_reactants": [
@@ -2116,10 +2122,11 @@
         "num_reactants": 2,
         "reaction_string": "[c;$(c1[c;$(c[C,S,N](=[OD1])[*;R0])]cccc1):1][C;$(C(=O)[O;H1])].[c;$(c1aaccc1):2][Cl,Br,I;D1]>>[c:1][c:2]",
         "reverse_reaction_strings": [
-            "[c:1][c:2]>>[c;$(c1[c;$(c[C,S,N](=[OD1])[*;R0])]cccc1):1][C;$(C(=O)[O;H1])].[c;$(c1aaccc1):2][Br]",
-            "[c:1][c:2]>>[c;$(c1[c;$(c[C,S,N](=[OD1])[*;R0])]cccc1):1][C;$(C(=O)[O;H1])].[c;$(c1aaccc1):2][Cl]",
-            "[c:1][c:2]>>[c;$(c1[c;$(c[C,S,N](=[OD1])[*;R0])]cccc1):1][C;$(C(=O)[O;H1])].[c;$(c1aaccc1):2][I]"
+            "[O:5]=[C,N,S:4][c:3][c:1]-[c:2]>>[O:5]=[C,N,S:4][c:3][c:1]C(=O)O.[c:2]Cl",
+            "[O:5]=[C,N,S:4][c:3][c:1]-[c:2]>>[O:5]=[C,N,S:4][c:3][c:1]C(=O)O.[c:2]Br",
+            "[O:5]=[C,N,S:4][c:3][c:1]-[c:2]>>[O:5]=[C,N,S:4][c:3][c:1]C(=O)O.[c:2]I"
         ],
+        "note": "Decarboxylative coupling is highly lossy (CO₂ and halide identity lost). Reverse assumes carboxylic acid + bromide/chloride/iodide as most common synthetic precursors.",
         "RXN_NUM": 89
     },
     "90_heteroaromatic_nuc_sub": {
