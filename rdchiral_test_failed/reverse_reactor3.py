@@ -157,6 +157,11 @@ def run_rxn(rxn_string: str, reactants_smi_list: List[str])-> List[List[str]]:
                 smiles = clean_up_smiles(smiles)
                 if smiles:
                     product_smiles.append(smiles)
+                else:
+                    print(f"Warning: Failed to clean up product SMILES: {Chem.MolToSmiles(product)}")
+                    print(f"Reaction string: {rxn_string}")
+                    print(f"Reactants: {reactants_smi_list}")
+                    print("")
         if product_smiles:
             # Sort the smiles in each set to make comparisons order-independent
             predicted_products.append(sorted(product_smiles))
