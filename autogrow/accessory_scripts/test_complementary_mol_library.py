@@ -7,8 +7,6 @@ Example submit:
 python autogrow4/accessory_scripts/test_complementary_mol_library.py \
 --rxn_library_file \
 autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/ClickChem_rxn_library.json \
---function_group_library \
-autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/ClickChem_functional_groups.json \
 --complementary_mol_directory \
 autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/complementary_mols \
 --output_folder autogrow4/accessory_scripts/output/
@@ -56,7 +54,7 @@ class SmilesClickChem:
             complementary_mol_directory, and function_group_library. ie.
             rxn_library_variables = [params['rxn_library_path'],
             params['rxn_library_file'],
-            params['function_group_library'],params['complementary_mol_directory']]
+            params['complementary_mol_directory']]
         :param list list_of_already_made_smiles: a list of lists. Each
             sublist contains info about a smiles made in this generation via
             mutation ie.[['O=C([O-])',
@@ -67,24 +65,41 @@ class SmilesClickChem:
 
         rxn_library_path = rxn_library_variables[0]
         rxn_library_file = rxn_library_variables[1]
-        function_group_library = rxn_library_variables[2]
-        complementary_mols = rxn_library_variables[3]
+        complementary_mols = rxn_library_variables[2]
         self.reaction_dict = self.retrieve_reaction_dict(
             rxn_library_path, rxn_library_file
         )
         # Retrieve the dictionary containing
         # all the possible ClickChem Reactions
         self.list_of_reaction_names = list(self.reaction_dict.keys())
-
-        self.functional_group_dict = self.retrieve_functional_group_dict(
-            rxn_library_path, function_group_library
-        )
+        self.functional_group_dict = self._extract_functional_groups(self.reaction_dict)
         self.complementary_mol_dict = self.retrieve_complementary_dictionary(
             rxn_library_path, complementary_mols
         )
-
         # List of already predicted smiles
         self.list_of_already_made_smiles = [x[0] for x in list_of_already_made_smiles]
+
+    def _extract_functional_groups(
+        self, reaction_dict: Dict[str, Any]
+    ) -> Dict[str, str]:
+        """
+        Extract functional groups and their SMARTS from the reaction dictionary.
+
+        Args:
+            reaction_dict (Dict[str, Any]): The dictionary of reactions.
+
+        Returns:
+            Dict[str, str]: A dictionary mapping functional group names to SMARTS strings.
+        """
+        functional_groups = {}
+        for rxn_name, rxn_details in reaction_dict.items():
+            if "functional_groups" in rxn_details and "group_smarts" in rxn_details:
+                for fg_name, fg_smarts in zip(
+                    rxn_details["functional_groups"], rxn_details["group_smarts"]
+                ):
+                    if fg_name not in functional_groups:
+                        functional_groups[fg_name] = fg_smarts
+        return functional_groups
 
     def rxn_lib_format_json_dict_of_dict(self, old_dict):
         """
@@ -110,26 +125,23 @@ class SmilesClickChem:
             the proper python data types.
         """
         new_dict = {}
-        for rxn_key in old_dict.keys():
-            rxn_dic_old = old_dict[rxn_key]
+        for rxn_key, rxn_dic_old in old_dict.items():
             key_str = str(rxn_key)
-
             # For reaction libraries
-            if type(rxn_dic_old) == dict:
+            if isinstance(rxn_dic_old, dict):
                 new_sub_dict = {}
-                for key in rxn_dic_old.keys():
+                for key, item in rxn_dic_old.items():
                     sub_key_str = str(key)
-                    item = rxn_dic_old[key]
-
-                    if sub_key_str == "num_reactants":
+                    if sub_key_str in [
+                        "functional_groups",
+                        "group_smarts",
+                        "example_rxn_reactants",
+                        "reverse_reaction_strings",
+                    ]:
+                        if isinstance(item, list):
+                            item = [str(i) for i in item]
+                    elif sub_key_str == "num_reactants":
                         item = int(item)
-                    elif sub_key_str == "functional_groups":
-                        new_list = []
-                        for i in item:
-                            i_str = str(i)
-                            new_list.append(i_str)
-
-                        item = new_list
                     else:
                         item = str(item)
 
@@ -604,19 +616,8 @@ def get_rxn_and_examples(current_rxn_dict):
     rxn_name = current_rxn_dict["reaction_name"]
     # Test example reactants
     example_smiles_rxn_reactants = current_rxn_dict["example_rxn_reactants"]
-    example_smiles_rxn_reactants = example_smiles_rxn_reactants.replace(
-        "['", ""
-    ).replace("']", "")
-    example_smiles_rxn_reactants = example_smiles_rxn_reactants.replace(
-        " ", ""
-    ).replace('"', "")
-    example_smiles_rxn_reactants = example_smiles_rxn_reactants.split("','")
-
     example_rxn_reactants = []
     for smiles_str in example_smiles_rxn_reactants:
-        smiles_str = smiles_str.replace("'", "").replace('"', "")
-        smiles_str = smiles_str.replace(" ", "")
-
         example_mol = Chem.MolFromSmiles(smiles_str)
 
         example_mol = MOH.check_sanitization(example_mol)
@@ -771,13 +772,11 @@ def run_main(params: Dict[str, Any]):
 
     output_folder = params["output_folder"]
     rxn_library_file = params["rxn_library_file"]
-    function_group_library = params["function_group_library"]
     complementary_mols = params["complementary_mol_directory"]
 
     rxn_library_variables = [
         rxn_library_path,
         rxn_library_file,
-        function_group_library,
         complementary_mols,
     ]
     new_mutation_smiles_list = []
@@ -837,26 +836,26 @@ def get_arguments_from_argparse(args_dict):
     :returns: dict args_dict: dictionary of parameters
     """
     # Argument handling
-    if args_dict["rxn_library_file"] == "" or args_dict["function_group_library"] == "":
+    if args_dict["rxn_library_file"] == "":
         raise ValueError(
             "TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY \
-                THE PATH TO THE REACTION LIBRARY USING INPUT PARAMETER rxn_library_path"
+    THE PATH TO THE REACTION LIBRARY USING INPUT PARAMETER rxn_library_path"
         )
     if os.path.exists(args_dict["rxn_library_file"]) is False:
         raise ValueError(
             "TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY \
-            THE PATH TO THE REACTION LIBRARY USING INPUT PARAMETER rxn_library_path"
+   THE PATH TO THE REACTION LIBRARY USING INPUT PARAMETER rxn_library_path"
         )
 
     if args_dict["complementary_mol_directory"] == "":
         raise ValueError(
             "TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY THE PATH \
-            TO THE REACTION LIBRARY USING INPUT PARAMETER function_group_library"
+   TO THE REACTION LIBRARY USING INPUT PARAMETER complementary_mol_directory"
         )
     if os.path.isdir(args_dict["complementary_mol_directory"]) is False:
         raise ValueError(
             "TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY THE PATH \
-            TO THE REACTION LIBRARY USING INPUT PARAMETER complementary_mol_directory"
+   TO THE REACTION LIBRARY USING INPUT PARAMETER complementary_mol_directory"
         )
 
     if "number_of_processors" not in args_dict.keys():
@@ -866,7 +865,7 @@ def get_arguments_from_argparse(args_dict):
     except Exception as e:
         raise ValueError(
             "number_of_processors must be an int. \
-            To use all processors set to -1."
+   To use all processors set to -1."
         ) from e
 
     if "output_folder" not in args_dict.keys():
@@ -915,25 +914,18 @@ PARSER.add_argument(
     help="This PATH to a Custom json file of SMARTS reactions to use for Mutation.",
 )
 PARSER.add_argument(
-    "--function_group_library",
-    type=str,
-    default="",
-    required=True,
-    help="This PATH for a dictionary of functional groups to be used for Mutation.",
-)
-PARSER.add_argument(
     "--complementary_mol_directory",
     type=str,
     default="",
     required=True,
     help="This PATH to the directory containing all the molecules being used \
-    to react with. The directory should contain .smi files contain SMILES of \
-    molecules containing the functional group represented by that file. Each file \
-    should be named with the same title as the functional groups described in \
-    rxn_library_file & function_group_library +.smi \
-    All Functional groups specified function_group_library must have its \
-    own .smi file. We recommend you filter these dictionaries prior to Autogrow \
-    for the Drug-likeliness and size filters you will Run Autogrow with.",
+ to react with. The directory should contain .smi files contain SMILES of \
+ molecules containing the functional group represented by that file. Each file \
+ should be named with the same title as the functional groups described in \
+ rxn_library_file +.smi \
+ All Functional groups specified function_group_library must have its \
+ own .smi file. We recommend you filter these dictionaries prior to Autogrow \
+ for the Drug-likeliness and size filters you will Run Autogrow with.",
 )
 PARSER.add_argument(
     "--output_folder",
@@ -941,9 +933,9 @@ PARSER.add_argument(
     default="",
     required=True,
     help="This PATH to where filtered .smi file and log files will be placed. \
-        Will save a file in this directory for mols which failed sanitization, \
-        mols which failed to react in specific reactions, and .smi files \
-        that contain all mols that reacted properly.",
+  Will save a file in this directory for mols which failed sanitization, \
+  mols which failed to react in specific reactions, and .smi files \
+  that contain all mols that reacted properly.",
 )
 # processors and multithread mode
 PARSER.add_argument(
@@ -952,7 +944,7 @@ PARSER.add_argument(
     type=int,
     default=-1,
     help="Number of processors to use for parallel calculations. \
-    Set to -1 for all available CPUs.",
+ Set to -1 for all available CPUs.",
 )
 
 

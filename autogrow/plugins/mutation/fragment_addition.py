@@ -203,8 +203,9 @@ class FragmentAddition(MutationBase):
 
         if not (hasattr(self, "functional_group_dict")):
             # Only load if not already loaded
-            self.functional_group_dict = self._load_functional_grps(rxn_library_path)
-
+            self.functional_group_dict = self._extract_functional_groups(
+                self.reaction_dict
+            )
         if not hasattr(self, "complementary_mol_dict"):
             # Only load if not already loaded
             self.complementary_mol_dict = self._load_complementary_mols(
@@ -216,10 +217,55 @@ class FragmentAddition(MutationBase):
         # Now called from setup, so only once, but think more about implementation.
         # existing_smiles: List[Compound],
         # self.existing_smiles = [
-        #     x.smiles for x in existing_smiles
+        #  x.smiles for x in existing_smiles
         # ]
 
         self._validate_rxn_lib()
+
+    def _extract_functional_groups(
+        self, reaction_dict: Dict[str, Any]
+    ) -> Dict[str, str]:
+        """
+        Extract functional groups and their SMARTS from the reaction dictionary.
+
+        Args:
+            reaction_dict (Dict[str, Any]): The dictionary of reactions.
+
+        Returns:
+            Dict[str, str]: A dictionary mapping functional group names to SMARTS strings.
+        """
+        functional_groups = {}
+        for rxn_name, rxn_details in reaction_dict.items():
+            if "functional_groups" in rxn_details and "group_smarts" in rxn_details:
+                for fg_name, fg_smarts in zip(
+                    rxn_details["functional_groups"], rxn_details["group_smarts"]
+                ):
+                    if fg_name not in functional_groups:
+                        functional_groups[fg_name] = fg_smarts
+        return functional_groups
+
+    def _validate_functional_group_definitions(self):
+        """
+        Validates that functional groups have consistent SMARTS definitions across all reactions.
+        Raises:
+            ValueError: If a functional group has multiple, conflicting SMARTS definitions.
+        """
+        func_grp_defs = {}
+        for reaction_name, reaction_info in self.reaction_dict.items():
+            for i, func_grp_name in enumerate(reaction_info["functional_groups"]):
+                func_grp_smarts = reaction_info["group_smarts"][i]
+                if func_grp_name not in func_grp_defs:
+                    func_grp_defs[func_grp_name] = func_grp_smarts
+                else:
+                    # Check if the existing definition matches the new one
+                    if func_grp_defs[func_grp_name] != func_grp_smarts:
+                        error_msg = (
+                            f"Multiple definitions for functional group '{func_grp_name}' "
+                            f"found in rxn_library.json. This must be consistent.\n"
+                            f"  Reaction '{reaction_name}' defines it as: {func_grp_smarts}\n"
+                            f"  Previous definition was: {func_grp_defs[func_grp_name]}"
+                        )
+                        raise ValueError(error_msg)
 
     def _validate_rxn_lib(self):
         """
@@ -249,7 +295,12 @@ class FragmentAddition(MutationBase):
 
             # Make sure they are all strings except functional_groups, which should be a list of strings.
             for x in val:
-                if x == "functional_groups":
+                if x in [
+                    "functional_groups",
+                    "group_smarts",
+                    "example_rxn_reactants",
+                    "reverse_reaction_strings",
+                ]:
                     continue
                 if x == "num_reactants":
                     continue
@@ -263,7 +314,15 @@ class FragmentAddition(MutationBase):
             assert all(
                 isinstance(x, str) for x in val["functional_groups"]
             ), f"Non-string value in functional_groups in reaction_dict: {key}"
-
+            assert isinstance(
+                val["group_smarts"], list
+            ), f"group_smarts is not a list in reaction_dict: {key}"
+            assert all(
+                isinstance(x, str) for x in val["group_smarts"]
+            ), f"Non-string value in group_smarts in reaction_dict: {key}"
+            assert len(val["functional_groups"]) == len(
+                val["group_smarts"]
+            ), f"Mismatch between functional_groups and group_smarts for {key}"
             assert isinstance(
                 val["num_reactants"], int
             ), "num_reactants is not an integer in reaction_dict"
@@ -291,6 +350,9 @@ class FragmentAddition(MutationBase):
                 assert isinstance(
                     self.complementary_mol_dict[group], list
                 ), f"Complementary molecules for {group} is not a list."
+
+        # After all other checks, validate functional group consistency
+        self._validate_functional_group_definitions()
 
     def _load_rxn_lib(self, rxn_library_path: str) -> Dict[str, Dict[str, Any]]:
         """
@@ -490,9 +552,8 @@ class FragmentAddition(MutationBase):
         and keys needing to be strings.
 
         Args:
-            old_dict (Dict[str, Any]): A dictionary of the reaction library or
+           old_dict (Dict[str, Any]): A dictionary of the reaction library or
                 functional groups. This is what is imported from the .json file.
-
         Returns:
             Dict[str, Any]: A dictionary of the reaction library or functional
                 groups where the unicode type items have been replaced with the
@@ -503,19 +564,18 @@ class FragmentAddition(MutationBase):
             key_str = str(rxn_key)
 
             # For reaction libraries
-            if type(rxn_dic_old) == dict:
+            if isinstance(rxn_dic_old, dict):
                 new_sub_dict = {}
-                for key in rxn_dic_old.keys():
+                for key, item in rxn_dic_old.items():
                     sub_key_str = str(key)
-                    item = rxn_dic_old[key]
-
-                    if sub_key_str == "functional_groups":
-                        new_list = []
-                        for i in item:
-                            i_str = str(i)
-                            new_list.append(i_str)
-
-                        item = new_list
+                    if sub_key_str in [
+                        "functional_groups",
+                        "group_smarts",
+                        "example_rxn_reactants",
+                        "reverse_reaction_strings",
+                    ]:
+                        if isinstance(item, list):
+                            item = [str(i) for i in item]
                     elif sub_key_str == "num_reactants":
                         item = int(item)
                     else:
@@ -525,9 +585,7 @@ class FragmentAddition(MutationBase):
                 new_dict[key_str] = new_sub_dict
 
             else:
-                item = old_dict[rxn_key]
-                new_dict[key_str] = str(item)
-
+                new_dict[key_str] = str(old_dict[rxn_key])
         return new_dict
 
     def _prepare_mol(
@@ -649,6 +707,12 @@ class FragmentAddition(MutationBase):
 
         for key in list(functional_group_dict.keys()):
             substructure = chemtoolkit.mol_from_smarts(functional_group_dict[key])
+            if substructure is None:
+                raise ValueError(
+                    f"Invalid SMARTS string for functional group '{key}': "
+                    f"'{functional_group_dict[key]}'. Please check your "
+                    f"rxn_library.json file."
+                )
             if mol_reprotanated.HasSubstructMatch(substructure):
                 list_subs_within_mol.append(key)
             elif mol_deprotanated.HasSubstructMatch(substructure):
