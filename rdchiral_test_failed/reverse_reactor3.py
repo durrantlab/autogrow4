@@ -10,12 +10,22 @@ from rdkit.Chem.Draw import rdMolDraw2D
 import os
 import sys
 
-# Assume reactions.json exists and is in the correct format
-with open("reactions.json", "r") as file:
-    contents = file.read()
-    # Replace some placeholders
-    contents = contents.replace("AZIDE_SEARCH", "[$(N=[N+]=[N-]),$([N-][N+]#N)]")
-    reactions = json.loads(contents)
+def validate_functional_group_defs(reactions):
+    func_grp_defs = {}
+    for reaction_name, reaction_info in reactions.items():
+        for i, func_grp_name in enumerate(reaction_info["functional_groups"]):
+            func_grp_smarts = reaction_info["group_smarts"][i]
+            if func_grp_name not in func_grp_defs:
+                func_grp_defs[func_grp_name] = func_grp_smarts
+            else:
+                # Check if the existing definition matches the new one
+                if func_grp_defs[func_grp_name] != func_grp_smarts:
+                    print(f"Warning: Functional group '{func_grp_name}' has multiple definitions:")
+                    print(f"  Existing: {func_grp_defs[func_grp_name]}")
+                    print(f"  New:      {func_grp_smarts}")
+                    # Optionally, you could raise an error here instead of just printing
+                    raise ValueError(f"Multiple definitions for functional group '{func_grp_name}'")
+
 
 def clean_undefined_stereo(smiles):
     mol = Chem.MolFromSmiles(smiles)
@@ -86,6 +96,7 @@ def clean_up_smiles(smiles: str) -> Optional[str]:
     smiles = smiles.replace("[Cl+]", "Cl")
     smiles = smiles.replace("[Br+]", "Br")
     smiles = smiles.replace("[I+]", "I")
+    smiles = smiles.replace("(=[O+])", "(=O)")  # Remove + from carbonyls
 
     # Strange tetrazole resonance structure I see in some SMILES
     smiles = smiles.replace("C2=N[N+]=NN2", "C2=NN=NN2")
@@ -324,6 +335,15 @@ def save_reaction_visualization(reaction_name: str, forward_reactants: List[str]
         except Exception as e2:
             print(f"Failed to save SVG fallback: {e2}")
 
+# Assume reactions.json exists and is in the correct format
+with open("reactions.json", "r") as file:
+    contents = file.read()
+    # Replace some placeholders
+    contents = contents.replace("AZIDE_SEARCH", "[$(N=[N+]=[N-]),$([N-][N+]#N)]")
+    reactions = json.loads(contents)
+
+validate_functional_group_defs(reactions)
+
 if len(sys.argv) > 1:
     # If a specific reaction is provided as an argument, filter the reactions
     specific_reaction = sys.argv[1]
@@ -410,7 +430,7 @@ for reaction_idx, reaction_name in enumerate(reactions):
         reverse_products_set = {clean_up_smiles(p) for p in all_reverse_products if clean_up_smiles(p)}
 
         if original_reactants_set.issubset(reverse_products_set):
-            print("Passed!") # , reaction_name, reverse_products_set)
+            print("Passed!", reaction_name) # , reverse_products_set)
             num_passed += 1
             
             # Save visualization for successful reaction
