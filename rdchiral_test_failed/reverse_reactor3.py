@@ -66,6 +66,7 @@ def clean_up_smiles(smiles: str) -> Optional[str]:
     smiles = smiles.replace("[CH3]", "C")
     smiles = smiles.replace("[CH]", "C")
     smiles = smiles.replace("[CH2-]", "C")
+    smiles = smiles.replace("[CH-]", "C")
     smiles = smiles.replace("[C]", "C")
     smiles = smiles.replace("[c]", "c")
     smiles = smiles.replace("[OH-]", "O")
@@ -121,7 +122,7 @@ def clean_up_smiles(smiles: str) -> Optional[str]:
     return smiles
 
 # --- MODIFIED FUNCTION ---
-def run_rxn(rxn_string: str, reactants_smi_list: List[str])-> List[List[str]]:
+def run_rxn(rxn_string: str, reactants_smi_list: List[str], metadata=None)-> List[List[str]]:
     """
     Runs a reaction with a list of reactant SMILES and returns the product sets.
     
@@ -161,6 +162,7 @@ def run_rxn(rxn_string: str, reactants_smi_list: List[str])-> List[List[str]]:
                     print(f"Warning: Failed to clean up product SMILES: {Chem.MolToSmiles(product)}")
                     print(f"Reaction string: {rxn_string}")
                     print(f"Reactants: {reactants_smi_list}")
+                    print(f"Metadata: {metadata}")
                     print("")
         if product_smiles:
             # Sort the smiles in each set to make comparisons order-independent
@@ -399,7 +401,7 @@ for reaction_idx, reaction_name in enumerate(reactions):
             for reverse_reaction_string in reverse_reaction_strings:
                 # For each product in the current product set, run the reverse reaction
                 for reverse_reactant in reverse_reactants_set:
-                    reverse_products = run_rxn(reverse_reaction_string, [reverse_reactant])
+                    reverse_products = run_rxn(reverse_reaction_string, [reverse_reactant], metadata=forward_reactants)
                     for r in reverse_products:
                         all_reverse_products.extend(iter(r))
         # Convert everything to sets
