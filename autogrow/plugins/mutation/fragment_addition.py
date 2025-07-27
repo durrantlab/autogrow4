@@ -21,6 +21,11 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from autogrow.config.argument_vars import ArgumentVars
 
 from autogrow.plugins.mutation import MutationBase
+from autogrow.plugins.mutation.utils import (
+    load_reaction_library,
+    validate_product,
+    validate_rxn_library_path,
+)
 from autogrow.types import Compound
 from autogrow.utils.logging import log_debug, log_warning
 import copy
@@ -97,23 +102,7 @@ class FragmentAddition(MutationBase):
         Raises:
          ValueError: If rxn_library_path is not provided or is invalid.
         """
-        if "rxn_library_path" not in params:
-            raise ValueError("rxn_library_path must be provided.")
-
-        # Make sure the rxn_library_path is a valid path
-        if os.path.exists(params["rxn_library_path"]) is False:
-            internal_lib = os.path.join(
-                os.path.dirname(__file__),
-                "reaction_libraries",
-                params["rxn_library_path"],
-            )
-            if os.path.exists(internal_lib):
-                params["rxn_library_path"] = internal_lib
-            else:
-                raise ValueError(
-                    "rxn_library_path is not a valid path. "
-                    "Please provide a valid path to the reaction library."
-                )
+        validate_rxn_library_path(params)
 
         min_mw = params.get("min_fragment_mol_weight")
         max_mw = params.get("max_fragment_mol_weight")
@@ -199,7 +188,7 @@ class FragmentAddition(MutationBase):
 
         if not hasattr(self, "reaction_dict"):
             # Only load if not already loaded
-            self.reaction_dict = self._load_rxn_lib(rxn_library_path)
+            self.reaction_dict = load_reaction_library(rxn_library_path)
 
         if not (hasattr(self, "functional_group_dict")):
             # Only load if not already loaded
@@ -354,74 +343,6 @@ class FragmentAddition(MutationBase):
         # After all other checks, validate functional group consistency
         self._validate_functional_group_definitions()
 
-    def _load_rxn_lib(self, rxn_library_path: str) -> Dict[str, Dict[str, Any]]:
-        """
-        Load the chemical reactions for SmartClickChem.
-
-        This is where all the chemical reactions for SmartClickChem are
-        retrieved.
-
-        The reactions are written as SMARTS-reaction strings. This dictionary
-        uses the reaction name as the key and the Reaction Smarts as the value.
-
-        Args:
-            rxn_library_path (str): A string defining the choice of the reaction
-                library.
-
-        Returns:
-            Dict[str, Dict[str, Any]]: A dictionary containing all the reactions
-                and all the information required to run the reaction.
-
-        Raises:
-            Exception: If the rxn_library file cannot be imported or if the
-                rxn_library_path is incorrectly formatted.
-        """
-        return self._load_reformatted_rxn_dict(
-            rxn_library_path,
-            "rxn_library.json",
-            "rxn_library_file json file not able to be imported.",
-            " Check that the rxn_library_path is formatted correctly",
-        )
-
-    def _load_functional_grps(self, rxn_library_path: str) -> Dict[str, str]:
-        r"""
-        Load the functional groups required for the respective reactions.
-
-        This retrieves a dictionary of all functional groups required for the
-        respective reactions. This dictionary will be used to identify possible
-        reactions.
-
-        Note: If your functional groups involve stereochemistry notations such
-        as '\', please replace with '\\' (all functional groups should be
-        formatted as SMARTS)
-
-        Args:
-            rxn_library_path (str): A string defining the choice of the reaction library.
-
-        Returns:
-            Dict[str, str]: A dictionary containing all SMARTS for identifying
-                the functional groups.
-
-        Raises:
-            Exception: If the function_group_library json file cannot be
-                imported or if the rxn_library_path is incorrectly formatted.
-        """
-        return self._load_reformatted_rxn_dict(
-            rxn_library_path,
-            "functional_groups.json",
-            "function_group_library json file not able to be imported. ",
-            "Check that the rxn_library_path is formatted correctly",
-        )
-
-    def _load_reformatted_rxn_dict(self, rxn_library_path, arg1, arg2, arg3):
-        rxn_library_file = os.path.join(rxn_library_path, arg1)
-        try:
-            with open(rxn_library_file, "r") as rxn_file:
-                reaction_dict_raw = json.load(rxn_file)
-        except Exception as e:
-            raise Exception((arg2 + arg3)) from e
-        return self._reformat_rxn_dict(reaction_dict_raw)
-
     def _load_complementary_mols(
         self, rxn_library_path: str
     ) -> Dict[str, List[List[str]]]:
@@ -534,59 +455,6 @@ class FragmentAddition(MutationBase):
             )
 
         return complementary_mols_dict
-
-    def _reformat_rxn_dict(self, old_dict: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Convert json dictionary items to appropriate Python data types.
-
-        Json dictionaries import as type unicode. This script converts all the
-        keys and items to strings, with a few specific exceptions. It takes both
-        the functional group dictionary and the reaction library.
-
-        The reaction library is a dictionary of dictionaries and has a few
-        exceptions which are not intended to be strings, i.e., the num_reactants
-        which converts to integer and functional_groups which convert to a list
-        of strings.
-
-        The functional_group_dictionary is simply a dictionary with all items
-        and keys needing to be strings.
-
-        Args:
-           old_dict (Dict[str, Any]): A dictionary of the reaction library or
-                functional groups. This is what is imported from the .json file.
-        Returns:
-            Dict[str, Any]: A dictionary of the reaction library or functional
-                groups where the unicode type items have been replaced with the
-                proper Python data types.
-        """
-        new_dict = {}
-        for rxn_key, rxn_dic_old in old_dict.items():
-            key_str = str(rxn_key)
-
-            # For reaction libraries
-            if isinstance(rxn_dic_old, dict):
-                new_sub_dict = {}
-                for key, item in rxn_dic_old.items():
-                    sub_key_str = str(key)
-                    if sub_key_str in [
-                        "functional_groups",
-                        "group_smarts",
-                        "example_rxn_reactants",
-                        "reverse_reaction_strings",
-                    ]:
-                        if isinstance(item, list):
-                            item = [str(i) for i in item]
-                    elif sub_key_str == "num_reactants":
-                        item = int(item)
-                    else:
-                        item = str(item)
-
-                    new_sub_dict[sub_key_str] = item
-                new_dict[key_str] = new_sub_dict
-
-            else:
-                new_dict[key_str] = str(old_dict[rxn_key])
-        return new_dict
 
     def _prepare_mol(
         self, ligand_smiles: str
@@ -830,7 +698,9 @@ class FragmentAddition(MutationBase):
             if reaction_products_list:
                 for reaction_product in reaction_products_list:
                     # Filter and check the product is valid
-                    reaction_product_smiles = self._validate_product(reaction_product, parent_info)
+                    reaction_product_smiles = validate_product(
+                        reaction_product, parent_info, self.plugin_managers
+                    )
                     if reaction_product_smiles is not None:
                         reaction_id_number = a_reaction_dict["RXN_NUM"]
                         return [(reaction_product_smiles, reaction_id_number, None)]
@@ -955,8 +825,8 @@ class FragmentAddition(MutationBase):
             if reaction_products_list:
                 for reaction_product in reaction_products_list:
                     # Filter and check if the product is valid
-                    reaction_product_smiles = self._validate_product(
-                        reaction_product, parent_info
+                    reaction_product_smiles = validate_product(
+                        reaction_product, parent_info, self.plugin_managers
                     )
                     if reaction_product_smiles is not None:
                         reaction_id_number = a_reaction_dict["RXN_NUM"]
@@ -973,91 +843,6 @@ class FragmentAddition(MutationBase):
                         )
                         break  # Move to the next mutant in the batch
         return products if products else None
-
-    def _validate_product(self, reaction_product, parent_info):
-        """
-        Validate the reaction product.
-
-        This function will test whether the product passes all of the
-        requirements:
-
-        1) Mol sanitizes
-        2) It passes Filters
-
-        Args:
-            reaction_product (Chem.Mol): An rdkit molecule to be checked.
-
-        Returns:
-            Optional[str]: The SMILES string of the validated product if it
-                passes all checks, or None if it fails any check.
-        """
-        reaction_product = MOH.check_sanitization(reaction_product)
-        if reaction_product is None:
-            return None
-
-        # Remove any fragments incase 1 made it through
-        reaction_product = MOH.handle_frag_check(reaction_product)
-        if reaction_product is None:
-            return None
-
-        # Make sure there are no unassigned atoms which made it through. These
-        # are very unlikely but possible
-        reaction_product = MOH.check_for_unassigned_atom(reaction_product)
-        if reaction_product is None:
-            return None
-
-        reaction_product = MOH.try_reprotanation(reaction_product)
-        if reaction_product is None:
-            return None
-
-        # Remove H's
-        reaction_product = MOH.try_deprotanation(reaction_product)
-        if reaction_product is None:
-            return None
-
-        reaction_product = MOH.check_sanitization(reaction_product)
-        if reaction_product is None:
-            return None
-
-        chemtoolkit = plugin_managers.ChemToolkit.toolkit
-
-        # Check if product SMILE has been made before
-        reaction_product_smiles: str = chemtoolkit.mol_to_smiles(
-            reaction_product, isomeric_smiles=True
-        )
-
-        # NOTE: I think duplicate smiles are eliminated in the function that
-        # calls this plugin. No need to do that here.
-
-        # if reaction_product_smiles in self.existing_smiles:
-        #     return None
-
-        # Run through filters
-        # passed_filter = Filter.run_filter_on_just_smiles(
-        #     reaction_product_smiles, self.filter_object_dict
-        # )
-        # TODO: Not good for this to be here. Should be applied to all
-        # mutations. Perhpas in execute_mutation.py, just as there is analogous
-        # code in execute_crossover.py.
-        assert self.plugin_managers is not None, "Plugin managers not set"
-
-        # TODO: Filter accepts a list of Compound. So we need to
-        # convert smiles string to that just for the purpose of filtering.
-        tmp_predock_cmpd = Compound(smiles=reaction_product_smiles, id="tmp")
-
-        passed_filter = (
-            len(self.plugin_managers.SmilesFilter.run(predock_cmpds=[tmp_predock_cmpd]))
-            > 0
-        )
-        if passed_filter and len(plugin_managers.DeepFragFilter.plugins) > 0:
-            tmp_predock_cmpd.parent_3D_mols = [parent_info.mol_3D]
-            passed_filter = (
-                    len(plugin_managers.DeepFragFilter.run(input_params=plugin_managers.DeepFragFilter.params,
-                                                           compounds=[tmp_predock_cmpd]))
-                    > 0
-            )
-
-        return reaction_product_smiles if passed_filter else None
 
     def _get_random_complementary_mol(
         self, functional_group: str
