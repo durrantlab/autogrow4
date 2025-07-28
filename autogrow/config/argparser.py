@@ -419,7 +419,7 @@ def _add_ga_params(parser: argparse._ArgumentGroup):
         "--mutants_per_batch",
         type=int,
         default=1,
-        help="For each mutation, generate this many new molecules. Use higher numbers for better DeepFrag caching.",
+        help="For each mutation, generate this many new molecules. Use higher numbers for better DeepFrag caching and to improve the chances of finding highly relevant DeepFrag matches.",
     )
 
 def _add_conversion_params(parser: argparse._ArgumentGroup):
