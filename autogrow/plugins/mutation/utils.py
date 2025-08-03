@@ -172,17 +172,4 @@ def validate_product(
     passed_filter = (
         len(plugin_managers_obj.SmilesFilter.run(predock_cmpds=[tmp_predock_cmpd])) > 0
     )
-
-    if passed_filter and len(plugin_managers_obj.DeepFragFilter.plugins) > 0:
-        tmp_predock_cmpd.parent_3D_mols = [parent_info.mol_3D]
-        passed_filter = (
-            len(
-                plugin_managers_obj.DeepFragFilter.run(
-                    input_params=plugin_managers_obj.DeepFragFilter.params,
-                    compounds=[tmp_predock_cmpd],
-                )
-            )
-            > 0
-        )
-
     return product_smiles if passed_filter else None

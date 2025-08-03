@@ -158,32 +158,22 @@ class DeepFragFilter(DeepFragFilterBase):
         return result
 
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
-        return (
-            "DeepFragFilter",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    type=float,
-                    default=False,
-                    help="An value representing the cosine similarity value to be "
-                         "considered as cutoff in order to a molecule pass the filter or "
-                         "not",
-                ),
-                ArgumentVars(
-                    name="DeepFragModel",
-                    type=str,
-                    default=None,
-                    help="path to the DeepFrag model that is .ckpt file",
-                ),
-                ArgumentVars(
-                    name="DeepFragOnCPU",
-                    action="store_true",
-                    default=False,
-                    help="Use CPU to run DeepFrag.",
-                )
-            ],
-        )
-
+        group_name, parent_args = super().add_arguments()
+        child_args = [
+            ArgumentVars(
+                name="DeepFragModel",
+                type=str,
+                default=None,
+                help="path to the DeepFrag model that is .ckpt file",
+            ),
+            ArgumentVars(
+                name="DeepFragOnCPU",
+                action="store_true",
+                default=False,
+                help="Use CPU to run DeepFrag.",
+            )
+        ]
+        return group_name, parent_args + child_args
     def download_deepfrag_ckpt(self, deepfrag_model_ckpt, deepfrag_model_url):
         """Download an in-house DeepFrag model checkpoint."""
 

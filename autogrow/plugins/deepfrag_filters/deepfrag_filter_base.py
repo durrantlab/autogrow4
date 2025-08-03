@@ -64,11 +64,13 @@ class DeepFragFilterBase(PluginBase):
                     passed_filter = True
                     similarity_str = None
                     if len(compound.parent_3D_mols) == 1:
+                        # This is a standard mutation
                         mcs_mol, _, fragments = self.__find_mcs_and_fragments(compound.parent_3D_mols[0], Chem.MolFromSmiles(compound.smiles))
                         similarity = self.__compute_cosine_similarity(receptor, mcs_mol, fragments)
                         passed_filter = similarity >= cutoff
                         similarity_str = f"{similarity:.3f}" if similarity is not None else "None"
                     elif self.apply_on_crossover and len(compound.parent_3D_mols) == 2:
+                        # This is a standard crossover
                         mcs_mol, _, fragments = self.__find_mcs_and_fragments(compound.parent_3D_mols[0], Chem.MolFromSmiles(compound.smiles))
                         similarity_0 = self.__compute_cosine_similarity(receptor, mcs_mol, fragments)
                         mcs_mol, _, fragments = self.__find_mcs_and_fragments(compound.parent_3D_mols[1], Chem.MolFromSmiles(compound.smiles))
@@ -124,9 +126,9 @@ class DeepFragFilterBase(PluginBase):
                     name=self.name,
                     type=float,
                     default=False,
-                    help="An value representing the cosine similarity value to be "
-                         "considered as cutoff in order to a molecule pass the filter or "
-                         "not.",
+                    help="The minimum cosine similarity score required for a molecule to pass the filter. \
+                        This filter is applied to the products of multi-reactant fragment additions. See \
+                        also --DeepFragFilterForCrossover.",
                 ),
                 ArgumentVars(
                     name="DeepFragFilterForCrossover",

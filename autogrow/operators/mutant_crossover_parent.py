@@ -179,10 +179,14 @@ class CompoundGenerator(ABC):
                             updated_history = result.parent_cmpds[0]._history[:]
                         else:
                             # Likely crossover. Multiple parents, so extend each history.
-                            updated_history = [p._history[:] for p in result.parent_cmpds]
+                            updated_history = [
+                                p._history[:] for p in result.parent_cmpds
+                            ]
                         parent_3D_mols = None
                         if len(plugin_managers.DeepFragFilter.plugins) > 0:
-                            parent_3D_mols = [parent.mol_3D for parent in result.parent_cmpds]
+                            parent_3D_mols = [
+                                parent.mol_3D for parent in result.parent_cmpds
+                            ]
                         ligand_info = Compound(
                             smiles=result.child_smiles,
                             id=new_lig_id,

@@ -454,23 +454,20 @@ def _generate_compounds(
     # Remove Nones
     new_compounds = [x for x in new_compounds if x is not None]
 
-    # List of SMILES from generation
-    new_compounds_list: List[Compound] = []
-
-    for i in new_compounds:
-        new_compounds_list.append(i)
-        if len(new_compounds_list) == num_compounds:
-            break
+    # List of SMILES from generation. Keep only first num_compounds
+    if len(new_compounds) >= num_compounds:
+        random.shuffle(new_compounds)
+        new_compounds = new_compounds[:num_compounds]
 
     # Save new compounds list
     _save_ligand_list(
         params["output_directory"],
         generation_num,
-        new_compounds_list,
+        new_compounds,
         f"Chosen_{compound_type[:1].upper()}{compound_type[1:]}",
     )
 
-    return new_compounds_list
+    return new_compounds
 
 
 # def _generate_mutations(

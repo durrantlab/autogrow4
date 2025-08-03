@@ -331,6 +331,9 @@ def _do_crossovers_smiles_merge(
                 len(plugin_managers.SmilesFilter.run(predock_cmpds=[tmp_predock_cmpd]))
                 > 0
             )
+
+            # TODO: Should applying DeepFrag to crossovers even be an option
+            # (false by default)? Just doesn't make a lot of sense conceptually.
             if passed_filter and len(plugin_managers.DeepFragFilter.plugins) > 0:
                 tmp_predock_cmpd.parent_3D_mols = [lig1_predock_cmpd.mol_3D, lig2_predock_cmpd.mol_3D]
                 passed_filter = (
