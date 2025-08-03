@@ -693,17 +693,17 @@ class FragmentAddition(MutationBase):
         self, rxn: Any, mol_to_use: Any, a_reaction_dict: Dict[str, Any], parent_info: Compound
     ) -> Optional[List[Tuple[str, int, Optional[str]]]]:
         """
-        Try a single reactant reaction once, returning all valid products.
+        Try a single reactant reaction once, returning a single randomly chosen valid product.
         Args:
-         rxn (AllChem.ChemicalReaction): The reaction object.
-         mol_to_use (Chem.Mol): The molecule to react.
-         a_reaction_dict (Dict[str, Any]): The reaction dictionary.
-         parent_info (Compound): The parent compound information.
+            rxn (AllChem.ChemicalReaction): The reaction object.
+            mol_to_use (Chem.Mol): The molecule to react.
+            a_reaction_dict (Dict[str, Any]): The reaction dictionary.
+            parent_info (Compound): The parent compound information.
         Returns:
-         Optional[List[Tuple[str, int, Optional[str]]]]: A list of tuples
-          for each valid product, containing the reaction product SMILES,
-          reaction ID number, and None. Returns None if the reaction fails or
-          produces no valid products.
+            Optional[List[Tuple[str, int, Optional[str]]]]: A list containing a
+                single tuple for a valid product, with the reaction product SMILES,
+                reaction ID number, and None. Returns None if the reaction fails or
+                produces no valid products.
         """
         products = []
         with contextlib.suppress(Exception):
@@ -728,6 +728,8 @@ class FragmentAddition(MutationBase):
                         products.append(
                             (reaction_product_smiles, reaction_id_number, None)
                         )
+                        # Only take the first valid product from a single reaction run
+                        break
         return products if products else None
 
     def _try_multi_reactant_reaction(
@@ -766,7 +768,7 @@ class FragmentAddition(MutationBase):
                 continue  # Failed to assemble reactants, try next mutant in batch
 
             tuple_reactant_mols, comp_mol_ids = reactant_info
-            products = self._run_reaction_and_get_products(
+            products = self._run_multi_reactant_reaction_and_get_products(
                 rxn, tuple_reactant_mols, comp_mol_ids, a_reaction_dict, parent_info
             )
             batch_products.extend(products)
@@ -875,7 +877,8 @@ class FragmentAddition(MutationBase):
                 return comp_mol_reprotanated, comp_id
 
         return None
-    def _run_reaction_and_get_products(
+
+    def _run_multi_reactant_reaction_and_get_products(
         self,
         rxn: Any,
         tuple_reactant_mols: Tuple[Any, ...],
@@ -921,6 +924,7 @@ class FragmentAddition(MutationBase):
                 # Only take the first valid product from a single reaction run
                 break
         return products
+
     def _filter_products_with_deepfrag(
         self,
         products: List[Tuple[str, int, Optional[str]]],
