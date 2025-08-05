@@ -1,5 +1,5 @@
 import json
-from typing import List, Optional, Set
+from typing import List, Optional, Set, Tuple
 from rdkit import Chem
 from rdkit.Chem import AllChem
 import re
@@ -11,7 +11,6 @@ import sys
 import enum
 from rdkit.Chem import Draw
 
-# --- NEW ENUM TO DESCRIBE REACTION OUTCOMES ---
 class ReactionStatus(enum.Enum):
     """Enum to represent the outcome of a reaction test."""
     SUCCESS = "SUCCESS"
@@ -215,16 +214,48 @@ def clean_up_smiles(smiles: str) -> Optional[str]:
 
     return smiles
 
-def run_rxn(rxn_string: str, reactants_smi_list: List[str], metadata=None)-> List[List[str]]:
+# --- NEW VISUALIZATION FUNCTION FOR CLEANUP FAILURES ---
+def save_cleanup_failure_visualization(reaction_name: str, 
+                                       reactant_smi_list: List[str], 
+                                       failed_mol: Chem.Mol, 
+                                       reactant_idx: int, 
+                                       form_name: str,
+                                       reaction_step: str) -> None:
     """
-    Runs a reaction with a list of reactant SMILES and returns the product sets.
+    Saves a specific PNG showing the reactants that led to an un-cleanable product.
+    """
+    viz_dir = "reaction_visualizations"
+    os.makedirs(viz_dir, exist_ok=True)
+    safe_reaction_name = re.sub(r'[^\w\-_\.]', '_', reaction_name)
     
-    Args:
-        rxn_string: The SMARTS reaction string.
-        reactants_smi_list: A list of SMILES strings for the reactants.
-        
-    Returns:
-        A list of product sets, where each product set is a list of SMILES strings.
+    reactant_mols = [Chem.MolFromSmiles(smi) for smi in reactant_smi_list if Chem.MolFromSmiles(smi) is not None]
+    
+    all_mols = reactant_mols + [None, failed_mol]
+    legends = ([f"Reactant {i+1}" for i in range(len(reactant_mols))] + 
+              ["→"] + 
+              ["Uncleanable Product"])
+    
+    status = f"FAIL_CLEANUP_{reaction_step}"
+    
+    png_filename = f"{viz_dir}/{safe_reaction_name}_{reactant_idx:03d}_{form_name}_{status}.png"
+    
+    try:
+        max_per_row = len(reactant_mols) + 2
+        img = Draw.MolsToGridImage(all_mols, molsPerRow=max_per_row, subImgSize=(250, 250), legends=legends, useSVG=False)
+        img.save(png_filename, "PNG")
+        print(f"Saved cleanup failure visualization: {png_filename}")
+    except Exception as e:
+        print(f"Failed to save cleanup failure PNG visualization {png_filename}: {e}")
+
+# --- MODIFIED run_rxn FUNCTION ---
+def run_rxn(rxn_string: str, 
+            reactants_smi_list: List[str], 
+            reaction_name: str, 
+            reactant_idx: int, 
+            form_name: str,
+            reaction_step: str) -> List[List[str]]:
+    """
+    Runs a reaction, visualizes any cleanup failures on the fly, and returns only valid product sets.
     """
     rxn = AllChem.ReactionFromSmarts(rxn_string)
     
@@ -245,18 +276,31 @@ def run_rxn(rxn_string: str, reactants_smi_list: List[str], metadata=None)-> Lis
         product_smiles = []
         for product in product_set:
             if product is not None:
-                # Sanitize the molecule to avoid errors in MolToSmiles
-                # Chem.SanitizeMol(product)
-                smiles = Chem.MolToSmiles(product)
-                smiles = clean_up_smiles(smiles)
-                if smiles:
-                    product_smiles.append(smiles)
-                else:
-                    print(f"Warning: Failed to clean up product SMILES: {Chem.MolToSmiles(product)}")
-                    print(f"Reaction string: {rxn_string}")
-                    print(f"Reactants: {reactants_smi_list}")
-                    print(f"Metadata: {metadata}")
-                    print("")
+                try:
+                    # Attempt to get a SMILES string first
+                    raw_smiles = Chem.MolToSmiles(product)
+                    # Now attempt to clean it
+                    cleaned_smiles = clean_up_smiles(raw_smiles)
+
+                    if cleaned_smiles:
+                        product_smiles.append(cleaned_smiles)
+                    else:
+                        # This is a failure to clean!
+                        print(f"Warning: Failed to clean up product SMILES: {raw_smiles}")
+                        # Immediately save a visualization of this specific failure
+                        save_cleanup_failure_visualization(
+                            reaction_name, reactants_smi_list, product, 
+                            reactant_idx, form_name, reaction_step
+                        )
+                except Exception as e:
+                    # RDKit can fail even on MolToSmiles for some malformed products
+                    print(f"Warning: MolToSmiles failed for a product. {e}")
+                    # Also save a visualization for this failure type
+                    save_cleanup_failure_visualization(
+                        reaction_name, reactants_smi_list, product,
+                        reactant_idx, form_name, reaction_step
+                    )
+
         if product_smiles:
             # Sort the smiles in each set to make comparisons order-independent
             predicted_products.append(sorted(product_smiles))
@@ -341,20 +385,9 @@ def save_reaction_visualization(reaction_name: str, forward_reactants: List[str]
                                reverse_products_set: set, reactant_index: int, 
                                form_name: str, success: bool = True) -> None:
     """
-    Save a visualization of the reaction pathway as PNG.
-    
-    Args:
-        reaction_name: Name of the reaction
-        forward_reactants: List of reactant SMILES
-        forward_products: List of product sets from forward reaction
-        all_reverse_products: List of reverse reaction products
-        original_reactants_set: Set of cleaned original reactant SMILES
-        reverse_products_set: Set of cleaned reverse product SMILES
-        reactant_index: Index of the current reactant set
-        form_name: The SMILES form tested (e.g., 'aromatic', 'kekule')
-        success: Whether the reaction was successful
+    Save a visualization of the PASS/FAIL reaction pathway.
     """
-    # Create a directory for reaction visualizations if it doesn't exist
+    # This function reverts to its simpler form, no longer needing to handle failed mols.
     viz_dir = "reaction_visualizations"
     os.makedirs(viz_dir, exist_ok=True)
 
@@ -363,62 +396,25 @@ def save_reaction_visualization(reaction_name: str, forward_reactants: List[str]
     
     # Get actual molecules for original reactants
     reactant_mols = [Chem.MolFromSmiles(smi) for smi in forward_reactants if Chem.MolFromSmiles(smi) is not None]
-    
-    # Get product molecules from forward reaction
-    product_mols = []
-    for reverse_reactants_set in forward_products:
-        for product_smi in reverse_reactants_set:
-            mol = Chem.MolFromSmiles(product_smi)
-            if mol is not None:
-                product_mols.append(mol)
+    product_mols = [Chem.MolFromSmiles(smi) for p_set in forward_products for smi in p_set if Chem.MolFromSmiles(smi)]
+    reverse_mols = [Chem.MolFromSmiles(smi) for smi in reverse_products_set if Chem.MolFromSmiles(smi)]
 
-    # Get reverse product molecules - use the cleaned set that's actually being compared
-    reverse_mols = []
-    for smi in reverse_products_set:
-        mol = Chem.MolFromSmiles(smi)
-        if mol is not None:
-            reverse_mols.append(mol)
-
-    # Create comprehensive visualization showing the full reaction pathway
     all_mols = reactant_mols + [None] + product_mols + [None] + reverse_mols
-    legends = ([f"Reactant {i+1}" for i in range(len(reactant_mols))] + 
-              ["→"] + 
-              [f"Product {i+1}" for i in range(len(product_mols))] + 
-              ["Reverse→"] + 
-              [f"Reverse {i+1}" for i in range(len(reverse_mols))])
+    legends = ([f"Reactant {i+1}" for i in range(len(reactant_mols))] + ["→"] + 
+              [f"Fwd Prod {i+1}" for i in range(len(product_mols))] + ["Rev→"] + 
+              [f"Rev Prod {i+1}" for i in range(len(reverse_mols))])
 
-    # Add information about missing reactants if failed
-    if not success:
-        missing_reactants = original_reactants_set - reverse_products_set
-        print(f"Missing from reverse products: {missing_reactants}")
-
-    # Determine the status for filename
     status = "PASS" if success else "FAIL"
-    
-    # Save the comprehensive reaction pathway as PNG
     png_filename = f"{viz_dir}/{safe_reaction_name}_{reactant_index:03d}_{form_name}_{status}.png"
     
     try:
-        # RDKit's MolsToGridImage returns a PIL Image when useSVG=False
-        img = Draw.MolsToGridImage(all_mols, molsPerRow=max(len(reactant_mols), len(product_mols), len(reverse_mols)) + 1, 
-                                  subImgSize=(200, 200), legends=legends, useSVG=False)
-        # Save the PIL Image directly
-        img.save(png_filename, "PNG")
-        # print(f"Saved reaction visualization: {png_filename}")
+        max_per_row = max(len(reactant_mols), len(product_mols), len(reverse_mols)) + 1
+        img = Draw.MolsToGridImage(all_mols, molsPerRow=max_per_row, subImgSize=(200, 200), legends=legends, useSVG=False)
+        img.save(png_filename)
     except Exception as e:
         print(f"Failed to save PNG visualization {png_filename}: {e}")
-        # Fallback to SVG if PNG fails
-        try:
-            svg_filename = f"{viz_dir}/{safe_reaction_name}_{reactant_index:03d}_{form_name}_{status}.svg"
-            img_svg = Draw.MolsToGridImage(all_mols, molsPerRow=max(len(reactant_mols), len(product_mols), len(reverse_mols)) + 1, 
-                                          subImgSize=(200, 200), legends=legends, useSVG=True)
-            with open(svg_filename, 'w') as f:
-                f.write(img_svg)
-            print(f"Saved SVG fallback: {svg_filename}")
-        except Exception as e2:
-            print(f"Failed to save SVG fallback: {e2}")
 
-# --- MODIFIED FUNCTION ---
+# --- MODIFIED execute_and_verify_reaction FUNCTION ---
 def execute_and_verify_reaction(
     reaction_name: str,
     reaction_info: dict,
@@ -427,37 +423,35 @@ def execute_and_verify_reaction(
     form_name: str,
 ) -> ReactionStatus:
     """
-    Runs the forward and reverse reaction for a given set of reactants and verifies the outcome.
-    
-    Returns:
-        A ReactionStatus enum member indicating the outcome.
+    Runs the full forward and reverse reaction cycle and returns a status.
+    Cleanup failures are now handled inside run_rxn and do not halt this function.
     """
     reaction_string = reaction_info["reaction_string"]
     reverse_reaction_strings = reaction_info.get("reverse_reaction_strings", [])
 
-    # First, do the forward reaction
-    forward_products = run_rxn(reaction_string, reactants_to_test)
+    # Forward reaction call now includes context for visualization
+    forward_products = run_rxn(
+        reaction_string, reactants_to_test, 
+        reaction_name, reactant_idx, form_name, "forward"
+    )
 
-    # Check if forward reaction failed to produce anything
     if not forward_products:
-        print(f"INFO: No products generated for forward reaction ({form_name}): {reactants_to_test}")
-        return ReactionStatus.FORWARD_FAILURE
-    
-    # Check if any products are None
-    if any(p is None for t1 in forward_products for p in t1):
-        print(f"Invalid products found in forward reaction for {reaction_name}: {forward_products}")
+        print(f"INFO: No valid products generated for forward reaction ({form_name}): {reactants_to_test}")
         return ReactionStatus.FORWARD_FAILURE
 
-    # Now, apply each of the reverse reactions to each of the products
+    # Reverse reaction
     all_reverse_products = []
     for reverse_reactants_set in forward_products:
         for reverse_reaction_string in reverse_reaction_strings:
-            reverse_products = run_rxn(reverse_reaction_string, reverse_reactants_set, metadata=reactants_to_test)
+            # Reverse reaction call also includes context
+            reverse_products = run_rxn(
+                reverse_reaction_string, reverse_reactants_set,
+                reaction_name, reactant_idx, form_name, "reverse"
+            )
             for r in reverse_products:
                 all_reverse_products.extend(iter(r))
     
-    # Convert everything to sets for comparison
-    all_reverse_products_before_cleaning = set(all_reverse_products[:])
+    # Comparison logic remains the same
     original_reactants_set = {clean_up_smiles(p) for p in reactants_to_test if clean_up_smiles(p)}
     reverse_products_set = {clean_up_smiles(p) for p in all_reverse_products if clean_up_smiles(p)}
 
@@ -468,11 +462,11 @@ def execute_and_verify_reaction(
                                   reverse_products_set, reactant_idx, form_name, success=True)
         return ReactionStatus.SUCCESS
     else:
-        # A reverse reaction failed. Generate the detailed prompt before returning.
+        # Save visualization for a true reverse failure
         save_reaction_visualization(reaction_name, reactants_to_test, forward_products,
                                   all_reverse_products, original_reactants_set,
                                   reverse_products_set, reactant_idx, form_name, success=False)
-
+        # And print the LLM debug prompt
         generate_llm_debug_prompt(
             reaction_name=reaction_name,
             form_name=form_name,
@@ -480,7 +474,7 @@ def execute_and_verify_reaction(
             forward_reactants=reactants_to_test,
             forward_products=forward_products,
             reverse_smarts_list=reverse_reaction_strings,
-            reverse_products_raw=all_reverse_products_before_cleaning,
+            reverse_products_raw=set(all_reverse_products),
             original_reactants_cleaned=original_reactants_set,
             reverse_products_cleaned=reverse_products_set,
         )
