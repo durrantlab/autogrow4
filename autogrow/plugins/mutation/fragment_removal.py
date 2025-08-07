@@ -23,6 +23,8 @@ import autogrow.utils.mol_object_handling as MOH
 
 # Set to True to enable image-based debugging for this plugin
 DEBUG = False
+MIN_FRAGMENT_HEAVY_ATOMS = 5
+
 
 class FragmentRemoval(MutationBase):
     """
@@ -132,43 +134,62 @@ class FragmentRemoval(MutationBase):
 
             for product_set in product_sets:
                 fragments = list(product_set)
-                sorted_fragments = []
+                if not fragments:
+                    continue
+
+                # Calculate MCS score for each fragment against the parent
                 fragment_mcs_scores = []
+                for frag in fragments:
+                    sane_frag = MOH.check_sanitization(copy.deepcopy(frag))
+                    if sane_frag is None:
+                        continue  # Skip fragments that don't sanitize
+                    mcs_result = chemtoolkit.find_mcs([mol_to_mutate, sane_frag])
+                    mcs_size = mcs_result.numAtoms if mcs_result is not None else 0
+                    fragment_mcs_scores.append((frag, mcs_size))
 
-                if len(fragments) > 1:
-                    # Calculate MCS for each fragment against the parent
-                    for frag in fragments:
-                        # Sanitize fragment before MCS calculation for robustness
-                        sane_frag = MOH.check_sanitization(copy.deepcopy(frag))
-                        if sane_frag is None:
-                            continue  # Skip fragments that don't sanitize
+                if not fragment_mcs_scores:
+                    continue  # No sanitizable fragments
 
-                        mcs_result = chemtoolkit.find_mcs([mol_to_mutate, sane_frag])
-                        mcs_size = mcs_result.numAtoms if mcs_result is not None else 0
-                        fragment_mcs_scores.append((frag, mcs_size))
+                # Sort fragments by MCS size to find the largest
+                fragment_mcs_scores.sort(key=lambda x: x[1], reverse=True)
 
-                    # Sort fragments by MCS size in descending order
-                    fragment_mcs_scores.sort(key=lambda x: x[1], reverse=True)
+                largest_mcs_fragment = fragment_mcs_scores[0][0]
 
-                    # Get the sorted list of fragments
-                    sorted_fragments = [item[0] for item in fragment_mcs_scores]
-                else:
-                    # If there's only one fragment, no need to sort
-                    sorted_fragments = fragments
-                    # Still calculate MCS for display purposes
-                    if len(fragments) == 1:
-                        sane_frag = MOH.check_sanitization(copy.deepcopy(fragments[0]))
-                        if sane_frag is not None:
-                            mcs_result = chemtoolkit.find_mcs([mol_to_mutate, sane_frag])
-                            mcs_size = mcs_result.numAtoms if mcs_result is not None else 0
-                            fragment_mcs_scores.append((fragments[0], mcs_size))
+                kept_fragments = [largest_mcs_fragment]
 
-                for fragment in sorted_fragments:
+                # Filter other fragments by heavy atom count
+                for frag, mcs_size in fragment_mcs_scores:
+                    if frag is largest_mcs_fragment:
+                        continue
+
+                    sane_frag = MOH.check_sanitization(copy.deepcopy(frag))
+                    if sane_frag is None:
+                        continue
+
+                    heavy_atom_count = chemtoolkit.lipinski_heavy_atom_count(sane_frag)
+                    if heavy_atom_count >= MIN_FRAGMENT_HEAVY_ATOMS:
+                        kept_fragments.append(frag)
+
+                # Remove duplicates. It's possible the largest MCS fragment was also
+                # added again due to passing the size filter.
+                unique_smiles = set()
+                unique_kept_fragments = []
+                for frag in kept_fragments:
+                    smi = chemtoolkit.mol_to_smiles(frag)
+                    if smi not in unique_smiles:
+                        unique_smiles.add(smi)
+                        unique_kept_fragments.append(frag)
+
+                kept_fragments = unique_kept_fragments
+
+                random.shuffle(kept_fragments)
+
+                for fragment in kept_fragments:
                     validated_smiles = validate_product(
                         fragment, cmpd, self.plugin_managers
                     )
                     if validated_smiles is not None:
-                        # Found a valid fragment, save debug image and return
+                        # Found a valid fragment
                         if DEBUG:
                             self._save_debug_image(
                                 parent_mol=mol_to_mutate,
