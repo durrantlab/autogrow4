@@ -35,6 +35,7 @@ import glob
 import autogrow.utils.mol_object_handling as MOH
 from autogrow.plugins.registry_base import plugin_managers
 import gzip
+from itertools import product
 
 
 class FragmentAddition(MutationBase):
@@ -94,7 +95,7 @@ class FragmentAddition(MutationBase):
                     name="mutants_per_batch",
                     type=int,
                     default=1,
-                    help=f"For each mutation, generate this many new molecules. Use higher numbers for better DeepFrag caching and to improve the chances of finding highly relevant DeepFrag matches. Used with the {self.name} plugin.",
+                    help=f"For each mutation, generate this many new molecules. Use higher numbers for better DeepFrag caching and to improve the chances of finding highly relevant DeepFrag matches. Set to -1 to generate all possible products. Used with the {self.name} plugin.",
                 ),
                 ArgumentVars(
                     name="max_pass_per_batch",
@@ -742,44 +743,282 @@ class FragmentAddition(MutationBase):
     ) -> Optional[List[Tuple[str, int, Optional[str]]]]:
         """
         Try a multi-reactant reaction to generate a batch of mutants.
+        This is a dispatcher function that calls the appropriate generation method
+        based on the `mutants_per_batch` parameter.
         Args:
-         rxn (AllChem.ChemicalReaction): The reaction object.
-         mol_to_use (Chem.Mol): The molecule to react.
-         a_reaction_dict (Dict[str, Any]): The reaction dictionary.
-         contains_group (int): Index of the functional group in the reaction
-          that is in the molecule.
-         parent_info (Compound): The parent compound information.
+            rxn (AllChem.ChemicalReaction): The reaction object.
+            mol_to_use (Chem.Mol): The molecule to react.
+            a_reaction_dict (Dict[str, Any]): The reaction dictionary.
+            contains_group (int): Index of the functional group in the reaction
+                that is in the molecule.
+            parent_info (Compound): The parent compound information.
         Returns:
-         Optional[List[Tuple[str, int, Optional[str]]]]: A list of tuples,
-          each containing the reaction product SMILES, reaction ID number,
-          and complementary molecule name(s). Returns None if reaction
-          fails to produce any valid products.
+            Optional[List[Tuple[str, int, Optional[str]]]]: A list of tuples,
+                each containing the reaction product SMILES, reaction ID number,
+                and complementary molecule name(s). Returns None if reaction
+                fails to produce any valid products.
         """
         mutants_per_batch = self.params.get("mutants_per_batch", 1)
-        if mutants_per_batch is None or mutants_per_batch <= 0:
-            mutants_per_batch = 1
+        if mutants_per_batch == -1:
+            # Exhaustive generation of all possible products
+            products = self._generate_all_possible_products(
+                rxn, mol_to_use, a_reaction_dict, contains_group, parent_info
+            )
+        else:
+            # Generate a random batch of products without replacement
+            if mutants_per_batch is None or mutants_per_batch <= 0:
+                mutants_per_batch = 1
+            products = self._generate_random_batch_of_products(
+                rxn,
+                mol_to_use,
+                a_reaction_dict,
+                contains_group,
+                parent_info,
+                mutants_per_batch,
+            )
+        if not products:
+            return None
 
+        # Post-generation filtering and pruning
+        filtered_products = self._filter_products_with_deepfrag(
+            products, parent_info
+        )
+        pruned_products = self._prune_products_by_batch_limit(filtered_products)
+        return pruned_products if pruned_products else None
+
+    def _generate_all_possible_products(
+        self,
+        rxn: Any,
+        mol_to_use: Any,
+        a_reaction_dict: Dict[str, Any],
+        contains_group: int,
+        parent_info: Compound,
+    ) -> Optional[List[Tuple[str, int, Optional[str]]]]:
+        """
+        Generate all possible mutation products for a multi-reactant reaction.
+        This method iterates through all available complementary molecules for each
+        required functional group, creating all possible combinations of reactants.
+        Args:
+            rxn (Any): The RDKit reaction object.
+            mol_to_use (Any): The primary molecule to be reacted.
+            a_reaction_dict (Dict[str, Any]): The reaction dictionary.
+            contains_group (int): The index of the primary molecule's functional
+                group in the reaction's list of functional groups.
+            parent_info (Compound): The parent compound information.
+        Returns:
+            Optional[List[Tuple[str, int, Optional[str]]]]: A list of all valid
+                product tuples. Returns None if no valid products could be generated.
+        """
+        all_products = []
+        fun_groups_in_rxn = a_reaction_dict["functional_groups"]
+        # Get lists of complementary molecules for each required functional group
+        comp_mol_lists = []
+        for i, functional_group_name in enumerate(fun_groups_in_rxn):
+            if i == contains_group:
+                continue
+            comp_mol_lists.append(
+                self.complementary_mol_dict.get(functional_group_name, [])
+            )
+        if not all(comp_mol_lists):  # check if any list is empty
+            return None
+        # Generate all combinations of complementary reactants
+        reactant_combinations = product(*comp_mol_lists)
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
+        for comp_reactants_info in reactant_combinations:
+            # comp_reactants_info is a tuple of [smiles, id] for each complementary reactant
+            list_reactant_mols: List[Optional[Any]] = [None] * len(
+                fun_groups_in_rxn
+            )
+            list_reactant_mols[contains_group] = mol_to_use
+            comp_mol_ids = []
+            comp_reactant_idx = 0
+            combination_is_valid = True
+            for i in range(len(fun_groups_in_rxn)):
+                if i == contains_group:
+                    continue
+                comp_smiles, comp_id = comp_reactants_info[comp_reactant_idx]
+                comp_mol = chemtoolkit.mol_from_smiles(comp_smiles, sanitize=False)
+                comp_mol = MOH.check_sanitization(comp_mol)
+                if comp_mol is None:
+                    # This specific complementary molecule is invalid, skip this combination
+                    combination_is_valid = False
+                    break
+                # Check for substructure match with both protonation states
+                functional_group_name = fun_groups_in_rxn[i]
+                substructure_smarts = chemtoolkit.mol_from_smarts(
+                    self.functional_group_dict[functional_group_name]
+                )
+                mol_to_add = None
+                comp_mol_deprotanated = MOH.try_deprotanation(copy.deepcopy(comp_mol))
+                if (
+                    comp_mol_deprotanated is not None
+                    and comp_mol_deprotanated.HasSubstructMatch(substructure_smarts)
+                ):
+                    mol_to_add = comp_mol_deprotanated
+                else:
+                    comp_mol_reprotanated = MOH.try_reprotanation(
+                        copy.deepcopy(comp_mol)
+                    )
+                    if (
+                        comp_mol_reprotanated is not None
+                        and comp_mol_reprotanated.HasSubstructMatch(substructure_smarts)
+                    ):
+                        mol_to_add = comp_mol_reprotanated
+                if mol_to_add is None:
+                    # This complementary molecule doesn't match the required functional group, skip combination
+                    combination_is_valid = False
+                    break
+                list_reactant_mols[i] = mol_to_add
+                comp_mol_ids.append(comp_id)
+                comp_reactant_idx += 1
+            if not combination_is_valid:
+                continue
+            # All reactants for this combination are valid and assembled
+            if any(mol is None for mol in list_reactant_mols):
+                continue
+            tuple_reactant_mols = tuple(list_reactant_mols)
+            products = self._run_multi_reactant_reaction_and_get_products(
+                rxn, tuple_reactant_mols, comp_mol_ids, a_reaction_dict, parent_info
+            )
+            all_products.extend(products)
+        return all_products if all_products else None
+
+    def _generate_random_batch_of_products(
+        self,
+        rxn: Any,
+        mol_to_use: Any,
+        a_reaction_dict: Dict[str, Any],
+        contains_group: int,
+        parent_info: Compound,
+        mutants_per_batch: int,
+    ) -> List[Tuple[str, int, str]]:
+        """
+        Generate a random batch of mutation products without replacement.
+        This method efficiently samples unique combinations of complementary
+        molecules to create a diverse batch of mutants.
+        Args:
+            rxn (Any): The RDKit reaction object.
+            mol_to_use (Any): The primary molecule to be reacted.
+            a_reaction_dict (Dict[str, Any]): The reaction dictionary.
+            contains_group (int): The index of the primary molecule's functional
+                group in the reaction's list of functional groups.
+            parent_info (Compound): The parent compound information.
+            mutants_per_batch (int): The number of mutants to generate.
+        Returns:
+            List[Tuple[str, int, str]]: A list of valid product tuples.
+        """
         batch_products = []
-        for _ in range(mutants_per_batch):
-            reactant_info = self._assemble_reactants(
-                mol_to_use, a_reaction_dict, contains_group
+        fun_groups_in_rxn = a_reaction_dict["functional_groups"]
+        # Get lists of complementary molecules
+        comp_mol_lists = []
+        for i, functional_group_name in enumerate(fun_groups_in_rxn):
+            if i == contains_group:
+                continue
+            comp_mol_lists.append(
+                self.complementary_mol_dict.get(functional_group_name, [])
+            )
+        if not all(comp_mol_lists):
+            return []
+        used_combinations = set()
+        # Heuristic for max attempts to avoid infinite loops
+        total_combinations = 1
+        for lib in comp_mol_lists:
+            total_combinations *= len(lib)
+        num_to_generate = min(mutants_per_batch, total_combinations)
+        max_attempts = num_to_generate * 5 + 100
+        attempts = 0
+        while len(batch_products) < num_to_generate and attempts < max_attempts:
+            attempts += 1
+            # Create a random combination of complementary reactants
+            random_combination_info = tuple(
+                random.choice(lib) for lib in comp_mol_lists
+            )
+            # Use a hashable key (tuple of SMILES) to track uniqueness
+            combination_key = tuple(info[0] for info in random_combination_info)
+            if combination_key in used_combinations:
+                continue
+            used_combinations.add(combination_key)
+            # Assemble the full list of reactants for this unique combination
+            reactant_info = self._assemble_reactants_from_info(
+                mol_to_use,
+                a_reaction_dict,
+                contains_group,
+                random_combination_info,
             )
             if reactant_info is None:
-                continue  # Failed to assemble reactants, try next mutant in batch
-
+                continue
             tuple_reactant_mols, comp_mol_ids = reactant_info
             products = self._run_multi_reactant_reaction_and_get_products(
                 rxn, tuple_reactant_mols, comp_mol_ids, a_reaction_dict, parent_info
             )
             batch_products.extend(products)
+        if len(batch_products) < mutants_per_batch:
+            log_warning(
+                f"Could only generate {len(batch_products)} unique mutants out of {mutants_per_batch} requested for reaction {a_reaction_dict['reaction_name']}."
+            )
+        return batch_products
 
-        filtered_products = self._filter_products_with_deepfrag(
-            batch_products, parent_info
-        )
-
-        pruned_products = self._prune_products_by_batch_limit(filtered_products)
-
-        return pruned_products if pruned_products else None
+    def _assemble_reactants_from_info(
+        self,
+        mol_to_use: Any,
+        a_reaction_dict: Dict[str, Any],
+        contains_group: int,
+        comp_reactants_info: Tuple[List[str], ...],
+    ) -> Optional[Tuple[Tuple[Any, ...], List[str]]]:
+        """
+        Assemble a list of reactant molecules from pre-selected complementary molecules.
+        Args:
+            mol_to_use (Any): The primary molecule to be reacted.
+            a_reaction_dict (Dict[str, Any]): The reaction dictionary.
+            contains_group (int): The index of the primary molecule's functional
+                group in the reaction's list of functional groups.
+            comp_reactants_info (Tuple[List[str], ...]): A tuple containing info
+                ([smiles, id]) for each complementary reactant.
+        Returns:
+            Optional[Tuple[Tuple[Any, ...], List[str]]]: A tuple containing the
+                tuple of reactant RDKit molecules and a list of complementary
+                molecule IDs. Returns None if any reactant is invalid.
+        """
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
+        fun_groups_in_rxn = a_reaction_dict["functional_groups"]
+        list_reactant_mols: List[Optional[Any]] = [None] * len(fun_groups_in_rxn)
+        list_reactant_mols[contains_group] = mol_to_use
+        comp_mol_ids = []
+        comp_reactant_idx = 0
+        for i in range(len(fun_groups_in_rxn)):
+            if i == contains_group:
+                continue
+            comp_smiles, comp_id = comp_reactants_info[comp_reactant_idx]
+            comp_mol = chemtoolkit.mol_from_smiles(comp_smiles, sanitize=False)
+            comp_mol = MOH.check_sanitization(comp_mol)
+            if comp_mol is None:
+                return None
+            functional_group_name = fun_groups_in_rxn[i]
+            substructure_smarts = chemtoolkit.mol_from_smarts(
+                self.functional_group_dict[functional_group_name]
+            )
+            mol_to_add = None
+            comp_mol_deprotanated = MOH.try_deprotanation(copy.deepcopy(comp_mol))
+            if (
+                comp_mol_deprotanated is not None
+                and comp_mol_deprotanated.HasSubstructMatch(substructure_smarts)
+            ):
+                mol_to_add = comp_mol_deprotanated
+            else:
+                comp_mol_reprotanated = MOH.try_reprotanation(copy.deepcopy(comp_mol))
+                if (
+                    comp_mol_reprotanated is not None
+                    and comp_mol_reprotanated.HasSubstructMatch(substructure_smarts)
+                ):
+                    mol_to_add = comp_mol_reprotanated
+            if mol_to_add is None:
+                return None
+            list_reactant_mols[i] = mol_to_add
+            comp_mol_ids.append(comp_id)
+            comp_reactant_idx += 1
+        if any(mol is None for mol in list_reactant_mols):
+            return None
+        return tuple(list_reactant_mols), comp_mol_ids
 
     def _assemble_reactants(
         self,
