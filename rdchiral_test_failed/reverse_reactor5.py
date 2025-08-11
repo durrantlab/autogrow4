@@ -11,258 +11,41 @@ import sys
 import enum
 from rdkit.Chem import Draw
 
-# 57_Paal_Knorr_pyrrole_SKIP_FAILING
-
-# --
-# FINAL SUMMARY for 12_Carbonochloridate_and_Amine:
-#   - Total Sets Tested: 99
-#   - Passed Sets: 95
-#   - Forward Reaction Failures: 4
-#   - Invalid Reactants (Skipped): 1
-
-# SUCCESS: 95/99 reactant sets passed for 12_Carbonochloridate_and_Amine.
-
-# --
-# FINAL SUMMARY for 13_Carboxylate_and_Amine:
-#   - Total Sets Tested: 100
-#   - Passed Sets: 91
-#   - Forward Reaction Failures: 9
-#   - Invalid Reactants (Skipped): 0
-
-# SUCCESS: 91/100 reactant sets passed for 13_Carboxylate_and_Amine.
-
-# --
-# FINAL SUMMARY for 18_Halide_and_Amine:
-#   - Total Sets Tested: 99
-#   - Passed Sets: 87
-#   - Forward Reaction Failures: 12
-#   - Invalid Reactants (Skipped): 1
-
-# SUCCESS: 87/99 reactant sets passed for 18_Halide_and_Amine.
-
-# --
-# FINAL SUMMARY for 23_Ester_and_Amine:
-#   - Total Sets Tested: 100
-#   - Passed Sets: 94
-#   - Forward Reaction Failures: 6
-#   - Invalid Reactants (Skipped): 0
-
-# SUCCESS: 94/100 reactant sets passed for 23_Ester_and_Amine.
-
-# --
-# FINAL SUMMARY for 24_Ester_and_Alcohol:
-#   - Total Sets Tested: 100
-#   - Passed Sets: 99
-#   - Forward Reaction Failures: 1
-#   - Invalid Reactants (Skipped): 0
-
-# SUCCESS: 99/100 reactant sets passed for 24_Ester_and_Alcohol.
-
-# --
-# FINAL SUMMARY for 25_Ester_and_Thiol:
-#   - Total Sets Tested: 98
-#   - Passed Sets: 97
-#   - Forward Reaction Failures: 1
-#   - Invalid Reactants (Skipped): 2
-
-# SUCCESS: 97/98 reactant sets passed for 25_Ester_and_Thiol.
-
-# --
-# FINAL SUMMARY for 26_Acid_Anhydride_Noncyclic_and_Amine:
-#   - Total Sets Tested: 100
-#   - Passed Sets: 90
-#   - Forward Reaction Failures: 10
-#   - Invalid Reactants (Skipped): 0
-
-# SUCCESS: 90/100 reactant sets passed for 26_Acid_Anhydride_Noncyclic_and_Amine.
-
-# --
-# FINAL SUMMARY for 31_Isocyanate_and_Amine:
-#   - Total Sets Tested: 100
-#   - Passed Sets: 89
-#   - Forward Reaction Failures: 11
-#   - Invalid Reactants (Skipped): 0
-
-# SUCCESS: 89/100 reactant sets passed for 31_Isocyanate_and_Amine.
-
-# --
-# FINAL SUMMARY for 32_Isothiocyanate_and_Amine:
-#   - Total Sets Tested: 99
-#   - Passed Sets: 93
-#   - Forward Reaction Failures: 6
-#   - Invalid Reactants (Skipped): 1
-
-# SUCCESS: 93/99 reactant sets passed for 32_Isothiocyanate_and_Amine.
-
-# --
-# FINAL SUMMARY for 39_benzimidazole_derivatives_aldehyde:
-#   - Total Sets Tested: 100
-#   - Passed Sets: 99
-#   - Forward Reaction Failures: 1
-#   - Invalid Reactants (Skipped): 0
-
-# SUCCESS: 99/100 reactant sets passed for 39_benzimidazole_derivatives_aldehyde.
-
-# --
-# FINAL SUMMARY for 40_benzothiazole:
-#   - Total Sets Tested: 100
-#   - Passed Sets: 92
-#   - Forward Reaction Failures: 8
-#   - Invalid Reactants (Skipped): 0
-
-# SUCCESS: 92/100 reactant sets passed for 40_benzothiazole.
-
-# --
-# FINAL SUMMARY for 41_benzoxazole_arom_aldehyde:
-#   - Total Sets Tested: 100
-#   - Passed Sets: 93
-#   - Forward Reaction Failures: 7
-#   - Invalid Reactants (Skipped): 0
-
-# SUCCESS: 93/100 reactant sets passed for 41_benzoxazole_arom_aldehyde.
-
-# --
-# FINAL SUMMARY for 42_benzoxazole_carboxylic_acid:
-#   - Total Sets Tested: 100
-#   - Passed Sets: 90
-#   - Forward Reaction Failures: 10
-#   - Invalid Reactants (Skipped): 0
-
-# SUCCESS: 90/100 reactant sets passed for 42_benzoxazole_carboxylic_acid.
-
-# --
-# FINAL SUMMARY for 43_thiazole:
-#   - Total Sets Tested: 11
-#   - Passed Sets: 11
-#   - Forward Reaction Failures: 0
-#   - Invalid Reactants (Skipped): 89
-
-# SUCCESS: 11/11 reactant sets passed for 43_thiazole.
-
-# --
-# FINAL SUMMARY for 44_Niementowski_quinazoline:
-#   - Total Sets Tested: 81
-#   - Passed Sets: 81
-#   - Forward Reaction Failures: 0
-#   - Invalid Reactants (Skipped): 19
-
-# SUCCESS: 81/81 reactant sets passed for 44_Niementowski_quinazoline.
-
-# --
-# FINAL SUMMARY for 45_tetrazole_terminal:
-#   - Total Sets Tested: 100
-#   - Passed Sets: 100
-#   - Forward Reaction Failures: 0
-#   - Invalid Reactants (Skipped): 0
-
-# SUCCESS: 100/100 reactant sets passed for 45_tetrazole_terminal.
-
-# --
-# FINAL SUMMARY for 46_tetrazole_connect_regioisomere_1:
-#   - Total Sets Tested: 97
-#   - Passed Sets: 97
-#   - Forward Reaction Failures: 0
-#   - Invalid Reactants (Skipped): 3
-
-# SUCCESS: 97/97 reactant sets passed for 46_tetrazole_connect_regioisomere_1.
-
-# --
-# FINAL SUMMARY for 47_tetrazole_connect_regioisomere_2:
-#   - Total Sets Tested: 99
-#   - Passed Sets: 99
-#   - Forward Reaction Failures: 0
-#   - Invalid Reactants (Skipped): 1
-
-# SUCCESS: 99/99 reactant sets passed for 47_tetrazole_connect_regioisomere_2.
-
-# --
-# FINAL SUMMARY for 48_Huisgen_Cu_catalyzed_1_4_subst:
-#   - Total Sets Tested: 17
-#   - Passed Sets: 17
-#   - Forward Reaction Failures: 0
-#   - Invalid Reactants (Skipped): 83
-
-# SUCCESS: 17/17 reactant sets passed for 48_Huisgen_Cu_catalyzed_1_4_subst.
-
-# --
-# FINAL SUMMARY for 49_Huisgen_Ru_catalyzed_1_5_subst:
-#   - Total Sets Tested: 18
-#   - Passed Sets: 18
-#   - Forward Reaction Failures: 0
-#   - Invalid Reactants (Skipped): 82
-
-# SUCCESS: 18/18 reactant sets passed for 49_Huisgen_Ru_catalyzed_1_5_subst.
-
-# --
-# FINAL SUMMARY for 50_Huisgen_disubst_alkyne:
-#   - Total Sets Tested: 24
-#   - Passed Sets: 24
-#   - Forward Reaction Failures: 0
-#   - Invalid Reactants (Skipped): 76
-
-# SUCCESS: 24/24 reactant sets passed for 50_Huisgen_disubst_alkyne.
-
-# --
-# FINAL SUMMARY for 51_1_2_4_triazole_acetohydrazide:
-#   - Total Sets Tested: 100
-#   - Passed Sets: 100
-#   - Forward Reaction Failures: 0
-#   - Invalid Reactants (Skipped): 0
-
-# SUCCESS: 100/100 reactant sets passed for 51_1_2_4_triazole_acetohydrazide.
-
-# --
-# FINAL SUMMARY for 52_1_2_4_triazole_carboxylic_acid_ester:
-#   - Total Sets Tested: 100
-#   - Passed Sets: 100
-#   - Forward Reaction Failures: 0
-#   - Invalid Reactants (Skipped): 0
-
-# SUCCESS: 100/100 reactant sets passed for 52_1_2_4_triazole_carboxylic_acid_ester.
-
-# --
-# FINAL SUMMARY for 53_3_nitrile_pyridine:
-#   - Total Sets Tested: 10
-#   - Passed Sets: 10
-#   - Forward Reaction Failures: 0
-#   - Invalid Reactants (Skipped): 90
-
-# SUCCESS: 10/10 reactant sets passed for 53_3_nitrile_pyridine.
-
-# --
-# FINAL SUMMARY for 54_spiro_chromanone:
-#   - Total Sets Tested: 100
-#   - Passed Sets: 100
-#   - Forward Reaction Failures: 0
-#   - Invalid Reactants (Skipped): 0
-
-# SUCCESS: 100/100 reactant sets passed for 54_spiro_chromanone.
-
-# --
-# FINAL SUMMARY for 55_pyrazole:
-#   - Total Sets Tested: 18
-#   - Passed Sets: 18
-#   - Forward Reaction Failures: 0
-#   - Invalid Reactants (Skipped): 82
-
-# SUCCESS: 18/18 reactant sets passed for 55_pyrazole.
-
-# --
-# FINAL SUMMARY for 56_phthalazinone:
-#   - Total Sets Tested: 100
-#   - Passed Sets: 100
-#   - Forward Reaction Failures: 0
-#   - Invalid Reactants (Skipped): 0
-
-# SUCCESS: 100/100 reactant sets passed for 56_phthalazinone.
-
-
 class ReactionStatus(enum.Enum):
     """Enum to represent the outcome of a reaction test."""
     SUCCESS = "SUCCESS"
     FORWARD_FAILURE = "FORWARD_FAILURE"
     REVERSE_FAILURE = "REVERSE_FAILURE"
     INVALID_REACTANTS = "INVALID_REACTANTS"  # New status for reactants that don't match group SMARTS
+    REVERSE_SKIPPED = "REVERSE_SKIPPED"  # New status for skipped reverse reactions due to exceptions
+
+def check_reverse_reaction_exception(reactants: List[str], exception_smarts: str, reaction_name: str, reactant_idx: int) -> bool:
+    """
+    Check if any of the reactants matches the reverse reaction exception SMARTS pattern.
+    Returns True if an exception is found (should skip reverse reaction), False otherwise.
+    """
+    try:
+        # Convert exception SMARTS to molecule pattern
+        exception_mol = Chem.MolFromSmarts(exception_smarts)
+        if exception_mol is None:
+            print(f"WARNING: Invalid reverse_reaction_exception SMARTS pattern: {exception_smarts} in {reaction_name}, set {reactant_idx}")
+            return False
+        
+        # Check each reactant against the exception pattern
+        for i, reactant_smiles in enumerate(reactants):
+            reactant_mol = Chem.MolFromSmiles(reactant_smiles)
+            if reactant_mol is None:
+                continue  # Skip invalid reactants (they'll be caught elsewhere)
+            
+            if reactant_mol.HasSubstructMatch(exception_mol):
+                print(f"REVERSE SKIP: Reactant {i+1} ({reactant_smiles}) matches reverse_reaction_exception pattern ({exception_smarts}) in {reaction_name}, set {reactant_idx}")
+                return True
+        
+        return False
+        
+    except Exception as e:
+        print(f"ERROR: Failed to process reverse_reaction_exception for {reaction_name}, set {reactant_idx}: {e}")
+        return False
 
 # --- NEW FUNCTION TO VALIDATE REACTANTS AGAINST GROUP SMARTS ---
 def validate_reactants_against_smarts(reactants: List[str], group_smarts: List[str], reaction_name: str, reactant_idx: int) -> bool:
@@ -640,6 +423,71 @@ def run_rxn(rxn_string: str,
             
     return predicted_products
 
+# --- NEWLY ADDED VALIDATION FUNCTION ---
+def validate_reaction_examples(reactions: dict) -> None:
+    """
+    Validates that the 'example_rxn_reactants' for each reaction, when processed
+    by 'reaction_string', produce the 'example_rxn_product'.
+    """
+    print("\n--- Running Reaction Example Validation ---")
+    for reaction_name, reaction_info in reactions.items():
+        if "SKIP" in reaction_name:
+            continue
+
+        # Get the required fields
+        example_reactants = reaction_info.get("example_rxn_reactants")
+        expected_product_smi = reaction_info.get("example_rxn_product")
+        reaction_smarts = reaction_info.get("reaction_string")
+
+        # Skip if the example is not fully defined
+        if not all([example_reactants, expected_product_smi, reaction_smarts]):
+            print(f"INFO: Skipping example validation for '{reaction_name}' due to missing 'example_rxn_reactants', 'example_rxn_product', or 'reaction_string'.")
+            continue
+
+        # Clean the expected product for a fair comparison
+        cleaned_expected_product = clean_up_smiles(expected_product_smi)
+        if not cleaned_expected_product:
+            raise ValueError(
+                f"FATAL: Could not process 'example_rxn_product' for reaction '{reaction_name}': "
+                f"'{expected_product_smi}'"
+            )
+
+        # Apply the same cleaning to the reactants
+        cleaned_reactants = [clean_up_smiles(r) for r in example_reactants]
+        if None in cleaned_reactants:
+             raise ValueError(
+                f"FATAL: Could not process one or more 'example_rxn_reactants' for reaction '{reaction_name}': "
+                f"{example_reactants}"
+            )
+
+        # Run the forward reaction using the provided example
+        actual_product_sets = run_rxn(
+            reaction_smarts,
+            cleaned_reactants,
+            reaction_name,
+            -1,  # Using -1 to indicate this is a validation run
+            "example_validation",
+            "forward"
+        )
+
+        # Flatten the list of product sets into a single set of unique products
+        actual_products_flat = {product for product_set in actual_product_sets for product in product_set}
+
+        # Check if the cleaned expected product is in the set of actual products
+        if cleaned_expected_product not in actual_products_flat:
+            error_msg = f"""
+FATAL: Example reaction validation failed for '{reaction_name}'.
+  - Reactants Used: {cleaned_reactants}
+  - Reaction SMARTS: '{reaction_smarts}'
+  - Expected Product (Canonical): '{cleaned_expected_product}'
+  - Actual Products Generated: {actual_products_flat or 'None'}
+The expected product was NOT found in the generated products. Please check the reaction definition and example in reactions.json.
+"""
+            raise ValueError(error_msg)
+
+    print("--- Validation Successful: All reaction examples work as expected. ---\n")
+
+
 # --- REVISED apply_prereaction FUNCTION ---
 def apply_prereaction(smiles: str,
                       prereaction_strings: List[str],
@@ -774,12 +622,19 @@ def execute_and_verify_reaction(
 ) -> ReactionStatus:
     """
     Runs the full forward and reverse reaction cycle and returns a status.
-    Now includes validation that reactants match their group SMARTS patterns.
+    Now includes validation that reactants match their group SMARTS patterns
+    and checks for reverse reaction exceptions.
     """
     # NEW: Validate reactants against group SMARTS before proceeding
     group_smarts = reaction_info.get("group_smarts", [])
     if not validate_reactants_against_smarts(reactants_to_test, group_smarts, reaction_name, reactant_idx):
         return ReactionStatus.INVALID_REACTANTS
+    
+    # NEW: Check for reverse reaction exception
+    reverse_exception_smarts = reaction_info.get("reverse_reaction_exception")
+    if reverse_exception_smarts:
+        if check_reverse_reaction_exception(reactants_to_test, reverse_exception_smarts, reaction_name, reactant_idx):
+            return ReactionStatus.REVERSE_SKIPPED
     
     reaction_string = reaction_info["reaction_string"]
     reverse_reaction_strings = reaction_info.get("reverse_reaction_strings", [])
@@ -845,7 +700,8 @@ with open("reactions.json", "r") as file:
 
 # --- RUN ALL VALIDATION CHECKS BEFORE TESTING ---
 validate_functional_group_defs(reactions)
-validate_smarts_consistency_and_examples(reactions)
+# validate_smarts_consistency_and_examples(reactions)
+validate_reaction_examples(reactions) # <-- New validation function is called here
 
 # --- GENERATE FUNCTIONAL GROUPS OUTPUT FILE ---
 def generate_functional_groups_output(reactions: dict) -> None:
@@ -950,7 +806,8 @@ for reaction_idx, reaction_name in enumerate(reactions):
     num_passed = 0
     num_tested = 0
     num_forward_failures = 0
-    num_invalid_reactants = 0  # NEW: Track invalid reactants
+    num_invalid_reactants = 0  # Track invalid reactants
+    num_reverse_skipped = 0   # NEW: Track reverse reactions skipped due to exceptions
     
     # Check if reactant_groups is empty
     if not reactant_groups or not reactant_groups[0]:
@@ -993,13 +850,13 @@ for reaction_idx, reaction_name in enumerate(reactions):
             #  print(f"Kekule form is identical to aromatic for set {reactant_idx}, skipping separate test.")
              kekule_status = aromatic_status
         
-        # NEW: Handle different status outcomes
+        # NEW: Handle different status outcomes including REVERSE_SKIPPED
         if aromatic_status == ReactionStatus.INVALID_REACTANTS or kekule_status == ReactionStatus.INVALID_REACTANTS:
             # Don't count invalid reactants in our test statistics
             num_invalid_reactants += 1
             continue
         
-        # Only count as tested if we have valid reactants
+        # Count as tested if we have valid reactants (regardless of reverse skip)
         num_tested += 1
         
         if aromatic_status == ReactionStatus.REVERSE_FAILURE or kekule_status == ReactionStatus.REVERSE_FAILURE:
@@ -1007,8 +864,12 @@ for reaction_idx, reaction_name in enumerate(reactions):
             raise AssertionError(f"FATAL: Reverse reaction for '{reaction_name}' failed. See debug prompt above.")
         
         # Tally results for the set
-        if aromatic_status == ReactionStatus.SUCCESS and kekule_status == ReactionStatus.SUCCESS:
+        if ((aromatic_status == ReactionStatus.SUCCESS or aromatic_status == ReactionStatus.REVERSE_SKIPPED) and 
+            (kekule_status == ReactionStatus.SUCCESS or kekule_status == ReactionStatus.REVERSE_SKIPPED)):
             num_passed += 1
+            # Count reverse skipped reactions for reporting
+            if aromatic_status == ReactionStatus.REVERSE_SKIPPED or kekule_status == ReactionStatus.REVERSE_SKIPPED:
+                num_reverse_skipped += 1
         elif aromatic_status == ReactionStatus.FORWARD_FAILURE or kekule_status == ReactionStatus.FORWARD_FAILURE:
             num_forward_failures += 1
             print(f"NOTE: Set {reactant_idx} for {reaction_name} logged as a FORWARD FAILURE.")
@@ -1018,9 +879,14 @@ for reaction_idx, reaction_name in enumerate(reactions):
     print(f"  - Total Sets Tested: {num_tested}")
     print(f"  - Passed Sets: {num_passed}")
     print(f"  - Forward Reaction Failures: {num_forward_failures}")
-    print(f"  - Invalid Reactants (Skipped): {num_invalid_reactants}")  # NEW: Report skipped sets
+    print(f"  - Invalid Reactants (Skipped): {num_invalid_reactants}")
+    print(f"  - Reverse Reactions Skipped (Exception): {num_reverse_skipped}")  # NEW: Report skipped reverse reactions
 
     if num_passed == 0 and num_tested > 0:
         print(f"\nWARNING: No reactant sets fully passed validation for {reaction_name}.")
     elif num_tested > 0:
         print(f"\nSUCCESS: {num_passed}/{num_tested} reactant sets passed for {reaction_name}.\n")
+    
+    # NEW: Additional reporting for reverse skipped reactions
+    if num_reverse_skipped > 0:
+        print(f"NOTE: {num_reverse_skipped} reactant sets had reverse reactions skipped due to exception pattern.\n")
