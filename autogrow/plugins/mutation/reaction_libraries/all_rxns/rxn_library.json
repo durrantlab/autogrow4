@@ -1789,7 +1789,7 @@
         "RXN_NUM": 78,
         "notes": "Here requiring that the double bond not be part of a ring. In practice it may be that it could be part of a ring, but that greatly complicates figuring out the reverse reaction."
     },
-    "79_Still": {
+    "79_Stille": {
         "reaction_name": "79_Stille",
         "example_rxn_product": "c1ccc(-c2ccccc2)cc1",
         "example_rxn_reactants": [
