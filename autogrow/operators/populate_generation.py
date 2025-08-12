@@ -57,6 +57,7 @@ def populate_generation(
     # directory to the plugins. It's easier to do this by setting it in the
     # params dict than as a separate argument to plugin.run() methods.
     params["cur_gen_dir"] = cur_gen_dir
+    params["generation_num"] = generation_num
 
     # Get the number of crossovers, mutations, and elite compounds to generate
     num_crossovers, num_mutations, num_elite_prev_gen = _get_subpop_sizes(

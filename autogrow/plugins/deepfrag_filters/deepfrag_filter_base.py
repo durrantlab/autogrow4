@@ -14,6 +14,7 @@ from scipy.spatial.distance import cosine
 from autogrow.utils.logging import LogLevel, log_debug, log_info, log_warning
 import random
 import os
+import hashlib
 
 # Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog("rdApp.*")
@@ -55,6 +56,7 @@ class DeepFragFilterBase(PluginBase):
         compounds = kwargs["compounds"]
         cutoff = kwargs["input_params"][self.name]
         receptor = kwargs["input_params"]["receptor_path"]
+        generation_num = kwargs["input_params"].get("generation_num", "NA")
 
         with LogLevel():
             log_info(
@@ -90,7 +92,7 @@ class DeepFragFilterBase(PluginBase):
                         similarity_str = (
                             f"{similarity:.3f}" if similarity is not None else "None"
                         )
-                        if DEEPFRAG_DEBUG:
+                        if DEEPFRAG_DEBUG and passed_filter:
                             self._save_debug_image(
                                 parent_mol=parent_mol,
                                 child_mol=child_mol,
@@ -101,6 +103,7 @@ class DeepFragFilterBase(PluginBase):
                                 similarity=similarity,
                                 passed_filter=passed_filter,
                                 compound_id=compound.id,
+                                generation_num=generation_num,
                             )
                     elif self.apply_on_crossover and len(compound.parent_3D_mols) == 2:
                         # This is a standard crossover
@@ -138,7 +141,7 @@ class DeepFragFilterBase(PluginBase):
                             if similarity_0 is not None and similarity_1 is not None
                             else "None"
                         )
-                        if DEEPFRAG_DEBUG:
+                        if DEEPFRAG_DEBUG and passed_filter:
                             self._save_debug_image(
                                 parent_mol=parent_mol_1,
                                 child_mol=child_mol,
@@ -149,6 +152,7 @@ class DeepFragFilterBase(PluginBase):
                                 similarity=similarity_0,
                                 passed_filter=passed_filter,
                                 compound_id=f"{compound.id}_parent1",
+                                generation_num=generation_num,
                             )
                             self._save_debug_image(
                                 parent_mol=parent_mol_2,
@@ -160,6 +164,7 @@ class DeepFragFilterBase(PluginBase):
                                 similarity=similarity_1,
                                 passed_filter=passed_filter,
                                 compound_id=f"{compound.id}_parent2",
+                                generation_num=generation_num,
                             )
                     compound.mol_3D = None
                     compound.parent_3D_mols = None
@@ -222,7 +227,7 @@ class DeepFragFilterBase(PluginBase):
             ],
         )
 
-    def _save_debug_image(self, parent_mol, child_mol, mcs_smarts, mcs_mol_with_coords, fragments_mol, connection_points_3d, similarity, passed_filter, compound_id):
+    def _save_debug_image(self, parent_mol, child_mol, mcs_smarts, mcs_mol_with_coords, fragments_mol, connection_points_3d, similarity, passed_filter, compound_id, generation_num):
         """
         Saves a debug image showing the parent, all fragments, and the chosen fragment.
 
@@ -236,20 +241,26 @@ class DeepFragFilterBase(PluginBase):
             similarity (float): The calculated cosine similarity.
             passed_filter (bool): Whether the compound passed the filter.
             compound_id (str): The ID of the compound.
+            generation_num (int or str): The generation number.
         """
         os.makedirs("./deepfrag_debug", exist_ok=True)
-        child_smiles_for_fname = (
-            Chem.MolToSmiles(child_mol)
-            .replace("/", "_slash_")
-            .replace("\\", "_backslash_")
-        )
-        unique_id = (
-            compound_id if compound_id is not None else hash(child_smiles_for_fname)
-        )
-        sanitized_unique_id = str(unique_id).replace("(", "_").replace(")", "_").replace("+", "_")
-        filename_prefix = "PASSED_" if passed_filter else ""
-        filename = f"./deepfrag_debug/{filename_prefix}{sanitized_unique_id}_{random.randint(1000, 9999)}.png"
         
+        # Create a unique hash for the image based on its contents
+        parent_smiles = Chem.MolToSmiles(parent_mol)
+        child_smiles = Chem.MolToSmiles(child_mol)
+        fragment_smiles = Chem.MolToSmiles(fragments_mol)
+        branching_points_str = str(sorted(connection_points_3d.keys()))
+
+        unique_str = f"{parent_smiles}|{child_smiles}|{fragment_smiles}|{branching_points_str}|{compound_id}"
+        file_hash = hashlib.md5(unique_str.encode()).hexdigest()
+
+        filename_prefix = "_PASSED_" if passed_filter else ""
+        filename = f"./deepfrag_debug/{filename_prefix}gen{generation_num}_{file_hash}.png"
+
+        if os.path.exists(filename):
+            log_info(f"Debug image already exists, skipping: {filename}")
+            return
+
         branching_points_indices = list(connection_points_3d.keys())
         
         mols_to_draw = [parent_mol, child_mol, Chem.MolFromSmarts(mcs_smarts), mcs_mol_with_coords, fragments_mol]
