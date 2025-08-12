@@ -12,6 +12,7 @@ from abc import abstractmethod
 from autogrow.config.argument_vars import ArgumentVars
 from scipy.spatial.distance import cosine
 from autogrow.utils.logging import LogLevel, log_debug, log_info, log_warning
+import random
 
 # Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog("rdApp.*")
@@ -124,11 +125,11 @@ class DeepFragFilterBase(PluginBase):
                     if similarity_str is not None:
                         if passed_filter:
                             log_info(
-                                f"Docked molecule {compound.id} with smiles string {compound.smiles} passed the similarity criterion using DeepFrag: {similarity_str}"
+                                f"Posed molecule {compound.id} with smiles string {compound.smiles} passed the similarity criterion using DeepFrag: {similarity_str}"
                             )
                             final_compound_list.append(compound)
                         else:
-                            mesg = f"Docked molecule {compound.id} with smiles string {compound.smiles} did not fulfill with the similarity criterion using DeepFrag: {similarity_str}"
+                            mesg = f"Posed molecule {compound.id} with smiles string {compound.smiles} did not fulfill with the similarity criterion using DeepFrag: {similarity_str}"
                             log_info(mesg)
                             self.filter_logger_file.info(mesg)
 
@@ -285,8 +286,8 @@ class DeepFragFilterBase(PluginBase):
             unique_id = (
                 compound_id if compound_id is not None else hash(child_smiles_for_fname)
             )
-            filename = f"./deepfrag_debug/{unique_id}.png"
-
+            sanitized_unique_id = str(unique_id).replace("(", "_").replace(")", "_").replace("+", "_")
+            filename = f"./deepfrag_debug/{sanitized_unique_id}_{random.randint(1000, 9999)}.png"
             mols_to_draw = [parent, child, mcs_mol]
             legends = ["Parent", "Child", f"MCS ({mcs_smarts})"]
 

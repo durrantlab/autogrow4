@@ -51,6 +51,7 @@ def create_logger(level: int, file_path: str = "log.txt"):
     logging.basicConfig(level=logging.DEBUG, handlers=[handler])
     # Set matplotlib logging level to WARNING to suppress findfont messages
     logging.getLogger('matplotlib').setLevel(logging.WARNING)
+    logging.getLogger('PIL').setLevel(logging.WARNING)
     set_log_tab_level(0)
 
 
