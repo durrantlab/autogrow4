@@ -13,6 +13,7 @@ from autogrow.config.argument_vars import ArgumentVars
 from scipy.spatial.distance import cosine
 from autogrow.utils.logging import LogLevel, log_debug, log_info, log_warning
 import random
+import os
 
 # Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog("rdApp.*")
@@ -68,49 +69,68 @@ class DeepFragFilterBase(PluginBase):
                 with LogLevel():
                     passed_filter = True
                     similarity_str = None
+                    child_mol = Chem.MolFromSmiles(compound.smiles)
                     if len(compound.parent_3D_mols) == 1:
                         # This is a standard mutation
-                        mcs_mol, _, fragments = self.__find_mcs_and_fragments(
-                            compound.parent_3D_mols[0],
-                            Chem.MolFromSmiles(compound.smiles),
+                        parent_mol = compound.parent_3D_mols[0]
+                        mcs_mol, frag_mol, fragments, mcs_smarts, connection_points_3d = self.__find_mcs_and_fragments(
+                            parent_mol,
+                            child_mol,
                             compound_id=compound.id,
                         )
+
                         if fragments is not None and len(fragments) > 1:
                             log_warning(
                                 f"Compound {compound.id} ({compound.smiles}) has {len(fragments)} R-groups attached to the MCS."
                             )
                         similarity = self.__compute_cosine_similarity(
-                            receptor, mcs_mol, fragments
+                            receptor, parent_mol, fragments
                         )
                         passed_filter = similarity >= cutoff
                         similarity_str = (
                             f"{similarity:.3f}" if similarity is not None else "None"
                         )
+                        if DEEPFRAG_DEBUG:
+                            self._save_debug_image(
+                                parent_mol=parent_mol,
+                                child_mol=child_mol,
+                                mcs_smarts=mcs_smarts,
+                                mcs_mol_with_coords=mcs_mol,
+                                fragments_mol=frag_mol,
+                                connection_points_3d=connection_points_3d,
+                                similarity=similarity,
+                                passed_filter=passed_filter,
+                                compound_id=compound.id,
+                            )
                     elif self.apply_on_crossover and len(compound.parent_3D_mols) == 2:
                         # This is a standard crossover
-                        mcs_mol, _, fragments = self.__find_mcs_and_fragments(
-                            compound.parent_3D_mols[0],
-                            Chem.MolFromSmiles(compound.smiles),
+                        parent_mol_1 = compound.parent_3D_mols[0]
+                        mcs_mol_1, frag_mol_1, fragments_1, mcs_smarts_1, connection_points_3d_1 = self.__find_mcs_and_fragments(
+                            parent_mol_1,
+                            child_mol,
                             compound_id=f"{compound.id}_parent1",
                         )
-                        if fragments is not None and len(fragments) > 1:
+
+                        if fragments_1 is not None and len(fragments_1) > 1:
                             log_warning(
-                                f"Compound {compound.id} ({compound.smiles}) with parent 1 has {len(fragments)} R-groups attached to the MCS."
+                                f"Compound {compound.id} ({compound.smiles}) with parent 1 has {len(fragments_1)} R-groups attached to the MCS."
                             )
                         similarity_0 = self.__compute_cosine_similarity(
-                            receptor, mcs_mol, fragments
+                            receptor, parent_mol_1, fragments_1
                         )
-                        mcs_mol, _, fragments = self.__find_mcs_and_fragments(
-                            compound.parent_3D_mols[1],
-                            Chem.MolFromSmiles(compound.smiles),
+
+                        parent_mol_2 = compound.parent_3D_mols[1]
+                        mcs_mol_2, frag_mol_2, fragments_2, mcs_smarts_2, connection_points_3d_2 = self.__find_mcs_and_fragments(
+                            parent_mol_2,
+                            child_mol,
                             compound_id=f"{compound.id}_parent2",
                         )
-                        if fragments is not None and len(fragments) > 1:
+                        if fragments_2 is not None and len(fragments_2) > 1:
                             log_warning(
-                                f"Compound {compound.id} ({compound.smiles}) with parent 2 has {len(fragments)} R-groups attached to the MCS."
+                                f"Compound {compound.id} ({compound.smiles}) with parent 2 has {len(fragments_2)} R-groups attached to the MCS."
                             )
                         similarity_1 = self.__compute_cosine_similarity(
-                            receptor, mcs_mol, fragments
+                            receptor, parent_mol_2, fragments_2
                         )
                         passed_filter = similarity_0 >= cutoff or similarity_1 >= cutoff
                         similarity_str = (
@@ -118,6 +138,29 @@ class DeepFragFilterBase(PluginBase):
                             if similarity_0 is not None and similarity_1 is not None
                             else "None"
                         )
+                        if DEEPFRAG_DEBUG:
+                            self._save_debug_image(
+                                parent_mol=parent_mol_1,
+                                child_mol=child_mol,
+                                mcs_smarts=mcs_smarts_1,
+                                mcs_mol_with_coords=mcs_mol_1,
+                                fragments_mol=frag_mol_1,
+                                connection_points_3d=connection_points_3d_1,
+                                similarity=similarity_0,
+                                passed_filter=passed_filter,
+                                compound_id=f"{compound.id}_parent1",
+                            )
+                            self._save_debug_image(
+                                parent_mol=parent_mol_2,
+                                child_mol=child_mol,
+                                mcs_smarts=mcs_smarts_2,
+                                mcs_mol_with_coords=mcs_mol_2,
+                                fragments_mol=frag_mol_2,
+                                connection_points_3d=connection_points_3d_2,
+                                similarity=similarity_1,
+                                passed_filter=passed_filter,
+                                compound_id=f"{compound.id}_parent2",
+                            )
                     compound.mol_3D = None
                     compound.parent_3D_mols = None
 
@@ -125,11 +168,11 @@ class DeepFragFilterBase(PluginBase):
                     if similarity_str is not None:
                         if passed_filter:
                             log_info(
-                                f"Posed molecule {compound.id} with smiles string {compound.smiles} passed the similarity criterion using DeepFrag: {similarity_str}"
+                                f"Docked molecule {compound.id} with smiles string {compound.smiles} passed the similarity criterion using DeepFrag: {similarity_str}"
                             )
                             final_compound_list.append(compound)
                         else:
-                            mesg = f"Posed molecule {compound.id} with smiles string {compound.smiles} did not fulfill with the similarity criterion using DeepFrag: {similarity_str}"
+                            mesg = f"Docked molecule {compound.id} with smiles string {compound.smiles} did not fulfill with the similarity criterion using DeepFrag: {similarity_str}"
                             log_info(mesg)
                             self.filter_logger_file.info(mesg)
 
@@ -179,16 +222,62 @@ class DeepFragFilterBase(PluginBase):
             ],
         )
 
+    def _save_debug_image(self, parent_mol, child_mol, mcs_smarts, mcs_mol_with_coords, fragments_mol, connection_points_3d, similarity, passed_filter, compound_id):
+        """
+        Saves a debug image showing the parent, all fragments, and the chosen fragment.
+
+        Args:
+            parent_mol (Any): The RDKit molecule object of the parent.
+            child_mol (Any): The RDKit molecule object of the child.
+            mcs_smarts (str): The SMARTS string of the MCS.
+            mcs_mol_with_coords (Any): The RDKit molecule of the MCS with parent coordinates.
+            fragments_mol (Any): The RDKit molecule containing the fragment(s).
+            connection_points_3d (dict): A dictionary of connection points.
+            similarity (float): The calculated cosine similarity.
+            passed_filter (bool): Whether the compound passed the filter.
+            compound_id (str): The ID of the compound.
+        """
+        os.makedirs("./deepfrag_debug", exist_ok=True)
+        child_smiles_for_fname = (
+            Chem.MolToSmiles(child_mol)
+            .replace("/", "_slash_")
+            .replace("\\", "_backslash_")
+        )
+        unique_id = (
+            compound_id if compound_id is not None else hash(child_smiles_for_fname)
+        )
+        sanitized_unique_id = str(unique_id).replace("(", "_").replace(")", "_").replace("+", "_")
+        filename_prefix = "PASSED_" if passed_filter else ""
+        filename = f"./deepfrag_debug/{filename_prefix}{sanitized_unique_id}_{random.randint(1000, 9999)}.png"
+        
+        branching_points_indices = list(connection_points_3d.keys())
+        
+        mols_to_draw = [parent_mol, child_mol, Chem.MolFromSmarts(mcs_smarts), mcs_mol_with_coords, fragments_mol]
+        similarity_text = f"Similarity: {similarity:.3f}" if similarity is not None else "Similarity: None"
+        legends = ["Parent", "Child", f"MCS ({mcs_smarts})", "MCS with Parent Coords", f"Fragment(s)\n{similarity_text}"]
+        
+        highlight_list = [branching_points_indices] + [[] for _ in range(len(mols_to_draw) - 1)]
+        
+        img = Draw.MolsToGridImage(
+            mols_to_draw,
+            legends=legends,
+            molsPerRow=5,
+            subImgSize=(300, 300),
+            highlightAtomLists=highlight_list
+        )
+        img.save(filename)
+        log_info(f"Saved DeepFrag MCS debug image to {filename}")
+
     # Create a new MCS molecule with 3D coordinates from parent
-    def __create_mcs_molecule(self, parent, child, compound_id=None):
+    def __create_mcs_molecule(self, parent, child):
         """
         Create a new molecule representing just the MCS with 3D coordinates from parent
 
         Returns:
-        - mcs_mol: The MCS molecule with 3D coordinates
-        - parent_to_mcs_map: Mapping from parent atom indices to MCS atom indices
-        - child_to_mcs_map: Mapping from child atom indices to MCS atom indices
-        - compound_id: The ID of the compound being processed (optional)
+            - mcs_mol: The MCS molecule with 3D coordinates
+            - parent_to_mcs_map: Mapping from parent atom indices to MCS atom indices
+            - child_to_mcs_map: Mapping from child atom indices to MCS atom indices
+            - mcs_smarts: The SMARTS string of the MCS.
         """
         parent = Chem.RemoveHs(parent)
         child = Chem.RemoveHs(child)
@@ -214,7 +303,7 @@ class DeepFragFilterBase(PluginBase):
 
         if not parent_match or not child_match:
             log_warning("No match found in one or both molecules.")
-            return None, {}, {}
+            return None, {}, {}, ""
 
         # Create a new editable molecule for the MCS
         mcs_editable = Chem.EditableMol(Chem.Mol())
@@ -275,35 +364,6 @@ class DeepFragFilterBase(PluginBase):
         except:
             log_warning("MCS molecule sanitization failed")
 
-        if DEEPFRAG_DEBUG:
-            os.makedirs("./deepfrag_debug", exist_ok=True)
-            child_smiles_for_fname = (
-                Chem.MolToSmiles(child)
-                .replace("/", "_slash_")
-                .replace("\\", "_backslash_")
-            )  # make it filename-safe
-
-            unique_id = (
-                compound_id if compound_id is not None else hash(child_smiles_for_fname)
-            )
-            sanitized_unique_id = str(unique_id).replace("(", "_").replace(")", "_").replace("+", "_")
-            filename = f"./deepfrag_debug/{sanitized_unique_id}_{random.randint(1000, 9999)}.png"
-            mols_to_draw = [parent, child, mcs_mol]
-            legends = ["Parent", "Child", f"MCS ({mcs_smarts})"]
-
-            if new_mcs_mol:
-                mols_to_draw.append(new_mcs_mol)
-                legends.append("MCS with Parent Coords")
-
-            img = Draw.MolsToGridImage(
-                mols_to_draw,
-                legends=legends,
-                molsPerRow=4,
-                subImgSize=(300, 300),
-            )
-            img.save(filename)
-            log_info(f"Saved DeepFrag MCS debug image to {filename}")
-
         # Add MCS to parent atom mapping
         mcs_to_parent_map = {
             atom_mapping[i]: parent_match[i] for i in range(len(parent_match))
@@ -312,17 +372,17 @@ class DeepFragFilterBase(PluginBase):
         mcs_to_child_map = {
             atom_mapping[i]: child_match[i] for i in range(len(child_match))
         }
-        return new_mcs_mol, mcs_to_parent_map, mcs_to_child_map
+        return new_mcs_mol, mcs_to_parent_map, mcs_to_child_map, mcs_smarts
 
     # Function to find MCS and remove it from the second molecule
     def __find_mcs_and_fragments(self, parent, child, compound_id=None):
         # Create an explicit MCS molecule with 3D coordinates from parent
-        mcs_mol, mcs_to_parent_map, mcs_to_child_map = self.__create_mcs_molecule(
-            parent, child, compound_id=compound_id
+        mcs_mol, mcs_to_parent_map, mcs_to_child_map, mcs_smarts = self.__create_mcs_molecule(
+            parent, child
         )
         if mcs_mol is None:
             log_warning("Failed to create MCS molecule.")
-            return None, None, []
+            return None, None, [], None, {}
 
         # Create reverse mappings
         child_to_mcs_map = {v: k for k, v in mcs_to_child_map.items()}
@@ -449,7 +509,7 @@ class DeepFragFilterBase(PluginBase):
             Chem.GetSSSR(frag_mol)
 
         # Return without connection_points_3d
-        return mcs_mol, frag_mol, fragment_info
+        return mcs_mol, frag_mol, fragment_info, mcs_smarts, connection_points_3d
 
     def __compute_cosine_similarity(self, receptor, parent_mol, fragments):
         similarity = 0
