@@ -150,6 +150,19 @@ class FragmentRemoval(MutationBase):
                 if not fragment_mcs_scores:
                     continue  # No sanitizable fragments
 
+                # #### START DEBUG
+                # from rdkit import Chem
+                # frag = product_sets[0][0]  # Use the first fragment for now. REDEFINE THIS TO BE NOT NN
+                # cpy = copy.deepcopy(frag)
+                # import pdb; pdb.set_trace()
+                # sane_frag = MOH.check_sanitization(cpy)
+                # if sane_frag is None:
+                #     continue  # Skip fragments that don't sanitize
+                # mcs_result = chemtoolkit.find_mcs([mol_to_mutate, sane_frag])
+                # mcs_size = mcs_result.numAtoms if mcs_result is not None else 0
+                # fragment_mcs_scores.append((frag, mcs_size))
+                # #### END DEBUG
+
                 # Sort fragments by MCS size to find the largest
                 fragment_mcs_scores.sort(key=lambda x: x[1], reverse=True)
 

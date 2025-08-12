@@ -51,6 +51,29 @@ def check_sanitization(mol):
 
     chemtoolkit = plugin_managers.ChemToolkit.toolkit
 
+    # See if there are explicit hydrogens for any reason. Try to remove these at
+    # the smiles level. This is admittedly hacky.
+    smiles = chemtoolkit.mol_to_smiles(mol, isomeric_smiles=True)
+    if "[H]" in smiles or "[CH" in smiles:
+        # Try to clean up smiles
+        # smiles_orig = smiles
+        smiles = smiles.replace("n([H])", "[nH]")
+        smiles = smiles.replace("([H])", "")
+        smiles = smiles.replace("[H]", "")
+        smiles = smiles.replace("([CH3])", "C")
+        smiles = smiles.replace("[CH3]", "C")
+        smiles = smiles.replace("([CH2])", "C")
+        smiles = smiles.replace("[CH2]", "C")
+        smiles = smiles.replace("([CH])", "C")
+        smiles = smiles.replace("[CH]", "C")
+
+        if "H]" in smiles and not "[nH" in smiles:
+            import pdb; pdb.set_trace()
+
+        mol2 = chemtoolkit.mol_from_smiles(smiles, sanitize=False)
+        if mol2 is not None:
+            mol = mol2
+
     # easiest nearly everything should get through
     try:
         mol, sanitize_msg = chemtoolkit.sanitize_mol(mol, catch_errors=True,)
