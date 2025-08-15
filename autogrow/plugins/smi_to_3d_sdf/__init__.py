@@ -132,10 +132,9 @@ class SmiTo3DSdfPluginManager(PluginManagerBase):
         # Validate that the sdf_path property is populated
         for cmpd in resp:
             if cmpd.sdf_path is None:
-                log_warning("ERROR! Your SmiTo3DSdf plugin must populate the sdf_path property of each Compound.")
-                # raise Exception(
-                #     "ERROR! Your SmiTo3DSdf plugin must populate the sdf_path property of each Compound."
-                # )
+                log_warning(
+                    f"SMILES to 3D SDF conversion failed for compound {cmpd.id} ({cmpd.smiles})."
+                )
             else:
                 cmpd.add_history("CONVERSION", f"Converted {cmpd.smiles} to 3D SDF file")
                 resp_final.append(cmpd)

@@ -13,7 +13,7 @@ from autogrow.docking.ranking.ranking_mol import rank_and_save_output_smi
 from autogrow.plugins.registry_base import plugin_managers
 from autogrow.plugins.docking import DockingPluginManager
 from autogrow.types import Compound
-from autogrow.utils.logging import LogLevel, log_info
+from autogrow.utils.logging import LogLevel, log_info, log_warning
 
 
 def run_docking_common(
@@ -41,12 +41,16 @@ def run_docking_common(
         post_docked_compounds = docking_plugin_manager.run(
             predocked_cmpds=new_gen_predock_cmpds, cache_dir=cur_gen_dir
         )
-        post_docked_compounds = post_docked_compounds
-
-    # Remove those that failed to convert
-    post_docked_compounds = [x for x in post_docked_compounds if x is not None]
-
-    # Remove those not associated with a docked sdf file
-    return [x for x in post_docked_compounds if x.sdf_path is not None and x.docking_score is not None]
-
-
+    # post_docked_compounds might contain None where docking failed.
+    # The docking plugins are responsible for logging their own complete failures.
+    valid_compounds = [c for c in post_docked_compounds if c is not None]
+    # Remove those not associated with a docked sdf file or score, and log them
+    final_compounds = []
+    for c in valid_compounds:
+        if c.sdf_path is not None and c.docking_score is not None:
+            final_compounds.append(c)
+        else:
+            log_warning(
+                f"Compound {c.id} ({c.smiles}) rejected post-docking due to missing SDF path or docking score."
+            )
+    return final_compounds

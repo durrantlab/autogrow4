@@ -178,7 +178,7 @@ class DeepFragFilterBase(PluginBase):
                             final_compound_list.append(compound)
                         else:
                             mesg = f"Docked molecule {compound.id} with smiles string {compound.smiles} did not fulfill with the similarity criterion using DeepFrag: {similarity_str}"
-                            log_info(mesg)
+                            log_warning(mesg)
                             self.filter_logger_file.info(mesg)
 
         return final_compound_list

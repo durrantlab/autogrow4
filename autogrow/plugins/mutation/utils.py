@@ -9,7 +9,7 @@ from typing import Any, Dict, Optional
 from autogrow.plugins.registry_base import plugin_managers
 from autogrow.types import Compound
 import autogrow.utils.mol_object_handling as MOH
-
+from autogrow.utils.logging import log_warning
 
 def validate_rxn_library_path(params: dict):
     """
@@ -135,41 +135,64 @@ def validate_product(
     Returns:
         Optional[str]: The SMILES string of the validated product, or None.
     """
+    chemtoolkit = plugin_managers_obj.ChemToolkit.toolkit
+    try:
+        # Try to get a SMILES string for logging, even if it's not canonical
+        original_smiles = chemtoolkit.mol_to_smiles(
+            product_mol, canonical=False, isomeric_smiles=True
+        )
+    except Exception:
+        original_smiles = "Unrepresentable Molecule"
     product_mol = MOH.check_sanitization(product_mol)
     if product_mol is None:
+        log_warning(f"Mutation product failed sanitization: {original_smiles}")
         return None
 
     product_mol = MOH.handle_frag_check(product_mol)
     if product_mol is None:
+        log_warning(f"Mutation product is a fragment and was discarded: {original_smiles}")
         return None
 
     product_mol = MOH.check_for_unassigned_atom(product_mol)
     if product_mol is None:
+        log_warning(
+            f"Mutation product contained an unassigned atom ('*') and was discarded: {original_smiles}"
+        )
         return None
 
     product_mol = MOH.try_reprotanation(product_mol)
     if product_mol is None:
+        log_warning(
+            f"Mutation product failed reprotonation and was discarded: {original_smiles}"
+        )
         return None
 
     product_mol = MOH.try_deprotanation(product_mol)
     if product_mol is None:
+        log_warning(
+            f"Mutation product failed deprotonation and was discarded: {original_smiles}"
+        )
         return None
 
     product_mol = MOH.check_sanitization(product_mol)
     if product_mol is None:
+        log_warning(
+            f"Mutation product failed final sanitization and was discarded: {original_smiles}"
+        )
         return None
-
-    chemtoolkit = plugin_managers_obj.ChemToolkit.toolkit
     product_smiles: str = chemtoolkit.mol_to_smiles(
         product_mol, isomeric_smiles=True
     )
 
     if product_smiles == parent_info.smiles:
+        log_warning(
+            f"Mutation product is identical to parent and was discarded: {product_smiles}"
+        )
         return None
 
     # Run through filters
     tmp_predock_cmpd = Compound(smiles=product_smiles, id="tmp")
     passed_filter = (
-        len(plugin_managers_obj.SmilesFilter.run(predock_cmpds=[tmp_predock_cmpd])) > 0
+        len(plugin_managers_obj.SmilesFilter.run(predock_cmpds=[tmp_predock_cmpd], parent_info=parent_info)) > 0
     )
     return product_smiles if passed_filter else None

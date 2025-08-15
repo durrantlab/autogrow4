@@ -767,51 +767,26 @@ def _test_source_smiles_convert(test_args):
     chemtoolkit = test_args["chemtoolkit"]
 
     if smile_info is None or not smile_info:
-        printout = (
-            "REMOVING SMILES FROM SOURCE LIST: Blank "
-            + "entry in source compound list.\n"
-        )
-        return f"{printout}\tRemoving: {smile_info}"
-
+        return f"Rejected source compound: Blank entry in source compound list: {smile_info}"
     # separate out SMILES str and ID
     smile_str = smile_info.smiles
     smile_id = smile_info.id
 
     if type(smile_str) is not type(""):
-        printout = (
-            "REMOVING SMILES FROM SOURCE LIST: SMILES string is not a "
-            + "String. Check for formatting errors. \n"
-        )
-        printout += f"\tIgnored SMILES is: {smile_str}"
-        return printout
-
+        return f"Rejected source compound: SMILES string is not a String for {smile_id}. Check for formatting errors. SMILES: {smile_str}"
     # Try importing it into RDKit with Sanitization off. Tests for errors in
     # having the wrong data type
     try:
         mol = chemtoolkit.mol_from_smiles(str(smile_str), sanitize=False)
     except Exception:
-        printout = (
-            "REMOVING SMILES FROM SOURCE LIST: SMILES string failed "
-            + "to import into RDKit.\n\t "
-        )
-        printout += f"Removed SMILE string is: {smile_str} \n"
-        printout += f"\t Removed SMILE ID is: {smile_id}"
-        return printout
-
+        return f"Rejected source compound: SMILES string failed to import into RDKit. SMILES: {smile_str}, ID: {smile_id}"
     # This will fail if there are valence errors. We won't try to correct
     # someones source compound list Although the MOH.check_sanitization will
     # do that. try sanitizing, which is necessary later
     try:
         mol, _ = chemtoolkit.sanitize_mol(mol)
     except Exception:
-        printout = (
-            "REMOVING SMILES FROM SOURCE LIST: SMILES "
-            + "string failed to Sanitize in RDKit.\n"
-        )
-        printout += f"\t Removed SMILE string is: {smile_str} \n"
-        printout += f"\t Removed SMILE ID is: {smile_id}"
-        return printout
-
+        return f"Rejected source compound: SMILES string failed to Sanitize in RDKit. SMILES: {smile_str}, ID: {smile_id}"
     # Make the mol again fresh and try running it through MOH.handleHs() This
     # will try protanating and Deprotanating the mol. If it can't handle that
     # We reject it as many functions will require this sort of manipulation.
@@ -821,27 +796,18 @@ def _test_source_smiles_convert(test_args):
         mol, True
     )  # TODO: Probably not compatible with open babel implementation of chem toolkit! Will need to reconsider.
     if mol is None:
-        printout = "REMOVING SMILES FROM SOURCE LIST: SMILES string failed \
-            to be protanated or deprotanated.\n"
-        printout = (
-            printout
-            + "\t This is often an issue with valence and sanitization "
-            + "issues with the SMILES string."
-        )
+        printout = "Rejected source compound: SMILES string failed to be protanated or deprotanated (often a valence/sanitization issue)."
         return _report_removed_compound_info(smile_str, printout, smile_id)
 
     # Check there are no * which are atoms with atomic number=0
     mol = MOH.check_for_unassigned_atom(mol)
     if mol is None:
-        printout = (
-            "REMOVING SMILES FROM SOURCE LIST: SMILES string contained "
-            + "an unassigned atom type labeled as *.\n"
-        )
+        printout = "Rejected source compound: SMILES string contained an unassigned atom type labeled as *."
         return _report_removed_compound_info(smile_str, printout, smile_id)
 
     # Check for fragments.
     if len(chemtoolkit.get_mol_frags(mol, as_mols=True, sanitize_frags=False)) != 1:
-        printout = "REMOVING SMILES FROM SOURCE LIST: SMILES string was fragmented.\n"
+        printout = "Rejected source compound: SMILES string was fragmented."
         return _report_removed_compound_info(smile_str, printout, smile_id)
 
     # the ligand is good enough to use throughout the program!
@@ -913,18 +879,14 @@ def _get_cmpds_prev_gen(params: Dict[str, Any], generation_num: int) -> List[Com
     job_input = tuple(
         ({"smile_info": i, "chemtoolkit": params["chemtoolkit"]},) for i in cmpds
     )
-
-    cmpds: List[Compound] = params["parallelizer"].run(
+    results = params["parallelizer"].run(
         job_input, _test_source_smiles_convert
     )
-
-    cmpds = [x for x in cmpds if x is not None]
-    print_errors = [x for x in cmpds if type(x) is str]
-    cmpds = [x for x in cmpds if type(x) is Compound]
-
+    results = [x for x in results if x is not None]
+    print_errors = [x for x in results if type(x) is str]
+    cmpds = [x for x in results if type(x) is Compound]
     for x in print_errors:
-        print(x)
-
+        log_warning(x)
     if not cmpds:
         _raise_exception_with_message(
             "\nThere were no ligands in source compound or previous \
