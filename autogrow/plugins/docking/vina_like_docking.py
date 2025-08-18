@@ -16,7 +16,7 @@ import os
 from autogrow.plugins.docking import DockingBase
 from typing import List, Tuple
 from autogrow.config.argument_vars import ArgumentVars
-from autogrow.types import Compound, Compound
+from autogrow.types import Compound
 from autogrow.utils.logging import log_warning
 from autogrow.utils.obabel import obabel_convert, obabel_convert_cmd
 
@@ -149,20 +149,9 @@ class VinaLikeDocking(DockingBase):
             (posed) SDF file.
         """
         # Convert receptor (PDB format) to PDBQT format if necessary
-        receptor_pdbqt = self.params["receptor_path"] + "qt"
-        if not os.path.exists(receptor_pdbqt):
-            recep_conversion_success = obabel_convert(
-                self.params["receptor_path"],
-                receptor_pdbqt,
-                self.params["obabel_path"],
-                extra_params="-xrp",
-            )
+        receptor_pdbqt = self.get_prepared_receptor()
 
-            assert (
-                recep_conversion_success
-            ), f"Failed to convert receptor to PDBQT: {self.params['receptor_path']}"
-
-        # Convert the ligands to PDBQT format as well
+        # Convert the ligands to PDBQT format as well if necessary
         lig_convert_cmds = []
         lig_dock_cmds = []
         vina_out_files = []
@@ -175,20 +164,14 @@ class VinaLikeDocking(DockingBase):
                 vina_out_files.append(None)
                 continue
 
-            lig_pdbqt_filename = f"{predocked_cmpd.sdf_path}.pdbqt"
-
-            # Get commands to convert ligand to pdbqt
-            cmd = obabel_convert_cmd(
-                predocked_cmpd.sdf_path, lig_pdbqt_filename, self.params["obabel_path"],
-            )
-            lig_convert_cmds.append(cmd)
+            lig_pdbqt_filename = self.get_prepared_ligand_and_add_cmd(predocked_cmpd, lig_convert_cmds)
 
             # Get commands to dock ligand
-            cmd = self.get_dock_cmd(lig_pdbqt_filename)
+            cmd = self.get_dock_cmd(lig_pdbqt_filename, receptor_pdbqt)
             lig_dock_cmds.append(cmd)
 
             # Get vina output files
-            vina_out_file = f"{lig_pdbqt_filename}.vina"
+            vina_out_file = self.get_output_file(lig_pdbqt_filename)
             vina_out_files.append(vina_out_file)
 
             # Also get the docked compound as an SDF file. It is important that
@@ -209,22 +192,29 @@ class VinaLikeDocking(DockingBase):
             )
             vina_out_convert_cmds_2.append(cmd2)
 
-        # Convert the ligands to PDBQT format
         assert self.plugin_managers is not None, "Plugin managers is None"
         assert (
             self.plugin_managers.ShellParallelizer is not None
         ), "Shell parallelizer is None"
-        
+
+        # Convert the ligands to PDBQT format if needed
         # TODO: Need to specify nprocs?
-        self.plugin_managers.ShellParallelizer.run(
-            cmds=lig_convert_cmds
-        )
+        if len(lig_convert_cmds) > 0:
+            self.plugin_managers.ShellParallelizer.run(
+                cmds=lig_convert_cmds
+            )
 
         # Dock the ligands
         # TODO: Need to specify nprocs?
         self.plugin_managers.ShellParallelizer.run(
             cmds=lig_dock_cmds
         )
+
+        # Postprocessing the docking output. This is useful for docking
+        # programs whose output for the input ligand is a file containing
+        # all their poses. Thus, it is required to select the best pose
+        # to perform the following steps.
+        self.select_best_pose(vina_out_files)
 
         # First step to convert the docked ligands to SDF format
         # TODO: Need to specify nprocs?
@@ -238,7 +228,73 @@ class VinaLikeDocking(DockingBase):
             cmds=vina_out_convert_cmds_2
         )
 
-        for predocked_cmpd, vina_out_file in zip(predocked_cmpds, vina_out_files):
+        self.process_results_before_exit(predocked_cmpds, vina_out_files)
+        return predocked_cmpds
+
+    def get_prepared_receptor(self) -> str:
+        """
+        Convert the .pdb file containing the receptor to the .pdbqt format required by Vina software.
+        """
+        receptor_pdbqt = self.params["receptor_path"] + "qt"
+        if not os.path.exists(receptor_pdbqt):
+            recep_conversion_success = obabel_convert(
+                self.params["receptor_path"],
+                receptor_pdbqt,
+                self.params["obabel_path"],
+                extra_params="-xrp",
+            )
+
+            assert (
+                recep_conversion_success
+            ), f"Failed to convert receptor to PDBQT: {self.params['receptor_path']}"
+
+        return receptor_pdbqt
+
+    def get_prepared_ligand_and_add_cmd(self, predocked_cmpd, lig_convert_cmds) -> str:
+        """
+        Convert the .sdf file containing the ligand to the .pdbqt format required by Vina software.
+
+        Args:
+            predocked_cmpd (Compound): A Compound object representing the ligand.
+            lig_convert_cmds (list): A list where the command to run to convert the ligand to the .pdbqt format
+                will be added.
+        """
+        lig_pdbqt_filename = f"{predocked_cmpd.sdf_path}.pdbqt"
+
+        # Get commands to convert ligand to pdbqt
+        cmd = obabel_convert_cmd(
+            predocked_cmpd.sdf_path, lig_pdbqt_filename, self.params["obabel_path"],
+        )
+        lig_convert_cmds.append(cmd)
+        return lig_pdbqt_filename
+
+    def get_output_file(self, lig_filename) -> str:
+        """
+        Return the path of the output file for the GNINA docking software.
+
+        Args:
+            lig_filename: Path of the input ligand.
+        """
+        return lig_filename + ".vina"
+
+    def select_best_pose(self, lig_output_files):
+        """
+        Do not make anything.
+        """
+        pass
+
+    def process_results_before_exit(self, predocked_cmpds, out_files):
+        """
+        Select the affinity value for each input compound from the corresponding output file of the
+        VINA docking software.
+
+        Args:
+            predocked_cmpds (list): List of Compound objects containing the poses.
+            out_files (list): List of paths representing each output file of the VINA docking software corresponding
+                to each pose.
+        """
+        # Iterate over output files to process the results
+        for predocked_cmpd, vina_out_file in zip(predocked_cmpds, out_files):
             if vina_out_file is None or not os.path.exists(vina_out_file):
                 # Throw out ones that failed to dock
                 log_warning(f"Failed to dock {predocked_cmpd.id}")
@@ -267,31 +323,30 @@ class VinaLikeDocking(DockingBase):
             predocked_cmpd.docking_score = score
             predocked_cmpd.sdf_path = f"{vina_out_file}.sdf"
 
-        return predocked_cmpds
-
     #######################################
     # DOCK USING VINA                     #
     #######################################
-    def get_dock_cmd(self, lig_pdbqt_filename) -> str:
+    def get_dock_cmd(self, lig_pdbqt_filename, receptor_pdbqt_file) -> str:
         """
         Generate the docking command for a given ligand using Vina-like software.
 
         Args:
-            lig_pdbqt_filename (str): The filename of the ligand in PDBQT format.
+            lig_pdbqt_filename (str): The filename of the ligand.
+            receptor_pdbqt_file (str): The filename of the receptor.
 
         Returns:
             str: The complete command string to run the docking for the given ligand.
         """
         params = self.params
+        output_file = self.get_output_file(lig_pdbqt_filename)
 
-        receptor_pdbqt_file = f'{params["receptor_path"]}qt'
         torun = (
             f'"{params["vina_like_executable"]}" '
             f'--center_x {params["center_x"]} --center_y {params["center_y"]} --center_z {params["center_z"]} '
             f'--size_x {params["size_x"]} --size_y {params["size_y"]} --size_z {params["size_z"]} '
             f'--receptor "{receptor_pdbqt_file}" '
             f'--ligand "{lig_pdbqt_filename}" '
-            f'--out "{lig_pdbqt_filename}.vina" --cpu {params["docking_nprocs"]}'
+            f'--out "{output_file}" --cpu {params["docking_nprocs"]}'
         )
 
         # Add optional user variables additional variable
@@ -308,10 +363,18 @@ class VinaLikeDocking(DockingBase):
         ) and type(params["docking_num_modes"]) in [int, float]:
             torun = f"{torun} --num_modes " + str(int(params["docking_num_modes"]))
 
+        torun = self.add_additional_args_docking_cmd(torun)
+
         # Add output line MUST ALWAYS INCLUDE THIS LINE
         torun = f'{torun} >>"{lig_pdbqt_filename}_docking_output.txt"  2>>"{lig_pdbqt_filename}_docking_output.txt"' \
             if os.name != "nt" else f'{torun} > "{lig_pdbqt_filename}_docking_output.txt" 2>&1'
 
+        return torun
+
+    def add_additional_args_docking_cmd(self, torun) -> str:
+        """
+        Do not make anything.
+        """
         return torun
 
     def replace_atoms_not_handled_by_forcefield(self, lig_pdbqt_filename):
