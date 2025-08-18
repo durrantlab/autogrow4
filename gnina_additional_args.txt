@@ -1,0 +1,3 @@
+# For additional GNINA arguments see https://github.com/gnina/gnina
+--no_gpu
+--addH
