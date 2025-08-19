@@ -85,7 +85,7 @@ def get_user_params() -> Dict[str, Any]:
 
     # Genetic Algorithm Options
     ga = parser.add_argument_group(
-        "General Genetic Algorithm Options (settings for the genetic algorithm)"
+        "Genetic Algorithm Options (settings for the genetic algorithm)"
     )
     _add_ga_params(ga)
 
@@ -93,12 +93,6 @@ def get_user_params() -> Dict[str, Any]:
         "Genetic Algorithm Options Applied to the First Generation (settings for the first generation)"
     )
     _add_ga_first_gen_params(ga_first_gen)
-
-    ga_subsequent_gen = parser.add_argument_group(
-        "Genetic Algorithm Options Applied to Subsequent Generations (settings for all generations after the first)"
-    )
-    _add_ga_subsequent_gen_params(ga_subsequent_gen)
-
     # Conversion Settings
     conversion = parser.add_argument_group(
         "Conversion Settings (options for file conversion)"
@@ -296,37 +290,32 @@ def _add_ga_first_gen_params(parser: CustomArgumentGroup):
     parser.add_argument(
         "--top_mols_to_seed_next_generation_first_generation",
         type=int,
-        help="Number of mols that seed next generation, for the first generation.\
-        Should be less than number_of_crossovers_first_generation + number_of_mutations_first_generation\
-        If not defined it will default to top_mols_to_seed_next_generation",
+        help="Number of mols that seed next generation, for the first generation. "
+        "Overrides --top_mols_to_seed_next_generation for the first generation.",
     )
     parser.add_argument(
         "--diversity_mols_to_seed_first_generation",
         type=int,
         default=10,
-        help="Should be less than number_of_crossovers_first_generation \
-        + number_of_mutations_first_generation",
+        help="Number of diverse molecules to select from the previous generation to seed the first generation.",
     )
     parser.add_argument(
         "--number_of_crossovers_first_generation",
         type=int,
-        help="The number of ligands which will be created via crossovers in the \
-        first generation. If not defined it will default to number_of_crossovers",
+        help="The number of ligands which will be created via crossovers in the "
+        "first generation. Overrides --number_of_crossovers for the first generation.",
     )
     parser.add_argument(
         "--number_of_mutants_first_generation",
         type=int,
-        help="The number of ligands which will be created via mutation in \
-        the first generation. If not defined it will default to number_of_mutants",
+        help="The number of ligands which will be created via mutation in "
+        "the first generation. Overrides --number_of_mutants for the first generation.",
     )
     parser.add_argument(
         "--number_elitism_advance_from_previous_gen_first_generation",
         type=int,
-        help="The number of ligands chosen for elitism for the first generation \
-        These will advance from the previous generation directly into the next \
-        generation.  This is purely advancing based on Docking/Rescore fitness. \
-        This does not select for diversity. If not defined it will default to \
-        number_elitism_advance_from_previous_gen",
+        help="The number of ligands chosen for elitism for the first generation. "
+        "Overrides --number_elitism_advance_from_previous_gen for the first generation.",
     )
     # parser.add_argument(
     #     "--dock_source_compounds_first",
@@ -345,43 +334,6 @@ def _add_ga_first_gen_params(parser: CustomArgumentGroup):
     #     source_compound_file for future simulations. \
     #     Default is True.",
     # )
-
-
-def _add_ga_subsequent_gen_params(parser: CustomArgumentGroup):
-    """
-    Add genetic algorithm parameters for subsequent generations.
-
-    This function adds arguments for the number of molecules to seed the next
-    generation, number of crossovers, and number of mutants for generations
-    after the first.
-
-    Args:
-        parser (CustomArgumentGroup): The argument group to add the
-            parameters to.
-    """
-    parser.add_argument(
-        "--top_mols_to_seed_next_generation",
-        type=int,
-        default=10,
-        help="Number of mols that seed next generation, for all generations after the first.\
-        Should be less than number_of_crossovers_first_generation \
-        + number_of_mutations_first_generation",
-    )
-    parser.add_argument(
-        "--number_of_crossovers",
-        type=int,
-        default=10,
-        help="The number of ligands which will be created via crossover in each \
-        generation besides the first",
-    )
-    parser.add_argument(
-        "--number_of_mutants",
-        type=int,
-        default=10,
-        help="The number of ligands which will be created via mutation in each \
-        generation besides the first.",
-    )
-
 
 def _add_ga_params(parser: CustomArgumentGroup):
     """
@@ -405,10 +357,10 @@ def _add_ga_params(parser: CustomArgumentGroup):
         "--number_elitism_advance_from_previous_gen",
         type=int,
         default=10,
-        help="The number of ligands chosen for elitism. These will advance from \
-        the previous generation directly into the next generation. \
-        This is purely advancing based on Docking/Rescore \
-        fitness. This does not select for diversity.",
+        help="The number of ligands chosen for elitism. These will advance from "
+        "the previous generation directly into the next generation. "
+        "This is purely advancing based on Docking/Rescore "
+        "fitness. This does not select for diversity.",
     )
 
     parser.add_argument(
@@ -416,6 +368,27 @@ def _add_ga_params(parser: CustomArgumentGroup):
         type=int,
         default=2,
         help="Each gen diversity_mols_to_seed_first_generation will decrease this amount",
+    )
+    parser.add_argument(
+        "--top_mols_to_seed_next_generation",
+        type=int,
+        default=10,
+        help="Number of mols that seed next generation for all generations. "
+        "Can be overridden for the first generation with --top_mols_to_seed_next_generation_first_generation.",
+    )
+    parser.add_argument(
+        "--number_of_crossovers",
+        type=int,
+        default=10,
+        help="The number of ligands which will be created via crossover in each "
+        "generation. Can be overridden for the first generation with --number_of_crossovers_first_generation.",
+    )
+    parser.add_argument(
+        "--number_of_mutants",
+        type=int,
+        default=10,
+        help="The number of ligands which will be created via mutation in each "
+        "generation. Can be overridden for the first generation with --number_of_mutants_first_generation.",
     )
 
 

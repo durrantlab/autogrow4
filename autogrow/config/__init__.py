@@ -83,8 +83,7 @@ def _set_missing_first_generation_params(params: Dict[str, Any]) -> None:
 
     This function checks for parameters specific to the first generation and
     sets them if they're not defined. If the first-generation version is not
-    defined, it uses either the default value of 10 or the value defined for
-    subsequent generations.
+    defined, it uses the value defined for subsequent generations.
 
     Args:
         params (Dict[str, Any]): The parameters dictionary to be modified.
@@ -98,17 +97,10 @@ def _set_missing_first_generation_params(params: Dict[str, Any]) -> None:
         "number_of_mutants",
         "number_elitism_advance_from_previous_gen",
     ]:
-        if f"{pname}_first_generation" not in list(params.keys()):
-            # The first-generation version is not defined.
-            if pname not in list(params.keys()):
-                # Subsequent-generation versions are also not defined. Use
-                # defined default of 10.
-                params[pname] = 10
-                params[f"{pname}_first_generation"] = 10
-            else:
-                # Subsequent-generation versions are defined. Use the same
-                # number for the first generation.
-                params[f"{pname}_first_generation"] = params[pname]
+        if f"{pname}_first_generation" not in params:
+            # The first-generation version is not defined. Use the same
+            # number for the first generation.
+            params[f"{pname}_first_generation"] = params[pname]
 
 
 def _convert_param_to_int_if_needed(
