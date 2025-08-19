@@ -111,8 +111,7 @@ class GhoseFilter(SmilesFilterBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Ghose filters for drug-likeliness; filters by molecular weight,\
-        logP and number of atoms.",
+                    help="Apply the Ghose filter for drug-likeness (MW, LogP, atom count, molar refractivity).",
                 )
             ],
         )

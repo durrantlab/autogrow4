@@ -198,8 +198,7 @@ def _add_general_params(parser: CustomArgumentGroup):
         "--json",
         "-j",
         metavar="param.json",
-        help="Name of a json file containing all parameters. \
-        Overrides other arguments.",
+        help="Path to a JSON file containing parameters. Overrides other arguments.",
     )
     # processors and multithread mode
     parser.add_argument(
@@ -214,16 +213,14 @@ def _add_general_params(parser: CustomArgumentGroup):
         "--multithread_mode",
         default="multithreading",
         choices=["multithreading", "serial"],
-        help="Determine what style \
-        multithreading: multithreading or serial. serial will override \
-        procs_per_node and force it to be on a single processor.",
+        help="Multithreading mode. 'serial' forces single-processor execution, overriding --procs_per_node.",
     )
     # for postprocessing
     parser.add_argument(
         "--process_input_compounds",
         action="store_true",
         default=False,
-        help="This is to use the information of the reference compounds in the processing of results.",
+        help="Include an analysis of the input compounds in the output, including docking and generating plots for generation 0.",
     )
 
 
@@ -243,14 +240,13 @@ def _add_io_params(parser: CustomArgumentGroup):
         "--output_directory",
         "-o",
         type=str,
-        help="The Path to the folder which all output files will be placed.",
+        help="Path to the output directory where all results will be saved.",
     )
     parser.add_argument(
         "--source_compound_file",
         "-s",
         type=str,
-        help="PATH to the file containing the source compounds. It must be \
-        tab-delineated .smi file. These ligands will seed the first generation.",
+        help="Path to the source compounds file to seed the first generation. Can be a tab-delineated .smi file or an .sdf file. These molecules will seed the first generation.",
     )
 
 
@@ -270,7 +266,7 @@ def _add_receptor_params(parser: CustomArgumentGroup):
         "--receptor_path",
         "-r",
         metavar="receptor.pdb",
-        help="The path to the receptor file. Should be .pdb file.",
+        help="Path to the receptor file in PDB format.",
     )
 
 
@@ -290,32 +286,28 @@ def _add_ga_first_gen_params(parser: CustomArgumentGroup):
     parser.add_argument(
         "--top_mols_to_seed_next_generation_first_generation",
         type=int,
-        help="Number of mols that seed next generation, for the first generation. "
-        "Overrides --top_mols_to_seed_next_generation for the first generation.",
+        help="Number of molecules from generation 0 to seed generation 1. Overrides --top_mols_to_seed_next_generation for the first generation only. Should be less than the sum of crossovers and mutants for the first generation.",
     )
     parser.add_argument(
         "--diversity_mols_to_seed_first_generation",
         type=int,
         default=10,
-        help="Number of diverse molecules to select from the previous generation to seed the first generation.",
+        help="Number of diverse molecules to select from generation 0 to seed generation 1. Should be less than the sum of crossovers and mutants for the first generation.",
     )
     parser.add_argument(
         "--number_of_crossovers_first_generation",
         type=int,
-        help="The number of ligands which will be created via crossovers in the "
-        "first generation. Overrides --number_of_crossovers for the first generation.",
+        help="Number of new molecules to create via crossover in generation 1. Overrides --number_of_crossovers for the first generation only.",
     )
     parser.add_argument(
         "--number_of_mutants_first_generation",
         type=int,
-        help="The number of ligands which will be created via mutation in "
-        "the first generation. Overrides --number_of_mutants for the first generation.",
+        help="Number of new molecules to create via mutation in generation 1. Overrides --number_of_mutants for the first generation only.",
     )
     parser.add_argument(
         "--number_elitism_advance_from_previous_gen_first_generation",
         type=int,
-        help="The number of ligands chosen for elitism for the first generation. "
-        "Overrides --number_elitism_advance_from_previous_gen for the first generation.",
+        help="Number of elite molecules to carry over from generation 0 to 1, based purely on fitness score. Overrides --number_elitism_advance_from_previous_gen for the first generation only.",
     )
     # parser.add_argument(
     #     "--dock_source_compounds_first",
@@ -351,44 +343,38 @@ def _add_ga_params(parser: CustomArgumentGroup):
         "--num_generations",
         type=int,
         default=10,
-        help="The number of generations to be created.",
+        help="Total number of generations to run.",
     )
     parser.add_argument(
         "--number_elitism_advance_from_previous_gen",
         type=int,
         default=10,
-        help="The number of ligands chosen for elitism. These will advance from "
-        "the previous generation directly into the next generation. "
-        "This is purely advancing based on Docking/Rescore "
-        "fitness. This does not select for diversity.",
+        help="Number of top-ranked molecules (elites) to carry over to the next generation without modification, based purely on fitness score. Does not select for diversity.",
     )
 
     parser.add_argument(
         "--diversity_seed_depreciation_per_gen",
         type=int,
         default=2,
-        help="Each gen diversity_mols_to_seed_first_generation will decrease this amount",
+        help="Amount by which to decrease the number of diverse seeds per generation.",
     )
     parser.add_argument(
         "--top_mols_to_seed_next_generation",
         type=int,
         default=10,
-        help="Number of mols that seed next generation for all generations. "
-        "Can be overridden for the first generation with --top_mols_to_seed_next_generation_first_generation.",
+        help="Number of molecules to select from each generation to seed the next. Should be less than the sum of crossovers and mutants. Can be overridden for the first generation with --top_mols_to_seed_next_generation_first_generation.",
     )
     parser.add_argument(
         "--number_of_crossovers",
         type=int,
         default=10,
-        help="The number of ligands which will be created via crossover in each "
-        "generation. Can be overridden for the first generation with --number_of_crossovers_first_generation.",
+        help="Number of new molecules to create via crossover in each generation. Can be overridden for the first generation with --number_of_crossovers_first_generation.",
     )
     parser.add_argument(
         "--number_of_mutants",
         type=int,
         default=10,
-        help="The number of ligands which will be created via mutation in each "
-        "generation. Can be overridden for the first generation with --number_of_mutants_first_generation.",
+        help="Number of new molecules to create via mutation in each generation. Can be overridden for the first generation with --number_of_mutants_first_generation.",
     )
 
 
@@ -405,9 +391,7 @@ def _add_conversion_params(parser: CustomArgumentGroup):
     # Path to Open Babel file conversion for docking inputs
     parser.add_argument(
         "--obabel_path",
-        help="The path to the open babel executable. \
-        Path may look like PATH/envs/py37/bin/obabel; \
-        may be found on Linux by running: which obabel",
+        help="Path to the Open Babel executable (e.g., '/usr/bin/obabel'). Required for most file conversions. Tip: Run `which obabel` on Linux.",
     )
 
 

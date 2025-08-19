@@ -125,11 +125,7 @@ class GhoseModifiedFilter(SmilesFilterBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Ghose filters for drug-likeliness; filters by molecular weight,\
-        logP and number of atoms. This is the same as the GhoseFilter, but \
-        the upper-bound of the molecular weight restrict is loosened from \
-        480Da to 500Da. This is intended to be run with Lipinski Filter and \
-        to match AutoGrow 3's Ghose Filter.",
+                    help="Apply a modified Ghose filter for drug-likeness (MW, LogP, atom count, molar refractivity). Same as the GhoseFilter, but with a relaxed MW upper bound of 500Da (rather than 480Da)."
                 )
             ],
         )

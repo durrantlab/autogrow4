@@ -32,19 +32,19 @@ class HeavyAtomCountFilter(SmilesFilterBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Filter compounds by a heavy-atom count range.",
+                    help="Enable filtering of compounds by a heavy-atom count range.",
                 ),
                 ArgumentVars(
                     name="min_heavy_atoms",
                     type=int,
                     default=0,
-                    help=f"The minimum number of heavy atoms allowed for a compound. Used with the {self.name} plugin.",
+                    help="The minimum number of heavy atoms allowed for a compound.",
                 ),
                 ArgumentVars(
                     name="max_heavy_atoms",
                     type=int,
                     default=50,
-                    help=f"The maximum number of heavy atoms allowed for a compound. Used with the {self.name} plugin.",
+                    help="The maximum number of heavy atoms allowed for a compound.",
                 ),
             ],
         )

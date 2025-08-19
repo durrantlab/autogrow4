@@ -53,7 +53,7 @@ class RankSelector(SelectorBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Select compounds to advance to the next generation per a ranked selector. The Rank option is a non-redundant selector. Do not use Rank_Selector for small runs as there is potential that the number of desired ligands exceed the number of ligands to chose from.",  # TODO: Add more detail here.
+                    help="Enable rank-based, non-redundant selection. Chooses the top N compounds based on score. Not recommended for small runs, where the number of desired molecules may exceed the number of molecules to chose from.",
                 )
             ],
         )

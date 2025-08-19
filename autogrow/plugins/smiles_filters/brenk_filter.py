@@ -102,8 +102,7 @@ class BRENKFilter(SmilesFilterBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="BRENK filter for lead-likeliness, by matching common false positive \
-        molecules to the current mol.",
+                    help="Apply the BRENK filter to remove molecules with undesirable substructures for lead-likeness.",
                 )
             ],
         )

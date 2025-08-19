@@ -43,7 +43,7 @@ class ObabelSmiTo3DSDF(SmiTo3DSdfBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Convert SMILES to 3D SDF using obabel.",
+                    help="Enable SMILES to 3D SDF conversion using OpenBabel.",
                 )
             ],
         )

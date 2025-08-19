@@ -45,9 +45,9 @@ class FakeDocking(DockingBase):
                     help="Use fake docking (for testing)",
                 ),
                 #     ArgumentVars(
-                #         name="vina_like_executable",
+                #         name="docking_executable",
                 #         default=None,
-                #         help="path to the vina_like_executable (vina, qvina2, smina, etc.)",
+                #         help="path to the docking_executable (vina, qvina2, smina, etc.)",
                 #     ),
                 #     ArgumentVars(
                 #         name="center_x",

@@ -39,35 +39,31 @@ class MergeMCS(CrossoverBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Run the Maximum Common Substructure Crossover plugin. Creates new molecules by merging two existing molecules.",
+                    help="Enable the Maximum Common Substructure (MCS) crossover operator.",
                 ),
                 ArgumentVars(
                     name="max_time_mcs_prescreen",
                     type=int,
                     default=1,
-                    help="amount time the pre-screen MCS times out. Time out doesnt prevent \
-                    mcs matching just takes what it has up to that point",
+                    help="Timeout in seconds for the initial, fast MCS search between molecule pairs.",
                 ),
                 ArgumentVars(
                     name="max_time_mcs_thorough",
                     type=int,
                     default=1,
-                    help="amount time the thorough MCS times out. Time out doesnt prevent \
-                    mcs matching just takes what it has up to that point",
+                    help="Timeout in seconds for the thorough MCS search between selected molecule pairs.",
                 ),
                 ArgumentVars(
                     name="min_atom_match_mcs",
                     type=int,
                     default=4,
-                    help="Determines the minimum number of atoms in common for a substructurematch. \
-                    The higher the more restrictive, but the more likely for two ligands not to match",
+                    help="Minimum number of atoms required for a valid Maximum Common Substructure match. Selecting a higher value is more restrictive, decreasing the likelihood that two ligands will match.",
                 ),
                 ArgumentVars(
                     name="protanate_step",
                     action="store_true",
                     default=False,
-                    help="Indicates if Smilesmerge uses protanated mols (if true) or deprot \
-                    (if False) SmilesMerge is 10x faster when deprotanated",
+                    help="Whether to use protonated molecules for crossover. Deprotonated is faster.",
                 ),
             ],
         )

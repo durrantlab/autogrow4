@@ -164,13 +164,13 @@ class DeepFragFilter(DeepFragFilterBase):
                 name="DeepFragModel",
                 type=str,
                 default=None,
-                help="path to the DeepFrag model that is .ckpt file",
+                help=f"Path to a DeepFrag model checkpoint (.ckpt) file, or the name of a built-in model (i.e., {', '.join(self.url_by_in_house_model.keys())}).",
             ),
             ArgumentVars(
                 name="DeepFragOnCPU",
                 action="store_true",
                 default=False,
-                help="Use CPU to run DeepFrag.",
+                help="Force DeepFrag to run on the CPU, even if a GPU is available.",
             )
         ]
         return group_name, parent_args + child_args

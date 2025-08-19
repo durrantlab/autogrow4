@@ -33,19 +33,19 @@ class MolWtFilter(SmilesFilterBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Filter compounds by a molecular weight range.",
+                    help="Enable filtering of compounds by a molecular weight range.",
                 ),
                 ArgumentVars(
                     name="min_mol_weight",
                     type=float,
                     default=0.0,
-                    help=f"The minimum molecular weight allowed for a compound. Used with the {self.name} plugin.",
+                    help="The minimum molecular weight allowed for a compound.",
                 ),
                 ArgumentVars(
                     name="max_mol_weight",
                     type=float,
                     default=550.0,
-                    help=f"The maximum molecular weight allowed for a compound. Used with the {self.name} plugin.",
+                    help="The maximum molecular weight allowed for a compound.",
                 ),
             ],
         )

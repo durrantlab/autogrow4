@@ -60,9 +60,7 @@ class FragmentAddition(MutationBase):
         built_in_libs = [os.path.basename(x) for x in built_in_libs]
 
         rxn_library_path_help = (
-            "The set of reactions and reactants for use in the mutation operation. Valid values include the path to a reaction library or "
-            + (", ".join(built_in_libs))
-            + "."
+            f"Path to a reaction library directory, or a built-in library name (e.g., {', '.join(built_in_libs)})."
         )
         return (
             "Fragment Addition Mutation",
@@ -71,7 +69,7 @@ class FragmentAddition(MutationBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Run the Fragment Addition Mutation plugin. Creates new molecules by adding fragments to existing molecules, per user-specified reaction libraries.",
+                    help="Enable the fragment addition mutation operator, which creates new molecules by adding fragments using reaction libraries.",
                 ),
                 ArgumentVars(
                     name="rxn_library_path",
@@ -83,25 +81,25 @@ class FragmentAddition(MutationBase):
                     name="min_fragment_mol_weight",
                     type=float,
                     default=None,
-                    help=f"The minimum molecular weight of fragments to be used in reactions. If not specified, no minimum MW filter is applied. Used with the {self.name} plugin.",
+                    help="Minimum molecular weight for fragments used in addition reactions. If not specified, no minimum MW filter is applied.",
                 ),
                 ArgumentVars(
                     name="max_fragment_mol_weight",
                     type=float,
                     default=None,
-                    help=f"The maximum molecular weight of fragments to be used in reactions. If not specified, no maximum MW filter is applied. Used with the {self.name} plugin.",
+                    help="Maximum molecular weight for fragments used in addition reactions. If not specified, no maximum MW filter is applied.",
                 ),
                 ArgumentVars(
                     name="mutants_per_batch",
                     type=int,
                     default=1,
-                    help=f"For each mutation, generate this many new molecules. Use higher numbers for better DeepFrag caching and to improve the chances of finding highly relevant DeepFrag matches. Set to -1 to generate all possible products. Used with the {self.name} plugin.",
+                    help="Number of mutants to generate per reaction. Higher values aid DeepFrag caching and similarity matching. Set to -1 to generate all possible products per reaction.",
                 ),
                 ArgumentVars(
                     name="max_pass_per_batch",
                     type=int,
                     default=None,
-                    help=f"If specified, randomly select this many compounds from each batch of mutants and discard the others. If not specified, all compounds generated from a batch are allowed to advance. Used with the {self.name} plugin.",
+                    help="Maximum number of mutants to keep from a single reaction batch. If unset, all are kept.",
                 ),
             ],
         )

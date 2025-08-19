@@ -22,23 +22,19 @@ class SubstructureFilter(SmilesFilterBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Filter compounds based on a required substructure.",
+                    help="Enable filtering of compounds based on a required or excluded substructure.",
                 ),
                 ArgumentVars(
                     name="--substructure_smiles",  # Note actually SMARTS string
-                    help="SMARTS string of required substructure. Compounds will only "
-                         "pass if they contain this substructure. Used with the " + self.name + " plugin.",
+                    help="SMARTS string of a required or excluded substructure.",
                     type=str,
-                    default=None
+                    default=None,
                 ),
                 ArgumentVars(
                     name="--exclude_substructure",  # NOTE: Untested
                     action="store_true",
                     default=False,
-                    help="Flag to exclude compounds containing the substructures specified via --substructure_smiles. "
-                    "Used with the "
-                    + self.name
-                    + " plugin.",
+                    help="Exclude compounds containing the substructure instead of requiring it.",
                 ),
             ]
         )
