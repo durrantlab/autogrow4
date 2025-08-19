@@ -218,6 +218,7 @@ class DeepFragFilterBase(PluginBase):
                         This filter is applied to the products of multi-reactant fragment additions. See \
                         also --DeepFragFilterForCrossover.",
                 ),
+
                 ArgumentVars(
                     name="DeepFragFilterForCrossover",
                     action="store_true",

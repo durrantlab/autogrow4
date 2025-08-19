@@ -174,6 +174,7 @@ class DeepFragFilter(DeepFragFilterBase):
             )
         ]
         return group_name, parent_args + child_args
+
     def download_deepfrag_ckpt(self, deepfrag_model_ckpt, deepfrag_model_url):
         """Download an in-house DeepFrag model checkpoint."""
 
