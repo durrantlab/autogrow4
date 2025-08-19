@@ -29,6 +29,7 @@ import json
 from typing import Any, Dict
 
 from autogrow.config import setup_params
+from autogrow.config.custom_argparser import CustomArgumentParser, CustomArgumentGroup
 from autogrow.config.json_config_utils import (
     convert_json_params_from_unicode,
     save_vars_as_json,
@@ -37,7 +38,8 @@ from autogrow.config.argument_vars import plugin_arg_groups_to_add
 from autogrow.plugins.registry_base import PluginManagerRegistry
 from autogrow.validation import validate_all
 
-parser = argparse.ArgumentParser(
+# parser = argparse.ArgumentParser(
+parser = CustomArgumentParser(
     description="AutoGrow: An automated drug optimization and generation tool."
 )
 
@@ -186,7 +188,7 @@ def get_user_params() -> Dict[str, Any]:
     return new_args_dict
 
 
-def _add_general_params(parser: argparse._ArgumentGroup):
+def _add_general_params(parser: CustomArgumentGroup):
     """
     Add general parameters to the argument group.
 
@@ -194,7 +196,7 @@ def _add_general_params(parser: argparse._ArgumentGroup):
     and multithread mode to the general settings group.
 
     Args:
-        parser (argparse._ArgumentGroup): The argument group to add the
+        parser (CustomArgumentGroup): The argument group to add the
             parameters to.
     """
     # Allows the run commands to be submitted via a .json file.
@@ -231,7 +233,7 @@ def _add_general_params(parser: argparse._ArgumentGroup):
     )
 
 
-def _add_io_params(parser: argparse._ArgumentGroup):
+def _add_io_params(parser: CustomArgumentGroup):
     """
     Add input/output parameters to the argument group.
 
@@ -239,7 +241,7 @@ def _add_io_params(parser: argparse._ArgumentGroup):
     file to the input/output settings group.
 
     Args:
-        parser (argparse._ArgumentGroup): The argument group to add the
+        parser (CustomArgumentGroup): The argument group to add the
             parameters to.
     """
     # Input/Output directories
@@ -258,7 +260,7 @@ def _add_io_params(parser: argparse._ArgumentGroup):
     )
 
 
-def _add_receptor_params(parser: argparse._ArgumentGroup):
+def _add_receptor_params(parser: CustomArgumentGroup):
     """
     Add receptor-related parameters to the argument group.
 
@@ -266,7 +268,7 @@ def _add_receptor_params(parser: argparse._ArgumentGroup):
     information group.
 
     Args:
-        parser (argparse._ArgumentGroup): The argument group to add the
+        parser (CustomArgumentGroup): The argument group to add the
             parameters to.
     """
     # receptor information
@@ -278,7 +280,7 @@ def _add_receptor_params(parser: argparse._ArgumentGroup):
     )
 
 
-def _add_ga_first_gen_params(parser: argparse._ArgumentGroup):
+def _add_ga_first_gen_params(parser: CustomArgumentGroup):
     """
     Add genetic algorithm parameters for the first generation.
 
@@ -287,7 +289,7 @@ def _add_ga_first_gen_params(parser: argparse._ArgumentGroup):
     diversity molecules, crossovers, mutants, and elitism.
 
     Args:
-        parser (argparse._ArgumentGroup): The argument group to add the
+        parser (CustomArgumentGroup): The argument group to add the
             parameters to.
     """
     # Seeding next gen and diversity
@@ -345,7 +347,7 @@ def _add_ga_first_gen_params(parser: argparse._ArgumentGroup):
     # )
 
 
-def _add_ga_subsequent_gen_params(parser: argparse._ArgumentGroup):
+def _add_ga_subsequent_gen_params(parser: CustomArgumentGroup):
     """
     Add genetic algorithm parameters for subsequent generations.
 
@@ -354,7 +356,7 @@ def _add_ga_subsequent_gen_params(parser: argparse._ArgumentGroup):
     after the first.
 
     Args:
-        parser (argparse._ArgumentGroup): The argument group to add the
+        parser (CustomArgumentGroup): The argument group to add the
             parameters to.
     """
     parser.add_argument(
@@ -381,7 +383,7 @@ def _add_ga_subsequent_gen_params(parser: argparse._ArgumentGroup):
     )
 
 
-def _add_ga_params(parser: argparse._ArgumentGroup):
+def _add_ga_params(parser: CustomArgumentGroup):
     """
     Add general genetic algorithm parameters.
 
@@ -389,7 +391,7 @@ def _add_ga_params(parser: argparse._ArgumentGroup):
     redocking elite compounds, and diversity seed depreciation.
 
     Args:
-        parser (argparse._ArgumentGroup): The argument group to add the
+        parser (CustomArgumentGroup): The argument group to add the
             parameters to.
     """
     # Populations settings
@@ -417,14 +419,14 @@ def _add_ga_params(parser: argparse._ArgumentGroup):
     )
 
 
-def _add_conversion_params(parser: argparse._ArgumentGroup):
+def _add_conversion_params(parser: CustomArgumentGroup):
     """
     Add file conversion parameters.
 
     This function adds an argument for the path to the OpenBabel executable.
 
     Args:
-        parser (argparse._ArgumentGroup): The argument group to add the
+        parser (CustomArgumentGroup): The argument group to add the
             parameters to.
     """
     # Path to Open Babel file conversion for docking inputs
@@ -436,7 +438,7 @@ def _add_conversion_params(parser: argparse._ArgumentGroup):
     )
 
 
-def _add_scoring_params(parser: argparse._ArgumentGroup):
+def _add_scoring_params(parser: CustomArgumentGroup):
     """
     Add scoring-related parameters.
 
@@ -444,7 +446,7 @@ def _add_scoring_params(parser: argparse._ArgumentGroup):
     rescoring option. TODO: Need to implement this in the future.
 
     Args:
-        parser (argparse._ArgumentGroup): The argument group to add the
+        parser (CustomArgumentGroup): The argument group to add the
             parameters to.
     """
     # scoring
@@ -467,7 +469,7 @@ def _add_scoring_params(parser: argparse._ArgumentGroup):
 
 
 # TODO: Use these parameter later when you implement gypsum option.
-# def _add_gypsum_params(parser: argparse._ArgumentGroup):
+# def _add_gypsum_params(parser: CustomArgumentGroup):
 #     # gypsum # max variance is the number of conformers made per ligand
 #     parser.add_argument(
 #         "--max_variants_per_compound",
@@ -522,14 +524,14 @@ def _add_scoring_params(parser: argparse._ArgumentGroup):
 #     )
 
 
-def _add_misc_params(parser: argparse._ArgumentGroup):
+def _add_misc_params(parser: CustomArgumentGroup):
     """
     Add miscellaneous parameters.
 
     This function adds an argument for generating a plot at the end of the run.
 
     Args:
-        parser (argparse._ArgumentGroup): The argument group to add the
+        parser (CustomArgumentGroup): The argument group to add the
             parameters to.
     """
     # # Make a line plot of the simulation at the end of the run.
