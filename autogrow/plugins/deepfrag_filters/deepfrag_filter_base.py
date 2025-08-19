@@ -279,6 +279,119 @@ class DeepFragFilterBase(PluginBase):
         img.save(filename)
         log_info(f"Saved DeepFrag MCS debug image to {filename}")
 
+    def _find_single_fragment_mcs(self, mol1, mol2):
+        """
+        Finds the largest common substructure (MCS) between two molecules that does
+        not result in more than one fragment for either of the input molecules
+        when the MCS is removed.
+
+        Args:
+            mol1 (Chem.Mol): The first RDKit molecule.
+            mol2 (Chem.Mol): The second RDKit molecule.
+
+        Returns:
+            str: The SMARTS string of the optimal MCS, or None if no suitable MCS is found.
+        """
+        if mol1 is None or mol2 is None:
+            raise ValueError("Invalid RDKit molecule provided.")
+
+        # Helper function to get fragments by removing MCS atoms
+        def _get_fragments_for_mol(mol, mcs_mol):
+            match = mol.GetSubstructMatch(mcs_mol)
+            if not match:
+                return [Chem.MolToSmiles(mol)] # Should not happen with valid MCS
+
+            emol = Chem.RWMol(mol)
+            atoms_to_remove = sorted(list(match), reverse=True)
+            for atom_idx in atoms_to_remove:
+                emol.RemoveAtom(atom_idx)
+            
+            frag_mol = emol.GetMol()
+            
+            try:
+                # Important: Sanitize=False to handle radical fragments, then sanitize later if needed.
+                frag_smiles = Chem.MolToSmiles(frag_mol, isomericSmiles=True)
+                # Split into fragments and remove empty strings from result
+                frags = [s for s in frag_smiles.split('.') if s]
+                return frags
+            except:
+                return []
+
+        def _get_atoms_sorted_by_connectivity(mol):
+            """
+            Returns atoms sorted by connectivity (degree), with terminal atoms first.
+            
+            Args:
+                mol: RDKit molecule object
+                
+            Returns:
+                list: Atoms sorted by degree (ascending), then by atom index for consistency
+            """
+            atoms_with_degree = []
+            for atom in mol.GetAtoms():
+                degree = atom.GetDegree()
+                atoms_with_degree.append((degree, atom.GetIdx(), atom))
+            
+            # Sort by degree (ascending, so terminal atoms first), then by index for consistency
+            atoms_with_degree.sort(key=lambda x: (x[0], x[1]))
+            
+            return [atom for _, _, atom in atoms_with_degree]
+
+        # 1. Find the initial, absolute MCS as a starting point.
+        initial_mcs = rdFMCS.FindMCS([mol1, mol2], timeout=30)
+        if initial_mcs.numAtoms == 0:
+            return None
+
+        # Our list of candidates to check, starting with the biggest.
+        # We store tuples of (mol_object, smarts_string).
+        mcs_mol = Chem.MolFromSmarts(initial_mcs.smartsString)
+        candidates = [(mcs_mol, initial_mcs.smartsString)]
+        
+        # Keep track of SMARTS we've already processed to avoid redundant work.
+        seen_smarts = {initial_mcs.smartsString}
+
+        while candidates:
+            # 2. Always check the largest candidate first.
+            candidates.sort(key=lambda x: x[0].GetNumAtoms(), reverse=True)
+            current_mcs_mol, current_mcs_smarts = candidates.pop(0)
+
+            # 3. Check if this candidate is "valid".
+            frags1 = _get_fragments_for_mol(mol1, current_mcs_mol)
+            frags2 = _get_fragments_for_mol(mol2, current_mcs_mol)
+
+            if len(frags1) <= 1 and len(frags2) <= 1:
+                # SUCCESS: We found the largest MCS that satisfies the condition.
+                return current_mcs_smarts
+
+            # 4. If not valid, generate smaller candidates by removing atoms in connectivity order.
+            if current_mcs_mol.GetNumAtoms() > 1:
+                # Get atoms sorted by connectivity (terminal atoms first)
+                sorted_atoms = _get_atoms_sorted_by_connectivity(current_mcs_mol)
+                
+                for atom in sorted_atoms:
+                    # Create a copy to modify
+                    emol = Chem.RWMol(current_mcs_mol)
+                    emol.RemoveAtom(atom.GetIdx())
+                    
+                    # Removing an atom can disconnect the MCS itself. We take the largest resulting piece.
+                    sub_frags = Chem.GetMolFrags(emol.GetMol(), asMols=True)
+                    if not sub_frags:
+                        continue
+
+                    largest_sub_frag = max(sub_frags, key=lambda m: m.GetNumAtoms())
+                    
+                    try:
+                        new_smarts = Chem.MolToSmarts(largest_sub_frag)
+                        if new_smarts not in seen_smarts:
+                            # Add new, smaller candidate to our list for checking.
+                            candidates.append((largest_sub_frag, new_smarts))
+                            seen_smarts.add(new_smarts)
+                    except:
+                        continue
+        
+        # If the loop finishes, no suitable MCS was found.
+        return None
+
     # Create a new MCS molecule with 3D coordinates from parent
     def __create_mcs_molecule(self, parent, child):
         """
@@ -292,22 +405,20 @@ class DeepFragFilterBase(PluginBase):
         """
         parent = Chem.RemoveHs(parent)
         child = Chem.RemoveHs(child)
+        
+        # Find the Maximum Common Substructure that does not fragment molecules
+        mcs_smarts = self._find_single_fragment_mcs(parent, child)
 
-        # Find the Maximum Common Substructure
-        mcs = rdFMCS.FindMCS(
-            [parent, child],
-            completeRingsOnly=True,
-            ringMatchesRingOnly=True,
-            matchValences=True,
-        )
+        if mcs_smarts is None:
+            log_warning(f"Could not find single-fragment MCS for {Chem.MolToSmiles(parent)} and {Chem.MolToSmiles(child)}")
+            return None, {}, {}, ""
+
         # Create a molecule from the MCS SMARTS pattern
-        mcs_smarts = mcs.smartsString
         mcs_mol = Chem.MolFromSmarts(mcs_smarts)
-
-        log_info(f"MCS found: {mcs.smartsString}")
-        log_info(f"Number of atoms in MCS: {mcs.numAtoms}")
-        log_info(f"Number of bonds in MCS: {mcs.numBonds}")
-
+        log_info(f"MCS found: {mcs_smarts}")
+        log_info(f"Number of atoms in MCS: {mcs_mol.GetNumAtoms()}")
+        log_info(f"Number of bonds in MCS: {mcs_mol.GetNumBonds()}")
+        
         # Match the MCS in both molecules
         parent_match = parent.GetSubstructMatch(mcs_mol)
         child_match = child.GetSubstructMatch(mcs_mol)
