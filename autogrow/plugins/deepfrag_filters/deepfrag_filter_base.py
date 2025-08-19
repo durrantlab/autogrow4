@@ -51,7 +51,8 @@ class DeepFragFilterBase(PluginBase):
             cutoff: the cosine similarity value to be considered as cutoff.
 
         Returns:
-            List[Compound]: A list of Compound objects.
+            List[Compound]: A list of Compound objects that passed the filter,
+                with their `sort_score` attribute populated.
         """
         compounds = kwargs["compounds"]
         cutoff = kwargs["input_params"][self.name]
@@ -62,15 +63,14 @@ class DeepFragFilterBase(PluginBase):
             log_info(
                 f"Applying DeepFrag filter with cutoff {cutoff} to {len(compounds)} compounds."
             )
-
-            final_compound_list = []
+            final_compound_list: List[Compound] = []
             for compound in compounds:
                 log_info(
                     f"Processing compound {compound.id} with smiles string {compound.smiles}"
                 )
                 with LogLevel():
-                    passed_filter = True
-                    similarity_str = None
+                    passed_filter = False
+                    similarity_str = "None"
                     child_mol = Chem.MolFromSmiles(compound.smiles)
                     if len(compound.parent_3D_mols) == 1:
                         # This is a standard mutation
@@ -88,7 +88,10 @@ class DeepFragFilterBase(PluginBase):
                         similarity = self.__compute_cosine_similarity(
                             receptor, parent_mol, fragments
                         )
-                        passed_filter = similarity >= cutoff
+                        passed_filter = similarity is not None and similarity >= cutoff
+                        if passed_filter:
+                            compound.sort_score = similarity
+                            final_compound_list.append(compound)
                         similarity_str = (
                             f"{similarity:.3f}" if similarity is not None else "None"
                         )
@@ -135,7 +138,19 @@ class DeepFragFilterBase(PluginBase):
                         similarity_1 = self.__compute_cosine_similarity(
                             receptor, parent_mol_2, fragments_2
                         )
-                        passed_filter = similarity_0 >= cutoff or similarity_1 >= cutoff
+                        sim_0_passes = similarity_0 is not None and similarity_0 >= cutoff
+                        sim_1_passes = similarity_1 is not None and similarity_1 >= cutoff
+                        passed_filter = sim_0_passes or sim_1_passes
+                        if passed_filter:
+                            max_similarity = -1.0
+                            if sim_0_passes and sim_1_passes:
+                                max_similarity = max(similarity_0, similarity_1)
+                            elif sim_0_passes:
+                                max_similarity = similarity_0
+                            else:
+                                max_similarity = similarity_1
+                            compound.sort_score = max_similarity
+                            final_compound_list.append(compound)
                         similarity_str = (
                             f"{similarity_0:.3f} and {similarity_1:.3f}"
                             if similarity_0 is not None and similarity_1 is not None
@@ -166,19 +181,19 @@ class DeepFragFilterBase(PluginBase):
                                 compound_id=f"{compound.id}_parent2",
                                 generation_num=generation_num,
                             )
+
                     compound.mol_3D = None
                     compound.parent_3D_mols = None
 
-                    # If False means that this filter is not applied on crossover
-                    if similarity_str is not None:
-                        if passed_filter:
-                            log_info(
-                                f"Docked molecule {compound.id} with smiles string {compound.smiles} passed the similarity criterion using DeepFrag: {similarity_str}"
-                            )
-                            final_compound_list.append(compound)
-                        else:
-                            mesg = f"Docked molecule {compound.id} with smiles string {compound.smiles} did not fulfill with the similarity criterion using DeepFrag: {similarity_str}"
-                            log_warning(mesg)
+                    # Log the outcome
+                    if passed_filter:
+                        log_info(
+                            f"Docked molecule {compound.id} with smiles string {compound.smiles} passed the similarity criterion using DeepFrag: {similarity_str}"
+                        )
+                    else:
+                        mesg = f"Docked molecule {compound.id} with smiles string {compound.smiles} did not fulfill with the similarity criterion using DeepFrag: {similarity_str}"
+                        log_warning(mesg)
+                        if self.filter_logger_file:
                             self.filter_logger_file.info(mesg)
 
         return final_compound_list

@@ -46,6 +46,9 @@ class Compound:  # Get new id when you figure out what context this is used in
         parent_3D_mols (Optional[Chem.Mol]): RDKit molecule object.
         fp (Optional[Any]): Molecular fingerprint.
         sdf_path (Optional[str]): Path to docked structure SDF file.
+        sort_score (Optional[float]): Score used for sorting compounds during
+            fragment addition (e.g., when DeepFrag provides a similarity
+            metric).
     """
 
     smiles: str
@@ -59,6 +62,7 @@ class Compound:  # Get new id when you figure out what context this is used in
     parent_3D_mols: List[Optional[Any]] = None
     fp: Optional[Any] = None
     sdf_path: Optional[str] = None
+    sort_score: Optional[float] = None
     _history: List[Any] = field(default_factory=list)
 
     # fitness_score: float  # Like -8.439

@@ -779,12 +779,22 @@ class FragmentAddition(MutationBase):
         if not products:
             return None
 
-        # Post-generation filtering and pruning
-        filtered_products = self._filter_products_with_deepfrag(
+        passing_compounds, id_to_reaction_info = self._score_and_filter_products(
             products, parent_info
         )
-        pruned_products = self._prune_products_by_batch_limit(filtered_products)
-        return pruned_products if pruned_products else None
+
+        pruned_compounds = self._prune_products_by_limit(passing_compounds)
+
+        if not pruned_compounds:
+            return None
+
+        # Convert back to tuple format
+        final_products = []
+        for compound in pruned_compounds:
+            reaction_id, comp_mol_id = id_to_reaction_info[compound.id]
+            final_products.append((compound.smiles, reaction_id, comp_mol_id))
+
+        return final_products
 
     def _generate_all_possible_products(
         self,
@@ -1164,57 +1174,74 @@ class FragmentAddition(MutationBase):
                 break
         return products
 
-    def _filter_products_with_deepfrag(
+    def _score_and_filter_products(
         self,
         products: List[Tuple[str, int, Optional[str]]],
         parent_info: Compound,
-    ) -> List[Tuple[str, int, Optional[str]]]:
+    ) -> Tuple[List[Compound], Dict[str, Tuple[int, Optional[str]]]]:
         """
-        Apply the DeepFrag filter to a list of reaction products.
-
+        Apply scoring filters (like DeepFrag) to a list of reaction products.
         Args:
             products (List[Tuple[str, int, Optional[str]]]): The list of
                 products to filter.
             parent_info (Compound): The parent compound information.
 
         Returns:
-            List[Tuple[str, int, Optional[str]]]: The filtered list of products.
+            Tuple[List[Compound], Dict[str, Tuple[int, Optional[str]]]]:
+                A tuple containing the filtered list of products (as Compound
+                objects with populated sort_score) and a dictionary mapping
+                their temporary IDs back to their original reaction info.
         """
-        if not products or len(self.plugin_managers.DeepFragFilter.plugins) == 0:
-            return products
+        if not products:
+            return [], {}
 
         compounds_to_filter = []
-        for p_smiles, _, _ in products:
-            tmp_cmpd = Compound(smiles=p_smiles, id="tmp_for_deepfrag")
+        id_to_reaction_info = {}
+
+        for p_smiles, reaction_id, comp_mol_id in products:
+            # Create a unique ID to map back to reaction info
+            temp_id = f"temp_{os.urandom(16).hex()}"
+            id_to_reaction_info[temp_id] = (reaction_id, comp_mol_id)
+
+            tmp_cmpd = Compound(smiles=p_smiles, id=temp_id)
             tmp_cmpd.parent_3D_mols = [parent_info.mol_3D]
             compounds_to_filter.append(tmp_cmpd)
 
-        filtered_compounds = self.plugin_managers.DeepFragFilter.run(
+        # This returns List[Compound] with sort_score populated for passing compounds
+        passing_compounds = self.plugin_managers.DeepFragFilter.run(
             input_params=self.plugin_managers.DeepFragFilter.params,
             compounds=compounds_to_filter,
         )
 
-        filtered_smiles = {c.smiles for c in filtered_compounds}
-        return [p for p in products if p[0] in filtered_smiles]
+        return passing_compounds, id_to_reaction_info
 
-    def _prune_products_by_batch_limit(
-        self, products: List[Tuple[str, int, Optional[str]]]
-    ) -> List[Tuple[str, int, Optional[str]]]:
+    def _prune_products_by_limit(
+        self, compounds: List[Compound]
+    ) -> List[Compound]:
         """
         Prune the list of products according to the max_pass_per_batch limit.
-
+        If products have a selection score, they are sorted by that score before
+        pruning. Otherwise, they are shuffled randomly.
         Args:
-            products (List[Tuple[str, int, Optional[str]]]): The list of
-                products to prune.
-
+            compounds (List[Compound]): The list of products to prune.
         Returns:
-            List[Tuple[str, int, Optional[str]]]: The pruned list of products.
+            List[Compound]: The pruned list of products.
         """
         max_pass_per_batch = self.params.get("max_pass_per_batch")
-        if max_pass_per_batch is not None and len(products) > max_pass_per_batch:
-            random.shuffle(products)
-            return products[:max_pass_per_batch]
-        return products
+
+        if max_pass_per_batch is None or len(compounds) <= max_pass_per_batch:
+            return compounds
+
+        # Check if the first item has a score to determine sorting strategy
+        if compounds and compounds[0].sort_score is not None:
+            # Sort by selection score, descending
+            compounds.sort(key=lambda x: x.sort_score, reverse=True)
+        else:
+            # No scores available, shuffle for random selection
+            random.shuffle(compounds)
+
+        return compounds[:max_pass_per_batch]
+
     def _get_random_complementary_mol(
         self, functional_group: str
     ) -> Optional[List[str]]:
