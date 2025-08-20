@@ -33,6 +33,12 @@ class GNINADocking(VinaLikeDocking):
         """
         args = super().add_arguments()[1]
         args.append(ArgumentVars(
+            name="no_gpu_for_gnina",
+            action="store_true",
+            default=False,
+            help="If specified, disable GPU acceleration, even if available.",
+        ))
+        args.append(ArgumentVars(
             name="additional_gnina_args",
             type=str,
             default=None,
@@ -51,6 +57,9 @@ class GNINADocking(VinaLikeDocking):
             ValueError: If the 'additional_gnina_args' was specified but it does notexist.
         """
         super().validate(params)
+        if params["no_gpu_for_gnina"]:
+            self.additional_docking_args = self.additional_docking_args + " --no_gpu"
+
         if params["additional_gnina_args"]:
             if not os.path.exists(params["additional_gnina_args"]):
                 raise ValueError(
