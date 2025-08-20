@@ -49,10 +49,10 @@ class VinaLikeDocking(DockingBase):
                     help="Use docking software from the vina family (vina, qvina2, smina, etc.)",
                 ),
                 ArgumentVars(
-                    name="vina_like_executable",
+                    name="docking_executable",
                     type=str,
                     default=None,
-                    help="path to the vina_like_executable (vina, qvina2, smina, etc.)",
+                    help="path to the docking_executable (vina, qvina2, smina, etc.)",
                 ),
                 ArgumentVars(
                     name="center_x",
@@ -341,7 +341,7 @@ class VinaLikeDocking(DockingBase):
         output_file = self.get_output_file(lig_pdbqt_filename)
 
         torun = (
-            f'"{params["vina_like_executable"]}" '
+            f'"{params["docking_executable"]}" '
             f'--center_x {params["center_x"]} --center_y {params["center_y"]} --center_z {params["center_z"]} '
             f'--size_x {params["size_x"]} --size_y {params["size_y"]} --size_z {params["size_z"]} '
             f'--receptor "{receptor_pdbqt_file}" '

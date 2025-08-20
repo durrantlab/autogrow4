@@ -118,16 +118,17 @@ class SmilesFilterPluginManager(PluginManagerBase):
         # assert isinstance(kwargs["smiles"][0], str), "smiles must be a list of strings"
 
         # Run filter on a single smiles string.
+        parent_info = kwargs.get("parent_info")
         passed_cmpds: List[Compound] = []
         for cmpd in kwargs["predock_cmpds"]:
             # run through the filters
-            passed = self._run_all_selected_filters(cmpd)
+            passed = self._run_all_selected_filters(cmpd, parent_info)
             if passed:
                 passed_cmpds.append(cmpd)
 
         return passed_cmpds
 
-    def _run_all_selected_filters(self, cmpd: Compound) -> bool:
+    def _run_all_selected_filters(self, cmpd: Compound, parent_info: Optional[Compound] = None) -> bool:
         """
         Determine if mol passes filters.
 
@@ -138,9 +139,10 @@ class SmilesFilterPluginManager(PluginManagerBase):
         Inputs:
         :param Compound cmpd: An rdkit mol object to be tested
             if it passes the filters
-
+        :param Compound parent_info: The parent compound information.
+        
         Returns:
-        returns bol bol: True if the mol passes all the filters. False if the mol
+            returns bol bol: True if the mol passes all the filters. False if the mol
             fails any filters.
         """
         filters_failed = 0
@@ -150,9 +152,9 @@ class SmilesFilterPluginManager(PluginManagerBase):
             filter_function = plugin.run
             if not filter_function(cmpd=cmpd):
                 filters_failed = filters_failed + 1
-                log_warning(f"Failed {plugin_name} filter: {cmpd.smiles}")
-                self.filter_logger_file.info(f"Failed {plugin_name} filter: {cmpd.smiles}")
-
+                parent_info_str = f" (from parent {parent_info.id})" if parent_info else ""
+                log_warning(f"Failed {plugin_name} filter: {cmpd.smiles}{parent_info_str}")
+                self.filter_logger_file.info(f"Failed {plugin_name} filter: {cmpd.smiles}{parent_info_str}")
         if filters_failed == 0:
             return True
 

@@ -28,8 +28,6 @@ class ArgumentVars:
 
 # Storage for plugin argument groups that need to be added
 plugin_arg_groups_to_add = []
-registered_args: Set[str] = set()  # Keep track of registered argument names
-
 
 def register_argparse_group(title: str, arg_vars: List[ArgumentVars]):
     """Register an argument group with its associated arguments.
@@ -42,16 +40,5 @@ def register_argparse_group(title: str, arg_vars: List[ArgumentVars]):
         arg_vars (List[ArgumentVars]): List of ArgumentVars objects representing
             the arguments to be added to the group.
     """
-    global plugin_arg_groups_to_add, registered_args
-    
-    # Filter out any arguments that have already been registered
-    new_arg_vars = []
-    for arg_var in arg_vars:
-        arg_name = arg_var.name.lstrip('-')  # Remove leading dashes
-        if arg_name not in registered_args:
-            registered_args.add(arg_name)
-            new_arg_vars.append(arg_var)
-    
-    # Only add the group if it has new arguments
-    if new_arg_vars:
-        plugin_arg_groups_to_add.append((title, new_arg_vars))
+    global plugin_arg_groups_to_add
+    plugin_arg_groups_to_add.append((title, arg_vars))

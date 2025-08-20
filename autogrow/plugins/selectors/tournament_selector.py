@@ -51,13 +51,13 @@ class TournamentSelector(SelectorBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Select compounds to advance to the next generation per a tournament selector. The tournament selector chooses without replacement and is stoichastic.",  # TODO: Add more detail here.
+                    help="Enable tournament selection. Repeatedly selects the best compound from a random subset of the population, without replacement.",
                 ),
                 ArgumentVars(
                     name="tourn_size",
                     type=float,
                     default=0.1,
-                    help="If using the Tournament_Selector, this determines the size of each tournament. The number of ligands used for each tournament will (tourn_size) * (the number of considered ligands).",
+                    help="Fraction of the population to include in each tournament (e.g., 0.1 for 10%).",
                 ),
             ],
         )

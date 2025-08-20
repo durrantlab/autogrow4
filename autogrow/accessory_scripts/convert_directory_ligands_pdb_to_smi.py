@@ -146,16 +146,14 @@ PARSER.add_argument(
     "-s",
     required=True,
     default=None,
-    help="Path to folder containing .pdb files to convert. \
-    File must contain a single small molecules. Without protein. \
-    Files must end with either .pdb or .PDB",
+    help="Path to a folder containing .pdb files to convert. Each PDB file should contain a single small molecule without a protein.",
 )
 PARSER.add_argument(
     "--output_folder",
     "-o",
     required=True,
     default=None,
-    help="Path to folder where we will output a .smi file of converted .pdb files.",
+    help="Path to the folder where the output .smi file will be saved.",
 )
 # processors and multithread mode
 PARSER.add_argument(
@@ -164,9 +162,7 @@ PARSER.add_argument(
     type=int,
     metavar="N",
     default=1,
-    help="Number of processors to use for parallel calculations. \
-    This script is able to multithread using SMP architecture. \
-    Set to -1 for all available CPUs.",
+    help="Number of processors to use for parallel calculations. This script supports multithreading. Set to -1 to use all available CPUs..",
 )
 
 ARGS_DICT = vars(PARSER.parse_args())

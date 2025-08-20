@@ -113,17 +113,14 @@ PARSER.add_argument(
     "-f",
     required=True,
     default=None,
-    help="Path to .pdbqt file to convert to a .pdb file. This must be a single \
-    ligand and must end with .pdbqt",
+    help="Path to a PDBQT file containing a single ligand to be converted to PDB format.",
 )
 PARSER.add_argument(
     "--output_file",
     "-o",
     type=str,
     default=None,
-    help="Path to file where we will output .pdb file. \
-    If not provide the output .pdb will be the same as the input \
-    pdbqt_file but ending with .pdb instead of .pdbqt.",
+    help="Path to the output PDB file. If not provided, the output will be saved in the same directory as the input file with a .pdb extension.",
 )
 
 ARGS_DICT = vars(PARSER.parse_args())

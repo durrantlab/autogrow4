@@ -94,7 +94,7 @@ class DockingPluginManager(PluginManagerBase):
         for post_docked_cmpd in post_docked_cmpds:
             try:
                 log_debug(
-                    f"Docked molecule {post_docked_cmpd.smiles}. Score: {post_docked_cmpd.docking_score: .2f}"
+                    f"Posed molecule {post_docked_cmpd.smiles}. Score: {post_docked_cmpd.docking_score: .2f}"
                 )
                 post_docked_cmpd.add_history(
                     "DOCKING",
@@ -106,7 +106,7 @@ class DockingPluginManager(PluginManagerBase):
                 post_docked_cmpd.fitness_score = post_docked_cmpd.docking_score
             except:
                 log_debug(
-                    f"Docked molecule {post_docked_cmpd.smiles} has 'docking_score' attribute as None (Null)"
+                    f"Posed molecule {post_docked_cmpd.smiles} has 'docking_score' attribute as None (Null)"
                 )
 
         # # Sanity check: Make sure each output sdf file exists (should be the

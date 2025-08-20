@@ -1,6 +1,6 @@
 """
 Lenient Lipinski Filter for oral drug availability.
-
+≈
 This module implements a Lenient Lipinski filter to refine molecules for oral
 drug availability. It filters molecules based on Molecular Weight (MW), number
 of hydrogen donors and acceptors, and LogP value.
@@ -120,9 +120,7 @@ class LipinskiLenientFilter(SmilesFilterBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Lipinski filters for orally available drugs following Lipinski rule of fives. \
-        Filters by molecular weight, logP and number of hydrogen bond donors and acceptors. \
-        Lenient implementation means a ligand may fail all but one requirement and still passes.",
+                    help="Apply Lipinski's Rule of Five (MW, logP, number of hydrogen bond donors and acceptors) for oral bioavailability, allowing one violation.",
                 )
             ],
         )

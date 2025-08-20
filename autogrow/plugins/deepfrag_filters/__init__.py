@@ -28,7 +28,8 @@ class DeepFragFilterManager(PluginManagerBase):
             **kwargs: A dictionary of arguments to pass to the plugin.
 
         Returns:
-            List[Compound]: A list of Compound objects.
+            List[Compound]: A list of Compound objects that passed the filter,
+                with their `sort_score` attribute populated.
 
         Raises:
             Exception: If multiple DeepFrag filters are selected.

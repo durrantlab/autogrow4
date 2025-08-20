@@ -91,8 +91,7 @@ class VandeWaterbeemdFilter(SmilesFilterBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="VandeWaterbeemd filters for drug likely to be blood brain barrier permeable. \
-        Filters by the number of molecular weight and Polar Sureface Area (PSA).",
+                    help="Apply the Van de Waterbeemd filter to select for blood-brain barrier permeability (MW, PSA).",
                 )
             ],
         )

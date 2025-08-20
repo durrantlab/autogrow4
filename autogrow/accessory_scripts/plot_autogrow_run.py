@@ -155,7 +155,7 @@ def get_plot_labels(params: Dict[str, Any], ligand_efficiency: bool = False) -> 
         y_label = "Ligand Efficiency"
     else:
         title = f"Docking scores for {receptor_name}"
-        scoring_type = params.get("vina_like_executable", "")
+        scoring_type = params.get("docking_executable", "")
         if "vina" in str(scoring_type):
             y_label = "Docking Score"
         else:
@@ -1313,7 +1313,7 @@ if __name__ == "__main__":
     )
     PARSER.add_argument(
         "--process_input_compounds", action="store_true", default=False,
-        help="Use information of reference compounds in processing results"
+        help="Include generation 0 (the input compounds) in the analysis and plots."
     )
 
     kwargs = vars(PARSER.parse_args())

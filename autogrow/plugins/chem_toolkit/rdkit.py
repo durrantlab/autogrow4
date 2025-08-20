@@ -38,7 +38,7 @@ class RDKitToolkit(ChemToolkitBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Fake conversion to 3D SDF. Converts only to 2D for speed. This is for testing purposes only. Use together with FakeDocking.",
+                    help="Use RDKit as the backend for chemistry operations.",
                 )
             ],
         )

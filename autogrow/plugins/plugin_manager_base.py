@@ -312,6 +312,7 @@ class PluginManagerBase(ABC):
         os.makedirs(f"{working_dir}{os.sep}filter_loggers", exist_ok=True)
         self.filter_logger_file = logging.getLogger(name)
         self.filter_logger_file.setLevel(logging.DEBUG)
+        self.filter_logger_file.propagate = False
         handler = logging.FileHandler(f"{working_dir}{os.sep}filter_loggers{os.sep}{name}")
         # formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         # handler.setFormatter(formatter)

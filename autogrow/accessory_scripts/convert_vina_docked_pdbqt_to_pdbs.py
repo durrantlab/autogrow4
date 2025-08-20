@@ -312,8 +312,7 @@ PARSER.add_argument(
     "-f",
     required=True,
     default=None,
-    help="Path to .pdbqt.vina file to split into 1 .pdb file per pose that matches all criteria. \
-    if this is a directory it will convert all of the files with the extension .pdbqt.vina",
+    help="Path to a .pdbqt.vina file to be split into PDB files, one for each pose that meets the criteria. If a directory is provided, all .pdbqt.vina files within it will be converted.",
 )
 
 PARSER.add_argument(

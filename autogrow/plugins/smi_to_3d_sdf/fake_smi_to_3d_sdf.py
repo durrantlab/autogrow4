@@ -42,7 +42,7 @@ class FakeSmiTo3DSDF(SmiTo3DSdfBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Fake conversion to 3D SDF. Converts only to 2D for speed. This is for testing purposes only. Use together with FakeDocking.",
+                    help="Enable fake SMILES to 3D SDF conversion (generates 2D conformers for speed). For testing only. Use together with FakeDocking.",
                 )
             ],
         )

@@ -50,13 +50,9 @@ class MutationGenerator(CompoundGenerator):
             List[Tuple]: List of tuples containing the compound to mutate and the
                 mutation plugin manager.
         """
-        mutants_per_batch = self.params.get("mutants_per_batch", 1)
-        if mutants_per_batch <= 0:
-            mutants_per_batch = 1
-        num_jobs = (num_to_process + mutants_per_batch - 1) // mutants_per_batch
         return [
             (compounds[i % len(compounds)], self.operation_params["plugin_manager"])
-            for i in range(num_jobs)
+            for i in range(num_to_process)
         ]
 
     def get_parallel_function(self) -> Callable:

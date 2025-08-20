@@ -104,6 +104,11 @@ class MutationPluginManager(PluginManagerBase):
 
         mutation = cast(MutationBase, self.plugins[mutation_name])
         resps = mutation.run(**kwargs)
+        # if mutation.name == "FragmentRemoval":
+        #     if resps is None:
+        #         print(f'Mutation {mutation.name} returned no results for {kwargs["cmpd"].smiles}')
+        #     else:
+        #         print(f'Mutation {mutation.name} returned {len(resps)} results for {kwargs["cmpd"].smiles}')
         if resps is None:
             return None
         final_resps = []

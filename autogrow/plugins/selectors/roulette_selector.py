@@ -49,7 +49,7 @@ class RouletteSelector(SelectorBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Select compounds to advance to the next generation per a weighted roulette selector. The roulette selector chooses without replacement and is stoichastic.",  # TODO: Add more detail here.
+                    help="Enable weighted roulette wheel selection. Chooses compounds stochastically based on score, without replacement.",
                 )
             ],
         )
