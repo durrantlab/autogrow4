@@ -55,7 +55,7 @@ class DeepFragFilterBase(PluginBase):
                 with their `sort_score` attribute populated.
         """
         compounds = kwargs["compounds"]
-        cutoff = kwargs["input_params"][self.name]
+        cutoff = kwargs["input_params"]["DeepFragCosineSimilarityCutoff"]
         receptor = kwargs["input_params"]["receptor_path"]
         generation_num = kwargs["input_params"].get("generation_num", "NA")
 
@@ -223,15 +223,13 @@ class DeepFragFilterBase(PluginBase):
                 command-line arguments.
         """
         return (
-            "DeepFragFilter",
+            "DeepFrag Filters",
             [
                 ArgumentVars(
-                    name=self.name,
+                    name="DeepFragCosineSimilarityCutoff",
                     type=float,
-                    default=False,
-                    help="The minimum cosine similarity score required for a molecule to pass the filter. \
-                        This filter is applied to the products of multi-reactant fragment additions. See \
-                        also --DeepFragFilterForCrossover.",
+                    default=0.35,
+                    help="The minimum cosine similarity score required for a molecule to pass any enabled DeepFrag filter. Default: 0.35",
                 ),
 
                 ArgumentVars(
