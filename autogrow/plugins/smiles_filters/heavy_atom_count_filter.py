@@ -32,7 +32,7 @@ class HeavyAtomCountFilter(SmilesFilterBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Enable filtering of compounds by a heavy-atom count range.",
+                    help="Enable filtering of compounds by a heavy-atom count range. This filter removes molecules that have fewer than `min_heavy_atoms` or more than `max_heavy_atoms`.",
                 ),
                 ArgumentVars(
                     name="min_heavy_atoms",

@@ -69,7 +69,7 @@ class FragmentAddition(MutationBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Enable the fragment addition mutation operator, which creates new molecules by adding fragments using reaction libraries.",
+                    help="Enable the fragment addition mutation operator. This operator creates new molecules by adding chemical fragments to existing ones based on a library of predefined chemical reactions.",
                 ),
                 ArgumentVars(
                     name="rxn_library_path",

@@ -126,7 +126,7 @@ class PAINSFilter(SmilesFilterBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Apply the PAINS filter to remove Pan Assay Interference Compounds (PAINS) via substructure search.",
+                    help="Enable the PAINS (Pan-Assay Interference Compounds) filter. This filter identifies and removes molecules containing substructures that are known to interfere with bioassays, helping to eliminate false positives from screening results.",
                 )
             ],
         )

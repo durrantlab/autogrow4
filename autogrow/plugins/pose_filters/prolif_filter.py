@@ -86,12 +86,7 @@ class ProLIFFilter(PoseFilterBase):
                     name=self.name,
                     type=str,
                     default=False,
-                    help="Comma-separated list containing the types of interactions to be considered, which can be: "
-                         "Hydrophobic, HBDonor, HBAcceptor, PiStacking, Anionic, Cationic, CationPi, PiCation, and "
-                         "VdWContact. For example, the argument in the command line --ProLIFFilter VdWContact,"
-                         "Hydrophobic will only consider VdWContact and Hydrophobic interactions between a receptor "
-                         "and a docked compound. additionally, it can be specified the 'all' value to indicate all the "
-                         "previous interactions will be consider.",
+                    help="Enable the ProLIF interaction filter. Provide a comma-separated list of interaction types (e.g., 'Hydrophobic,HBDonor') that a docked molecule must have with the receptor. A molecule must exhibit at least one of the specified interactions to pass. Use 'all' to require at least one interaction of any type. Interaction types include: Hydrophobic, HBDonor, HBAcceptor, PiStacking, Anionic, Cationic, CationPi, PiCation, and VdWContact.",
                 )
             ],
         )

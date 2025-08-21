@@ -22,7 +22,7 @@ class SubstructureFilter(SmilesFilterBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Enable filtering of compounds based on a required or excluded substructure.",
+                    help="Enable filtering based on a custom substructure. This allows you to require that all generated molecules contain a specific chemical scaffold, or to exclude molecules containing an undesirable moiety. Use `--substructure_smiles` to define the SMARTS pattern and `--exclude_substructure` to control the filtering mode.",
                 ),
                 ArgumentVars(
                     name="--substructure_smiles",  # Note actually SMARTS string

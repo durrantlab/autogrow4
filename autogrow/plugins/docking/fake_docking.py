@@ -42,7 +42,7 @@ class FakeDocking(DockingBase):
                     name="FakeDocking",
                     action="store_true",
                     default=False,
-                    help="Use fake docking (for testing)",
+                    help="Use fake docking for testing purposes. This plugin assigns random scores to compounds without performing actual docking calculations, useful for rapid pipeline testing.",
                 ),
                 #     ArgumentVars(
                 #         name="docking_executable",

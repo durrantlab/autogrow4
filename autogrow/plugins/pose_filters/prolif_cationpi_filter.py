@@ -52,9 +52,7 @@ class CationPiInteractionFilter(SpecificInteractionFilter):
                     name=self.name,
                     type=str,
                     default=False,
-                    help="Comma-separated list of specific residues in a receptor that should have CationPi "
-                         "interactions with respect to a docked molecule. For example, --CationPiInteractionFilter "
-                         "TYR907",
+                    help="Comma-separated list of specific residues in the receptor (e.g., 'TYR907,TRP123') that must form cation-pi interactions with the docked molecule. The molecule will be filtered out if it does not form all specified interactions. For example, --CationPiInteractionFilter TYR907",
                 )
             ],
         )

@@ -42,7 +42,7 @@ class FakeSmiTo3DSDF(SmiTo3DSdfBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Enable fake SMILES to 3D SDF conversion (generates 2D conformers for speed). For testing only. Use together with FakeDocking.",
+                    help="Enable fake SMILES to 3D SDF conversion for testing. This plugin generates placeholder 2D conformers quickly, and should be used in conjunction with the FakeDocking plugin for rapid pipeline testing without actual 3D generation or docking.",
                 )
             ],
         )

@@ -33,7 +33,7 @@ class MolWtFilter(SmilesFilterBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Enable filtering of compounds by a molecular weight range.",
+                    help="Enable filtering of compounds by a molecular weight range. This filter removes molecules with a molecular weight outside the range defined by `min_mol_weight` and `max_mol_weight`.",
                 ),
                 ArgumentVars(
                     name="min_mol_weight",

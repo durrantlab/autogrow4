@@ -38,7 +38,7 @@ class RDKitToolkit(ChemToolkitBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Use RDKit as the backend for chemistry operations.",
+                    help="Use the RDKit library as the backend for all cheminformatics operations, such as molecule manipulation and fingerprint generation.",
                 )
             ],
         )

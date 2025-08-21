@@ -125,7 +125,7 @@ class GhoseModifiedFilter(SmilesFilterBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Apply a modified Ghose filter for drug-likeness (MW, LogP, atom count, molar refractivity). Same as the GhoseFilter, but with a relaxed MW upper bound of 500Da (rather than 480Da)."
+                    help="Enable the modified Ghose filter for drug-likeness. This filter is similar to the standard Ghose filter but uses a relaxed molecular weight upper bound of 500 Da (instead of 480 Da).",
                 )
             ],
         )

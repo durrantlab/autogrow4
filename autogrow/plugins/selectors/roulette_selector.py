@@ -49,7 +49,7 @@ class RouletteSelector(SelectorBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Enable weighted roulette wheel selection. Chooses compounds stochastically based on score, without replacement.",
+                    help="Enable weighted roulette wheel selection. This stochastic method selects compounds based on their scores, where higher-scoring compounds have a proportionally higher chance of being chosen. Selection is performed without replacement.",
                 )
             ],
         )

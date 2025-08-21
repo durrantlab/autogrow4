@@ -103,7 +103,7 @@ class NIHFilter(SmilesFilterBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Apply the NIH filter to remove molecules with undesirable functional groups via substructure search.",
+                    help="Enable the NIH filter. This filter screens for and removes molecules that contain undesirable functional groups.",
                 )
             ],
         )

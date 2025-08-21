@@ -52,9 +52,7 @@ class HydrophobicInteractionFilter(SpecificInteractionFilter):
                     name=self.name,
                     type=str,
                     default=False,
-                    help="Comma-separated list of specific residues in a receptor that should have hydrophobic "
-                         "interactions with respect to a docked molecule. For example, --HydrophobicInteractionFilter "
-                         "HIS862,TYR896,TYR907",
+                    help="Enable the Hydrophobic Interaction Filter. Provide a comma-separated list of specific residues in the receptor (e.g., 'LEU123,ILE45') that must form hydrophobic interactions with the docked molecule. The molecule will be filtered out if it does not form all specified interactions. For example, --HydrophobicInteractionFilter HIS862,TYR896,TYR907",
                 )
             ],
         )

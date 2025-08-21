@@ -39,7 +39,7 @@ class MergeMCS(CrossoverBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Enable the Maximum Common Substructure (MCS) crossover operator.",
+                    help="Enable the Maximum Common Substructure (MCS) crossover operator. This operator creates new crossover molecules by identifying the largest common substructure between two parent molecules and swapping the remaining fragments.",
                 ),
                 ArgumentVars(
                     name="max_time_mcs_prescreen",

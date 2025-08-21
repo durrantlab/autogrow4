@@ -55,7 +55,7 @@ class LigandEfficiency(RescoringBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Rescore ligands by ligand efficiency (docking score / number of heavy atoms). The original docking score is saved in the compound's history.",
+                    help="Enable rescoring by ligand efficiency (docking score / heavy atom count). This metric helps to normalize binding affinity by molecular size, identifying smaller, more efficient binders. The original docking score is saved in the compound's history.",
                 )
             ],
         )

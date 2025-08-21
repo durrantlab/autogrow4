@@ -48,7 +48,7 @@ class PythonMultiprocessing(ShellParallelizerBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Use Python's multiprocessing module to run shell commands in parallel.",
+                    help="Use Python's built-in multiprocessing module to run shell commands in parallel. This is a cross-platform solution for parallelization.",
                 )
             ],
         )

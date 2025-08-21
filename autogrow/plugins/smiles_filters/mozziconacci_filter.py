@@ -121,7 +121,7 @@ class MozziconacciFilter(SmilesFilterBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Apply the Mozziconacci filter for drug-likeness (rotatable bonds, rings, O, N, halogens).",
+                    help="Enable the Mozziconacci filter for drug-likeness. This filter evaluates compounds based on structural properties, including the number of rotatable bonds, rings, and counts of oxygen, nitrogen, and halogen atoms.",
                 )
             ],
         )

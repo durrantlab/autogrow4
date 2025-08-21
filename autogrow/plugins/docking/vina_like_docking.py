@@ -46,7 +46,7 @@ class VinaLikeDocking(DockingBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Use docking software from the vina family (vina, qvina2, smina, etc.)",
+                    help="Enable docking with Vina-like software (e.g., Vina, QVina2, Smina). This plugin handles file preparation, execution, and result parsing for this family of docking programs.",
                 ),
                 ArgumentVars(
                     name="docking_executable",

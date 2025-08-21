@@ -91,7 +91,7 @@ class VandeWaterbeemdFilter(SmilesFilterBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Apply the Van de Waterbeemd filter to select for blood-brain barrier permeability (MW, PSA).",
+                    help="Enable the Van de Waterbeemd filter to screen for blood-brain barrier (BBB) permeability. This filter assesses molecules based on their molecular weight and polar surface area (PSA) to predict their ability to cross the BBB.",
                 )
             ],
         )

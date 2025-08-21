@@ -51,7 +51,7 @@ class FragmentRemoval(MutationBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Enable the fragment removal mutation operator, which removes fragments via reverse reactions.",
+                    help="Enable the fragment removal mutation operator. To maintain synthetic accessibility, this operator removes fragments from a molecule by applying the reverse of the reactions defined in the reaction library.",
                 ),
                 ArgumentVars(
                     name="FragmentRemoval_first_gen_only",

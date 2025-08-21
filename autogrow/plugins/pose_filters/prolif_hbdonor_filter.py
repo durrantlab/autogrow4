@@ -52,9 +52,7 @@ class HBDonorInteractionFilter(SpecificInteractionFilter):
                     name=self.name,
                     type=str,
                     default=False,
-                    help="Comma-separated list of specific residues in a receptor that should have HBDonor "
-                         "interactions with respect to a docked molecule. For example, --HBDonorInteractionFilter "
-                         "HIS862,TYR896,TYR907",
+                    help="Enable the Hydrogen Bond Donor Interaction Filter. Provide a comma-separated list of specific residues in the receptor (e.g., 'HIS862,TYR896') that must act as hydrogen bond acceptors from the docked molecule (which acts as a donor). The molecule will be filtered out if it does not form all specified interactions. For example, --HBDonorInteractionFilter HIS862,TYR896,TYR907",
                 )
             ],
         )

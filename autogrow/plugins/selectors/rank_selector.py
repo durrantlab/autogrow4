@@ -53,7 +53,7 @@ class RankSelector(SelectorBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Enable rank-based, non-redundant selection. Chooses the top N compounds based on score. Not recommended for small runs, where the number of desired molecules may exceed the number of molecules to chose from.",
+                    help="Enable rank-based selection. This deterministic method chooses the top-ranked compounds based on their scores, ensuring no duplicates are selected. It is not recommended for small runs where the number of available compounds may be less than the number to be selected.",
                 )
             ],
         )

@@ -102,7 +102,7 @@ class BRENKFilter(SmilesFilterBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Apply the BRENK filter to remove molecules with undesirable substructures for lead-likeness.",
+                    help="Enable the BRENK filter. This filter removes molecules containing substructures that are known to be problematic for lead-likeness, helping to improve the quality of generated compounds.",
                 )
             ],
         )

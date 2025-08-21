@@ -52,9 +52,7 @@ class CationicInteractionFilter(SpecificInteractionFilter):
                     name=self.name,
                     type=str,
                     default=False,
-                    help="Comma-separated list of specific residues in a receptor that should have Cationic "
-                         "interactions with respect to a docked molecule. For example, --CationicInteractionFilter "
-                         "TYR907",
+                    help="Comma-separated list of specific residues in the receptor (e.g., 'LYS123,ARG45') that must form cationic interactions with the docked molecule. The molecule will be filtered out if it does not form all specified interactions. For example, --CationicInteractionFilter TYR907",
                 )
             ],
         )

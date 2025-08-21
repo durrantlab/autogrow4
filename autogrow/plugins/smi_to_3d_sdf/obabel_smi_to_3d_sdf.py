@@ -43,7 +43,7 @@ class ObabelSmiTo3DSDF(SmiTo3DSdfBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Enable SMILES to 3D SDF conversion using OpenBabel.",
+                    help="Enable SMILES to 3D SDF conversion using OpenBabel. This plugin generates 3D coordinates for molecules from their SMILES strings and saves them in SDF format.",
                 )
             ],
         )

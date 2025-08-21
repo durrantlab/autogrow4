@@ -52,9 +52,7 @@ class VDWInteractionFilter(SpecificInteractionFilter):
                     name=self.name,
                     type=str,
                     default=False,
-                    help="Comma-separated list of specific residues in a receptor that should have VDW "
-                         "interactions with respect to a docked molecule. For example, --VDWInteractionFilter "
-                         "TYR907",
+                    help="Enable the Van der Waals Interaction Filter. Provide a comma-separated list of specific residues in the receptor (e.g., 'VAL123,ALA45') that must form Van der Waals contacts with the docked molecule. The molecule will be filtered out if it does not form all specified interactions. For example, --VDWInteractionFilter TYR907",
                 )
             ],
         )

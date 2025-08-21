@@ -120,7 +120,7 @@ class LipinskiLenientFilter(SmilesFilterBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Apply Lipinski's Rule of Five (MW, logP, number of hydrogen bond donors and acceptors) for oral bioavailability, allowing one violation.",
+                    help="Enable the lenient Lipinski's Rule of Five filter for oral bioavailability. This filter checks for molecular weight, logP, and the number of hydrogen bond donors and acceptors, but allows for one violation of the rules, providing a less strict screen for drug-likeness.",
                 )
             ],
         )

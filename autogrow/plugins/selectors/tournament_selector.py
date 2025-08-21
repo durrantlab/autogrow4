@@ -51,7 +51,7 @@ class TournamentSelector(SelectorBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Enable tournament selection. Repeatedly selects the best compound from a random subset of the population, without replacement.",
+                    help="Enable tournament selection. This stochastic method repeatedly selects the best compound from a random subset of the population. The size of the subset is controlled by the `tourn_size` parameter. Selection is performed without replacement.",
                 ),
                 ArgumentVars(
                     name="tourn_size",

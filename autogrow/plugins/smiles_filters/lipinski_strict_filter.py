@@ -117,7 +117,7 @@ class LipinskiStrictFilter(SmilesFilterBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Apply Lipinski's Rule of Five (MW, logP, number of hydrogen bond donors and acceptors) for oral bioavailability, requiring all criteria to be met."
+                    help="Enable the strict Lipinski's Rule of Five filter for oral bioavailability. This filter enforces all criteria of the Rule of Five (molecular weight, logP, hydrogen bond donors, and acceptors) with no exceptions, ensuring a stringent screen for drug-likeness.",
                 )
             ],
         )

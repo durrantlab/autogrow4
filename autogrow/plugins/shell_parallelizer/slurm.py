@@ -37,7 +37,7 @@ class Slurm(ShellParallelizerBase):
                     name=self.name,
                     action="store_true",
                     default=False,
-                    help="Use Slurm to run shell commands in parallel",
+                    help="Use the Slurm Workload Manager to run shell commands in parallel as array jobs. This is suitable for high-performance computing clusters.",
                 ),
                 ArgumentVars(
                     name="slurm_template_file",
