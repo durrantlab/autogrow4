@@ -7,15 +7,13 @@ Classes:
 
 import __future__
 import os
-
-from autogrow.plugins.docking.vina_like_docking import VinaLikeDocking
+from autogrow.plugins.docking.vina_docking_base import VinaDockingBase
 from typing import List, Tuple
 from autogrow.config.argument_vars import ArgumentVars
 from rdkit import Chem
 from autogrow.utils.logging import log_warning
 
-
-class GNINADocking(VinaLikeDocking):
+class GNINADocking(VinaDockingBase):
     """
     This module implements a docking plugin for GNINA docking software.
     """
@@ -30,16 +28,27 @@ class GNINADocking(VinaLikeDocking):
             List[ArgumentVars]: A list of ArgumentVars objects defining the
             command-line arguments for Vina-like docking.
         """
-        args = super().add_arguments()
-        args.append(
+        enabling_arg = [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Enable docking with GNINA software. This plugin handles file preparation, execution, and result parsing for GNINA.",
+            )
+        ]
+        
+        gnina_specific_args = [
             ArgumentVars(
                 name="additional_gnina_args",
                 type=str,
                 default=None,
                 help="Path to a text file containing additional parameters of the GNINA docking software.",
             )
-        )
-        return args
+        ]
+        
+        base_args = super().add_arguments()
+        
+        return enabling_arg + gnina_specific_args + base_args
 
     def validate(self, params: dict):
         """

@@ -124,6 +124,9 @@ class PluginManagerBase(ABC):
                                 # Create an instance and register its arguments
                                 plugin = obj()
                                 args = plugin.add_arguments()
+                                if args and not PluginManagerBase.is_abstract(obj):
+                                    assert args[0].name == plugin.name, \
+                                        f"The first argument for plugin '{plugin.name}' must be the enabling flag '--{plugin.name}'. Found '--{args[0].name}' instead. Please check the add_arguments() method of the {plugin.name} class."
                                 title = f"{plugin.name} ({plugin.plugin_type_name}: {plugin.plugin_description})"
                                 register_argparse_group(title, args)
                     except ImportError as e:
