@@ -592,20 +592,19 @@ def process_inputs(inputs: Dict[str, Any]) -> Dict[str, Any]:
         inputs["run_brics"] = True
 
     if "run_frag" in inputs.keys():
-        inputs["run_frag"] = convert_to_bool(inputs["run_brics"])
+        inputs["run_frag"] = convert_to_bool(inputs["run_frag"])
     else:
         inputs["run_frag"] = True
 
     if "c_c_bonds_off" in inputs.keys():
-        inputs["c_c_bonds_off"] = convert_to_bool(inputs["run_brics"])
+        inputs["c_c_bonds_off"] = convert_to_bool(inputs["c_c_bonds_off"])
     else:
         inputs["c_c_bonds_off"] = True
 
     if "number_of_processors" in inputs.keys():
-        inputs["number_of_processors"] = int(inputs["run_brics"])
+        inputs["number_of_processors"] = int(inputs["number_of_processors"])
     else:
-        inputs["number_of_processors"] = True
-
+        inputs["number_of_processors"] = -1
     return inputs
 
 

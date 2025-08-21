@@ -195,6 +195,7 @@ def start_run_main(params: Dict[str, Any]) -> None:
     min_docking_score = params["min_docking_score"]
 
     vina_docked_pdbqt_file = params["vina_docked_pdbqt_file"]
+    number_of_processors = params["number_of_processors"]
     if os.path.isfile(str(vina_docked_pdbqt_file)) is True:
 
         run_conversion_for_a_vina_file(
@@ -229,7 +230,7 @@ def start_run_main(params: Dict[str, Any]) -> None:
             )
         )
         # run convert in multithread
-        mp.multi_threading(job_input, -1, run_conversion_for_a_vina_file)
+        mp.multi_threading(job_input, number_of_processors, run_conversion_for_a_vina_file)
 
 
 def get_arguments_from_argparse(args_dict):

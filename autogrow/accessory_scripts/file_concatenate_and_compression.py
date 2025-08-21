@@ -174,7 +174,7 @@ def _del_files(file_name: str) -> None:
 
     if os.path.exists(file_name):
         try:
-            os.system(f"rm {file_name}")
+            os.remove(file_name)
         except Exception:
             print(f"couldn't delete file: {file_name}")
 

@@ -60,7 +60,7 @@ def run_convert_on_single_pdb(pdb: str) -> str:
     return output_data
 
 
-def make_smile_list(sub_folder: str) -> List[str]:
+def make_smile_list(sub_folder: str, num_processors: int) -> List[str]:
     """
     This function converts every ligand within a folder into SMILES
     and returns the list of smiles with a name.
@@ -68,19 +68,19 @@ def make_smile_list(sub_folder: str) -> List[str]:
 
     Inputs:
     :param str sub_folder: path to the folder to search for pdb files
+    :param int num_processors: the number of processors to use
     Returns:
     :returns: list smiles_list: A list of lists containing all SMILES from
         the .pdb files and their respective name
     """
     sub_folder += os.sep
     smiles_list = []
-    pdb_list = glob.glob(os.sep + sub_folder + "*.pdb")
-    pdb_list.extend(glob.glob(os.sep + sub_folder + "*.PDB"))
+    pdb_list = glob.glob(os.path.join(sub_folder, "*.pdb"))
+    pdb_list.extend(glob.glob(os.path.join(sub_folder, "*.PDB")))
     pdb_list = list(tuple((pdb,) for pdb in pdb_list))
 
     # run convert in multithread
-    return mp.multi_threading(pdb_list, -1, run_convert_on_single_pdb)
-
+    return mp.multi_threading(pdb_list, num_processors, run_convert_on_single_pdb)
 
 def start_run_main(params: Dict[str, Any]) -> None:
     """
@@ -90,7 +90,9 @@ def start_run_main(params: Dict[str, Any]) -> None:
     :param dict params: dictionary of user variables.
     """
     # Running converter
-    smiles_list = make_smile_list(str(params["source_folder"]))
+    smiles_list = make_smile_list(
+        str(params["source_folder"]), params["number_of_processors"]
+    )
     name = [x for x in str(params["source_folder"]).split(os.sep) if x != ""][-1]
     output_file = str(params["output_folder"]) + os.sep + name + ".smi"
     with open(output_file, "w") as f:
