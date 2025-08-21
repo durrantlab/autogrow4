@@ -945,8 +945,8 @@ def process_inputs(inputs: Dict[str, Any]) -> Dict[str, Any]:
 
         # Get complementary_mol_directory from vars.json
         elif vars_dict["rxn_library_path"].lower() in [
-            "click_chem_rxns",
-            "robust_rxns",
+            # "click_chem_rxns",
+            # "robust_rxns",
             "all_rxns",
         ]:
             dir_above_script_dir = str(
