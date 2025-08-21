@@ -36,7 +36,7 @@ class LigandEfficiency(RescoringBase):
             rescores.append(compound.get_ligand_efficiency())
         return rescores
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments required by the plugin.
 
@@ -44,21 +44,17 @@ class LigandEfficiency(RescoringBase):
         ligand efficiency calculation.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing the argument
-                group name and a list of ArgumentVars objects defining the
-                command-line arguments.
+            List[ArgumentVars]: A list of ArgumentVars objects defining the
+            command-line arguments.
         """
-        return (
-            "Ligand efficiency",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    action="store_true",
-                    default=False,
-                    help="Enable rescoring by ligand efficiency (docking score / heavy atom count). This metric helps to normalize binding affinity by molecular size, identifying smaller, more efficient binders. The original docking score is saved in the compound's history.",
-                )
-            ],
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Enable rescoring by ligand efficiency (docking score / heavy atom count). This metric helps to normalize binding affinity by molecular size, identifying smaller, more efficient binders. The original docking score is saved in the compound's history.",
+            )
+        ]
 
     def validate(self, params: dict):
         """

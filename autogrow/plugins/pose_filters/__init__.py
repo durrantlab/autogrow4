@@ -15,6 +15,16 @@ class PoseFilterBase(PluginBase):
     1) Filters based on ProLIF
     """
 
+    @property
+    def plugin_type_name(self) -> str:
+        """Return the user-friendly name of the plugin type."""
+        return "Pose Filter"
+
+    @property
+    def plugin_description(self) -> str:
+        """Return a brief description of the plugin type."""
+        return "Filters docked poses based on interactions or other criteria"
+
     def run(self, **kwargs) -> bool:
         """
         Execute the filter plugin with the provided receptor and molecule.

@@ -8,6 +8,16 @@ from autogrow.plugins.plugin_manager_base import PluginManagerBase
 class ChemToolkitBase(PluginBase):
     """Abstract base class for chemistry toolkit plugins."""
 
+    @property
+    def plugin_type_name(self) -> str:
+        """Return the user-friendly name of the plugin type."""
+        return "Chemistry Toolkit"
+
+    @property
+    def plugin_description(self) -> str:
+        """Return a brief description of the plugin type."""
+        return "Handles molecular manipulations and calculations"
+
     def validate(self, params: dict):
         """Validate plugin parameters."""
         pass

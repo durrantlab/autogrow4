@@ -22,23 +22,24 @@ class GNINADocking(VinaLikeDocking):
 
     additional_docking_args = ""
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments required by the GNINA docking plugin.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing the argument
-            group name and a list of ArgumentVars objects defining the
+            List[ArgumentVars]: A list of ArgumentVars objects defining the
             command-line arguments for Vina-like docking.
         """
-        args = super().add_arguments()[1]
-        args.append(ArgumentVars(
-            name="additional_gnina_args",
-            type=str,
-            default=None,
-            help="Path to a text file containing additional parameters of the GNINA docking software.",
-        ))
-        return "GNINA Docking Options", args
+        args = super().add_arguments()
+        args.append(
+            ArgumentVars(
+                name="additional_gnina_args",
+                type=str,
+                default=None,
+                help="Path to a text file containing additional parameters of the GNINA docking software.",
+            )
+        )
+        return args
 
     def validate(self, params: dict):
         """

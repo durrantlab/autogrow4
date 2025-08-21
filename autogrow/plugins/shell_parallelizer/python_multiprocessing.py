@@ -23,7 +23,7 @@ class PythonMultiprocessing(ShellParallelizerBase):
 
     number_procs = -1
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments specific to Python Multiprocessing Plugin.
 
@@ -31,27 +31,20 @@ class PythonMultiprocessing(ShellParallelizerBase):
         configure the Python Multiprocessing Plugin.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing:
-                - The name of the argument group ("Python Multiprocessing Shell
-                  Parallelizer")
-                - A list with one ArgumentVars object defining the argument
-                  to enable the Python Multiprocessing Plugin
-
+            List[ArgumentVars]: A list with one ArgumentVars object defining
+            the argument to enable the Python Multiprocessing Plugin.
         Note:
             This plugin doesn't require additional parameters beyond its
             activation flag.
         """
-        return (
-            "Python Multiprocessing Shell Parallelizer",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    action="store_true",
-                    default=False,
-                    help="Use Python's built-in multiprocessing module to run shell commands in parallel. This is a cross-platform solution for parallelization.",
-                )
-            ],
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Use Python's built-in multiprocessing module to run shell commands in parallel. This is a cross-platform solution for parallelization.",
+            )
+        ]
 
     def validate(self, params: dict):
         """

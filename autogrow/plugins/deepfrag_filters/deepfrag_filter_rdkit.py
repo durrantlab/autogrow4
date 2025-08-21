@@ -40,17 +40,16 @@ class DeepFragFilterRDKit(DeepFragFilter):
             log_warning(f"Error calculating RDKit fingerprint: {e}")
             return np.zeros(2048)
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments required by the plugin.
         This method defines the command-line arguments specific to the
         DeepFrag RDKit filter.
         Returns:
-        Tuple[str, List[ArgumentVars]]: A tuple containing the argument
-                        group name and a list of ArgumentVars objects defining the
-                        command-line arguments.
+            List[ArgumentVars]: A list of ArgumentVars objects defining the
+            command-line arguments.
         """
-        group_name, parent_args = super().add_arguments()
+        parent_args = super().add_arguments()
         child_args = [
             ArgumentVars(
                 name=self.name,
@@ -59,4 +58,5 @@ class DeepFragFilterRDKit(DeepFragFilter):
                 help="Enable the RDKit-based DeepFrag filter. This filter combines a deep learning model for analyzing the binding pocket with traditional RDKit-based fingerprinting for the appended fragment.",
             )
         ]
-        return group_name, child_args + parent_args
+        return child_args + parent_args
+

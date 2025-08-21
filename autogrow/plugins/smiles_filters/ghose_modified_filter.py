@@ -105,7 +105,7 @@ class GhoseModifiedFilter(SmilesFilterBase):
         # passed all filters
         return True
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments required by the plugin.
 
@@ -114,18 +114,14 @@ class GhoseModifiedFilter(SmilesFilterBase):
         options.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing the argument
-                group name and a list of ArgumentVars objects defining the
-                command-line arguments.
+            List[ArgumentVars]: A list of ArgumentVars objects defining the
+            command-line arguments.
         """
-        return (
-            "SMILES Filters",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    action="store_true",
-                    default=False,
-                    help="Enable the modified Ghose filter for drug-likeness. This filter is similar to the standard Ghose filter but uses a relaxed molecular weight upper bound of 500 Da (instead of 480 Da).",
-                )
-            ],
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Enable the modified Ghose filter for drug-likeness. This filter is similar to the standard Ghose filter but uses a relaxed molecular weight upper bound of 500 Da (instead of 480 Da).",
+            )
+        ]

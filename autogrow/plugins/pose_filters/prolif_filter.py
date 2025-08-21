@@ -67,7 +67,7 @@ class ProLIFFilter(PoseFilterBase):
         _, df = self._compute_interaction_fingerprints(kwargs["receptor"], kwargs["docked_cmpd"])
         return df.size > 0 if df is not None else False
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments required by the plugin.
 
@@ -75,21 +75,17 @@ class ProLIFFilter(PoseFilterBase):
         It allows users to enable the filter via command-line options.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing the argument
-                group name and a list of ArgumentVars objects defining the
-                command-line arguments.
+            List[ArgumentVars]: A list of ArgumentVars objects defining the
+            command-line arguments.
         """
-        return (
-            "Pose Filters",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    type=str,
-                    default=False,
-                    help="Enable the ProLIF interaction filter. Provide a comma-separated list of interaction types (e.g., 'Hydrophobic,HBDonor') that a docked molecule must have with the receptor. A molecule must exhibit at least one of the specified interactions to pass. Use 'all' to require at least one interaction of any type. Interaction types include: Hydrophobic, HBDonor, HBAcceptor, PiStacking, Anionic, Cationic, CationPi, PiCation, and VdWContact.",
-                )
-            ],
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                type=str,
+                default=False,
+                help="Enable the ProLIF interaction filter. Provide a comma-separated list of interaction types (e.g., 'Hydrophobic,HBDonor') that a docked molecule must have with the receptor. A molecule must exhibit at least one of the specified interactions to pass. Use 'all' to require at least one interaction of any type. Interaction types include: Hydrophobic, HBDonor, HBAcceptor, PiStacking, Anionic, Cationic, CationPi, PiCation, and VdWContact.",
+            )
+        ]
 
     def _compute_interaction_fingerprints(self, receptor: Chem.Mol, docked_cmpd: Chem.Mol) -> Tuple[Any, Any]:
         """

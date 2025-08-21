@@ -20,6 +20,16 @@ class CrossoverBase(PluginBase):
     implement the `run_crossover` method to define specific crossover behavior.
     """
 
+    @property
+    def plugin_type_name(self) -> str:
+        """Return the user-friendly name of the plugin type."""
+        return "Crossover Operator"
+
+    @property
+    def plugin_description(self) -> str:
+        """Return a brief description of the plugin type."""
+        return "Creates new molecules by combining parts of two parent molecules"
+
     def run(self, **kwargs) -> Optional[str]:
         """
         Run the crossover plugin with provided arguments.

@@ -23,6 +23,16 @@ class SmiTo3DSdfBase(PluginBase):
     provides some common utility methods.
     """
 
+    @property
+    def plugin_type_name(self) -> str:
+        """Return the user-friendly name of the plugin type."""
+        return "SMILES-to-3D-SDF Converter"
+
+    @property
+    def plugin_description(self) -> str:
+        """Return a brief description of the plugin type."""
+        return "Converts 2D SMILES representations to 3D SDF files"
+
     def run(self, **kwargs) -> List[Compound]:
         """
         Run the SMILES to 3D SDF conversion with provided arguments.

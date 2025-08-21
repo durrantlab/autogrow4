@@ -30,15 +30,26 @@ class PluginBase(ABC):
         # children can overwrite
         pass
 
+    @property
     @abstractmethod
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def plugin_type_name(self) -> str:
+        """Return the user-friendly name of the plugin type."""
+        pass
+
+    @property
+    @abstractmethod
+    def plugin_description(self) -> str:
+        """Return a brief description of the plugin type."""
+        pass
+
+    @abstractmethod
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments required by the plugin.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing the argument
-                group name and a list of ArgumentVars objects defining the
-                command-line arguments.
+            List[ArgumentVars]: A list of ArgumentVars objects defining the
+            command-line arguments.
         """
         pass
 

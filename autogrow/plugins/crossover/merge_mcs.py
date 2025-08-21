@@ -21,52 +21,46 @@ class MergeMCS(CrossoverBase):
     protonation, MCS finding, and R-group selection and merging.
     """
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments required by the plugin.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing the plugin name
-                and a list of ArgumentVars objects defining the required
-                command-line arguments.
+            List[ArgumentVars]: A list of ArgumentVars objects defining the
+            required command-line arguments.
         """
-        # TODO: These parameter names are not descriptive.
-
-        return (
-            "Maximum Common Substructure Crossover",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    action="store_true",
-                    default=False,
-                    help="Enable the Maximum Common Substructure (MCS) crossover operator. This operator creates new crossover molecules by identifying the largest common substructure between two parent molecules and swapping the remaining fragments.",
-                ),
-                ArgumentVars(
-                    name="max_time_mcs_prescreen",
-                    type=int,
-                    default=1,
-                    help="Timeout in seconds for the initial, fast MCS search between molecule pairs.",
-                ),
-                ArgumentVars(
-                    name="max_time_mcs_thorough",
-                    type=int,
-                    default=1,
-                    help="Timeout in seconds for the thorough MCS search between selected molecule pairs.",
-                ),
-                ArgumentVars(
-                    name="min_atom_match_mcs",
-                    type=int,
-                    default=4,
-                    help="Minimum number of atoms required for a valid Maximum Common Substructure match. Selecting a higher value is more restrictive, decreasing the likelihood that two ligands will match.",
-                ),
-                ArgumentVars(
-                    name="protanate_step",
-                    action="store_true",
-                    default=False,
-                    help="Whether to use protonated molecules for crossover. Deprotonated is faster.",
-                ),
-            ],
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Enable the Maximum Common Substructure (MCS) crossover operator. This operator creates new crossover molecules by identifying the largest common substructure between two parent molecules and swapping the remaining fragments.",
+            ),
+            ArgumentVars(
+                name="max_time_mcs_prescreen",
+                type=int,
+                default=1,
+                help="Timeout in seconds for the initial, fast MCS search between molecule pairs.",
+            ),
+            ArgumentVars(
+                name="max_time_mcs_thorough",
+                type=int,
+                default=1,
+                help="Timeout in seconds for the thorough MCS search between selected molecule pairs.",
+            ),
+            ArgumentVars(
+                name="min_atom_match_mcs",
+                type=int,
+                default=4,
+                help="Minimum number of atoms required for a valid Maximum Common Substructure match. Selecting a higher value is more restrictive, decreasing the likelihood that two ligands will match.",
+            ),
+            ArgumentVars(
+                name="protanate_step",
+                action="store_true",
+                default=False,
+                help="Whether to use protonated molecules for crossover. Deprotonated is faster.",
+            ),
+        ]
 
     def validate(self, params: dict):
         """Validate the provided arguments."""

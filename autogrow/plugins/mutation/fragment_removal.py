@@ -36,44 +36,40 @@ class FragmentRemoval(MutationBase):
         """Initialize the plugin."""
         self.generated_smiles_by_removal = set()
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments required by the plugin.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing the plugin category
-            and a list of ArgumentVars.
+            List[ArgumentVars]: a list of ArgumentVars.
         """
-        return (
-            "Fragment Removal Mutation",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    action="store_true",
-                    default=False,
-                    help="Enable the fragment removal mutation operator. To maintain synthetic accessibility, this operator removes fragments from a molecule by applying the reverse of the reactions defined in the reaction library.",
-                ),
-                ArgumentVars(
-                    name="FragmentRemoval_first_gen_only",
-                    action="store_true",
-                    default=False,
-                    help="Apply fragment removal only during the first generation. Useful for decomposing initial ligands before subsequent generations focus on growth.",
-                ),
-                ArgumentVars(
-                    name="FragmentRemoval_min_mol_weight",
-                    type=float,
-                    default=0.0,
-                    help="Minimum molecular weight for a molecule to be eligible for fragment removal. Molecules below this weight are skipped. Defaults to 0.0 (no minimum).",
-                ),
-                ArgumentVars(
-                    name="FragmentRemoval_prevent_backtracking",
-                    action="store_true",
-                    default=False,
-                    help="Prevent the generation of a molecule that has already been created by this plugin in the same run.",
-                ),
-                # This plugin uses the same rxn_library_path as FragmentAddition
-            ],
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Enable the fragment removal mutation operator. To maintain synthetic accessibility, this operator removes fragments from a molecule by applying the reverse of the reactions defined in the reaction library.",
+            ),
+            ArgumentVars(
+                name="FragmentRemoval_first_gen_only",
+                action="store_true",
+                default=False,
+                help="Apply fragment removal only during the first generation. Useful for decomposing initial ligands before subsequent generations focus on growth.",
+            ),
+            ArgumentVars(
+                name="FragmentRemoval_min_mol_weight",
+                type=float,
+                default=0.0,
+                help="Minimum molecular weight for a molecule to be eligible for fragment removal. Molecules below this weight are skipped. Defaults to 0.0 (no minimum).",
+            ),
+            ArgumentVars(
+                name="FragmentRemoval_prevent_backtracking",
+                action="store_true",
+                default=False,
+                help="Prevent the generation of a molecule that has already been created by this plugin in the same run.",
+            ),
+            # This plugin uses the same rxn_library_path as FragmentAddition
+        ]
 
     def validate(self, params: dict):
         """

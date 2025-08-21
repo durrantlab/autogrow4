@@ -40,7 +40,7 @@ class GhoseFilter(SmilesFilterBase):
     Note:
         This implementation protonates the molecule before filtering because
         hydrogens affect atom count. The Ghose filter implementation counts
-        hydrogens against the total number of atoms.
+        hydrogens towards atom count.
     """
 
     def run_filter(self, cmpd: Compound) -> bool:
@@ -94,24 +94,19 @@ class GhoseFilter(SmilesFilterBase):
         # passed all filters
         return True
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments specific to the Ghose filter.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing:
-                - The name of the argument group ("SMILES Filters")
-                - A list with one ArgumentVars object defining the argument to
-                  enable the Ghose filter
+            List[ArgumentVars]: A list with one ArgumentVars object defining
+            the argument to enable the Ghose filter.
         """
-        return (
-            "SMILES Filters",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    action="store_true",
-                    default=False,
-                    help="Enable the Ghose filter for drug-likeness. This filter assesses compounds based on a range of physicochemical properties including molecular weight, LogP, atom count, and molar refractivity.",
-                )
-            ],
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Enable the Ghose filter for drug-likeness. This filter assesses compounds based on a range of physicochemical properties including molecular weight, LogP, atom count, and molar refractivity.",
+            )
+        ]

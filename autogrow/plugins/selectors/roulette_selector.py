@@ -25,7 +25,7 @@ class RouletteSelector(SelectorBase):
     without replacement.
     """
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments specific to the Roulette Selector.
 
@@ -33,26 +33,20 @@ class RouletteSelector(SelectorBase):
         configure the Roulette Selector.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing:
-                - The name of the argument group ("Selectors")
-                - A list with one ArgumentVars object defining the argument
-                  to enable the Roulette Selector
-
+            List[ArgumentVars]: A list with one ArgumentVars object defining
+            the argument to enable the Roulette Selector.
         Note:
             The Roulette Selector doesn't require additional parameters beyond
             its activation flag.
         """
-        return (
-            "Selectors",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    action="store_true",
-                    default=False,
-                    help="Enable weighted roulette wheel selection. This stochastic method selects compounds based on their scores, where higher-scoring compounds have a proportionally higher chance of being chosen. Selection is performed without replacement.",
-                )
-            ],
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Enable weighted roulette wheel selection. This stochastic method selects compounds based on their scores, where higher-scoring compounds have a proportionally higher chance of being chosen. Selection is performed without replacement.",
+            )
+        ]
 
     def validate(self, params: dict):
         """

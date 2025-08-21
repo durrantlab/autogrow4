@@ -32,7 +32,11 @@ try:
     numba_logger.setLevel(logging.WARNING)
     prody.LOGGER._logger.disabled = True
 except ImportError as e:
-    print("DeepFrag environment (e.g., torch, prody) is not installed. DeepFrag filters will not be available. " + str(e) + "\n")
+    print(
+        "DeepFrag environment (e.g., torch, prody) is not installed. DeepFrag filters will not be available. "
+        + str(e)
+        + "\n"
+    )
 
 
 class DeepFragFilter(DeepFragFilterBase):
@@ -157,8 +161,8 @@ class DeepFragFilter(DeepFragFilterBase):
 
         return result
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
-        group_name, parent_args = super().add_arguments()
+    def add_arguments(self) -> List[ArgumentVars]:
+        parent_args = super().add_arguments()
         child_args = [
             ArgumentVars(
                 name="DeepFragModel",
@@ -171,9 +175,9 @@ class DeepFragFilter(DeepFragFilterBase):
                 action="store_true",
                 default=False,
                 help="Force DeepFrag to run on the CPU, even if a GPU is available.",
-            )
+            ),
         ]
-        return group_name, parent_args + child_args
+        return parent_args + child_args
 
     def download_deepfrag_ckpt(self, deepfrag_model_ckpt, deepfrag_model_url):
         """Download an in-house DeepFrag model checkpoint."""

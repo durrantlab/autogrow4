@@ -85,24 +85,19 @@ class BRENKFilter(SmilesFilterBase):
 
         return self.filters.HasMatch(mol) is not True
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments specific to the BRENK filter.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing:
-                - The name of the argument group ("SMILES Filters")
-                - A list with one ArgumentVars object defining the argument to
-                  enable the BRENK filter
+            List[ArgumentVars]: A list with one ArgumentVars object defining
+            the argument to enable the BRENK filter.
         """
-        return (
-            "SMILES Filters",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    action="store_true",
-                    default=False,
-                    help="Enable the BRENK filter. This filter removes molecules containing substructures that are known to be problematic for lead-likeness, helping to improve the quality of generated compounds.",
-                )
-            ],
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Enable the BRENK filter. This filter removes molecules containing substructures that are known to be problematic for lead-likeness, helping to improve the quality of generated compounds.",
+            )
+        ]

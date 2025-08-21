@@ -71,7 +71,7 @@ class VandeWaterbeemdFilter(SmilesFilterBase):
         # passes everything
         return True
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments required by the plugin.
 
@@ -80,18 +80,14 @@ class VandeWaterbeemdFilter(SmilesFilterBase):
         command-line options.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing the argument
-                group name and a list of ArgumentVars objects defining the
-                command-line arguments.
+            List[ArgumentVars]: A list of ArgumentVars objects defining the
+            command-line arguments.
         """
-        return (
-            "SMILES Filters",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    action="store_true",
-                    default=False,
-                    help="Enable the Van de Waterbeemd filter to screen for blood-brain barrier (BBB) permeability. This filter assesses molecules based on their molecular weight and polar surface area (PSA) to predict their ability to cross the BBB.",
-                )
-            ],
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Enable the Van de Waterbeemd filter to screen for blood-brain barrier (BBB) permeability. This filter assesses molecules based on their molecular weight and polar surface area (PSA) to predict their ability to cross the BBB.",
+            )
+        ]

@@ -26,41 +26,36 @@ class TournamentSelector(SelectorBase):
     replacement.
     """
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments specific to the Tournament Selector.
 
         This method defines the command-line arguments that can be used to
         configure the Tournament Selector.
-
+        
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing:
-                - The name of the argument group ("Selectors")
-                - A list of ArgumentVars objects defining the arguments:
-                    1. An argument to enable the Tournament Selector
-                    2. The 'tourn_size' parameter to set the tournament size
-
+            List[ArgumentVars]: A list of ArgumentVars objects defining the
+            arguments:
+            1. An argument to enable the Tournament Selector
+            2. The 'tourn_size' parameter to set the tournament size
         Note:
             The 'tourn_size' parameter determines the fraction of the total
             population to include in each tournament.
         """
-        return (
-            "Selectors",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    action="store_true",
-                    default=False,
-                    help="Enable tournament selection. This stochastic method repeatedly selects the best compound from a random subset of the population. The size of the subset is controlled by the `tourn_size` parameter. Selection is performed without replacement.",
-                ),
-                ArgumentVars(
-                    name="tourn_size",
-                    type=float,
-                    default=0.1,
-                    help="Fraction of the population to include in each tournament (e.g., 0.1 for 10%).",
-                ),
-            ],
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Enable tournament selection. This stochastic method repeatedly selects the best compound from a random subset of the population. The size of the subset is controlled by the `tourn_size` parameter. Selection is performed without replacement.",
+            ),
+            ArgumentVars(
+                name="tourn_size",
+                type=float,
+                default=0.1,
+                help="Fraction of the population to include in each tournament (e.g., 0.1 for 10%).",
+            ),
+        ]
 
     def validate(self, params: dict):
         """

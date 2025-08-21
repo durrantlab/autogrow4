@@ -39,6 +39,16 @@ class ShellParallelizerBase(PluginBase):
     some common utility methods.
     """
 
+    @property
+    def plugin_type_name(self) -> str:
+        """Return the user-friendly name of the plugin type."""
+        return "Shell Parallelizer"
+
+    @property
+    def plugin_description(self) -> str:
+        """Return a brief description of the plugin type."""
+        return "Executes shell commands in parallel"
+
     def run(self, **kwargs) -> List[ShellCmdResult]:
         """
         Run the plugin with provided arguments.

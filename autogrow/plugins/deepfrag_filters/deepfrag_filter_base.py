@@ -37,6 +37,16 @@ class DeepFragFilterBase(PluginBase):
     fps_fragment_cache = {}
     filter_logger_file = None
 
+    @property
+    def plugin_type_name(self) -> str:
+        """Return the user-friendly name of the plugin type."""
+        return "DeepFrag Filter"
+
+    @property
+    def plugin_description(self) -> str:
+        """Return a brief description of the plugin type."""
+        return "Filters molecules based on DeepFrag predictions"
+
     def set_log_file(self, filter_logger_file):
         self.filter_logger_file = filter_logger_file
 
@@ -210,36 +220,32 @@ class DeepFragFilterBase(PluginBase):
         """Validate the provided arguments."""
         self.apply_on_crossover = bool(params["DeepFragFilterForCrossover"])
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments required by the plugin.
 
-        This method defines the command-line arguments specific for the
+        This method defines the command-line arguments specific to the
         DeepFrag filter.
+        It allows users to enable the filter via command-line options.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing the argument
-                group name and a list of ArgumentVars objects defining the
-                command-line arguments.
+            List[ArgumentVars]: A list of ArgumentVars objects defining the
+            command-line arguments.
         """
-        return (
-            "DeepFrag Filters",
-            [
-                ArgumentVars(
-                    name="DeepFragCosineSimilarityCutoff",
-                    type=float,
-                    default=0.35,
-                    help="The minimum cosine similarity score required for a molecule to pass any enabled DeepFrag filter. Default: 0.35",
-                ),
-
-                ArgumentVars(
-                    name="DeepFragFilterForCrossover",
-                    action="store_true",
-                    default=False,
-                    help="Apply a DeepFrag filter on the new compounds obtained by crossover.",
-                )
-            ],
-        )
+        return [
+            ArgumentVars(
+                name="DeepFragCosineSimilarityCutoff",
+                type=float,
+                default=0.35,
+                help="The minimum cosine similarity score required for a molecule to pass any enabled DeepFrag filter. Default: 0.35",
+            ),
+            ArgumentVars(
+                name="DeepFragFilterForCrossover",
+                action="store_true",
+                default=False,
+                help="Apply a DeepFrag filter on the new compounds obtained by crossover.",
+            ),
+        ]
 
     def _save_debug_image(self, parent_mol, child_mol, mcs_smarts, mcs_mol_with_coords, fragments_mol, connection_points_3d, similarity, passed_filter, compound_id, generation_num):
         """

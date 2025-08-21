@@ -20,7 +20,7 @@ class ParallelExec(ShellParallelizerBase):
     capabilities using the GNU parallel utility.
     """
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments specific to the Parallel Exec Plugin.
 
@@ -28,34 +28,28 @@ class ParallelExec(ShellParallelizerBase):
         configure the Parallel Exec Plugin.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing:
-                - The name of the argument group ("Parallel Exec Shell
-                  Parallelizer")
-                - A list of ArgumentVars objects defining the arguments:
-                    1. An argument to enable the Parallel Exec Plugin
-                    2. The path to the GNU parallel executable
-
+            List[ArgumentVars]: A list of ArgumentVars objects defining the
+            arguments:
+            1. An argument to enable the Parallel Exec Plugin
+            2. The path to the GNU parallel executable
         Note:
             The default path for the GNU parallel executable is set to
             "/usr/bin/parallel".
         """
-        return (
-            "Parallel Exec Shell Parallelizer",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    action="store_true",
-                    default=False,
-                    help="Use GNU parallel to run shell commands in parallel. This can significantly speed up tasks like file conversion and docking on multi-core systems. See https://www.gnu.org/software/parallel/ for more information.",
-                ),
-                ArgumentVars(
-                    name="parallel_exec_path",
-                    type=str,
-                    default="/usr/bin/parallel",
-                    help="Path to the GNU parallel executable.",
-                ),
-            ],
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Use GNU parallel to run shell commands in parallel. This can significantly speed up tasks like file conversion and docking on multi-core systems. See https://www.gnu.org/software/parallel/ for more information.",
+            ),
+            ArgumentVars(
+                name="parallel_exec_path",
+                type=str,
+                default="/usr/bin/parallel",
+                help="Path to the GNU parallel executable.",
+            ),
+        ]
 
     def validate(self, params: dict):
         """

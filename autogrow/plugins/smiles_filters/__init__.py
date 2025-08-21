@@ -31,6 +31,16 @@ class SmilesFilterBase(PluginBase):
         3) BRENKFilter
     """
 
+    @property
+    def plugin_type_name(self) -> str:
+        """Return the user-friendly name of the plugin type."""
+        return "SMILES Filter"
+
+    @property
+    def plugin_description(self) -> str:
+        """Return a brief description of the plugin type."""
+        return "Filters molecules based on chemical properties"
+
     def run(self, **kwargs) -> bool:
         """
         Execute the filter plugin with the provided molecule.

@@ -21,27 +21,22 @@ rdkit.RDLogger.DisableLog("rdApp.*")
 class RDKitToolkit(ChemToolkitBase):
     """RDKit implementation of chemistry toolkit."""
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments specific to the RDkit toolkit.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing:
-                - The name of the argument group ("Chemistry Toolkit")
-                - A list with one ArgumentVars object defining the argument to
-                  enable the rdkit chemistry toolkit
+            List[ArgumentVars]: A list with one ArgumentVars object defining the
+            argument to enable the rdkit chemistry toolkit.
         """
-        return (
-            "Chemistry Toolkit",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    action="store_true",
-                    default=False,
-                    help="Use the RDKit library as the backend for all cheminformatics operations, such as molecule manipulation and fingerprint generation.",
-                )
-            ],
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Use the RDKit library as the backend for all cheminformatics operations, such as molecule manipulation and fingerprint generation.",
+            )
+        ]
 
     def mol_from_smiles(self, smiles: str, sanitize: bool = True) -> Any:
         """Create a molecule from SMILES."""

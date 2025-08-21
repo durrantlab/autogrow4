@@ -7,8 +7,9 @@ Anionic interaction specified as input.
 
 ProLIF library is available at https://github.com/chemosim-lab/ProLIF
 """
-
-from autogrow.plugins.pose_filters.prolif_specific_interaction_filter import SpecificInteractionFilter
+from autogrow.plugins.pose_filters.prolif_specific_interaction_filter import (
+    SpecificInteractionFilter,
+)
 import prolif
 import rdkit  # type: ignore
 from typing import List, Tuple
@@ -33,7 +34,7 @@ class AnionicInteractionFilter(SpecificInteractionFilter):
     def get_interaction_type(self) -> str:
         return "Anionic"
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments required by the plugin.
 
@@ -41,20 +42,17 @@ class AnionicInteractionFilter(SpecificInteractionFilter):
         It allows users to enable the filter via command-line options.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing the argument
-                group name and a list of ArgumentVars objects defining the
-                command-line arguments.
+            List[ArgumentVars]: A list of ArgumentVars objects defining the
+            command-line arguments.
         """
-        return (
-            "Pose Filters",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    type=str,
-                    default=False,
-                    help="Comma-separated list of specific residues in a receptor that should have Anionic "
-                         "interactions with respect to a docked molecule. For example, --AnionicInteractionFilter "
-                         "TYR907",
-                )
-            ],
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                type=str,
+                default=False,
+                help="Comma-separated list of specific residues in a receptor that should have Anionic "
+                "interactions with respect to a docked molecule. For example, --AnionicInteractionFilter "
+                "TYR907",
+            )
+        ]
+

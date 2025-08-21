@@ -84,7 +84,7 @@ class NIHFilter(SmilesFilterBase):
 
         return self.filters.HasMatch(mol) is not True
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments required by the plugin.
 
@@ -92,18 +92,14 @@ class NIHFilter(SmilesFilterBase):
         Filter. It allows users to enable the filter via command-line options.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing the argument
-                group name and a list of ArgumentVars objects defining the
-                command-line arguments.
+            List[ArgumentVars]: A list of ArgumentVars objects defining the
+            command-line arguments.
         """
-        return (
-            "SMILES Filters",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    action="store_true",
-                    default=False,
-                    help="Enable the NIH filter. This filter screens for and removes molecules that contain undesirable functional groups.",
-                )
-            ],
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Enable the NIH filter. This filter screens for and removes molecules that contain undesirable functional groups.",
+            )
+        ]

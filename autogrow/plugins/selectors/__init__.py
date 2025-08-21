@@ -29,6 +29,16 @@ class SelectorBase(PluginBase):
         List[Compound]: Selected compounds
     """
 
+    @property
+    def plugin_type_name(self) -> str:
+        """Return the user-friendly name of the plugin type."""
+        return "Selector"
+
+    @property
+    def plugin_description(self) -> str:
+        """Return a brief description of the plugin type."""
+        return "Selects compounds to advance to the next generation"
+
     def run(self, **kwargs) -> List[Compound]:
         """Run the plugin with provided arguments."""
         predock_cmpds: List[Compound] = kwargs["predock_cmpds"]

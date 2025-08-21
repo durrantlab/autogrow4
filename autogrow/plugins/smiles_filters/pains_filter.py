@@ -107,7 +107,7 @@ class PAINSFilter(SmilesFilterBase):
         # Passed the filter.
         return True
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments required by the plugin.
 
@@ -115,18 +115,14 @@ class PAINSFilter(SmilesFilterBase):
         Filter. It allows users to enable the filter via command-line options.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing the argument
-                group name and a list of ArgumentVars objects defining the
-                command-line arguments.
+            List[ArgumentVars]: A list of ArgumentVars objects defining the
+            command-line arguments.
         """
-        return (
-            "SMILES Filters",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    action="store_true",
-                    default=False,
-                    help="Enable the PAINS (Pan-Assay Interference Compounds) filter. This filter identifies and removes molecules containing substructures that are known to interfere with bioassays, helping to eliminate false positives from screening results.",
-                )
-            ],
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Enable the PAINS (Pan-Assay Interference Compounds) filter. This filter identifies and removes molecules containing substructures that are known to interfere with bioassays, helping to eliminate false positives from screening results.",
+            )
+        ]

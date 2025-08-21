@@ -101,7 +101,7 @@ class MozziconacciFilter(SmilesFilterBase):
         # Passes everything
         return True
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments required by the plugin.
 
@@ -110,18 +110,14 @@ class MozziconacciFilter(SmilesFilterBase):
         command-line options.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing the argument
-                group name and a list of ArgumentVars objects defining the
-                command-line arguments.
+            List[ArgumentVars]: A list of ArgumentVars objects defining the
+            command-line arguments.
         """
-        return (
-            "SMILES Filters",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    action="store_true",
-                    default=False,
-                    help="Enable the Mozziconacci filter for drug-likeness. This filter evaluates compounds based on structural properties, including the number of rotatable bonds, rings, and counts of oxygen, nitrogen, and halogen atoms.",
-                )
-            ],
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Enable the Mozziconacci filter for drug-likeness. This filter evaluates compounds based on structural properties, including the number of rotatable bonds, rings, and counts of oxygen, nitrogen, and halogen atoms.",
+            )
+        ]
