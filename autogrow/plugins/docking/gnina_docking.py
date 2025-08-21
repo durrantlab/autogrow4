@@ -20,6 +20,7 @@ class GNINADocking(VinaLikeDocking):
     This module implements a docking plugin for GNINA docking software.
     """
 
+    fitness_value = ""
     additional_docking_args = ""
 
     def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
@@ -33,13 +34,20 @@ class GNINADocking(VinaLikeDocking):
         """
         args = super().add_arguments()[1]
         args.append(ArgumentVars(
-            name="no_gpu_for_gnina",
+            name="gnina_fitness_value",
+            type=str,
+            default="CNN_VS",
+            help="The fitness value to be used to guide the AutoGrow optimization process. The possibles values are:"
+                 "CNNscore, CNNaffinity, and CNN_VS.",
+        ))
+        args.append(ArgumentVars(
+            name="gnina_no_gpu",
             action="store_true",
             default=False,
             help="If specified, disable GPU acceleration, even if available.",
         ))
         args.append(ArgumentVars(
-            name="additional_gnina_args",
+            name="gnina_additional_args",
             type=str,
             default=None,
             help="Path to a text file containing additional parameters of the GNINA docking software.",
@@ -57,15 +65,22 @@ class GNINADocking(VinaLikeDocking):
             ValueError: If the 'additional_gnina_args' was specified but it does notexist.
         """
         super().validate(params)
-        if params["no_gpu_for_gnina"]:
+        if not params["gnina_fitness_value"] in ["CNNscore", "CNNaffinity", "CNN_VS"]:
+            raise ValueError(
+                f"The {self.name} is not a valid fitness value to be used for the AUtoGrow optimization. "
+                f"See --gnina_fitness_value parameter for more information."
+            )
+        self.fitness_value = params["gnina_fitness_value"]
+
+        if params["gnina_no_gpu"]:
             self.additional_docking_args = self.additional_docking_args + " --no_gpu"
 
-        if params["additional_gnina_args"]:
-            if not os.path.exists(params["additional_gnina_args"]):
+        if "gnina_additional_args" in params:
+            if not os.path.exists(params["gnina_additional_args"]):
                 raise ValueError(
                     f"The text file containing additional GNINA arguments does not exist {self.name}"
                 )
-            with open(params["additional_gnina_args"], "r") as f:
+            with open(params["gnina_additional_args"], "r") as f:
                 lines = f.readlines()
                 for line in lines:
                     if not line.startswith("#"):
@@ -108,12 +123,25 @@ class GNINADocking(VinaLikeDocking):
             lig_new_filename = lig_output_file[:last_position] + "_gnina_all.sdf"
             os.rename(lig_output_file, lig_new_filename)
 
-            # read the best pose from gnina output file and save in a new sdf file
+            # read the best pose from the gnina output file, and save in a new sdf file
             reader = Chem.SDMolSupplier(lig_new_filename)
             writer = Chem.SDWriter(lig_output_file)
-            for compound in reader:
-                writer.write(compound)
-                break
+            # It is always ranked as the best one
+            if self.fitness_value == "CNN_VS":
+                for compound in reader:
+                    writer.write(compound)
+                    break
+            # Search the best compound. The greater the fitness value, the better the compound.
+            else:
+                best_fitness = 0
+                best_compound = None
+                for current_compound in reader:
+                    fitness_val = float(current_compound.GetProp(self.fitness_value))
+                    if fitness_val > best_fitness:
+                        best_fitness = fitness_val
+                        best_compound = current_compound
+                writer.write(best_compound)
+            # Closing writer
             writer.close()
 
     def process_results_before_exit(self, predocked_cmpds, out_files):
@@ -134,9 +162,10 @@ class GNINADocking(VinaLikeDocking):
 
             reader = Chem.SDMolSupplier(out_file)
             for compound in reader:
-                affinity = float(compound.GetProp("minimizedAffinity"))
-                predocked_cmpd.fitness_score = affinity
-                predocked_cmpd.docking_score = affinity
+                # Get multiplied by -1 to optimize according to the minimum value as it performs with the docking score
+                predocked_cmpd.fitness_score = float(compound.GetProp(self.fitness_value)) * -1
+                # Getting the docking score
+                predocked_cmpd.docking_score = float(compound.GetProp("minimizedAffinity"))
                 predocked_cmpd.sdf_path = out_file
                 break
 
