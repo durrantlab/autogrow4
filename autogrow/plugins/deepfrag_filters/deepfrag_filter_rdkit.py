@@ -30,7 +30,7 @@ class DeepFragFilterRDKit(DeepFragFilter):
         """
         chemtoolkit = plugin_managers.ChemToolkit.toolkit
         try:
-            fp = chemtoolkit.get_rdk_fingerprint_as_bit_vect(fragment, max_path=10, fp_size=2048)
+            fp = chemtoolkit.get_rdk_fingerprint(fragment, max_path=10, fp_size=2048)
             n_fp = list(map(int, list(chemtoolkit.bit_vect_to_bit_string(fp))))
             return np.array(n_fp)
         except Exception as e:

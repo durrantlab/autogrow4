@@ -394,11 +394,6 @@ class ChemToolkitBase(PluginBase):
         pass
 
     @abstractmethod
-    def get_rdk_fingerprint_as_bit_vect(self, mol: Any, max_path: int, fp_size: int) -> Any:
-        """Generate RDKit fingerprint as a bit vector."""
-        pass
-
-    @abstractmethod
     def bit_vect_to_bit_string(self, bit_vect: Any) -> str:
         """Convert a bit vector to a bit string."""
         pass

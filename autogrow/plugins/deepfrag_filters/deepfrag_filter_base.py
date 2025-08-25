@@ -8,6 +8,7 @@ from autogrow.plugins.plugin_base import PluginBase
 from abc import abstractmethod
 from autogrow.config.argument_vars import ArgumentVars
 from scipy.spatial.distance import cosine
+import numpy as np
 from autogrow.utils.logging import LogLevel, log_debug, log_info, log_warning
 import random
 import os
@@ -627,23 +628,47 @@ class DeepFragFilterBase(PluginBase):
         Returns:
             The cosine similarity value.
         """
-        similarity = 0
+        similarity = 0.0
+        if not fragments:
+            return 1.0
+
         for fragment_info in fragments:
             fragment_smiles = fragment_info['fragment_smiles']
             branching_point = fragment_info['coordinates']
 
             # No cache because this calculation depends on the receptor and a specific branching point,
             # and it is strange that a branching point can be used twice in the same or different molecules
-            fps_receptor_parent = self.get_prediction_for_parent_receptor(parent_mol, receptor, branching_point).tolist()
+            fps_receptor_parent_np = self.get_prediction_for_parent_receptor(parent_mol, receptor, branching_point)
+            fps_receptor_parent = fps_receptor_parent_np.tolist()
 
-            fps_fragment = self.fps_fragment_cache.get(fragment_smiles)
-            if fps_fragment is None:
+            fps_fragment_from_cache = self.fps_fragment_cache.get(fragment_smiles)
+            if fps_fragment_from_cache is None:
                 chemtoolkit = plugin_managers.ChemToolkit.toolkit
                 fragment_mol = chemtoolkit.mol_from_smiles(fragment_smiles)
-                fps_fragment = self.get_fingerprints_for_fragment(fragment_mol).tolist()
+                if fragment_mol is None:
+                    log_warning(f"Could not create molecule from fragment SMILES: {fragment_smiles}. Treating as zero vector.")
+                    fps_fragment_np = np.zeros(2048)
+                else:
+                    fps_fragment_np = self.get_fingerprints_for_fragment(fragment_mol)
+
+                fps_fragment = fps_fragment_np.tolist()
                 self.fps_fragment_cache[fragment_smiles] = fps_fragment
+            else:
+                fps_fragment_np = np.array(fps_fragment_from_cache)
+                fps_fragment = fps_fragment_from_cache
 
-            similarity = similarity + (1 - cosine(fps_receptor_parent, fps_fragment))
+            # Check for zero vectors to avoid nan from cosine distance
+            if np.all(fps_receptor_parent_np == 0) or np.all(fps_fragment_np == 0):
+                current_similarity = 0.0
+            else:
+                cosine_distance = cosine(fps_receptor_parent, fps_fragment)
+                if np.isnan(cosine_distance):
+                    log_warning(f"Cosine similarity resulted in NaN for fragment {fragment_smiles}. Treating as 0 similarity.")
+                    current_similarity = 0.0
+                else:
+                    current_similarity = 1.0 - cosine_distance
 
-        similarity = (similarity / len(fragments)) if len(fragments) > 0 else 1
+            similarity += current_similarity
+
+        similarity = (similarity / len(fragments)) if len(fragments) > 0 else 1.0
         return similarity

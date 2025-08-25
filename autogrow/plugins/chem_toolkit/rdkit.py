@@ -399,10 +399,6 @@ class RDKitToolkit(ChemToolkitBase):
         """Generate RDKit fingerprint."""
         return rdmolops.RDKFingerprint(mol, maxPath=max_path, fpSize=fp_size)
 
-    def get_rdk_fingerprint_as_bit_vect(self, mol: Any, max_path: int, fp_size: int) -> Any:
-        """Generate RDKit fingerprint as a bit vector."""
-        return rdmolops.RDKFingerprint(mol, maxPath=max_path, fpSize=fp_size, returnBitVect=True)
-
     def bit_vect_to_bit_string(self, bit_vect: Any) -> str:
         """Convert a bit vector to a bit string."""
         return bit_vect.ToBitString()
