@@ -67,7 +67,7 @@ def check_sanitization(mol):
         smiles = smiles.replace("([CH])", "C")
         smiles = smiles.replace("[CH]", "C")
 
-        if "H]" in smiles and not "[nH" in smiles:
+        if "H]" in smiles and not "[nH" in smiles and not "@H]" in smiles:
             import pdb; pdb.set_trace()
 
         mol2 = chemtoolkit.mol_from_smiles(smiles, sanitize=False)
