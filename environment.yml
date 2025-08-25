@@ -40,3 +40,4 @@ dependencies:
       - Fancy-aggregations
       - wget
       - fair-esm
+      - prolif==2.0.3
