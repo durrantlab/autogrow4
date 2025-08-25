@@ -19,7 +19,7 @@ import hashlib
 # Disable the unnecessary RDKit warnings
 rdkit.RDLogger.DisableLog("rdApp.*")
 
-DEEPFRAG_DEBUG = True
+DEEPFRAG_DEBUG = False
 if DEEPFRAG_DEBUG:
     from rdkit.Chem import Draw
     import os
@@ -65,7 +65,7 @@ class DeepFragFilterBase(PluginBase):
                 with their `sort_score` attribute populated.
         """
         compounds = kwargs["compounds"]
-        cutoff = kwargs["input_params"]["DeepFragCosineSimilarityCutoff"]
+        cutoff = kwargs["input_params"]["deepfrag_cosine_similarity_cutoff"]
         receptor = kwargs["input_params"]["receptor_path"]
         generation_num = kwargs["input_params"].get("generation_num", "NA")
 
@@ -76,7 +76,9 @@ class DeepFragFilterBase(PluginBase):
             final_compound_list: List[Compound] = []
             for compound in compounds:
                 log_info(
-                    f"Processing compound {compound.id} with smiles string {compound.smiles}"
+                    # compound.id is temporary, so no need to mention it
+                    # f"Processing compound {compound.id} with smiles string {compound.smiles}"
+                    f"Processing compound with smiles string {compound.smiles}"
                 )
                 with LogLevel():
                     passed_filter = False
@@ -218,7 +220,7 @@ class DeepFragFilterBase(PluginBase):
 
     def validate(self, params: dict):
         """Validate the provided arguments."""
-        self.apply_on_crossover = bool(params["DeepFragFilterForCrossover"])
+        self.apply_on_crossover = bool(params["deepfrag_filter_for_crossover"])
 
     def add_arguments(self) -> List[ArgumentVars]:
         """
@@ -234,13 +236,13 @@ class DeepFragFilterBase(PluginBase):
         """
         return [
             ArgumentVars(
-                name="DeepFragCosineSimilarityCutoff",
+                name="deepfrag_cosine_similarity_cutoff",
                 type=float,
                 default=0.35,
                 help="The minimum cosine similarity score required for a molecule to pass any enabled DeepFrag filter. Default: 0.35",
             ),
             ArgumentVars(
-                name="DeepFragFilterForCrossover",
+                name="deepfrag_filter_for_crossover",
                 action="store_true",
                 default=False,
                 help="Apply a DeepFrag filter on the new compounds obtained by crossover.",

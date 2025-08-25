@@ -63,23 +63,18 @@ class DeepFragFilter(DeepFragFilterBase):
     def validate(self, params: dict):
         """Validate the provided arguments."""
         super().validate(params)
-
-        self.cpu = bool(params["DeepFragOnCPU"]) or not torch.cuda.is_available()
-
-        if "DeepFragModel" not in params:
+        self.cpu = bool(params["deepfrag_on_cpu"]) or not torch.cuda.is_available()
+        if "deepfrag_model" not in params:
             raise Exception("The path of a DeepFrag model should be given as input using"
-                            " the '--DeepFragModel' parameter.")
-
-        df_model = params["DeepFragModel"]
+                " the '--deepfrag_model' parameter.")
+        df_model = params["deepfrag_model"]
         if df_model in self.url_by_in_house_model:
             df_model = self.download_deepfrag_ckpt(df_model + ".ckpt", self.url_by_in_house_model[df_model])
-            params["DeepFragModel"] = df_model
-
+            params["deepfrag_model"] = df_model
         if not os.path.exists(df_model):
             raise Exception(f"DeepFrag model {df_model} is not an in-house model, or does not exist in "
-                            f"the path specified.")
-
-        self.ckpt_filename = params["DeepFragModel"]
+                f"the path specified.")
+        self.ckpt_filename = params["deepfrag_model"]
         self.model = DeepFragModel.load_from_checkpoint(self.ckpt_filename)
         if not self.cpu:
             self.model = self.model.to(torch.device('cuda'))
@@ -165,13 +160,13 @@ class DeepFragFilter(DeepFragFilterBase):
         parent_args = super().add_arguments()
         child_args = [
             ArgumentVars(
-                name="DeepFragModel",
+                name="deepfrag_model",
                 type=str,
                 default=None,
                 help=f"Path to a DeepFrag model checkpoint (.ckpt) file, or the name of a built-in model (i.e., {', '.join(self.url_by_in_house_model.keys())}).",
             ),
             ArgumentVars(
-                name="DeepFragOnCPU",
+                name="deepfrag_on_cpu",
                 action="store_true",
                 default=False,
                 help="Force DeepFrag to run on the CPU, even if a GPU is available.",

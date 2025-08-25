@@ -111,7 +111,7 @@ class PluginManagerBase(ABC):
                     if module_name in processed_modules:
                         continue
                     processed_modules.add(module_name)
-                    
+
                     try:
                         module = importlib.import_module(module_name)
                         for name, obj in inspect.getmembers(module):
@@ -124,14 +124,14 @@ class PluginManagerBase(ABC):
                                 # Create an instance and register its arguments
                                 plugin = obj()
                                 args = plugin.add_arguments()
-                                if args and not PluginManagerBase.is_abstract(obj):
-                                    assert args[0].name == plugin.name, \
-                                        f"The first argument for plugin '{plugin.name}' must be the enabling flag '--{plugin.name}'. Found '--{args[0].name}' instead. Please check the add_arguments() method of the {plugin.name} class."
+                                # if args and not PluginManagerBase.is_abstract(obj):
+                                #     assert args[0].name == plugin.name, \
+                                #         f"The first argument for plugin '{plugin.name}' must be the enabling flag '--{plugin.name}'. Found '--{args[0].name}' instead. Please check the add_arguments() method of the {plugin.name} class."
                                 title = f"{plugin.name} ({plugin.plugin_type_name}: {plugin.plugin_description})"
-                                register_argparse_group(title, args)
+                                register_argparse_group(title, args, plugin.name)
                     except ImportError as e:
                         print(f"Failed to import {module_name}: {e}")
-                        
+
     def on_plugin_manager_setup_done(self):
         """
         Perform any initialization tasks for the plugin manager.
