@@ -616,6 +616,17 @@ class DeepFragFilterBase(PluginBase):
         return mcs_mol, frag_mol, fragment_info, mcs_smarts, connection_points_3d
 
     def __compute_cosine_similarity(self, receptor, parent_mol, fragments):
+        """
+        Compute the cosine similarity between the fingerprints of the receptor-parent complex and the fragment.
+
+        Args:
+            receptor: .pdb file containing the receptor.
+            parent_mol: RDKit molecule representing the parent interacting with the receptor.
+            fragments: list of dictionaries, where each dictionary contains information of a chemical fragment.
+
+        Returns:
+            The cosine similarity value.
+        """
         similarity = 0
         for fragment_info in fragments:
             fragment_smiles = fragment_info['fragment_smiles']
@@ -627,7 +638,9 @@ class DeepFragFilterBase(PluginBase):
 
             fps_fragment = self.fps_fragment_cache.get(fragment_smiles)
             if fps_fragment is None:
-                fps_fragment = self.get_fingerprints_for_fragment(Chem.MolFromSmiles(fragment_smiles)).tolist()
+                chemtoolkit = plugin_managers.ChemToolkit.toolkit
+                fragment_mol = chemtoolkit.mol_from_smiles(fragment_smiles)
+                fps_fragment = self.get_fingerprints_for_fragment(fragment_mol).tolist()
                 self.fps_fragment_cache[fragment_smiles] = fps_fragment
 
             similarity = similarity + (1 - cosine(fps_receptor_parent, fps_fragment))

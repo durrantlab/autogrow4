@@ -242,7 +242,7 @@ class RDKitToolkit(ChemToolkitBase):
 
     def get_noneditable_mol(self, mol: Any) -> Any:
         """Get non-editable molecule."""
-        return Chem.Mol(mol)
+        return mol.GetMol()
 
     def combine_mols(self, mol1: Any, mol2: Any) -> Any:
         """Combine mols.
