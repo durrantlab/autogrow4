@@ -8,10 +8,10 @@ from autogrow.utils.rank_file import load_rank_file
 
 def generate_summary_html(output_dir: str):
     """
-    Generate a standalone HTML visualization of AutoGrow4 results.
+    Generate a standalone HTML visualization of AutoGrow5 results.
     
     Args:
-        output_dir (str): Path to AutoGrow4 output directory containing generation_X folders
+        output_dir (str): Path to AutoGrow5 output directory containing generation_X folders
     """
     import os
     import glob
@@ -74,7 +74,7 @@ def generate_summary_html(output_dir: str):
     html_template = f"""<!DOCTYPE html>
 <html>
 <head>
-    <title>AutoGrow4 Results</title>
+    <title>AutoGrow5 Results</title>
     <meta charset="UTF-8">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">

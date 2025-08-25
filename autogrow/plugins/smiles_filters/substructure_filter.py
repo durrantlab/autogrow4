@@ -71,7 +71,7 @@ class SubstructureFilter(SmilesFilterBase):
             bool: True if compound contains substructure, False otherwise.
         """
         # Convert SMILES to mol object for substructure matching
-        mol = self.cmpd_to_rdkit_mol(cmpd)
+        mol = self.cmpd_to_mol(cmpd)
         if mol is None:
             return False
 

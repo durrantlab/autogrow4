@@ -52,7 +52,7 @@ class Slurm(ShellParallelizerBase):
                 name="wait_for_slurm",
                 action="store_true",
                 default=False,
-                help="Wait for the slurm job to complete. If this parameter is not given, AutoGrow4 will submit slurm jobs as needed and exit after each submission. You will have to restart AutoGrow4 after each slurm job finishes to continue.",
+                help="Wait for the slurm job to complete. If this parameter is not given, AutoGrow5 will submit slurm jobs as needed and exit after each submission. You will have to restart AutoGrow5 after each slurm job finishes to continue.",
             ),
         ]
 

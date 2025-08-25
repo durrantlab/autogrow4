@@ -3,8 +3,6 @@ DeepFrag plugin calculating RDKit fingerprints for chemical fragments and DeepFr
 fingerprints for receptor-parent pairs.
 """
 import __future__
-
-import rdkit
 import logging
 import numpy as np
 from autogrow.config.argument_vars import ArgumentVars
@@ -13,11 +11,8 @@ from autogrow.plugins.deepfrag_filters.deepfrag_filter_base import DeepFragFilte
 import os
 import wget
 import sys
-from rdkit import Chem
 from autogrow.utils.logging import log_info
-
-# Disable the unnecessary RDKit warnings
-rdkit.RDLogger.DisableLog("rdApp.*")
+from autogrow.plugins.registry_base import plugin_managers
 
 try:
     import torch
@@ -92,14 +87,13 @@ class DeepFragFilter(DeepFragFilterBase):
         Returns:
            Numpy array containing the DeepFrag fingerprints.
         """
-
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
         # The receptor doesn't change, so the parent molecule and the branching
         # point alone unique identify this DeepFrag prediction. We need to
         # generate a hash.
         hash_str = None
         try:
-            hash_str = f"{Chem.MolToPDBBlock(parent_mol)} {round(branching_point.x, 3)} {round(branching_point.y, 3)} {round(branching_point.z, 3)}"
-
+            hash_str = f"{chemtoolkit.mol_to_pdb_block(parent_mol)} {round(branching_point.x, 3)} {round(branching_point.y, 3)} {round(branching_point.z, 3)}"
             if hash_str in self.cached_deepfrag_results:
                 # If the result is cached, return it
                 log_info("Using cached DeepFrag result.")

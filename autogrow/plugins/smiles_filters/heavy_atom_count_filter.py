@@ -85,7 +85,7 @@ class HeavyAtomCountFilter(SmilesFilterBase):
             bool: True if the molecule's heavy-atom count is within the
             specified range, False otherwise.
         """
-        mol = self.cmpd_to_rdkit_mol(cmpd)
+        mol = self.cmpd_to_mol(cmpd)
         if mol is None:
             return False
         chemtoolkit = plugin_managers.ChemToolkit.toolkit

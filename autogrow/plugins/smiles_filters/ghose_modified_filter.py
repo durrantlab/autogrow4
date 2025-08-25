@@ -76,7 +76,7 @@ class GhoseModifiedFilter(SmilesFilterBase):
             bool: True if the molecule passes all filter criteria, False
                 otherwise.
         """
-        mol = self.cmpd_to_rdkit_mol(cmpd)
+        mol = self.cmpd_to_mol(cmpd)
         if mol is None:
             return False
 

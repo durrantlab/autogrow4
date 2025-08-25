@@ -4,16 +4,10 @@ Ligand efficiency plugin for re-scoring.
 import __future__
 
 from autogrow.plugins.rescoring import RescoringBase
-import rdkit  # type: ignore
 from typing import List, Tuple
 from autogrow.config.argument_vars import ArgumentVars
 from autogrow.types import Compound
 from autogrow.plugins.registry_base import plugin_managers
-
-# Disable the unnecessary RDKit warnings
-rdkit.RDLogger.DisableLog("rdApp.*")
-
-
 class LigandEfficiency(RescoringBase):
     """
     Ligand efficiency plugin for re-scoring.

@@ -18,14 +18,7 @@ import argparse
 import contextlib
 from typing import Any, Dict
 
-import rdkit  # type: ignore
-import rdkit.Chem as Chem  # type: ignore
-from rdkit.Chem import AllChem  # type: ignore
-
 # Disable the unnecessary RDKit warnings
-rdkit.RDLogger.DisableLog("rdApp.*")
-
-
 import support_scripts.Multiprocess as mp
 import support_scripts.mol_object_handling as MOH
 import gzip
@@ -46,11 +39,14 @@ def react_with_multiple_reactants(mol_tuple, mol_name, rxn_obj):
 
     Returns:
     :returns: str mol_name: returns the mol_name if it fails to react;
-        returns None if it passes reaction
+     returns None if it passes reaction
     """
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
     try:
         # if reaction works keep it
-        reaction_products_list = [x[0] for x in rxn_obj.RunReactants(mol_tuple)]
+        reaction_products_list = [
+            x[0] for x in chemtoolkit.run_reactants(rxn_obj, mol_tuple)
+        ]
     except Exception:
         return mol_name
 
@@ -77,12 +73,13 @@ def run_a_single_reactant_reaction(mol_info, rxn_obj):
     :returns: str mol_name: returns the mol_name if it fails to react;
         returns None if it passes reaction
     """
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
     mol_name = mol_info[1]
     mol_1 = mol_info[-1]
 
     try:
         # if reaction works keep it
-        reaction_products_list = rxn_obj.RunReactants((mol_1,))
+        reaction_products_list = chemtoolkit.run_reactants(rxn_obj, (mol_1,))
     except Exception:
         return mol_name
     if not reaction_products_list:
@@ -105,13 +102,13 @@ def get_rxn_and_examples(current_rxn_dict):
     :returns: rdkit.Chem.rdChemReactions.ChemicalReaction rxn_obj: the
         reaction object to use
     """
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
     rxn_name = current_rxn_dict["reaction_name"]
     # Test example reactants
     example_smiles_rxn_reactants = current_rxn_dict["example_rxn_reactants"]
     example_rxn_reactants = []
     for smiles_str in example_smiles_rxn_reactants:
-        example_mol = Chem.MolFromSmiles(smiles_str)
-
+        example_mol = chemtoolkit.mol_from_smiles(smiles_str)
         example_mol = MOH.check_sanitization(example_mol)
         if example_mol is None:
             print(smiles_str)
@@ -124,8 +121,8 @@ def get_rxn_and_examples(current_rxn_dict):
     example_rxn_reactants = tuple(example_rxn_reactants)
     reaction_string = current_rxn_dict["reaction_string"]
     try:
-        rxn_obj = AllChem.ReactionFromSmarts(reaction_string)
-        rxn_obj.Initialize()
+        rxn_obj = chemtoolkit.reaction_from_smarts(reaction_string)
+        chemtoolkit.initialize_reaction(rxn_obj)
     except Exception as e:
         printout = f"rxn {rxn_name} failed to be created. Rxn SMART is flawed"
         print(printout)
@@ -146,7 +143,9 @@ def get_rxn_and_examples(current_rxn_dict):
     return example_rxn_reactants, rxn_obj
 
 
-def run_all_for_fun_group(params, fun_group, rxns_by_fun_group, fragment_addition_object):
+def run_all_for_fun_group(
+    params, fun_group, rxns_by_fun_group, fragment_addition_object
+):
     """
     This runs the all testing for a single functional group.
 
@@ -163,6 +162,7 @@ def run_all_for_fun_group(params, fun_group, rxns_by_fun_group, fragment_additio
         list: a list of mol names which failed to sanitize
     """
     # unpack variables
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
     complementary_mol_dict = fragment_addition_object.complementary_mol_dict
     reaction_dict = fragment_addition_object.reaction_dict
     number_of_processors = params["number_of_processors"]
@@ -173,7 +173,7 @@ def run_all_for_fun_group(params, fun_group, rxns_by_fun_group, fragment_additio
     fun_group_mol_list = []
     failed_to_sanitize = []
     for info in fun_group_list:
-        mol = Chem.MolFromSmiles(info[0])
+        mol = chemtoolkit.mol_from_smiles(info[0])
         mol = MOH.check_sanitization(mol)
         if mol is None:
             failed_to_sanitize.append(info)

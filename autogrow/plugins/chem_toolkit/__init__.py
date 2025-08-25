@@ -308,7 +308,204 @@ class ChemToolkitBase(PluginBase):
         """Check if atom is in ring."""
         pass
 
+    @abstractmethod
+    def mol_from_pdb_file(self, pdb_file: str, sanitize: bool = True, remove_hs: bool = False) -> Any:
+        """Create molecule from PDB file."""
+        pass
 
+    @abstractmethod
+    def is_aromatic(self, bond: Any) -> bool:
+        """Check if a bond is aromatic."""
+        pass
+
+    @abstractmethod
+    def brics_decompose(
+        self,
+        mol: Any,
+        return_mols: bool = True,
+        min_fragment_size: int = 1,
+        keep_non_leaf_nodes: bool = False,
+    ) -> List[Any]:
+        """Decompose molecule using BRICS."""
+        pass
+
+    @abstractmethod
+    def fragment_on_bonds(
+        self, mol: Any, bond_indices: List[int], add_dummies: bool = True
+    ) -> Any:
+        """Fragment molecule on specified bonds."""
+        pass
+
+    @abstractmethod
+    def mols_to_grid_image(
+        self,
+        mols: List[Any],
+        mols_per_row: int,
+        sub_img_size: Tuple[int, int],
+        highlight_atom_lists: Optional[List[List[int]]] = None,
+    ) -> Any:
+        """Create a grid image of molecules."""
+        pass
+
+    @abstractmethod
+    def compute_2d_coords(self, mol: Any) -> int:
+        """Compute 2D coordinates for a molecule."""
+        pass
+
+    @abstractmethod
+    def get_morgan_fingerprint_as_bit_vect(
+        self, mol: Any, radius: int, n_bits: int
+    ) -> Any:
+        """Generate Morgan fingerprint as a bit vector."""
+        pass
+
+    @abstractmethod
+    def mols_from_sdf_file(
+        self, sdf_file: str, sanitize: bool = False, remove_hs: bool = True
+    ) -> List[Any]:
+        """Load molecules from an SDF file."""
+        pass
+
+    @abstractmethod
+    def run_reactants(
+        self, reaction: Any, reactants: Tuple[Any, ...]
+    ) -> List[List[Any]]:
+        """Run a reaction with the given reactants."""
+        pass
+
+    @abstractmethod
+    def initialize_reaction(self, reaction: Any):
+        """Initialize a reaction object."""
+        pass
+
+    @abstractmethod
+    def get_prop(self, mol: Any, prop_name: str) -> Any:
+        """Get a property from a molecule."""
+        pass
+
+    @abstractmethod
+    def mol_to_pdb_block(self, mol: Any) -> str:
+        """Convert molecule to a PDB block string."""
+        pass
+
+    @abstractmethod
+    def get_rdk_fingerprint(self, mol: Any, max_path: int, fp_size: int) -> Any:
+        """Generate RDKit fingerprint."""
+        pass
+
+    @abstractmethod
+    def get_rdk_fingerprint_as_bit_vect(self, mol: Any, max_path: int, fp_size: int) -> Any:
+        """Generate RDKit fingerprint as a bit vector."""
+        pass
+
+    @abstractmethod
+    def bit_vect_to_bit_string(self, bit_vect: Any) -> str:
+        """Convert a bit vector to a bit string."""
+        pass
+
+    @abstractmethod
+    def mol_to_sdf_file(self, mol: Any, file_path: str) -> None:
+        """Write a molecule to an SDF file."""
+        pass
+
+    @abstractmethod
+    def create_empty_editable_mol(self) -> Any:
+        """Create an empty editable molecule."""
+        pass
+
+    @abstractmethod
+    def copy_atom(self, atom: Any) -> Any:
+        """Create a copy of an atom."""
+        pass
+
+    @abstractmethod
+    def add_atom_to_mol(self, editable_mol: Any, atom: Any) -> int:
+        """Add an atom to an editable molecule."""
+        pass
+
+    @abstractmethod
+    def add_bond_to_mol(self, editable_mol: Any, begin_atom_idx: int, end_atom_idx: int, bond_type: Any) -> None:
+        """Add a bond to an editable molecule."""
+        pass
+
+    @abstractmethod
+    def create_conformer(self, num_atoms: int) -> Any:
+        """Create a conformer."""
+        pass
+
+    @abstractmethod
+    def get_conformer(self, mol: Any, conf_id: int = -1) -> Any:
+        """Get a conformer from a molecule."""
+        pass
+
+    @abstractmethod
+    def get_atom_position(self, conformer: Any, atom_idx: int) -> Any:
+        """Get the position of an atom in a conformer."""
+        pass
+
+    @abstractmethod
+    def set_atom_position_in_conformer(self, conformer: Any, atom_idx: int, pos: Any) -> None:
+        """Set the position of an atom in a conformer."""
+        pass
+
+    @abstractmethod
+    def add_conformer_to_mol(self, mol: Any, conformer: Any) -> int:
+        """Add a conformer to a molecule."""
+        pass
+
+    @abstractmethod
+    def get_num_conformers(self, mol: Any) -> int:
+        """Get the number of conformers in a molecule."""
+        pass
+
+    @abstractmethod
+    def get_atom_degree(self, atom: Any) -> int:
+        """Get the degree of an atom."""
+        pass
+
+    @abstractmethod
+    def mol_to_smarts(self, mol: Any) -> str:
+        """Convert a molecule to a SMARTS string."""
+        pass
+
+    @abstractmethod
+    def get_atom_property(self, atom: Any, prop: str) -> Any:
+        """Get a property from an atom."""
+        pass
+
+    @abstractmethod
+    def set_atom_property(self, atom: Any, prop: str, value: Any) -> None:
+        """Set a property on an atom."""
+        pass
+
+    @abstractmethod
+    def get_substruct_match(self, mol: Any, query: Any) -> Optional[Tuple[int, ...]]:
+        """Get a single substructure match."""
+        pass
+
+    @abstractmethod
+    def remove_atom_from_editable_mol(self, editable_mol: Any, atom_idx: int) -> None:
+        """Remove an atom from an editable molecule."""
+        pass
+
+    @abstractmethod
+    def get_single_bond_type(self) -> Any:
+        """Get the single bond type object."""
+        pass
+    @abstractmethod
+    def create_atom(self, atomic_num: int) -> Any:
+        """Create an atom."""
+        pass
+
+    @abstractmethod
+    def filter_has_match(self, filter_obj: Any, mol: Any) -> bool:
+        """Check if a molecule has a match in a filter."""
+        pass
+
+    @abstractmethod
+    def mol_from_sdf_file(self, sdf_file: str) -> Optional[Any]:
+        """Create a single molecule from an SDF file."""
+        pass
 class ChemToolkitPluginManager(PluginManagerBase):
     """Plugin manager for chemistry toolkits."""
 

@@ -25,9 +25,8 @@ fragments. It is adapted from Gypsum-DL
 
 ##### MolObjectHandling.py
 import __future__
-from typing import Any, List
+from typing import Any, List, Optional
 from autogrow.plugins.registry_base import plugin_managers
-
 
 def check_sanitization(mol):
     """Sanitizes an RDKit molecule and fixes common valence errors.
@@ -216,7 +215,7 @@ def remove_atoms(mol, list_of_idx_to_remove: List[int]):
         return None
 
 
-def nitrogen_charge_adjustment(mol: Any):
+def nitrogen_charge_adjustment(mol: Any) -> Optional[Any]:
     """
     Adjust formal charges on four-bonded nitrogen atoms.
 
@@ -239,7 +238,7 @@ def nitrogen_charge_adjustment(mol: Any):
     # makes sure its an rdkit obj
 
     chemtoolkit = plugin_managers.ChemToolkit.toolkit
-
+    # makes sure its an rdkit obj
     try:
         atoms = chemtoolkit.get_atoms(mol)
     except Exception:
@@ -247,10 +246,7 @@ def nitrogen_charge_adjustment(mol: Any):
 
     for atom in atoms:
         if chemtoolkit.get_atomic_num(atom) == 7:
-            bonds = [
-                chemtoolkit.get_bond_type_as_double(bond)
-                for bond in chemtoolkit.get_bonds(atom)
-            ]
+            bonds = [chemtoolkit.get_bond_type_as_double(bond) for bond in chemtoolkit.get_bonds(atom)]
             # If aromatic skip as we do not want assume the charge.
             if 1.5 in bonds:
                 continue
@@ -263,8 +259,7 @@ def nitrogen_charge_adjustment(mol: Any):
                 chemtoolkit.set_formal_charge(atom, +1)
     return mol
 
-
-def check_for_unassigned_atom(mol):
+def check_for_unassigned_atom(mol: Any) -> Optional[Any]:
     """
     Check for presence of unassigned atoms (atomic number 0).
 
@@ -294,7 +289,7 @@ def check_for_unassigned_atom(mol):
     return mol
 
 
-def handle_frag_check(mol):
+def handle_frag_check(mol: Any) -> Optional[Any]:
     """
     Process molecules with multiple fragments.
 
@@ -342,3 +337,29 @@ def handle_frag_check(mol):
     largest_frag_idx = frag_info_list[0][0]
     largest_frag = frags[largest_frag_idx]
     return largest_frag
+
+def _get_largest_checked_fragment(frags: list[Any]) -> Optional[Any]:
+    """
+    Returns the largest fragment from a list of fragments after checking for
+    unassigned atoms.
+    Inputs:
+    :param list[rdkit.Chem.rdchem.Mol] frags: list of fragments
+    Returns:
+    :returns: rdkit.Chem.rdchem.Mol: the largest fragment or None if it fails.
+    """
+    frag_info_list = []
+    frag_index = 0
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
+    for frag in frags:
+        # Check for unassigned breaks ie. a '*'
+        frag = check_for_unassigned_atom(frag)
+        if frag is not None:
+            num_atoms = chemtoolkit.get_num_atoms(frag)
+            frag_info = [frag_index, num_atoms]
+            frag_info_list.append(frag_info)
+        frag_index = frag_index + 1
+    if not frag_info_list:
+        return None
+    # Get the largest Fragment
+    frag_info_list.sort(key=lambda x: float(x[-1]), reverse=True)
+    return frags[frag_info_list[0][0]]

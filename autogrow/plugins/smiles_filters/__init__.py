@@ -77,7 +77,7 @@ class SmilesFilterBase(PluginBase):
         """Validate the provided arguments."""
         pass
 
-    def cmpd_to_rdkit_mol(self, cmpd: Compound) -> Optional[Any]:
+    def cmpd_to_mol(self, cmpd: Compound) -> Optional[Any]:
         """
         Convert a Compound object to an RDKit molecule object.
 

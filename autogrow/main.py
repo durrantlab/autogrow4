@@ -105,11 +105,11 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
     start_gen_num = 1
     if start_gen_num > num_gens_to_make:
         log_warning(
-            "This AutoGrow4 run has already been completed to the user defined number \
+            "This AutoGrow5 run has already been completed to the user defined number \
                 of generations. Please check your user variables."
         )
         raise Exception(
-            "This AutoGrow4 run has already been completed to the user defined number \
+            "This AutoGrow5 run has already been completed to the user defined number \
                 of generations. Please check your user variables."
         )
 
@@ -164,8 +164,8 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
 
     log_info("Run time")
     with LogLevel():
-        log_info(f"AutoGrow4 run started at:   {start_time}")
-        log_info(f"AutoGrow4 run completed at: {str(datetime.datetime.now())}")
+        log_info(f"AutoGrow5 run started at:   {start_time}")
+        log_info(f"AutoGrow5 run completed at: {str(datetime.datetime.now())}")
 
     # Generate the final graphics only when the 'process_input_compounds' parameter is True.
     # Otherwise, the final graphics coincide with the graphics of the last generation in the 'graphics' directory.

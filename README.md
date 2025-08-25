@@ -1,70 +1,91 @@
-# AutoGrow4
+# AutoGrow5
 
-AutoGrow4 is an evolutionary algorithm that optimizes candidate ligands for
-predicted binding affinity and other drug-like properties. Though no
-substitute for the medicinal chemist, AutoGrow4 attempts to introduce some
-chemical intuition into the automated optimization process.
+AutoGrow5 is an evolutionary algorithm that optimizes candidate ligands for
+predicted binding affinity and other drug-like properties. While it cannot
+replace the expertise of medicinal chemists, AutoGrow5 does seek to bring
+chemical intuition to the automated optimization process.
 
-AutoGrow4 takes advantage of recent advancements in multiprocessing,
-cheminformatics, and docking. It handles all ligand manipulations using SMILES
-strings via the RDKit API. Docking programs require 3D small-molecule models,
-so AutoGrow4 use Gypsum-DL to convert the SMILES to 3D.
+## Overview
 
-AutoGrow4 was designed with modularity in mind. New options allow users to
-control drug-likeness, access new reaction libraries, use additional docking
-programs, rank AutoGrow4-generated compounds using alternate schemes, and
-advance candidate compounds via several selection algorithms. The codebase has
-been redesigned so users can easily add their own custom options as well.
-Please see the tutorial (`/autogrow4/tutorial/TUTORIAL.md`), which describes
-how to expand these various options.
+AutoGrow5 uses an evolutionary algorithm to generate novel compounds with
+desirable properties. Starting from a population of seed molecules, it
+iteratively applies genetic operators to create new generations of compounds:
 
-The default fragment libraries included with AutoGrow4 were derived from a
-subset of the ZINC database (https://zinc.docking.org/). We thank ZINC for
-allowing us to distribute these fragment libraries to AutoGrow4 users.
+- **Mutation**: Modifies molecules (e.g., by adding fragments)
+- **Crossover**: Combines parts of two parent molecules to create offspring
+- **Elitism**: Advances the best-performing compounds from each generation to
+  the next
 
-## Getting Started with AutoGrow4
+This evolutionary process guides optimization toward molecules with better
+predicted binding affinity and drug-like characteristics.
 
-Use the `run_autogrow.py` script to run AutoGrow4. The script supports both
-command-line parameters and a JSON parameter file. A detailed tutorial
-describing AutoGrow4's dependencies and general use is located at
-`/autogrow4/tutorial/TUTORIAL.md`. Additional descriptions of all AutoGrow4
-parameters can be obtained by running: `python run_autogrow.py -h`.
+## Modular Architecture
 
-We strongly recommend running AutoGrow4 via Docker using
-`/autogrow4/docker/autogrow_in_docker.py`. See the tutorial at
-`/autogrow4/tutorial/TUTORIAL.md` for more details.
+AutoGrow5 was designed with modularity as a core principle. Its plugin-based
+architecture allows extensive customization of the drug discovery workflow:
 
-## Dependencies Notes
+- **Drug-likeness filtering**: Control compound quality through various
+  SMILES-based filters (Lipinski, Ghose, PAINS)
+- **Reaction libraries**: Access different libraries for mutation and crossover
+  operations
+- **Docking programs**: Choose from various options (AutoDock Vina, GNINA)
+- **Selection algorithms**: Use different compound selection methods (Rank,
+  Tournament, Roulette)
+- **Pose filtering**: Apply ProLIF-based interaction filters and other methods
+- **Rescoring**: Use ligand efficiency and other rescoring approaches
 
-The Python dependencies used in AutoGrow4 version 4.0.1 are specified in the 
-environment.yml file.
+The codebase has also been redesigned to make it easy for users to add custom
+options.
 
-## Python environment configuration via conda
+## Fragment Libraries
 
-We provide the steps to create a Python environment from an environment.yml file 
-using conda:
+The default fragment libraries included with AutoGrow5 (used by the default
+fragment addition mutation operator) are derived from two sources: the NCI/DTP
+Open Chemicals Repository and the original AutoGrow4 libraries (a subset of the
+ZINC database). This initial compound set was subjected to rigorous filtering to
+ensure drug-likeness, including constraints on molecular weight, rotatable
+bonds, and cLogP. In some cases, the libraries were further augmented using in
+silico synthesis, retrosynthesis, and stereoisomer variation to ensure a diverse
+set of small, extensible fragments. See
+`autogrow/plugins/mutation/reaction_libraries/all_rxns/AUTOGROW5_MOIETY_LIB.md`
+for full details.
 
-1. conda env create -f environment.yml
-2. conda activate Autogrow4
-3. conda env list
+We thank ZINC (https://zinc.docking.org/) for allowing us to distribute these
+fragment libraries to AutoGrow5 users.
 
-AutoGrow4 version 4.0.1 has been run both on Mac, Linux, and Windows platforms. 
-If you are unable to run AutoGrow4, we alternatively provide a Docker-containerized 
-version of AutoGrow4, which automatically installs dependencies that are verified to
-work with. If you discover that AutoGrow4 is no longer compatible
-with current library releases, please contact us, and we will attempt to
-correct the code.
+## Citation
 
-## Developer Note
+If you use AutoGrow version 5.0 in your research, please cite:
 
-Dimorphite is Version 1.2.3 with the citation print statements silenced.
-Please remember to cite Dimorphite-DL: Ropp PJ, Kaminsky JC,
-Yablonski S, Durrant JD (2019) Dimorphite-DL: An open-source program for
-enumerating the ionization states of drug-like small molecules. J Cheminform
-11:14. doi:10.1186/s13321-019-0336-9.
+Spiegel, J.O., Durrant, J.D. AutoGrow4: an open-source genetic algorithm for
+de novo drug design and lead optimization. J Cheminform 12, 25 (2020). doi:
+10.1186/s13321-020-00429-4
 
-As of May 2020, AutoGrow4 works in the provided Docker container (with the
-specific, hard-coded versions of the dependencies). These dependencies are
-known to be compatible with AutoGrow4. When developing future versions of
-AutoGrow4, be sure to test the current versions of these dependencies and to
-update `$PATH/docker/Dockerfile` appropriately.
+## Getting Started
+
+Use the `run_autogrow.py` script to run AutoGrow5. The script supports both
+command-line parameters and JSON parameter files. To see all available plugins
+and parameters, run:
+
+```bash
+python run_autogrow.py -h
+```
+
+## Dependencies
+
+Python dependencies for AutoGrow5 are specified in the `environment.yml` file.
+AutoGrow5 also requires some third-party software such as OpenBabel for file
+conversions. Some accessory scripts for plotting and analysis may require
+`matplotlib`, `pandas`, `numpy`, `scikit-learn`, etc.
+
+We have tested AutoGrow5 on macOS and Linux. We expect it can also run run on
+Windows, though Windows is not officially supported. If you discover
+compatibility issues with current library releases, please contact us, and we
+will work to correct the code.
+
+## Environment Setup
+
+To create a Python environment using conda:
+
+1. `conda env create -f environment.yml`
+2. `conda activate AutoGrow5`

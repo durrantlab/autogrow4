@@ -11,19 +11,13 @@ import os
 import argparse
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import rdkit  # type: ignore
-import rdkit.Chem as Chem  # type: ignore
-from rdkit.Chem.BRICS import BRICSDecompose  # type: ignore
-from rdkit import RDLogger  # type: ignore
-
 # Turn off warnings
-RDLogger.DisableLog("rdApp.*")
-
 import support_scripts.Multiprocess as mp
 import support_scripts.mol_object_handling as MOH
+from autogrow.plugins.registry_base import plugin_managers
 
 
-def get_atom_w_iso_num(mol: Chem.Mol, iso_num: int) -> Optional[int]:
+def get_atom_w_iso_num(mol: Any, iso_num: int) -> Optional[int]:
     """
     Find all permutations of bonds to cut on a molecule.
 
@@ -35,13 +29,18 @@ def get_atom_w_iso_num(mol: Chem.Mol, iso_num: int) -> Optional[int]:
     :returns: int atom_idx: the atom.GetIdx() of the atom with the
         isotope label. If not in atom return None
     """
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
     return next(
-        (atom.GetIdx() for atom in mol.GetAtoms() if atom.GetIsotope() == iso_num),
+        (
+            chemtoolkit.get_idx(atom)
+            for atom in chemtoolkit.get_atoms(mol)
+            if chemtoolkit.get_isotope(atom) == iso_num
+        ),
         None,
     )
 
 
-def label_iso_num_w_idx(mol: Chem.Mol) -> Chem.Mol:
+def label_iso_num_w_idx(mol: Any) -> Any:
     """
     Find all permutations of bonds to cut on a molecule.
 
@@ -51,13 +50,14 @@ def label_iso_num_w_idx(mol: Chem.Mol) -> Chem.Mol:
     Returns:
     :returns: rdkit.Chem.rdchem.Mol mol: a rdkit mol
     """
-    for atom in mol.GetAtoms():
-        atom.SetIsotope(atom.GetIdx())
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
+    for atom in chemtoolkit.get_atoms(mol):
+        chemtoolkit.set_isotope(atom, chemtoolkit.get_idx(atom))
     return mol
 
 
 def get_rot_bond_permutations_to_cut(
-    mol: Chem.Mol, c_c_bonds_off: bool = False
+    mol: Any, c_c_bonds_off: bool = False
 ) -> List:
     """
     Find all permutations of bonds to cut on a molecule.
@@ -69,22 +69,22 @@ def get_rot_bond_permutations_to_cut(
     Returns:
     :returns: list permutations_of_bonds_to_remove: list of bonds to cut for a mol
     """
-    rotatable_bond = Chem.MolFromSmarts("[!$(*#*)&!D1]-&!@[!$(*#*)&!D1]")
-    rotatable_bonds_set = mol.GetSubstructMatches(rotatable_bond)
-
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
+    rotatable_bond = chemtoolkit.mol_from_smarts("[!$(*#*)&!D1]-&!@[!$(*#*)&!D1]")
+    rotatable_bonds_set = chemtoolkit.get_substruct_matches(mol, rotatable_bond)
     rotatable_bonds_to_frag = []
     for rot_bond in rotatable_bonds_set:
-        atom1 = mol.GetAtomWithIdx(rot_bond[0])
-        atom2 = mol.GetAtomWithIdx(rot_bond[1])
-        atom_isos = [atom1.GetIsotope(), atom2.GetIsotope()]
-        bond = mol.GetBondBetweenAtoms(rot_bond[0], rot_bond[1])
-        if bond.GetIsAromatic() is True:
+        atom1 = chemtoolkit.get_atom_with_idx(mol, rot_bond[0])
+        atom2 = chemtoolkit.get_atom_with_idx(mol, rot_bond[1])
+        atom_isos = [chemtoolkit.get_isotope(atom1), chemtoolkit.get_isotope(atom2)]
+        bond = chemtoolkit.get_bond_between_atoms(mol, rot_bond[0], rot_bond[1])
+        if chemtoolkit.is_aromatic(bond) is True:
             continue
         # Remove any bonds including Hydrogen
-        if atom1.GetAtomicNum() == 1 or atom2.GetAtomicNum() == 1:
+        if chemtoolkit.get_atomic_num(atom1) == 1 or chemtoolkit.get_atomic_num(atom2) == 1:
             continue
         # Remove any C-C single bonds
-        if atom1.GetAtomicNum() == 6 and atom2.GetAtomicNum() == 6:
+        if chemtoolkit.get_atomic_num(atom1) == 6 and chemtoolkit.get_atomic_num(atom2) == 6:
             if c_c_bonds_off:
                 continue
 
@@ -100,7 +100,7 @@ def get_rot_bond_permutations_to_cut(
     return permutations_of_bonds_to_remove
 
 
-def remove_atoms(mol: Chem.Mol, list_of_idx_to_remove: List[int]) -> Optional[Chem.Mol]:
+def remove_atoms(mol: Any, list_of_idx_to_remove: List[int]) -> Optional[Any]:
     """
     This function removes atoms from an rdkit mol based on
     a provided list. The RemoveAtom function in Rdkit requires
@@ -115,27 +115,10 @@ def remove_atoms(mol: Chem.Mol, list_of_idx_to_remove: List[int]) -> Optional[Ch
     :returns: rdkit.Chem.rdchem.Mol new_mol: the rdkit mol as input but with
                                             the atoms from the list removed
     """
-
-    if mol is None:
-        return None
-
-    try:
-        atoms_to_remove = list_of_idx_to_remove
-        atoms_to_remove.sort(reverse=True)
-    except Exception:
-        return None
-
-    try:
-        em1 = Chem.EditableMol(mol)
-        for atom in atoms_to_remove:
-            em1.RemoveAtom(atom)
-
-        return em1.GetMol()
-    except Exception:
-        return None
+    return MOH.remove_atoms(mol, list_of_idx_to_remove)
 
 
-def get_brics_permutations(mol: Chem.Mol, min_frag_size: int = 3) -> List[str]:
+def get_brics_permutations(mol: Any, min_frag_size: int = 3) -> List[str]:
     """
     Fragment a mol using BRICS methods.
 
@@ -145,35 +128,38 @@ def get_brics_permutations(mol: Chem.Mol, min_frag_size: int = 3) -> List[str]:
     Returns:
     :returns: list clean_frag_list: list of fragmented SMILES
     """
-    res = list(BRICSDecompose(mol, returnMols=True, minFragmentSize=min_frag_size))
-    smis = [Chem.MolToSmiles(x, True) for x in res]
-
-    # Get larger pieces
-    res = list(
-        BRICSDecompose(
-            mol, returnMols=True, keepNonLeafNodes=True, minFragmentSize=min_frag_size
-        )
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
+    res = chemtoolkit.brics_decompose(
+        mol, return_mols=True, min_fragment_size=min_frag_size
     )
-    smis.extend([Chem.MolToSmiles(x, True) for x in res])
+    smis = [chemtoolkit.mol_to_smiles(x, True) for x in res]
+    # Get larger pieces
+    res = chemtoolkit.brics_decompose(
+        mol,
+        return_mols=True,
+        keep_non_leaf_nodes=True,
+        min_fragment_size=min_frag_size,
+    )
+    smis.extend([chemtoolkit.mol_to_smiles(x, True) for x in res])
     clean_frag_list = []
     for x in res:
-        list_to_remove = [i.GetIdx() for i in x.GetAtoms() if i.GetAtomicNum() == 0]
-        x = remove_atoms(x, list_to_remove)
-
+        list_to_remove = [
+            chemtoolkit.get_idx(i)
+            for i in chemtoolkit.get_atoms(x)
+            if chemtoolkit.get_atomic_num(i) == 0
+        ]
+        x = MOH.remove_atoms(x, list_to_remove)
         assert x is not None, "Failed to remove atoms from BRICS fragment"
-
-        for atom in x.GetAtoms():
-            atom.SetIsotope(0)
-
-        clean_frag_list.append(Chem.MolToSmiles(x))
+        for atom in chemtoolkit.get_atoms(x):
+            chemtoolkit.set_isotope(atom, 0)
+        clean_frag_list.append(chemtoolkit.mol_to_smiles(x))
     list(set(list(clean_frag_list)))
-
     return clean_frag_list
 
 
 def remove_bonds(
-    mol: Chem.Mol, list_of_atomiso_bondsets_to_remove: List[List[int]]
-) -> Optional[Chem.Mol]:
+    mol: Any, list_of_atomiso_bondsets_to_remove: List[List[int]]
+) -> Optional[Any]:
     """
     This function removes bond from an rdkit mol based on
     a provided list. This list is a list of sets, with each set containing
@@ -192,15 +178,7 @@ def remove_bonds(
     # instead of raise TypeError
     if mol is None:
         return None
-
-    # If mol is wrong data type (excluding None) raise TypeError
-    if type(mol) not in [rdkit.Chem.rdchem.Mol, rdkit.Chem.rdchem.RWMol]:
-        printout = (
-            "mol is the wrong data type. \n"
-            + "Input should be a rdkit.Chem.rdchem.Mol\n"
-        )
-        printout += f"Input mol was {type(mol)} type."
-        raise TypeError(printout)
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
     new_mol = copy.deepcopy(mol)
     if not list_of_atomiso_bondsets_to_remove:
         return None
@@ -215,8 +193,8 @@ def remove_bonds(
         atom2_idx = get_atom_w_iso_num(new_mol, atomiso_bondsets[1])
 
         try:
-            new_mol = Chem.FragmentOnBonds(
-                new_mol, [atom1_idx, atom2_idx], addDummies=False
+            new_mol = chemtoolkit.fragment_on_bonds(
+                new_mol, [atom1_idx, atom2_idx], add_dummies=False
             )
         except Exception:
             return None
@@ -228,7 +206,7 @@ def remove_bonds(
     return None if new_mol is None else new_mol
 
 
-def make_list_of_all_unique_frags(fragment_list: List[Chem.Mol]) -> List[str]:
+def make_list_of_all_unique_frags(fragment_list: List[Any]) -> List[str]:
     """
     This function takes a list of all molecules after fragmentation and separates the
     the fragments into individual rdkit mol objects, sanitizes each, removes isotopes
@@ -246,23 +224,25 @@ def make_list_of_all_unique_frags(fragment_list: List[Chem.Mol]) -> List[str]:
     :returns: list clean_frag_list: List of unique sanitized SMILES strings from all objects
                 in fragment_list. Isotope labels are also removed here.
     """
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
     clean_frag_list = []
     for fragments in fragment_list:
-        frags = Chem.GetMolFrags(fragments, asMols=True, sanitizeFrags=False)
+        frags = chemtoolkit.get_mol_frags(
+            fragments, as_mols=True, sanitize_frags=False
+        )
         for frag in frags:
             frag = MOH.check_sanitization(frag)
             if frag is None:
                 continue
 
             # Remove those under 2 atoms minimum
-            list_mol_atoms = frag.GetAtoms()
+            list_mol_atoms = chemtoolkit.get_atoms(frag)
             if len(list_mol_atoms) < 3:
                 continue
-
-            for atom in frag.GetAtoms():
-                atom.SetIsotope(0)
+            for atom in chemtoolkit.get_atoms(frag):
+                chemtoolkit.set_isotope(atom, 0)
             clean_frag_list.append(
-                Chem.MolToSmiles(frag, isomericSmiles=True, canonical=True)
+                chemtoolkit.mol_to_smiles(frag, isomeric_smiles=True, canonical=True)
             )
         list(set(list(clean_frag_list)))
 
@@ -326,19 +306,20 @@ def make_frag_list_for_one_mol(
     :returns: list final_frag_list: A list of lists containing the chosen unique fragments.
             final_frag_list[0] = [SMILE, mol_id]
     """
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
     mol_smiles = mol_info[0]
     lig_id = mol_info[1]
-
-    mol = Chem.MolFromSmiles(mol_smiles, sanitize=False)
+    mol = chemtoolkit.mol_from_smiles(mol_smiles, sanitize=False)
     mol = MOH.check_sanitization(mol)
     if mol is None:
         printout = "\nMolecule {} failed to sanitize. \
-                    Could not make any fragments from it".format(
+        Could not make any fragments from it".format(
             lig_id
         )
         raise Exception(printout)
-    mol_smiles = Chem.MolToSmiles(mol, isomericSmiles=True, canonical=True)
-
+    mol_smiles = chemtoolkit.mol_to_smiles(
+        mol, isomeric_smiles=True, canonical=True
+    )
     mol = label_iso_num_w_idx(mol)
     mol_copy = copy.deepcopy(mol)
     bonds_to_remove_permutations = get_rot_bond_permutations_to_cut(
@@ -377,7 +358,9 @@ def make_frag_list_for_one_mol(
         printout = f"\nFor {lig_id}: {len(clean_frag_list)} fragmented were made."
         print(printout)
         for frag in clean_frag_list:
-            unique_lig_id = make_unique_lig_id(lig_id, [x[1] for x in final_frag_list])
+            unique_lig_id = make_unique_lig_id(
+                lig_id, [x[1] for x in final_frag_list]
+            )
             temp_frag_info = (frag, unique_lig_id)
             final_frag_list.append(temp_frag_info)
     return final_frag_list
@@ -394,13 +377,16 @@ def get_ligands_from_smi(smi_file: str) -> List[List[str]]:
     :returns: list list_of_ligands: A list of lists containing the chosen unique fragments.
             final_frag_list[0] = [SMILE, mol_id]
     """
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
     list_of_ligands = []
     with open(smi_file, "r") as smiles_file:
         line_counter = 0
         for line in smiles_file:
             line_counter = line_counter + 1
             line = line.replace("\n", "")
-            parts = line.split("\t")  # split line into parts separated by 4-spaces
+            parts = line.split(
+                "\t"
+            )  # split line into parts separated by 4-spaces
             if len(parts) == 1:
                 parts = line.split(
                     "    "
@@ -415,15 +401,16 @@ def get_ligands_from_smi(smi_file: str) -> List[List[str]]:
                 continue
 
             try:
-                mol = Chem.MolFromSmiles(mol_string, sanitize=False)
+                mol = chemtoolkit.mol_from_smiles(mol_string, sanitize=False)
             except Exception:
                 print(f"Miss Formatted within .SMI. Line number {str(line_counter)}")
                 continue
             mol = MOH.check_sanitization(mol)
             if mol is None:
                 continue
-
-            mol_smile = Chem.MolToSmiles(mol, isomericSmiles=True, canonical=True)
+            mol_smile = chemtoolkit.mol_to_smiles(
+                mol, isomeric_smiles=True, canonical=True
+            )
             mol_info = [mol_smile, mol_id]
             list_of_ligands.append(mol_info)
 
@@ -605,6 +592,7 @@ def process_inputs(inputs: Dict[str, Any]) -> Dict[str, Any]:
         inputs["number_of_processors"] = int(inputs["number_of_processors"])
     else:
         inputs["number_of_processors"] = -1
+    inputs["RDKitToolkit"] = True
     return inputs
 
 
@@ -669,7 +657,7 @@ PARSER.add_argument(
 
 ARGS_DICT = vars(PARSER.parse_args())
 ARGS_DICT = process_inputs(ARGS_DICT)
-
+plugin_managers.setup_plugin_managers(ARGS_DICT)
 run_fragmentation_main(ARGS_DICT)
 print(f'Fragments located at: {ARGS_DICT["output_smi_file"]}')
 print("Finished")

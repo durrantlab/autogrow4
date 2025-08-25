@@ -86,7 +86,7 @@ class MolWtFilter(SmilesFilterBase):
             bool: True if the molecule's molecular weight is within the
                 specified range, False otherwise.
         """
-        mol = self.cmpd_to_rdkit_mol(cmpd)
+        mol = self.cmpd_to_mol(cmpd)
         if mol is None:
             return False
 

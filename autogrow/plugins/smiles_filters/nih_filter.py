@@ -18,8 +18,7 @@ from autogrow.types import Compound
 
 from typing import Any, List, Tuple
 from autogrow.config.argument_vars import ArgumentVars
-
-
+from autogrow.plugins.registry_base import plugin_managers
 class NIHFilter(SmilesFilterBase):
     """
     Implements NIH filter for removing ligands with bad functional groups.
@@ -78,12 +77,13 @@ class NIHFilter(SmilesFilterBase):
         # If the mol matches a mol in the filter list. we return a False (as it
         # failed the filter). if No matches are found to filter list this will
         # return a True as it Passed the filter.
-        mol = self.cmpd_to_rdkit_mol(cmpd)
+        mol = self.cmpd_to_mol(cmpd)
         if mol is None:
             return False
-
-        return self.filters.HasMatch(mol) is not True
-
+        return (
+            plugin_managers.ChemToolkit.toolkit.filter_has_match(self.filters, mol)
+            is not True
+        )
     def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments required by the plugin.

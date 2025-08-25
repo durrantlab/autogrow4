@@ -13,7 +13,6 @@ from autogrow.plugins.registry_base import plugin_managers
 from autogrow.types import Compound, ScoreType
 import autogrow.utils.mol_object_handling as MOH
 import autogrow.docking.ranking.ranking_mol as Ranking
-from rdkit import Chem
 
 from autogrow.utils.rank_file import save_rank_file
 
@@ -277,13 +276,11 @@ def get_predockcmpds_from_sdf_file(infile: str) -> List[Compound]:
     if os.path.exists(infile) is False:
         print(f"\nFile of Source compounds does not exist: {infile}\n")
         raise Exception("File of Source compounds does not exist")
-
-    r = Chem.SDMolSupplier(infile)
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
+    r = chemtoolkit.mols_from_sdf_file(infile)
     for compound in r:
         compoundInfo = Compound.from_rdkit_object(compound)
         predock_cmpds.append(compoundInfo)
-    r.reset()
-
     return predock_cmpds
 
 

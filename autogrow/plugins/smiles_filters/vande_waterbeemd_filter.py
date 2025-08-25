@@ -55,7 +55,7 @@ class VandeWaterbeemdFilter(SmilesFilterBase):
             bool: True if the molecule passes all filter criteria (MW < 450
                 dalton and PSA < 90 A^2), False otherwise.
         """
-        mol = self.cmpd_to_rdkit_mol(cmpd)
+        mol = self.cmpd_to_mol(cmpd)
         if mol is None:
             return False
 

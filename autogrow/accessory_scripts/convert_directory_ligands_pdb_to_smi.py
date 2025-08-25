@@ -29,11 +29,9 @@ import argparse
 
 import contextlib
 from typing import Any, Dict, Union, List
-from rdkit import Chem  # type: ignore
-
 import support_scripts.mol_object_handling as MOH
 import support_scripts.Multiprocess as mp
-
+from autogrow.plugins.registry_base import plugin_managers
 
 def run_convert_on_single_pdb(pdb: str) -> str:
     """
@@ -46,14 +44,15 @@ def run_convert_on_single_pdb(pdb: str) -> str:
     Returns:
     :returns: list output_data: A list containing all SMILES info from the file
     """
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
 
     output_data = ""
     with contextlib.suppress(Exception):
-        mol = Chem.MolFromPDBFile(pdb)
+        mol = chemtoolkit.mol_from_pdb_file(pdb)
 
         mol_sanitized = MOH.check_sanitization(mol)
         if mol_sanitized is not None:
-            smiles = Chem.MolToSmiles(mol_sanitized, isomericSmiles=True)
+            smiles = chemtoolkit.mol_to_smiles(mol_sanitized, isomeric_smiles=True)
             file_name = os.path.basename(pdb)
             file_stripped = file_name.replace(".pdb", "")
             output_data = smiles + "\t" + file_stripped
@@ -138,6 +137,7 @@ def get_arguments_from_argparse(args_dict: Dict[str, Any]) -> Dict[str, Any]:
             os.path.abspath(args_dict["output_folder"]) + os.sep
         )
 
+    args_dict["RDKitToolkit"] = True
     return args_dict
 
 
@@ -169,6 +169,7 @@ PARSER.add_argument(
 
 ARGS_DICT = vars(PARSER.parse_args())
 ARGS_DICT = get_arguments_from_argparse(ARGS_DICT)
+plugin_managers.setup_plugin_managers(ARGS_DICT)
 
 # Running converter
 start_run_main(ARGS_DICT)

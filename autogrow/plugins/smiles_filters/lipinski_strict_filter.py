@@ -72,7 +72,7 @@ class LipinskiStrictFilter(SmilesFilterBase):
         permeability in drug discovery and development settings Advanced Drug
         Delivery Reviews, 46 (2001), pp. 3-26
         """
-        mol = self.cmpd_to_rdkit_mol(cmpd)
+        mol = self.cmpd_to_mol(cmpd)
         if mol is None:
             return False
 

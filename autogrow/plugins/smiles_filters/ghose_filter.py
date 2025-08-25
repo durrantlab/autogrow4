@@ -62,7 +62,7 @@ class GhoseFilter(SmilesFilterBase):
             to it before applying the filter. This ensures that hydrogens are
             counted in the total atom count without affecting other filters.
         """
-        mol = self.cmpd_to_rdkit_mol(cmpd)
+        mol = self.cmpd_to_mol(cmpd)
         if mol is None:
             return False
 
