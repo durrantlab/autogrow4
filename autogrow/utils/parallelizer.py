@@ -30,7 +30,10 @@ system. (Description provided by Harrison Green.)
 """
 import __future__
 import multiprocessing
+import warnings
+import subprocess
 
+_plugins_initialized = False
 
 class Parallelizer(object):
     """Abstract class for parallel computation management.
@@ -88,7 +91,7 @@ class Parallelizer(object):
         else:
             self.num_procs = num_procs
 
-    def run(self, args, func, num_procs=None, mode=None):
+    def run(self, args, func, num_procs=None, mode=None, params=None):
         """
         Run a task in parallel across the system.
 
@@ -102,6 +105,8 @@ class Parallelizer(object):
             mode (str, optional): Multiprocess mode to use. Must be
                 'multiprocessing' or 'serial'. If None, uses mode from
                 initialization. Primarily for developers. Best to leave as None.
+                Defaults to None.
+            params (dict, optional): Parameters for initializing worker processes.
                 Defaults to None.
 
         Returns:
@@ -147,10 +152,10 @@ class Parallelizer(object):
 
         # compute
         if mode == "multiprocessing":
-            return _multi_threading(args, num_procs, func)
+            return _multi_threading(args, num_procs, func, params)
         else:
             # serial is running the ParallelThreading with num_procs=1
-            return _multi_threading(args, 1, func)
+            return _multi_threading(args, 1, func, params)
 
     def _compute_nodes(self, mode=None):
         """
@@ -183,7 +188,7 @@ class Parallelizer(object):
         return self.num_procs
 
 
-def _multi_threading(inputs, num_procs, task_name):
+def _multi_threading(inputs, num_procs, task_name, params=None):
     """
     Execute parallel processing using multiprocessing.
 
@@ -194,7 +199,9 @@ def _multi_threading(inputs, num_procs, task_name):
         inputs (list): List of data where each item contains details for a
             single job on a single processor
         num_procs (int): Number of processors to use task_name (callable):
-        Function that governs processing for each job
+        func (callable): Function that governs processing for each job
+        params (dict, optional): Parameters for initializing worker processes.
+            Defaults to None.
 
     Returns:
         list: Results from all processors. Empty list if no inputs provided.
@@ -227,12 +234,10 @@ def _multi_threading(inputs, num_procs, task_name):
             output = job(*args)
             results.append(output)
     else:
-        results = _start_processes(tasks, num_procs)
-
+        results = _start_processes(tasks, num_procs, params)
     return results
 
-
-def _worker(input_q: multiprocessing.Queue, output_q: multiprocessing.Queue):
+def _worker(input_q: multiprocessing.Queue, output_q: multiprocessing.Queue, params=None):
     """
     Worker function for parallel processing.
 
@@ -243,7 +248,16 @@ def _worker(input_q: multiprocessing.Queue, output_q: multiprocessing.Queue):
             pairs. Jobs consist of (function, arguments) pairs.
         output_q (multiprocessing.Queue): Queue for storing (sequence, result)
             pairs.
+        params (dict, optional): Parameters for initializing worker processes.
+            Defaults to None.
     """
+    global _plugins_initialized
+    if not _plugins_initialized and params is not None:
+        from autogrow.plugins.registry_base import plugin_managers
+        # This will setup all plugin managers for this worker process.
+        plugin_managers.setup_plugin_managers(params)
+        _plugins_initialized = True
+    
     for seq, job in iter(input_q.get, "STOP"):
         func, args = job
         result = func(*args)
@@ -315,7 +329,7 @@ def _count_processors(num_inputs, num_procs):
     return num_procs
 
 
-def _start_processes(inputs, num_procs):
+def _start_processes(inputs, num_procs, params=None):
     """
     Create and manage multiprocessing queues and worker processes.
 
@@ -325,6 +339,8 @@ def _start_processes(inputs, num_procs):
     Args:
         inputs (list): List of (index, (task_name, arguments)) pairs
         num_procs (int): Number of worker processes to create
+        params (dict, optional): Parameters for initializing worker processes.
+            Defaults to None.
 
     Returns:
         list: Results from all workers, sorted by original input order
@@ -339,7 +355,7 @@ def _start_processes(inputs, num_procs):
 
     # Start worker processes
     for _ in range(num_procs):
-        multiprocessing.Process(target=_worker, args=(task_queue, done_queue)).start()
+        multiprocessing.Process(target=_worker, args=(task_queue, done_queue, params)).start()
     results = [done_queue.get() for _ in range(len(inputs))]
     # Tell child processes to stop
     for _ in range(num_procs):

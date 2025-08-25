@@ -14,7 +14,7 @@ class MolWtFilter(SmilesFilterBase):
     A filter that screens compounds based on a minimum and maximum molecular weight.
     """
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments required by the plugin.
 
@@ -22,33 +22,29 @@ class MolWtFilter(SmilesFilterBase):
         MolWtFilter.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing the argument
-                group name and a list of ArgumentVars objects defining the
-                command-line arguments.
+            List[ArgumentVars]: A list of ArgumentVars objects defining the
+            command-line arguments.
         """
-        return (
-            "SMILES Filters",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    action="store_true",
-                    default=False,
-                    help="Enable filtering of compounds by a molecular weight range.",
-                ),
-                ArgumentVars(
-                    name="min_mol_weight",
-                    type=float,
-                    default=0.0,
-                    help="The minimum molecular weight allowed for a compound.",
-                ),
-                ArgumentVars(
-                    name="max_mol_weight",
-                    type=float,
-                    default=550.0,
-                    help="The maximum molecular weight allowed for a compound.",
-                ),
-            ],
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Enable filtering of compounds by a molecular weight range. This filter removes molecules with a molecular weight outside the range defined by `min_mol_weight` and `max_mol_weight`.",
+            ),
+            ArgumentVars(
+                name="min_mol_weight",
+                type=float,
+                default=0.0,
+                help="The minimum molecular weight allowed for a compound.",
+            ),
+            ArgumentVars(
+                name="max_mol_weight",
+                type=float,
+                default=550.0,
+                help="The maximum molecular weight allowed for a compound.",
+            ),
+        ]
 
     def validate(self, params: dict):
         """
@@ -90,7 +86,7 @@ class MolWtFilter(SmilesFilterBase):
             bool: True if the molecule's molecular weight is within the
                 specified range, False otherwise.
         """
-        mol = self.cmpd_to_rdkit_mol(cmpd)
+        mol = self.cmpd_to_mol(cmpd)
         if mol is None:
             return False
 

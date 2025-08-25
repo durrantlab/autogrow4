@@ -3,8 +3,6 @@ DeepFrag plugin calculating RDKit fingerprints for chemical fragments and DeepFr
 fingerprints for receptor-parent pairs.
 """
 import __future__
-
-import rdkit
 import logging
 import numpy as np
 from autogrow.config.argument_vars import ArgumentVars
@@ -13,11 +11,8 @@ from autogrow.plugins.deepfrag_filters.deepfrag_filter_base import DeepFragFilte
 import os
 import wget
 import sys
-from rdkit import Chem
 from autogrow.utils.logging import log_info
-
-# Disable the unnecessary RDKit warnings
-rdkit.RDLogger.DisableLog("rdApp.*")
+from autogrow.plugins.registry_base import plugin_managers
 
 try:
     import torch
@@ -32,7 +27,11 @@ try:
     numba_logger.setLevel(logging.WARNING)
     prody.LOGGER._logger.disabled = True
 except ImportError as e:
-    print("DeepFrag environment (e.g., torch, prody) is not installed. DeepFrag filters will not be available. " + str(e) + "\n")
+    print(
+        "DeepFrag environment (e.g., torch, prody) is not installed. DeepFrag filters will not be available. "
+        + str(e)
+        + "\n"
+    )
 
 
 class DeepFragFilter(DeepFragFilterBase):
@@ -59,23 +58,18 @@ class DeepFragFilter(DeepFragFilterBase):
     def validate(self, params: dict):
         """Validate the provided arguments."""
         super().validate(params)
-
-        self.cpu = bool(params["DeepFragOnCPU"]) or not torch.cuda.is_available()
-
-        if "DeepFragModel" not in params:
+        self.cpu = bool(params["deepfrag_on_cpu"]) or not torch.cuda.is_available()
+        if "deepfrag_model" not in params:
             raise Exception("The path of a DeepFrag model should be given as input using"
-                            " the '--DeepFragModel' parameter.")
-
-        df_model = params["DeepFragModel"]
+                " the '--deepfrag_model' parameter.")
+        df_model = params["deepfrag_model"]
         if df_model in self.url_by_in_house_model:
             df_model = self.download_deepfrag_ckpt(df_model + ".ckpt", self.url_by_in_house_model[df_model])
-            params["DeepFragModel"] = df_model
-
+            params["deepfrag_model"] = df_model
         if not os.path.exists(df_model):
             raise Exception(f"DeepFrag model {df_model} is not an in-house model, or does not exist in "
-                            f"the path specified.")
-
-        self.ckpt_filename = params["DeepFragModel"]
+                f"the path specified.")
+        self.ckpt_filename = params["deepfrag_model"]
         self.model = DeepFragModel.load_from_checkpoint(self.ckpt_filename)
         if not self.cpu:
             self.model = self.model.to(torch.device('cuda'))
@@ -93,14 +87,13 @@ class DeepFragFilter(DeepFragFilterBase):
         Returns:
            Numpy array containing the DeepFrag fingerprints.
         """
-
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
         # The receptor doesn't change, so the parent molecule and the branching
         # point alone unique identify this DeepFrag prediction. We need to
         # generate a hash.
         hash_str = None
         try:
-            hash_str = f"{Chem.MolToPDBBlock(parent_mol)} {round(branching_point.x, 3)} {round(branching_point.y, 3)} {round(branching_point.z, 3)}"
-
+            hash_str = f"{chemtoolkit.mol_to_pdb_block(parent_mol)} {round(branching_point.x, 3)} {round(branching_point.y, 3)} {round(branching_point.z, 3)}"
             if hash_str in self.cached_deepfrag_results:
                 # If the result is cached, return it
                 log_info("Using cached DeepFrag result.")
@@ -157,23 +150,23 @@ class DeepFragFilter(DeepFragFilterBase):
 
         return result
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
-        group_name, parent_args = super().add_arguments()
+    def add_arguments(self) -> List[ArgumentVars]:
+        parent_args = super().add_arguments()
         child_args = [
             ArgumentVars(
-                name="DeepFragModel",
+                name="deepfrag_model",
                 type=str,
                 default=None,
                 help=f"Path to a DeepFrag model checkpoint (.ckpt) file, or the name of a built-in model (i.e., {', '.join(self.url_by_in_house_model.keys())}).",
             ),
             ArgumentVars(
-                name="DeepFragOnCPU",
+                name="deepfrag_on_cpu",
                 action="store_true",
                 default=False,
                 help="Force DeepFrag to run on the CPU, even if a GPU is available.",
-            )
+            ),
         ]
-        return group_name, parent_args + child_args
+        return parent_args + child_args
 
     def download_deepfrag_ckpt(self, deepfrag_model_ckpt, deepfrag_model_url):
         """Download an in-house DeepFrag model checkpoint."""

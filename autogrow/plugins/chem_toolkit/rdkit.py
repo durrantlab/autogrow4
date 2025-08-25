@@ -1,5 +1,5 @@
 """RDKit implementation of chemistry toolkit plugin."""
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Optional
 from autogrow.config.argument_vars import ArgumentVars
 from autogrow.plugins.chem_toolkit import ChemToolkitBase
 
@@ -14,34 +14,31 @@ from rdkit.Chem.FilterCatalog import FilterCatalogParams  # type: ignore
 import rdkit.Chem.Lipinski as Lipinski  # type: ignore
 import rdkit.Chem.Crippen as Crippen  # type: ignore
 from rdkit.Chem import AllChem  # type: ignore
-
+from rdkit.Chem.BRICS import BRICSDecompose  # type: ignore
+from rdkit.Chem import Draw
+from rdkit.Chem import rdmolops
 rdkit.RDLogger.DisableLog("rdApp.*")
 
 
 class RDKitToolkit(ChemToolkitBase):
     """RDKit implementation of chemistry toolkit."""
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments specific to the RDkit toolkit.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing:
-                - The name of the argument group ("Chemistry Toolkit")
-                - A list with one ArgumentVars object defining the argument to
-                  enable the rdkit chemistry toolkit
+            List[ArgumentVars]: A list with one ArgumentVars object defining the
+            argument to enable the rdkit chemistry toolkit.
         """
-        return (
-            "Chemistry Toolkit",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    action="store_true",
-                    default=False,
-                    help="Use RDKit as the backend for chemistry operations.",
-                )
-            ],
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Use the RDKit library as the backend for all cheminformatics operations, such as molecule manipulation and fingerprint generation.",
+            )
+        ]
 
     def mol_from_smiles(self, smiles: str, sanitize: bool = True) -> Any:
         """Create a molecule from SMILES."""
@@ -245,7 +242,7 @@ class RDKitToolkit(ChemToolkitBase):
 
     def get_noneditable_mol(self, mol: Any) -> Any:
         """Get non-editable molecule."""
-        return Chem.Mol(mol)
+        return mol.GetMol()
 
     def combine_mols(self, mol1: Any, mol2: Any) -> Any:
         """Combine mols.
@@ -316,6 +313,183 @@ class RDKitToolkit(ChemToolkitBase):
         """Check if atom is in ring."""
         return atom.IsInRing()
 
+    def mol_from_pdb_file(self, pdb_file: str, sanitize: bool = True, remove_hs: bool = False) -> Any:
+        """Create molecule from PDB file."""
+        return Chem.MolFromPDBFile(pdb_file, sanitize=sanitize, removeHs=remove_hs)
+
+    def is_aromatic(self, bond: Any) -> bool:
+        """Check if a bond is aromatic."""
+        return bond.GetIsAromatic()
+
+    def brics_decompose(
+        self,
+        mol: Any,
+        return_mols: bool = True,
+        min_fragment_size: int = 1,
+        keep_non_leaf_nodes: bool = False,
+    ) -> List[Any]:
+        """Decompose molecule using BRICS."""
+        return list(
+            BRICSDecompose(
+                mol,
+                returnMols=return_mols,
+                minFragmentSize=min_fragment_size,
+                keepNonLeafNodes=keep_non_leaf_nodes,
+            )
+        )
+
+    def fragment_on_bonds(
+        self, mol: Any, bond_indices: List[int], add_dummies: bool = True
+    ) -> Any:
+        """Fragment molecule on specified bonds."""
+        return Chem.FragmentOnBonds(mol, bond_indices, addDummies=add_dummies)
+
+    def mols_to_grid_image(
+        self,
+        mols: List[Any],
+        mols_per_row: int,
+        sub_img_size: Tuple[int, int],
+        highlight_atom_lists: Optional[List[List[int]]] = None,
+    ) -> Any:
+        """Create a grid image of molecules."""
+        return Draw.MolsToGridImage(
+            mols,
+            molsPerRow=mols_per_row,
+            subImgSize=sub_img_size,
+            highlightAtomLists=highlight_atom_lists,
+        )
+
+    def compute_2d_coords(self, mol: Any) -> int:
+        """Compute 2D coordinates for a molecule."""
+        return AllChem.Compute2DCoords(mol)
+
+    def get_morgan_fingerprint_as_bit_vect(
+        self, mol: Any, radius: int, n_bits: int
+    ) -> Any:
+        """Generate Morgan fingerprint as a bit vector."""
+        return AllChem.GetMorganFingerprintAsBitVect(mol, radius, nBits=n_bits)
+
+    def mols_from_sdf_file(
+        self, sdf_file: str, sanitize: bool = False, remove_hs: bool = True
+    ) -> List[Any]:
+        """Load molecules from an SDF file."""
+        # Note: returns an iterator in RDKit, but we'll return a list for simplicity
+        supplier = Chem.SDMolSupplier(sdf_file, sanitize=sanitize, removeHs=remove_hs)
+        return [mol for mol in supplier if mol is not None]
+
+    def run_reactants(
+        self, reaction: Any, reactants: Tuple[Any, ...]
+    ) -> List[List[Any]]:
+        """Run a reaction with the given reactants."""
+        return reaction.RunReactants(reactants)
+
+    def initialize_reaction(self, reaction: Any):
+        """Initialize a reaction object."""
+        reaction.Initialize()
+
+    def get_prop(self, mol: Any, prop_name: str) -> Any:
+        """Get a property from a molecule."""
+        return mol.GetProp(prop_name)
+
+    def mol_to_pdb_block(self, mol: Any) -> str:
+        """Convert molecule to a PDB block string."""
+        return Chem.MolToPDBBlock(mol)
+
+    def get_rdk_fingerprint(self, mol: Any, max_path: int, fp_size: int) -> Any:
+        """Generate RDKit fingerprint."""
+        return rdmolops.RDKFingerprint(mol, maxPath=max_path, fpSize=fp_size)
+
+    def bit_vect_to_bit_string(self, bit_vect: Any) -> str:
+        """Convert a bit vector to a bit string."""
+        return bit_vect.ToBitString()
+
+    def mol_to_sdf_file(self, mol: Any, file_path: str) -> None:
+        """Write a molecule to an SDF file."""
+        writer = Chem.SDWriter(file_path)
+        writer.write(mol)
+        writer.close()
+
+    def create_empty_editable_mol(self) -> Any:
+        """Create an empty editable molecule."""
+        return Chem.EditableMol(Chem.Mol())
+
+    def copy_atom(self, atom: Any) -> Any:
+        """Create a copy of an atom."""
+        return Chem.Atom(atom)
+
+    def add_atom_to_mol(self, editable_mol: Any, atom: Any) -> int:
+        """Add an atom to an editable molecule."""
+        return editable_mol.AddAtom(atom)
+
+    def add_bond_to_mol(self, editable_mol: Any, begin_atom_idx: int, end_atom_idx: int, bond_type: Any) -> None:
+        """Add a bond to an editable molecule."""
+        editable_mol.AddBond(begin_atom_idx, end_atom_idx, bond_type)
+
+    def create_conformer(self, num_atoms: int) -> Any:
+        """Create a conformer."""
+        return Chem.Conformer(num_atoms)
+
+    def get_conformer(self, mol: Any, conf_id: int = -1) -> Any:
+        """Get a conformer from a molecule."""
+        return mol.GetConformer(conf_id)
+
+    def get_atom_position(self, conformer: Any, atom_idx: int) -> Any:
+        """Get the position of an atom in a conformer."""
+        return conformer.GetAtomPosition(atom_idx)
+
+    def set_atom_position_in_conformer(self, conformer: Any, atom_idx: int, pos: Any) -> None:
+        """Set the position of an atom in a conformer."""
+        conformer.SetAtomPosition(atom_idx, pos)
+
+    def add_conformer_to_mol(self, mol: Any, conformer: Any) -> int:
+        """Add a conformer to a molecule."""
+        return mol.AddConformer(conformer)
+
+    def get_num_conformers(self, mol: Any) -> int:
+        """Get the number of conformers for a molecule."""
+        return mol.GetNumConformers()
+
+    def get_atom_degree(self, atom: Any) -> int:
+        """Get the degree of an atom."""
+        return atom.GetDegree()
+
+    def mol_to_smarts(self, mol: Any) -> str:
+        """Convert a molecule to a SMARTS string."""
+        return Chem.MolToSmarts(mol)
+
+    def get_atom_property(self, atom: Any, prop: str) -> Any:
+        """Get a property from an atom."""
+        return atom.GetProp(prop)
+
+    def set_atom_property(self, atom: Any, prop: str, value: Any) -> None:
+        """Set a property on an atom."""
+        atom.SetProp(prop, value)
+
+    def get_substruct_match(self, mol: Any, query: Any) -> Optional[Tuple[int, ...]]:
+        """Get a single substructure match."""
+        return mol.GetSubstructMatch(query)
+
+    def remove_atom_from_editable_mol(self, editable_mol: Any, atom_idx: int) -> None:
+        """Remove an atom from an editable molecule."""
+        editable_mol.RemoveAtom(atom_idx)
+
+    def get_single_bond_type(self) -> Any:
+        """Get the single bond type object."""
+        return Chem.BondType.SINGLE
+    def create_atom(self, atomic_num: int) -> Any:
+        """Create an atom."""
+        return Chem.Atom(atomic_num)
+
+    def filter_has_match(self, filter_obj: Any, mol: Any) -> bool:
+        """Check if a molecule has a match in a filter."""
+        return filter_obj.HasMatch(mol)
+
+    def mol_from_sdf_file(self, sdf_file: str) -> Optional[Any]:
+        """Create a single molecule from an SDF file."""
+        supplier = Chem.SDMolSupplier(sdf_file, sanitize=False, removeHs=True)
+        if supplier:
+            return next(iter(supplier), None)
+        return None
 
 # TO CONSIDER
 # HasSubstructMatch

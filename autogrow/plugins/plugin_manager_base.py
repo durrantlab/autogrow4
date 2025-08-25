@@ -50,7 +50,9 @@ class PluginManagerBase(ABC):
     params = None
     filter_logger_file = None
     setup_filter_logger_file = False
-    plugin_base_class: Optional[Type[PluginBase]] = None  # Class variable for the base plugin class
+    plugin_base_class: Optional[
+        Type[PluginBase]
+    ] = None  # Class variable for the base plugin class
 
     def __init__(self, plugin_base_class: Type[PluginBase]):
         """
@@ -76,7 +78,7 @@ class PluginManagerBase(ABC):
     def register_plugin_arguments(cls) -> None:
         """Register command-line arguments for all plugins of this type.
         
-        This class method discovers and registers arguments for all plugins without 
+        This class method discovers and registers arguments for all plugins without
         requiring full plugin manager instantiation. It should be called during
         argument parsing setup.
         
@@ -101,27 +103,35 @@ class PluginManagerBase(ABC):
                     if rel_path == ".":
                         module_name = f"{package_name}.{file[:-3]}"
                     else:
-                        module_name = f"{package_name}.{rel_path.replace(os.path.sep, '.')}.{file[:-3]}"
-                    
+                        module_name = (
+                            f"{package_name}.{rel_path.replace(os.path.sep, '.')}.{file[:-3]}"
+                        )
+
                     # Skip if we've already processed this module
                     if module_name in processed_modules:
                         continue
                     processed_modules.add(module_name)
-                    
+
                     try:
                         module = importlib.import_module(module_name)
                         for name, obj in inspect.getmembers(module):
-                            if (inspect.isclass(obj)
-                                    and issubclass(obj, cls.plugin_base_class)
-                                    and obj is not cls.plugin_base_class
-                                    and not PluginManagerBase.is_abstract(obj)):
+                            if (
+                                inspect.isclass(obj)
+                                and issubclass(obj, cls.plugin_base_class)
+                                and obj is not cls.plugin_base_class
+                                and not PluginManagerBase.is_abstract(obj)
+                            ):
                                 # Create an instance and register its arguments
                                 plugin = obj()
-                                title, args = plugin.add_arguments()
-                                register_argparse_group(title, args)
+                                args = plugin.add_arguments()
+                                # if args and not PluginManagerBase.is_abstract(obj):
+                                #     assert args[0].name == plugin.name, \
+                                #         f"The first argument for plugin '{plugin.name}' must be the enabling flag '--{plugin.name}'. Found '--{args[0].name}' instead. Please check the add_arguments() method of the {plugin.name} class."
+                                title = f"{plugin.name} ({plugin.plugin_type_name}: {plugin.plugin_description})"
+                                register_argparse_group(title, args, plugin.name)
                     except ImportError as e:
                         print(f"Failed to import {module_name}: {e}")
-                        
+
     def on_plugin_manager_setup_done(self):
         """
         Perform any initialization tasks for the plugin manager.

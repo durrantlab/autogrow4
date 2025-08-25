@@ -20,7 +20,7 @@ from typing import Any, List, Tuple
 from autogrow.config.argument_vars import ArgumentVars
 from autogrow.plugins.smiles_filters import SmilesFilterBase
 from autogrow.types import Compound
-
+from autogrow.plugins.registry_base import plugin_managers
 
 class PAINSFilter(SmilesFilterBase):
     """
@@ -91,7 +91,7 @@ class PAINSFilter(SmilesFilterBase):
             bool: True if the molecule passes all PAINS filters (no matches
                 found in any filter list), False otherwise.
         """
-        mol = self.cmpd_to_rdkit_mol(cmpd)
+        mol = self.cmpd_to_mol(cmpd)
         if mol is None:
             return False
 
@@ -100,14 +100,17 @@ class PAINSFilter(SmilesFilterBase):
 
             # If the mol matches a mol in the filter list we return a False
             # (as it failed the filter)
-            if filters.HasMatch(mol) is True:
+            if (
+                plugin_managers.ChemToolkit.toolkit.filter_has_match(filters, mol)
+                is True
+            ):
                 return False
 
         # if No matches are found to filter list this will return a True as it
         # Passed the filter.
         return True
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments required by the plugin.
 
@@ -115,18 +118,14 @@ class PAINSFilter(SmilesFilterBase):
         Filter. It allows users to enable the filter via command-line options.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing the argument
-                group name and a list of ArgumentVars objects defining the
-                command-line arguments.
+            List[ArgumentVars]: A list of ArgumentVars objects defining the
+            command-line arguments.
         """
-        return (
-            "SMILES Filters",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    action="store_true",
-                    default=False,
-                    help="Apply the PAINS filter to remove Pan Assay Interference Compounds (PAINS) via substructure search.",
-                )
-            ],
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Enable the PAINS (Pan-Assay Interference Compounds) filter. This filter identifies and removes molecules containing substructures that are known to interfere with bioassays, helping to eliminate false positives from screening results.",
+            )
+        ]

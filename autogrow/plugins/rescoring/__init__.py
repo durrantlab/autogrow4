@@ -20,6 +20,16 @@ class RescoringBase(PluginBase):
     run method that calls the abstract run_rescoring method.
     """
 
+    @property
+    def plugin_type_name(self) -> str:
+        """Return the user-friendly name of the plugin type."""
+        return "Rescoring Method"
+
+    @property
+    def plugin_description(self) -> str:
+        """Return a brief description of the plugin type."""
+        return "Recalculates or adjusts docking scores"
+
     def run(self, **kwargs) -> List[Compound]:
         """
         Run the re-scoring plugin with provided arguments.

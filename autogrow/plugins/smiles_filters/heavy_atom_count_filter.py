@@ -13,7 +13,7 @@ class HeavyAtomCountFilter(SmilesFilterBase):
     A filter that screens compounds based on a minimum and maximum heavy-atom count.
     """
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments required by the plugin.
 
@@ -21,33 +21,29 @@ class HeavyAtomCountFilter(SmilesFilterBase):
         HeavyAtomCountFilter.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing the argument
-            group name and a list of ArgumentVars objects defining the
+            List[ArgumentVars]: A list of ArgumentVars objects defining the
             command-line arguments.
         """
-        return (
-            "SMILES Filters",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    action="store_true",
-                    default=False,
-                    help="Enable filtering of compounds by a heavy-atom count range.",
-                ),
-                ArgumentVars(
-                    name="min_heavy_atoms",
-                    type=int,
-                    default=0,
-                    help="The minimum number of heavy atoms allowed for a compound.",
-                ),
-                ArgumentVars(
-                    name="max_heavy_atoms",
-                    type=int,
-                    default=50,
-                    help="The maximum number of heavy atoms allowed for a compound.",
-                ),
-            ],
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Enable filtering of compounds by a heavy-atom count range. This filter removes molecules that have fewer than `min_heavy_atoms` or more than `max_heavy_atoms`.",
+            ),
+            ArgumentVars(
+                name="min_heavy_atoms",
+                type=int,
+                default=0,
+                help="The minimum number of heavy atoms allowed for a compound.",
+            ),
+            ArgumentVars(
+                name="max_heavy_atoms",
+                type=int,
+                default=50,
+                help="The maximum number of heavy atoms allowed for a compound.",
+            ),
+        ]
 
     def validate(self, params: dict):
         """
@@ -89,7 +85,7 @@ class HeavyAtomCountFilter(SmilesFilterBase):
             bool: True if the molecule's heavy-atom count is within the
             specified range, False otherwise.
         """
-        mol = self.cmpd_to_rdkit_mol(cmpd)
+        mol = self.cmpd_to_mol(cmpd)
         if mol is None:
             return False
         chemtoolkit = plugin_managers.ChemToolkit.toolkit

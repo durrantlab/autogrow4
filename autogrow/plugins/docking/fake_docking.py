@@ -26,79 +26,75 @@ class FakeDocking(DockingBase):
     scores to compounds without actually performing docking calculations.
     """
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments required by the fake docking plugin.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing the argument
-            group name and a list of ArgumentVars objects defining the
+            List[ArgumentVars]: A list of ArgumentVars objects defining the
             command-line arguments.
         """
-        return (
-            "Fake Docking Options",
-            [
-                ArgumentVars(
-                    name="FakeDocking",
-                    action="store_true",
-                    default=False,
-                    help="Use fake docking (for testing)",
-                ),
-                #     ArgumentVars(
-                #         name="docking_executable",
-                #         default=None,
-                #         help="path to the docking_executable (vina, qvina2, smina, etc.)",
-                #     ),
-                #     ArgumentVars(
-                #         name="center_x",
-                #         type=float,
-                #         default=None,
-                #         help="x-coordinate for the center of the pocket to be tested by docking. (Angstrom)",
-                #     ),
-                #     ArgumentVars(
-                #         name="center_y",
-                #         type=float,
-                #         default=None,
-                #         help="y-coordinate for the center of the pocket to be tested by docking. (Angstrom)",
-                #     ),
-                #     ArgumentVars(
-                #         name="center_z",
-                #         type=float,
-                #         default=None,
-                #         help="z-coordinate for the center of the pocket to be tested by docking. (Angstrom)",
-                #     ),
-                #     ArgumentVars(
-                #         name="size_x",
-                #         type=float,
-                #         default=None,
-                #         help="dimension of box to dock into in the x-axis (Angstrom)",
-                #     ),
-                #     ArgumentVars(
-                #         name="size_y",
-                #         type=float,
-                #         default=None,
-                #         help="dimension of box to dock into in the y-axis (Angstrom)",
-                #     ),
-                #     ArgumentVars(
-                #         name="size_z",
-                #         type=float,
-                #         default=None,
-                #         help="dimension of box to dock into in the z-axis (Angstrom)",
-                #     ),
-                #     ArgumentVars(
-                #         name="docking_exhaustiveness",
-                #         default=8,
-                #         help="exhaustiveness of the global search (roughly proportional to time. \
-                #         see docking software for settings.",
-                #     ),
-                #     ArgumentVars(
-                #         name="docking_num_modes",
-                #         default=9,
-                #         help=" maximum number of binding modes to generate in docking. \
-                #         See docking software for settings. ",
-                #     )
-            ],
-        )
+        return [
+            ArgumentVars(
+                name="FakeDocking",
+                action="store_true",
+                default=False,
+                help="Use fake docking for testing purposes. This plugin assigns random scores to compounds without performing actual docking calculations, useful for rapid pipeline testing.",
+            ),
+            #     ArgumentVars(
+            #         name="docking_executable",
+            #         default=None,
+            #         help="path to the docking_executable (vina, qvina2, smina, etc.)",
+            #     ),
+            #     ArgumentVars(
+            #         name="center_x",
+            #         type=float,
+            #         default=None,
+            #         help="x-coordinate for the center of the pocket to be tested by docking. (Angstrom)",
+            #     ),
+            #     ArgumentVars(
+            #         name="center_y",
+            #         type=float,
+            #         default=None,
+            #         help="y-coordinate for the center of the pocket to be tested by docking. (Angstrom)",
+            #     ),
+            #     ArgumentVars(
+            #         name="center_z",
+            #         type=float,
+            #         default=None,
+            #         help="z-coordinate for the center of the pocket to be tested by docking. (Angstrom)",
+            #     ),
+            #     ArgumentVars(
+            #         name="size_x",
+            #         type=float,
+            #         default=None,
+            #         help="dimension of box to dock into in the x-axis (Angstrom)",
+            #     ),
+            #     ArgumentVars(
+            #         name="size_y",
+            #         type=float,
+            #         default=None,
+            #         help="dimension of box to dock into in the y-axis (Angstrom)",
+            #     ),
+            #     ArgumentVars(
+            #         name="size_z",
+            #         type=float,
+            #         default=None,
+            #         help="dimension of box to dock into in the z-axis (Angstrom)",
+            #     ),
+            #     ArgumentVars(
+            #         name="docking_exhaustiveness",
+            #         default=8,
+            #         help="exhaustiveness of the global search (roughly proportional to time. \
+            #         see docking software for settings.",
+            #     ),
+            #     ArgumentVars(
+            #         name="docking_num_modes",
+            #         default=9,
+            #         help=" maximum number of binding modes to generate in docking. \
+            #         See docking software for settings. ",
+            #     )
+        ]
 
     def validate(self, params: dict):
         """

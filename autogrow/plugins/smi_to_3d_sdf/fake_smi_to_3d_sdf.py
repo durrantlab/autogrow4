@@ -22,7 +22,7 @@ class FakeSmiTo3DSDF(SmiTo3DSdfBase):
     FakeDocking.
     """
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line args specific to the Fake SMILES to 3D SDF converter.
 
@@ -30,22 +30,17 @@ class FakeSmiTo3DSDF(SmiTo3DSdfBase):
         configure the Fake SMILES to 3D SDF converter.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing:
-                - The name of the argument group ("SMILES-to-3D-SDF Converter")
-                - A list with one ArgumentVars object defining the argument to
-                  enable the Fake SMILES to 3D SDF converter
+            List[ArgumentVars]: A list with one ArgumentVars object defining
+            the argument to enable the Fake SMILES to 3D SDF converter
         """
-        return (
-            "SMILES-to-3D-SDF Converter",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    action="store_true",
-                    default=False,
-                    help="Enable fake SMILES to 3D SDF conversion (generates 2D conformers for speed). For testing only. Use together with FakeDocking.",
-                )
-            ],
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Enable fake SMILES to 3D SDF conversion for testing. This plugin generates placeholder 2D conformers quickly, and should be used in conjunction with the FakeDocking plugin for rapid pipeline testing without actual 3D generation or docking.",
+            )
+        ]
 
     def validate(self, params: dict):
         """

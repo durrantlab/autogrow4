@@ -23,6 +23,17 @@ class MutationBase(PluginBase):
     This abstract class defines the interface that all mutation plugins must
     implement. It inherits from PluginBase and adds mutation-specific methods.
     """
+
+    @property
+    def plugin_type_name(self) -> str:
+        """Return the user-friendly name of the plugin type."""
+        return "Mutation Operator"
+
+    @property
+    def plugin_description(self) -> str:
+        """Return a brief description of the plugin type."""
+        return "Creates new molecules by modifying a parent molecule"
+
     def run(self, **kwargs) -> Optional[List[Tuple[str, int, Union[str, None]]]]:
         """
         Run the mutation plugin with provided arguments.

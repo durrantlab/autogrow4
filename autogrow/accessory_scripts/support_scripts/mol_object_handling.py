@@ -22,13 +22,11 @@
 # file name change from MolObjectHandling.py to mol_object_handling.py
 
 import __future__
-from typing import Any, List
-from autogrow.plugins.plugin_manager_instances import plugin_managers
-
-
-def check_sanitization(mol: Any) -> Any | None:
+from typing import Any, List, Optional
+from autogrow.plugins.registry_base import plugin_managers
+def check_sanitization(mol: Any) -> Optional[Any]:
     """
-    Given a rdkit.Chem.rdchem.Mol this script will sanitize the molecule.
+    Given a molecule object this script will sanitize the molecule.
     It will be done using a series of try/except statements so that if it fails it will return a None
     rather than causing the outer script to fail.
 
@@ -82,9 +80,9 @@ def check_sanitization(mol: Any) -> Any | None:
     return None if sanitize_string.name != "SANITIZE_NONE" else mol
 
 
-def handle_hydrogens(mol: Any, protanate_step: bool) -> Any | None:
+def handle_hydrogens(mol: Any, protanate_step: bool) -> Optional[Any]:
     """
-    Given a rdkit.Chem.rdchem.Mol this script will sanitize the molecule, remove all non-explicit H's
+    Given a molecule object this script will sanitize the molecule, remove all non-explicit H's
     and add back on all implicit H's. This is to control for any discrepencies in the smiles strings or presence and
     absense of H's.
     If it fails it will return a None rather than causing the outer script to fail. Handled here so there are no problems later.
@@ -118,7 +116,7 @@ def handle_hydrogens(mol: Any, protanate_step: bool) -> Any | None:
     return mol
 
 
-def try_deprotanation(sanitized_mol: Any) -> Any | None:
+def try_deprotanation(sanitized_mol: Any) -> Optional[Any]:
     """
     Given an already sanitize rdkit.Chem.rdchem.Mol object, we will try to deprotanate the mol of all non-explicit
     Hs. If it fails it will return a None rather than causing the outer script to fail.
@@ -138,7 +136,7 @@ def try_deprotanation(sanitized_mol: Any) -> Any | None:
     return check_sanitization(mol)
 
 
-def try_reprotanation(sanitized_deprotanated_mol: Any) -> Any | None:
+def try_reprotanation(sanitized_deprotanated_mol: Any) -> Optional[Any]:
     """
     Given an already sanitize and deprotanate rdkit.Chem.rdchem.Mol object, we will try to reprotanate the mol with
     implicit Hs. If it fails it will return a None rather than causing the outer script to fail.
@@ -193,7 +191,7 @@ def remove_atoms(mol, list_of_idx_to_remove: List[int]):
     except Exception:
         return None
 
-def nitrogen_charge_adjustment(mol: Any) -> Any | None:
+def nitrogen_charge_adjustment(mol: Any) -> Optional[Any]:
     """
     When importing ligands with sanitation turned off, one can successfully import
     import a SMILES in which a Nitrogen (N) can have 4 bonds, but no positive charge.
@@ -215,15 +213,19 @@ def nitrogen_charge_adjustment(mol: Any) -> Any | None:
     """
     if mol is None:
         return None
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
     # makes sure its an rdkit obj
     try:
-        atoms = mol.GetAtoms()
+        atoms = chemtoolkit.get_atoms(mol)
     except Exception:
         return None
 
     for atom in atoms:
-        if atom.GetAtomicNum() == 7:
-            bonds = [bond.GetBondTypeAsDouble() for bond in atom.GetBonds()]
+        if chemtoolkit.get_atomic_num(atom) == 7:
+            bonds = [
+                chemtoolkit.get_bond_type_as_double(bond)
+                for bond in chemtoolkit.get_bonds(atom)
+            ]
             # If aromatic skip as we do not want assume the charge.
             if 1.5 in bonds:
                 continue
@@ -233,30 +235,30 @@ def nitrogen_charge_adjustment(mol: Any) -> Any | None:
 
             # Check if the octet is filled
             if num_bond_sums == 4.0:
-                atom.SetFormalCharge(+1)
+                chemtoolkit.set_formal_charge(atom, +1)
     return mol
 
 
-def check_for_unassigned_atom(mol: Any) -> Any | None:
+def check_for_unassigned_atom(mol: Any) -> Optional[Any]:
     """
     Check there isn't a missing atom group ie. '*'
     A '*' in a SMILES string is an atom with an atomic num of 0
     """
     if mol is None:
         return None
-
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
     try:
-        atoms = mol.GetAtoms()
+        atoms = chemtoolkit.get_atoms(mol)
     except Exception:
         return None
 
     for atom in atoms:
-        if atom.GetAtomicNum() == 0:
+        if chemtoolkit.get_atomic_num(atom) == 0:
             return None
     return mol
 
 
-def handle_frag_check(mol: Any) -> Any | None:
+def handle_frag_check(mol: Any) -> Optional[Any]:
     """
     Checks if the molecule is fragmented. If fragmented, it returns the largest fragment.
 
@@ -278,7 +280,7 @@ def handle_frag_check(mol: Any) -> Any | None:
     return mol if len(frags) == 1 else _get_largest_checked_fragment(frags)
 
 
-def _get_largest_checked_fragment(frags: list[Any]) -> Any | None:
+def _get_largest_checked_fragment(frags: list[Any]) -> Optional[Any]:
     """
     Returns the largest fragment from a list of fragments after checking for
     unassigned atoms.
@@ -290,11 +292,12 @@ def _get_largest_checked_fragment(frags: list[Any]) -> Any | None:
     """
     frag_info_list = []
     frag_index = 0
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
     for frag in frags:
         # Check for unassigned breaks ie. a '*'
         frag = check_for_unassigned_atom(frag)
         if frag is not None:
-            num_atoms = frag.GetNumAtoms()
+            num_atoms = chemtoolkit.get_num_atoms(frag)
             frag_info = [frag_index, num_atoms]
             frag_info_list.append(frag_info)
         frag_index = frag_index + 1

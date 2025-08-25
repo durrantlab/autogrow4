@@ -4,12 +4,9 @@ react in all reactions they may be used in.
 
 Example submit:
 
-python autogrow4/accessory_scripts/test_complementary_mol_library.py \
---rxn_library_file \
-autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/ClickChem_rxn_library.json \
---complementary_mol_directory \
-autogrow4/autogrow/operators/mutation/smiles_click_chem/reaction_libraries/click_chem_rxns/complementary_mols \
---output_folder autogrow4/accessory_scripts/output/
+python autogrow/accessory_scripts/test_complementary_mol_library.py \
+--rxn_library_path autogrow4/plugins/mutation/reaction_libraries/all_rxns \
+--output_folder autogrow/accessory_scripts/output/
 """
 
 import __future__
@@ -21,525 +18,13 @@ import argparse
 import contextlib
 from typing import Any, Dict
 
-import rdkit  # type: ignore
-import rdkit.Chem as Chem  # type: ignore
-from rdkit.Chem import AllChem  # type: ignore
-
 # Disable the unnecessary RDKit warnings
-rdkit.RDLogger.DisableLog("rdApp.*")
-
-
 import support_scripts.Multiprocess as mp
 import support_scripts.mol_object_handling as MOH
 import gzip
-
-
-class SmilesClickChem:
-    """
-    This class will take a molecule and Mutate it by reacting it.
-
-    This is modified from the AutoGrow source code file:
-        /autogrow4/autogrow/operators/mutation/smiles_click_chem/smiles_click_chem.py
-    Unused sections were removed for simplicity.
-    """
-
-    def __init__(self, rxn_library_variables, list_of_already_made_smiles):
-        """
-        init for SmilesClickChem. This will set up all the reaction and
-        functional dictionaries required to Mutate a molecular
-
-        Inputs:
-        :param list rxn_library_variables: a list of user variables which
-            define the rxn_library_path, rxn_library_file,
-            complementary_mol_directory, and function_group_library. ie.
-            rxn_library_variables = [params['rxn_library_path'],
-            params['rxn_library_file'],
-            params['complementary_mol_directory']]
-        :param list list_of_already_made_smiles: a list of lists. Each
-            sublist contains info about a smiles made in this generation via
-            mutation ie.[['O=C([O-])',
-            '(Gen_3_Mutant_37_747+ZINC51)Gen_4_Mutant_15_52']]
-        """
-
-        # Unpackage the rxn_library_variables
-
-        rxn_library_path = rxn_library_variables[0]
-        rxn_library_file = rxn_library_variables[1]
-        complementary_mols = rxn_library_variables[2]
-        self.reaction_dict = self.retrieve_reaction_dict(
-            rxn_library_path, rxn_library_file
-        )
-        # Retrieve the dictionary containing
-        # all the possible ClickChem Reactions
-        self.list_of_reaction_names = list(self.reaction_dict.keys())
-        self.functional_group_dict = self._extract_functional_groups(self.reaction_dict)
-        self.complementary_mol_dict = self.retrieve_complementary_dictionary(
-            rxn_library_path, complementary_mols
-        )
-        # List of already predicted smiles
-        self.list_of_already_made_smiles = [x[0] for x in list_of_already_made_smiles]
-
-    def _extract_functional_groups(
-        self, reaction_dict: Dict[str, Any]
-    ) -> Dict[str, str]:
-        """
-        Extract functional groups and their SMARTS from the reaction dictionary.
-
-        Args:
-            reaction_dict (Dict[str, Any]): The dictionary of reactions.
-
-        Returns:
-            Dict[str, str]: A dictionary mapping functional group names to SMARTS strings.
-        """
-        functional_groups = {}
-        for rxn_name, rxn_details in reaction_dict.items():
-            if "functional_groups" in rxn_details and "group_smarts" in rxn_details:
-                for fg_name, fg_smarts in zip(
-                    rxn_details["functional_groups"], rxn_details["group_smarts"]
-                ):
-                    if fg_name not in functional_groups:
-                        functional_groups[fg_name] = fg_smarts
-        return functional_groups
-
-    def rxn_lib_format_json_dict_of_dict(self, old_dict):
-        """
-        json dictionaries  import as type unicode. This script converts all
-        the keys and items to strings, with a few specific exceptions. It
-        takes both the functional group dictionary and the reaction library.
-
-        The reaction library is a dictionary of dictionary and has a few
-        exceptions which are not intended to be strings. ie. the num_reactants
-        which converts to interger and functional_groups which convert to a
-        list of strings.
-
-        The functional_group_dictionary is simply a dictionary with all items
-        and keys needing to be strings.
-
-        Inputs:
-        :param dic old_dict: a dictionary of the the reaction library or
-            functional groups. This is what is importanted from the .json file.
-
-        Returns:
-        :returns: dic new_dict: a dictionary of the the reaction library or
-            functional groups where the unicode type items have been replaced with
-            the proper python data types.
-        """
-        new_dict = {}
-        for rxn_key, rxn_dic_old in old_dict.items():
-            key_str = str(rxn_key)
-            # For reaction libraries
-            if isinstance(rxn_dic_old, dict):
-                new_sub_dict = {}
-                for key, item in rxn_dic_old.items():
-                    sub_key_str = str(key)
-                    if sub_key_str in [
-                        "functional_groups",
-                        "group_smarts",
-                        "example_rxn_reactants",
-                        "reverse_reaction_strings",
-                    ]:
-                        if isinstance(item, list):
-                            item = [str(i) for i in item]
-                    elif sub_key_str == "num_reactants":
-                        item = int(item)
-                    else:
-                        item = str(item)
-
-                    new_sub_dict[sub_key_str] = item
-                new_dict[key_str] = new_sub_dict
-
-            # For functional groups
-            else:
-                item = old_dict[rxn_key]
-                new_dict[key_str] = str(item)
-
-        return new_dict
-
-    def retrieve_reaction_dict(self, rxn_library_path, rxn_library_file):
-        """
-        This is where all the chemical reactions for SmartClickChem are
-        retrieved. If you want to add more just add a Custom set of reactions
-        please add a folder to
-        PATH/autogrow/operators/mutation/smiles_click_chem/Reaction_libraries/.
-        They should be formatted as a dictionary of dictionary using the same
-        format as :
-        os.path.join(pwd,"reaction_libraries",
-                    "click_chem_rxns","ClickChem_rxn_library.json")
-
-        The reactions are written as SMARTS-reaction strings.
-
-        This dictionary uses the reaction name as the key and the Reaction
-        Smarts as the value.
-
-        Inputs:
-        :param str rxn_library_path: A string defining the choice of the reaction
-            library. ClickChem uses the set of reactions from Autogrow 3.1.2.
-            Custom means you've defined a path to a Custom library in
-            params['rxn_library_file']
-        :param str rxn_library_file: a PATH to a Custom reaction library file
-            formatted in a dictionary of dictionaries. in a .json file. This will
-            be a blank string if one choses a predefined rxn_library_path option.
-
-        Returns:
-        :returns: dict reaction_dict: A dictionary containing all the
-            reactions for ClickChemistry and all the information required to run
-            the reaction
-        """
-        # Get the JSON file to import the proper reaction library
-        pwd = os.path.dirname(__file__)
-        if rxn_library_file == "":
-
-            if rxn_library_path == "click_chem_rxns":
-                rxn_library_file = os.path.join(
-                    pwd,
-                    "reaction_libraries",
-                    "click_chem_rxns",
-                    "ClickChem_rxn_library.json",
-                )
-            elif rxn_library_path == "robust_rxns":
-                rxn_library_file = os.path.join(
-                    pwd,
-                    "reaction_libraries",
-                    "robust_rxns",
-                    "Robust_Rxns_rxn_library.json",
-                )
-            elif rxn_library_path == "all_rxns":
-                rxn_library_file = os.path.join(
-                    pwd, "reaction_libraries", "all_rxns", "All_Rxns_rxn_library.json"
-                )
-            elif rxn_library_path == "Custom":
-                if os.path.exists(rxn_library_file) is False:
-                    raise Exception(
-                        "Custom rxn_library_file cannot be found. "
-                        + "Please check the path: ",
-                        rxn_library_file,
-                    )
-            else:
-                raise Exception(
-                    "rxn_library_path is not incorporated into smiles_click_chem.py"
-                )
-
-            # Import the proper reaction library JSON file
-            try:
-                with open(rxn_library_file, "r") as rxn_file:
-                    reaction_dict_raw = json.load(rxn_file)
-            except Exception as e:
-                raise Exception(
-                    "rxn_library_file json file not able to be imported."
-                    + " Check that the rxn_library_path is formatted correctly"
-                ) from e
-
-        elif type(rxn_library_file) == str:
-            if os.path.exists(rxn_library_file) is False:
-                raise Exception(
-                    "Custom specified rxn_library_file directory can not be found"
-                )
-
-            if os.path.isfile(rxn_library_file) is False:
-                raise Exception("Custom specified rxn_library_file is not a file")
-
-            try:
-                extension = os.path.splitext(rxn_library_file)[1]
-            except Exception as e:
-                raise Exception(
-                    "Custom specified rxn_library_file is not .json file."
-                    + " It must be a .json dictionary"
-                ) from e
-
-            if extension != ".json":
-                raise Exception(
-                    "Custom specified rxn_library_file is not .json file."
-                    + " It must be a .json dictionary"
-                )
-
-            # Import the proper reaction library JSON file
-            try:
-                with open(rxn_library_file, "r") as rxn_file:
-                    reaction_dict_raw = json.load(rxn_file)
-            except Exception as exc:
-                raise Exception(
-                    "Custom specified rxn_library_file json file not able to "
-                    + "be imported. Check that the rxn_library_path is "
-                    + "formatted correctly"
-                ) from exc
-
-        else:
-            raise Exception(
-                "Custom specified rxn_library_file directory can not be found"
-            )
-
-        # Convert the reaction_dict_raw from unicode to the proper
-        return self.rxn_lib_format_json_dict_of_dict(reaction_dict_raw)
-
-    def retrieve_functional_group_dict(self, rxn_library_path, function_group_library):
-        """
-        This retrieves a dictionary of all functional groups required for the
-        respective reactions. This dictionary will be used to identify
-        possible reactions.
-
-        This is where all the functional groups which will be used in the
-        SmartClickChem reactions are retrieved. If you want to add more just
-        add a Custom set of reactions please add a folder to
-        PATH/autogrow/operators/mutation/smiles_click_chem/Reaction_libraries/.
-        They should be formatted as a dictionary of dictionary using the same
-        format as :
-        os.path.join(pwd,"reaction_libraries","click_chem_rxns",
-                     "ClickChem_functional_groups.json")
-
-        IF YOU CHOSE TO DO A Custom REACTION SET YOU MUST PROVIDE A DICTIONARY
-        OF ALL FUNCTIONAL GROUPS IT WILL REACT. IF YOU FORGET TO ADD A
-        FUNCTIONAL GROUP TO YOUR Custom DICTIONARY, THE REACTION MAY NEVER BE
-        UTILIZED.
-
-        Please note if your functional groups involve stereochemistry
-            notations such as '\' please replace with '\\' (all functional
-            groups should be formatted as SMARTS)
-
-        Inputs:
-        :param str rxn_library_path: A string defining the choice of the reaction
-            library. ClickChem uses the set of reactions from Autogrow 3.1.2.
-            Custom means you've defined a path to a Custom library in
-            params['function_group_library']
-        :param str function_group_library: a PATH to a Custom functional group
-            dictionary in a .json file. This will be a blank string if one choses
-            a predefined functional groups option.
-
-        Returns:
-        :returns: dict functional_group_dict: A dictionary containing all
-            SMARTS for identifying the functional groups for ClickChemistry
-        """
-
-        # Get the JSON file to import the proper reaction library
-        pwd = os.path.dirname(__file__)
-
-        if function_group_library == "":
-
-            if rxn_library_path == "click_chem_rxns":
-                function_group_library = os.path.join(
-                    pwd,
-                    "reaction_libraries",
-                    "click_chem_rxns",
-                    "ClickChem_functional_groups.json",
-                )
-            elif rxn_library_path == "robust_rxns":
-                function_group_library = os.path.join(
-                    pwd,
-                    "reaction_libraries",
-                    "robust_rxns",
-                    "Robust_Rxns_functional_groups.json",
-                )
-            elif rxn_library_path == "all_rxns":
-                function_group_library = os.path.join(
-                    pwd,
-                    "reaction_libraries",
-                    "all_rxns",
-                    "All_Rxns_functional_groups.json",
-                )
-            elif rxn_library_path == "Custom":
-                if os.path.exists(function_group_library) is False:
-                    raise Exception(
-                        "Custom function_group_library cannot be found. "
-                        + "Please check the path: ",
-                        function_group_library,
-                    )
-            else:
-                raise Exception(
-                    "rxn_library_path is not incorporated into smiles_click_chem.py"
-                )
-
-            # Import the proper function_group_library JSON file
-            try:
-                with open(function_group_library, "r") as func_dict_file:
-                    functional_group_dict_raw = json.load(func_dict_file)
-            except Exception as e:
-                raise Exception(
-                    "function_group_library json file not able to be imported. "
-                    + "Check that the rxn_library_path is formatted correctly"
-                ) from e
-
-        elif type(function_group_library) == str:
-            if os.path.exists(function_group_library) is False:
-                raise Exception(
-                    "Custom specified function_group_library directory can not be found"
-                )
-
-            if os.path.isfile(function_group_library) is False:
-                raise Exception("Custom specified function_group_library is not a file")
-
-            try:
-                extension = os.path.splitext(function_group_library)[1]
-            except Exception as e:
-                raise Exception(
-                    "Custom specified function_group_library is not .json "
-                    + "file. It must be a .json dictionary"
-                ) from e
-
-            if extension != ".json":
-                raise Exception(
-                    "Custom specified function_group_library is not .json "
-                    + "file. It must be a .json dictionary"
-                )
-
-            # Import the proper function_group_library JSON file
-            try:
-                with open(function_group_library, "r") as func_dict_file:
-                    functional_group_dict_raw = json.load(func_dict_file)
-            except Exception as exc:
-                raise Exception(
-                    "function_group_library json file not able to be imported."
-                    + " Check that the rxn_library_path is formatted correctly"
-                ) from exc
-        else:
-            raise Exception(
-                "Custom specified function_group_library directory can not be found"
-            )
-
-        # Convert the reaction_dict_raw from unicode to the proper
-        return self.rxn_lib_format_json_dict_of_dict(functional_group_dict_raw)
-
-    def retrieve_complementary_dictionary(self, rxn_library_path, complementary_mols):
-        """
-        Based on user controlled variables, this definition will retrieve a
-        dictionary of molecules separated into classes by their functional
-        groups. The sorting of a .smi file into this should be handled in the
-        user parameter testing when autogrow is initially started.
-
-        Inputs:
-        :param str rxn_library_path: A string defining the choice of the reaction
-            library. ClickChem uses the set of reactions from Autogrow 3.1.2.
-            Custom means you've defined a path to a Custom library in
-            params['complementary_mols']
-        :param dict complementary_mols: the path to the
-            complementary_mols directory. It may be an empty string in which
-            case the complementary_mols directory will default to those of the
-            rxn_library_path
-
-        Returns:
-        :returns: dict complementary_mols_dict: a dictionary of complementary molecules
-        """
-        script_dir = os.path.dirname(os.path.realpath(__file__))
-
-        if complementary_mols == "":
-            if rxn_library_path == "click_chem_rxns":
-                complementary_mols = os.path.join(
-                    script_dir,
-                    "reaction_libraries",
-                    "click_chem_rxns",
-                    "complementary_mols",
-                )
-            elif rxn_library_path == "robust_rxns":
-                complementary_mols = os.path.join(
-                    script_dir,
-                    "reaction_libraries",
-                    "robust_rxns",
-                    "complementary_mols",
-                )
-            elif rxn_library_path == "all_rxns":
-                complementary_mols = os.path.join(
-                    script_dir, "reaction_libraries", "all_rxns", "complementary_mols",
-                )
-            elif rxn_library_path == "Custom":
-                if os.path.isdir(complementary_mols) is False:
-                    raise Exception(
-                        "Custom complementary_mols cannot be found. "
-                        + "Please check the path: ",
-                        complementary_mols,
-                    )
-            else:
-                raise Exception(
-                    "rxn_library_path is not incorporated into smiles_click_chem.py"
-                )
-
-        elif os.path.isdir(complementary_mols) is False:
-            raise Exception(
-                "complementary_mols is not a directory. It must be a \
-                    directory with .smi.gz files containing SMILES specified by \
-                    functional groups. These .smi.gz files must be named the same \
-                    as the files in the complementary_mols."
-            )
-
-        # Make a list of all the functional groups. These will be the name of
-        # the .smi folders already separated by group.
-        functional_groups = self.functional_group_dict.keys()
-
-        missing_smi_files = []
-        complementary_mols_dict = {}
-        for group in functional_groups:
-            filepath = f"{complementary_mols}{os.sep}{group}.smi.gz"
-            if os.path.isfile(filepath) is True:
-                complementary_mols_dict[group] = filepath
-
-            else:
-                missing_smi_files.append(filepath)
-                print(
-                    f"Could not find the following .smi.gz file for complementary  molecules for Mutation: {filepath}"
-                )
-
-        if missing_smi_files:
-            raise Exception(
-                "The following .smi.gz file for complementary molecules "
-                + "for Mutation is missing: ",
-                missing_smi_files,
-            )
-
-        return complementary_mols_dict
-
-
-def get_usable_format(infile):
-    """
-    This code takes a string for an file which is formatted as an .smi file. It
-    opens the file and reads in the components into a usable list.
-
-    The .smi must follow the following format for each line:
-        MANDATORY INFO
-            part 1 is the SMILES string
-            part 2 is the SMILES name/ID
-
-        Optional info
-            part -1 (the last piece of info) is the SMILES diversity score
-                relative to its population
-            part -2 (the second to last piece of info) is the fitness metric
-                for evaluating
-                - For default setting this is the Docking score
-                - If you add a unique scoring function Docking score should be
-                    -3 and that score function should be -2
-
-            Any other information MUST be between part 2 and part -2 (this
-            allows for the expansion of features without disrupting the rest of the code)
-
-    Inputs:
-    :param str infile: the string of the PATHname of a formatted .smi file to
-        be read into the program
-
-    Returns:
-    :returns: list usable_list_of_smiles: list of SMILES and their associated
-        information formatted into a list which is usable by the rest of Autogrow
-    """
-
-    # IMPORT SMILES FROM THE PREVIOUS GENERATION
-    usable_list_of_smiles = []
-
-    if os.path.exists(infile) is False:
-        print(f"\nFile of Source compounds does not exist: {infile}\n")
-        raise Exception("File of Source compounds does not exist")
-
-    open_func = gzip.open if infile.endswith(".gz") else open
-    mode = "rt" if infile.endswith(".gz") else "r"
-
-    with open_func(infile, mode) as smiles_file:
-        for line in smiles_file:
-            line = line.replace("\n", "")
-            parts = line.split("\t")  # split line into parts separated by 4-spaces
-            if len(parts) == 1:
-                parts = line.split(
-                    "    "
-                )  # split line into parts separated by 4-spaces
-
-            choice_list = [parts[i] for i in range(len(parts))]
-            usable_list_of_smiles.append(choice_list)
-
-    return usable_list_of_smiles
-
+from autogrow.plugins.registry_base import plugin_managers
+from autogrow.plugins.mutation import MutationPluginManager, MutationBase
+from autogrow.plugins.mutation.utils import validate_rxn_library_path
 
 def react_with_multiple_reactants(mol_tuple, mol_name, rxn_obj):
     """
@@ -554,11 +39,14 @@ def react_with_multiple_reactants(mol_tuple, mol_name, rxn_obj):
 
     Returns:
     :returns: str mol_name: returns the mol_name if it fails to react;
-        returns None if it passes reaction
+     returns None if it passes reaction
     """
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
     try:
         # if reaction works keep it
-        reaction_products_list = [x[0] for x in rxn_obj.RunReactants(mol_tuple)]
+        reaction_products_list = [
+            x[0] for x in chemtoolkit.run_reactants(rxn_obj, mol_tuple)
+        ]
     except Exception:
         return mol_name
 
@@ -585,12 +73,13 @@ def run_a_single_reactant_reaction(mol_info, rxn_obj):
     :returns: str mol_name: returns the mol_name if it fails to react;
         returns None if it passes reaction
     """
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
     mol_name = mol_info[1]
     mol_1 = mol_info[-1]
 
     try:
         # if reaction works keep it
-        reaction_products_list = rxn_obj.RunReactants((mol_1,))
+        reaction_products_list = chemtoolkit.run_reactants(rxn_obj, (mol_1,))
     except Exception:
         return mol_name
     if not reaction_products_list:
@@ -613,13 +102,13 @@ def get_rxn_and_examples(current_rxn_dict):
     :returns: rdkit.Chem.rdChemReactions.ChemicalReaction rxn_obj: the
         reaction object to use
     """
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
     rxn_name = current_rxn_dict["reaction_name"]
     # Test example reactants
     example_smiles_rxn_reactants = current_rxn_dict["example_rxn_reactants"]
     example_rxn_reactants = []
     for smiles_str in example_smiles_rxn_reactants:
-        example_mol = Chem.MolFromSmiles(smiles_str)
-
+        example_mol = chemtoolkit.mol_from_smiles(smiles_str)
         example_mol = MOH.check_sanitization(example_mol)
         if example_mol is None:
             print(smiles_str)
@@ -632,8 +121,8 @@ def get_rxn_and_examples(current_rxn_dict):
     example_rxn_reactants = tuple(example_rxn_reactants)
     reaction_string = current_rxn_dict["reaction_string"]
     try:
-        rxn_obj = AllChem.ReactionFromSmarts(reaction_string)
-        rxn_obj.Initialize()
+        rxn_obj = chemtoolkit.reaction_from_smarts(reaction_string)
+        chemtoolkit.initialize_reaction(rxn_obj)
     except Exception as e:
         printout = f"rxn {rxn_name} failed to be created. Rxn SMART is flawed"
         print(printout)
@@ -654,36 +143,37 @@ def get_rxn_and_examples(current_rxn_dict):
     return example_rxn_reactants, rxn_obj
 
 
-def run_all_for_fun_group(params, fun_group, rxns_by_fun_group, a_smiles_click_object):
+def run_all_for_fun_group(
+    params, fun_group, rxns_by_fun_group, fragment_addition_object
+):
     """
     This runs the all testing for a single functional group.
 
     This will also write the compounds which pass to a .smi file.
-
-    Inputs:
-    :param dict params: Dictionary of User variables
-    :param str fun_group: functional group name
-    :param dict rxns_by_fun_group: Dictionary of rxns names organized by
-        functional groups
-    :param obj a_smiles_click_object: a a_smiles_click_object class object.
-        This provides useful pathing information.
-
+    Args:
+        params (Dict): Dictionary of User variables
+        fun_group (str): functional group name
+        rxns_by_fun_group (Dict): Dictionary of rxns names organized by
+            functional groups
+        fragment_addition_object (object): a FragmentAddition class object.
+            This provides useful pathing information.
     Returns:
-    :returns: list failed_to_react: a list of mol names which failed to react
-    :returns: list failed_to_sanitize: a list of mol names which failed to sanitize
+        list: a list of mol names which failed to react
+        list: a list of mol names which failed to sanitize
     """
     # unpack variables
-    complementary_mol_dict = a_smiles_click_object.complementary_mol_dict
-    reaction_dict = a_smiles_click_object.reaction_dict
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
+    complementary_mol_dict = fragment_addition_object.complementary_mol_dict
+    reaction_dict = fragment_addition_object.reaction_dict
     number_of_processors = params["number_of_processors"]
     output_folder = params["output_folder"]
 
-    smi_comp_file = complementary_mol_dict[fun_group]
-    fun_group_list = get_usable_format(smi_comp_file)
+    fun_group_list = complementary_mol_dict.get(fun_group, [])
+
     fun_group_mol_list = []
     failed_to_sanitize = []
     for info in fun_group_list:
-        mol = Chem.MolFromSmiles(info[0])
+        mol = chemtoolkit.mol_from_smiles(info[0])
         mol = MOH.check_sanitization(mol)
         if mol is None:
             failed_to_sanitize.append(info)
@@ -750,45 +240,32 @@ def run_all_for_fun_group(params, fun_group, rxns_by_fun_group, a_smiles_click_o
     for mol_info in fun_group_list:
         if mol_info[1] in master_failed_to_react:
             continue
-        master_passes_reactions.append("    ".join(mol_info))
+        master_passes_reactions.append(" ".join(mol_info))
     # write to output .smi file
     with open(output_folder + fun_group + ".smi", "w") as f:
         f.write("\n".join(master_passes_reactions))
-
-    return failed_to_react, failed_to_sanitize
     return failed_to_react, failed_to_sanitize
 
 
 def run_main(params: Dict[str, Any]):
     """
     This runs the main testing.
-
-    Inputs:
-    :param dict params: Dictionary of User variables
+    Args:
+        params (Dict[str, Any]): Dictionary of User variables
     """
+    # Setup the plugin managers
+    plugin_managers.setup_plugin_managers(params)
+    # Instantiate and setup mutation manager to get FragmentAddition plugin
+    mutation_manager = MutationPluginManager(MutationBase)
+    mutation_manager.setup_plugin_manager(params, plugin_managers)
+    fragment_addition_object = mutation_manager.plugins.get('FragmentAddition')
+    if fragment_addition_object is None:
+        raise ValueError("FragmentAddition plugin could not be initialized. "
+                         "Ensure it is enabled and configured correctly.")
 
-    # Force rxn_library_path to be custom because why else run this
-    rxn_library_path = "Custom"
-
-    output_folder = params["output_folder"]
-    rxn_library_file = params["rxn_library_file"]
-    complementary_mols = params["complementary_mol_directory"]
-
-    rxn_library_variables = [
-        rxn_library_path,
-        rxn_library_file,
-        complementary_mols,
-    ]
-    new_mutation_smiles_list = []
-
-    a_smiles_click_chem_object = SmilesClickChem(
-        rxn_library_variables, new_mutation_smiles_list
-    )
-
-    list_of_reaction_names = a_smiles_click_chem_object.list_of_reaction_names
-    functional_group_dict = a_smiles_click_chem_object.functional_group_dict
-    reaction_dict = a_smiles_click_chem_object.reaction_dict
-
+    list_of_reaction_names = list(fragment_addition_object.reaction_dict.keys())
+    functional_group_dict = fragment_addition_object.functional_group_dict
+    reaction_dict = fragment_addition_object.reaction_dict
     rxns_by_fun_group = {fun_group: [] for fun_group in functional_group_dict.keys()}
     for rxn_name in list_of_reaction_names:
         current_rxn_dict = reaction_dict[rxn_name]
@@ -802,12 +279,13 @@ def run_main(params: Dict[str, Any]):
 
     for fun_group in rxns_by_fun_group:
         failed_to_react, failed_to_sanitize = run_all_for_fun_group(
-            params, fun_group, rxns_by_fun_group, a_smiles_click_chem_object
+            params, fun_group, rxns_by_fun_group, fragment_addition_object
         )
         failed_to_react_by_fun_group[fun_group] = failed_to_react
         failed_to_sanitize_by_fun_group[fun_group] = failed_to_sanitize
 
     # Handle saving log
+    output_folder = params["output_folder"]
     with open(f"{output_folder}failed_to_sanitize_mol_by_fun_group.json", "w") as fp:
         json.dump(failed_to_sanitize_by_fun_group, fp, indent=4)
 
@@ -829,34 +307,12 @@ def run_main(params: Dict[str, Any]):
 def get_arguments_from_argparse(args_dict):
     """
     This function handles the arg parser arguments for the script.
-
-    Inputs:
-    :param dict args_dict: dictionary of parameters
+    Args:
+        args_dict (dict): dictionary of parameters
     Returns:
-    :returns: dict args_dict: dictionary of parameters
+        dict: dictionary of parameters
     """
-    # Argument handling
-    if args_dict["rxn_library_file"] == "":
-        raise ValueError(
-            "TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY \
-    THE PATH TO THE REACTION LIBRARY USING INPUT PARAMETER rxn_library_path"
-        )
-    if os.path.exists(args_dict["rxn_library_file"]) is False:
-        raise ValueError(
-            "TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY \
-   THE PATH TO THE REACTION LIBRARY USING INPUT PARAMETER rxn_library_path"
-        )
-
-    if args_dict["complementary_mol_directory"] == "":
-        raise ValueError(
-            "TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY THE PATH \
-   TO THE REACTION LIBRARY USING INPUT PARAMETER complementary_mol_directory"
-        )
-    if os.path.isdir(args_dict["complementary_mol_directory"]) is False:
-        raise ValueError(
-            "TO USE Custom REACTION LIBRARY OPTION, ONE MUST SPECIFY THE PATH \
-   TO THE REACTION LIBRARY USING INPUT PARAMETER complementary_mol_directory"
-        )
+    validate_rxn_library_path(args_dict)
 
     if "number_of_processors" not in args_dict.keys():
         args_dict["number_of_processors"] = -1
@@ -900,6 +356,10 @@ def get_arguments_from_argparse(args_dict):
         if os.path.exists(args_dict["output_folder"]) is False:
             raise Exception("output_folder could not be made or found.")
 
+    # Setup params for plugin system
+    args_dict['RDKitToolkit'] = True
+    args_dict['FragmentAddition'] = True
+
     return args_dict
 
 
@@ -907,25 +367,11 @@ def get_arguments_from_argparse(args_dict):
 PARSER = argparse.ArgumentParser()
 # Mutation Settings
 PARSER.add_argument(
-    "--rxn_library_file",
+    "--rxn_library_path",
     type=str,
-    default="",
+    default="all_rxns",
     required=True,
-    help="This PATH to a Custom json file of SMARTS reactions to use for Mutation.",
-)
-PARSER.add_argument(
-    "--complementary_mol_directory",
-    type=str,
-    default="",
-    required=True,
-    help="This PATH to the directory containing all the molecules being used \
- to react with. The directory should contain .smi files contain SMILES of \
- molecules containing the functional group represented by that file. Each file \
- should be named with the same title as the functional groups described in \
- rxn_library_file +.smi \
- All Functional groups specified function_group_library must have its \
- own .smi file. We recommend you filter these dictionaries prior to Autogrow \
- for the Drug-likeliness and size filters you will Run Autogrow with.",
+    help="Path to a reaction library directory, or a built-in library name (e.g., all_rxns).",
 )
 PARSER.add_argument(
     "--output_folder",

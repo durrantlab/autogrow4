@@ -18,8 +18,7 @@ from autogrow.types import Compound
 
 from typing import Any, List, Tuple
 from autogrow.config.argument_vars import ArgumentVars
-
-
+from autogrow.plugins.registry_base import plugin_managers
 class NIHFilter(SmilesFilterBase):
     """
     Implements NIH filter for removing ligands with bad functional groups.
@@ -78,13 +77,14 @@ class NIHFilter(SmilesFilterBase):
         # If the mol matches a mol in the filter list. we return a False (as it
         # failed the filter). if No matches are found to filter list this will
         # return a True as it Passed the filter.
-        mol = self.cmpd_to_rdkit_mol(cmpd)
+        mol = self.cmpd_to_mol(cmpd)
         if mol is None:
             return False
-
-        return self.filters.HasMatch(mol) is not True
-
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+        return (
+            plugin_managers.ChemToolkit.toolkit.filter_has_match(self.filters, mol)
+            is not True
+        )
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments required by the plugin.
 
@@ -92,18 +92,14 @@ class NIHFilter(SmilesFilterBase):
         Filter. It allows users to enable the filter via command-line options.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing the argument
-                group name and a list of ArgumentVars objects defining the
-                command-line arguments.
+            List[ArgumentVars]: A list of ArgumentVars objects defining the
+            command-line arguments.
         """
-        return (
-            "SMILES Filters",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    action="store_true",
-                    default=False,
-                    help="Apply the NIH filter to remove molecules with undesirable functional groups via substructure search.",
-                )
-            ],
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Enable the NIH filter. This filter screens for and removes molecules that contain undesirable functional groups.",
+            )
+        ]

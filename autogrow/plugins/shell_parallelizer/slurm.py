@@ -21,44 +21,40 @@ class Slurm(ShellParallelizerBase):
     submits the job and exits the program.
     """
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add arguments for the Slurm shell parallelizer plugin.
         
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing the plugin
-                category name and a list of ArgumentVars for the plugin's specific
-                arguments.
+            List[ArgumentVars]: A list of ArgumentVars for the plugin's
+            specific arguments.
         """
-        return (
-            "Slurm Shell Parallelizer",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    action="store_true",
-                    default=False,
-                    help="Use Slurm to run shell commands in parallel",
-                ),
-                ArgumentVars(
-                    name="slurm_template_file",
-                    type=str,
-                    help="Path to Slurm job template file containing sbatch directives",
-                    default=None,
-                ),
-                ArgumentVars(
-                    name="sbatch_path",
-                    type=str,
-                    help="Path to the sbatch executable",
-                    default="sbatch",
-                ),
-                ArgumentVars(
-                    name="wait_for_slurm",
-                    action="store_true",
-                    default=False,
-                    help="Wait for the slurm job to complete. If this parameter is not given, AutoGrow4 will submit slurm jobs as needed and exit after each submission. You will have to restart AutoGrow4 after each slurm job finishes to continue.",
-                ),
-            ],
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Use the Slurm Workload Manager to run shell commands in parallel as array jobs. This is suitable for high-performance computing clusters.",
+            ),
+            ArgumentVars(
+                name="slurm_template_file",
+                type=str,
+                help="Path to Slurm job template file containing sbatch directives",
+                default=None,
+            ),
+            ArgumentVars(
+                name="sbatch_path",
+                type=str,
+                help="Path to the sbatch executable",
+                default="sbatch",
+            ),
+            ArgumentVars(
+                name="wait_for_slurm",
+                action="store_true",
+                default=False,
+                help="Wait for the slurm job to complete. If this parameter is not given, AutoGrow5 will submit slurm jobs as needed and exit after each submission. You will have to restart AutoGrow5 after each slurm job finishes to continue.",
+            ),
+        ]
 
     def validate(self, params: dict):
         """Validate Slurm template file exists."""

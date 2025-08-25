@@ -21,7 +21,7 @@ If --max_docking_score is not set it will convert all poses to .pdb;
         It will take the top 5 poses as long as they also have docking scores <=-11.4
 
 Example submit:
-python PATH/autogrow4/accessory_scripts/convert_vina_docked_pdbqt_to_pdbs.py \
+python PATH/autogrow/accessory_scripts/convert_vina_docked_pdbqt_to_pdbs.py \
     --vina_docked_pdbqt_file \
         PATH/Run_1/Run_0/generation_30/PDBs/Gen_30_Cross_313228__1.pdbqt.vina \
     --output_folder PATH/outfolder/ \
@@ -195,6 +195,7 @@ def start_run_main(params: Dict[str, Any]) -> None:
     min_docking_score = params["min_docking_score"]
 
     vina_docked_pdbqt_file = params["vina_docked_pdbqt_file"]
+    number_of_processors = params["number_of_processors"]
     if os.path.isfile(str(vina_docked_pdbqt_file)) is True:
 
         run_conversion_for_a_vina_file(
@@ -229,7 +230,7 @@ def start_run_main(params: Dict[str, Any]) -> None:
             )
         )
         # run convert in multithread
-        mp.multi_threading(job_input, -1, run_conversion_for_a_vina_file)
+        mp.multi_threading(job_input, number_of_processors, run_conversion_for_a_vina_file)
 
 
 def get_arguments_from_argparse(args_dict):
@@ -246,7 +247,7 @@ def get_arguments_from_argparse(args_dict):
     if type(args_dict["vina_docked_pdbqt_file"]) != str:
         raise Exception(
             "provided vina_docked_pdbqt_file must be either a docked vina file or \
-            a directory of docked vina files."
+   a directory of docked vina files."
         )
 
     if type(args_dict["output_folder"]) != str:
@@ -259,7 +260,7 @@ def get_arguments_from_argparse(args_dict):
         if os.path.isdir(args_dict["vina_docked_pdbqt_file"]) is False:
             raise Exception(
                 "provided vina_docked_pdbqt_file must be either a docked vina file \
-            containing .pdbqt.vina in file name or a directory of docked vina files."
+   containing .pdbqt.vina in file name or a directory of docked vina files."
             )
 
         args_dict["vina_docked_pdbqt_file"] = (
@@ -281,27 +282,20 @@ def get_arguments_from_argparse(args_dict):
 
     # handle max_num_of_poses
     if args_dict["max_num_of_poses"] is not None:
-        if type(args_dict["max_num_of_poses"]) not in [float, int]:
+        if not isinstance(args_dict["max_num_of_poses"], (int, float)):
             raise Exception("max_num_of_poses must be a int or None")
-        if type(args_dict["max_num_of_poses"]) == float:
+        if isinstance(args_dict["max_num_of_poses"], float):
             args_dict["max_num_of_poses"] = int(args_dict["max_num_of_poses"])
     # handle max_docking_score
     if args_dict["max_docking_score"] is not None:
-        if (
-            type(args_dict["max_docking_score"]) != float
-            or type(args_dict["max_docking_score"]) != int
-        ):
+        if not isinstance(args_dict["max_docking_score"], (int, float)):
             raise Exception("max_docking_score must be a float or None")
-        args_dict["max_docking_score"] = float(args_dict["max_num_of_poses"])
+        args_dict["max_docking_score"] = float(args_dict["max_docking_score"])
     # handle min_docking_score
     if args_dict["min_docking_score"] is not None:
-        if (
-            type(args_dict["min_docking_score"]) != float
-            or type(args_dict["min_docking_score"]) != int
-        ):
+        if not isinstance(args_dict["min_docking_score"], (int, float)):
             raise Exception("min_docking_score must be a float or None")
-        args_dict["min_docking_score"] = float(args_dict["max_num_of_poses"])
-
+        args_dict["min_docking_score"] = float(args_dict["min_docking_score"])
     return args_dict
 
 

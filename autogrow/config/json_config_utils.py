@@ -14,7 +14,7 @@ def convert_json_params_from_unicode(
 
     Args:
         params_unicode (Dict[str, Union[str, int]]): The parameters dictionary
-            with potentially Unicode keys and values.
+        with potentially Unicode keys and values.
 
     Returns:
         Dict[str, Union[str, int]]: A new dictionary with ASCII-encoded keys
@@ -22,7 +22,10 @@ def convert_json_params_from_unicode(
 
     Note:
         This function is particularly useful when working with JSON-loaded
-        data, which may contain Unicode strings.
+        data, which may contain Unicode strings from older Python versions.
+        Modern RDKit versions are generally compatible with standard Python 3
+        strings, but this provides a safeguard. Non-ASCII characters are
+        silently ignored.
     """
     # Also, rdkit doesn't play nice with unicode, so convert to ascii
 

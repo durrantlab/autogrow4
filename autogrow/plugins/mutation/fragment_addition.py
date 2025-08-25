@@ -41,13 +41,12 @@ from itertools import product
 class FragmentAddition(MutationBase):
     """Plugin that dds fragments to existing mols using reaction libraries."""
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments required by the plugin.
 
         Returns:
-         Tuple[str, List[ArgumentVars]]: A tuple containing the plugin category
-          and a list of ArgumentVars.
+            List[ArgumentVars]: A list of ArgumentVars.
         """
         built_in_libs = glob.glob(
             os.path.join(os.path.dirname(__file__), "reaction_libraries") + "/*"
@@ -62,47 +61,44 @@ class FragmentAddition(MutationBase):
         rxn_library_path_help = (
             f"Path to a reaction library directory, or a built-in library name (e.g., {', '.join(built_in_libs)})."
         )
-        return (
-            "Fragment Addition Mutation",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    action="store_true",
-                    default=False,
-                    help="Enable the fragment addition mutation operator, which creates new molecules by adding fragments using reaction libraries.",
-                ),
-                ArgumentVars(
-                    name="rxn_library_path",
-                    type=str,
-                    default="all_rxns",
-                    help=rxn_library_path_help,
-                ),
-                ArgumentVars(
-                    name="min_fragment_mol_weight",
-                    type=float,
-                    default=None,
-                    help="Minimum molecular weight for fragments used in addition reactions. If not specified, no minimum MW filter is applied.",
-                ),
-                ArgumentVars(
-                    name="max_fragment_mol_weight",
-                    type=float,
-                    default=None,
-                    help="Maximum molecular weight for fragments used in addition reactions. If not specified, no maximum MW filter is applied.",
-                ),
-                ArgumentVars(
-                    name="mutants_per_batch",
-                    type=int,
-                    default=1,
-                    help="Number of mutants to generate per reaction. Higher values aid DeepFrag caching and similarity matching. Set to -1 to generate all possible products per reaction.",
-                ),
-                ArgumentVars(
-                    name="max_pass_per_batch",
-                    type=int,
-                    default=None,
-                    help="Maximum number of mutants to keep from a single reaction batch. If unset, all are kept.",
-                ),
-            ],
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Enable the fragment addition mutation operator. This operator creates new molecules by adding chemical fragments to existing ones based on a library of predefined chemical reactions.",
+            ),
+            ArgumentVars(
+                name="rxn_library_path",
+                type=str,
+                default="all_rxns",
+                help=rxn_library_path_help,
+            ),
+            ArgumentVars(
+                name="min_fragment_mol_weight",
+                type=float,
+                default=None,
+                help="Minimum molecular weight for fragments used in addition reactions. If not specified, no minimum MW filter is applied.",
+            ),
+            ArgumentVars(
+                name="max_fragment_mol_weight",
+                type=float,
+                default=None,
+                help="Maximum molecular weight for fragments used in addition reactions. If not specified, no maximum MW filter is applied.",
+            ),
+            ArgumentVars(
+                name="mutants_per_batch",
+                type=int,
+                default=1,
+                help="Number of mutants to generate per reaction. Higher values aid DeepFrag caching and similarity matching. Set to -1 to generate all possible products per reaction.",
+            ),
+            ArgumentVars(
+                name="max_pass_per_batch",
+                type=int,
+                default=None,
+                help="Maximum number of mutants to keep from a single reaction batch. If unset, all are kept.",
+            ),
+        ]
 
     def validate(self, params: dict):
         """

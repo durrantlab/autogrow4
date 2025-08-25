@@ -2,7 +2,7 @@
 Plots a line plot of the average score for each generation of AutoGrow run.
 
 Example submit:
-    python autogrow4/accessory_scripts/plot_autogrow_run.py\
+    python autogrow/accessory_scripts/plot_autogrow_run.py\
         -i $PATH/Run_1/Run_0/ \
         --plot_reference_lines [['Olaparib Score',-12.8,'y'],\
             ['Niraparib',-10.7,'k'],['NAD/NADH',-10.3,'purple'],\
@@ -19,12 +19,9 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import matplotlib  # type: ignore
 from matplotlib.ticker import MaxNLocator
 import matplotlib.pyplot as plt  # type: ignore
-from rdkit import Chem
-from rdkit.Chem import AllChem
-from rdkit.Chem.rdMolDescriptors import GetMorganFingerprint
-from rdkit.Chem import Lipinski
-from rdkit import DataStructs
+
 from autogrow.utils.rank_file import get_gen_number_from_folder_name, load_rank_file
+from autogrow.plugins.registry_base import plugin_managers
 import prolif
 import numpy as np
 import pandas as pd
@@ -81,8 +78,9 @@ def calculate_ligand_efficiency(docking_score: float, smiles: str) -> float:
     Returns:
         Ligand efficiency value.
     """
-    mol = Chem.MolFromSmiles(smiles, sanitize=False)
-    num_heavy_atoms = Lipinski.HeavyAtomCount(mol)
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
+    mol = chemtoolkit.mol_from_smiles(smiles, sanitize=False)
+    num_heavy_atoms = chemtoolkit.lipinski_heavy_atom_count(mol)
     return docking_score / num_heavy_atoms
 
 
@@ -98,10 +96,13 @@ def get_morgan_fingerprint(mol, radius: int = 10, use_features: bool = True):
     Returns:
         Morgan fingerprint.
     """
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
     if use_features:
-        return GetMorganFingerprint(mol, radius=radius, useFeatures=True)
+        return chemtoolkit.get_morgan_fingerprint(mol, radius=radius, use_features=True)
     else:
-        return AllChem.GetMorganFingerprintAsBitVect(mol, radius=radius, nBits=2048)
+        return chemtoolkit.get_morgan_fingerprint_as_bit_vect(
+            mol, radius=radius, n_bits=2048
+        )
 
 
 def filter_valid_compounds(ranked_cmpds: List, require_docking_score: bool = False) -> List:
@@ -184,12 +185,12 @@ def exist_generation_0(infolder: str) -> bool:
 
 def read_smi_file(source_file: str):
     """Read molecules from SMILES file."""
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
     rdkit_molecules = []
     with open(source_file) as smiles_file:
         for tsv_line in smiles_file:
-            prts = tsv_line.replace("    ", "\t").strip().split("\t")
-            rdkit_molecules.append(Chem.MolFromSmiles(prts[0]))
-
+            prts = tsv_line.replace(" ", "\t").strip().split("\t")
+            rdkit_molecules.append(chemtoolkit.mol_from_smiles(prts[0]))
     if None in rdkit_molecules:
         raise Exception("An input molecule was not successfully read from " + source_file)
 
@@ -198,11 +199,8 @@ def read_smi_file(source_file: str):
 
 def read_sdf_file(source_file: str):
     """Read molecules from SDF file."""
-    rdkit_molecules = []
-    r = Chem.SDMolSupplier(source_file, sanitize=False)
-    for compound in r:
-        rdkit_molecules.append(compound)
-    r.reset()
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
+    rdkit_molecules = chemtoolkit.mols_from_sdf_file(source_file, sanitize=False)
     return rdkit_molecules
 
 
@@ -227,6 +225,7 @@ def calc_diversity_scores(reference_comp, new_comps):
         - Removes any None entries from the input list.
         - Uses Morgan Fingerprints with radius 10 and feature-based encoding.
     """
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
     similarity_values = []
     reference_comp_fp = get_morgan_fingerprint(reference_comp)
     
@@ -236,14 +235,18 @@ def calc_diversity_scores(reference_comp, new_comps):
 
             # if DiceSimilarity=1.0 it is a perfect match, the smaller the
             # number, the more diverse it is.
-            diversity_score = DataStructs.DiceSimilarity(reference_comp_fp, mol_fp)
+            diversity_score = chemtoolkit.dice_similarity(reference_comp_fp, mol_fp)
             similarity_values.append(diversity_score)
 
     return similarity_values
 
 
-def calc_interaction_fp_per_generation(params: Dict[str, Any], infolder: str, 
-                                     interactions: List[str], analyze_gen_0: bool):
+def calc_interaction_fp_per_generation(
+    params: Dict[str, Any],
+    infolder: str,
+    interactions: List[str],
+    analyze_gen_0: bool,
+):
     """
     Calculate percent of interaction types per generation.
 
@@ -259,7 +262,10 @@ def calc_interaction_fp_per_generation(params: Dict[str, Any], infolder: str,
         list: list containing labels of the rows
         list: list containing labels of the columns
     """
-    receptor = Chem.MolFromPDBFile(params["receptor_path"], sanitize=True)
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
+    receptor = chemtoolkit.mol_from_pdb_file(
+        params["receptor_path"], sanitize=True
+    )
     fingerprints = prolif.Fingerprint(interactions)
 
     all_interactions = []
@@ -324,8 +330,9 @@ def calc_interaction_fp_per_generation(params: Dict[str, Any], infolder: str,
             #                     number_interactions_per_gen[interaction][gen_num] + 1
 
     all_generations = []
-    result_matrix = np.zeros((len(num_compounds_per_generation), len(all_interactions)))
-    
+    result_matrix = np.zeros(
+        (len(num_compounds_per_generation), len(all_interactions))
+    )
     for gen_num_idx in range(len(num_compounds_per_generation)):
         gen_num = (gen_num_idx + 1) if not analyze_gen_0 else gen_num_idx
         all_generations.append(f"generation_{gen_num}")
@@ -333,16 +340,24 @@ def calc_interaction_fp_per_generation(params: Dict[str, Any], infolder: str,
         for interaction_num in range(len(all_interactions)):
             interaction = all_interactions[interaction_num]
             if str(gen_num) in number_interactions_per_gen[interaction]:
-                percent_of_interactions = number_interactions_per_gen[interaction][str(gen_num)]
+                percent_of_interactions = number_interactions_per_gen[interaction][
+                    str(gen_num)
+                ]
                 percent_of_interactions = round(
-                    float(percent_of_interactions / num_compounds_per_generation[str(gen_num)]), 2
+                    float(
+                        percent_of_interactions
+                        / num_compounds_per_generation[str(gen_num)]
+                    ),
+                    2,
                 )
                 result_matrix[gen_num_idx, interaction_num] = percent_of_interactions
 
     return result_matrix, all_generations, all_interactions
 
 
-def generate_tSNE_scatterplot(infolder: str, params: Dict[str, Any], outfile: str, exist_gen_0: bool):
+def generate_tSNE_scatterplot(
+    infolder: str, params: Dict[str, Any], outfile: str, exist_gen_0: bool
+):
     """
     Generate a t-SNE scatterplot for the compounds generated by Autogrow and the input compounds.
 
@@ -355,6 +370,7 @@ def generate_tSNE_scatterplot(infolder: str, params: Dict[str, Any], outfile: st
         program runs.
     :param str outfile: Path for the output file for the plot
     """
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
     label_list = []
     result_matrix = []
     
@@ -362,7 +378,7 @@ def generate_tSNE_scatterplot(infolder: str, params: Dict[str, Any], outfile: st
     
     for gen_folder_name in generation_folders:
         ranked_cmpds = load_rank_file(gen_folder_name)
-        new_comps = [Chem.MolFromSmiles(cmpd.smiles) for cmpd in ranked_cmpds]
+        new_comps = [chemtoolkit.mol_from_smiles(cmpd.smiles) for cmpd in ranked_cmpds]
         gen_num = get_gen_number_from_folder_name(gen_folder_name)
 
         for mol in new_comps:
@@ -377,15 +393,14 @@ def generate_tSNE_scatterplot(infolder: str, params: Dict[str, Any], outfile: st
     tsne_model = TSNE(n_components=2, random_state=0)
     tsne_results = tsne_model.fit_transform(result_matrix)
     tsne_results = np.vstack((tsne_results.T, np.array(label_list))).T
-
-    tsne_df = pd.DataFrame(data=tsne_results, columns=("Dim_1", "Dim_2", "Generations"))
+    tsne_df = pd.DataFrame(
+        data=tsne_results, columns=("Dim_1", "Dim_2", "Generations")
+    )
     tsne_df["Dim_1"] = pd.to_numeric(tsne_df["Dim_1"])
     tsne_df["Dim_2"] = pd.to_numeric(tsne_df["Dim_2"])
-    grouped_tsne_df = tsne_df.groupby('Generations')
-
-    x = grouped_tsne_df['Dim_1'].apply(lambda x: x.values)
-    y = grouped_tsne_df['Dim_2'].apply(lambda y: y.values)
-
+    grouped_tsne_df = tsne_df.groupby("Generations")
+    x = grouped_tsne_df["Dim_1"].apply(lambda x: x.values)
+    y = grouped_tsne_df["Dim_2"].apply(lambda y: y.values)
     setup_plot_styling()
     fig, ax = plt.subplots()
     
@@ -393,10 +408,8 @@ def generate_tSNE_scatterplot(infolder: str, params: Dict[str, Any], outfile: st
         gen_name = "generation_" + (str(gen_id + 1) if not exist_gen_0 else str(gen_id))
         x_gen = x.loc[gen_name]
         y_gen = y.loc[gen_name]
-        ax.scatter(x_gen, y_gen, label=gen_name, c='black' if gen_id == 0 else None)
-
-    ax.legend(bbox_to_anchor=(1.05, 1.0), loc='upper left')
-
+        ax.scatter(x_gen, y_gen, label=gen_name, c="black" if gen_id == 0 else None)
+    ax.legend(bbox_to_anchor=(1.05, 1.0), loc="upper left")
     # Add titles and labels
     plt.xlabel("Dimension 1", fontweight="semibold")
     plt.ylabel("Dimension 2", fontweight="semibold")
@@ -423,14 +436,14 @@ def calc_diversity_scores_per_generation(infolder: str):
         - Removes any None entries from the input list.
         - Uses Morgan Fingerprints with radius 10 and feature-based encoding.
     """
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
     average_dict = {}
     generation_folders = get_generation_folders(infolder)
     
     for gen_folder_name in generation_folders:
         ranked_cmpds = load_rank_file(gen_folder_name)
         gen_num = get_gen_number_from_folder_name(gen_folder_name)
-        new_comps = [Chem.MolFromSmiles(cmpd.smiles) for cmpd in ranked_cmpds]
-
+        new_comps = [chemtoolkit.mol_from_smiles(cmpd.smiles) for cmpd in ranked_cmpds]
         similarity_values = []
         for i in range(len(new_comps)):
             reference_comp = new_comps[i]
@@ -444,11 +457,13 @@ def calc_diversity_scores_per_generation(infolder: str):
                     continue
 
                 mol_fp = get_morgan_fingerprint(mol)
-                diversity_score = DataStructs.DiceSimilarity(reference_comp_fp, mol_fp)
-                
+                diversity_score = chemtoolkit.dice_similarity(
+                    reference_comp_fp, mol_fp
+                )
                 if diversity_score >= 0.9:
-                    print(f"Compounds {i+1} and {j+1} of generation {gen_num} are similar: {diversity_score}")
-                
+                    print(
+                        f"Compounds {i+1} and {j+1} of generation {gen_num} are similar: {diversity_score}"
+                    )
                 similarity_values.append(diversity_score)
 
         gen_name = f"generation_{gen_num}"
@@ -523,6 +538,7 @@ def get_efficiency_per_generated_comp(infolder: str) -> Dict[str, float]:
     Notes:
         if a generated molecule is not successfully read, an efficiency equal to 0 is assigned.
     """
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
     efficiency_dict = {}
     ranked_file = infolder + os.sep + "summary_ranked.sdf"
     ranked_molecules = read_sdf_file(ranked_file)
@@ -531,8 +547,8 @@ def get_efficiency_per_generated_comp(infolder: str) -> Dict[str, float]:
         if mol is None:
             efficiency_dict[f"compound_{i+1}"] = 0.0
         else:
-            docking_score = float(mol.GetProp('Docking_Score'))
-            num_heavy_atoms = Lipinski.HeavyAtomCount(mol)
+            docking_score = float(chemtoolkit.get_prop(mol, "Docking_Score"))
+            num_heavy_atoms = chemtoolkit.lipinski_heavy_atom_count(mol)
             efficiency_dict[f"compound_{i+1}"] = docking_score / num_heavy_atoms
 
     return efficiency_dict
@@ -1264,7 +1280,7 @@ def process_inputs(inputs: Dict[str, Any]) -> Dict[str, Any]:
     # Update vars_dict with input commands
     for key in inputs:
         vars_dict[key] = inputs[key]
-
+    vars_dict["RDKitToolkit"] = True
     return vars_dict
 
 
@@ -1282,7 +1298,7 @@ def main(**kwargs):
             del inputs[k]
 
     user_vars = process_inputs(inputs)
-    
+    plugin_managers.setup_plugin_managers(user_vars)
     # Generate figures
     generate_figures(user_vars, bool(user_vars.get("process_input_compounds", False)))
 

@@ -22,6 +22,16 @@ class DockingBase(PluginBase):
     run method that calls the abstract run_docking method.
     """
 
+    @property
+    def plugin_type_name(self) -> str:
+        """Return the user-friendly name of the plugin type."""
+        return "Docking Engine"
+
+    @property
+    def plugin_description(self) -> str:
+        """Return a brief description of the plugin type."""
+        return "Performs molecular docking simulations"
+
     def run(self, **kwargs) -> List[Compound]:
         """
         Run the docking plugin with provided arguments.

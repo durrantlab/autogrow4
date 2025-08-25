@@ -23,7 +23,7 @@ class ObabelSmiTo3DSDF(SmiTo3DSdfBase):
     functionality using OpenBabel.
     """
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line args specific to the Obabel SMILES to 3D SDF converter.
 
@@ -31,22 +31,17 @@ class ObabelSmiTo3DSDF(SmiTo3DSdfBase):
         configure the OpenBabel SMILES to 3D SDF converter.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing:
-                - The name of the argument group ("SMILES-to-3D-SDF Converter")
-                - A list with one ArgumentVars object defining the argument to
-                  enable the OpenBabel SMILES to 3D SDF converter
+            List[ArgumentVars]: A list with one ArgumentVars object defining
+            the argument to enable the OpenBabel SMILES to 3D SDF converter.
         """
-        return (
-            "SMILES-to-3D-SDF Converter",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    action="store_true",
-                    default=False,
-                    help="Enable SMILES to 3D SDF conversion using OpenBabel.",
-                )
-            ],
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Enable SMILES to 3D SDF conversion using OpenBabel. This plugin generates 3D coordinates for molecules from their SMILES strings and saves them in SDF format.",
+            )
+        ]
 
     def validate(self, params: dict):
         """

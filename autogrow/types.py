@@ -9,8 +9,7 @@ from dataclasses import dataclass, field
 from typing import Any, List, Optional
 from enum import Enum
 import json
-from rdkit import Chem
-from rdkit.Chem import Lipinski
+from autogrow.plugins.registry_base import plugin_managers
 
 
 class ScoreType(Enum):
@@ -71,8 +70,9 @@ class Compound:  # Get new id when you figure out what context this is used in
 
     def get_ligand_efficiency(self) -> float:
         try:
-            mol = Chem.MolFromSmiles(self.smiles, sanitize=False)
-            num_heavy_atoms = Lipinski.HeavyAtomCount(mol)
+            chemtoolkit = plugin_managers.ChemToolkit.toolkit
+            mol = chemtoolkit.mol_from_smiles(self.smiles, sanitize=False)
+            num_heavy_atoms = chemtoolkit.lipinski_heavy_atom_count(mol)
             return self.docking_score / num_heavy_atoms
         except:
             return 0.0
@@ -125,8 +125,11 @@ class Compound:  # Get new id when you figure out what context this is used in
         Returns:
             Compound: A Compound object created from the RDKit object.
         """
-        cmpd = Compound(smiles=Chem.MolToSmiles(rdkit_mol, isomericSmiles=False),
-                        id=rdkit_mol.GetProp('_Name'))
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
+        cmpd = Compound(
+            smiles=chemtoolkit.mol_to_smiles(rdkit_mol, isomeric_smiles=False),
+            id=chemtoolkit.get_prop(rdkit_mol, "_Name"),
+        )
         cmpd.mol_3D = rdkit_mol
         return cmpd
 
@@ -170,10 +173,8 @@ class Compound:  # Get new id when you figure out what context this is used in
         """
         Return the RDKit object representing the 3D structure of the compound.
         """
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
         try:
-            reader = Chem.SDMolSupplier(self.sdf_path)
-            for compound in reader:
-                self.mol_3D = compound
-                break
-        except:
+            self.mol_3D = chemtoolkit.mol_from_sdf_file(self.sdf_path)
+        except Exception:
             self.mol_3D = None

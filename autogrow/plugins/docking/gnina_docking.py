@@ -7,15 +7,14 @@ Classes:
 
 import __future__
 import os
-
-from autogrow.plugins.docking.vina_like_docking import VinaLikeDocking
+from autogrow.plugins.docking.vina_docking_base import VinaDockingBase
 from typing import List, Tuple
 from autogrow.config.argument_vars import ArgumentVars
-from rdkit import Chem
 from autogrow.utils.logging import log_warning
+from autogrow.plugins.registry_base import plugin_managers
 
 
-class GNINADocking(VinaLikeDocking):
+class GNINADocking(VinaDockingBase):
     """
     This module implements a docking plugin for GNINA docking software.
     """
@@ -23,36 +22,48 @@ class GNINADocking(VinaLikeDocking):
     fitness_score = ""
     additional_docking_args = ""
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments required by the GNINA docking plugin.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing the argument
-            group name and a list of ArgumentVars objects defining the
+            List[ArgumentVars]: A list of ArgumentVars objects defining the
             command-line arguments for Vina-like docking.
         """
-        args = super().add_arguments()[1]
-        args.append(ArgumentVars(
-            name="gnina_fitness_score",
-            type=str,
-            default="CNN_VS",
-            help="The fitness score to be used to guide the AutoGrow optimization process. The possible scores are:"
-                 "CNNscore, CNNaffinity, and CNN_VS.",
-        ))
-        args.append(ArgumentVars(
-            name="gnina_no_gpu",
-            action="store_true",
-            default=False,
-            help="If specified, disable GPU acceleration, even if available.",
-        ))
-        args.append(ArgumentVars(
-            name="gnina_additional_args",
-            type=str,
-            default=None,
-            help="Path to a text file containing additional parameters of the GNINA docking software.",
-        ))
-        return "GNINA Docking Options", args
+        enabling_arg = [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Enable docking with GNINA software. This plugin handles file preparation, execution, and result parsing for GNINA.",
+            )
+        ]
+        
+        gnina_specific_args = [
+            ArgumentVars(
+                name="gnina_fitness_score",
+                type=str,
+                default="CNN_VS",
+                help="The fitness score to be used to guide the AutoGrow optimization process. The possible scores are:"
+                    "CNNscore, CNNaffinity, and CNN_VS.",
+            ),
+            ArgumentVars(
+                name="gnina_no_gpu",
+                action="store_true",
+                default=False,
+                help="If specified, disable GPU acceleration, even if available.",
+            ),
+            ArgumentVars(
+                name="gnina_additional_args",
+                type=str,
+                default=None,
+                help="Path to a text file containing additional parameters of the GNINA docking software.",
+            )
+        ]
+        
+        base_args = super().add_arguments()
+        
+        return enabling_arg + gnina_specific_args + base_args
 
     def validate(self, params: dict):
         """
@@ -117,32 +128,38 @@ class GNINADocking(VinaLikeDocking):
         Args:
             lig_output_files: Path of the input ligand.
         """
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
         for lig_output_file in lig_output_files:
+            if lig_output_file is None or not os.path.exists(lig_output_file):
+                continue
             # Rename output file name to finishing with _gnina_all.sdf
             last_position = lig_output_file.rfind(".sdf")
             lig_new_filename = lig_output_file[:last_position] + "_gnina_all.sdf"
             os.rename(lig_output_file, lig_new_filename)
 
             # read the best pose from the gnina output file, and save in a new sdf file
-            reader = Chem.SDMolSupplier(lig_new_filename)
-            writer = Chem.SDWriter(lig_output_file)
+            mols = chemtoolkit.mols_from_sdf_file(lig_new_filename)
+            if not mols:
+                continue
+
+            best_compound = None
             # It is always ranked as the best one
             if self.fitness_score == "CNN_VS":
-                for compound in reader:
-                    writer.write(compound)
-                    break
+                best_compound = mols[0]
             # Search the best compound. The greater the fitness value, the better the compound.
             else:
-                best_fitness = 0
-                best_compound = None
-                for current_compound in reader:
-                    fitness_val = float(current_compound.GetProp(self.fitness_score))
-                    if fitness_val > best_fitness:
-                        best_fitness = fitness_val
-                        best_compound = current_compound
-                writer.write(best_compound)
-            # Closing writer
-            writer.close()
+                best_fitness = -1e6  # Initialize with a very small number
+                for current_compound in mols:
+                    try:
+                        fitness_val = float(chemtoolkit.get_prop(current_compound, self.fitness_score))
+                        if fitness_val > best_fitness:
+                            best_fitness = fitness_val
+                            best_compound = current_compound
+                    except (ValueError, KeyError):
+                        continue  # Skip if property is missing or not a float
+
+            if best_compound:
+                chemtoolkit.mol_to_sdf_file(best_compound, lig_output_file)
 
     def process_results_before_exit(self, predocked_cmpds, out_files):
         """
@@ -153,21 +170,27 @@ class GNINADocking(VinaLikeDocking):
             out_files (list): List of paths representing each output file of the GNINA docking software corresponding
                 to each pose.
         """
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
         # Iterate over output files to process the results
         for predocked_cmpd, out_file in zip(predocked_cmpds, out_files):
             if out_file is None or not os.path.exists(out_file):
                 # Throw out ones that failed to dock
                 log_warning(f"Failed to dock {predocked_cmpd.id}")
                 continue
+            mols = chemtoolkit.mols_from_sdf_file(out_file)
+            if not mols:
+                continue
 
-            reader = Chem.SDMolSupplier(out_file)
-            for compound in reader:
+            compound = mols[0]
+            try:
                 # Get multiplied by -1 to optimize according to the minimum value as it performs with the docking score
-                predocked_cmpd.fitness_score = float(compound.GetProp(self.fitness_score)) * -1
+                predocked_cmpd.fitness_score = float(chemtoolkit.get_prop(compound, self.fitness_score)) * -1
                 # Getting the docking score
-                predocked_cmpd.docking_score = float(compound.GetProp("minimizedAffinity"))
+                predocked_cmpd.docking_score = float(chemtoolkit.get_prop(compound, "minimizedAffinity"))
                 predocked_cmpd.sdf_path = out_file
-                break
+            except (ValueError, KeyError) as e:
+                log_warning(f"Could not parse scores from {out_file}: {e}")
+                continue
 
     def add_additional_args_docking_cmd(self, torun) -> str:
         """

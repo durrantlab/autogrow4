@@ -15,10 +15,11 @@
             "[#6;+0&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0])]-[OR0;v2;H1,-]"
         ],
         "num_reactants": 2,
-        "reaction_string": "[CR1;H2,H1X4,H0X4:1]1[O;X2][CR1;H2,H1X4,H0X4:2]1.[#6;+0&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):3]-[OR0;v2;H1,-]>>O[C:1][C:2]O-[#6:3]",
+        "reaction_string": "[CR1;H2,H1X4,H0X4:1]1[O;X2][CR1;H2,H1X4,H0X4:2]1.[#6;+0&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):3]-[OR0;v2;H1,-:4]>>O[C:1][C:2][O:4]-[#6:3]",
         "reverse_reaction_strings": [
-            "[OH][C;X4:1][C;X4:2][O;X2]-[#6;+0&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):3]>>[C:1]1O[C:2]1.[#6:3]O"
+            "[OH][C;X4;!R:1][C;X4;!R:2][O;!R:4]-[#6;+0&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):3]>>[C:1]1O[C:2]1.[#6:3][O:4]"
         ],
+        "note": "The chemical mechanism for this reaction can be SN1 or SN2 (with or without inversion of stereochemistry at the reacting carbon). The forward reaction SMARTS is defined non-stereospecifically for robustness. See https://chem.libretexts.org/Bookshelves/Organic_Chemistry/Organic_Chemistry_(Morsch_et_al.)/18%3A_Ethers_and_Epoxides_Thiols_and_Sulfides/18.06%3A_Reactions_of_Epoxides_-_Ring-opening",
         "RXN_NUM": 1
     },
     "2_Epoxide_and_Thiol": {
@@ -37,10 +38,11 @@
             "[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[SR0;X1])]-[SR0;v2;H1,-]"
         ],
         "num_reactants": 2,
-        "reaction_string": "[CR1;H2,H1X4,H0X4:1]1[O;X2][CR1;H2,H1X4,H0X4:2]1.[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[SR0;X1]):3]-[SR0;v2;H1,-]>>O[C:1][C:2]S-[#6:3]",
+        "reaction_string": "[CR1;H2,H1X4,H0X4:1]1[O;X2][CR1;H2,H1X4,H0X4:2]1.[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[SR0;X1]):3]-[SR0;v2;H1,-:4]>>O[C:1][C:2][S:4]-[#6:3]",
         "reverse_reaction_strings": [
-            "[OH][C;X4:1][C;X4:2][S;X2]-[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[SR0;X1]):3]>>[C:1]1O[C:2]1.[#6:3]S"
+            "[OH][C;X4;!R:1][C;X4;!R:2][S;X2;!R:4]-[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[SR0;X1]):3]>>[C:1]1O[C:2]1.[#6:3][S:4]"
         ],
+        "note": "The chemical mechanism for this reaction can be SN1 or SN2 (with or without inversion of stereochemistry at the reacting carbon). The forward reaction SMARTS is defined non-stereospecifically for robustness. See https://chem.libretexts.org/Bookshelves/Organic_Chemistry/Organic_Chemistry_(Morsch_et_al.)/18%3A_Ethers_and_Epoxides_Thiols_and_Sulfides/18.06%3A_Reactions_of_Epoxides_-_Ring-opening",
         "RXN_NUM": 2
     },
     "3_Alkene_Oxidized_To_Epoxide": {
@@ -58,8 +60,17 @@
         "num_reactants": 1,
         "reaction_string": "[CR0;X3,X2H1,X1H2:1]=[CR0;X3,X2H1,X1H2:2]>>[C:1]1O[C:2]1",
         "reverse_reaction_strings": [
-            "[C:1]1[O;X2][C:2]1>>[C:1]=[C:2]"
+            "[C;R1:1]1O[C;R1:2]1>>[C:1]=[C:2]",
+            "[C;H1;R1:1]([*:3])1O[C;H1;R1:2]([*:4])1>>[*:3]/[C:1]=[C:2]/[*:4]",
+            "[C;H1;R1:1]([*:3])1O[C;H1;R1:2]([*:4])1>>[*:3]/[C:1]=[C:2]\\[*:4]",
+            "[C;H0;R1:1]([*:3])([*:4])1O[C;H1;R1:2]([*:5])1>>[*:3]/[C:1]([*:4])=[C:2]/[*:5]",
+            "[C;H0;R1:1]([*:3])([*:4])1O[C;H1;R1:2]([*:5])1>>[*:3]/[C:1]([*:4])=[C:2]\\[*:5]",
+            "[C;H1;R1:1]([*:3])1O[C;H0;R1:2]([*:4])([*:5])1>>[*:3]/[C:1]=[C:2]([*:4])/[*:5]",
+            "[C;H1;R1:1]([*:3])1O[C;H0;R1:2]([*:4])([*:5])1>>[*:3]/[C:1]=[C:2]([*:4])\\[*:5]",
+            "[C;R1:1]([*:3])([*:4])1O[C;R1:2]([*:5])([*:6])1>>[*:3]/[C:1]([*:4])=[C:2]([*:5])/[*:6]",
+            "[C;R1:1]([*:3])([*:4])1O[C;R1:2]([*:5])([*:6])1>>[*:3]/[C:1]([*:4])=[C:2]([*:5])\\[*:6]"
         ],
+        "note": "This reaction is stereospecific, but a single reaction SMARTS string cannot conditionally create different stereoisomers. So here the forward reaction is general, and the reverse reactions regenerate all possible alkene precursors from an epoxide, including stereoisomers.",
         "RXN_NUM": 3
     },
     "4_Sulfonyl_Azide_and_Thio_Acid": {
@@ -98,16 +109,20 @@
         ],
         "group_smarts": [
             "[CR0;X2,X1H1]#[CR0;X2,X1H1]",
-            "[*;#6]-[$(N=[N+]=[N-]),$([N-][N+]#N)]"
+            "[*]-[$(N=[N+]=[N-]),$([N-][N+]#N)]"
         ],
         "num_reactants": 2,
-        "reaction_string": "[CR0;X2,X1H1:2]#[CR0;X2,X1H1:3].[*;#6:1]-[$(N=[N+]=[N-]),$([N-][N+]#N)]>>[c:2]1:[c:3]:[n](-[*;#6:1]):[n]:[n]:1",
+        "ignore_double_bond_stereo_on_reverse": true,
+
+        "reaction_string": "[CR0;X2,X1H1:2]#[CR0;X2,X1H1:3].[*:1]-[$(N=[N+]=[N-]),$([N-][N+]#N)]>>[c:2]1:[c:3]:[n](-[*:1]):[n]:[n]:1",
         "reverse_reaction_strings": [
-            "[c:2]1:[c:3]:[n](-[*:1]):[n]:[n]:1>>[CR0;X2,X1H1:2]#[CR0;X2,X1H1:3].[*;#6:1]-N=[N+]=[N-]",
-            "[c:3]1:[c:2]:[n](-[*:1]):[n]:[n]:1>>[CR0;X2,X1H1:2]#[CR0;X2,X1H1:3].[*;#6:1]-N=[N+]=[N-]",
-            "[C:2]1=[C:3]-[N](-[*:1])-[N]=[N]1>>[CR0;X2,X1H1:2]#[CR0;X2,X1H1:3].[*;#6:1]-N=[N+]=[N-]",
-            "[C:3]1=[C:2]-[N](-[*:1])-[N]=[N]1>>[CR0;X2,X1H1:2]#[CR0;X2,X1H1:3].[*;#6:1]-N=[N+]=[N-]"
+            "[c:2]1:[c:3]:[n](-[*:1]):[n]:[n]:1>>[CR0;X2,X1H1:2]#[CR0;X2,X1H1:3].[*:1]-N=[N+]=[N-]",
+            "[c:3]1:[c:2]:[n](-[*:1]):[n]:[n]:1>>[CR0;X2,X1H1:2]#[CR0;X2,X1H1:3].[*:1]-N=[N+]=[N-]",
+            "[C:2]1=[C:3]-[N](-[*:1])-[N]=[N]1>>[CR0;X2,X1H1:2]#[CR0;X2,X1H1:3].[*:1]-N=[N+]=[N-]",
+            "[C:3]1=[C:2]-[N](-[*:1])-[N]=[N]1>>[CR0;X2,X1H1:2]#[CR0;X2,X1H1:3].[*:1]-N=[N+]=[N-]"
         ],
+        "note": "This reaction is subject to a known RDKit limitation where pre-existing stereochemistry on a reactant ('spectator stereochemistry') may be lost during the reverse reaction.",
+
         "RXN_NUM": 5
     },
     "6_Alcohol_To_Azide": {
@@ -124,9 +139,11 @@
         ],
         "num_reactants": 1,
         "reaction_string": "[#6;+0&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):1]-[OR0;v2;H1,-]>>[N-]=[N+]=N-[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):1]",
+
         "reverse_reaction_strings": [
             "[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):1]-[$(N=[N+]=[N-]),$([N-][N+]#N)]>>[#6:1]-[O;H1]"
         ],
+        "note": "The chemical mechanism for this reaction (e.g., via Mitsunobu or a tosylate intermediate) proceeds with inversion of stereochemistry. However, the forward reaction SMARTS is defined non-stereospecifically for robustness. See https://commonorganicchemistry.com/Rxn_Pages/Alcohol_to_Azide/Alcohol_to_Azide_Index.htm",
         "RXN_NUM": 6
     },
     "7_Alcohol_To_Cyanide": {
@@ -142,10 +159,12 @@
             "[#6;+0&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0])]-[OR0;v2;H1,-]"
         ],
         "num_reactants": 1,
+        "ignore_chiral_stereo_on_reverse": true,
         "reaction_string": "[#6;+0&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):1]-[OR0;v2;H1,-]>>N#C-[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):1]",
         "reverse_reaction_strings": [
             "N#C-[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):1]>>[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):1]-[OR0;H1,-]"
         ],
+        "note": "The chemical mechanism for this reaction (e.g., via Mitsunobu or a tosylate intermediate) proceeds with inversion of stereochemistry. However, the forward reaction SMARTS is defined non-stereospecifically for robustness. See https://www.masterorganicchemistry.com/2012/07/04/the-sn2-mechanism/",
         "RXN_NUM": 7
     },
     "8_Primary_Amine_Oxidized_To_an_Azide": {
@@ -161,10 +180,12 @@
             "[#7;$([H3+]),$([H2R0;!+])]-[#6]"
         ],
         "num_reactants": 1,
+        "ignore_double_bond_stereo_on_reverse": true,
         "reaction_string": "[#7;$([H3+]),$([H2R0;!+])]-[#6:1]>>[#6:1]N=[N+]=[N-]",
         "reverse_reaction_strings": [
             "[*;#6:1]-[$(N=[N+]=[N-]),$([N-][N+]#N)]>>[#7;$([H3+]),$([H2R0;!+])]-[#6:1]"
         ],
+        "note": "This reaction is subject to a known RDKit limitation where pre-existing stereochemistry on a reactant ('spectator stereochemistry') may be lost during the reverse reaction.",
         "RXN_NUM": 8
     },
     "9_Primary_Amine_Oxidized_To_an_Isocyanate": {
@@ -180,10 +201,13 @@
             "[#7;$([H3+]),$([H2R0;!+])]-[#6]"
         ],
         "num_reactants": 1,
+        "ignore_double_bond_stereo_on_reverse": true,
         "reaction_string": "[#7;$([H3+]),$([H2R0;!+])]-[#6:1]>>[#6:1][N;X2]=C=[O;X1]",
         "reverse_reaction_strings": [
             "[#6:1][N;X2]=C=[O;X1]>>[#7;$([H3+]),$([H2R0;!+])]-[#6:1]"
         ],
+        "note": "This reaction is subject to a known RDKit limitation where pre-existing stereochemistry on a reactant ('spectator stereochemistry') may be lost during the reverse reaction.",
+
         "RXN_NUM": 9
     },
     "10_Primary_Amine_Oxidized_To_an_Isothiocyanate": {
@@ -199,9 +223,9 @@
             "[#7;$([H3+]),$([H2R0;!+])]-[#6]"
         ],
         "num_reactants": 1,
-        "reaction_string": "[#7;$([H3+]),$([H2R0;!+])]-[#6:1]>>[#6:1][N;X2]=C=[S;X1]",
+        "reaction_string": "[#7;$([H3+]),$([H2R0;!+]):2]-[#6:1]>>[#6:1][N;X2:2]=C=[S;X1]",
         "reverse_reaction_strings": [
-            "[#6:1][N;X2]=C=[S;X1]>>[#7;$([H3+]),$([H2R0;!+])]-[#6:1]"
+            "[#6:1]-[N;X2:2]=C=[S;X1]>>[#7;$([H3+]),$([H2R0;!+]):2]-[#6:1]"
         ],
         "RXN_NUM": 10
     },
@@ -215,13 +239,16 @@
             "Azide_1R_clickchem"
         ],
         "group_smarts": [
-            "[*;#6]-[$(N=[N+]=[N-]),$([N-][N+]#N)]"
+            "[*]-[$(N=[N+]=[N-]),$([N-][N+]#N)]"
         ],
         "num_reactants": 1,
-        "reaction_string": "[*;#6:1]-[$(N=[N+]=[N-]),$([N-][N+]#N)]>>[NH2][*;#6:1]",
+        "ignore_double_bond_stereo_on_reverse": true,
+
+        "reaction_string": "[*:1]-[$(N=[N+]=[N-]),$([N-][N+]#N)]>>[NH2][*;#6:1]",
         "reverse_reaction_strings": [
             "[NH2][*;#6:1]>>[*;#6:1]-N=[N+]=[N-]"
         ],
+        "note": "This reaction is subject to a known RDKit limitation where pre-existing stereochemistry on a reactant ('spectator stereochemistry') may be lost during the reverse reaction.",
         "RXN_NUM": 11
     },
     "12_Carbonochloridate_and_Amine": {
@@ -259,15 +286,14 @@
             "Amine_2R_clickchem"
         ],
         "group_smarts": [
-            "[*;!O]-[$([CR0;X3](=[OR0&D1])[OR0&H1]),$([CR0;X3](=[OR0&D1])[OR0-])]",
+            "[*;!O]-[C;X3](=[OR0&D1])[OR0;H1,H0-]",
             "[#7&X3,#7&X2;H2,H1;!$([#7]=[*]);!$([#7][#6]=[#8])]"
         ],
         "note": "I assume an amide nitrogen is not sufficiently nucleophilic to participate in this reaction.",
         "num_reactants": 2,
-        "reaction_string": "[*;!O:1]-[$([CR0;X3](=[OR0&D1])[OR0&H1]),$([CR0;X3](=[OR0&D1])[OR0-])].[#7&X3,#7&X2;H2,H1;!$([#7]=[*]);!$([#7][#6]=[#8]):2]>>[*;!O:1]C(=O)-[#7+0:2]",
-        "TODO_delete_in_time": "[*;!O:1]C(=O)-[#7+0:2]>>[*;!O:1]-C(=O)O.[#7&X3,#7&X2;H2,H1;!$([#7]=[*]);!$([#7][#6]=[#8]):2]",
+        "reaction_string": "[*;!O:1]-[C;X3:100](=[OR0&D1])[OR0;H1,H0-].[#7&X3,#7&X2;H2,H1;!$([#7]=[*]);!$([#7][#6]=[#8]):2]>>[*;!O:1][C:100](=O)[#7+0:2]",
         "reverse_reaction_strings": [
-            "[*;!O:1][C;X3](=[O;X1])[#7;X3;H0,H1:2]>>[*;!O:1]C(=O)O.[#7H:2]"
+            "[*;!O:1][C:100](=[O;X1])[#7;X3;H0,H1:2]>>[*;!O:1][C:100](=O)O.[#7H:2]"
         ],
         "RXN_NUM": 13
     },
@@ -283,14 +309,16 @@
             "Alcohol_clickchem"
         ],
         "group_smarts": [
-            "[*;!O]-[$([CR0;X3](=[OR0&D1])[OR0&H1]),$([CR0;X3](=[OR0&D1])[OR0-])]",
+            "[*;!O]-[C;X3](=[OR0&D1])[OR0;H1,H0-]",
             "[#6;+0&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0])]-[OR0;v2;H1,-]"
         ],
         "num_reactants": 2,
-        "reaction_string": "[*;!O:1]-[$([CR0;X3](=[OR0&D1])[OR0&H1]),$([CR0;X3](=[OR0&D1])[OR0-])].[#6;+0&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):2]-[OR0;v2;H1,-]>>[*;!O:1]C(=O)-O[#6:2]",
+        "ignore_double_bond_stereo_on_reverse": true,
+        "reaction_string": "[*;!O:1]-[C;X3:100](=[OR0&D1])[OR0;H1,H0-].[#6;+0&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):2]-[OR0;v2;H1,-]>>[*;!O:1][C:100](=O)-O[#6:2]",
         "reverse_reaction_strings": [
-            "[*;!O:1][C;X3](=[O;X1])[O;X2][#6&$([CR0,R&X3,R&X4]):2]>>[*;!O:1]-[CR0;X3](=[OR0&D1])[OR0&H1].[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):2][OR0;H1]"
+            "[*;!O:1][C:100](=[O;X1])[O;X2][#6&$([CR0,R&X3,R&X4]):2]>>[*;!O:1][CR0;X3:100](=[OR0&D1])[OR0&H1].[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):2][OR0;H1]"
         ],
+        "note": "This reaction is subject to a known RDKit limitation where pre-existing stereochemistry on a reactant ('spectator stereochemistry') may be lost during the reverse reaction.",
         "RXN_NUM": 14
     },
     "15_Carboxylate_and_Thiol": {
@@ -305,13 +333,13 @@
             "Thiol_1R_clickchem"
         ],
         "group_smarts": [
-            "[*;!O]-[$([CR0;X3](=[OR0&D1])[OR0&H1]),$([CR0;X3](=[OR0&D1])[OR0-])]",
+            "[*;!O]-[C;X3](=[OR0&D1])[OR0;H1,H0-]",
             "[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[SR0;X1])]-[SR0;v2;H1,-]"
         ],
         "num_reactants": 2,
-        "reaction_string": "[*;!O:1]-[$([CR0;X3](=[OR0&D1])[OR0&H1]),$([CR0;X3](=[OR0&D1])[OR0-])].[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[SR0;X1]):2]-[SR0;v2;H1,-]>>[*;!O:1]C(=O)-S[#6:2]",
+        "reaction_string": "[*;!O:1]-[C;X3:100](=[OR0&D1])[OR0;H1,H0-].[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[SR0;X1]):2]-[SR0;v2;H1,-]>>[*;!O:1][C:100](=O)-S[#6:2]",
         "reverse_reaction_strings": [
-            "[*;!O:1][C;X3](=[O;X1])[S;X2][#6&$([CR0,R&X3,R&X4]):2]>>[*;!O:1][CR0;X3](=[OR0&D1])[OR0&H1].[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[SR0]):2][SR0;D1;H1]"
+            "[*;!O:1][C:100](=[O;X1])[S;X2][#6&$([CR0,R&X3,R&X4]):2]>>[*;!O:1][CR0;X3:100](=[OR0&D1])[OR0&H1].[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[SR0]):2][SR0;D1;H1]"
         ],
         "RXN_NUM": 15
     },
@@ -325,12 +353,12 @@
             "Carboxylate_clickchem"
         ],
         "group_smarts": [
-            "[*;!O]-[$([CR0;X3](=[OR0&D1])[OR0&H1]),$([CR0;X3](=[OR0&D1])[OR0-])]"
+            "[*;!O]-[C;X3](=[OR0&D1])[OR0;H1,H0-]"
         ],
         "num_reactants": 1,
-        "reaction_string": "[*;!O:1]-[$([CR0;X3](=[OR0&D1])[OR0&H1]),$([CR0;X3](=[OR0&D1])[OR0-])]>>[*;!O:1]C(=O)C#N",
+        "reaction_string": "[*;!O:1]-[C;X3:100](=[OR0&D1])[OR0;H1,H0-]>>[*;!O:1][C:100](=O)C#N",
         "reverse_reaction_strings": [
-            "[*;!O:1][C;X3](=[O;X1])[C;X2]#[N;X1]>>[*;!O:1]-[CR0;X3](=[OR0&D1])[OR0&H1]"
+            "[*;!O:1][C:100](=[O;X1])[C;X2]#[N;X1]>>[*;!O:1]-[CR0;X3:100](=[OR0&D1])[OR0&H1]"
         ],
         "RXN_NUM": 16
     },
@@ -344,12 +372,12 @@
             "Carboxylate_clickchem"
         ],
         "group_smarts": [
-            "[*;!O]-[$([CR0;X3](=[OR0&D1])[OR0&H1]),$([CR0;X3](=[OR0&D1])[OR0-])]"
+            "[*;!O]-[C;X3](=[OR0&D1])[OR0;H1,H0-]"
         ],
         "num_reactants": 1,
-        "reaction_string": "[*;!O:1]-[$([CR0;X3](=[OR0&D1])[OR0&H1]),$([CR0;X3](=[OR0&D1])[OR0-])]>>[*;!O:1]C(=O)-N=[N+]=[N-]",
+        "reaction_string": "[*;!O:1]-[C;X3:100](=[OR0&D1])[OR0;H1,H0-]>>[*;!O:1][C:100](=O)-N=[N+]=[N-]",
         "reverse_reaction_strings": [
-            "[*;!O:1][C;X3](=[O;X1])-[$(N=[N+]=[N-]),$([N-][N+]#N)]>>[*;!O:1]-[CR0;X3](=[OR0&D1])[OR0&H1]"
+            "[*;!O:1][C:100](=[O;X1])-[$(N=[N+]=[N-]),$([N-][N+]#N)]>>[*;!O:1]-[CR0;X3:100](=[OR0&D1])[OR0&H1]"
         ],
         "RXN_NUM": 17
     },
@@ -368,16 +396,17 @@
             "[Cl,Br,I;D1][$([CX4,c]),$([#6X3]=[O,S])]",
             "[#7&X3,#7&X2;H2,H1;!$([#7]=[*]);!$([#7][#6]=[#8])]"
         ],
-        "note": "I assume an amide nitrogen is not sufficiently nucleophilic to participate in this reaction.",
+        "note": "Nucleophilic substitution of halides by amines. Covers both aromatic (c-n, c-N) and aliphatic (C-n, C-N) cases. The chemical mechanism for this reaction (SN2) proceeds with inversion of stereochemistry at the reacting sp3 carbon center. However, the forward reaction SMARTS is defined non-stereospecifically for robustness, as it must account for cases where the reaction is stereocenter-destroying (i.e., the product is achiral). See https://chem.libretexts.org/Bookshelves/Organic_Chemistry/Organic_Chemistry_(Morsch_et_al.)/24%3A_Amines_and_Heterocycles/24.06%3A_Synthesis_of_Amines . Note that I assume an amide nitrogen is not sufficiently nucleophilic to participate in this reaction.",
         "num_reactants": 2,
         "reaction_string": "[Cl,Br,I;D1][$([CX4,c]),$([#6X3]=[O,S]):1].[#7&X3,#7&X2;H2,H1;!$([#7]=[*]);!$([#7][#6]=[#8]):2]>>[#6:1]-[#7+0:2]",
         "reverse_reaction_strings": [
-            "[$([CX4,c]),$([#6X3]=[O,S]):1]-[#7;X3;H0,H1:2]>>[$([CX4,c]),$([#6X3]=[O,S]):1]Cl.[#7H:2]",
-            "[$([CX4,c]),$([#6X3]=[O,S]):1]-[#7;X3;H0,H1:2]>>[$([CX4,c]),$([#6X3]=[O,S]):1]Br.[#7H:2]",
-            "[$([CX4,c]),$([#6X3]=[O,S]):1]-[#7;X3;H0,H1:2]>>[$([CX4,c]),$([#6X3]=[O,S]):1]I.[#7H:2]"
+            "[$([#6X3]=[O,S]):1]-[#7;+0;X3;H0,H1;!$([#7]([#6]=[O,S])[#6]=[O,S]):2]>>[$([#6X3]=[O,S]):1]Cl.[#7H:2]",
+            "[$([#6X3]=[O,S]):1]-[#7;+0;X3;H0,H1;!$([#7]([#6]=[O,S])[#6]=[O,S]):2]>>[$([#6X3]=[O,S]):1]Br.[#7H:2]",
+            "[$([#6X3]=[O,S]):1]-[#7;+0;X3;H0,H1;!$([#7]([#6]=[O,S])[#6]=[O,S]):2]>>[$([#6X3]=[O,S]):1]I.[#7H:2]",
+            "[$([CX4,c]):1]-[#7;+0;X3;H0,H1;!$([#7][#6]=[O]):2]>>[$([CX4,c]):1]Cl.[#7H:2]",
+            "[$([CX4,c]):1]-[#7;+0;X3;H0,H1;!$([#7][#6]=[O]):2]>>[$([CX4,c]):1]Br.[#7H:2]",
+            "[$([CX4,c]):1]-[#7;+0;X3;H0,H1;!$([#7][#6]=[O]):2]>>[$([CX4,c]):1]I.[#7H:2]"
         ],
-        "notes": "Nucleophilic substitution of halides by amines. Covers both aromatic (c-n, c-N) and aliphatic (C-n, C-N) cases. You will get some errors, but among valid smiles will be correct reverse products.",
-        "note2": "I'm worried that the reverse reacton here is so different than the forward reaction. Good to revisit.",
         "RXN_NUM": 18
     },
     "19_Halide_and_Alcohol": {
@@ -398,10 +427,11 @@
         "num_reactants": 2,
         "reaction_string": "[Cl,Br,I;D1][$([CX4,c]),$([#6X3]=[O,S]):1].[#6;+0&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):2]-[OR0;v2;H1,-]>>[#6:1]-O-[#6:2]",
         "reverse_reaction_strings": [
-            "[$([CX4,c]),$([#6X3]=[O,S]):1]-[O;X2]-[#6&$([CR0,R&X3,R&X4]):2]>>[$([CX4,c]),$([#6X3]=[O,S]):1]Cl.[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):2]-[OR0;H1]",
-            "[$([CX4,c]),$([#6X3]=[O,S]):1]-[O;X2]-[#6&$([CR0,R&X3,R&X4]):2]>>[$([CX4,c]),$([#6X3]=[O,S]):1]Br.[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):2]-[OR0;H1]",
-            "[$([CX4,c]),$([#6X3]=[O,S]):1]-[O;X2]-[#6&$([CR0,R&X3,R&X4]):2]>>[$([CX4,c]),$([#6X3]=[O,S]):1]I.[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):2]-[OR0;H1]"
+            "[$([CX4,c]),$([#6X3]=[O,S]):1]-[O;X2;!R]-[#6;+0&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):2]>>[$([CX4,c]),$([#6X3]=[O,S]):1]Cl.[#6;+0&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):2]-[OR0;H1]",
+            "[$([CX4,c]),$([#6X3]=[O,S]):1]-[O;X2;!R]-[#6;+0&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):2]>>[$([CX4,c]),$([#6X3]=[O,S]):1]Br.[#6;+0&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):2]-[OR0;H1]",
+            "[$([CX4,c]),$([#6X3]=[O,S]):1]-[O;X2;!R]-[#6;+0&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):2]>>[$([CX4,c]),$([#6X3]=[O,S]):1]I.[#6;+0&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):2]-[OR0;H1]"
         ],
+        "note": "The chemical mechanism for this reaction (SN2) proceeds with inversion of stereochemistry at the reacting sp3 carbon center. However, the forward reaction SMARTS is defined non-stereospecifically for robustness, as it must account for cases where the reaction is stereocenter-destroying (i.e., the product is achiral). See https://chem.libretexts.org/Bookshelves/Organic_Chemistry/Supplemental_Modules_(Organic_Chemistry)/Ethers/Synthesis_of_Ethers/Williamson_Ether_Synthesis",
         "RXN_NUM": 19
     },
     "20_Halide_and_Thiol": {
@@ -426,6 +456,7 @@
             "[$([CX4,c]),$([#6X3]=[O,S]):1]-[S;X2]-[#6&$([CR0,R&X3,R&X4]):2]>>[$([CX4,c]),$([#6X3]=[O,S]):1]Br.[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[SR0]):2]-[SR0;H1]",
             "[$([CX4,c]),$([#6X3]=[O,S]):1]-[S;X2]-[#6&$([CR0,R&X3,R&X4]):2]>>[$([CX4,c]),$([#6X3]=[O,S]):1]I.[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[SR0]):2]-[SR0;H1]"
         ],
+        "note": "The chemical mechanism for this reaction (SN2) proceeds with inversion of stereochemistry at the reacting sp3 carbon center. However, the forward reaction SMARTS is defined non-stereospecifically for robustness, as it must account for cases where the reaction is stereocenter-destroying (i.e., the product is achiral). The 'ignore_chiral_stereo_on_reverse' flag should be used for validation. See https://chem.libretexts.org/Bookshelves/Organic_Chemistry/Supplemental_Modules_(Organic_Chemistry)/Ethers/Synthesis_of_Ethers/Williamson_Ether_Synthesis",
         "RXN_NUM": 20
     },
     "21_Halide_To_Cyanide": {
@@ -441,12 +472,15 @@
             "[Cl,Br,I;D1][$([CX4,c]),$([#6X3]=[O,S])]"
         ],
         "num_reactants": 1,
+        "ignore_chiral_stereo_on_reverse": true,
+
         "reaction_string": "[Cl,Br,I;D1][$([CX4,c]),$([#6X3]=[O,S]):1]>>[#6:1]C#N",
         "reverse_reaction_strings": [
             "[$([CX4,c]),$([#6X3]=[O,S]):1]-C#N>>[$([CX4,c]),$([#6X3]=[O,S]):1]Cl",
             "[$([CX4,c]),$([#6X3]=[O,S]):1]-C#N>>[$([CX4,c]),$([#6X3]=[O,S]):1]Br",
             "[$([CX4,c]),$([#6X3]=[O,S]):1]-C#N>>[$([CX4,c]),$([#6X3]=[O,S]):1]I"
         ],
+        "note": "The chemical mechanism for this reaction (SN2) proceeds with inversion of stereochemistry at the reacting sp3 carbon center. However, the forward reaction SMARTS is defined non-stereospecifically for robustness, as it must account for cases where the reaction is stereocenter-destroying (i.e., the product is achiral). See https://www.masterorganicchemistry.com/2012/07/04/the-sn2-mechanism/",
         "RXN_NUM": 21
     },
     "22_Halide_To_Azide": {
@@ -468,6 +502,7 @@
             "[$([CX4,c]),$([#6X3]=[O,S]):1]-[$(N=[N+]=[N-]),$([N-][N+]#N)]>>[$([CX4,c]),$([#6X3]=[O,S]):1]Br",
             "[$([CX4,c]),$([#6X3]=[O,S]):1]-[$(N=[N+]=[N-]),$([N-][N+]#N)]>>[$([CX4,c]),$([#6X3]=[O,S]):1]I"
         ],
+        "note": "The chemical mechanism for this reaction (SN2) proceeds with inversion of stereochemistry at the reacting sp3 carbon center. However, the forward reaction SMARTS is defined non-stereospecifically for robustness, as it must account for cases where the reaction is stereocenter-destroying (i.e., the product is achiral). See https://www.masterorganicchemistry.com/2018/06/29/some-reactions-of-azides/",
         "RXN_NUM": 22
     },
     "23_Ester_and_Amine": {
@@ -494,7 +529,7 @@
         "reaction_string": "[*;#6:1]C(=O)-[#8][*].[#7&X3,#7&X2;H2,H1;!$([#7]=[*]);!$([#7][#6]=[#8]):2]>>[*;#6:1]C(=O)-[#7+0:2]",
         "note2": "The ester group can be anything. Let's pick just the simplest one (C) for now.  Also, if the ester is in a ring (lactone), it cannot be reversed. The reversed product will be a linear ester. So skipping that case.",
         "reverse_reaction_strings": [
-            "[*;#6:1][C;X3](=[O;X1])[#7;X3;H0,H1:2]>>[*;#6:1]C(=O)OC.[#7H:2]"
+            "[*;#6:1][C;X3;R0](=[O;X1])[#7;X3;H0,H1:2]>>[*;#6:1]C(=O)OC.[#7H:2]"
         ],
         "RXN_NUM": 23
     },
@@ -514,14 +549,15 @@
             "[#6;+0&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0])]-[OR0;v2;H1,-]"
         ],
         "num_reactants": 2,
+        "ignore_double_bond_stereo_on_reverse": true,
         "debug_prereaction": [
             "[*;#6:1]C(=O)O[*]>>[*;#6:1]C(=O)OC"
         ],
         "reverse_reaction_exception": "[*;#6][C;R](=O)-[#8;R][*]",
         "reaction_string": "[*;#6:1]C(=O)-[#8][*].[#6;+0&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):2]-[OR0;v2;H1,-]>>[*;#6:1]C(=O)-O[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):2]",
-        "note": "The ester group can be anything. Let's pick just the simplest one (C) for now. Also, if the ester is in a ring (lactone), it cannot be reversed. The reversed product will be a linear ester. So skipping that case.",
+        "note": "The ester group can be anything. Let's pick just the simplest one (C) for now. Also, if the ester is in a ring (lactone), it cannot be reversed. The reversed product will be a linear ester. So skipping that case. Note that this works with enols, though it is not clear to me if that is actually chemically feasible. This reaction is also subject to a known RDKit limitation where pre-existing stereochemistry on a reactant ('spectator stereochemistry') may be lost during the reverse reaction.",
         "reverse_reaction_strings": [
-            "[*;#6:1][C;X3](=[O;X1])[O;X2][#6&$([CR0,R&X3,R&X4]):2]>>[*;#6:1][C;X3](=[O;X1])[O;X2]C.[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):2]-[OR0;H1]"
+            "[*;#6:1][C;X3;R0](=[O;X1])[O;X2][#6&$([CR0,R&X3,R&X4]):2]>>[*;#6:1][C;X3](=[O;X1])[O;X2]C.[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):2]-[OR0;H1]"
         ],
         "RXN_NUM": 24
     },
@@ -548,7 +584,7 @@
         "reaction_string": "[*;#6:1]C(=O)-[#8][*].[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[SR0;X1]):2]-[SR0;v2;H1,-]>>[*;#6:1]C(=O)-S[CR0&$([#6])&!$([#6]=O):2]",
         "note": "The ester group can be anything. Let's pick just the simplest one (C) for now. Also, if the ester is in a ring (lactone), it cannot be reversed. The reversed product will be a linear ester. So skipping that case.",
         "reverse_reaction_strings": [
-            "[*;#6:1][C;X3](=[O;X1])[S;X2][#6&$([CR0,R&X3,R&X4]):2]>>[*;#6:1][C;X3](=[O;X1])[O;X2]C.[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[SR0]):2]-[SR0;H1]"
+            "[*;#6:1][C;X3;R0](=[O;X1])[S;X2][#6&$([CR0,R&X3,R&X4]):2]>>[*;#6:1][C;X3](=[O;X1])[O;X2]C.[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[SR0]):2]-[SR0;H1]"
         ],
         "RXN_NUM": 25
     },
@@ -574,8 +610,8 @@
         ],
         "reaction_string": "[*:1]C(=O)-[O;R0]-C(=O)[*].[#7&X3,#7&X2;H2,H1;!$([#7]=[*]);!$([#7][#6]=[#8]):2]>>[*:1]C(=O)-[#7+0:2]",
         "reverse_reaction_strings": [
-            "[*:1]C(=O)-[#7;X3;H0,H1:2]>>[*:1]C(=O)-[O;R0]-C(=O)C.[#7H:2]",
-            "[*:1]C(=O)-[n:2]>>[*:1]C(=O)-[O;R0]-C(=O)C.[nH:2]"
+            "[*;!c:1][C;R0](=O)-[#7;X3;H0,H1:2]>>[*:1]C(=O)-[O;R0]-C(=O)C.[#7H:2]",
+            "[*;!c:1][C;R0](=O)-[n:2]>>[*:1]C(=O)-[O;R0]-C(=O)C.[nH:2]"
         ],
         "RXN_NUM": 26
     },
@@ -595,13 +631,15 @@
             "[#6;+0&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0])]-[OR0;v2;H1,-]"
         ],
         "num_reactants": 2,
+        "ignore_double_bond_stereo_on_reverse": true,
         "debug_prereaction": [
             "[*:1]C(=O)-[O;R0]-C(=O)[*]>>[*:1]C(=O)OC(=O)C"
         ],
         "reaction_string": "[*:1]C(=O)-[O;R0]-C(=O)[*].[#6;+0&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):2]-[OR0;v2;H1,-]>>[*:1]C(=O)-O[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):2]",
         "reverse_reaction_strings": [
-            "[*:1]C(=O)-O[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):2]>>[*:1]C(=O)-[O;R0]-C(=O)C.[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):2]-[OR0;H1]"
+            "[*:1][C;R0](=O)-O[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):2]>>[*:1]C(=O)-[O;R0]-C(=O)C.[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):2]-[OR0;H1]"
         ],
+        "note": "Note that this works with enols, though it is not clear to me if that is actually chemically feasible. The reaction is also subject to a known RDKit limitation where pre-existing stereochemistry on a reactant ('spectator stereochemistry') may be lost during the reverse reaction.",
         "RXN_NUM": 27
     },
     "28_Acid_Anhydride_Noncyclic_and_Thiol": {
@@ -625,7 +663,7 @@
         ],
         "reaction_string": "[*:1]C(=O)-[O;R0]-C(=O)[*].[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[SR0;X1]):2]-[SR0;v2;H1,-]>>[*:1]C(=O)-S[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[SR0]):2]",
         "reverse_reaction_strings": [
-            "[*:1]C(=O)-S[#6&$([CR0,R&X3,R&X4]):2]>>[*:1]C(=O)-[O;R0]-C(=O)C.[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[SR0]):2]-[SR0;H1]"
+            "[*:1][C;R0](=O)-S[#6&$([CR0,R&X3,R&X4]):2]>>[*:1]C(=O)-[O;R0]-C(=O)C.[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[SR0]):2]-[SR0;H1]"
         ],
         "RXN_NUM": 28
     },
@@ -647,7 +685,7 @@
         ],
         "reaction_string": "[*:1]C(=O)-[O;R0]-C(=O)[*]>>[*:1]C(=O)C#N",
         "reverse_reaction_strings": [
-            "[*:1]C(=O)C#N>>[*:1]C(=O)-[O;R0]-C(=O)C"
+            "[*:1][C;R0](=O)C#N>>[*:1]C(=O)-[O;R0]-C(=O)C"
         ],
         "RXN_NUM": 29
     },
@@ -669,8 +707,8 @@
         ],
         "reaction_string": "[*:1]C(=O)-[O;R0]-C(=O)[*]>>[*:1]C(=O)-N=[N+]=[N-]",
         "reverse_reaction_strings": [
-            "[*:1]C(=O)-N=[N+]=[N-]>>[*:1]C(=O)-[O;R0]-C(=O)C",
-            "[*:1]C(=O)[N-][N+]#[N]>>[*:1]C(=O)-[O;R0]-C(=O)C"
+            "[*:1][C;R0](=O)-N=[N+]=[N-]>>[*:1]C(=O)-[O;R0]-C(=O)C",
+            "[*:1][C;R0](=O)[N-][N+]#[N]>>[*:1]C(=O)-[O;R0]-C(=O)C"
         ],
         "RXN_NUM": 30
     },
@@ -689,12 +727,13 @@
             "[#6][N;X2]=C=[O;X1]",
             "[#7&X3,#7&X2;H2,H1;!$([#7]=[*]);!$([#7][#6]=[#8])]"
         ],
-        "note": "I assume an amide nitrogen is not sufficiently nucleophilic to participate in this reaction.",
         "num_reactants": 2,
+        "ignore_double_bond_stereo_on_reverse": true,
         "reaction_string": "[#6:1][N;X2]=C=[O;X1].[#7&X3,#7&X2;H2,H1;!$([#7]=[*]);!$([#7][#6]=[#8]):2]>>[#6:1]N-C(=O)-[#7+0:2]",
         "reverse_reaction_strings": [
             "[#6:1][N;X3]-[C;X3](=[O;X1])-[#7;X3;H0,H1:2]>>[#6:1][N;X2]=C=[O;X1].[#7;H1,$([nH]):2]"
         ],
+        "note": "I assume an amide nitrogen is not sufficiently nucleophilic to participate in this reaction. Also, this reaction is subject to a known RDKit limitation where pre-existing stereochemistry on a reactant ('spectator stereochemistry') may be lost during the reverse reaction.",
         "RXN_NUM": 31
     },
     "32_Isothiocyanate_and_Amine": {
@@ -736,9 +775,10 @@
             "[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[SR0;X1])]-[SR0;v2;H1,-]"
         ],
         "num_reactants": 2,
+        "ignore_double_bond_stereo_on_reverse": true,
         "reaction_string": "[#6:1][N;X2]=C=[O;X1].[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[SR0;X1]):2]-[SR0;v2;H1,-]>>[#6:1]N-C(=O)-S[#6:2]",
         "reverse_reaction_strings": [
-            "[#6:1][N;X3]-[C;X3](=[O;X1])-S[#6:2]>>[#6:1][N;X2]=C=[O;X1].[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[SR0]):2]-[SR0;H1]"
+            "[#6:1][N;X3]-[C;X3](=[O;X1])-S[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[SR0;X1]):2]>>[#6:1][N;X2]=C=[O;X1].[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[SR0;X1]):2]-[SR0;v2;H1,-]"
         ],
         "RXN_NUM": 33
     },
@@ -780,9 +820,9 @@
             "[#6;+0&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0])]-[OR0;v2;H1,-]"
         ],
         "num_reactants": 2,
-        "reaction_string": "[#6:1][N;X2]=C=[O;X1].[#6;+0&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):2]-[OR0;v2;H1,-]>>[#6:1]N-C(=O)-O[#6:2]",
+        "reaction_string": "[#6:1][N;X2:3]=[C:5]=[O;X1:6].[#6;+0&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):2]-[OR0;v2;H1,-:4]>>[#6:1]-[N;H1:3]-[C:5](=[O:6])-[O:4]-[#6:2]",
         "reverse_reaction_strings": [
-            "[#6:1][N;X3]-[C;X3](=[O;X1])-[O;X2][#6:2]>>[#6:1][N;X2]=C=[O;X1].[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):2]-[OR0;H1]"
+            "[#6:1]-[N;H1:3]-[C;X3:5](=[O;X1:6])-[O;X2:4]-[#6;+0&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):2]>>[#6:1]-[N;X2:3]=[C:5]=[O;X1:6].[#6;+0&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):2]-[OR0;H1:4]"
         ],
         "RXN_NUM": 35
     },
@@ -802,9 +842,9 @@
             "[#6;+0&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0])]-[OR0;v2;H1,-]"
         ],
         "num_reactants": 2,
-        "reaction_string": "[#6:1][N;X2]=C=[S;X1].[#6;+0&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):2]-[OR0;v2;H1,-]>>[#6:1]N-C(=S)-O[#6:2]",
+        "reaction_string": "[#6:1][N;X2:3]=[C:5]=[S;X1:6].[#6;+0&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):2]-[OR0;v2;H1,-:4]>>[#6:1]-[N;H1:3]-[C:5](=[S:6])-[O:4]-[#6:2]",
         "reverse_reaction_strings": [
-            "[#6:1][N;X3]-[C;X3](=[S;X1])-[O;X2][#6:2]>>[#6:1][N;X2]=C=[S;X1].[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):2]-[OR0;H1]"
+            "[#6:1][N;H1:3]-[C;X3:5](=[S;X1:6])-[O;X2:4]-[#6;+0&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):2]>>[#6:1][N;X2:3]=[C:5]=[S;X1:6].[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):2]-[OR0;H1:4]"
         ],
         "RXN_NUM": 36
     },
@@ -842,17 +882,17 @@
             "carboxylic_acid_or_ester_robust"
         ],
         "group_smarts": [
-            "[c&r6](-[N;D2&H1&$(N-[#6])]):[c&r6]-[N;D1&H2]",
+            "[c;r6](-[N;D2;H1]-[*]):[c;r6](-[N;D1;H2])",
             "[#6]-[C&R0](=[O&D1])-[#8;H1,$(O-[C&H3])]"
         ],
         "num_reactants": 2,
         "debug_prereaction": [
             "[*;#6:1]C(=O)O[*]>>[*;#6:1]C(=O)OC"
         ],
-        "reaction_string": "[c;r6:1](-[N;D2;H1;$(N-[#6]):2]):[c;r6:3](-[N;D1;H2:4]).[#6:6]-[C;R0:5](=[OD1])-[#8;H1,$(O-[CH3])]>>[c:3]2:[c:1]:[n:2]:[c:5](-[#6:6]):[n:4]@2",
+        "reaction_string": "[c;r6:1](-[N;D2;H1:2]-[*:7]):[c;r6:3](-[N;D1;H2:4]).[#6:6]-[C;R0:5](=[OD1])-[#8;H1,$(O-[CH3])]>>[c:1]1=[c:3]-[n:4]=[c:5](-[#6:6])-[n:2](-[*:7])1",
         "reverse_reaction_strings": [
-            "[c:3]2:[c:1]:[n:2]:[c:5](-[#6:6]):[n:4]@2>>[c;r6:1](-[NH1;D2;$(N-[#6]):2]):[c;r6:3](-[NH2;D1:4]).[#6:6]-[C;R0:5](=[OD1])-[#8;H1]",
-            "[c:3]2:[c:1]:[n:2]:[c:5](-[#6:6]):[n:4]@2>>[c;r6:1](-[NH1;D2;$(N-[#6]):2]):[c;r6:3](-[NH2;D1:4]).[#6:6]-[C;R0:5](=[OD1])-[#8;$(O-[C&H3])][C&H3]"
+            "[c:3]2:[c:1]:[n:2](-[*:7]):[c:5](-[#6:6]):[n:4]@2>>[c;r6:1](-[NH1;D2:2]-[*:7]):[c;r6:3](-[NH2;D1:4]).[#6:6]-[C;R0:5](=[OD1])-[#8;H1]",
+            "[c:3]2:[c:1]:[n:2](-[*:7]):[c:5](-[#6:6]):[n:4]@2>>[c;r6:1](-[NH1;D2:2]-[*:7]):[c;r6:3](-[NH2;D1:4]).[#6:6]-[C;R0:5](=[OD1])-[#8;$(O-[C&H3])][C&H3]"
         ],
         "RXN_NUM": 38
     },
@@ -868,13 +908,13 @@
             "aldehyde_robust"
         ],
         "group_smarts": [
-            "[c&r6](-[N;D2&H1&$(N-[#6])]):[c&r6]-[N;D1&H2]",
+            "[c;r6](-[N;D2;H1]-[*]):[c;r6](-[N;D1;H2])",
             "[#6]-[C&H1&R0]=[O&D1]"
         ],
         "num_reactants": 2,
-        "reaction_string": "[c;r6:1](-[N;D2;H1;$(N-[#6]):2]):[c;r6:3](-[N;D1;H2:4]).[#6:6]-[CH1;R0:5](=[OD1])>>[c:3]2:[c:1]:[nH0:2]:[c:5](-[#6:6]):[nH0:4]2",
+        "reaction_string": "[c;r6:1](-[N;D2;H1:2]-[*:7]):[c;r6:3](-[N;D1;H2:4]).[#6:6]-[CH1;R0:5](=[OD1])>>[c:1]1=[c:3]-[n:4]=[c:5](-[#6:6])-[n:2](-[*:7])1",
         "reverse_reaction_strings": [
-            "[c:3]2:[c:1]:[n:2]:[c:5](-[#6:6]):[n:4]@2>>[c;r6:1](-[NH1;D2;$(N-[#6]):2]):[c;r6:3](-[NH2;D1:4]).[#6:6]-[CH1;R0:5](=[OD1])"
+            "[c:3]2:[c:1]:[n:2](-[*:7]):[c:5](-[#6:6]):[n:4]@2>>[c;r6:1](-[NH1;D2:2]-[*:7]):[c;r6:3](-[NH2;D1:4]).[#6:6]-[CH1;R0:5](=[OD1])"
         ],
         "RXN_NUM": 39
     },
@@ -957,16 +997,19 @@
         ],
         "group_smarts": [
             "[#6]-[C&R0](=[O&D1])-[C&H1&R0](-[#6])-[*;#17,#35,#53;D1]",
-            "[N&H2]-[C]=[S&D1]"
+            "[#7&X3]-[C]=[S&D1]"
         ],
-        "note": "This version doesn't account for one of the tautomers of the thioamide. Attempts to support that tautomer caused rdkit to fail even in the forward reaction. Not worth supporting.",
         "num_reactants": 2,
-        "reaction_string": "[#6:6]-[C;R0:1](=[OD1])-[CH1;R0:5](-[#6:7])-[*;#17,#35,#53;D1].[NH2:2]-[C:3]=[SD1:4]>>[c:1]2(-[#6:6]):[n:2]:[c:3]:[s:4][c:5]([#6:7]):2",
+        "ignore_chiral_stereo_on_reverse": true,
+        "reaction_string": "[#6:6]-[C;R0:1](=[OD1])-[CH1;R0:5](-[#6:7])-[*;#17,#35,#53;D1].[#7X3:2]-[C:3](=[SD1:4])>>[c;H0:1]2(-[#6:6]):[n:2]:[c:3]:[s:4]:[c;H0:5](-[#6:7]):2",
+
         "reverse_reaction_strings": [
-            "[c:1]2(-[#6:6]):[n:2]:[c:3]:[s:4][c:5]([#6:7]):2>>[#6:6]-[C;R0:1](=[O&D1])-[CH1;R0:5](-[#6:7])-[#17;D1].[NH2:2]-[C:3]=[SD1:4]",
-            "[c:1]2(-[#6:6]):[n:2]:[c:3]:[s:4][c:5]([#6:7]):2>>[#6:6]-[C;R0:1](=[O&D1])-[CH1;R0:5](-[#6:7])-[#35;D1].[NH2:2]-[C:3]=[SD1:4]",
-            "[c:1]2(-[#6:6]):[n:2]:[c:3]:[s:4][c:5]([#6:7]):2>>[#6:6]-[C;R0:1](=[O&D1])-[CH1;R0:5](-[#6:7])-[#53;D1].[NH2:2]-[C:3]=[SD1:4]"
+            "[c:1]2(-[#6:6]):[n:2]:[c:3]:[s:4]:[c:5](-[#6:7]):2>>[#6:6]-[C;R0:1](=[O&D1])-[CH1;R0:5](-[#6:7])-[#17;D1].[NH2:2]-[C:3]=[SD1:4]",
+            "[c:1]2(-[#6:6]):[n:2]:[c:3]:[s:4]:[c:5](-[#6:7]):2>>[#6:6]-[C;R0:1](=[O&D1])-[CH1;R0:5](-[#6:7])-[#35;D1].[NH2:2]-[C:3]=[SD1:4]",
+            "[c:1]2(-[#6:6]):[n:2]:[c:3]:[s:4]:[c:5](-[#6:7]):2>>[#6:6]-[C;R0:1](=[O&D1])-[CH1;R0:5](-[#6:7])-[#53;D1].[NH2:2]-[C:3]=[SD1:4]"
         ],
+        "note": "The forward reaction is stereocenter-destroying, as the chiral alpha-carbon of the haloketone becomes an achiral sp2 carbon in the aromatic product. The reverse reaction correctly produces a non-stereospecific (racemic) product. Note also that This version doesn't account for one of the tautomers of the thioamide. Attempts to support that tautomer caused rdkit to fail even in the forward reaction. Not worth supporting.",
+
         "RXN_NUM": 43
     },
     "44_Niementowski_quinazoline": {
@@ -1005,10 +1048,12 @@
             "[C&H0&$(C-[#6])]#[N&H0;X1]"
         ],
         "num_reactants": 1,
+        "ignore_chiral_stereo_on_reverse": true,
         "reaction_string": "[CH0;$(C-[#6]):1]#[NH0;X1:2]>>[C:1]1=[N:2]-N-N=N-1",
         "reverse_reaction_strings": [
             "[c:1]1[n:2][nH]nn1>>[C&H0&$(C-[#6]):1]#[N&H0;X1:2]"
         ],
+        "note": "The forward reaction can be stereocenter-destroying if it creates a product where the reaction center is no longer chiral (e.g., by creating a second, identical group on the atom). In such cases, the reverse reaction cannot recover the original stereochemistry and correctly produces a non-stereospecific (racemic) product.",
         "RXN_NUM": 45
     },
     "46_tetrazole_connect_regioisomere_1": {
@@ -1024,16 +1069,18 @@
         ],
         "group_smarts": [
             "[C&H0&$(C-[#6])]#[N&H0;X1]",
-            "[C&A&!$(C=O)]-[*;#17,#35,#53;D1]"
+            "[C;A;!$(C=[O,C])]-[*;#17,#35,#53;D1]"
         ],
         "num_reactants": 2,
-        "reaction_string": "[CH0;$(C-[#6]):1]#[NH0;X1:2].[C;A;!$(C=O):3]-[*;#17,#35,#53;D1]>>[C:1]1=[N:2]-N(-[C:3])-N=N-1",
+        "reaction_string": "[CH0;$(C-[#6]):1]#[NH0;X1:2].[C;A;!$(C=[O,C]):3]-[*;#17,#35,#53;D1]>>[C:1]1=[N:2]-N(-[C:3])-N=N-1",
         "reverse_reaction_strings": [
             "[c:1]1:[n:2]:[n](-[C:3]):[n]:[n]:1>>[CH0;$(C-[#6]):1]#[N&H0;X1:2].[C;A;!$(C=O):3]-[Cl;D1]",
             "[c:1]1:[n:2]:[n](-[C:3]):[n]:[n]:1>>[CH0;$(C-[#6]):1]#[N&H0;X1:2].[C;A;!$(C=O):3]-[Br;D1]",
             "[c:1]1:[n:2]:[n](-[C:3]):[n]:[n]:1>>[CH0;$(C-[#6]):1]#[N&H0;X1:2].[C;A;!$(C=O):3]-[I;D1]"
         ],
+        "note": "I am intentionally excluding vinyl halides from the reactants, since they greatly complicate the reverse reaction.",
         "RXN_NUM": 46
+
     },
     "47_tetrazole_connect_regioisomere_2": {
         "reaction_name": "47_tetrazole_connect_regioisomere_2",
@@ -1048,16 +1095,17 @@
         ],
         "group_smarts": [
             "[C&H0&$(C-[#6])]#[N&H0;X1]",
-            "[C&A&!$(C=O)]-[*;#17,#35,#53;D1]"
+            "[C;A;!$(C=[O,C])]-[*;#17,#35,#53;D1]"
         ],
         "num_reactants": 2,
-        "reaction_string": "[CH0;$(C-[#6]):1]#[NH0;X1:2].[C;A;!$(C=O):3]-[*;#17,#35,#53;D1]>>[C:1]1=[N:2]-N=N-N-1(-[C:3])",
+        "reaction_string": "[CH0;$(C-[#6]):1]#[NH0;X1:2].[C;A;!$(C=[O,C]):3]-[*;#17,#35,#53;D1]>>[C:1]1=[N:2]-N=N-N-1(-[C:3])",
         "reverse_reaction_strings": [
             "[c:1]1:[n:2]:[n]:[n]:[n]:1(-[C:3])>>[CH0;$(C-[#6]):1]#[NH0;X1:2].[C;A;!$(C=O):3]-[Cl;D1]",
             "[c:1]1:[n:2]:[n]:[n]:[n]:1(-[C:3])>>[CH0;$(C-[#6]):1]#[NH0;X1:2].[C;A;!$(C=O):3]-[Br;D1]",
             "[c:1]1:[n:2]:[n]:[n]:[n]:1(-[C:3])>>[CH0;$(C-[#6]):1]#[NH0;X1:2].[C;A;!$(C=O):3]-[I;D1]"
         ],
-        "RXN_NUM": 47
+        "RXN_NUM": 47,
+        "note": "I am intentionally excluding vinyl halides from the reactants, since they greatly complicate the reverse reaction."
     },
     "48_Huisgen_Cu_catalyzed_1_4_subst": {
         "reaction_name": "48_Huisgen_Cu_catalyzed_1_4_subst",
@@ -1072,16 +1120,17 @@
         ],
         "group_smarts": [
             "[C&H0&$(C-[#6])]#[C&H1]",
-            "[C;H1,H2;!$(C=O)]-[#17&X1,#35&X1,#53&X1,O&H1]"
+            "[C;H1,H2;!$(C=[O,C])]-[#17&X1,#35&X1,#53&X1,O&H1]"
         ],
         "num_reactants": 2,
-        "reaction_string": "[CH0;$(C-[#6]):1]#[CH1:2].[C;H1,H2;!$(C=O):3]-[#17&X1,#35&X1,#53&X1,OH1]>>[C:1]1=[C:2]-N(-[C:3])-N=N-1",
+        "reaction_string": "[CH0;$(C-[#6]):1]#[CH1:2].[C;H1,H2;!$(C=[O,C]):3]-[#17&X1,#35&X1,#53&X1,OH1]>>[C:1]1=[C:2]-N(-[C:3])-N=N-1",
         "reverse_reaction_strings": [
-            "[c;$(c-[#6]):1]1[c;H1:2]n(-[C;H1,H2;!$(C=O):3])nn1>>[C&H0&$(C-[#6]):1]#[C&H1:2].[C;!$(C=O):3]-[Br;D1]",
-            "[c;$(c-[#6]):1]1[c;H1:2]n(-[C;H1,H2;!$(C=O):3])nn1>>[C&H0&$(C-[#6]):1]#[C&H1:2].[C;!$(C=O):3]-[Cl;D1]",
-            "[c;$(c-[#6]):1]1[c;H1:2]n(-[C;H1,H2;!$(C=O):3])nn1>>[C&H0&$(C-[#6]):1]#[C&H1:2].[C;!$(C=O):3]-[I;D1]",
-            "[c;$(c-[#6]):1]1[c;H1:2]n(-[C;H1,H2;!$(C=O):3])nn1>>[C&H0&$(C-[#6]):1]#[C&H1:2].[C;!$(C=O):3]-[OH1]"
+            "[c;$(c-[#6]):1]1[c;H1:2]n(-[C;H1,H2;!$(C=O):3])nn1>>[C&H0&$(C-[#6]):1]#[C&H1:2].[C;!$(C=[O,C]):3]-[Br;D1]",
+            "[c;$(c-[#6]):1]1[c;H1:2]n(-[C;H1,H2;!$(C=O):3])nn1>>[C&H0&$(C-[#6]):1]#[C&H1:2].[C;!$(C=[O,C]):3]-[Cl;D1]",
+            "[c;$(c-[#6]):1]1[c;H1:2]n(-[C;H1,H2;!$(C=O):3])nn1>>[C&H0&$(C-[#6]):1]#[C&H1:2].[C;!$(C=[O,C]):3]-[I;D1]",
+            "[c;$(c-[#6]):1]1[c;H1:2]n(-[C;H1,H2;!$(C=O):3])nn1>>[C&H0&$(C-[#6]):1]#[C&H1:2].[C;!$(C=[O,C]):3]-[OH1]"
         ],
+        "note": "Intentionally excluding aryl halides from the reactants, since they greatly complicate the reverse reaction.",
         "RXN_NUM": 48
     },
     "49_Huisgen_Ru_catalyzed_1_5_subst": {
@@ -1097,16 +1146,18 @@
         ],
         "group_smarts": [
             "[C&H0&$(C-[#6])]#[C&H1]",
-            "[C;H1,H2;!$(C=O)]-[#17&X1,#35&X1,#53&X1,O&H1]"
+            "[C;H1,H2;!$(C=[O,C])]-[#17&X1,#35&X1,#53&X1,O&H1]"
         ],
         "num_reactants": 2,
-        "reaction_string": "[CH0;$(C-[#6]):1]#[CH1:2].[C;H1,H2;!$(C=O):3]-[#17&X1,#35&X1,#53&X1,OH1]>>[C:1]1=[C:2]-N=NN(-[C:3])-1",
+        "ignore_double_bond_stereo_on_reverse": true,
+        "reaction_string": "[CH0;$(C-[#6]):1]#[CH1:2].[C;H1,H2;!$(C=[O,C]):3]-[#17&X1,#35&X1,#53&X1,OH1]>>[C:1]1=[C:2]-N=NN(-[C:3])-1",
         "reverse_reaction_strings": [
-            "[c;$(c-[#6]):1]1[c;H1:2]nnn1(-[C;H1,H2;!$(C=O):3])>>[C&H0&$(C-[#6]):1]#[C&H1:2].[C;!$(C=O):3]-[Cl;D1]",
-            "[c;$(c-[#6]):1]1[c;H1:2]nnn1(-[C;H1,H2;!$(C=O):3])>>[C&H0&$(C-[#6]):1]#[C&H1:2].[C;!$(C=O):3]-[Br;D1]",
-            "[c;$(c-[#6]):1]1[c;H1:2]nnn1(-[C;H1,H2;!$(C=O):3])>>[C&H0&$(C-[#6]):1]#[C&H1:2].[C;!$(C=O):3]-[I;D1]",
-            "[c;$(c-[#6]):1]1[c;H1:2]nnn1(-[C;H1,H2;!$(C=O):3])>>[C&H0&$(C-[#6]):1]#[C&H1:2].[C;!$(C=O):3]-[OH1]"
+            "[c;$(c-[#6]):1]1[c;H1:2]nnn1(-[C;H1,H2;!$(C=O):3])>>[C&H0&$(C-[#6]):1]#[C&H1:2].[C;!$(C=[O,C]):3]-[Cl;D1]",
+            "[c;$(c-[#6]):1]1[c;H1:2]nnn1(-[C;H1,H2;!$(C=O):3])>>[C&H0&$(C-[#6]):1]#[C&H1:2].[C;!$(C=[O,C]):3]-[Br;D1]",
+            "[c;$(c-[#6]):1]1[c;H1:2]nnn1(-[C;H1,H2;!$(C=O):3])>>[C&H0&$(C-[#6]):1]#[C&H1:2].[C;!$(C=[O,C]):3]-[I;D1]",
+            "[c;$(c-[#6]):1]1[c;H1:2]nnn1(-[C;H1,H2;!$(C=O):3])>>[C&H0&$(C-[#6]):1]#[C&H1:2].[C;!$(C=[O,C]):3]-[OH1]"
         ],
+        "note": "Intentionally excluding aryl halides from the reactants, since they greatly complicate the reverse reaction.",
         "RXN_NUM": 49
     },
     "50_Huisgen_disubst_alkyne": {
@@ -1122,16 +1173,17 @@
         ],
         "group_smarts": [
             "[C&H0&$(C-[#6])]#[C&H0&$(C-[#6])]",
-            "[C;H1,H2;!$(C=O)]-[#17&X1,#35&X1,#53&X1,O&H1]"
+            "[C;H1,H2;!$(C=[O,C])]-[#17&X1,#35&X1,#53&X1,O&H1]"
         ],
         "num_reactants": 2,
-        "reaction_string": "[CH0;$(C-[#6]):1]#[CH0;$(C-[#6]):2].[C;H1,H2;!$(C=O):3]-[#17&X1,#35&X1,#53&X1,OH1]>>[C:1]1=[C:2]-N=NN(-[C:3])-1",
+        "reaction_string": "[CH0;$(C-[#6]):1]#[CH0;$(C-[#6]):2].[C;H1,H2;!$(C=[O,C]):3]-[#17&X1,#35&X1,#53&X1,OH1]>>[C:1]1=[C:2]-N=NN(-[C:3])-1",
         "reverse_reaction_strings": [
-            "[c;$(c-[#6]):1]1[c;$(c-[#6]):2]nnn1(-[C;H1,H2;!$(C=O):3])>>[C&H0&$(C-[#6]):1]#[C&H0&$(C-[#6]):2].[C;!$(C=O):3]-[Br;D1]",
-            "[c;$(c-[#6]):1]1[c;$(c-[#6]):2]nnn1(-[C;H1,H2;!$(C=O):3])>>[C&H0&$(C-[#6]):1]#[C&H0&$(C-[#6]):2].[C;!$(C=O):3]-[Cl;D1]",
-            "[c;$(c-[#6]):1]1[c;$(c-[#6]):2]nnn1(-[C;H1,H2;!$(C=O):3])>>[C&H0&$(C-[#6]):1]#[C&H0&$(C-[#6]):2].[C;!$(C=O):3]-[I;D1]",
-            "[c;$(c-[#6]):1]1[c;$(c-[#6]):2]nnn1(-[C;H1,H2;!$(C=O):3])>>[C&H0&$(C-[#6]):1]#[C&H0&$(C-[#6]):2].[C;!$(C=O):3]-[OH1]"
+            "[c;$(c-[#6]):1]1[c;$(c-[#6]):2]nnn1(-[C;H1,H2;!$(C=O):3])>>[C&H0&$(C-[#6]):1]#[C&H0&$(C-[#6]):2].[C;!$(C=[O,C]):3]-[Br;D1]",
+            "[c;$(c-[#6]):1]1[c;$(c-[#6]):2]nnn1(-[C;H1,H2;!$(C=O):3])>>[C&H0&$(C-[#6]):1]#[C&H0&$(C-[#6]):2].[C;!$(C=[O,C]):3]-[Cl;D1]",
+            "[c;$(c-[#6]):1]1[c;$(c-[#6]):2]nnn1(-[C;H1,H2;!$(C=O):3])>>[C&H0&$(C-[#6]):1]#[C&H0&$(C-[#6]):2].[C;!$(C=[O,C]):3]-[I;D1]",
+            "[c;$(c-[#6]):1]1[c;$(c-[#6]):2]nnn1(-[C;H1,H2;!$(C=O):3])>>[C&H0&$(C-[#6]):1]#[C&H0&$(C-[#6]):2].[C;!$(C=[O,C]):3]-[OH1]"
         ],
+        "note": "Intentionally excluding aryl halides from the reactants, since they greatly complicate the reverse reaction.",
         "RXN_NUM": 50
     },
     "51_1_2_4_triazole_acetohydrazide": {
@@ -1194,10 +1246,13 @@
             "[#6;!$([#6](-C=O)-C=O)]-[C&H0](=[O&D1])-[C;R0;H1&!$(C-[*;!#6])&!$(C-C(=O)O),H2]-[C&H0&R0](=[O&D1])-[#6;!$([#6](-C=O)-C=O)]"
         ],
         "num_reactants": 1,
-        "reaction_string": "[#6;!$([#6](-C=O)-C=O):4]-[CH0:1](=[OD1])-[C;R0;H1&!$(C-[*;!#6])&!$(C-C(=O)O),H2:2]-[C;H0;R0:3](=[OD1])-[#6&!$([#6](-C=O)-C=O):5]>>[c:1]1(-[#6:4]):[c:2]:[c:3](-[#6:5]):n:c(-O):c(-C#N):1",
+        "ignore_chiral_stereo_on_reverse": true,
+
+        "reaction_string": "[#6;!$([#6](-C=O)-C=O):4]-[CH0:1](=[OD1])-[C;R0;H1&!$(C-[*;!#6])&!$(C-C(=O)O),H2:2]-[C;H0;R0:3](=[OD1])-[#6&!$([#6](-C=O)-C=O):5]>>[c:1]1(-[#6:4]):[c;H0:2]:[c:3](-[#6:5]):n:c(-O):c(-C#N):1",
         "reverse_reaction_strings": [
             "[c:1]1(-[#6:4]):[c:2]:[c:3](-[#6:5]):n:c(-O):c(-C#N):1>>[#6;!$([#6](-C=O)-C=O):4]-[C&H0&R0:1](=[OD1])-[C&!$(C-[*&!#6])&!$(C-C(=O)O):2]-[CH0;R0:3](=[OD1])-[#6;!$([#6](-C=O)-C=O):5]"
         ],
+        "note": "The forward reaction is stereocenter-destroying. The central carbon of the dicarbonyl reactant, which may be chiral, becomes an achiral sp2 carbon in the aromatic pyridine product.",
         "RXN_NUM": 53
     },
     "54_spiro_chromanone": {
@@ -1238,10 +1293,13 @@
             "[N&H2]-[N&!H0;$(N-[#6]),H2]"
         ],
         "num_reactants": 2,
-        "reaction_string": "[#6;!$([#6](-C=O)-C=O):4]-[C;H0:1](=[OD1])-[C;R0;H1&!$(C-[*;!#6])&!$(C-C(=O)O),H2:2]-[C;H0;R0:3](=[OD1])-[#6;!$([#6](-C=O)-C=O):5].[NH2:6]-[N;!H0;$(N-[#6]),H2:7]>>[C:1]1(-[#6:4])-[C:2]=[C:3](-[#6:5])-[N:7]-[N:6]=1",
+        "ignore_chiral_stereo_on_reverse": true,
+        "reaction_string": "[#6;!$([#6](-C=O)-C=O):4]-[C;H0:1](=[OD1])-[C;R0;H1&!$(C-[*;!#6])&!$(C-C(=O)O),H2:2]-[C;H0;R0:3](=[OD1])-[#6;!$([#6](-C=O)-C=O):5].[NH2:6]-[N;!H0;$(N-[#6]),H2:7]>>[C:1]1(-[#6:4])-[C;H0:2]=[C:3](-[#6:5])-[N:7]-[N:6]=1",
         "reverse_reaction_strings": [
             "[c:1]1(-[#6:4])[c:2][c:3](-[#6:5])[n:7][n:6]1>>[#6;!R&!$([#6](-C=O)-C=O):4]-[CH0;R0:1](=[OD1])-[C&!$(C-[*&!#6])&!$(C-C(=O)O):2]-[CH0;R0:3](=[OD1])-[#6;!R;!$([#6](-C=O)-C=O):5].[NH2:6]-[N;$(N-[#6]):7]"
         ],
+        "note": "The forward reaction can be stereocenter-destroying.",
+
         "RXN_NUM": 55
     },
     "56_phthalazinone": {
@@ -1282,11 +1340,16 @@
             "[N&H2&$(N-[C,N])&!$(NC=[O,S,N])&!$(N(-,:[#6])[#6])&!$(N~N~N)]"
         ],
         "num_reactants": 2,
-        "reaction_string": "[#6:5]-[C;R0:1](=[OD1])-[C;!R;H1,H2:2]-[C;!R;H1,H2:3]-[C;R0:4](=[OD1])-[#6:6].[NH2;$(N-[C,N]);!$(NC=[O,S,N]);!$(N(-,:[#6])[#6]);!$(N~N~N):7]>>[C:1]1(-[#6:5])=[C:2]-[C:3]=[C:4](-[#6:6])-[N:7]-1",
+        "ignore_chiral_stereo_on_reverse": true,
+        "reaction_string_orig": "[#6:5]-[C;R0:1](=[OD1])-[C;!R;H1,H2:2]-[C;!R;H1,H2:3]-[C;R0:4](=[OD1])-[#6:6].[NH2;$(N-[C,N]);!$(NC=[O,S,N]);!$(N(-,:[#6])[#6]);!$(N~N~N):7]>>[C:1]1(-[#6:5])=[C:2]-[C:3]=[C:4](-[#6:6])-[N:7]-1",
+        "reverse_reaction_strings_orig": [
+            "[c:1]1(-[#6:5]):[c:2]:[c:3]:[c:4](-[#6:6]):[n:7]:1>>[#6;!R:5]-[C;R0:1](=[OD1])-[C;!R:2]-[C;!R:3]-[C:4](=[OD1])-[#6;!R:6].[NH2;$(N-[C,N]);!$(NC=[O,S,N]);!$(N([#6])[#6]);!$(N~N~N):7]"
+        ],
+        "reaction_string": "[#6:5]-[C;R0:1](=[OD1])-[C;!R;H1,H2:2]-[C;!R;H1,H2:3]-[C;R0:4](=[OD1])-[#6:6].[NH2;$(N-[C,N]);!$(NC=[O,S,N]);!$(N(-,:[#6])[#6]);!$(N~N~N):7]>>[c:1]1(-[#6:5])[c;H0:2][c;H0:3][c:4](-[#6:6])[n:7]1",
         "reverse_reaction_strings": [
             "[c:1]1(-[#6:5]):[c:2]:[c:3]:[c:4](-[#6:6]):[n:7]:1>>[#6;!R:5]-[C;R0:1](=[OD1])-[C;!R:2]-[C;!R:3]-[C:4](=[OD1])-[#6;!R:6].[NH2;$(N-[C,N]);!$(NC=[O,S,N]);!$(N([#6])[#6]);!$(N~N~N):7]"
         ],
-        "notes": "There is nothing in the original SMARTS string from https://pubs.acs.org/doi/suppl/10.1021/ci200379p/suppl_file/ci200379p_si_002.pdf to prevent the two central carbons of the dione from being in a common ring, but I exclude it here because the reverse reaction becomes very difficult (cannot kekulize).",
+        "notes": "There is nothing in the original SMARTS string from https://pubs.acs.org/doi/suppl/10.1021/ci200379p/suppl_file/ci200379p_si_002.pdf to prevent the two central carbons of the dione from being in a common ring, but I exclude it here because the reverse reaction becomes very difficult (cannot kekulize). Note also that the forward reaction can be stereocenter-destroying.",
         "RXN_NUM": 57
     },
     "58_triaryl_imidazole": {
@@ -1305,7 +1368,9 @@
             "c-[C&H1&R0]=[O&D1]"
         ],
         "num_reactants": 2,
-        "reaction_string": "[C;!R;$(C-c1ccccc1):1](=[OD1])-[C;!R;D3;$(C-c1ccccc1):2]~[O;D1,H1].[c:4]-[CH1;R0:3]=[OD1]>>[C:1]1-N=[C:3]([c:4])-[NH1]-[C:2]=1",
+        "ignore_chiral_stereo_on_reverse": true,
+
+        "reaction_string": "[C;!R;$(C-c1ccccc1):1](=[OD1])-[C;!R;D3;$(C-c1ccccc1):2]~[O;D1,H1].[c:4]-[CH1;R0:3]=[OD1]>>[c:1]1n[c:3]([c:4])[nH1][c;H0:2]1",
         "reverse_reaction_strings": [
             "[C;$(C-c1ccccc1):1]1-N=[C;$(C-c):3](-[*])-[NH1]-[C;D3;$(C-c1ccccc1):2]=1>>[C:1](=[OD1])-[C:2][O;D1,H1].[CH1:3]=[OD1]",
             "[C;$(C-c1ccccc1):1]1-N=[C;$(C-c):3](-[*])-[NH1]-[C;D3;$(C-c1ccccc1):2]=1>>[C:1]([O;D1,H1])-[C:2]=[OD1].[CH1:3]=[OD1]",
@@ -1314,7 +1379,7 @@
             "[c;$(c-*):1]1:[n]:[c;$(c-*):3]:[n]:[c;$(c-*):2]:1>>[C:1]([O;D1,H1])-[C:2]=[OD1].[CH1:3]=[OD1]",
             "[c;$(c-*):1]1:[n]:[c;$(c-*):3]:[n]:[c;$(c-*):2]:1>>[C:1](=[OD1])-[C:2]=[OD1].[CH1:3]=[OD1]"
         ],
-        "notes": "reverse reaction might have problems. Good to revisit.",
+        "note": "Note also that the forward reaction can be stereocenter-destroying.",
         "RXN_NUM": 58
     },
     "59_Fischer_indole": {
@@ -1470,10 +1535,11 @@
         "num_reactants": 2,
         "reaction_string": "[#6;$([#6]~[#6]);!$([#6]=O):2][#8;H1:3].[Cl,Br,I;D1][#6;H2;$([#6]~[#6]):4]>>[CH2:4][O:3][#6:2]",
         "reverse_reaction_strings": [
-            "[CH2;$([#6]~[#6]):4][O:3][#6;$([#6]~[#6]);!$([#6]=O):2]>>[#6:2][OH:3].[Cl][CH2:4]",
-            "[CH2;$([#6]~[#6]):4][O:3][#6;$([#6]~[#6]);!$([#6]=O):2]>>[#6:2][OH:3].[Br][CH2:4]",
-            "[CH2;$([#6]~[#6]):4][O:3][#6;$([#6]~[#6]);!$([#6]=O):2]>>[#6:2][OH:3].[I][CH2:4]"
+            "[CH2;$([#6]~[#6]):4][O;!R:3][#6;$([#6]~[#6]);!$([#6]=O):2]>>[#6:2][OH:3].[Cl][CH2:4]",
+            "[CH2;$([#6]~[#6]):4][O;!R:3][#6;$([#6]~[#6]);!$([#6]=O):2]>>[#6:2][OH:3].[Br][CH2:4]",
+            "[CH2;$([#6]~[#6]):4][O;!R:3][#6;$([#6]~[#6]);!$([#6]=O):2]>>[#6:2][OH:3].[I][CH2:4]"
         ],
+        "note": "The chemical mechanism for this reaction (SN2) proceeds with inversion of stereochemistry at the reacting alkyl halide carbon. However, the forward reaction SMARTS is defined non-stereospecifically for robustness. See https://chem.libretexts.org/Bookshelves/Organic_Chemistry/Supplemental_Modules_(Organic_Chemistry)/Ethers/Synthesis_of_Ethers/Williamson_Ether_Synthesis",
         "RXN_NUM": 65
     },
     "66_reductive_amination": {
@@ -1544,7 +1610,7 @@
         ],
         "num_reactants": 2,
         "reaction_string_old": "[c;H1:3]1:[c:4]:[c:5]:[c;H1:6]:[c:7]2:[nH:8]:[c:9]:[c;H1:1]:[c:2]:1:2.O=[C:10]1[#6;H2:11][#6;H2:12][N][#6;H2][#6;H2]1>>[#6;H2:12]3[#6;H1:11]=[C:10]([c:1]1:[c:9]:[n:8]:[c:7]2:[c:6]:[c:5]:[c:4]:[c:3]:[c:2]:1:2)[#6;H2:15][#6;H2:14][N:13]3",
-        "reaction_string":     "[c;H1:3]1:[c:4]:[c:5]:[c;H1:6]:[c:7]2:[nH:8]:[c:9]:[c;H1:1]:[c:2]12.O=[C:10]1[#6;H2:11][#6;H2:12][N:13][#6;H2:14][#6;H2:15]1>>[#6;H2:12]3[#6;H1:11]=[C:10]([c:1]1:[c:9]:[n:8]:[c:7]2:[c:6]:[c:5]:[c:4]:[c:3]:[c:2]:1:2)[#6;H2:15][#6;H2:14][N:13]3",
+        "reaction_string": "[c;H1:3]1:[c:4]:[c:5]:[c;H1:6]:[c:7]2:[nH:8]:[c:9]:[c;H1:1]:[c:2]12.O=[C:10]1[#6;H2:11][#6;H2:12][N:13][#6;H2:14][#6;H2:15]1>>[#6;H2:12]3[#6;H1:11]=[C:10]([c:1]1:[c:9]:[n:8]:[c:7]2:[c:6]:[c:5]:[c:4]:[c:3]:[c:2]:1:2)[#6;H2:15][#6;H2:14][N:13]3",
         "reverse_reaction_strings": [
             "[#6;H2:12]3[#6;H1:11]=[C:10]([c:1]1:[c:9]:[n:8]:[c:7]2:[c:6]:[c:5]:[c:4]:[c:3]:[c:2]:1:2)[#6;H2:15][#6;H2:14][N:13]3>>[c;H1:3]1:[c:4]:[c:5]:[c;H1:6]:[c:7]2:[nH:8]:[c:9]:[c;H1:1]:[c:2]:1:2.O=[C:10]1[#6;H2:11][#6;H2:12][N:13][#6;H2:14][#6;H2:15]1"
         ],
@@ -1563,22 +1629,24 @@
             "halide_type_3_robust"
         ],
         "group_smarts": [
-            "[#6&$([#6]~[#6])&!$([#6]~[S,N,O,P])][Cl,Br,I;D1]",
-            "[#6&$([#6]~[#6])&!$([#6]~[S,N,O,P])][Cl,Br,I;D1]"
+            "[#6&$([#6]~[#6])&!$([#6]~[S,N,O,P])&!$([#6]=[#6])][Cl,Br,I;D1]",
+            "[#6&$([#6]~[#6])&!$([#6]~[S,N,O,P])&!$([#6]=[#6])][Cl,Br,I;D1]"
         ],
         "num_reactants": 2,
-        "reaction_string": "[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):1][Cl,Br,I;D1].[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):2][Cl,Br,I;D1]>>[#6:2][#6:1]",
+        "reaction_string": "[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):1][Cl,Br,I;D1].[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):2][Cl,Br,I;D1]>>[#6:2][#6:1]",
         "reverse_reaction_strings": [
-            "[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):2][#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):1]>>[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):1]Cl.Cl[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):2]",
-            "[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):2][#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):1]>>[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):1]Cl.Br[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):2]",
-            "[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):2][#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):1]>>[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):1]Cl.I[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):2]",
-            "[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):2][#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):1]>>[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):1]Br.Cl[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):2]",
-            "[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):2][#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):1]>>[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):1]Br.Br[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):2]",
-            "[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):2][#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):1]>>[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):1]Br.I[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):2]",
-            "[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):2][#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):1]>>[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):1]I.Cl[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):2]",
-            "[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):2][#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):1]>>[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):1]I.Br[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):2]",
-            "[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):2][#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):1]>>[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):1]I.I[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P]):2]"
+            "[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):2][#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):1]>>[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):1]Cl.Cl[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):2]",
+            "[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):2][#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):1]>>[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):1]Cl.Br[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):2]",
+            "[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):2][#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):1]>>[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):1]Cl.I[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):2]",
+            "[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):2][#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):1]>>[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):1]Br.Cl[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):2]",
+            "[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):2][#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):1]>>[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):1]Br.Br[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):2]",
+            "[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):2][#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):1]>>[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):1]Br.I[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):2]",
+            "[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):2][#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):1]>>[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):1]I.Cl[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):2]",
+            "[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):2][#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):1]>>[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):1]I.Br[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):2]",
+            "[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):2][#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):1]>>[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):1]I.I[#6;$([#6]~[#6]);!$([#6]~[S,N,O,P])&!$([#6]=[#6]):2]"
         ],
+
+        "note": "Intentionally excluding vinyl halides because these complicate the reverse reactions.",
         "RXN_NUM": 69
     },
     "70_Mitsunobu_imide": {
@@ -1602,6 +1670,7 @@
         "reverse_reaction_strings": [
             "[C;H1&$(C([#6])[#6]),H2&$(C[#6]):1][N;$(N(C=O)C=O):2]>>[C&$(C(-,:[#6])[#6]),$(C[#6]):1][O&H1].[N&H1&$(N(-,:C=O)C=O):2]"
         ],
+        "note": "The Mitsunobu reaction proceeds with inversion of stereochemistry at the reacting alcohol carbon. However, the forward reaction SMARTS is defined non-stereospecifically for robustness, as it must account for cases where the reaction is stereocenter-destroying. See PMC9609662.",
         "RXN_NUM": 70
     },
     "71_Mitsunobu_phenole": {
@@ -1621,10 +1690,10 @@
         ],
         "num_reactants": 2,
         "reaction_string": "[C;H1&$(C(-,:[#6])[#6]),H2&$(C[#6]):1][OH1].[OH1;$(Oc1ccccc1):2]>>[C:1][O:2]",
-        "old": "[C:1][O:2]>>[C;H1&$(C([#6])[#6]),H2&$(C[#6]):1][OH1].[OH1;$(Oc1ccccc1):2]",
         "reverse_reaction_strings": [
             "[C;H1&$(C([#6])[#6]),H2&$(C[#6]):1][O;$(Oc1ccccc1):2]>>[C&$(C(-,:[#6])[#6]),$(C[#6]):1][O&H1].[O&H1&$(Oc1ccccc1):2]"
         ],
+        "note": "The Mitsunobu reaction proceeds with inversion of stereochemistry at the reacting alcohol carbon. However, the forward reaction SMARTS is defined non-stereospecifically for robustness, as it must account for cases where the reaction is stereocenter-destroying.  See PMC9609662.",
         "RXN_NUM": 71
     },
     "72_Mitsunobu_sulfonamide": {
@@ -1644,10 +1713,10 @@
         ],
         "num_reactants": 2,
         "reaction_string": "[C;H1&$(C(-,:[#6])[#6]),H2&$(C[#6]):1][OH1].[N;H1;$(N(-,:[#6])S(=O)=O):2]>>[C:1][N:2]",
-        "old": "[C:1][N:2]>>[C;H1&$(C([#6])[#6]),H2&$(C[#6]):1][OH1].[NH1;$(N([#6])S(=O)=O):2]",
         "reverse_reaction_strings": [
             "[C;H1&$(C([#6])[#6]),H2&$(C[#6]):1][N;$(N([#6])S(=O)=O):2]>>[C$(C(-,:[#6])[#6]),$(C[#6]):1][O&H1].[N&H1&$(N(-,:[#6])S(=O)=O):2]"
         ],
+        "note": "The Mitsunobu reaction proceeds with inversion of stereochemistry at the reacting alcohol carbon. However, the forward reaction SMARTS is defined non-stereospecifically for robustness, as it must account for cases where the reaction is stereocenter-destroying.  See PMC9609662.",
         "RXN_NUM": 72
     },
     "73_Mitsunobu_tetrazole_1": {
@@ -1667,10 +1736,10 @@
         ],
         "num_reactants": 2,
         "reaction_string": "[C;H1&$(C(-,:[#6])[#6]),H2&$(C[#6]):1][OH1].[#7+0;H1:2]1~[#7+0;H0;D2:3]~[#7+0;H0;D2:4]~[#7+0;H0;D2:5]~[#6:6]~1>>[C:1][#7:2]1:[#7:3]:[#7:4]:[#7:5]:[#6:6]:1",
-        "TODO_remove_old_in_time": "[C:1][#7:2]1:[#7:3]:[#7:4]:[#7:5]:[#6:6]:1>>[C;H1&$(C([#6])[#6]),H2&$(C[#6]):1][OH1].[#7+0;H1:2]1~[#7+0;H0;D2:3]~[#7+0;H0;D2:4]~[#7+0;H0;D2:5]~[#6:6]~1",
         "reverse_reaction_strings": [
-            "[C:1][#7:2]1:[#7:3]:[#7:4]:[#7:5]:[#6:6]:1>>[C;$(C(-,:[#6])[#6]),$(C[#6]):1][OH1].[nH:2]1~[#7+0&H0&D2:3]~[#7+0&H0&D2:4]~[#7+0&H0&D2:5]~[#6:6]~1"
+            "[C;H1&$(C(-,:[#6])[#6]),H2&$(C[#6]):1][#7;H0:2]1:[#7:3]:[#7:4]:[#7:5]:[#6:6]:1>>[C;H1&$(C(-,:[#6])[#6]),H2&$(C[#6]):1][OH1].[nH:2]1~[#7+0&H0&D2:3]~[#7+0&H0&D2:4]~[#7+0&H0&D2:5]~[#6:6]~1"
         ],
+        "note": "The Mitsunobu reaction proceeds with inversion of stereochemistry at the reacting alcohol carbon. However, the forward reaction SMARTS is defined non-stereospecifically for robustness, as it must account for cases where the reaction is stereocenter-destroying.  See PMC9609662.",
         "RXN_NUM": 73
     },
     "74_Mitsunobu_tetrazole_2": {
@@ -1693,6 +1762,7 @@
         "reverse_reaction_strings": [
             "[#7H0:2]1:[#7:3]:[#7H0:4]([C:1]):[#7:5]:[#6:6]:1>>[C;$(C(-,:[#6])[#6]),$(C[#6]):1][O&H1].[#7+0&H1:2]1:[#7+0&H0&D2:3]:[#7+0&H0&D2:4]:[#7+0&H0&D2:5]:[#6:6]:1"
         ],
+        "note": "The Mitsunobu reaction proceeds with inversion of stereochemistry at the reacting alcohol carbon. However, the forward reaction SMARTS is defined non-stereospecifically for robustness, as it must account for cases where the reaction is stereocenter-destroying.  See PMC9609662.",
         "RXN_NUM": 74
     },
     "75_Mitsunobu_tetrazole_3": {
@@ -1715,6 +1785,7 @@
         "reverse_reaction_strings": [
             "[C:1][#7H0:2]1:[#7:3]:[#7H0:4]:[#7:5]:[#6:6]:1>>[C;$(C(-,:[#6])[#6]),$(C[#6]):1][O&H1].[#7&H0&D2:2]1:[#7&H0&D2:3]:[nH:4]:[#7&H0&D2:5]:[#6:6]:1"
         ],
+        "note": "The Mitsunobu reaction proceeds with inversion of stereochemistry at the reacting alcohol carbon. However, the forward reaction SMARTS is defined non-stereospecifically for robustness, as it must account for cases where the reaction is stereocenter-destroying.  See PMC9609662.",
         "RXN_NUM": 75
     },
     "76_Mitsunobu_tetrazole_4": {
@@ -1737,6 +1808,7 @@
         "reverse_reaction_strings": [
             "[#7:2]1:[#7:3]:[#7+0,+1:4]([C:1]):[#7:5]:[#6:6]:1>>[C;$(C(-,:[#6])[#6]),$(C[#6]):1][O&H1].[#7&H0&D2:2]1:[#7&H0&D2:3]:[nH:4]:[#7&H0&D2:5]:[#6:6]:1"
         ],
+        "note": "The Mitsunobu reaction proceeds with inversion of stereochemistry at the reacting alcohol carbon. However, the forward reaction SMARTS is defined non-stereospecifically for robustness, as it must account for cases where the reaction is stereocenter-destroying.  See PMC9609662.",
         "RXN_NUM": 76
     },
     "77_Heck_terminal_vinyl": {
@@ -1754,6 +1826,7 @@
             "[#6;c,$(C(=O)O),$(C#N)][#6&H1]=[#6&H2]",
             "[#6;$([#6]=[#6]),$(c:c)][Cl,Br,I;D1]"
         ],
+        "ignore_double_bond_stereo_on_reverse": true,
         "num_reactants": 2,
         "reaction_string": "[#6;c,$(C(=O)O),$(C#N):3][#6;H1:2]=[#6;H2:1].[#6;$([#6]=[#6]),$(c:c):4][Cl,Br,I;D1]>>[#6:4]/[#6:1]=[#6:2]/[#6:3]",
         "reverse_reaction_strings": [
@@ -1761,6 +1834,7 @@
             "[#6;$([#6]=[#6]),$(c:c):4]/[#6;H1:1]=[#6;H1:2]/[#6;c,$(C(=O)O),$(C#N):3]>>[#6;c,$(C(=O)O),$(C#N):3][#6;H1:2]=[#6;H2:1].[#6;$([#6]=[#6]),$(c:c):4][Cl]",
             "[#6;$([#6]=[#6]),$(c:c):4]/[#6;H1:1]=[#6;H1:2]/[#6;c,$(C(=O)O),$(C#N):3]>>[#6;c,$(C(=O)O),$(C#N):3][#6;H1:2]=[#6;H2:1].[#6;$([#6]=[#6]),$(c:c):4][I]"
         ],
+        "note": "This reaction is subject to a known RDKit limitation where stereochemistry on a vinyl halide reactant may be lost during the reverse reaction fragmentation step.",
         "RXN_NUM": 77
     },
     "78_Heck_non_terminal_vinyl": {
@@ -1781,10 +1855,19 @@
         "num_reactants": 2,
         "reaction_string": "[#6;c,$(C(=O)O),$(C#N):3][#6;!R:2](-,:[#6:5])=[#6;!R;H1;$([#6][#6]):1].[#6;$([#6]=[#6]),$(c:c):4][Cl,Br,I;D1]>>[#6:4][#6;H0:1]=[#6:2]([#6:5])[#6:3]",
         "reaction_string_orig": "[#6;c,$(C(=O)O),$(C#N):3][#6;!R:2]([#6:5])=[#6;!R;H1;$([#6][#6]):1].[#6;$([#6]=[#6]),$(c:c):4][Cl,Br,I;D1]>>[#6:4][#6;H0:1]=[#6:2]([#6:5])[#6:3]",
+        "ignore_double_bond_stereo_on_reverse": true,
         "reverse_reaction_strings": [
             "[#6;$([#6]=[#6]),$(c:c):4][#6;H0:1]=[#6:2]([#6:5])[#6;c,$(C(=O)O),$(C#N):3]>>[#6:3][#6:2]([#6:5])=[#6;H1:1].[#6:4][Cl]",
             "[#6;$([#6]=[#6]),$(c:c):4][#6;H0:1]=[#6:2]([#6:5])[#6;c,$(C(=O)O),$(C#N):3]>>[#6:3][#6:2]([#6:5])=[#6;H1:1].[#6:4][Br]",
             "[#6;$([#6]=[#6]),$(c:c):4][#6;H0:1]=[#6:2]([#6:5])[#6;c,$(C(=O)O),$(C#N):3]>>[#6:3][#6:2]([#6:5])=[#6;H1:1].[#6:4][I]"
+        ],
+        "reverse_reaction_strings_new": [
+            "[#6;$([#6]=[#6]),$(c:c):4][#6;H0:1]=[#6:2]([#6:5])[#6;c,$(C(=O)O),$(C#N):3]>>[#6:3][#6:2]([#6:5])=[#6;H1:1].[#6:4][Br]",
+            "[#6;$([#6]=[#6]),$(c:c):4][#6;H0:1]=[#6:2]([#6:5])[#6;c,$(C(=O)O),$(C#N):3]>>[#6:3][#6:2]([#6:5])=[#6;H1:1].[#6:4][Cl]",
+            "[#6;$([#6]=[#6]),$(c:c):4][#6;H0:1]=[#6:2]([#6:5])[#6;c,$(C(=O)O),$(C#N):3]>>[#6:3][#6:2]([#6:5])=[#6;H1:1].[#6:4][I]",
+            "[#6;c,$(C(=O)O),$(C#N):4][#6;H0:1]=[#6:2]([#6:5])[#6;$([#6]=[#6]),$(c:c):3]>>[#6:3][#6:2]([#6:5])=[#6;H1:1].[#6:4][Br]",
+            "[#6;c,$(C(=O)O),$(C#N):4][#6;H0:1]=[#6:2]([#6:5])[#6;$([#6]=[#6]),$(c:c):3]>>[#6:3][#6:2]([#6:5])=[#6;H1:1].[#6:4][Cl]",
+            "[#6;c,$(C(=O)O),$(C#N):4][#6;H0:1]=[#6:2]([#6:5])[#6;$([#6]=[#6]),$(c:c):3]>>[#6:3][#6:2]([#6:5])=[#6;H1:1].[#6:4][I]"
         ],
         "RXN_NUM": 78,
         "notes": "Here requiring that the double bond not be part of a ring. In practice it may be that it could be part of a ring, but that greatly complicates figuring out the reverse reaction."
@@ -1801,19 +1884,27 @@
             "aryl_halide_type_2_robust"
         ],
         "group_smarts": [
-            "[#6;$(C=C-[#6]),$(c:c)][Br,I;D1]",
-            "[Cl,Br,I;D1][c]"
+            "[#6;c,$(C=C)][Br,I;D1]",
+            "[c][Cl,Br,I;D1]"
         ],
         "num_reactants": 2,
-        "reaction_string": "[#6;$(C=C-[#6]),$(c:c):1][Br,I;D1].[Cl,Br,I;D1][c:2]>>[c:2][#6:1]",
+        "ignore_double_bond_stereo_on_reverse": true,
+        "reaction_string": "[#6;c,$(C=C):1][Br,I;D1].[c:2][Cl,Br,I;D1]>>[#6:1]-[#6:2]",
         "reverse_reaction_strings": [
-            "[c:2][#6;$(C=C-[#6]),$(c:c):1]>>[#6:1][Br].[Cl][c:2]",
-            "[c:2][#6;$(C=C-[#6]),$(c:c):1]>>[#6:1][Br].[Br][c:2]",
-            "[c:2][#6;$(C=C-[#6]),$(c:c):1]>>[#6:1][Br].[I][c:2]",
-            "[c:2][#6;$(C=C-[#6]),$(c:c):1]>>[#6:1][I].[Cl][c:2]",
-            "[c:2][#6;$(C=C-[#6]),$(c:c):1]>>[#6:1][I].[Br][c:2]",
-            "[c:2][#6;$(C=C-[#6]),$(c:c):1]>>[#6:1][I].[I][c:2]"
+            "[#6;c,$(C=C):1]-[c:2]>>[#6:1][Br].[#6:2][Cl]",
+            "[#6;c,$(C=C):1]-[c:2]>>[#6:1][Br].[#6:2][Br]",
+            "[#6;c,$(C=C):1]-[c:2]>>[#6:1][Br].[#6:2][I]",
+            "[#6;c,$(C=C):1]-[c:2]>>[#6:1][I].[#6:2][Cl]",
+            "[#6;c,$(C=C):1]-[c:2]>>[#6:1][I].[#6:2][Br]",
+            "[#6;c,$(C=C):1]-[c:2]>>[#6:1][I].[#6:2][I]",
+            "[c:1]-[#6;c,$(C=C):2]>>[#6:1][Cl].[#6:2][Br]",
+            "[c:1]-[#6;c,$(C=C):2]>>[#6:1][Cl].[#6:2][I]",
+            "[c:1]-[#6;c,$(C=C):2]>>[#6:1][Br].[#6:2][Br]",
+            "[c:1]-[#6;c,$(C=C):2]>>[#6:1][Br].[#6:2][I]",
+            "[c:1]-[#6;c,$(C=C):2]>>[#6:1][I].[#6:2][Br]",
+            "[c:1]-[#6;c,$(C=C):2]>>[#6:1][I].[#6:2][I]"
         ],
+        "note": "This reaction is subject to a known RDKit limitation where stereochemistry on a vinyl halide reactant ('spectator stereochemistry') may be lost during the reverse reaction.",
         "RXN_NUM": 79
     },
     "80_Grignard_carbonyl": {
@@ -1832,12 +1923,17 @@
             "[Cl,Br,I;D1][#6&$([#6]~[#6])&!$([#6](-,:[Cl,Br,I;D1])[Cl,Br,I;D1])&!$([#6]=O)]"
         ],
         "num_reactants": 2,
+        "ignore_double_bond_stereo_on_reverse": true,
         "reaction_string": "[#6:1][C:2]#[#7;D1].[Cl,Br,I;D1][#6;$([#6]~[#6]);!$([#6](-,:[Cl,Br,I;D1])[Cl,Br,I;D1]);!$([#6]=O):3]>>[#6:1][C:2](=O)[#6:3]",
         "reverse_reaction_strings": [
             "[#6:1][C:2](=O)[#6;$([#6]~[#6]);!$([#6]([Cl,Br,I;D1])[Cl,Br,I;D1]);!$([#6]=O):3]>>[#6:1][C:2]#[#7;D1].[Br][#6:3]",
             "[#6:1][C:2](=O)[#6;$([#6]~[#6]);!$([#6]([Cl,Br,I;D1])[Cl,Br,I;D1]);!$([#6]=O):3]>>[#6:1][C:2]#[#7;D1].[Cl][#6:3]",
-            "[#6:1][C:2](=O)[#6;$([#6]~[#6]);!$([#6]([Cl,Br,I;D1])[Cl,Br,I;D1]);!$([#6]=O):3]>>[#6:1][C:2]#[#7;D1].[I][#6:3]"
+            "[#6:1][C:2](=O)[#6;$([#6]~[#6]);!$([#6]([Cl,Br,I;D1])[Cl,Br,I;D1]);!$([#6]=O):3]>>[#6:1][C:2]#[#7;D1].[I][#6:3]",
+            "[#6:3][C:2](=O)[#6;$([#6]~[#6]);!$([#6]([Cl,Br,I;D1])[Cl,Br,I;D1]);!$([#6]=O):1]>>[#6:1][C:2]#[#7;D1].[Br][#6:3]",
+            "[#6:3][C:2](=O)[#6;$([#6]~[#6]);!$([#6]([Cl,Br,I;D1])[Cl,Br,I;D1]);!$([#6]=O):1]>>[#6:1][C:2]#[#7;D1].[Cl][#6:3]",
+            "[#6:3][C:2](=O)[#6;$([#6]~[#6]);!$([#6]([Cl,Br,I;D1])[Cl,Br,I;D1]);!$([#6]=O):1]>>[#6:1][C:2]#[#7;D1].[I][#6:3]"
         ],
+        "note": "This reaction is subject to a known RDKit limitation where stereochemistry on a reactant ('spectator stereochemistry') may be lost during the reverse reaction. It has also been made symmetric to account for the two possible ways a ketone can be disconnected.",
         "RXN_NUM": 80
     },
     "81_Grignard_alcohol": {
@@ -1856,12 +1952,17 @@
             "[Cl,Br,I;D1][#6&$([#6]~[#6])&!$([#6](-,:[Cl,Br,I;D1])[Cl,Br,I;D1])&!$([#6]=O)]"
         ],
         "num_reactants": 2,
-        "reaction_string": "[#6:1][C;H1,$(C(-,:[#6])[#6]):2]=[OD1:3].[Cl,Br,I;D1][#6;$([#6]~[#6]);!$([#6](-,:[Cl,Br,I;D1])[Cl,Br,I;D1]);!$([#6]=O):4]>>[C:1][#6:2]([OH1:3])[#6:4]",
+        "ignore_double_bond_stereo_on_reverse": true,
+        "reaction_string": "[#6:1][C;H1,$(C(-,:[#6])[#6]):2]=[OD1:3].[Cl,Br,I;D1][#6;$([#6]~[#6]);!$([#6](-,:[Cl,Br,I;D1])[Cl,Br,I;D1]);!$([#6]=O):4]>>[#6:1][C:2]([OH1:3])[#6:4]",
         "reverse_reaction_strings": [
             "[#6:1][C;H1,$([C]([#6])[#6]):2]([OH1:3])[#6;$([#6]~[#6]);!$([#6]([Cl,Br,I;D1])[Cl,Br,I;D1]);!$([#6]=O):4]>>[#6:1][C:2]=[OD1:3].[Br][#6:4]",
             "[#6:1][C;H1,$([C]([#6])[#6]):2]([OH1:3])[#6;$([#6]~[#6]);!$([#6]([Cl,Br,I;D1])[Cl,Br,I;D1]);!$([#6]=O):4]>>[#6:1][C:2]=[OD1:3].[Cl][#6:4]",
-            "[#6:1][C;H1,$([C]([#6])[#6]):2]([OH1:3])[#6;$([#6]~[#6]);!$([#6]([Cl,Br,I;D1])[Cl,Br,I;D1]);!$([#6]=O):4]>>[#6:1][C:2]=[OD1:3].[I][#6:4]"
+            "[#6:1][C;H1,$([C]([#6])[#6]):2]([OH1:3])[#6;$([#6]~[#6]);!$([#6]([Cl,Br,I;D1])[Cl,Br,I;D1]);!$([#6]=O):4]>>[#6:1][C:2]=[OD1:3].[I][#6:4]",
+            "[#6:4][C;H1,$([C]([#6])[#6]):2]([OH1:3])[#6;$([#6]~[#6]);!$([#6]([Cl,Br,I;D1])[Cl,Br,I;D1]);!$([#6]=O):1]>>[#6:4][C:2]=[OD1:3].[Br][#6:1]",
+            "[#6:4][C;H1,$([C]([#6])[#6]):2]([OH1:3])[#6;$([#6]~[#6]);!$([#6]([Cl,Br,I;D1])[Cl,Br,I;D1]);!$([#6]=O):1]>>[#6:4][C:2]=[OD1:3].[Cl][#6:1]",
+            "[#6:4][C;H1,$([C]([#6])[#6]):2]([OH1:3])[#6;$([#6]~[#6]);!$([#6]([Cl,Br,I;D1])[Cl,Br,I;D1]);!$([#6]=O):1]>>[#6:4][C:2]=[OD1:3].[I][#6:1]"        
         ],
+        "note": "This reaction is subject to a known RDKit limitation where stereochemistry on a reactant ('spectator stereochemistry') may be lost during the reverse reaction.",
         "RXN_NUM": 81
     },
     "82_Sonogashira": {
@@ -1876,15 +1977,22 @@
             "terminal_alkyne_robust"
         ],
         "group_smarts": [
-            "[#6;$(C=C-[#6]),$(c:c)][Br,I;D1]",
+            "[#6;c,$(C=C)][Br,I;D1]",
             "[C&H1&$(C#CC)]"
         ],
+        "ignore_double_bond_stereo_on_reverse": true,
         "num_reactants": 2,
-        "reaction_string": "[#6;$(C=C-[#6]),$(c:c):1][Br,I;D1].[CH1;$(C#CC):2]>>[#6:1][C:2]",
-        "reverse_reaction_strings": [
+        "reaction_string2": "[#6;$(C=C-[#6]),$(c:c):1][Br,I;D1].[CH1;$(C#CC):2]>>[#6:1][C:2]",
+        "reverse_reaction_strings2": [
             "[#6;$(C=C-[#6]),$(c:c):1][C:2]#[C:3]>>[#6;$(C=C-[#6]),$(c:c):1][Br].[C&H1&$(C#CC):2]#[C:3]",
             "[#6;$(C=C-[#6]),$(c:c):1][C:2]#[C:3]>>[#6;$(C=C-[#6]),$(c:c):1][I].[C&H1&$(C#CC):2]#[C:3]"
         ],
+        "reaction_string": "[#6;c,$(C=C):1][Br,I;D1].[CH1;$(C#CC):2]>>[#6:1][C:2]",
+        "reverse_reaction_strings": [
+            "[#6;c,$(C=C):1][C:2]#[C:3]>>[#6:1][Br].[C&H1&$(C#CC):2]#[C:3]",
+            "[#6;c,$(C=C):1][C:2]#[C:3]>>[#6:1][I].[C&H1&$(C#CC):2]#[C:3]"
+        ],
+        "note": "This reaction is subject to a known RDKit limitation where stereochemistry on a vinyl halide reactant ('spectator stereochemistry') may be lost during the reverse reaction.",
         "RXN_NUM": 82
     },
     "83_Schotten_Baumann_amide": {
@@ -1903,10 +2011,13 @@
             "[N&$(NC)&!$(N=*)&!$([N&-])&!$(N#*)&!$([N&D3])&!$([N&D4])&!$(N[O,N])&!$(N[C,S]=[S,O,N])]"
         ],
         "num_reactants": 2,
+        "ignore_double_bond_stereo_on_reverse": true,
         "reaction_string": "[#6:3]-[C;R0:1](=[OD1:4])-[OH1].[N;$(NC);!$(N=*);!$([N-]);!$(N#*);!$([ND3]);!$([ND4]);!$(N[O,N]);!$(N[C,S]=[S,O,N]):2]>>[#6:3][C:1](=[OD1:4])[N+0:2]",
         "reverse_reaction_strings": [
             "[#6:1][C;X3](=[O;X1])[#7:2]>>[#6:1]-[C&R0](=[O&D1])-[O&H1].[N&$(NC)&!$(N=*)&!$([N&-])&!$(N#*)&!$([N&D3])&!$([N&D4])&!$(N[O,N])&!$(N[C,S]=[S,O,N]):2]"
         ],
+        "note": "This reaction is subject to a known RDKit limitation where pre-existing stereochemistry on a reactant ('spectator stereochemistry') may be lost during the reverse reaction. The 'ignore_double_bond_stereo_on_reverse' flag should be used to handle this during validation.",
+
         "RXN_NUM": 83
     },
     "84_sulfon_amide": {
@@ -1930,7 +2041,7 @@
         ],
         "reaction_string": "[S;$(S(=O)(=O)[C,N]):1][O;!R].[N;$(NC);!$(N=*);!$([N-]);!$(N#*);!$([ND3]);!$([ND4]);!$(N[c,O]);!$(N[C,S]=[S,O,N]):2]>>[S:1][N+0:2]",
         "reverse_reaction_strings": [
-            "[C,N:1][S;$(S(=O)(=O)[C,N]):2](=[O:3])(=[O:4])-[N;H0,H1,H2:5]>>[*:1][S:2](=[O:3])(=[O:4])O[Cl].[N&$(NC)&!$(N=*)&!$([N&-])&!$(N#*)&!$([N&D3])&!$([N&D4])&!$(N[c,O])&!$(N[C,S]=[S,O,N]):5]"
+            "[C,N:1][S;$(S(=O)(=O)[C,N]):2](=[O:3])(=[O:4])-[N;H0,H1;$(N[#6]);!$(N[C]=O);!$(N[c]):5]>>[*:1][S:2](=[O:3])(=[O:4])O[Cl].[N&$(NC)&!$(N=*)&!$([N&-])&!$(N#*)&!$([N&D3])&!$([N&D4])&!$(N[c,O])&!$(N[C,S]=[S,O,N]):5]"
         ],
         "note": "Reverses sulfonamide formation by breaking S-N bonds in sulfonyl compounds back to sulfonyl chlorides and amines. Patterns are specific to sulfonamide products.",
         "RXN_NUM": 84
@@ -2029,13 +2140,14 @@
         ],
         "note": "There is nothing in the original SMARTS string from https://pubs.acs.org/doi/suppl/10.1021/ci200379p/suppl_file/ci200379p_si_002.pdf to prevent the R1 and R2 groups of the alpha_halo_ketone_robust from being in a common ring, but we prohibit this possibility because the reverse reaction would otherwise produce products that, though correct when visualized, have incorrect rdkit-assigned aromaticity to some atoms. For example, apply [c:4]1[c:5][nH:3][c:2][n:1]1>>[C;$(C([#6])[#6;!$([#6]Br)]):4](=[OD1])[CH;$(C([#6])[#6]):5]Br.[#7;H2:3][C;$(C(=N)(N)[c,#7]):2]=[#7;H1;D1:1] to CC(C)c1ccc2[nH]c(-c3ccnnc3Sc3nncs3)nc2c(=O)c1. Very complicated.",
         "num_reactants": 2,
+        "ignore_chiral_stereo_on_reverse": true,
+
         "reaction_string": "[C;!R;$(C(-,:[#6])[#6;!$([#6][Br;D1])]):4](=[OD1])[C;H1;$(C(-,:[#6])[#6]):5][Br;D1].[#7;H2:3][C;$(C(=N)(-,:N)[c,#7]):2]=[#7;H1;D1:1]>>[C:4]1=[CH0:5][NH:3][C:2]=[N:1]1",
         "reverse_reaction_strings": [
             "[C:4]1=[C:5][nH:3][c:2][n:1]1>>[C;$(C([#6])[#6;!$([#6][Br;D1])]):4](=[OD1])[CH;$(C([#6])[#6]):5][Br;D1].[#7;H2:3][C;$(C(=N)(N)[c,#7]):2]=[#7;H1;D1:1]",
             "[c:4]1[c:5][nH:3][c:2][n:1]1>>[C;$(C([#6])[#6;!$([#6][Br;D1])]):4](=[OD1])[CH;$(C([#6])[#6]):5][Br;D1].[#7;H2:3][C;$(C(=N)(N)[c,#7]):2]=[#7;H1;D1:1]",
             "[c:4]1[c:5]2[c][c][c](=O)[c]2[nH:3][c:2][n:1]1>>[C;$(C([#6])[#6;!$([#6][Br;D1])]):4](=[OD1])[CH;$(C([#6])[#6]):5][Br;D1].[#7;H2:3][C;$(C(=N)(N)[c,#7]):2]=[#7;H1;D1:1]"
         ],
-        "notes": "Be sure to revisit.",
         "RXN_NUM": 88
     },
     "89_decarboxylative_coupling": {
@@ -2081,8 +2193,8 @@
         "num_reactants": 2,
         "reaction_string": "[c;!$(c1ccccc1);$(c1[n,c]c[n,c]c[n,c]1):1][Cl,F].[N;$(NC);!$(N=*);!$([N-]);!$(N#*);!$([ND3]);!$([ND4]);!$(N[c,O]);!$(N[C,S]=[S,O,N]):2]>>[c:1][N:2]",
         "reverse_reaction_strings": [
-            "[c;!$(c1ccccc1);$(c1[n,c]c[n,c]c[n,c]1):1][N;$(NC);!$(N=*);!$([N-]);!$(N#*);!$([ND4]):2]>>[c:1][Cl].[N&$(NC)&!$(N=*)&!$([N&-])&!$(N#*)&!$([N&D3])&!$([N&D4])&!$(N[c,O])&!$(N[C,S]=[S,O,N]):2]",
-            "[c;!$(c1ccccc1);$(c1[n,c]c[n,c]c[n,c]1):1][N;$(NC);!$(N=*);!$([N-]);!$(N#*);!$([ND4]):2]>>[c:1][F].[N&$(NC)&!$(N=*)&!$([N&-])&!$(N#*)&!$([N&D3])&!$([N&D4])&!$(N[c,O])&!$(N[C,S]=[S,O,N]):2]"
+            "[c;!$(c1ccccc1);$(c1[n,c]c[n,c]c[n,c]1):1][N;$(NC);!$(N=*);!$([N-]);!$(N#*);!$([ND4]);!$(N[C,S]=[S,O,N]):2]>>[c:1][Cl].[N&$(NC)&!$(N=*)&!$([N&-])&!$(N#*)&!$([N&D3])&!$([N&D4])&!$(N[c,O])&!$(N[C,S]=[S,O,N]):2]",
+            "[c;!$(c1ccccc1);$(c1[n,c]c[n,c]c[n,c]1):1][N;$(NC);!$(N=*);!$([N-]);!$(N#*);!$([ND4]);!$(N[C,S]=[S,O,N]):2]>>[c:1][F].[N&$(NC)&!$(N=*)&!$([N&-])&!$(N#*)&!$([N&D3])&!$([N&D4])&!$(N[c,O])&!$(N[C,S]=[S,O,N]):2]"
         ],
         "notes": "complex amine pattern in forward reaction, not in reverse.",
         "RXN_NUM": 90

@@ -4,16 +4,10 @@ Ligand efficiency plugin for re-scoring.
 import __future__
 
 from autogrow.plugins.rescoring import RescoringBase
-import rdkit  # type: ignore
 from typing import List, Tuple
 from autogrow.config.argument_vars import ArgumentVars
 from autogrow.types import Compound
 from autogrow.plugins.registry_base import plugin_managers
-
-# Disable the unnecessary RDKit warnings
-rdkit.RDLogger.DisableLog("rdApp.*")
-
-
 class LigandEfficiency(RescoringBase):
     """
     Ligand efficiency plugin for re-scoring.
@@ -36,7 +30,7 @@ class LigandEfficiency(RescoringBase):
             rescores.append(compound.get_ligand_efficiency())
         return rescores
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments required by the plugin.
 
@@ -44,21 +38,17 @@ class LigandEfficiency(RescoringBase):
         ligand efficiency calculation.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing the argument
-                group name and a list of ArgumentVars objects defining the
-                command-line arguments.
+            List[ArgumentVars]: A list of ArgumentVars objects defining the
+            command-line arguments.
         """
-        return (
-            "Ligand efficiency",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    action="store_true",
-                    default=False,
-                    help="Rescore ligands by ligand efficiency (docking score / number of heavy atoms). The original docking score is saved in the compound's history.",
-                )
-            ],
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Enable rescoring by ligand efficiency (docking score / heavy atom count). This metric helps to normalize binding affinity by molecular size, identifying smaller, more efficient binders. The original docking score is saved in the compound's history.",
+            )
+        ]
 
     def validate(self, params: dict):
         """

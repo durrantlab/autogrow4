@@ -142,7 +142,7 @@ def merge_smiles_with_core(
                     # ai is the atom Idx
                     # bt is the bondtype
                     try:
-                        rw_core_merg.AddBond(idx_for_anchor, ai, bt)
+                        chemtoolkit.add_bond_to_mol(rw_core_merg, idx_for_anchor, ai, bt)
                     except Exception:
                         return None
 

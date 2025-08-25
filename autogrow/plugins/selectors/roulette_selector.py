@@ -25,7 +25,7 @@ class RouletteSelector(SelectorBase):
     without replacement.
     """
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments specific to the Roulette Selector.
 
@@ -33,26 +33,20 @@ class RouletteSelector(SelectorBase):
         configure the Roulette Selector.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing:
-                - The name of the argument group ("Selectors")
-                - A list with one ArgumentVars object defining the argument
-                  to enable the Roulette Selector
-
+            List[ArgumentVars]: A list with one ArgumentVars object defining
+            the argument to enable the Roulette Selector.
         Note:
             The Roulette Selector doesn't require additional parameters beyond
             its activation flag.
         """
-        return (
-            "Selectors",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    action="store_true",
-                    default=False,
-                    help="Enable weighted roulette wheel selection. Chooses compounds stochastically based on score, without replacement.",
-                )
-            ],
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Enable weighted roulette wheel selection. This stochastic method selects compounds based on their scores, where higher-scoring compounds have a proportionally higher chance of being chosen. Selection is performed without replacement.",
+            )
+        ]
 
     def validate(self, params: dict):
         """
@@ -138,16 +132,16 @@ class RouletteSelector(SelectorBase):
                 "diversity" scores.
 
         Returns:
-            List[float]: A list of adjusted scores.
-
+            List[float]: A list of adjusted scores (positive weights).
         Raises:
             Exception: If an invalid score_type is provided.
 
         Note:
-            For diversity scores, the adjustment is (1/x^2) to make smaller
-            (more diverse) scores more prominent. For docking scores, the
-            adjustment is (x^10) to emphasize the difference between the
-            scores and account for the directionality of the scores.
+            For DIVERSITY, lower scores are better. We use 1/score^2 to create
+            positive weights where smaller scores get larger weights.
+            For FITNESS, lower (more negative) scores are better. We transform them
+            into positive weights using: max_score - score + epsilon, so the
+            best scores get the highest weights.
         """
         if score_type == ScoreType.DIVERSITY:
             weight_scores = [
@@ -155,21 +149,21 @@ class RouletteSelector(SelectorBase):
                 for x in predock_cmpds
                 if x.diversity_score is not None
             ]
-            # adjust by squaring the number to make the discrpency larger and
-            # invert by dividing 1/x^2 (because the more diverse a mol is the
-            # smaller the number)
-            adjusted = [(x ** -2) for x in weight_scores]
-
-        elif ScoreType.FITNESS:
+            # Use 1/x^2 to make smaller (more diverse) scores have larger weights
+            # Add a small epsilon to avoid division by zero
+            adjusted = [(1 / (x**2 + 1e-6)) for x in weight_scores]
+        elif score_type == ScoreType.FITNESS:
             weight_scores = [
-                x.docking_score for x in predock_cmpds if x.docking_score is not None
+                x.fitness_score for x in predock_cmpds if x.fitness_score is not None
             ]
-            # minimum is the most positive value from predock_cmpds the more
-            # negative the docking score the better the dock
-            minimum = max(weight_scores) + 0.1
-            minimum = max(minimum, 0)
-            adjusted = [(x ** 10) + minimum for x in weight_scores]
-
+            # To handle negative scores where lower is better, we transform them.
+            # A common method is to subtract scores from the max score.
+            if not weight_scores:
+                return []
+            max_score = max(weight_scores)
+            # Add a small epsilon to ensure all weights are non-zero
+            epsilon = 1e-6
+            adjusted = [(max_score - x + epsilon) for x in weight_scores]
         else:
             raise Exception("docking_or_diversity choice not an option")
 

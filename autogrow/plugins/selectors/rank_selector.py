@@ -37,26 +37,22 @@ class RankSelector(SelectorBase):
     of desired ligands might exceed the number of ligands to choose from.
     """
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments required by the plugin.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing the plugin
-                category name and a list of ArgumentVars for the plugin's specific
-                arguments.
+            List[ArgumentVars]: A list of ArgumentVars for the plugin's
+            specific arguments.
         """
-        return (
-            "Selectors",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    action="store_true",
-                    default=False,
-                    help="Enable rank-based, non-redundant selection. Chooses the top N compounds based on score. Not recommended for small runs, where the number of desired molecules may exceed the number of molecules to chose from.",
-                )
-            ],
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Enable rank-based selection. This deterministic method chooses the top-ranked compounds based on their scores, ensuring no duplicates are selected. It is not recommended for small runs where the number of available compounds may be less than the number to be selected.",
+            )
+        ]
 
     def validate(self, params: dict):
         """

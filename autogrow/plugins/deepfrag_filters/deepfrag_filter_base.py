@@ -2,26 +2,21 @@
 DeepFrag plugin.
 """
 import __future__
-import rdkit
-import rdkit.Chem as Chem
-from rdkit.Chem import rdFMCS
 from typing import List, Tuple
 from autogrow.types import Compound
 from autogrow.plugins.plugin_base import PluginBase
 from abc import abstractmethod
 from autogrow.config.argument_vars import ArgumentVars
 from scipy.spatial.distance import cosine
+import numpy as np
 from autogrow.utils.logging import LogLevel, log_debug, log_info, log_warning
 import random
 import os
 import hashlib
+from autogrow.plugins.registry_base import plugin_managers
 
-# Disable the unnecessary RDKit warnings
-rdkit.RDLogger.DisableLog("rdApp.*")
-
-DEEPFRAG_DEBUG = True
+DEEPFRAG_DEBUG = False
 if DEEPFRAG_DEBUG:
-    from rdkit.Chem import Draw
     import os
 
 
@@ -36,6 +31,16 @@ class DeepFragFilterBase(PluginBase):
     apply_on_crossover = False
     fps_fragment_cache = {}
     filter_logger_file = None
+
+    @property
+    def plugin_type_name(self) -> str:
+        """Return the user-friendly name of the plugin type."""
+        return "DeepFrag Filter"
+
+    @property
+    def plugin_description(self) -> str:
+        """Return a brief description of the plugin type."""
+        return "Filters molecules based on DeepFrag predictions"
 
     def set_log_file(self, filter_logger_file):
         self.filter_logger_file = filter_logger_file
@@ -55,9 +60,10 @@ class DeepFragFilterBase(PluginBase):
                 with their `sort_score` attribute populated.
         """
         compounds = kwargs["compounds"]
-        cutoff = kwargs["input_params"][self.name]
+        cutoff = kwargs["input_params"]["deepfrag_cosine_similarity_cutoff"]
         receptor = kwargs["input_params"]["receptor_path"]
         generation_num = kwargs["input_params"].get("generation_num", "NA")
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
 
         with LogLevel():
             log_info(
@@ -66,12 +72,14 @@ class DeepFragFilterBase(PluginBase):
             final_compound_list: List[Compound] = []
             for compound in compounds:
                 log_info(
-                    f"Processing compound {compound.id} with smiles string {compound.smiles}"
+                    # compound.id is temporary, so no need to mention it
+                    # f"Processing compound {compound.id} with smiles string {compound.smiles}"
+                    f"Processing compound with smiles string {compound.smiles}"
                 )
                 with LogLevel():
                     passed_filter = False
                     similarity_str = "None"
-                    child_mol = Chem.MolFromSmiles(compound.smiles)
+                    child_mol = chemtoolkit.mol_from_smiles(compound.smiles)
                     if len(compound.parent_3D_mols) == 1:
                         # This is a standard mutation
                         parent_mol = compound.parent_3D_mols[0]
@@ -195,8 +203,7 @@ class DeepFragFilterBase(PluginBase):
                         log_warning(mesg)
                         if self.filter_logger_file:
                             self.filter_logger_file.info(mesg)
-
-        return final_compound_list
+            return final_compound_list
 
     @abstractmethod
     def get_prediction_for_parent_receptor(self, parent_mol, receptor, branching_point):
@@ -208,40 +215,34 @@ class DeepFragFilterBase(PluginBase):
 
     def validate(self, params: dict):
         """Validate the provided arguments."""
-        self.apply_on_crossover = bool(params["DeepFragFilterForCrossover"])
+        self.apply_on_crossover = bool(params["deepfrag_filter_for_crossover"])
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments required by the plugin.
 
-        This method defines the command-line arguments specific for the
+        This method defines the command-line arguments specific to the
         DeepFrag filter.
+        It allows users to enable the filter via command-line options.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing the argument
-                group name and a list of ArgumentVars objects defining the
-                command-line arguments.
+            List[ArgumentVars]: A list of ArgumentVars objects defining the
+            command-line arguments.
         """
-        return (
-            "DeepFragFilter",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    type=float,
-                    default=False,
-                    help="The minimum cosine similarity score required for a molecule to pass the filter. \
-                        This filter is applied to the products of multi-reactant fragment additions. See \
-                        also --DeepFragFilterForCrossover.",
-                ),
-
-                ArgumentVars(
-                    name="DeepFragFilterForCrossover",
-                    action="store_true",
-                    default=False,
-                    help="Apply a DeepFrag filter on the new compounds obtained by crossover.",
-                )
-            ],
-        )
+        return [
+            ArgumentVars(
+                name="deepfrag_cosine_similarity_cutoff",
+                type=float,
+                default=0.35,
+                help="The minimum cosine similarity score required for a molecule to pass any enabled DeepFrag filter. Default: 0.35",
+            ),
+            ArgumentVars(
+                name="deepfrag_filter_for_crossover",
+                action="store_true",
+                default=False,
+                help="Apply a DeepFrag filter on the new compounds obtained by crossover.",
+            ),
+        ]
 
     def _save_debug_image(self, parent_mol, child_mol, mcs_smarts, mcs_mol_with_coords, fragments_mol, connection_points_3d, similarity, passed_filter, compound_id, generation_num):
         """
@@ -260,11 +261,11 @@ class DeepFragFilterBase(PluginBase):
             generation_num (int or str): The generation number.
         """
         os.makedirs("./deepfrag_debug", exist_ok=True)
-        
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
         # Create a unique hash for the image based on its contents
-        parent_smiles = Chem.MolToSmiles(parent_mol)
-        child_smiles = Chem.MolToSmiles(child_mol)
-        fragment_smiles = Chem.MolToSmiles(fragments_mol)
+        parent_smiles = chemtoolkit.mol_to_smiles(parent_mol)
+        child_smiles = chemtoolkit.mol_to_smiles(child_mol)
+        fragment_smiles = chemtoolkit.mol_to_smiles(fragments_mol)
         branching_points_str = str(sorted(connection_points_3d.keys()))
 
         unique_str = f"{parent_smiles}|{child_smiles}|{fragment_smiles}|{branching_points_str}|{compound_id}"
@@ -278,19 +279,16 @@ class DeepFragFilterBase(PluginBase):
             return
 
         branching_points_indices = list(connection_points_3d.keys())
-        
-        mols_to_draw = [parent_mol, child_mol, Chem.MolFromSmarts(mcs_smarts), mcs_mol_with_coords, fragments_mol]
+        mols_to_draw = [parent_mol, child_mol, chemtoolkit.mol_from_smarts(mcs_smarts), mcs_mol_with_coords, fragments_mol]
         similarity_text = f"Similarity: {similarity:.3f}" if similarity is not None else "Similarity: None"
         legends = ["Parent", "Child", f"MCS ({mcs_smarts})", "MCS with Parent Coords", f"Fragment(s)\n{similarity_text}"]
         
         highlight_list = [branching_points_indices] + [[] for _ in range(len(mols_to_draw) - 1)]
-        
-        img = Draw.MolsToGridImage(
+        img = chemtoolkit.mols_to_grid_image(
             mols_to_draw,
-            legends=legends,
-            molsPerRow=5,
-            subImgSize=(300, 300),
-            highlightAtomLists=highlight_list
+            mols_per_row=5,
+            sub_img_size=(300, 300),
+            highlight_atom_lists=highlight_list,
         )
         img.save(filename)
         log_info(f"Saved DeepFrag MCS debug image to {filename}")
@@ -308,25 +306,23 @@ class DeepFragFilterBase(PluginBase):
         Returns:
             str: The SMARTS string of the optimal MCS, or None if no suitable MCS is found.
         """
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
         if mol1 is None or mol2 is None:
             raise ValueError("Invalid RDKit molecule provided.")
 
         # Helper function to get fragments by removing MCS atoms
         def _get_fragments_for_mol(mol, mcs_mol):
-            match = mol.GetSubstructMatch(mcs_mol)
+            match = chemtoolkit.get_substruct_match(mol, mcs_mol)
             if not match:
-                return [Chem.MolToSmiles(mol)] # Should not happen with valid MCS
-
-            emol = Chem.RWMol(mol)
+                return [chemtoolkit.mol_to_smiles(mol)]  # Should not happen with valid MCS
+            emol = chemtoolkit.get_editable_mol(mol)
             atoms_to_remove = sorted(list(match), reverse=True)
             for atom_idx in atoms_to_remove:
-                emol.RemoveAtom(atom_idx)
-            
-            frag_mol = emol.GetMol()
-            
+                chemtoolkit.remove_atom_from_editable_mol(emol, atom_idx)
+            frag_mol = chemtoolkit.get_noneditable_mol(emol)
             try:
                 # Important: Sanitize=False to handle radical fragments, then sanitize later if needed.
-                frag_smiles = Chem.MolToSmiles(frag_mol, isomericSmiles=True)
+                frag_smiles = chemtoolkit.mol_to_smiles(frag_mol, isomeric_smiles=True)
                 # Split into fragments and remove empty strings from result
                 frags = [s for s in frag_smiles.split('.') if s]
                 return frags
@@ -344,23 +340,22 @@ class DeepFragFilterBase(PluginBase):
                 list: Atoms sorted by degree (ascending), then by atom index for consistency
             """
             atoms_with_degree = []
-            for atom in mol.GetAtoms():
-                degree = atom.GetDegree()
-                atoms_with_degree.append((degree, atom.GetIdx(), atom))
-            
+            for atom in chemtoolkit.get_atoms(mol):
+                degree = chemtoolkit.get_atom_degree(atom)
+                atoms_with_degree.append((degree, chemtoolkit.get_idx(atom), atom))
             # Sort by degree (ascending, so terminal atoms first), then by index for consistency
             atoms_with_degree.sort(key=lambda x: (x[0], x[1]))
             
             return [atom for _, _, atom in atoms_with_degree]
 
         # 1. Find the initial, absolute MCS as a starting point.
-        initial_mcs = rdFMCS.FindMCS([mol1, mol2], timeout=30)
+        initial_mcs = chemtoolkit.find_mcs([mol1, mol2], timeout=30)
         if initial_mcs.numAtoms == 0:
             return None
 
         # Our list of candidates to check, starting with the biggest.
         # We store tuples of (mol_object, smarts_string).
-        mcs_mol = Chem.MolFromSmarts(initial_mcs.smartsString)
+        mcs_mol = chemtoolkit.mol_from_smarts(initial_mcs.smartsString)
         candidates = [(mcs_mol, initial_mcs.smartsString)]
         
         # Keep track of SMARTS we've already processed to avoid redundant work.
@@ -368,7 +363,7 @@ class DeepFragFilterBase(PluginBase):
 
         while candidates:
             # 2. Always check the largest candidate first.
-            candidates.sort(key=lambda x: x[0].GetNumAtoms(), reverse=True)
+            candidates.sort(key=lambda x: chemtoolkit.get_num_atoms(x[0]), reverse=True)
             current_mcs_mol, current_mcs_smarts = candidates.pop(0)
 
             # 3. Check if this candidate is "valid".
@@ -380,24 +375,21 @@ class DeepFragFilterBase(PluginBase):
                 return current_mcs_smarts
 
             # 4. If not valid, generate smaller candidates by removing atoms in connectivity order.
-            if current_mcs_mol.GetNumAtoms() > 1:
+            if chemtoolkit.get_num_atoms(current_mcs_mol) > 1:
                 # Get atoms sorted by connectivity (terminal atoms first)
                 sorted_atoms = _get_atoms_sorted_by_connectivity(current_mcs_mol)
                 
                 for atom in sorted_atoms:
                     # Create a copy to modify
-                    emol = Chem.RWMol(current_mcs_mol)
-                    emol.RemoveAtom(atom.GetIdx())
-                    
+                    emol = chemtoolkit.get_editable_mol(current_mcs_mol)
+                    chemtoolkit.remove_atom_from_editable_mol(emol, chemtoolkit.get_idx(atom))
                     # Removing an atom can disconnect the MCS itself. We take the largest resulting piece.
-                    sub_frags = Chem.GetMolFrags(emol.GetMol(), asMols=True)
+                    sub_frags = chemtoolkit.get_mol_frags(chemtoolkit.get_noneditable_mol(emol), as_mols=True)
                     if not sub_frags:
                         continue
-
-                    largest_sub_frag = max(sub_frags, key=lambda m: m.GetNumAtoms())
-                    
+                    largest_sub_frag = max(sub_frags, key=lambda m: chemtoolkit.get_num_atoms(m))
                     try:
-                        new_smarts = Chem.MolToSmarts(largest_sub_frag)
+                        new_smarts = chemtoolkit.mol_to_smarts(largest_sub_frag)
                         if new_smarts not in seen_smarts:
                             # Add new, smaller candidate to our list for checking.
                             candidates.append((largest_sub_frag, new_smarts))
@@ -419,86 +411,68 @@ class DeepFragFilterBase(PluginBase):
             - child_to_mcs_map: Mapping from child atom indices to MCS atom indices
             - mcs_smarts: The SMARTS string of the MCS.
         """
-        parent = Chem.RemoveHs(parent)
-        child = Chem.RemoveHs(child)
-        
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
+        parent = chemtoolkit.remove_hs(parent)
+        child = chemtoolkit.remove_hs(child)
         # Find the Maximum Common Substructure that does not fragment molecules
         mcs_smarts = self._find_single_fragment_mcs(parent, child)
 
         if mcs_smarts is None:
-            log_warning(f"Could not find single-fragment MCS for {Chem.MolToSmiles(parent)} and {Chem.MolToSmiles(child)}")
+            log_warning(f"Could not find single-fragment MCS for {chemtoolkit.mol_to_smiles(parent)} and {chemtoolkit.mol_to_smiles(child)}")
             return None, {}, {}, ""
 
         # Create a molecule from the MCS SMARTS pattern
-        mcs_mol = Chem.MolFromSmarts(mcs_smarts)
+        mcs_mol = chemtoolkit.mol_from_smarts(mcs_smarts)
         log_info(f"MCS found: {mcs_smarts}")
-        log_info(f"Number of atoms in MCS: {mcs_mol.GetNumAtoms()}")
-        log_info(f"Number of bonds in MCS: {mcs_mol.GetNumBonds()}")
-        
+        log_info(f"Number of atoms in MCS: {chemtoolkit.get_num_atoms(mcs_mol)}")
+        log_info(f"Number of bonds in MCS: {len(mcs_mol.GetBonds())}")
         # Match the MCS in both molecules
-        parent_match = parent.GetSubstructMatch(mcs_mol)
-        child_match = child.GetSubstructMatch(mcs_mol)
-
+        parent_match = chemtoolkit.get_substruct_match(parent, mcs_mol)
+        child_match = chemtoolkit.get_substruct_match(child, mcs_mol)
         if not parent_match or not child_match:
             log_warning("No match found in one or both molecules.")
             return None, {}, {}, ""
 
         # Create a new editable molecule for the MCS
-        mcs_editable = Chem.EditableMol(Chem.Mol())
-
+        mcs_editable = chemtoolkit.create_empty_editable_mol()
         # Add atoms to the new molecule
         atom_mapping = {}  # Maps MCS query atom idx to the new molecule atom idx
-        for i, atom in enumerate(mcs_mol.GetAtoms()):
+        for i, atom in enumerate(chemtoolkit.get_atoms(mcs_mol)):
             # Get the corresponding atom from parent based on the match
             parent_atom_idx = parent_match[i]
-            parent_atom = parent.GetAtomWithIdx(parent_atom_idx)
-
+            parent_atom = chemtoolkit.get_atom_with_idx(parent, parent_atom_idx)
             # Create a new atom with the same properties
-            new_atom = Chem.Atom(parent_atom.GetAtomicNum())
-            new_atom.SetFormalCharge(parent_atom.GetFormalCharge())
-            new_atom.SetChiralTag(parent_atom.GetChiralTag())
-            new_atom.SetHybridization(parent_atom.GetHybridization())
-            new_atom.SetNumExplicitHs(parent_atom.GetNumExplicitHs())
-            new_atom.SetNoImplicit(parent_atom.GetNoImplicit())
-            new_atom.SetIsAromatic(parent_atom.GetIsAromatic())
-
+            new_atom = chemtoolkit.copy_atom(parent_atom)
             # Add the atom to the new molecule
-            new_idx = mcs_editable.AddAtom(new_atom)
+            new_idx = chemtoolkit.add_atom_to_mol(mcs_editable, new_atom)
             atom_mapping[i] = new_idx
 
         # Add bonds to the new molecule
         for bond in mcs_mol.GetBonds():
-            begin_atom = atom_mapping[bond.GetBeginAtomIdx()]
-            end_atom = atom_mapping[bond.GetEndAtomIdx()]
-            bond_type = Chem.BondType.SINGLE  # Default to single bond
-
+            begin_atom_idx = atom_mapping[bond.GetBeginAtomIdx()]
+            end_atom_idx = atom_mapping[bond.GetEndAtomIdx()]
+            bond_type = chemtoolkit.get_single_bond_type()  # Default to single bond
             # Get the corresponding bond from parent
             parent_begin = parent_match[bond.GetBeginAtomIdx()]
             parent_end = parent_match[bond.GetEndAtomIdx()]
-            parent_bond = parent.GetBondBetweenAtoms(parent_begin, parent_end)
-
+            parent_bond = chemtoolkit.get_bond_between_atoms(parent, parent_begin, parent_end)
             if parent_bond:
-                bond_type = parent_bond.GetBondType()
-
-            mcs_editable.AddBond(begin_atom, end_atom, bond_type)
-
+                bond_type = chemtoolkit.get_bond_type(parent_bond)
+            chemtoolkit.add_bond_to_mol(mcs_editable, begin_atom_idx, end_atom_idx, bond_type)
         # Create the final MCS molecule
-        new_mcs_mol = mcs_editable.GetMol()
-
+        new_mcs_mol = chemtoolkit.get_noneditable_mol(mcs_editable)
         # Add a conformer to the new molecule to store 3D coordinates
-        conf = Chem.Conformer(new_mcs_mol.GetNumAtoms())
-
+        conf = chemtoolkit.create_conformer(chemtoolkit.get_num_atoms(new_mcs_mol))
         # Copy coordinates from parent to the new MCS molecule
+        parent_conformer = chemtoolkit.get_conformer(parent)
         for i, idx in enumerate(parent_match):
             new_idx = atom_mapping[i]
-            pos = parent.GetConformer().GetAtomPosition(idx)
-            conf.SetAtomPosition(new_idx, pos)
-
-        new_mcs_mol.AddConformer(conf)
-
+            pos = chemtoolkit.get_atom_position(parent_conformer, idx)
+            chemtoolkit.set_atom_position_in_conformer(conf, new_idx, pos)
+        chemtoolkit.add_conformer_to_mol(new_mcs_mol, conf)
         # Try to sanitize the MCS molecule
         try:
-            Chem.SanitizeMol(new_mcs_mol)
+            chemtoolkit.sanitize_mol(new_mcs_mol)
         except:
             log_warning("MCS molecule sanitization failed")
 
@@ -514,6 +488,7 @@ class DeepFragFilterBase(PluginBase):
 
     # Function to find MCS and remove it from the second molecule
     def __find_mcs_and_fragments(self, parent, child, compound_id=None):
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
         # Create an explicit MCS molecule with 3D coordinates from parent
         mcs_mol, mcs_to_parent_map, mcs_to_child_map, mcs_smarts = self.__create_mcs_molecule(
             parent, child
@@ -526,20 +501,17 @@ class DeepFragFilterBase(PluginBase):
         child_to_mcs_map = {v: k for k, v in mcs_to_child_map.items()}
 
         # Create an RWMol for editing
-        rwmol = Chem.RWMol(child)
-
+        rwmol = chemtoolkit.get_editable_mol(child)
         # Find atoms connected to the MCS but not part of it (meaning, attachment points)
         attachment_bonds = []
         connection_points_3d = {}  # Store connection info
-        assert parent.GetNumConformers() == 1
-        parent_conf = parent.GetConformer()
-
+        assert chemtoolkit.get_num_conformers(parent) == 1
+        parent_conf = chemtoolkit.get_conformer(parent)
         # Find attachment points using the MCS molecule and mappings
         for mcs_atom_idx, child_atom_idx in mcs_to_child_map.items():
-            child_atom = child.GetAtomWithIdx(child_atom_idx)
-
-            for neighbor in child_atom.GetNeighbors():
-                neighbor_idx = neighbor.GetIdx()
+            child_atom = chemtoolkit.get_atom_with_idx(child, child_atom_idx)
+            for neighbor in chemtoolkit.get_neighbors(child_atom):
+                neighbor_idx = chemtoolkit.get_idx(neighbor)
                 if neighbor_idx not in child_to_mcs_map:
                     # This is a bond to an attachment point
                     # Find the corresponding atom in the parent using the MCS mapping
@@ -549,10 +521,10 @@ class DeepFragFilterBase(PluginBase):
                         # Store only the necessary connection details
                         connection_points_3d[parent_atom_idx] = {
                             "mcs_atom_idx": mcs_atom_idx,
-                            "neighbor_symbol": child.GetAtomWithIdx(
-                                neighbor_idx
+                            "neighbor_symbol": chemtoolkit.get_atom_with_idx(
+                                child, neighbor_idx
                             ).GetSymbol(),
-                            "coordinates": parent_conf.GetAtomPosition(parent_atom_idx),
+                            "coordinates": chemtoolkit.get_atom_position(parent_conf, parent_atom_idx),
                             # Only needed for matching later
                         }
 
@@ -562,9 +534,9 @@ class DeepFragFilterBase(PluginBase):
         dummy_atoms = []
         for child_atom_idx, neighbor_idx in attachment_bonds:
             # Add a dummy atom (R group)
-            dummy_idx = rwmol.AddAtom(Chem.Atom("*"))
+            dummy_idx = chemtoolkit.add_atom_to_mol(rwmol, chemtoolkit.create_atom(0))
             # Add a bond from the dummy atom to the neighbor atom
-            rwmol.AddBond(dummy_idx, neighbor_idx, Chem.BondType.SINGLE)
+            chemtoolkit.add_bond_to_mol(rwmol, dummy_idx, neighbor_idx, chemtoolkit.get_single_bond_type())
             dummy_atoms.append(
                 (dummy_idx, child_atom_idx)
             )  # Store the dummy atom and its corresponding MCS atom
@@ -574,9 +546,9 @@ class DeepFragFilterBase(PluginBase):
                     child_atom_idx
                 ):
                     connection_info["dummy_idx"] = dummy_idx
-                    atom = rwmol.GetAtomWithIdx(dummy_idx)
-                    atom.SetProp(
-                        "atom_connecting_mcs", str(connection_info.get("mcs_atom_idx"))
+                    atom = chemtoolkit.get_atom_with_idx(rwmol, dummy_idx)
+                    chemtoolkit.set_atom_property(
+                        atom, "atom_connecting_mcs", str(connection_info.get("mcs_atom_idx"))
                     )
         # Convert the child_to_mcs_map keys to a set for faster lookups
         mcs_atoms_in_child = set(child_to_mcs_map.keys())
@@ -584,30 +556,26 @@ class DeepFragFilterBase(PluginBase):
         # Now delete atoms in the MCS (in reverse order to avoid index shifting issues)
         atoms_to_delete = sorted(list(mcs_atoms_in_child), reverse=True)
         for atom_idx in atoms_to_delete:
-            rwmol.RemoveAtom(atom_idx)
-
+            chemtoolkit.remove_atom_from_editable_mol(rwmol, atom_idx)
         # Convert to a molecule
-        frag_mol = rwmol.GetMol()
-
+        frag_mol = chemtoolkit.get_noneditable_mol(rwmol)
         # Get fragments (in case there are disconnected fragments)
         # First get the atom mapping for each fragment
-        atom_frags = Chem.GetMolFrags(frag_mol)
-
+        atom_frags = chemtoolkit.get_mol_frags(frag_mol)
         # Then get the actual fragment molecules
         frags = [
-            Chem.GetMolFrags(frag_mol, asMols=True, sanitizeFrags=False)[i]
+            chemtoolkit.get_mol_frags(frag_mol, as_mols=True, sanitize_frags=False)[i]
             for i in range(len(atom_frags))
         ]
         # For each fragment, identify which dummy atom it contains
         fragment_info = []
         for i, frag in enumerate(frags):
-            frag_smiles = Chem.MolToSmiles(frag)
-
+            frag_smiles = chemtoolkit.mol_to_smiles(frag)
             # We'll track which connections this fragment has
             fragment_connections = []
 
             # Look for dummy atoms in this fragment
-            for atom in frag.GetAtoms():
+            for atom in chemtoolkit.get_atoms(frag):
                 if atom.GetSymbol() == "*":
                     # For each dummy atom, identify its connections
                     # dummy_neighbors = [neighbor.GetSymbol() for neighbor in atom.GetNeighbors()]
@@ -618,8 +586,8 @@ class DeepFragFilterBase(PluginBase):
                     for cp_info in connection_points_3d.values():
                         # Generic matching based on atom indices and connectivity
                         # Use the dummy atom's neighbor to match with the appropriate connection point
-                        if str(cp_info["mcs_atom_idx"]) in atom.GetProp(
-                            "atom_connecting_mcs"
+                        if str(cp_info["mcs_atom_idx"]) in chemtoolkit.get_atom_property(
+                            atom, "atom_connecting_mcs"
                         ):
                             connection_info = {
                                 "fragment_smiles": frag_smiles,
@@ -640,31 +608,67 @@ class DeepFragFilterBase(PluginBase):
 
         # Sanitize to fix any valence issues
         try:
-            Chem.SanitizeMol(frag_mol)
+            chemtoolkit.sanitize_mol(frag_mol)
         except:
             log_warning("Sanitization failed, the fragment may have valence issues")
             # Try to get the molecule anyway
-            Chem.GetSSSR(frag_mol)
-
+            chemtoolkit.rdmolops_get_sssr(frag_mol)
         # Return without connection_points_3d
         return mcs_mol, frag_mol, fragment_info, mcs_smarts, connection_points_3d
 
     def __compute_cosine_similarity(self, receptor, parent_mol, fragments):
-        similarity = 0
+        """
+        Compute the cosine similarity between the fingerprints of the receptor-parent complex and the fragment.
+
+        Args:
+            receptor: .pdb file containing the receptor.
+            parent_mol: RDKit molecule representing the parent interacting with the receptor.
+            fragments: list of dictionaries, where each dictionary contains information of a chemical fragment.
+
+        Returns:
+            The cosine similarity value.
+        """
+        similarity = 0.0
+        if not fragments:
+            return 1.0
+
         for fragment_info in fragments:
             fragment_smiles = fragment_info['fragment_smiles']
             branching_point = fragment_info['coordinates']
 
             # No cache because this calculation depends on the receptor and a specific branching point,
             # and it is strange that a branching point can be used twice in the same or different molecules
-            fps_receptor_parent = self.get_prediction_for_parent_receptor(parent_mol, receptor, branching_point).tolist()
+            fps_receptor_parent_np = self.get_prediction_for_parent_receptor(parent_mol, receptor, branching_point)
+            fps_receptor_parent = fps_receptor_parent_np.tolist()
 
-            fps_fragment = self.fps_fragment_cache.get(fragment_smiles)
-            if fps_fragment is None:
-                fps_fragment = self.get_fingerprints_for_fragment(Chem.MolFromSmiles(fragment_smiles)).tolist()
+            fps_fragment_from_cache = self.fps_fragment_cache.get(fragment_smiles)
+            if fps_fragment_from_cache is None:
+                chemtoolkit = plugin_managers.ChemToolkit.toolkit
+                fragment_mol = chemtoolkit.mol_from_smiles(fragment_smiles)
+                if fragment_mol is None:
+                    log_warning(f"Could not create molecule from fragment SMILES: {fragment_smiles}. Treating as zero vector.")
+                    fps_fragment_np = np.zeros(2048)
+                else:
+                    fps_fragment_np = self.get_fingerprints_for_fragment(fragment_mol)
+
+                fps_fragment = fps_fragment_np.tolist()
                 self.fps_fragment_cache[fragment_smiles] = fps_fragment
+            else:
+                fps_fragment_np = np.array(fps_fragment_from_cache)
+                fps_fragment = fps_fragment_from_cache
 
-            similarity = similarity + (1 - cosine(fps_receptor_parent, fps_fragment))
+            # Check for zero vectors to avoid nan from cosine distance
+            if np.all(fps_receptor_parent_np == 0) or np.all(fps_fragment_np == 0):
+                current_similarity = 0.0
+            else:
+                cosine_distance = cosine(fps_receptor_parent, fps_fragment)
+                if np.isnan(cosine_distance):
+                    log_warning(f"Cosine similarity resulted in NaN for fragment {fragment_smiles}. Treating as 0 similarity.")
+                    current_similarity = 0.0
+                else:
+                    current_similarity = 1.0 - cosine_distance
 
-        similarity = (similarity / len(fragments)) if len(fragments) > 0 else 1
+            similarity += current_similarity
+
+        similarity = (similarity / len(fragments)) if len(fragments) > 0 else 1.0
         return similarity

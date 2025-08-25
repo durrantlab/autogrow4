@@ -110,19 +110,7 @@ def get_user_params() -> Dict[str, Any]:
     # _add_misc_params(misc)
 
     # Now add in plugin arg groups
-    titles = []
-    titles_to_arg_vars = {}
     for title, arg_vars in plugin_arg_groups_to_add:
-        if title not in titles:
-            titles.append(title)
-
-        if title not in titles_to_arg_vars:
-            titles_to_arg_vars[title] = []
-
-        titles_to_arg_vars[title].extend(arg_vars)
-
-    for title in titles:
-        arg_vars = titles_to_arg_vars[title]
         group = parser.add_argument_group(title)
         for arg_var in arg_vars:
             if arg_var.name[:2] != "--":

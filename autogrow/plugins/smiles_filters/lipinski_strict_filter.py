@@ -72,7 +72,7 @@ class LipinskiStrictFilter(SmilesFilterBase):
         permeability in drug discovery and development settings Advanced Drug
         Delivery Reviews, 46 (2001), pp. 3-26
         """
-        mol = self.cmpd_to_rdkit_mol(cmpd)
+        mol = self.cmpd_to_mol(cmpd)
         if mol is None:
             return False
 
@@ -97,7 +97,7 @@ class LipinskiStrictFilter(SmilesFilterBase):
         # Passed all filters
         return True
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments required by the plugin.
 
@@ -106,18 +106,14 @@ class LipinskiStrictFilter(SmilesFilterBase):
         options.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing the argument
-                group name and a list of ArgumentVars objects defining the
-                command-line arguments.
+            List[ArgumentVars]: A list of ArgumentVars objects defining the
+            command-line arguments.
         """
-        return (
-            "SMILES Filters",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    action="store_true",
-                    default=False,
-                    help="Apply Lipinski's Rule of Five (MW, logP, number of hydrogen bond donors and acceptors) for oral bioavailability, requiring all criteria to be met."
-                )
-            ],
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Enable the strict Lipinski's Rule of Five filter for oral bioavailability. This filter enforces all criteria of the Rule of Five (molecular weight, logP, hydrogen bond donors, and acceptors) with no exceptions, ensuring a stringent screen for drug-likeness.",
+            )
+        ]

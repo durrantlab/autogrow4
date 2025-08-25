@@ -55,7 +55,7 @@ class VandeWaterbeemdFilter(SmilesFilterBase):
             bool: True if the molecule passes all filter criteria (MW < 450
                 dalton and PSA < 90 A^2), False otherwise.
         """
-        mol = self.cmpd_to_rdkit_mol(cmpd)
+        mol = self.cmpd_to_mol(cmpd)
         if mol is None:
             return False
 
@@ -71,7 +71,7 @@ class VandeWaterbeemdFilter(SmilesFilterBase):
         # passes everything
         return True
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments required by the plugin.
 
@@ -80,18 +80,14 @@ class VandeWaterbeemdFilter(SmilesFilterBase):
         command-line options.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing the argument
-                group name and a list of ArgumentVars objects defining the
-                command-line arguments.
+            List[ArgumentVars]: A list of ArgumentVars objects defining the
+            command-line arguments.
         """
-        return (
-            "SMILES Filters",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    action="store_true",
-                    default=False,
-                    help="Apply the Van de Waterbeemd filter to select for blood-brain barrier permeability (MW, PSA).",
-                )
-            ],
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Enable the Van de Waterbeemd filter to screen for blood-brain barrier (BBB) permeability. This filter assesses molecules based on their molecular weight and polar surface area (PSA) to predict their ability to cross the BBB.",
+            )
+        ]

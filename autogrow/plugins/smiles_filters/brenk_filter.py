@@ -18,7 +18,7 @@ from autogrow.plugins.smiles_filters import SmilesFilterBase
 from autogrow.types import Compound
 from typing import Any, List, Tuple
 from autogrow.config.argument_vars import ArgumentVars
-
+from autogrow.plugins.registry_base import plugin_managers
 
 class BRENKFilter(SmilesFilterBase):
     """
@@ -78,31 +78,26 @@ class BRENKFilter(SmilesFilterBase):
         # If the mol matches a mol in the filter list. we return a False (as it
         # failed the filter). If No matches are found to filter list this will
         # return a True as it Passed the filter.
-
-        mol = self.cmpd_to_rdkit_mol(cmpd)
+        mol = self.cmpd_to_mol(cmpd)
         if mol is None:
             return False
-
-        return self.filters.HasMatch(mol) is not True
-
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+        return (
+            plugin_managers.ChemToolkit.toolkit.filter_has_match(self.filters, mol)
+            is not True
+        )
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments specific to the BRENK filter.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing:
-                - The name of the argument group ("SMILES Filters")
-                - A list with one ArgumentVars object defining the argument to
-                  enable the BRENK filter
+            List[ArgumentVars]: A list with one ArgumentVars object defining
+            the argument to enable the BRENK filter.
         """
-        return (
-            "SMILES Filters",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    action="store_true",
-                    default=False,
-                    help="Apply the BRENK filter to remove molecules with undesirable substructures for lead-likeness.",
-                )
-            ],
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Enable the BRENK filter. This filter removes molecules containing substructures that are known to be problematic for lead-likeness, helping to improve the quality of generated compounds.",
+            )
+        ]

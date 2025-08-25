@@ -19,14 +19,11 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import matplotlib.pyplot as plt  # type: ignore
 from matplotlib.axes import Axes  # type: ignore
 
-import rdkit  # type: ignore
-import rdkit.Chem as Chem  # type: ignore
-from rdkit.Chem import Draw, AllChem  # type: ignore
 from PIL import Image  # type: ignore
 import gzip
+from autogrow.plugins.registry_base import plugin_managers
 
 # Disable the unnecessary RDKit warnings
-rdkit.RDLogger.DisableLog("rdApp.*")
 ##################################################################
 ##################################################################
 ########### BASIC OPERATIONS #####################################
@@ -230,12 +227,12 @@ def make_single_image_files(
         are each parent ligands full-length name, or None if there aren't two
         parents
     """
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
     img_size = 500 if len(list(lineage_dict.keys())) <= 6 else 250
-
     # make single img files for each ligand
     # make a blank None image used later for spacers
-    mol_none = Chem.MolFromSmiles("")
-    img = Draw.MolsToGridImage(
+    mol_none = chemtoolkit.mol_from_smiles("")
+    img = chemtoolkit.mols_to_grid_image(
         [mol_none], molsPerRow=1, subImgSize=(img_size, img_size)
     )
     img_file_name = params["single_image_folder"] + "None.png"
@@ -243,9 +240,10 @@ def make_single_image_files(
 
     for mol_name in mol_dict:
         mol = copy.deepcopy(mol_dict[mol_name][-1])
-        tmp = AllChem.Compute2DCoords(mol)
-
-        img = Draw.MolsToGridImage([mol], molsPerRow=1, subImgSize=(img_size, img_size))
+        tmp = chemtoolkit.compute_2d_coords(mol)
+        img = chemtoolkit.mols_to_grid_image(
+            [mol], molsPerRow=1, subImgSize=(img_size, img_size)
+        )
         img_file_name = params["single_image_folder"] + mol_name + ".png"
         img.save(img_file_name)
         del tmp
@@ -557,7 +555,9 @@ def make_comp_mol_dict(params: Dict[str, Any]) -> None:
     """
     # Add complementary mols from reactions
     # Only valid for autoclickchem rxns
-    comp_smi_list = glob.glob(params["complementary_mol_directory"] + os.sep + "*.smi.gz")
+    comp_smi_list = glob.glob(
+        params["complementary_mol_directory"] + os.sep + "*.smi.gz"
+    )
     if not comp_smi_list:
         raise Exception(
             (
@@ -572,12 +572,19 @@ def make_comp_mol_dict(params: Dict[str, Any]) -> None:
             comp_dict[mol_entry[1]] = mol_entry[0]
         del comp_mol_list
     del comp_smi_list
-
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
     # Make this match those with scores
     for mol_name in comp_dict:
-        mol = Chem.MolFromSmiles(comp_dict[mol_name])
-        temp_info = [comp_dict[mol_name], mol_name, mol_name, mol_name, None, None, mol]
-
+        mol = chemtoolkit.mol_from_smiles(comp_dict[mol_name])
+        temp_info = [
+            comp_dict[mol_name],
+            mol_name,
+            mol_name,
+            mol_name,
+            None,
+            None,
+            mol,
+        ]
         comp_dict[mol_name] = temp_info
 
     comp_dict_pickle = params["comp_dict_pickle"]
@@ -654,6 +661,7 @@ def make_ranked_files_mol_dict(params: Dict[str, Any]) -> None:
         mol_list.extend(new_source_compound_list)
 
     new_list = []
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
     for x in mol_list:
         temp = []
         for y in x:
@@ -662,7 +670,7 @@ def make_ranked_files_mol_dict(params: Dict[str, Any]) -> None:
                 temp.append(y)
             except Exception:
                 temp.append(y)
-        temp.append(Chem.MolFromSmiles(temp[0]))
+        temp.append(chemtoolkit.mol_from_smiles(temp[0]))
         new_list.append(temp)
 
     del mol_list
@@ -945,8 +953,8 @@ def process_inputs(inputs: Dict[str, Any]) -> Dict[str, Any]:
 
         # Get complementary_mol_directory from vars.json
         elif vars_dict["rxn_library_path"].lower() in [
-            "click_chem_rxns",
-            "robust_rxns",
+            # "click_chem_rxns",
+            # "robust_rxns",
             "all_rxns",
         ]:
             dir_above_script_dir = str(
@@ -965,15 +973,17 @@ def process_inputs(inputs: Dict[str, Any]) -> Dict[str, Any]:
                     "complementary_mols",
                 ]
             )
-
-            complementary_mol_directory = os.path.abspath(complementary_mol_directory)
+            complementary_mol_directory = os.path.abspath(
+                complementary_mol_directory
+            )
             if os.path.exists(complementary_mol_directory) is False:
                 raise Exception(
                     "Please provide path to complementary_mol_directory. \
                     Could not find the location of the directory"
                 )
-
-            inputs["complementary_mol_directory"] = complementary_mol_directory + os.sep
+            inputs["complementary_mol_directory"] = (
+                complementary_mol_directory + os.sep
+            )
         else:
             raise Exception(
                 "Please provide path to complementary_mol_directory. \
@@ -1064,8 +1074,9 @@ def process_inputs(inputs: Dict[str, Any]) -> Dict[str, Any]:
             the tab-delineated .smi file used to seed generation zero of the \
             AutoGrow run. This is a mandatory file."
         )
-
-    inputs["source_compound_file"] = os.path.abspath(inputs["source_compound_file"])
+    inputs["source_compound_file"] = os.path.abspath(
+        inputs["source_compound_file"]
+    )
     if os.path.exists(inputs["source_compound_file"]) is False:
         raise Exception(
             "source_compound_file could not be found \
@@ -1081,9 +1092,13 @@ def process_inputs(inputs: Dict[str, Any]) -> Dict[str, Any]:
         )
 
     # assign the destination for our pickle files (may already exist)
-    inputs["ranked_mol_dict_pickle"] = inputs["input_dir"] + "ranked_mol_dict_pickle"
+    inputs["ranked_mol_dict_pickle"] = (
+        inputs["input_dir"] + "ranked_mol_dict_pickle"
+    )
     inputs["comp_dict_pickle"] = inputs["input_dir"] + "comp_dict_pickle"
-    inputs["master_mol_dict_pickle"] = inputs["input_dir"] + "master_mol_dict_pickle"
+    inputs["master_mol_dict_pickle"] = (
+        inputs["input_dir"] + "master_mol_dict_pickle"
+    )
     inputs["master_shortname_mol_dict_pickle"] = (
         inputs["input_dir"] + "master_shortname_mol_dict_pickle"
     )
@@ -1121,7 +1136,7 @@ def process_inputs(inputs: Dict[str, Any]) -> Dict[str, Any]:
     # If true delete files and terminate program
     if inputs["purge_previous_pickled_files"] is True:
         run_purge_previous_pickled_files(inputs)
-
+    inputs["RDKitToolkit"] = True
     return inputs
 
 
@@ -1275,5 +1290,5 @@ for k, v in ARGSDICT.items():
         del INPUTS[k]
 
 VARS = process_inputs(INPUTS)
-
+plugin_managers.setup_plugin_managers(VARS)
 run_everything(VARS)

@@ -21,11 +21,11 @@ The formatting of the concatenation is:
     "\n##############################$$END_FILE$$ {}".format(os.path.basename(file_name_2))
 
 Example decompression:
-    python autogrow4/accessory_scripts/file_concatenation_and_compression.py \
+    python autogrow/accessory_scripts/file_concatenation_and_compression.py \
     --compress_or_decompress decompress \
     --input_folder_or_file PATH_TO_RUN/Run_0/generation_1/PDBs/compressed_PDBS.txt.gz
 Example compression:
-    python autogrow4/accessory_scripts/file_concatenation_and_compression.py \
+    python autogrow/accessory_scripts/file_concatenation_and_compression.py \
     --compress_or_decompress compress \
     --input_folder_or_file PATH_TO_RUN/Run_0/generation_1/PDBs/
 
@@ -136,10 +136,7 @@ def _separate_files(compressed_file: str) -> None:
             print(f"file failed to decompress: {f}")
             all_are_made = False
     if all_are_made is True:
-        to_run = f"rm {decompressed_file}"
-        os.system(to_run)
-
-
+        os.remove(decompressed_file)
 #######
 def _get_file_info(file_name: str) -> str:
     """
@@ -174,7 +171,7 @@ def _del_files(file_name: str) -> None:
 
     if os.path.exists(file_name):
         try:
-            os.system(f"rm {file_name}")
+            os.remove(file_name)
         except Exception:
             print(f"couldn't delete file: {file_name}")
 
@@ -186,7 +183,7 @@ def _run_concatenation(directory: str) -> None:
     makes data transfer easier later on.
 
     To decompress the folder please use script in
-    $PATH/autogrow4/accessory_scripts/file_concatenation_and_compression.py
+    $PATH/autogrow/accessory_scripts/file_concatenation_and_compression.py
 
     Inputs:
     :param str directory: the path to the folder which will be compiled and compressed.

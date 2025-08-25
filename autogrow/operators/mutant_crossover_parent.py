@@ -146,10 +146,13 @@ class CompoundGenerator(ABC):
                 num_to_process = max(num_to_process, self.procs_per_node)
 
                 job_input_list = self.prepare_job_inputs(cmpds_queue, num_to_process)
-
+                # Create a pickleable version of params for worker processes
+                params_for_worker = {
+                    k: v for k, v in self.params.items() if k not in ["parallelizer", "chemtoolkit"]
+                }
                 # Run parallel operation
                 results = self.params["parallelizer"].run(
-                    tuple(job_input_list), self.get_parallel_function()
+                    tuple(job_input_list), self.get_parallel_function(), params=params_for_worker
                 )
                 for idx, res_list in enumerate(results):
                     if res_list is None:

@@ -70,7 +70,7 @@ class LipinskiLenientFilter(SmilesFilterBase):
             bool: True if the molecule passes the filter (allows up to one
                 violation), False otherwise.
         """
-        mol = self.cmpd_to_rdkit_mol(cmpd)
+        mol = self.cmpd_to_mol(cmpd)
         if mol is None:
             return False
 
@@ -100,7 +100,7 @@ class LipinskiLenientFilter(SmilesFilterBase):
         # Failed more than two filters
         return False
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments required by the plugin.
 
@@ -109,18 +109,14 @@ class LipinskiLenientFilter(SmilesFilterBase):
         options.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing the argument
-                group name and a list of ArgumentVars objects defining the
-                command-line arguments.
+            List[ArgumentVars]: A list of ArgumentVars objects defining the
+            command-line arguments.
         """
-        return (
-            "SMILES Filters",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    action="store_true",
-                    default=False,
-                    help="Apply Lipinski's Rule of Five (MW, logP, number of hydrogen bond donors and acceptors) for oral bioavailability, allowing one violation.",
-                )
-            ],
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Enable the lenient Lipinski's Rule of Five filter for oral bioavailability. This filter checks for molecular weight, logP, and the number of hydrogen bond donors and acceptors, but allows for one violation of the rules, providing a less strict screen for drug-likeness.",
+            )
+        ]

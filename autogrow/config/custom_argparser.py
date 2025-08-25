@@ -185,9 +185,10 @@ class CustomArgumentParser:
             action = self._option_string_actions.get(option_string)
 
             if not action:
-                i += 1
-                continue
-
+                script_name = os.path.basename(sys.argv[0] if sys.argv else 'script.py')
+                sys.stderr.write(f"usage: {script_name} [-h] ...\n")
+                sys.stderr.write(f"{script_name}: error: unrecognized arguments: {arg}\n")
+                sys.exit(2)
             if action.action == 'store':
                 if value_str is None:  # value is in the next arg
                     i += 1

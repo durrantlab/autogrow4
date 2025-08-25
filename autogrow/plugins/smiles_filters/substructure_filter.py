@@ -9,35 +9,32 @@ from autogrow.types import Compound
 class SubstructureFilter(SmilesFilterBase):
     """Filter that passes compounds containing a specified substructure."""
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """Add command-line arguments for the substructure filter.
         
         Returns:
-            Tuple[str, List[ArgumentVars]]: Title and list of arguments.
+            List[ArgumentVars]: List of arguments.
         """
-        return (
-            "SMILES Filters",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    action="store_true",
-                    default=False,
-                    help="Enable filtering of compounds based on a required or excluded substructure.",
-                ),
-                ArgumentVars(
-                    name="--substructure_smiles",  # Note actually SMARTS string
-                    help="SMARTS string of a required or excluded substructure.",
-                    type=str,
-                    default=None,
-                ),
-                ArgumentVars(
-                    name="--exclude_substructure",  # NOTE: Untested
-                    action="store_true",
-                    default=False,
-                    help="Exclude compounds containing the substructure instead of requiring it.",
-                ),
-            ]
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Enable filtering based on a custom substructure. This allows you to require that all generated molecules contain a specific chemical scaffold, or to exclude molecules containing an undesirable moiety. Use `--substructure_smiles` to define the SMARTS pattern and `--exclude_substructure` to control the filtering mode.",
+            ),
+            ArgumentVars(
+                name="substructure_smiles",  # Note actually SMARTS string
+                help="SMARTS string of a required or excluded substructure.",
+                type=str,
+                default=None,
+            ),
+            ArgumentVars(
+                name="exclude_substructure",  # NOTE: Untested
+                action="store_true",
+                default=False,
+                help="Exclude compounds containing the substructure instead of requiring it.",
+            ),
+        ]
 
     def validate(self, params: dict):
         """Validate the substructure SMILES parameter.
@@ -60,7 +57,7 @@ class SubstructureFilter(SmilesFilterBase):
             raise ValueError(
                 f"Invalid substructure SMILES: {params['substructure_smiles']}"
             )
-        
+
         self.query_mol = query_mol
         self.exclude_substructure = params.get("exclude_substructure", False)
 
@@ -74,7 +71,7 @@ class SubstructureFilter(SmilesFilterBase):
             bool: True if compound contains substructure, False otherwise.
         """
         # Convert SMILES to mol object for substructure matching
-        mol = self.cmpd_to_rdkit_mol(cmpd)
+        mol = self.cmpd_to_mol(cmpd)
         if mol is None:
             return False
 

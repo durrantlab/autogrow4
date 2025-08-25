@@ -2,10 +2,9 @@ from abc import abstractmethod
 from typing import List, cast, Type
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
 from autogrow.types import Compound
-from rdkit import Chem  # type: ignore
-from rdkit.Chem.MolStandardize import rdMolStandardize  # type: ignore
 from autogrow.plugins.plugin_base import PluginBase
 from autogrow.utils.logging import log_warning
+from autogrow.plugins.registry_base import plugin_managers
 
 
 class PoseFilterBase(PluginBase):
@@ -14,6 +13,16 @@ class PoseFilterBase(PluginBase):
 
     1) Filters based on ProLIF
     """
+
+    @property
+    def plugin_type_name(self) -> str:
+        """Return the user-friendly name of the plugin type."""
+        return "Pose Filter"
+
+    @property
+    def plugin_description(self) -> str:
+        """Return a brief description of the plugin type."""
+        return "Filters docked poses based on interactions or other criteria"
 
     def run(self, **kwargs) -> bool:
         """
@@ -75,7 +84,8 @@ class PoseFilterPluginManager(PluginManagerBase):
 
         # Run filter on a single smiles string.
         passed_cmpds: List[Compound] = []
-        receptor = Chem.MolFromPDBFile(kwargs["docking_plugin_manager_params"]["receptor_path"], removeHs=False, sanitize=True)
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
+        receptor = chemtoolkit.mol_from_pdb_file(kwargs["docking_plugin_manager_params"]["receptor_path"], remove_hs=False, sanitize=True)
         for docked_cmpd in kwargs["docked_cmpds"]:
             # run through the filters
             passed = self._run_all_selected_filters(receptor, docked_cmpd, kwargs["docking_plugin_manager_params"])
@@ -98,12 +108,14 @@ class PoseFilterPluginManager(PluginManagerBase):
         returns bool: True if the mol passes all the filters. False if the mol
             fails any filters.
         """
-        r = Chem.SDMolSupplier(docked_cmpd.sdf_path, removeHs=False)
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
+        mols = chemtoolkit.mols_from_sdf_file(docked_cmpd.sdf_path, remove_hs=False)
         docked_cmpd_mol = None
-        for lig in r:
-            docked_cmpd_mol = lig
-            break
-        r.reset()
+        if mols:
+            docked_cmpd_mol = mols[0]
+
+        if docked_cmpd_mol is None:
+            return False
 
         filters_failed = 0
         for plugin_name in self.plugins:

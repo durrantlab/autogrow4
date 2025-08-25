@@ -36,44 +36,40 @@ class FragmentRemoval(MutationBase):
         """Initialize the plugin."""
         self.generated_smiles_by_removal = set()
 
-    def add_arguments(self) -> Tuple[str, List[ArgumentVars]]:
+    def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments required by the plugin.
 
         Returns:
-            Tuple[str, List[ArgumentVars]]: A tuple containing the plugin category
-            and a list of ArgumentVars.
+            List[ArgumentVars]: a list of ArgumentVars.
         """
-        return (
-            "Fragment Removal Mutation",
-            [
-                ArgumentVars(
-                    name=self.name,
-                    action="store_true",
-                    default=False,
-                    help="Enable the fragment removal mutation operator, which removes fragments via reverse reactions.",
-                ),
-                ArgumentVars(
-                    name="FragmentRemoval_first_gen_only",
-                    action="store_true",
-                    default=False,
-                    help="Apply fragment removal only during the first generation. Useful for decomposing initial ligands before subsequent generations focus on growth.",
-                ),
-                ArgumentVars(
-                    name="FragmentRemoval_min_mol_weight",
-                    type=float,
-                    default=0.0,
-                    help="Minimum molecular weight for a molecule to be eligible for fragment removal. Molecules below this weight are skipped. Defaults to 0.0 (no minimum).",
-                ),
-                ArgumentVars(
-                    name="FragmentRemoval_prevent_backtracking",
-                    action="store_true",
-                    default=False,
-                    help="Prevent the generation of a molecule that has already been created by this plugin in the same run.",
-                ),
-                # This plugin uses the same rxn_library_path as FragmentAddition
-            ],
-        )
+        return [
+            ArgumentVars(
+                name=self.name,
+                action="store_true",
+                default=False,
+                help="Enable the fragment removal mutation operator. To maintain synthetic accessibility, this operator removes fragments from a molecule by applying the reverse of the reactions defined in the reaction library.",
+            ),
+            ArgumentVars(
+                name="fragment_removal_first_gen_only",
+                action="store_true",
+                default=False,
+                help="Apply fragment removal only during the first generation. Useful for decomposing initial ligands before subsequent generations focus on growth.",
+            ),
+            ArgumentVars(
+                name="fragment_removal_min_mol_weight",
+                type=float,
+                default=0.0,
+                help="Minimum molecular weight for a molecule to be eligible for fragment removal. Molecules below this weight are skipped. Defaults to 0.0 (no minimum).",
+            ),
+            ArgumentVars(
+                name="fragment_removal_prevent_backtracking",
+                action="store_true",
+                default=False,
+                help="Prevent the generation of a molecule that has already been created by this plugin in the same run.",
+            ),
+            # This plugin uses the same rxn_library_path as FragmentAddition
+        ]
 
     def validate(self, params: dict):
         """
@@ -86,9 +82,9 @@ class FragmentRemoval(MutationBase):
             ValueError: If rxn_library_path is not provided or is invalid.
         """
         validate_rxn_library_path(params)
-        min_mw = params["FragmentRemoval_min_mol_weight"]
+        min_mw = params["fragment_removal_min_mol_weight"]
         if min_mw < 0.0:
-            raise ValueError("FragmentRemoval_min_mol_weight must be non-negative.")
+            raise ValueError("fragment_removal_min_mol_weight must be non-negative.")
 
     def setup(self, **kwargs):
         """
@@ -104,17 +100,17 @@ class FragmentRemoval(MutationBase):
         """
         rxn_library_path = self.params["rxn_library_path"]
         reaction_dict = load_reaction_library(rxn_library_path)
-
         chemtoolkit = plugin_managers.ChemToolkit.toolkit
-        self.reverse_reactions: List[Tuple[Any, int]] = []
+        self.reverse_reactions: List[Tuple[Any, int, List[str]]] = []
         for rxn_name, rxn_info in reaction_dict.items():
             if "reverse_reaction_strings" in rxn_info and rxn_info["reverse_reaction_strings"]:
                 rxn_num = rxn_info["RXN_NUM"]
+                group_smarts = rxn_info.get("group_smarts", [])
                 for reverse_smarts in rxn_info["reverse_reaction_strings"]:
                     try:
                         rxn = chemtoolkit.reaction_from_smarts(reverse_smarts)
                         rxn.Initialize()
-                        self.reverse_reactions.append((rxn, rxn_num))
+                        self.reverse_reactions.append((rxn, rxn_num, group_smarts))
                     except Exception:
                         log_warning(
                             f"Could not parse reverse reaction SMARTS in '{rxn_name}': "
@@ -135,7 +131,7 @@ class FragmentRemoval(MutationBase):
             single tuple with the new fragment's SMILES, the original reaction ID,
             and None. Returns None if no valid fragment could be generated.
         """
-        if self.params.get("FragmentRemoval_first_gen_only", False) and self.params.get("generation_num", 1) > 1:
+        if self.params.get("fragment_removal_first_gen_only", False) and self.params.get("generation_num", 1) > 1:
             return None
         
         if DEBUG:
@@ -146,7 +142,7 @@ class FragmentRemoval(MutationBase):
         if mol_to_mutate is None:
             return None
 
-        min_mw = self.params["FragmentRemoval_min_mol_weight"]
+        min_mw = self.params["fragment_removal_min_mol_weight"]
         if min_mw > 0.0:
             chemtoolkit = plugin_managers.ChemToolkit.toolkit
             mw = chemtoolkit.descriptors_exact_mol_wt(mol_to_mutate)
@@ -161,8 +157,11 @@ class FragmentRemoval(MutationBase):
         random.shuffle(shuffled_reactions)
 
         chemtoolkit = plugin_managers.ChemToolkit.toolkit
-
-        for rxn, rxn_num in shuffled_reactions:
+        for rxn, rxn_num, group_smarts in shuffled_reactions:
+            group_smarts_mols = [chemtoolkit.mol_from_smarts(s) for s in group_smarts]
+            group_smarts_mols = [m for m in group_smarts_mols if m is not None]
+            if not group_smarts_mols:
+                continue
             products_tuple = rxn.RunReactants((mol_to_mutate,))
 
             if not products_tuple:
@@ -175,7 +174,19 @@ class FragmentRemoval(MutationBase):
                 fragments = list(product_set)
                 if not fragments:
                     continue
-
+                qualified_fragments = []
+                for frag in fragments:
+                    sane_frag = MOH.check_sanitization(copy.deepcopy(frag))
+                    if sane_frag is None:
+                        continue
+                    if any(
+                        sane_frag.HasSubstructMatch(smarts_mol)
+                        for smarts_mol in group_smarts_mols
+                    ):
+                        qualified_fragments.append(frag)
+                if not qualified_fragments:
+                    continue
+                fragments = qualified_fragments
                 # Calculate MCS score for each fragment against the parent
                 fragment_mcs_scores = []
                 for frag in fragments:
@@ -241,7 +252,7 @@ class FragmentRemoval(MutationBase):
                         fragment, cmpd, self.plugin_managers
                     )
                     if validated_smiles is not None:
-                        if self.params.get("FragmentRemoval_prevent_backtracking", False):
+                        if self.params.get("fragment_removal_prevent_backtracking", False):
                             if validated_smiles in self.generated_smiles_by_removal:
                                 continue
                             self.generated_smiles_by_removal.add(validated_smiles)
