@@ -85,11 +85,11 @@
             "Thio_Acid_clickchem"
         ],
         "group_smarts": [
-            "[*]S(=O)(=O)-AZIDE_SEARCH",
+            "[*]S(=O)(=O)-[$(N=[N+]=[N-]),$([N-][N+]#N)]",
             "[C]-[$([CX3R0]([S;H1;X2])=[OX1]),$([CX3R0]([O;H1,X1])=[SX1])]"
         ],
         "num_reactants": 2,
-        "reaction_string": "[*:1]S(=O)(=O)-AZIDE_SEARCH.[C:2]-[$([CX3R0]([S;H1;X2])=[OX1]),$([CX3R0]([O;H1,X1])=[SX1])]>>[*:1]S(=O)(=O)NC(=O)[C:2]",
+        "reaction_string": "[*:1]S(=O)(=O)-[$(N=[N+]=[N-]),$([N-][N+]#N)].[C:2]-[$([CX3R0]([S;H1;X2])=[OX1]),$([CX3R0]([O;H1,X1])=[SX1])]>>[*:1]S(=O)(=O)NC(=O)[C:2]",
         "reverse_reaction_strings": [
             "[*:1]S(=O)(=O)[N;H1]-C(=O)[C:2]>>[*:1]S(=O)(=O)-N=[N+]=[N-].[C:2]C(=O)S",
             "[*:1]S(=O)(=O)[N;H1]-C(=O)[C:2]>>[*:1]S(=O)(=O)-N=[N+]=[N-].[C:2]C(=S)O"
@@ -109,12 +109,12 @@
         ],
         "group_smarts": [
             "[CR0;X2,X1H1]#[CR0;X2,X1H1]",
-            "[*]-AZIDE_SEARCH"
+            "[*]-[$(N=[N+]=[N-]),$([N-][N+]#N)]"
         ],
         "num_reactants": 2,
         "ignore_double_bond_stereo_on_reverse": true,
 
-        "reaction_string": "[CR0;X2,X1H1:2]#[CR0;X2,X1H1:3].[*:1]-AZIDE_SEARCH>>[c:2]1:[c:3]:[n](-[*:1]):[n]:[n]:1",
+        "reaction_string": "[CR0;X2,X1H1:2]#[CR0;X2,X1H1:3].[*:1]-[$(N=[N+]=[N-]),$([N-][N+]#N)]>>[c:2]1:[c:3]:[n](-[*:1]):[n]:[n]:1",
         "reverse_reaction_strings": [
             "[c:2]1:[c:3]:[n](-[*:1]):[n]:[n]:1>>[CR0;X2,X1H1:2]#[CR0;X2,X1H1:3].[*:1]-N=[N+]=[N-]",
             "[c:3]1:[c:2]:[n](-[*:1]):[n]:[n]:1>>[CR0;X2,X1H1:2]#[CR0;X2,X1H1:3].[*:1]-N=[N+]=[N-]",
@@ -141,7 +141,7 @@
         "reaction_string": "[#6;+0&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):1]-[OR0;v2;H1,-]>>[N-]=[N+]=N-[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):1]",
 
         "reverse_reaction_strings": [
-            "[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):1]-AZIDE_SEARCH>>[#6:1]-[O;H1]"
+            "[#6&$([CR0,R&X3,R&X4])&!$([#6](=,-[OR0,SR0])[OR0]):1]-[$(N=[N+]=[N-]),$([N-][N+]#N)]>>[#6:1]-[O;H1]"
         ],
         "note": "The chemical mechanism for this reaction (e.g., via Mitsunobu or a tosylate intermediate) proceeds with inversion of stereochemistry. However, the forward reaction SMARTS is defined non-stereospecifically for robustness. See https://commonorganicchemistry.com/Rxn_Pages/Alcohol_to_Azide/Alcohol_to_Azide_Index.htm",
         "RXN_NUM": 6
@@ -183,7 +183,7 @@
         "ignore_double_bond_stereo_on_reverse": true,
         "reaction_string": "[#7;$([H3+]),$([H2R0;!+])]-[#6:1]>>[#6:1]N=[N+]=[N-]",
         "reverse_reaction_strings": [
-            "[*;#6:1]-AZIDE_SEARCH>>[#7;$([H3+]),$([H2R0;!+])]-[#6:1]"
+            "[*;#6:1]-[$(N=[N+]=[N-]),$([N-][N+]#N)]>>[#7;$([H3+]),$([H2R0;!+])]-[#6:1]"
         ],
         "note": "This reaction is subject to a known RDKit limitation where pre-existing stereochemistry on a reactant ('spectator stereochemistry') may be lost during the reverse reaction.",
         "RXN_NUM": 8
@@ -239,12 +239,12 @@
             "Azide_1R_clickchem"
         ],
         "group_smarts": [
-            "[*]-AZIDE_SEARCH"
+            "[*]-[$(N=[N+]=[N-]),$([N-][N+]#N)]"
         ],
         "num_reactants": 1,
         "ignore_double_bond_stereo_on_reverse": true,
 
-        "reaction_string": "[*:1]-AZIDE_SEARCH>>[NH2][*;#6:1]",
+        "reaction_string": "[*:1]-[$(N=[N+]=[N-]),$([N-][N+]#N)]>>[NH2][*;#6:1]",
         "reverse_reaction_strings": [
             "[NH2][*;#6:1]>>[*;#6:1]-N=[N+]=[N-]"
         ],
@@ -377,7 +377,7 @@
         "num_reactants": 1,
         "reaction_string": "[*;!O:1]-[C;X3:100](=[OR0&D1])[OR0;H1,H0-]>>[*;!O:1][C:100](=O)-N=[N+]=[N-]",
         "reverse_reaction_strings": [
-            "[*;!O:1][C:100](=[O;X1])-AZIDE_SEARCH>>[*;!O:1]-[CR0;X3:100](=[OR0&D1])[OR0&H1]"
+            "[*;!O:1][C:100](=[O;X1])-[$(N=[N+]=[N-]),$([N-][N+]#N)]>>[*;!O:1]-[CR0;X3:100](=[OR0&D1])[OR0&H1]"
         ],
         "RXN_NUM": 17
     },
@@ -498,9 +498,9 @@
         "num_reactants": 1,
         "reaction_string": "[Cl,Br,I;D1][$([CX4,c]),$([#6X3]=[O,S]):1]>>[#6:1]-N=[N+]=[N-]",
         "reverse_reaction_strings": [
-            "[$([CX4,c]),$([#6X3]=[O,S]):1]-AZIDE_SEARCH>>[$([CX4,c]),$([#6X3]=[O,S]):1]Cl",
-            "[$([CX4,c]),$([#6X3]=[O,S]):1]-AZIDE_SEARCH>>[$([CX4,c]),$([#6X3]=[O,S]):1]Br",
-            "[$([CX4,c]),$([#6X3]=[O,S]):1]-AZIDE_SEARCH>>[$([CX4,c]),$([#6X3]=[O,S]):1]I"
+            "[$([CX4,c]),$([#6X3]=[O,S]):1]-[$(N=[N+]=[N-]),$([N-][N+]#N)]>>[$([CX4,c]),$([#6X3]=[O,S]):1]Cl",
+            "[$([CX4,c]),$([#6X3]=[O,S]):1]-[$(N=[N+]=[N-]),$([N-][N+]#N)]>>[$([CX4,c]),$([#6X3]=[O,S]):1]Br",
+            "[$([CX4,c]),$([#6X3]=[O,S]):1]-[$(N=[N+]=[N-]),$([N-][N+]#N)]>>[$([CX4,c]),$([#6X3]=[O,S]):1]I"
         ],
         "note": "The chemical mechanism for this reaction (SN2) proceeds with inversion of stereochemistry at the reacting sp3 carbon center. However, the forward reaction SMARTS is defined non-stereospecifically for robustness, as it must account for cases where the reaction is stereocenter-destroying (i.e., the product is achiral). See https://www.masterorganicchemistry.com/2018/06/29/some-reactions-of-azides/",
         "RXN_NUM": 22

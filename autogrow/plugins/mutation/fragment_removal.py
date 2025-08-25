@@ -100,17 +100,17 @@ class FragmentRemoval(MutationBase):
         """
         rxn_library_path = self.params["rxn_library_path"]
         reaction_dict = load_reaction_library(rxn_library_path)
-
         chemtoolkit = plugin_managers.ChemToolkit.toolkit
-        self.reverse_reactions: List[Tuple[Any, int]] = []
+        self.reverse_reactions: List[Tuple[Any, int, List[str]]] = []
         for rxn_name, rxn_info in reaction_dict.items():
             if "reverse_reaction_strings" in rxn_info and rxn_info["reverse_reaction_strings"]:
                 rxn_num = rxn_info["RXN_NUM"]
+                group_smarts = rxn_info.get("group_smarts", [])
                 for reverse_smarts in rxn_info["reverse_reaction_strings"]:
                     try:
                         rxn = chemtoolkit.reaction_from_smarts(reverse_smarts)
                         rxn.Initialize()
-                        self.reverse_reactions.append((rxn, rxn_num))
+                        self.reverse_reactions.append((rxn, rxn_num, group_smarts))
                     except Exception:
                         log_warning(
                             f"Could not parse reverse reaction SMARTS in '{rxn_name}': "
@@ -157,8 +157,11 @@ class FragmentRemoval(MutationBase):
         random.shuffle(shuffled_reactions)
 
         chemtoolkit = plugin_managers.ChemToolkit.toolkit
-
-        for rxn, rxn_num in shuffled_reactions:
+        for rxn, rxn_num, group_smarts in shuffled_reactions:
+            group_smarts_mols = [chemtoolkit.mol_from_smarts(s) for s in group_smarts]
+            group_smarts_mols = [m for m in group_smarts_mols if m is not None]
+            if not group_smarts_mols:
+                continue
             products_tuple = rxn.RunReactants((mol_to_mutate,))
 
             if not products_tuple:
@@ -171,7 +174,19 @@ class FragmentRemoval(MutationBase):
                 fragments = list(product_set)
                 if not fragments:
                     continue
-
+                qualified_fragments = []
+                for frag in fragments:
+                    sane_frag = MOH.check_sanitization(copy.deepcopy(frag))
+                    if sane_frag is None:
+                        continue
+                    if any(
+                        sane_frag.HasSubstructMatch(smarts_mol)
+                        for smarts_mol in group_smarts_mols
+                    ):
+                        qualified_fragments.append(frag)
+                if not qualified_fragments:
+                    continue
+                fragments = qualified_fragments
                 # Calculate MCS score for each fragment against the parent
                 fragment_mcs_scores = []
                 for frag in fragments:
