@@ -763,8 +763,9 @@ def _test_source_smiles_convert(test_args):
          Compound object. If it failed to convert, it returns an
          error message string. This passes out to prevent MPI print issues.
     """
+    from autogrow.plugins.registry_base import plugin_managers
     smile_info = test_args["smile_info"]
-    chemtoolkit = test_args["chemtoolkit"]
+    chemtoolkit = plugin_managers.ChemToolkit.toolkit
 
     if smile_info is None or not smile_info:
         return f"Rejected source compound: Blank entry in source compound list: {smile_info}"
@@ -877,10 +878,14 @@ def _get_cmpds_prev_gen(params: Dict[str, Any], generation_num: int) -> List[Com
     # import and Sanitize in RDKit. SMILES will be excluded if they are
     # fragmented, contain atoms with no atomic number (*), or do not sanitize
     job_input = tuple(
-        ({"smile_info": i, "chemtoolkit": params["chemtoolkit"]},) for i in cmpds
+        ({"smile_info": i},) for i in cmpds
     )
+
+    params_for_worker = {
+        k: v for k, v in params.items() if k not in ["parallelizer", "chemtoolkit"]
+    }
     results = params["parallelizer"].run(
-        job_input, _test_source_smiles_convert
+        job_input, _test_source_smiles_convert, params=params_for_worker
     )
     results = [x for x in results if x is not None]
     print_errors = [x for x in results if type(x) is str]
