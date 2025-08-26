@@ -14,7 +14,7 @@ import os
 import hashlib
 from autogrow.plugins.registry_base import plugin_managers
 
-DEEPFRAG_DEBUG = False
+DEEPFRAG_DEBUG = True
 if DEEPFRAG_DEBUG:
     import os
 
@@ -292,32 +292,54 @@ class DeepFragFilterBase(PluginBase):
         img.save(filename)
         log_info(f"Saved DeepFrag MCS debug image to {filename}")
 
+    def _find_bridge_atoms(self, mol):
+        """
+        Identifies bridge atoms in a molecule.
+
+        A bridge atom is an atom whose removal would increase the number of
+        connected components (fragments) in the molecule.
+
+        Args:
+            mol (Any): An RDKit molecule object.
+
+        Returns:
+            List[int]: A list of indices of the bridge atoms.
+        """
+        chemtoolkit = plugin_managers.ChemToolkit.toolkit
+        bridges = []
+        num_frags_initial = len(chemtoolkit.get_mol_frags(mol))
+        for atom in chemtoolkit.get_atoms(mol):
+            emol = chemtoolkit.get_editable_mol(mol)
+            chemtoolkit.remove_atom_from_editable_mol(emol, chemtoolkit.get_idx(atom))
+            frag_mol = chemtoolkit.get_noneditable_mol(emol)
+            num_frags_after_removal = len(chemtoolkit.get_mol_frags(frag_mol))
+            if num_frags_after_removal > num_frags_initial:
+                bridges.append(chemtoolkit.get_idx(atom))
+        return bridges
+
     def _find_single_fragment_mcs(self, mol1, mol2):
         """
         Finds the largest non-fragmenting Maximum Common Substructure (MCS).
 
-        This function identifies the largest common substructure between two molecules
-        that, when removed, does not break either molecule into multiple pieces.
-        This is crucial for identifying a single, coherent fragment for
-        analysis by DeepFrag.
+        This function identifies the largest common substructure between two
+        molecules that, when removed, does not break either molecule into
+        multiple chemically meaningful pieces. A "meaningful" piece is defined
+        as a fragment containing at least one heavy (non-hydrogen) atom. This is
+        crucial for identifying a single, coherent fragment for analysis by
+        DeepFrag.
 
-        The process can be computationally intensive, especially for large, similar
-        molecules, due to the following steps:
-        1.  An initial, absolute MCS is found using RDKit's `find_mcs`. This
-            is fast but may not meet the non-fragmenting criteria.
-        2.  If this initial MCS causes fragmentation, the function enters an
-            iterative loop.
-        3.  In the loop, it systematically generates smaller MCS candidates by
-            removing one atom at a time from the current-best (but invalid) MCS.
-            It prioritizes removing terminal atoms first.
-        4.  Each new, smaller candidate is tested. If it is valid (i.e., does
-            not cause fragmentation), it is returned as the result. If it is
-            also invalid, it is used to generate even smaller candidates.
-        5.  This search continues until a valid MCS is found or all possibilities
-            have been exhausted.
-
-        The potential for a large number of candidates makes this a slow
-        operation in some cases.
+        The process can be computationally intensive and uses a two-phase approach
+        for efficiency:
+        1.  **Initial MCS & Pruning**: It first finds the absolute largest MCS. If
+            this MCS causes fragmentation, it performs a "smart pruning" step. It
+            identifies all "bridge atoms" within the MCS (atoms that connect
+            different parts of the parent molecules) and removes them to create a
+            smaller, more stable MCS candidate.
+        2.  **Iterative Search**: This new, smaller candidate becomes the starting
+            point for a more exhaustive iterative search, which removes one atom
+            at a time until a valid, non-fragmenting MCS is found. This two-step
+            process significantly reduces the search space and speeds up the
+            calculation for complex molecules.
 
         Args:
             mol1 (Chem.Mol): The first RDKit molecule.
@@ -344,8 +366,13 @@ class DeepFragFilterBase(PluginBase):
                 # Important: Sanitize=False to handle radical fragments, then sanitize later if needed.
                 frag_smiles = chemtoolkit.mol_to_smiles(frag_mol, isomeric_smiles=True)
                 # Split into fragments and remove empty strings from result
-                frags = [s for s in frag_smiles.split('.') if s]
-                return frags
+                raw_frags = [s for s in frag_smiles.split('.') if s]
+                meaningful_frags = []
+                for frag_smi in raw_frags:
+                    frag_mol_obj = chemtoolkit.mol_from_smiles(frag_smi, sanitize=False)
+                    if frag_mol_obj is not None and chemtoolkit.lipinski_heavy_atom_count(frag_mol_obj) > 0:
+                        meaningful_frags.append(frag_smi)
+                return meaningful_frags
             except:
                 return []
 
@@ -377,10 +404,58 @@ class DeepFragFilterBase(PluginBase):
         # We store tuples of (mol_object, smarts_string).
         mcs_mol = chemtoolkit.mol_from_smarts(initial_mcs.smartsString)
         candidates = [(mcs_mol, initial_mcs.smartsString)]
-        
+
         # Keep track of SMARTS we've already processed to avoid redundant work.
         seen_smarts = {initial_mcs.smartsString}
 
+        # Check the initial MCS first
+        initial_frags1 = _get_fragments_for_mol(mol1, mcs_mol)
+        initial_frags2 = _get_fragments_for_mol(mol2, mcs_mol)
+        if len(initial_frags1) <= 1 and len(initial_frags2) <= 1:
+            return initial_mcs.smartsString
+
+        # Initial MCS is fragmenting, so we start the optimization
+        log_warning(
+            "Initial MCS causes fragmentation. Starting optimized search for a "
+            "non-fragmenting MCS. This may be slow."
+        )
+
+        # OPTIMIZATION: Prune by removing bridge atoms from the MCS
+        bridge_atoms_in_mol1 = self._find_bridge_atoms(mol1)
+        bridge_atoms_in_mol2 = self._find_bridge_atoms(mol2)
+
+        parent1_match = chemtoolkit.get_substruct_match(mol1, mcs_mol)
+        parent2_match = chemtoolkit.get_substruct_match(mol2, mcs_mol)
+
+        problem_mcs_indices = set()
+        if parent1_match:
+            for i, parent_idx in enumerate(parent1_match):
+                if parent_idx in bridge_atoms_in_mol1:
+                    problem_mcs_indices.add(i)
+
+        if parent2_match:
+            for i, parent_idx in enumerate(parent2_match):
+                if parent_idx in bridge_atoms_in_mol2:
+                    problem_mcs_indices.add(i)
+
+        if problem_mcs_indices:
+            emol = chemtoolkit.get_editable_mol(mcs_mol)
+            for idx in sorted(list(problem_mcs_indices), reverse=True):
+                chemtoolkit.remove_atom_from_editable_mol(emol, idx)
+
+            pruned_mcs_mol_base = chemtoolkit.get_noneditable_mol(emol)
+            sub_frags = chemtoolkit.get_mol_frags(pruned_mcs_mol_base, as_mols=True)
+            if sub_frags:
+                largest_sub_frag = max(sub_frags, key=lambda m: chemtoolkit.get_num_atoms(m))
+                try:
+                    pruned_smarts = chemtoolkit.mol_to_smarts(largest_sub_frag)
+                    if pruned_smarts not in seen_smarts:
+                        candidates.append((largest_sub_frag, pruned_smarts))
+                        seen_smarts.add(pruned_smarts)
+                except:
+                    pass  # Ignore if SMARTS generation fails
+
+        # Now, proceed with the iterative search, which will start with better candidates
         while candidates:
             # 2. Always check the largest candidate first.
             candidates.sort(key=lambda x: chemtoolkit.get_num_atoms(x[0]), reverse=True)
