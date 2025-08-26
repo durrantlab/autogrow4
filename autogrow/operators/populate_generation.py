@@ -261,7 +261,7 @@ def _make_mutations(cur_gen_dir: str, params: Dict[str, Any], generation_num: in
                     log_warning("No mutations made, per user settings")
                     mut_predock_cmpds: List[Compound] = []
                 cache.data = mut_predock_cmpds
-        log_info(f"Created {len(mut_predock_cmpds)} mutant compounds")
+        log_info(f"Selected {len(mut_predock_cmpds)} mutant compounds")
     return mut_predock_cmpds
 
 
@@ -315,7 +315,7 @@ def _make_crossovers(
                     cross_predock_cmpds: List[Compound] = []
                 cache.data = cross_predock_cmpds
 
-        log_info(f"Created {len(cross_predock_cmpds)} crossover compounds")
+        log_info(f"Selected {len(cross_predock_cmpds)} crossover compounds")
     return cross_predock_cmpds
 
 

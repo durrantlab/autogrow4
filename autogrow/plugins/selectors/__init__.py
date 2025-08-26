@@ -172,10 +172,12 @@ class SelectorPluginManager(PluginManagerBase):
         # Combine the two lists
         selected_cmpd_list = list(docking_fitness_cmpd_list)
         selected_cmpd_list.extend(diversity_cmpd_list)
-
+        initial_count = len(selected_cmpd_list)
         # Keep only compounds that are unique
         selected_cmpd_list = list({x.smiles: x for x in selected_cmpd_list}.values())
-
+        final_count = len(selected_cmpd_list)
+        if initial_count != final_count:
+            log_info(f"Removed {initial_count - final_count} duplicate compounds from seed list, leaving {final_count} unique compounds.")
         # Shuffle the list to prevent bias
         random.shuffle(selected_cmpd_list)
 

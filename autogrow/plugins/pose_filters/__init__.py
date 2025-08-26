@@ -3,7 +3,7 @@ from typing import List, Optional, cast, Type
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
 from autogrow.types import Compound
 from autogrow.plugins.plugin_base import PluginBase
-from autogrow.utils.logging import log_warning
+from autogrow.utils.logging import log_warning, log_info, LogLevel
 from autogrow.plugins.registry_base import plugin_managers
 
 
@@ -90,12 +90,14 @@ class PoseFilterPluginManager(PluginManagerBase):
         passed_cmpds: List[Compound] = []
         chemtoolkit = plugin_managers.ChemToolkit.toolkit
         receptor = chemtoolkit.mol_from_pdb_file(kwargs["docking_plugin_manager_params"]["receptor_path"], remove_hs=False, sanitize=True)
-        for docked_cmpd in kwargs["docked_cmpds"]:
-            # run through the filters
-            passed = self._run_all_selected_filters(receptor, docked_cmpd, kwargs["docking_plugin_manager_params"])
-            if passed:
-                passed_cmpds.append(docked_cmpd)
 
+        log_info("Applying pose filters")
+        with LogLevel():
+            for docked_cmpd in kwargs["docked_cmpds"]:
+                # run through the filters
+                passed = self._run_all_selected_filters(receptor, docked_cmpd, kwargs["docking_plugin_manager_params"])
+                if passed:
+                    passed_cmpds.append(docked_cmpd)
         return passed_cmpds
 
     def _run_all_selected_filters(self, receptor, docked_cmpd: Compound, docking_plugin_manager_params) -> bool:
@@ -128,9 +130,11 @@ class PoseFilterPluginManager(PluginManagerBase):
             plugin = cast(PoseFilterBase, self.plugins[plugin_name])
             filter_function = plugin.run
             if not filter_function(receptor=receptor, docked_cmpd=docked_cmpd_mol,
-                                   docking_plugin_manager_params=docking_plugin_manager_params):
+                    docking_plugin_manager_params=docking_plugin_manager_params):
                 filters_failed = filters_failed + 1
-                log_warning(f"Failed {plugin_name} filter: {docked_cmpd.smiles} (id: {docked_cmpd.id})")
+                log_warning(f"Failed {plugin_name} filter for compound: {docked_cmpd.id}")
+                with LogLevel():
+                    log_warning(f"SMILES: {docked_cmpd.smiles}")
                 self.filter_logger_file.info(f"Failed {plugin_name} filter: {docked_cmpd.smiles} (id: {docked_cmpd.id})")
         if filters_failed == 0:
             return True
