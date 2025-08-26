@@ -2,15 +2,14 @@
 DeepFrag plugin.
 """
 import __future__
-from typing import List, Tuple
+from typing import List
 from autogrow.types import Compound
 from autogrow.plugins.plugin_base import PluginBase
 from abc import abstractmethod
 from autogrow.config.argument_vars import ArgumentVars
 from scipy.spatial.distance import cosine
 import numpy as np
-from autogrow.utils.logging import LogLevel, log_debug, log_info, log_warning
-import random
+from autogrow.utils.logging import LogLevel, log_info, log_warning
 import os
 import hashlib
 from autogrow.plugins.registry_base import plugin_managers
@@ -295,9 +294,30 @@ class DeepFragFilterBase(PluginBase):
 
     def _find_single_fragment_mcs(self, mol1, mol2):
         """
-        Finds the largest common substructure (MCS) between two molecules that does
-        not result in more than one fragment for either of the input molecules
-        when the MCS is removed.
+        Finds the largest non-fragmenting Maximum Common Substructure (MCS).
+
+        This function identifies the largest common substructure between two molecules
+        that, when removed, does not break either molecule into multiple pieces.
+        This is crucial for identifying a single, coherent fragment for
+        analysis by DeepFrag.
+
+        The process can be computationally intensive, especially for large, similar
+        molecules, due to the following steps:
+        1.  An initial, absolute MCS is found using RDKit's `find_mcs`. This
+            is fast but may not meet the non-fragmenting criteria.
+        2.  If this initial MCS causes fragmentation, the function enters an
+            iterative loop.
+        3.  In the loop, it systematically generates smaller MCS candidates by
+            removing one atom at a time from the current-best (but invalid) MCS.
+            It prioritizes removing terminal atoms first.
+        4.  Each new, smaller candidate is tested. If it is valid (i.e., does
+            not cause fragmentation), it is returned as the result. If it is
+            also invalid, it is used to generate even smaller candidates.
+        5.  This search continues until a valid MCS is found or all possibilities
+            have been exhausted.
+
+        The potential for a large number of candidates makes this a slow
+        operation in some cases.
 
         Args:
             mol1 (Chem.Mol): The first RDKit molecule.
@@ -403,7 +423,12 @@ class DeepFragFilterBase(PluginBase):
     # Create a new MCS molecule with 3D coordinates from parent
     def __create_mcs_molecule(self, parent, child):
         """
-        Create a new molecule representing just the MCS with 3D coordinates from parent
+        Create a new molecule representing just the MCS with 3D coordinates from parent.
+
+        This function orchestrates the creation of a 3D-aware MCS molecule. It
+        first calls `_find_single_fragment_mcs` to determine the appropriate
+        MCS SMARTS pattern, then constructs a new RDKit molecule with 3D
+        coordinates inherited from the parent molecule.
 
         Returns:
             - mcs_mol: The MCS molecule with 3D coordinates
@@ -412,8 +437,14 @@ class DeepFragFilterBase(PluginBase):
             - mcs_smarts: The SMARTS string of the MCS.
         """
         chemtoolkit = plugin_managers.ChemToolkit.toolkit
-        parent = chemtoolkit.remove_hs(parent)
-        child = chemtoolkit.remove_hs(child)
+        try:
+            parent = chemtoolkit.remove_hs(parent)
+            child = chemtoolkit.remove_hs(child)
+        except Exception as e:
+            log_warning(
+                f"Failed to remove hydrogens from parent or child molecule, skipping MCS. Error: {e}"
+            )
+            return None, {}, {}, ""
         # Find the Maximum Common Substructure that does not fragment molecules
         mcs_smarts = self._find_single_fragment_mcs(parent, child)
 
@@ -488,6 +519,29 @@ class DeepFragFilterBase(PluginBase):
 
     # Function to find MCS and remove it from the second molecule
     def __find_mcs_and_fragments(self, parent, child, compound_id=None):
+        """
+        Find the MCS, identify fragments, and determine 3D connection points.
+
+        This is the main orchestrator for preparing a molecule for DeepFrag
+        analysis. It performs three key steps:
+        1. Calls `__create_mcs_molecule` to obtain a 3D MCS molecule and atom
+           mappings between the parent, child, and MCS.
+        2. Identifies the fragments of the child molecule that are not part of
+           the MCS.
+        3. Determines the 3D coordinates of the "connection points" on the
+           parent molecule where these fragments would attach.
+
+        Args:
+            parent (Any): The parent RDKit molecule.
+            child (Any): The child RDKit molecule.
+            compound_id (Optional[str], optional): The ID of the compound, used
+                for debugging. Defaults to None.
+
+        Returns:
+            tuple: A tuple containing the MCS molecule, the fragment molecule, a
+                list of fragment information dictionaries, the MCS SMARTS string,
+                and a dictionary of 3D connection points.
+        """
         chemtoolkit = plugin_managers.ChemToolkit.toolkit
         # Create an explicit MCS molecule with 3D coordinates from parent
         mcs_mol, mcs_to_parent_map, mcs_to_child_map, mcs_smarts = self.__create_mcs_molecule(
