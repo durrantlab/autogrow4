@@ -33,7 +33,7 @@ from autogrow.config.custom_argparser import CustomArgumentParser, CustomArgumen
 from autogrow.config.json_config_utils import (
  convert_json_params_from_unicode,
 )
-from autogrow.config.argument_vars import plugin_arg_groups_to_add
+from autogrow.config.argument_vars import plugin_arg_groups_to_add, ArgumentVars
 from autogrow.plugins.registry_base import PluginManagerRegistry
 from autogrow.validation import validate_all
 
@@ -42,16 +42,29 @@ parser = CustomArgumentParser(
     description="AutoGrow: An automated drug optimization and generation tool."
 )
 
-def filter_inactive_plugin_params(args_dict: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Removes parameters for inactive plugins from the arguments dictionary.
+def get_dest_from_arg_var(arg_var: "ArgumentVars") -> str:
+    """Derive the 'dest' key from an ArgumentVars object's name.
 
-    This function iterates through all registered plugin argument groups. For each
-    group, it checks if the plugin's enabling flag is set to True in the
-    provided arguments dictionary. If a plugin is not enabled, all of its
-    associated parameters (excluding the enabling flag itself) are removed from
-    the dictionary. This ensures that parameters for inactive plugins are not
-    logged or saved in the configuration file.
+    The key in the args_dict is the 'dest', which is derived from the
+    argument name. For example:
+    - A flag like '--MyPlugin' becomes 'MyPlugin'.
+    - A flag like '--my-arg' becomes 'my_arg'.
+
+    Args:
+        arg_var ("ArgumentVars"): The ArgumentVars object.
+
+    Returns:
+        str: The derived destination key.
+    """
+    return arg_var.name.lstrip('-').replace('-', '_')
+
+def filter_inactive_plugin_params(args_dict: Dict[str, Any]) -> Dict[str, Any]:
+    """Removes parameters associated only with inactive plugins.
+
+    This function intelligently filters parameters to prevent issues with shared
+    parameters between plugins. A parameter is removed from the arguments
+    dictionary if and only if all plugins that define it are inactive. If a
+    parameter is used by at least one active plugin, it is retained.
 
     Args:
         args_dict (Dict[str, Any]): The dictionary of parsed arguments, where
@@ -61,25 +74,42 @@ def filter_inactive_plugin_params(args_dict: Dict[str, Any]) -> Dict[str, Any]:
         Dict[str, Any]: A new dictionary containing only the parameters for
             active plugins and general program settings.
     """
-    filtered_args = args_dict.copy()
-
     global plugin_arg_groups_to_add
 
-    for title, arg_vars_list in plugin_arg_groups_to_add:
+    # 1. Build a map of each parameter to the set of plugins that define it.
+    param_to_plugins: Dict[str, set] = {}
+    plugin_enabling_flags = set()
+
+    for _, arg_vars_list in plugin_arg_groups_to_add:
         if not arg_vars_list:
             continue
-
+        
         enabling_arg = arg_vars_list[0]
-        # The key in args_dict is the 'dest', which is derived from the name.
-        # For a flag like '--MyPlugin', dest becomes 'MyPlugin'.
-        # For a flag like '--my-arg', dest becomes 'my_arg'.
-        plugin_dest_key = enabling_arg.name.lstrip('-').replace('-', '_')
-        if not filtered_args.get(plugin_dest_key, False):
-            # Plugin is inactive. Delete all its parameters except the enabling flag.
-            for arg_var in arg_vars_list[1:]:
-                param_dest_key = arg_var.name.lstrip('-').replace('-', '_')
-                if param_dest_key in filtered_args:
-                    del filtered_args[param_dest_key]
+        plugin_dest_key = get_dest_from_arg_var(enabling_arg)
+        plugin_enabling_flags.add(plugin_dest_key)
+
+        for arg_var in arg_vars_list[1:]:
+            param_dest_key = get_dest_from_arg_var(arg_var)
+            if param_dest_key not in param_to_plugins:
+                param_to_plugins[param_dest_key] = set()
+            param_to_plugins[param_dest_key].add(plugin_dest_key)
+
+    # 2. Identify all active plugins based on their enabling flags.
+    active_plugins = {
+        plugin_key for plugin_key in plugin_enabling_flags 
+        if args_dict.get(plugin_key, False)
+    }
+
+    # 3. Filter parameters. A parameter is kept if at least one of the plugins
+    #    that define it is active.
+    filtered_args = args_dict.copy()
+    
+    for param_key, defining_plugins in param_to_plugins.items():
+        # A parameter should be removed if NONE of the plugins that define it are active.
+        if not defining_plugins.intersection(active_plugins):
+            if param_key in filtered_args:
+                del filtered_args[param_key]
+    
     return filtered_args
 
 def get_user_params() -> Dict[str, Any]:

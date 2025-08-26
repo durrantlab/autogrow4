@@ -253,13 +253,27 @@ def _worker(input_q: multiprocessing.Queue, output_q: multiprocessing.Queue, par
     """
     if params is not None:
         from autogrow.plugins.registry_base import plugin_managers
+        import logging
+        import os
+        from autogrow.utils.logging import create_logger, set_log_tab_level
+
+        # Re-initialize the main logger for this worker process
+        log_file_path = os.path.join(params["output_directory"], "log.txt")
+        create_logger(logging.DEBUG, file_path=log_file_path)
+
+        # Set the correct indentation level for the worker process
+        if 'logging_level' in params:
+            set_log_tab_level(params['logging_level'])
+
         # This will setup all plugin managers for this worker process.
         plugin_managers.setup_plugin_managers(params)
+
         # Create log files for each manager within the worker process
         managers_dict = plugin_managers.get_managers_dict()
         generation_num = params.get("generation_num", "NA_worker")
         for manager in managers_dict.values():
             manager.create_log_file(params, generation_num)
+
     for seq, job in iter(input_q.get, "STOP"):
         func, args = job
         result = func(*args)

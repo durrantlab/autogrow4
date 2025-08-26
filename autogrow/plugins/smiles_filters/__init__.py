@@ -167,8 +167,8 @@ class SmilesFilterPluginManager(PluginManagerBase):
             if not filter_function(cmpd=cmpd):
                 filters_failed = filters_failed + 1
                 parent_info_str = f" (from parent {parent_info.id})" if parent_info else ""
-                log_warning(f"Failed {plugin_name} filter: {cmpd.smiles}{parent_info_str}")
-                self.filter_logger_file.info(f"Failed {plugin_name} filter: {cmpd.smiles}{parent_info_str}")
+                log_warning(f"Failed {plugin_name} filter: {cmpd.smiles} (id: {cmpd.id}){parent_info_str}")
+                self.filter_logger_file.info(f"Failed {plugin_name} filter: {cmpd.smiles} (id: {cmpd.id}){parent_info_str}")
         if filters_failed == 0:
             return True
 

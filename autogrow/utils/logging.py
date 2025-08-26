@@ -10,7 +10,6 @@ from typing import List, Optional
 import textwrap
 
 logger: Optional[logging.Logger] = None
-handler: Optional[logging.StreamHandler] = None
 log_filename = "log.txt"
 level = 0
 MAX_MSG_LINE_LENGTH = 60
@@ -38,20 +37,29 @@ def create_logger(level: int, file_path: str = "log.txt"):
     global log_filename
 
     log_filename = file_path
-
-    # Create a logger
+    
+    # Get the root logger
     logger = logging.getLogger("autogrow")
     logger.setLevel(level)
-
-    # Create a handler
-    handler = logging.StreamHandler()
-
-    # Add the handler to the logger
-    # logger.addHandler(handler)
-    logging.basicConfig(level=logging.DEBUG, handlers=[handler])
+    
+    # Prevent handlers from being added multiple times
+    if logger.hasHandlers():
+        logger.handlers.clear()
+    
+    # Create stream handler for console output
+    stream_handler = logging.StreamHandler()
+    
+    # Create file handler for file output
+    file_handler = logging.FileHandler(log_filename)
+    
+    # Add handlers to the logger
+    logger.addHandler(stream_handler)
+    logger.addHandler(file_handler)
+    
     # Set matplotlib logging level to WARNING to suppress findfont messages
     logging.getLogger('matplotlib').setLevel(logging.WARNING)
     logging.getLogger('PIL').setLevel(logging.WARNING)
+    
     set_log_tab_level(0)
 
 
@@ -121,19 +129,20 @@ def set_log_tab_level(tab_count: int):
     Note:
         Modifies the global handler's formatter and level variables.
     """
-    global level, handler
-
+    global level, logger
+    level = tab_count
+    
+    if logger is None:
+        return
+        
     # Create an initial formatter
     new_formatter = CustomFormatter(
         fmt="%(asctime)s - %(levelname)s - " + (tab_count * TAB) + "%(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
-
-    if handler is not None:
+    
+    for handler in logger.handlers:
         handler.setFormatter(new_formatter)
-
-    level = tab_count
-
 
 def wrap_msg(msg: str) -> List[str]:
     """Wrap a message to fit within the maximum line length.
@@ -192,20 +201,14 @@ def log_info(msg: str):
         Uses global level and logger variables. Writes to global log_filename.
         Wrapped lines are indented with INDENT.
     """
-    global level
     global logger
-
+    if logger is None:
+        return
+    
     for i, m in enumerate(wrap_msg(msg)):
         if i > 0:
             m = INDENT + m
-
-        if logger is not None:
-            # Add space to align with DEBUG
-            logger.info(m)
-
-        with open(log_filename, "a") as f:
-            f.write((level * TAB) + m + "\n")
-
+        logger.info(m)
 
 def log_debug(msg: str):
     """Log a message at DEBUG level with proper indentation and line wrapping.
@@ -221,18 +224,14 @@ def log_debug(msg: str):
         Uses global level and logger variables. Writes to global log_filename.
         Wrapped lines are indented with INDENT.
     """
-    global level
     global logger
-
+    if logger is None:
+        return
+    
     for i, m in enumerate(wrap_msg(msg)):
         if i > 0:
             m = INDENT + m
-        if logger is not None:
-            logger.debug(m)
-
-        with open(log_filename, "a") as f:
-            f.write((level * TAB) + m + "\n")
-
+        logger.debug(m)
 
 def log_warning(msg: str):
     """
@@ -249,18 +248,19 @@ def log_warning(msg: str):
         Uses global level and logger variables. Writes to global log_filename.
         Wrapped lines are indented with INDENT.
     """
-    global level
     global logger
-
+    if logger is None:
+        return
+    
     for i, m in enumerate(wrap_msg(msg)):
         if i > 0:
             m = INDENT + m
-        if logger is not None:
-            logger.warning(m)
+        logger.warning(m)
 
-        with open(log_filename, "a") as f:
-            f.write((level * TAB) + m + "\n")
-
+def get_log_tab_level() -> int:
+    """Returns the current log indentation level."""
+    global level
+    return level
 
 class LogLevel:
     """Context manager for temporarily adjusting log indentation levels.

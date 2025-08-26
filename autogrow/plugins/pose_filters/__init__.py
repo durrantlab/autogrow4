@@ -130,9 +130,8 @@ class PoseFilterPluginManager(PluginManagerBase):
             if not filter_function(receptor=receptor, docked_cmpd=docked_cmpd_mol,
                                    docking_plugin_manager_params=docking_plugin_manager_params):
                 filters_failed = filters_failed + 1
-                log_warning(f"Failed {plugin_name} filter: {docked_cmpd.smiles}")
-                self.filter_logger_file.info(f"Failed {plugin_name} filter: {docked_cmpd.smiles}")
-
+                log_warning(f"Failed {plugin_name} filter: {docked_cmpd.smiles} (id: {docked_cmpd.id})")
+                self.filter_logger_file.info(f"Failed {plugin_name} filter: {docked_cmpd.smiles} (id: {docked_cmpd.id})")
         if filters_failed == 0:
             return True
 

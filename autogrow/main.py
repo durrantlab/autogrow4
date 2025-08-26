@@ -62,14 +62,15 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
             or other constraints.
     """
     start_time = str(datetime.datetime.now())
-
     multiprocessing.freeze_support()
-
-    create_logger(logging.DEBUG)
-
+    
     if params is None:
         params = get_user_params()
-
+    
+    # Create logger AFTER params are loaded and output_directory is known and created.
+    log_file_path = os.path.join(params["output_directory"], "log.txt")
+    create_logger(logging.DEBUG, file_path=log_file_path)
+    
     # Setup all plugin managers
     plugin_managers.setup_plugin_managers(params)
 
@@ -96,7 +97,7 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
     print(printout)
     sys.stdout.flush()
 
-    log_info("Parameters")
+    log_info("\nParameters")
     with LogLevel():
         for key in list(params.keys()):
             log_info(f"{key}: {str(params[key])}")
@@ -136,25 +137,25 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
             populate_generation(
                 params, gen_num, cur_gen_dir, smiles_already_generated
             )
-
-            log_info("Writing partial summary files")
-            with LogLevel():
-                html_summary = generate_summary_html(params["output_directory"])
-                summary_tsv, summary_sdf = generate_summary_txt(params["output_directory"])
-
-            log_info(f"Generating graphics to interpret results until generation {gen_num}.")
-            graphic_output_dir = f"{params['output_directory']}graphics{os.sep}generation_{gen_num}{os.sep}"
-            os.makedirs(graphic_output_dir, exist_ok=True)
-            plot_args = {
-                "infolder": params["output_directory"],
-                "outfile": graphic_output_dir,
-                "outfile_format": "png",
-            }
-            plot_autogrow_run(**plot_args)
-            os.rename(html_summary, f"{graphic_output_dir}{os.sep}summary.html")
-            os.rename(summary_tsv, f"{graphic_output_dir}{os.sep}summary_tsv.tsv")
-            os.rename(summary_sdf, f"{graphic_output_dir}{os.sep}summary_sdf.sdf")
-
+        
+        log_info("Writing partial summary files")
+        with LogLevel():
+            html_summary = generate_summary_html(params["output_directory"])
+            summary_tsv, summary_sdf = generate_summary_txt(params["output_directory"])
+        
+        log_info(f"Generating graphics to interpret results until generation {gen_num}.")
+        graphic_output_dir = f"{params['output_directory']}graphics{os.sep}generation_{gen_num}{os.sep}"
+        os.makedirs(graphic_output_dir, exist_ok=True)
+        plot_args = {
+            "infolder": params["output_directory"],
+            "outfile": graphic_output_dir,
+            "outfile_format": "png",
+        }
+        plot_autogrow_run(**plot_args)
+        
+        os.rename(html_summary, f"{graphic_output_dir}{os.sep}summary.html")
+        os.rename(summary_tsv, f"{graphic_output_dir}{os.sep}summary_tsv.tsv")
+        os.rename(summary_sdf, f"{graphic_output_dir}{os.sep}summary_sdf.sdf")
         sys.stdout.flush()
 
     log_info("Writing summary files")

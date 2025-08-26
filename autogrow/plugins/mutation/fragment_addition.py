@@ -428,7 +428,6 @@ class FragmentAddition(MutationBase):
 
         missing_smi_files = []
         complementary_mols_dict = {}
-        chemtoolkit = plugin_managers.ChemToolkit.toolkit
 
         for group in functional_groups:
             filepath = f"{complementary_mols_dir}{os.sep}{group}.smi.gz"
@@ -445,7 +444,7 @@ class FragmentAddition(MutationBase):
                     parts = line.strip().split()
                     if len(parts) < 3:
                         continue
-                    smiles, mol_id, mw = parts[0], f"CID-{parts[1]}", float(parts[2])
+                    smiles, mol_id, mw = parts[0], f"{parts[1]}", float(parts[2])
 
                     if perform_mw_filter:
                         passes_min = (min_mw is None) or (mw >= min_mw)
