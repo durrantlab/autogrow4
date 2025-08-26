@@ -7,7 +7,7 @@ and saving docked compounds.
 """
 
 from abc import abstractmethod
-from typing import List, cast
+from typing import List, Optional, cast
 from autogrow.plugins.plugin_base import PluginBase
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
 from autogrow.types import Compound, Compound
@@ -69,6 +69,10 @@ class DockingPluginManager(PluginManagerBase):
     This class is responsible for selecting and executing docking plugins,
     as well as ranking and saving the output of docking operations.
     """
+    @property
+    def default_plugin(self) -> Optional[str]:
+        """Return the name of the default plugin for this manager."""
+        return "VinaLikeDocking"
 
     def execute(self, **kwargs) -> List[Compound]:
         """

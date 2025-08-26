@@ -108,6 +108,10 @@ class SmilesFilterBase(PluginBase):
 
 class SmilesFilterPluginManager(PluginManagerBase):
     """Manages and executes SMILES-based filter plugins in the autogrow framework."""
+    @property
+    def default_plugin(self) -> Optional[str]:
+        """Return the name of the default plugin for this manager."""
+        return None
 
     def __init__(self, plugin_base_class: Type[PluginBase]):
         self.setup_filter_logger_file = True

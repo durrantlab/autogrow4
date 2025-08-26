@@ -77,6 +77,10 @@ class MutationBase(PluginBase):
 
 class MutationPluginManager(PluginManagerBase):
     """Manager class for handling multiple mutation plugins."""
+    @property
+    def default_plugin(self) -> Optional[str]:
+        """Return the name of the default plugin for this manager."""
+        return "FragmentAddition"
 
     def execute(
         self, **kwargs

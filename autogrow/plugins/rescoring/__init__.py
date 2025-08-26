@@ -6,7 +6,7 @@ handling re-scoring operations.
 """
 
 from abc import abstractmethod
-from typing import List, cast
+from typing import List, Optional, cast
 from autogrow.plugins.plugin_base import PluginBase
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
 from autogrow.types import Compound
@@ -64,6 +64,10 @@ class RescoringPluginManager(PluginManagerBase):
 
     This class is responsible for selecting and executing re-scoring plugins.
     """
+    @property
+    def default_plugin(self) -> Optional[str]:
+        """Return the name of the default plugin for this manager."""
+        return None
 
     def execute(self, **kwargs) -> List[Compound]:
         """

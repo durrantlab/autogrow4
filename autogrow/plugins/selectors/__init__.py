@@ -73,6 +73,10 @@ class SelectorBase(PluginBase):
 
 class SelectorPluginManager(PluginManagerBase):
     """Plugin manager for selector plugins in the AutoGrow system."""
+    @property
+    def default_plugin(self) -> Optional[str]:
+        """Return the name of the default plugin for this manager."""
+        return "RankSelector"
 
     def execute(self, **kwargs) -> List[Compound]:
         """

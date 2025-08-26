@@ -26,10 +26,9 @@ from autogrow.config.argument_vars import register_argparse_group
 from autogrow.plugins.plugin_base import PluginBase
 import logging
 from autogrow.utils.caching import CacheManager
-
+from autogrow.utils.logging import log_info
 if TYPE_CHECKING:
     from autogrow.plugins.registry_base import PluginManagerRegistry
-
 
 class PluginManagerBase(ABC):
     """
@@ -53,7 +52,6 @@ class PluginManagerBase(ABC):
     plugin_base_class: Optional[
         Type[PluginBase]
     ] = None  # Class variable for the base plugin class
-
     def __init__(self, plugin_base_class: Type[PluginBase]):
         """
         Initialize the plugin manager.
@@ -69,6 +67,7 @@ class PluginManagerBase(ABC):
         self.params = None
         self.filter_logger_file = None
         self.plugin_base_class = None
+        self._validate_default_plugin()
 
     def create_log_file(self, params: dict, gen_num: int) -> None:
         if self.setup_filter_logger_file and len(self.plugins) > 0:
@@ -132,6 +131,26 @@ class PluginManagerBase(ABC):
                     except ImportError as e:
                         print(f"Failed to import {module_name}: {e}")
 
+    @property
+    @abstractmethod
+    def default_plugin(self) -> Optional[str]:
+        """Return the name of the default plugin for this manager."""
+        pass
+
+    def _validate_default_plugin(self):
+        """
+        Validate that the default plugin is a valid, loaded plugin.
+        Raises:
+            ValueError: If the default plugin is not found among loaded plugins.
+        """
+        default_plugin_name = self.default_plugin
+        if default_plugin_name is not None:
+            if default_plugin_name not in self.plugins:
+                raise ValueError(
+                    f"Default plugin '{default_plugin_name}' for manager '{self.__class__.__name__}' is not a valid loaded plugin. "
+                    f"Available: {list(self.plugins.keys())}"
+                )
+
     def on_plugin_manager_setup_done(self):
         """
         Perform any initialization tasks for the plugin manager.
@@ -167,17 +186,12 @@ class PluginManagerBase(ABC):
                 within other plugins to avoid circular imports.
         """
         self.params = params
-
-        names_of_plugins_to_load: Optional[List[str]] = None
-        plugins_to_load = self.get_selected_plugins_from_params()
-        if plugins_to_load is not None:
-            names_of_plugins_to_load = [os.path.basename(p) for p in plugins_to_load]
-
+        plugins_to_load: List[str] = self.get_selected_plugins_from_params()
         # Now we filter the plugins to only keep the ones we want to load
         self.plugins = {
             name: plugin
             for name, plugin in self.plugins.items()
-            if names_of_plugins_to_load is None or name in names_of_plugins_to_load
+            if name in plugins_to_load
         }
 
         for plugin in self.plugins.values():
@@ -201,13 +215,12 @@ class PluginManagerBase(ABC):
         for plugin in self.plugins.values():
             plugin.setup(**kwargs)
 
-    def get_selected_plugins_from_params(self) -> Optional[List[str]]:
+    def get_selected_plugins_from_params(self) -> List[str]:
         """
         Extract the list of plugins to load from the provided parameters.
-
+        If no plugin is selected by the user, the default plugin is used.
         Returns:
-            Optional[List[str]]: List of plugins to load, or None to load all
-            plugins. Child classes should override this method.
+         List[str]: A list of plugin names to load.
         """
         # For debugging
         # print("Available plugins:", list(self.plugins.keys()))
@@ -215,7 +228,16 @@ class PluginManagerBase(ABC):
         # print("Common keys:", set(self.plugins.keys()) & set(self.params.keys()))
         
         keys_in_common = set(self.plugins.keys()) & set(self.params.keys())
-        return [key for key in keys_in_common if self.params[key]]
+        selected = [key for key in keys_in_common if self.params.get(key)]
+        if not selected:
+            default_plugin_name = self.default_plugin
+            if default_plugin_name is None:
+                # This manager is optional, and no plugins were selected.
+                return []
+            log_info(f"No plugin selected for {self.__class__.__name__}, using default: {default_plugin_name}")
+            self.params[default_plugin_name] = True
+            return [default_plugin_name]
+        return selected
 
     def load_plugins(self) -> Dict[str, PluginBase]:
         """

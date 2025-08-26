@@ -9,7 +9,7 @@ parallelization plugins.
 from abc import abstractmethod
 from dataclasses import dataclass
 import os
-from typing import List, cast
+from typing import List, Optional, cast
 from autogrow.plugins.plugin_base import PluginBase
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
 from autogrow.utils.logging import log_debug, log_warning
@@ -115,6 +115,10 @@ class ShellParallelizerPluginManager(PluginManagerBase):
     This class manages the selection and execution of shell parallelizer
     plugins.
     """
+    @property
+    def default_plugin(self) -> Optional[str]:
+        """Return the name of the default plugin for this manager."""
+        return "PythonMultiprocessing"
 
     def execute(self, **kwargs) -> List[ShellCmdResult]:
         """
@@ -136,11 +140,6 @@ class ShellParallelizerPluginManager(PluginManagerBase):
             Only one shell parallelizer can be selected at a time.
         """
         shell_parallelizers = self.get_selected_plugins_from_params()
-
-        if shell_parallelizers is None or len(shell_parallelizers) == 0:
-            raise Exception(
-                f"You must specify a shell parallelizer program! Choose from {str(self.plugins.keys())}"
-            )
         if len(shell_parallelizers) > 1:
             raise Exception(
                 f"Only one shell parallelizer can be selected at a time! You selected {shell_parallelizers}"

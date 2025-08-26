@@ -14,7 +14,8 @@ import sys
 from typing import Any, Dict, Optional
 from autogrow.accessory_scripts.plot_autogrow_run import main as plot_autogrow_run
 from autogrow import program_info
-from autogrow.config.argparser import get_user_params
+from autogrow.config.argparser import get_user_params, filter_inactive_plugin_params
+from autogrow.config.json_config_utils import save_vars_as_json
 import autogrow.docking.execute_docking as DockingClass
 import autogrow.docking.ranking.ranking_mol as Ranking
 from autogrow.operators.populate_generation import populate_generation
@@ -22,7 +23,6 @@ from autogrow.summary import generate_summary_html, generate_summary_txt
 from autogrow.utils.logging import LogLevel, create_logger, log_info, log_warning
 from autogrow.plugins.registry_base import plugin_managers
 from autogrow.operators.populate_generation import _get_source_compounds_or_raise
-
 
 def dock_input_compounds(params: Optional[Dict[str, Any]]) -> None:
     cur_gen_dir = f"{params['output_directory']}generation_{0}_input_compounds{os.sep}"
@@ -72,6 +72,11 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
 
     # Setup all plugin managers
     plugin_managers.setup_plugin_managers(params)
+
+    params = filter_inactive_plugin_params(params)
+
+    # Now that defaults are set, save vars.json
+    save_vars_as_json(params)
     # Now toolkit should be initialized
     chemtoolkit = plugin_managers.ChemToolkit
     if chemtoolkit is None or chemtoolkit.toolkit is None:

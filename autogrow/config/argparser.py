@@ -31,8 +31,7 @@ from typing import Any, Dict
 from autogrow.config import setup_params
 from autogrow.config.custom_argparser import CustomArgumentParser, CustomArgumentGroup
 from autogrow.config.json_config_utils import (
-    convert_json_params_from_unicode,
-    save_vars_as_json,
+ convert_json_params_from_unicode,
 )
 from autogrow.config.argument_vars import plugin_arg_groups_to_add
 from autogrow.plugins.registry_base import PluginManagerRegistry
@@ -43,6 +42,45 @@ parser = CustomArgumentParser(
     description="AutoGrow: An automated drug optimization and generation tool."
 )
 
+def filter_inactive_plugin_params(args_dict: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Removes parameters for inactive plugins from the arguments dictionary.
+
+    This function iterates through all registered plugin argument groups. For each
+    group, it checks if the plugin's enabling flag is set to True in the
+    provided arguments dictionary. If a plugin is not enabled, all of its
+    associated parameters (excluding the enabling flag itself) are removed from
+    the dictionary. This ensures that parameters for inactive plugins are not
+    logged or saved in the configuration file.
+
+    Args:
+        args_dict (Dict[str, Any]): The dictionary of parsed arguments, where
+            keys are parameter names and values are their settings.
+
+    Returns:
+        Dict[str, Any]: A new dictionary containing only the parameters for
+            active plugins and general program settings.
+    """
+    filtered_args = args_dict.copy()
+
+    global plugin_arg_groups_to_add
+
+    for title, arg_vars_list in plugin_arg_groups_to_add:
+        if not arg_vars_list:
+            continue
+
+        enabling_arg = arg_vars_list[0]
+        # The key in args_dict is the 'dest', which is derived from the name.
+        # For a flag like '--MyPlugin', dest becomes 'MyPlugin'.
+        # For a flag like '--my-arg', dest becomes 'my_arg'.
+        plugin_dest_key = enabling_arg.name.lstrip('-').replace('-', '_')
+        if not filtered_args.get(plugin_dest_key, False):
+            # Plugin is inactive. Delete all its parameters except the enabling flag.
+            for arg_var in arg_vars_list[1:]:
+                param_dest_key = arg_var.name.lstrip('-').replace('-', '_')
+                if param_dest_key in filtered_args:
+                    del filtered_args[param_dest_key]
+    return filtered_args
 
 def get_user_params() -> Dict[str, Any]:
     """
@@ -155,15 +193,6 @@ def get_user_params() -> Dict[str, Any]:
     new_args_dict = setup_params(new_args_dict)
 
     validate_all(new_args_dict)
-
-    # Save variables in vars dict to a .json file for later usage and reference
-    # It saves the file to the output_directory + "vars.json"
-    # -If AutoGrow has been run multiple times for the same directory it
-    # will save the new vars file as append a number to the file name
-    # starting with 2. The util scripts will only look at the original "vars.json"
-    #     ie) output_directory + "vars_2.json"
-    save_vars_as_json(new_args_dict)
-
     # output the paramters used
     # new_args_dict, printout = load_commandline_parameters(new_args_dict)
 

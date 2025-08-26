@@ -504,6 +504,10 @@ class ChemToolkitBase(PluginBase):
         pass
 class ChemToolkitPluginManager(PluginManagerBase):
     """Plugin manager for chemistry toolkits."""
+    @property
+    def default_plugin(self) -> Optional[str]:
+        """Return the name of the default plugin for this manager."""
+        return "RDKitToolkit"
 
     def __init__(self, plugin_base_class: Type[PluginBase]):
         """

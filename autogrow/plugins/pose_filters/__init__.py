@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import List, cast, Type
+from typing import List, Optional, cast, Type
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
 from autogrow.types import Compound
 from autogrow.plugins.plugin_base import PluginBase
@@ -64,6 +64,10 @@ class PoseFilterBase(PluginBase):
 
 class PoseFilterPluginManager(PluginManagerBase):
     """Manages and executes interaction-based filter plugins in the autogrow framework."""
+    @property
+    def default_plugin(self) -> Optional[str]:
+        """Return the name of the default plugin for this manager."""
+        return None
 
     def __init__(self, plugin_base_class: Type[PluginBase]):
         self.setup_filter_logger_file = True

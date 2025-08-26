@@ -79,6 +79,10 @@ class CrossoverPluginManager(PluginManagerBase):
     from the available plugins. It randomly chooses a crossover method from
     the selected plugins and executes it.
     """
+    @property
+    def default_plugin(self) -> Optional[str]:
+        """Return the name of the default plugin for this manager."""
+        return "MergeMCS"
 
     def execute(self, **kwargs) -> Optional[str]:
         """
