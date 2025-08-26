@@ -251,13 +251,15 @@ def _worker(input_q: multiprocessing.Queue, output_q: multiprocessing.Queue, par
         params (dict, optional): Parameters for initializing worker processes.
             Defaults to None.
     """
-    global _plugins_initialized
-    if not _plugins_initialized and params is not None:
+    if params is not None:
         from autogrow.plugins.registry_base import plugin_managers
         # This will setup all plugin managers for this worker process.
         plugin_managers.setup_plugin_managers(params)
-        _plugins_initialized = True
-    
+        # Create log files for each manager within the worker process
+        managers_dict = plugin_managers.get_managers_dict()
+        generation_num = params.get("generation_num", "NA_worker")
+        for manager in managers_dict.values():
+            manager.create_log_file(params, generation_num)
     for seq, job in iter(input_q.get, "STOP"):
         func, args = job
         result = func(*args)

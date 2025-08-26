@@ -17,7 +17,7 @@ from autogrow.plugins.registry_base import plugin_managers
 DEEPFRAG_DEBUG = True
 if DEEPFRAG_DEBUG:
     import os
-
+    import copy
 
 class DeepFragFilterBase(PluginBase):
     """
@@ -276,18 +276,20 @@ class DeepFragFilterBase(PluginBase):
         if os.path.exists(filename):
             log_info(f"Debug image already exists, skipping: {filename}")
             return
-
+        # Create a 2D representation of the parent molecule for better visualization.
+        parent_mol_2d = copy.deepcopy(parent_mol)
+        chemtoolkit.compute_2d_coords(parent_mol_2d)
         branching_points_indices = list(connection_points_3d.keys())
-        mols_to_draw = [parent_mol, child_mol, chemtoolkit.mol_from_smarts(mcs_smarts), mcs_mol_with_coords, fragments_mol]
+        mols_to_draw = [parent_mol_2d, child_mol, chemtoolkit.mol_from_smarts(mcs_smarts), mcs_mol_with_coords, fragments_mol]
         similarity_text = f"Similarity: {similarity:.3f}" if similarity is not None else "Similarity: None"
-        legends = ["Parent", "Child", f"MCS ({mcs_smarts})", "MCS with Parent Coords", f"Fragment(s)\n{similarity_text}"]
-        
+        legends = ["3D Parent, 2D Vis", "Child", f"MCS ({mcs_smarts})", "MCS with Parent Coords", f"Fragment(s)\n{similarity_text}"]
         highlight_list = [branching_points_indices] + [[] for _ in range(len(mols_to_draw) - 1)]
         img = chemtoolkit.mols_to_grid_image(
             mols_to_draw,
             mols_per_row=5,
             sub_img_size=(300, 300),
             highlight_atom_lists=highlight_list,
+            legends=legends,
         )
         img.save(filename)
         log_info(f"Saved DeepFrag MCS debug image to {filename}")
@@ -759,7 +761,7 @@ class DeepFragFilterBase(PluginBase):
         """
         similarity = 0.0
         if not fragments:
-            return 1.0
+            return 0.0
 
         for fragment_info in fragments:
             fragment_smiles = fragment_info['fragment_smiles']
