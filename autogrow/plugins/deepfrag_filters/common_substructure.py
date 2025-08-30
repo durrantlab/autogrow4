@@ -2,6 +2,7 @@
 Functions for calculating a pruned maximum common substructure (MCS).
 """
 import __future__
+import time
 from typing import Any, Dict, List, Optional, Tuple
 
 if __name__ != "__main__":
@@ -180,9 +181,13 @@ def _find_single_fragment_mcs(mol1: Any, mol2: Any) -> Optional[str]:
     # The list of candidates to check, starting with the biggest.
     # We store tuples of (mol_object, smarts_string).
     mcs_mol = chemtoolkit.mol_from_smarts(initial_mcs.smartsString)
-    
+    # Caching dictionary for the validity of a given MCS SMARTS. This avoids
+    # re-computation.
+    validity_cache: Dict[str, Optional[bool]] = {}
     # Check if the absolute largest MCS is valid from the start.
-    if _is_valid_mcs(mol1, mol2, mcs_mol):
+    is_valid = _is_valid_mcs(mol1, mol2, mcs_mol)
+    validity_cache[initial_mcs.smartsString] = is_valid
+    if is_valid:
         return initial_mcs.smartsString
 
     # Initial MCS is not valid, so we start the optimization search.
@@ -190,10 +195,7 @@ def _find_single_fragment_mcs(mol1: Any, mol2: Any) -> Optional[str]:
         "Initial MCS is invalid (causes fragmentation or bond order change). "
         "Starting optimized search for a valid MCS. This may be slow."
     )
-    
     candidates = [(mcs_mol, initial_mcs.smartsString)]
-    seen_smarts = {initial_mcs.smartsString}
-
     # Prune by removing bridge atoms from the initial MCS
     bridge_atoms_in_mol1 = _find_bridge_atoms(mol1)
     bridge_atoms_in_mol2 = _find_bridge_atoms(mol2)
@@ -221,19 +223,28 @@ def _find_single_fragment_mcs(mol1: Any, mol2: Any) -> Optional[str]:
             largest_sub_frag = max(sub_frags, key=lambda m: chemtoolkit.get_num_atoms(m))
             try:
                 pruned_smarts = chemtoolkit.mol_to_smarts(largest_sub_frag)
-                if pruned_smarts not in seen_smarts:
+                if pruned_smarts not in validity_cache:
                     candidates.append((largest_sub_frag, pruned_smarts))
-                    seen_smarts.add(pruned_smarts)
+                    validity_cache[pruned_smarts] = None  # Mark as seen, validity not yet known
             except:
                 pass  # Ignore if SMARTS generation fails
 
     # Now, proceed with the iterative search, which will start with better candidates
+    search_start_time = time.time()
+    SEARCH_TIMEOUT_SECONDS = 0.125  # Could be evaluating many, many candidates, so limit total time
     while candidates:
+        if time.time() - search_start_time > SEARCH_TIMEOUT_SECONDS:
+            log_warning(f"MCS search timed out after {SEARCH_TIMEOUT_SECONDS} seconds.")
+            return None
         candidates.sort(key=lambda x: chemtoolkit.get_num_atoms(x[0]), reverse=True)
         current_mcs_mol, current_mcs_smarts = candidates.pop(0)
-
+        # Check cache first. If not present (or None), compute and store.
+        is_valid = validity_cache.get(current_mcs_smarts)
+        if is_valid is None:
+            is_valid = _is_valid_mcs(mol1, mol2, current_mcs_mol)
+            validity_cache[current_mcs_smarts] = is_valid
         # Check if this candidate is valid using our comprehensive function.
-        if _is_valid_mcs(mol1, mol2, current_mcs_mol):
+        if is_valid:
             return current_mcs_smarts
 
         # If not valid, generate smaller candidates.
@@ -251,10 +262,10 @@ def _find_single_fragment_mcs(mol1: Any, mol2: Any) -> Optional[str]:
                 largest_sub_frag = max(sub_frags, key=lambda m: chemtoolkit.get_num_atoms(m))
                 try:
                     new_smarts = chemtoolkit.mol_to_smarts(largest_sub_frag)
-                    if new_smarts not in seen_smarts:
+                    if new_smarts not in validity_cache:
                         # Add new, smaller candidate to our list for checking.
                         candidates.append((largest_sub_frag, new_smarts))
-                        seen_smarts.add(new_smarts)
+                        validity_cache[new_smarts] = None  # Mark as seen
                 except:
                     continue
     # If the loop finishes, no suitable MCS was found.
