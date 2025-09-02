@@ -14,7 +14,8 @@ import os
 import hashlib
 from autogrow.plugins.registry_base import plugin_managers
 from autogrow.plugins.deepfrag_filters.common_substructure import find_mcs_and_fragments
-DEEPFRAG_DEBUG = True
+
+DEEPFRAG_DEBUG = False
 if DEEPFRAG_DEBUG:
     import os
     import copy
@@ -200,10 +201,10 @@ class DeepFragFilterBase(PluginBase):
                     # Log the outcome
                     if passed_filter:
                         log_info(
-                            f"Docked molecule {compound.id} with smiles string {compound.smiles} passed the similarity criterion using DeepFrag: {similarity_str}"
+                            f"Candidate molecule {compound.id} with smiles string {compound.smiles} passed the similarity criterion using DeepFrag: {similarity_str}"
                         )
                     else:
-                        mesg = f"Docked molecule {compound.id} with smiles string {compound.smiles} did not fulfill with the similarity criterion using DeepFrag: {similarity_str}"
+                        mesg = f"Candidate molecule {compound.id} with smiles string {compound.smiles} did not fulfill with the similarity criterion using DeepFrag: {similarity_str}"
                         log_warning(mesg)
                         if self.filter_logger_file:
                             self.filter_logger_file.info(mesg)

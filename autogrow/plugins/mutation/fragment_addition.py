@@ -41,6 +41,10 @@ from itertools import product
 class FragmentAddition(MutationBase):
     """Plugin that dds fragments to existing mols using reaction libraries."""
 
+    def on_init(self):
+        """Initialize the plugin."""
+        self.generated_smiles_by_addition = set()
+
     def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments required by the plugin.
@@ -97,6 +101,12 @@ class FragmentAddition(MutationBase):
                 type=int,
                 default=None,
                 help="Maximum number of mutants to keep from a single reaction batch. If unset, all are kept.",
+            ),
+            ArgumentVars(
+                name="fragment_addition_prevent_backtracking",
+                action="store_true",
+                default=False,
+                help="Prevent the generation of a molecule that has already been created by this plugin in the same run.",
             ),
         ]
 
@@ -718,6 +728,11 @@ class FragmentAddition(MutationBase):
                         reaction_product, parent_info, self.plugin_managers
                     )
                     if reaction_product_smiles is not None:
+                        if self.params.get("fragment_addition_prevent_backtracking", False):
+                            if reaction_product_smiles in self.generated_smiles_by_addition:
+                                continue
+                            self.generated_smiles_by_addition.add(reaction_product_smiles)
+
                         reaction_id_number = a_reaction_dict["RXN_NUM"]
                         products.append(
                             (reaction_product_smiles, reaction_id_number, None)
@@ -1154,6 +1169,11 @@ class FragmentAddition(MutationBase):
                 reaction_product, parent_info, self.plugin_managers
             )
             if reaction_product_smiles is not None:
+                if self.params.get("fragment_addition_prevent_backtracking", False):
+                    if reaction_product_smiles in self.generated_smiles_by_addition:
+                        continue
+                    self.generated_smiles_by_addition.add(reaction_product_smiles)
+
                 reaction_id_number = a_reaction_dict["RXN_NUM"]
                 comp_mol_names = "+".join(comp_mol_ids)
                 products.append(
