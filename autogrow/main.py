@@ -142,20 +142,18 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
         with LogLevel():
             html_summary = generate_summary_html(params["output_directory"])
             summary_tsv, summary_sdf = generate_summary_txt(params["output_directory"])
-        
-        log_info(f"Generating graphics to interpret results until generation {gen_num}.")
-        graphic_output_dir = f"{params['output_directory']}graphics{os.sep}generation_{gen_num}{os.sep}"
-        os.makedirs(graphic_output_dir, exist_ok=True)
+        log_info(f"Generating analysis plots to interpret results until generation {gen_num}.")
+        analysis_output_dir = f"{params['output_directory']}analysis{os.sep}generation_{gen_num}{os.sep}"
+        os.makedirs(analysis_output_dir, exist_ok=True)
         plot_args = {
             "infolder": params["output_directory"],
-            "outfile": graphic_output_dir,
+            "outfile": analysis_output_dir,
             "outfile_format": "png",
         }
         plot_autogrow_run(**plot_args)
-        
-        os.rename(html_summary, f"{graphic_output_dir}{os.sep}summary.html")
-        os.rename(summary_tsv, f"{graphic_output_dir}{os.sep}summary_tsv.tsv")
-        os.rename(summary_sdf, f"{graphic_output_dir}{os.sep}summary_sdf.sdf")
+        os.rename(html_summary, f"{analysis_output_dir}{os.sep}summary.html")
+        os.rename(summary_tsv, f"{analysis_output_dir}{os.sep}summary_tsv.tsv")
+        os.rename(summary_sdf, f"{analysis_output_dir}{os.sep}summary_sdf.sdf")
         sys.stdout.flush()
 
     log_info("Writing summary files")
@@ -167,19 +165,17 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
     with LogLevel():
         log_info(f"AutoGrow5 run started at:   {start_time}")
         log_info(f"AutoGrow5 run completed at: {str(datetime.datetime.now())}")
-
-    # Generate the final graphics only when the 'process_input_compounds' parameter is True.
-    # Otherwise, the final graphics coincide with the graphics of the last generation in the 'graphics' directory.
+    # Generate the final analysis plots only when the 'process_input_compounds' parameter is True.
+    # Otherwise, the final analysis plots coincide with the analysis plots of the last generation in the 'analysis' directory.
     if bool(params["process_input_compounds"]):
         log_info("Docking input compounds for further analysis")
         dock_input_compounds(params)
-
-        log_info("Generating graphics to interpret results.")
-        graphic_output_dir = f"{params['output_directory']}graphics{os.sep}"
-        os.makedirs(graphic_output_dir, exist_ok=True)
+        log_info("Generating analysis plots to interpret results.")
+        analysis_output_dir = f"{params['output_directory']}analysis{os.sep}"
+        os.makedirs(analysis_output_dir, exist_ok=True)
         plot_args = {
             "infolder": params["output_directory"],
-            "outfile": graphic_output_dir,
+            "outfile": analysis_output_dir,
             "outfile_format": "png",
             "process_input_compounds": "True"
         }
