@@ -97,7 +97,7 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
     print(printout)
     sys.stdout.flush()
 
-    log_info("\nParameters")
+    log_info("Parameters")
     with LogLevel():
         for key in list(params.keys()):
             log_info(f"{key}: {str(params[key])}")
