@@ -138,23 +138,24 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
                 params, gen_num, cur_gen_dir, smiles_already_generated
             )
         
-        log_info("Writing partial summary files")
-        with LogLevel():
-            html_summary = generate_summary_html(params["output_directory"])
-            summary_tsv, summary_sdf = generate_summary_txt(params["output_directory"])
-        log_info(f"Generating analysis plots to interpret results until generation {gen_num}.")
-        analysis_output_dir = f"{params['output_directory']}analysis{os.sep}generation_{gen_num}{os.sep}"
-        os.makedirs(analysis_output_dir, exist_ok=True)
-        plot_args = {
-            "infolder": params["output_directory"],
-            "outfile": analysis_output_dir,
-            "outfile_format": "png",
-        }
-        plot_autogrow_run(**plot_args)
-        os.rename(html_summary, f"{analysis_output_dir}{os.sep}summary.html")
-        os.rename(summary_tsv, f"{analysis_output_dir}{os.sep}summary_tsv.tsv")
-        os.rename(summary_sdf, f"{analysis_output_dir}{os.sep}summary_sdf.sdf")
-        sys.stdout.flush()
+            log_info("Writing partial summary files")
+            with LogLevel():
+                html_summary = generate_summary_html(params["output_directory"])
+                summary_tsv, summary_sdf = generate_summary_txt(params["output_directory"])
+            
+            log_info(f"Generating analysis plots to interpret results until generation {gen_num}.")
+            analysis_output_dir = f"{params['output_directory']}analysis{os.sep}generation_{gen_num}{os.sep}"
+            os.makedirs(analysis_output_dir, exist_ok=True)
+            plot_args = {
+                "infolder": params["output_directory"],
+                "outfile": analysis_output_dir,
+                "outfile_format": "png",
+            }
+            plot_autogrow_run(**plot_args)
+            os.rename(html_summary, f"{analysis_output_dir}{os.sep}summary.html")
+            os.rename(summary_tsv, f"{analysis_output_dir}{os.sep}summary_tsv.tsv")
+            os.rename(summary_sdf, f"{analysis_output_dir}{os.sep}summary_sdf.sdf")
+            sys.stdout.flush()
 
     log_info("Writing summary files")
     with LogLevel():

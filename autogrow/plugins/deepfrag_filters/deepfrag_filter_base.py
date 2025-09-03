@@ -65,10 +65,10 @@ class DeepFragFilterBase(PluginBase):
         generation_num = kwargs["input_params"].get("generation_num", "NA")
         chemtoolkit = plugin_managers.ChemToolkit.toolkit
 
+        log_info(
+            f"Applying DeepFrag filter with cutoff {cutoff} to {len(compounds)} compounds."
+        )
         with LogLevel():
-            log_info(
-                f"Applying DeepFrag filter with cutoff {cutoff} to {len(compounds)} compounds."
-            )
             final_compound_list: List[Compound] = []
             for compound in compounds:
                 log_info(
