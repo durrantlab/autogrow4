@@ -9,7 +9,8 @@ import os
 from typing import List, Optional
 import textwrap
 
-logger: Optional[logging.Logger] = None
+console_logger: Optional[logging.Logger] = None
+file_logger: Optional[logging.Logger] = None
 log_filename = "log.txt"
 level = 0
 MAX_MSG_LINE_LENGTH = 60
@@ -18,44 +19,41 @@ INDENT = " "
 
 
 def create_logger(level: int, file_path: str = "log.txt"):
-    """Create and configure a logger with specified level and file path.
+    """Create and configure loggers for console and file output.
 
-    Sets up a global logger with a StreamHandler and basic configuration. The
-    logger is named "autogrow" and will output to both console and file.
+    Sets up two loggers:
+    - A console logger for wrapped, indented output to the stream.
+    - A file logger for unwrapped, indented output to a log file.
 
     Args:
-        level (int): Logging level (e.g., logging.DEBUG, logging.INFO)
-        file_path (str): Path where log file will be created. Defaults to
-            "log.txt"
+        level (int): Logging level (e.g., logging.DEBUG, logging.INFO).
+        file_path (str): Path where the log file will be created. Defaults to
+            "log.txt".
 
     Note:
-        This function modifies global logger, handler, and log_filename
-        variables.
+        This function modifies global logger variables.
     """
-    global logger
-    global handler
-    global log_filename
-
+    global console_logger, file_logger, log_filename
     log_filename = file_path
-    
-    # Get the root logger
-    logger = logging.getLogger("autogrow")
-    logger.setLevel(level)
-    
-    # Prevent handlers from being added multiple times
-    if logger.hasHandlers():
-        logger.handlers.clear()
-    
-    # Create stream handler for console output
+
+    # Console logger for wrapped output
+    console_logger = logging.getLogger("autogrow_console")
+    console_logger.setLevel(level)
+    if console_logger.hasHandlers():
+        console_logger.handlers.clear()
     stream_handler = logging.StreamHandler()
-    
-    # Create file handler for file output
+    console_logger.addHandler(stream_handler)
+    console_logger.propagate = False
+
+    # File logger for unwrapped output
+    file_logger = logging.getLogger("autogrow_file")
+    file_logger.setLevel(level)
+    if file_logger.hasHandlers():
+        file_logger.handlers.clear()
     file_handler = logging.FileHandler(log_filename)
-    
-    # Add handlers to the logger
-    logger.addHandler(stream_handler)
-    logger.addHandler(file_handler)
-    
+    file_logger.addHandler(file_handler)
+    file_logger.propagate = False
+
     # Set matplotlib logging level to WARNING to suppress findfont messages
     logging.getLogger('matplotlib').setLevel(logging.WARNING)
     logging.getLogger('PIL').setLevel(logging.WARNING)
@@ -121,27 +119,30 @@ def set_log_tab_level(tab_count: int):
     Set the indentation level for log messages.
 
     Configures a new formatter with the specified indentation level and applies
-    it to the global handler.
-
+    it to both console and file handlers.
     Args:
         tab_count (int): Number of tab indentations to prepend to log messages
 
     Note:
-        Modifies the global handler's formatter and level variables.
+        Modifies the global level variable and formatters for both console_logger
+        and file_logger.
     """
-    global level, logger
+    global level, console_logger, file_logger
     level = tab_count
-    
-    if logger is None:
+    if console_logger is None or file_logger is None:
         return
-        
-    # Create an initial formatter
+
+    # Formatter for both console and file.
+    # The wrapping logic for console will handle additional indentation for wrapped lines.
     new_formatter = CustomFormatter(
         fmt="%(asctime)s - %(levelname)s - " + (tab_count * TAB) + "%(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
-    
-    for handler in logger.handlers:
+
+    for handler in console_logger.handlers:
+        handler.setFormatter(new_formatter)
+
+    for handler in file_logger.handlers:
         handler.setFormatter(new_formatter)
 
 def wrap_msg(msg: str) -> List[str]:
@@ -188,74 +189,86 @@ def decrease_log_tab_level():
 
 
 def log_info(msg: str):
-    """Log a message at INFO level with proper indentation and line wrapping.
+    """Log a message at INFO level with wrapping for console and no wrapping for file.
 
-    Writes the message to both the logger (if configured) and the log file. Long
-    messages are wrapped to fit MAX_MSG_LINE_LENGTH, with subsequent lines
-    indented.
+    Writes the message to both the console logger (with line wrapping) and
+    the file logger (without wrapping). Long messages are wrapped to fit
+    MAX_MSG_LINE_LENGTH for console output, with subsequent lines indented.
 
     Args:
-        msg (str): The message to log
+        msg (str): The message to log.
 
     Note:
         Uses global level and logger variables. Writes to global log_filename.
         Wrapped lines are indented with INDENT.
     """
-    global logger
-    if logger is None:
+    global console_logger, file_logger
+    if console_logger is None or file_logger is None:
         return
-    
+
+    # Log to console with wrapping
     for i, m in enumerate(wrap_msg(msg)):
         if i > 0:
             m = INDENT + m
-        logger.info(m)
+        console_logger.info(m)
+
+    # Log to file without wrapping
+    file_logger.info(msg)
 
 def log_debug(msg: str):
-    """Log a message at DEBUG level with proper indentation and line wrapping.
+    """Log a message at DEBUG level with wrapping for console and no wrapping for file.
 
-    Writes the message to both the logger (if configured) and the log file. Long
-    messages are wrapped to fit MAX_MSG_LINE_LENGTH, with subsequent lines
-    indented.
+    Writes the message to both the console logger (with line wrapping) and
+    the file logger (without wrapping). Long messages are wrapped to fit
+    MAX_MSG_LINE_LENGTH for console output, with subsequent lines indented.
 
     Args:
-        msg (str): The message to log
+        msg (str): The message to log.
 
     Note:
         Uses global level and logger variables. Writes to global log_filename.
         Wrapped lines are indented with INDENT.
     """
-    global logger
-    if logger is None:
+    global console_logger, file_logger
+    if console_logger is None or file_logger is None:
         return
-    
+
+    # Log to console with wrapping
     for i, m in enumerate(wrap_msg(msg)):
         if i > 0:
             m = INDENT + m
-        logger.debug(m)
+        console_logger.debug(m)
+
+    # Log to file without wrapping
+    file_logger.debug(msg)
 
 def log_warning(msg: str):
     """
-    Log a message at WARNING level with proper indentation and line wrapping.
+    Log a message at WARNING level with wrapping for console and no wrapping for file.
 
-    Writes the message to both the logger (if configured) and the log file. Long
-    messages are wrapped to fit MAX_MSG_LINE_LENGTH, with subsequent lines
-    indented.
+    Writes the message to both the console logger (with line wrapping) and
+    the file logger (without wrapping). Long messages are wrapped to fit
+    MAX_MSG_LINE_LENGTH for console output, with subsequent lines indented.
 
     Args:
-        msg (str): The message to log
+        msg (str): The message to log.
 
     Note:
         Uses global level and logger variables. Writes to global log_filename.
         Wrapped lines are indented with INDENT.
     """
-    global logger
-    if logger is None:
+    global console_logger, file_logger
+    if console_logger is None or file_logger is None:
         return
-    
+
+    # Log to console with wrapping
     for i, m in enumerate(wrap_msg(msg)):
         if i > 0:
             m = INDENT + m
-        logger.warning(m)
+        console_logger.warning(m)
+
+    # Log to file without wrapping
+    file_logger.warning(msg)
 
 def get_log_tab_level() -> int:
     """Returns the current log indentation level."""
