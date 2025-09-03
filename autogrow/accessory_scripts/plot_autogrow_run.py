@@ -409,7 +409,7 @@ def generate_tSNE_scatterplot(
         gen_name = "generation_" + (str(gen_id + 1) if not exist_gen_0 else str(gen_id))
         x_gen = x.loc[gen_name]
         y_gen = y.loc[gen_name]
-        ax.scatter(x_gen, y_gen, label=gen_name, c="black" if gen_id == 0 else None)
+        ax.scatter(x_gen, y_gen, label=gen_name, c="black" if gen_id == 0 else None, s=10)
     ax.legend(bbox_to_anchor=(1.05, 1.0), loc="upper left")
     # Add titles and labels
     plt.xlabel("Dimension 1", fontweight="semibold")
