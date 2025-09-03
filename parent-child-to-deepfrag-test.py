@@ -42,8 +42,8 @@ def create_mcs_molecule(parent, child):
     mcs_mol = Chem.MolFromSmarts(mcs_smarts)
     
     print(f"MCS found: {mcs.smartsString}")
-    print(f"Number of atoms in MCS: {mcs.numAtoms}")
-    print(f"Number of bonds in MCS: {mcs.numBonds}")
+    # print(f"Number of atoms in MCS: {mcs.numAtoms}")
+    # print(f"Number of bonds in MCS: {mcs.numBonds}")
     
     # Match the MCS in both molecules
     parent_match = parent.GetSubstructMatch(mcs_mol)

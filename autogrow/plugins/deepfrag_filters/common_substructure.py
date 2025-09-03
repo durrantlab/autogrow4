@@ -8,8 +8,7 @@ from typing import Any, Dict, List, Optional, Tuple
 if __name__ != "__main__":
     from autogrow.plugins.registry_base import plugin_managers
     from autogrow.utils.logging import log_info, log_warning
-
-
+    import autogrow.utils.mol_object_handling as MOH
 
 def _find_bridge_atoms(mol: Any) -> List[int]:
     """Identifies bridge atoms in a molecule.
@@ -294,8 +293,12 @@ def create_mcs_molecule(parent: Any, child: Any) -> Tuple[Optional[Any], Dict, D
     """
     chemtoolkit = plugin_managers.ChemToolkit.toolkit
     try:
-        parent = chemtoolkit.remove_hs(parent)
-        child = chemtoolkit.remove_hs(child)
+        parent_no_h = chemtoolkit.remove_hs(parent, sanitize=False)
+        parent = MOH.check_sanitization(parent_no_h)
+        child_no_h = chemtoolkit.remove_hs(child, sanitize=False)
+        child = MOH.check_sanitization(child_no_h)
+        if parent is None or child is None:
+            raise ValueError("Parent or child sanitization failed after removing hydrogens.")
     except Exception as e:
         log_warning(
             f"Failed to remove hydrogens from parent or child molecule, skipping MCS. Error: {e}"
@@ -311,8 +314,8 @@ def create_mcs_molecule(parent: Any, child: Any) -> Tuple[Optional[Any], Dict, D
     # Create a molecule from the MCS SMARTS pattern
     mcs_mol = chemtoolkit.mol_from_smarts(mcs_smarts)
     log_info(f"MCS found: {mcs_smarts}")
-    log_info(f"Number of atoms in MCS: {chemtoolkit.get_num_atoms(mcs_mol)}")
-    log_info(f"Number of bonds in MCS: {len(mcs_mol.GetBonds())}")
+    # log_info(f"Number of atoms in MCS: {chemtoolkit.get_num_atoms(mcs_mol)}")
+    # log_info(f"Number of bonds in MCS: {len(mcs_mol.GetBonds())}")
 
     # Match the MCS in both molecules
     parent_match = chemtoolkit.get_substruct_match(parent, mcs_mol)
