@@ -404,12 +404,32 @@ def generate_tSNE_scatterplot(
     y = grouped_tsne_df["Dim_2"].apply(lambda y: y.values)
     setup_plot_styling()
     fig, ax = plt.subplots()
-    
-    for gen_id in range(len(x)):
+    num_generations = len(x)
+    cmap = plt.get_cmap('Blues')
+    for gen_id in range(num_generations):
         gen_name = "generation_" + (str(gen_id + 1) if not exist_gen_0 else str(gen_id))
         x_gen = x.loc[gen_name]
         y_gen = y.loc[gen_name]
-        ax.scatter(x_gen, y_gen, label=gen_name, c="black" if gen_id == 0 else None, s=5)
+        # Original coloring approach commented out as requested
+        # ax.scatter(x_gen, y_gen, label=gen_name, c="black" if gen_id == 0 else None, s=10)
+
+        # New coloring logic
+        if num_generations > 1:
+            # Normalize gen_id to map to the colormap (0.0 to 1.0)
+            normalized_gen_id = gen_id / (num_generations - 1)
+            
+            # Remap the normalized value to a new range (e.g., 0.2 to 1.0)
+            # to avoid using the very lightest colors.
+            color_min = 0.2
+            color_max = 1.0
+            color_val = (normalized_gen_id * (color_max - color_min)) + color_min
+            
+            color = cmap(color_val)
+        else:
+            # Handle case with only one generation
+            color = cmap(1.0)  # Darkest blue
+
+        ax.scatter(x_gen, y_gen, label=gen_name, c=[color], s=10)
     ax.legend(bbox_to_anchor=(1.05, 1.0), loc="upper left")
     # Add titles and labels
     plt.xlabel("Dimension 1", fontweight="semibold")
