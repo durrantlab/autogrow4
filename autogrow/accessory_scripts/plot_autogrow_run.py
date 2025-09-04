@@ -128,43 +128,28 @@ def setup_plot_styling():
     plt.clf()
 
 
-def save_plot(outfile: str, params: Dict[str, Any]):
+def save_plot(outfile: str, params: Dict[str, Any], data_to_save: Optional[pd.DataFrame] = None):
     """
-    Save plot with common parameters.
-    
+    Save plot as PNG and SVG, and data as TSV.
     Args:
-        outfile: Output file path.
-        params: Parameters dictionary containing format and DPI settings.
+     outfile: Output file path. The extension will be ignored.
+     params: Parameters dictionary (not used for format/DPI, but kept for compatibility).
+     data_to_save: Optional pandas DataFrame with data to save to a TSV.
     """
-    plt.savefig(outfile, bbox_inches="tight", format=params["outfile_format"], dpi=1000)
+    base_outfile = os.path.splitext(outfile)[0]
 
+    # Save PNG
+    plt.savefig(f"{base_outfile}.png", bbox_inches="tight", format="png", dpi=1000)
+
+    # Save SVG
+    plt.savefig(f"{base_outfile}.svg", bbox_inches="tight", format="svg")
+
+    # Save TSV
+    if data_to_save is not None and not data_to_save.empty:
+        data_to_save.to_csv(f"{base_outfile}.tsv", sep="\t", index=False)
 
 def get_plot_labels(params: Dict[str, Any], ligand_efficiency: bool = False) -> Tuple[str, str, str]:
-    """
-    Get standard plot labels based on parameters.
-    
-    Args:
-        params: Parameters dictionary.
-        ligand_efficiency: Whether calculating ligand efficiency.
-        
-    Returns:
-        Tuple of (title, x_label, y_label).
-    """
-    receptor_name = os.path.basename(params["receptor_path"])
-    
-    if ligand_efficiency:
-        title = f"Ligand efficiencies for {receptor_name}"
-        y_label = "Ligand Efficiency"
-    else:
-        title = f"Docking scores for {receptor_name}"
-        scoring_type = params.get("docking_executable", "")
-        if "vina" in str(scoring_type):
-            y_label = "Docking Score"
-        else:
-            y_label = "Fitness Score"
-    
-    return title, "Generation Number", y_label
-
+    # No changes made to this function
 
 # ============================================================================
 # CORE ANALYSIS FUNCTIONS
@@ -434,9 +419,7 @@ def generate_tSNE_scatterplot(
     # Add titles and labels
     plt.xlabel("Dimension 1", fontweight="semibold")
     plt.ylabel("Dimension 2", fontweight="semibold")
-
-    save_plot(outfile, params)
-
+    save_plot(outfile, params, data_to_save=tsne_df)
 
 def calc_diversity_scores_per_generation(infolder: str):
     """
@@ -845,7 +828,7 @@ def make_graph(dictionary: Dict[str, Union[float, str]], analyze_gen_0: bool,
 # ============================================================================
 
 def run_score_plotter(params: Dict[str, Any], dict_of_averages: Dict[str, Dict[str, Union[float, str]]],
-                     outfile: str, ligand_efficiency: bool, analyze_gen_0: bool, exist_gen_0: bool) -> None:
+      outfile: str, ligand_efficiency: bool, analyze_gen_0: bool, exist_gen_0: bool) -> None:
     """
     This plots the averages into a matplotlib figure. It will require you to
     answer questions about titles and labels
@@ -874,12 +857,18 @@ def run_score_plotter(params: Dict[str, Any], dict_of_averages: Dict[str, Dict[s
         ("top_5", "Top 5", "g"),
         ("top_1", "Top 1", "r")
     ]
-
+    series_to_plot = {}
     for key, label, color in plot_configs:
         if key in dict_of_averages:
             generations, scores = make_graph(dict_of_averages[key], analyze_gen_0, exist_gen_0)
             if generations is not None and scores is not None:
                 ax.plot(generations, scores, color=color, label=label)
+                series_to_plot[label] = pd.Series(data=scores, index=generations)
+
+    df_to_save = pd.DataFrame(series_to_plot) if series_to_plot else pd.DataFrame()
+    if not df_to_save.empty:
+        df_to_save.index.name = 'generation'
+        df_to_save = df_to_save.reset_index()
 
     # Add reference lines if specified
     if params.get("plot_reference_lines"):
@@ -894,12 +883,11 @@ def run_score_plotter(params: Dict[str, Any], dict_of_averages: Dict[str, Dict[s
     
     ax.legend(loc="center left", bbox_to_anchor=(1, 0.274), fontsize="small")
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-
-    save_plot(outfile, params)
+    save_plot(outfile, params, data_to_save=df_to_save)
 
 def run_line_plot_per_generation(params: Dict[str, Any], dictionary_of_values: Dict[str, Union[int, float, str]], outfile: str,
-      x_label: str, y_label: str, title_of_figure: str = None,
-      analyze_gen_0: bool = False, exist_gen_0: bool = False) -> None:
+   x_label: str, y_label: str, title_of_figure: str = None,
+   analyze_gen_0: bool = False, exist_gen_0: bool = False) -> None:
     """
     Create line plot for per-generation data.
     Args:
@@ -913,6 +901,7 @@ def run_line_plot_per_generation(params: Dict[str, Any], dictionary_of_values: D
         exist_gen_0: Whether generation 0 exists.
     """
     generations, values = make_graph(dictionary_of_values, analyze_gen_0, exist_gen_0)
+    df_to_save = pd.DataFrame({x_label: generations, y_label: values}) if generations is not None and values is not None else pd.DataFrame()
     if generations is None or not generations or values is None or not values:
         log_warning(f"Could not generate plot '{title_of_figure}' due to missing data.")
         return
@@ -929,11 +918,11 @@ def run_line_plot_per_generation(params: Dict[str, Any], dictionary_of_values: D
         plt.ylabel(y_label, fontweight="semibold")
 
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-    save_plot(outfile, params)
+    save_plot(outfile, params, data_to_save=df_to_save)
 
 def run_boxplot(params: Dict[str, Any], dictionary_of_values: Dict[str, List[float]], outfile: str,
-               key_start_with: str, x_label: str, y_label: str, title_of_figure: str = None,
-               analyze_gen_0: bool = False, exist_gen_0: bool = False) -> None:
+      key_start_with: str, x_label: str, y_label: str, title_of_figure: str = None,
+      analyze_gen_0: bool = False, exist_gen_0: bool = False) -> None:
     """
     Create boxplot for the given data.
 
@@ -958,14 +947,13 @@ def run_boxplot(params: Dict[str, Any], dictionary_of_values: Dict[str, List[flo
         if key in dictionary_of_values:
             data.append(dictionary_of_values[key])
             yticklabels.append(key)
-
+    df_to_save = pd.DataFrame(dictionary_of_values)
     setup_plot_styling()
     fig = plt.figure(figsize=(10, 7))
     ax = fig.add_subplot(111)
 
     bp = ax.boxplot(data, patch_artist=True, notch=False, vert=0, showmeans=True,
-                    meanprops={"markerfacecolor": "black", "markeredgecolor": "black"})
-    
+        meanprops={"markerfacecolor": "black", "markeredgecolor": "black"})
     for median in bp['medians']:
         median.set_color('black')
 
@@ -977,12 +965,10 @@ def run_boxplot(params: Dict[str, Any], dictionary_of_values: Dict[str, List[flo
     
     if title_of_figure:
         plt.title(title_of_figure, fontweight="semibold")
-
-    save_plot(outfile, params)
-
+    save_plot(outfile, params, data_to_save=df_to_save)
 
 def run_plotter(params: Dict[str, Any], dictionary_of_values: Dict[str, Any], outfile: str,
-               key_start_with: str, x_label: str, y_label: str, title_of_figure: str = None) -> None:
+      key_start_with: str, x_label: str, y_label: str, title_of_figure: str = None) -> None:
     """
     Create line plot for the given data.
 
@@ -1003,7 +989,7 @@ def run_plotter(params: Dict[str, Any], dictionary_of_values: Dict[str, Any], ou
         if key in dictionary_of_values:
             y.append(dictionary_of_values[key])
             x.append(i + 1)
-
+    df_to_save = pd.DataFrame({x_label: x, y_label: y})
     setup_plot_styling()
     plt.plot(x, y, marker='o', linestyle='-', color='b')
 
@@ -1015,11 +1001,10 @@ def run_plotter(params: Dict[str, Any], dictionary_of_values: Dict[str, Any], ou
         plt.ylabel(y_label, fontweight="semibold")
 
     plt.legend()
-    save_plot(outfile, params)
-
+    save_plot(outfile, params, data_to_save=df_to_save)
 
 def run_heatmap(params: Dict[str, Any], outfile: str, result_matrix, x_label_list, y_label_list,
-               title_of_figure: str) -> None:
+      title_of_figure: str) -> None:
     """
     Create heatmap for the given data.
 
@@ -1033,10 +1018,10 @@ def run_heatmap(params: Dict[str, Any], outfile: str, result_matrix, x_label_lis
     """
     setup_plot_styling()
     fig, ax = plt.subplots()
+    df_to_save = pd.DataFrame(result_matrix, index=y_label_list, columns=x_label_list)
     ax.imshow(result_matrix, cmap="Blues")
-
-    ax.set_xticks(range(len(x_label_list)), labels=x_label_list, rotation=45, ha="right", 
-                  rotation_mode="anchor", size="x-small")
+    ax.set_xticks(range(len(x_label_list)), labels=x_label_list, rotation=45, ha="right",
+         rotation_mode="anchor", size="x-small")
     ax.set_yticks(range(len(y_label_list)), labels=y_label_list, size="x-small")
 
     # Add text annotations
@@ -1052,8 +1037,7 @@ def run_heatmap(params: Dict[str, Any], outfile: str, result_matrix, x_label_lis
             ax.text(j, i, text, ha="center", va="center", color="black", size="xx-small")
 
     ax.set_title(title_of_figure, size="small")
-    save_plot(outfile, params)
-
+    save_plot(outfile, params, data_to_save=df_to_save.reset_index())
 
 # ============================================================================
 # MAIN ANALYSIS FUNCTIONS

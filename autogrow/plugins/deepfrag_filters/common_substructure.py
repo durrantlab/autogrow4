@@ -5,10 +5,12 @@ import __future__
 import time
 from typing import Any, Dict, List, Optional, Tuple
 
+SEARCH_TIMEOUT_SECONDS = 0.125  # Could be evaluating many, many candidates, so limit total time
+
 if __name__ != "__main__":
+    import autogrow.utils.mol_object_handling as MOH
     from autogrow.plugins.registry_base import plugin_managers
     from autogrow.utils.logging import log_info, log_warning
-    import autogrow.utils.mol_object_handling as MOH
 
 def _find_bridge_atoms(mol: Any) -> List[int]:
     """Identifies bridge atoms in a molecule.
@@ -230,10 +232,12 @@ def _find_single_fragment_mcs(mol1: Any, mol2: Any) -> Optional[str]:
 
     # Now, proceed with the iterative search, which will start with better candidates
     search_start_time = time.time()
-    SEARCH_TIMEOUT_SECONDS = 0.125  # Could be evaluating many, many candidates, so limit total time
     while candidates:
         if time.time() - search_start_time > SEARCH_TIMEOUT_SECONDS:
             log_warning(f"MCS search timed out after {SEARCH_TIMEOUT_SECONDS} seconds.")
+            # DEBUG: Save two molecules to file for later analysis
+            with open("mcs_timeout_debug.smi", "a") as f:
+                f.write(chemtoolkit.mol_to_smiles(mol1) + "\t" + chemtoolkit.mol_to_smiles(mol2) + "\n")
             return None
         candidates.sort(key=lambda x: chemtoolkit.get_num_atoms(x[0]), reverse=True)
         current_mcs_mol, current_mcs_smarts = candidates.pop(0)
@@ -575,6 +579,7 @@ if __name__ == "__main__":
 
     # Now we can import from autogrow
     from autogrow.plugins.registry_base import plugin_managers
+    import autogrow.utils.mol_object_handling as MOH
     from rdkit import Chem
     from rdkit.Chem import AllChem
 
@@ -668,6 +673,12 @@ if __name__ == "__main__":
     assert Chem.MolToSmiles(mcs_mol) == "C1CCCCC1"  # This one fails. Chem.MolToSmiles(mcs_mol) => 'CC1CCCCC1' Why?
     assert len(parent_to_mcs_map) == len(child_to_mcs_map) == 6
     assert mcs_smarts == "[#6]1-[#6]-[#6]-[#6]-[#6]-[#6]-1"
+
+    # Try a case that will take a long time to find a valid MCS
+    print("\n\nHI\n\n")
+    parent_child_smiles = ("CC(=O)N(CC(C)F)C(=O)NC(C)C(=O)Oc1n[nH]c(=O)c2ccccc12", "CC(=O)N(CC(C)OC(=O)NC(=S)NCC(=O)OCCC=CO)C(=O)NC(C)C(=O)Oc1n[nH]c(=O)c2ccccc12")
+    mcs_mol, frag_mol, frag_info_dict, mcs_smarts, con_pts_dict = test_find_mcs_and_fragments(parent_child_smiles)
+
 
     print("\nAll tests passed.")
 
