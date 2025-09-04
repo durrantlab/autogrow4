@@ -350,6 +350,7 @@ class RDKitToolkit(ChemToolkitBase):
         mols_per_row: int,
         sub_img_size: Tuple[int, int],
         highlight_atom_lists: Optional[List[List[int]]] = None,
+        legends: Optional[List[str]] = None,
     ) -> Any:
         """Create a grid image of molecules."""
         return Draw.MolsToGridImage(
@@ -357,6 +358,7 @@ class RDKitToolkit(ChemToolkitBase):
             molsPerRow=mols_per_row,
             subImgSize=sub_img_size,
             highlightAtomLists=highlight_atom_lists,
+            legends=legends,
         )
 
     def compute_2d_coords(self, mol: Any) -> int:

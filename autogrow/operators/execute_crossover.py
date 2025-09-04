@@ -21,6 +21,7 @@ from autogrow.plugins.crossover import CrossoverPluginManager
 from autogrow.types import Compound
 from autogrow.utils.logging import LogLevel, log_debug, log_warning
 import autogrow.utils.mol_object_handling as MOH
+import os
 
 # TODO: Lots of this code is specific to the MCS crossover. But that code should
 # all be in the appropriate plugin, not here in this generic function.
@@ -324,8 +325,9 @@ def _do_crossovers_smiles_merge(
             # This is because crossover doesn't return a PreDockCompound object
             # yet. Need to refactor so that happens. As is, smiles getting
             # converted to PreDockCompound twice.
-            tmp_predock_cmpd = Compound(smiles=ligand_new_smiles, id="tmp")
-
+            temp_id = f"id_{os.urandom(8).hex()}"
+            tmp_predock_cmpd = Compound(smiles=ligand_new_smiles, id=temp_id)
+            
             # Filter Here
             passed_filter = (
                 len(plugin_managers.SmilesFilter.run(predock_cmpds=[tmp_predock_cmpd]))
@@ -337,9 +339,10 @@ def _do_crossovers_smiles_merge(
             if passed_filter and len(plugin_managers.DeepFragFilter.plugins) > 0:
                 tmp_predock_cmpd.parent_3D_mols = [lig1_predock_cmpd.mol_3D, lig2_predock_cmpd.mol_3D]
                 passed_filter = (
-                        len(plugin_managers.DeepFragFilter.run(input_params=crossover_manager.params,
-                                                                        compounds=[tmp_predock_cmpd]))
-                        > 0
+                    len(plugin_managers.DeepFragFilter.run(
+                        input_params=crossover_manager.params,
+                        compounds=[tmp_predock_cmpd]))
+                    > 0
                 )
 
             if not passed_filter:

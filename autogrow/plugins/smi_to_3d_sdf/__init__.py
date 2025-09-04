@@ -7,7 +7,7 @@ SmiTo3DSdfPluginManager for managing SMILES to 3D SDF conversion plugins.
 
 from abc import abstractmethod
 import os
-from typing import List, cast
+from typing import List, cast, Optional
 
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
 from autogrow.types import Compound
@@ -92,6 +92,10 @@ class SmiTo3DSdfPluginManager(PluginManagerBase):
     This class manages the selection and execution of SMILES to 3D SDF converter
     plugins.
     """
+    @property
+    def default_plugin(self) -> Optional[str]:
+        """Return the name of the default plugin for this manager."""
+        return "ObabelSmiTo3DSDF"
 
     def execute(self, **kwargs) -> List[Compound]:
         """
@@ -116,11 +120,6 @@ class SmiTo3DSdfPluginManager(PluginManagerBase):
             Only one SMILES to 3D SDF converter can be selected at a time.
         """
         smi_to_sdf_converters = self.get_selected_plugins_from_params()
-
-        if smi_to_sdf_converters is None or len(smi_to_sdf_converters) == 0:
-            raise Exception(
-                f"You must specify an smi-to-3d-sdf Converter! Choose from {str(self.plugins.keys())}"
-            )
         if len(smi_to_sdf_converters) > 1:
             raise Exception(
                 f"Only one smi-to-3d-sdf Converter can be selected at a time! You selected {smi_to_sdf_converters}"

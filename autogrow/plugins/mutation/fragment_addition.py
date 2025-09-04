@@ -41,6 +41,10 @@ from itertools import product
 class FragmentAddition(MutationBase):
     """Plugin that dds fragments to existing mols using reaction libraries."""
 
+    def on_init(self):
+        """Initialize the plugin."""
+        self.generated_smiles_by_addition = set()
+
     def add_arguments(self) -> List[ArgumentVars]:
         """
         Add command-line arguments required by the plugin.
@@ -97,6 +101,12 @@ class FragmentAddition(MutationBase):
                 type=int,
                 default=None,
                 help="Maximum number of mutants to keep from a single reaction batch. If unset, all are kept.",
+            ),
+            ArgumentVars(
+                name="fragment_addition_prevent_backtracking",
+                action="store_true",
+                default=False,
+                help="Prevent the generation of a molecule that has already been created by this plugin in the same run.",
             ),
         ]
 
@@ -428,7 +438,6 @@ class FragmentAddition(MutationBase):
 
         missing_smi_files = []
         complementary_mols_dict = {}
-        chemtoolkit = plugin_managers.ChemToolkit.toolkit
 
         for group in functional_groups:
             filepath = f"{complementary_mols_dir}{os.sep}{group}.smi.gz"
@@ -445,7 +454,7 @@ class FragmentAddition(MutationBase):
                     parts = line.strip().split()
                     if len(parts) < 3:
                         continue
-                    smiles, mol_id, mw = parts[0], f"CID-{parts[1]}", float(parts[2])
+                    smiles, mol_id, mw = parts[0], f"{parts[1]}", float(parts[2])
 
                     if perform_mw_filter:
                         passes_min = (min_mw is None) or (mw >= min_mw)
@@ -719,6 +728,11 @@ class FragmentAddition(MutationBase):
                         reaction_product, parent_info, self.plugin_managers
                     )
                     if reaction_product_smiles is not None:
+                        if self.params.get("fragment_addition_prevent_backtracking", False):
+                            if reaction_product_smiles in self.generated_smiles_by_addition:
+                                continue
+                            self.generated_smiles_by_addition.add(reaction_product_smiles)
+
                         reaction_id_number = a_reaction_dict["RXN_NUM"]
                         products.append(
                             (reaction_product_smiles, reaction_id_number, None)
@@ -1155,6 +1169,11 @@ class FragmentAddition(MutationBase):
                 reaction_product, parent_info, self.plugin_managers
             )
             if reaction_product_smiles is not None:
+                if self.params.get("fragment_addition_prevent_backtracking", False):
+                    if reaction_product_smiles in self.generated_smiles_by_addition:
+                        continue
+                    self.generated_smiles_by_addition.add(reaction_product_smiles)
+
                 reaction_id_number = a_reaction_dict["RXN_NUM"]
                 comp_mol_names = "+".join(comp_mol_ids)
                 products.append(

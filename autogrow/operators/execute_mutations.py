@@ -30,11 +30,10 @@ class MutationGenerator(CompoundGenerator):
         Prepare operation-specific parameters.
         
         Returns:
-            Dict[str, Any]: Dictionary containing the mutation plugin manager.
+            Dict[str, Any]: An empty dictionary, as parameters are now handled
+            within the worker process.
         """
-        mutation_plugin_manager = plugin_managers.Mutation
-        mutation_plugin_manager.setup_plugins()
-        return {"plugin_manager": mutation_plugin_manager}
+        return {}
 
     def prepare_job_inputs(
         self, compounds: List[Compound], num_to_process: int
@@ -47,12 +46,11 @@ class MutationGenerator(CompoundGenerator):
             num_to_process (int): Number of compounds to mutate.
 
         Returns:
-            List[Tuple]: List of tuples containing the compound to mutate and the
+            List[Tuple]: List of tuples containing the compound to mutate.
                 mutation plugin manager.
         """
         return [
-            (compounds[i % len(compounds)], self.operation_params["plugin_manager"])
-            for i in range(num_to_process)
+            (compounds[i % len(compounds)],) for i in range(num_to_process)
         ]
 
     def get_parallel_function(self) -> Callable:
@@ -109,7 +107,7 @@ class MutationGenerator(CompoundGenerator):
 
 
 def _run_mutation_for_multithread(
-    cmpd: Compound, mutation_obj: MutationPluginManager
+    cmpd: Compound
 ) -> Optional[List[Tuple[str, int, Union[str, None], List[Compound], str]]]:
     """
     Perform a single mutation operation on a Compound.
@@ -118,8 +116,7 @@ def _run_mutation_for_multithread(
     for parallel processing of mutations.
 
     Args:
-        smile (Compound): Compound of the molecule to mutate.
-        mutation_obj (MutationPluginManager): Mutation object to perform the mutation.
+        cmpd (Compound): Compound of the molecule to mutate.
 
     Returns:
         Optional[List[Tuple[str, int, Union[str, None], List[Compound], str]]]:
@@ -128,11 +125,14 @@ def _run_mutation_for_multithread(
         compound ID, or None if the mutation fails.
     Note:
         This function is a wrapper around the mutation object's run method,
-        making it suitable for use in multiprocessing contexts.
+        making it suitable for use in multiprocessing contexts. It retrieves the
+        mutation manager from the worker's plugin registry.
     """
     # print("cmpd", cmpd)
     # print("mutation_obj", mutation_obj)
     # print("===" * 20)
+    mutation_obj = plugin_managers.Mutation
+    mutation_obj.setup_plugins()
     resps = mutation_obj.run(cmpd=cmpd)
     if resps is None:
         return None

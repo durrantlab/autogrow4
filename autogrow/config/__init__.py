@@ -40,11 +40,8 @@ def setup_params(params: Dict[str, Any]) -> Dict[str, Any]:
 
     # Check if the user wants to continue a run or start a new run. Make new run
     # directory if necessary. return the Run folder path The run folder path
-    # will be where we place our generations and output files
-    if not os.path.exists(params["output_directory"]):
-        os.makedirs(params["output_directory"])
-        log_info(f"Making the output folder path: {params['output_directory']}")
-
+    # will be where we place our generations and output files NOTE: The output
+    # directory is already created within config_paths if it doesn't exist.
     return params
 
 

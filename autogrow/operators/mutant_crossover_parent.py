@@ -5,8 +5,7 @@ import random
 from typing import Callable, Dict, List, Any, Tuple, Set, Optional
 from autogrow.plugins.registry_base import plugin_managers
 from autogrow.types import Compound
-from autogrow.utils.logging import LogLevel, log_debug, log_warning
-
+from autogrow.utils.logging import LogLevel, log_debug, log_warning, get_log_tab_level, log_info
 
 @dataclass
 class CommonParallelResponse:
@@ -135,7 +134,7 @@ class CompoundGenerator(ABC):
 
             ids_already_generated = set()
             attempts_to_fill_queue = 0
-
+            duplicate_attempts = 0
             while len(new_cmpds) < self.num_compounds and attempts_to_fill_queue < 10:
                 attempts_to_fill_queue += 1
                 random.shuffle(cmpds_queue)
@@ -150,6 +149,8 @@ class CompoundGenerator(ABC):
                 params_for_worker = {
                     k: v for k, v in self.params.items() if k not in ["parallelizer", "chemtoolkit"]
                 }
+                # Add current logging level to pass to workers
+                params_for_worker['logging_level'] = get_log_tab_level()
                 # Run parallel operation
                 results = self.params["parallelizer"].run(
                     tuple(job_input_list), self.get_parallel_function(), params=params_for_worker
@@ -161,11 +162,15 @@ class CompoundGenerator(ABC):
                         if res is None:
                             continue
                         result = self.get_formatted_respose(res)
+                        # Generate a potential ID for logging and for the new compound.
+                        potential_new_lig_id = self.make_compound_id(result)
                         if result.child_smiles in smiles_already_generated:
+                            duplicate_attempts += 1
+                            log_debug(f"Discarding already created (duplicate) compound: {result.child_smiles} (potential id: {potential_new_lig_id})")
                             continue
-                        # Generate unique ID
-                        new_lig_id = ""
-                        while new_lig_id in ids_already_generated or not new_lig_id:
+                        # Generate unique ID, handling potential collisions within the batch.
+                        new_lig_id = potential_new_lig_id
+                        while new_lig_id in ids_already_generated:
                             new_lig_id = self.make_compound_id(result)
                         ids_already_generated.add(new_lig_id)
                         smiles_already_generated.add(result.child_smiles)
@@ -202,11 +207,17 @@ class CompoundGenerator(ABC):
                 if not cmpds_queue:
                     cmpds_queue = copy.deepcopy(self.cmpds)
                     random.shuffle(cmpds_queue)
+            
+            total_generated = len(new_cmpds) + duplicate_attempts
+            if total_generated > 0 and duplicate_attempts > 0:
+                log_info(
+                    f"Generated {total_generated} total compounds via {self.get_operation_name()}, "
+                    f"kept {len(new_cmpds)} unique molecules ({duplicate_attempts} duplicates discarded)."
+                )
 
             if len(new_cmpds) < self.num_compounds:
                 log_warning(
                     f"Only able to create {len(new_cmpds)} of {self.num_compounds} "
                     f"requested {self.get_operation_name()}s."
                 )
-
             return new_cmpds

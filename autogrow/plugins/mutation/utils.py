@@ -1,7 +1,7 @@
 """
 Utility functions for reaction-based mutation plugins.
 """
-import copy
+import contextlib
 import json
 import os
 from typing import Any, Dict, Optional
@@ -191,7 +191,8 @@ def validate_product(
         return None
 
     # Run through filters
-    tmp_predock_cmpd = Compound(smiles=product_smiles, id="tmp")
+    temp_id = f"id_{os.urandom(8).hex()}"
+    tmp_predock_cmpd = Compound(smiles=product_smiles, id=temp_id)
     passed_filter = (
         len(plugin_managers_obj.SmilesFilter.run(predock_cmpds=[tmp_predock_cmpd], parent_info=parent_info)) > 0
     )

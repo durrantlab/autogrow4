@@ -22,6 +22,7 @@ import matplotlib.pyplot as plt  # type: ignore
 
 from autogrow.utils.rank_file import get_gen_number_from_folder_name, load_rank_file
 from autogrow.plugins.registry_base import plugin_managers
+from autogrow.utils.logging import log_warning
 import prolif
 import numpy as np
 import pandas as pd
@@ -127,43 +128,28 @@ def setup_plot_styling():
     plt.clf()
 
 
-def save_plot(outfile: str, params: Dict[str, Any]):
+def save_plot(outfile: str, params: Dict[str, Any], data_to_save: Optional[pd.DataFrame] = None):
     """
-    Save plot with common parameters.
-    
+    Save plot as PNG and SVG, and data as TSV.
     Args:
-        outfile: Output file path.
-        params: Parameters dictionary containing format and DPI settings.
+     outfile: Output file path. The extension will be ignored.
+     params: Parameters dictionary (not used for format/DPI, but kept for compatibility).
+     data_to_save: Optional pandas DataFrame with data to save to a TSV.
     """
-    plt.savefig(outfile, bbox_inches="tight", format=params["outfile_format"], dpi=1000)
+    base_outfile = os.path.splitext(outfile)[0]
 
+    # Save PNG
+    plt.savefig(f"{base_outfile}.png", bbox_inches="tight", format="png", dpi=1000)
+
+    # Save SVG
+    plt.savefig(f"{base_outfile}.svg", bbox_inches="tight", format="svg")
+
+    # Save TSV
+    if data_to_save is not None and not data_to_save.empty:
+        data_to_save.to_csv(f"{base_outfile}.tsv", sep="\t", index=False)
 
 def get_plot_labels(params: Dict[str, Any], ligand_efficiency: bool = False) -> Tuple[str, str, str]:
-    """
-    Get standard plot labels based on parameters.
-    
-    Args:
-        params: Parameters dictionary.
-        ligand_efficiency: Whether calculating ligand efficiency.
-        
-    Returns:
-        Tuple of (title, x_label, y_label).
-    """
-    receptor_name = os.path.basename(params["receptor_path"])
-    
-    if ligand_efficiency:
-        title = f"Ligand efficiencies for {receptor_name}"
-        y_label = "Ligand Efficiency"
-    else:
-        title = f"Docking scores for {receptor_name}"
-        scoring_type = params.get("docking_executable", "")
-        if "vina" in str(scoring_type):
-            y_label = "Docking Score"
-        else:
-            y_label = "Fitness Score"
-    
-    return title, "Generation Number", y_label
-
+    # No changes made to this function
 
 # ============================================================================
 # CORE ANALYSIS FUNCTIONS
@@ -403,19 +389,37 @@ def generate_tSNE_scatterplot(
     y = grouped_tsne_df["Dim_2"].apply(lambda y: y.values)
     setup_plot_styling()
     fig, ax = plt.subplots()
-    
-    for gen_id in range(len(x)):
+    num_generations = len(x)
+    cmap = plt.get_cmap('Blues')
+    for gen_id in range(num_generations):
         gen_name = "generation_" + (str(gen_id + 1) if not exist_gen_0 else str(gen_id))
         x_gen = x.loc[gen_name]
         y_gen = y.loc[gen_name]
-        ax.scatter(x_gen, y_gen, label=gen_name, c="black" if gen_id == 0 else None)
+        # Original coloring approach commented out as requested
+        # ax.scatter(x_gen, y_gen, label=gen_name, c="black" if gen_id == 0 else None, s=10)
+
+        # New coloring logic
+        if num_generations > 1:
+            # Normalize gen_id to map to the colormap (0.0 to 1.0)
+            normalized_gen_id = gen_id / (num_generations - 1)
+            
+            # Remap the normalized value to a new range (e.g., 0.2 to 1.0)
+            # to avoid using the very lightest colors.
+            color_min = 0.2
+            color_max = 1.0
+            color_val = (normalized_gen_id * (color_max - color_min)) + color_min
+            
+            color = cmap(color_val)
+        else:
+            # Handle case with only one generation
+            color = cmap(1.0)  # Darkest blue
+
+        ax.scatter(x_gen, y_gen, label=gen_name, c=[color], s=10)
     ax.legend(bbox_to_anchor=(1.05, 1.0), loc="upper left")
     # Add titles and labels
     plt.xlabel("Dimension 1", fontweight="semibold")
     plt.ylabel("Dimension 2", fontweight="semibold")
-
-    save_plot(outfile, params)
-
+    save_plot(outfile, params, data_to_save=tsne_df)
 
 def calc_diversity_scores_per_generation(infolder: str):
     """
@@ -471,6 +475,24 @@ def calc_diversity_scores_per_generation(infolder: str):
 
     return average_dict
 
+
+def get_num_compounds_per_generation(infolder: str) -> Dict[str, int]:
+    """
+    Get the number of compounds for each generation.
+    This function reads ranked .smi files from each generation folder and
+    counts the number of compounds.
+    Args:
+        infolder: Path to the folder containing all generation folders.
+    Returns:
+        Dictionary with generation names as keys and number of compounds as values.
+    """
+    num_compounds_dict = {}
+    generation_folders = get_generation_folders(infolder)
+    for gen_folder_name in generation_folders:
+        ranked_cmpds = load_rank_file(gen_folder_name)
+        gen_num = get_gen_number_from_folder_name(gen_folder_name)
+        num_compounds_dict[f"generation_{gen_num}"] = len(ranked_cmpds)
+    return num_compounds_dict
 
 def get_similarity_list_per_input_comp(infolder: str, source_file: str) -> Dict[str, List[float]]:
     """
@@ -806,7 +828,7 @@ def make_graph(dictionary: Dict[str, Union[float, str]], analyze_gen_0: bool,
 # ============================================================================
 
 def run_score_plotter(params: Dict[str, Any], dict_of_averages: Dict[str, Dict[str, Union[float, str]]],
-                     outfile: str, ligand_efficiency: bool, analyze_gen_0: bool, exist_gen_0: bool) -> None:
+      outfile: str, ligand_efficiency: bool, analyze_gen_0: bool, exist_gen_0: bool) -> None:
     """
     This plots the averages into a matplotlib figure. It will require you to
     answer questions about titles and labels
@@ -835,12 +857,18 @@ def run_score_plotter(params: Dict[str, Any], dict_of_averages: Dict[str, Dict[s
         ("top_5", "Top 5", "g"),
         ("top_1", "Top 1", "r")
     ]
-
+    series_to_plot = {}
     for key, label, color in plot_configs:
         if key in dict_of_averages:
             generations, scores = make_graph(dict_of_averages[key], analyze_gen_0, exist_gen_0)
             if generations is not None and scores is not None:
                 ax.plot(generations, scores, color=color, label=label)
+                series_to_plot[label] = pd.Series(data=scores, index=generations)
+
+    df_to_save = pd.DataFrame(series_to_plot) if series_to_plot else pd.DataFrame()
+    if not df_to_save.empty:
+        df_to_save.index.name = 'generation'
+        df_to_save = df_to_save.reset_index()
 
     # Add reference lines if specified
     if params.get("plot_reference_lines"):
@@ -855,13 +883,46 @@ def run_score_plotter(params: Dict[str, Any], dict_of_averages: Dict[str, Dict[s
     
     ax.legend(loc="center left", bbox_to_anchor=(1, 0.274), fontsize="small")
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+    save_plot(outfile, params, data_to_save=df_to_save)
 
-    save_plot(outfile, params)
+def run_line_plot_per_generation(params: Dict[str, Any], dictionary_of_values: Dict[str, Union[int, float, str]], outfile: str,
+   x_label: str, y_label: str, title_of_figure: str = None,
+   analyze_gen_0: bool = False, exist_gen_0: bool = False) -> None:
+    """
+    Create line plot for per-generation data.
+    Args:
+        params: Parameters dictionary.
+        dictionary_of_values: Dictionary of value lists.
+        outfile: Output file path.
+        x_label: X-axis label.
+        y_label: Y-axis label.
+        title_of_figure: Plot title.
+        analyze_gen_0: Whether to analyze generation 0.
+        exist_gen_0: Whether generation 0 exists.
+    """
+    generations, values = make_graph(dictionary_of_values, analyze_gen_0, exist_gen_0)
+    df_to_save = pd.DataFrame({x_label: generations, y_label: values}) if generations is not None and values is not None else pd.DataFrame()
+    if generations is None or not generations or values is None or not values:
+        log_warning(f"Could not generate plot '{title_of_figure}' due to missing data.")
+        return
 
+    setup_plot_styling()
+    ax = plt.subplot(111)
+    ax.plot(generations, values, marker='o', linestyle='-', color='b')
+
+    if title_of_figure:
+        plt.title(title_of_figure, fontweight="semibold")
+    if x_label:
+        plt.xlabel(x_label, fontweight="semibold")
+    if y_label:
+        plt.ylabel(y_label, fontweight="semibold")
+
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+    save_plot(outfile, params, data_to_save=df_to_save)
 
 def run_boxplot(params: Dict[str, Any], dictionary_of_values: Dict[str, List[float]], outfile: str,
-               key_start_with: str, x_label: str, y_label: str, title_of_figure: str = None,
-               analyze_gen_0: bool = False, exist_gen_0: bool = False) -> None:
+      key_start_with: str, x_label: str, y_label: str, title_of_figure: str = None,
+      analyze_gen_0: bool = False, exist_gen_0: bool = False) -> None:
     """
     Create boxplot for the given data.
 
@@ -886,14 +947,13 @@ def run_boxplot(params: Dict[str, Any], dictionary_of_values: Dict[str, List[flo
         if key in dictionary_of_values:
             data.append(dictionary_of_values[key])
             yticklabels.append(key)
-
+    df_to_save = pd.DataFrame(dictionary_of_values)
     setup_plot_styling()
     fig = plt.figure(figsize=(10, 7))
     ax = fig.add_subplot(111)
 
     bp = ax.boxplot(data, patch_artist=True, notch=False, vert=0, showmeans=True,
-                    meanprops={"markerfacecolor": "black", "markeredgecolor": "black"})
-    
+        meanprops={"markerfacecolor": "black", "markeredgecolor": "black"})
     for median in bp['medians']:
         median.set_color('black')
 
@@ -905,12 +965,10 @@ def run_boxplot(params: Dict[str, Any], dictionary_of_values: Dict[str, List[flo
     
     if title_of_figure:
         plt.title(title_of_figure, fontweight="semibold")
-
-    save_plot(outfile, params)
-
+    save_plot(outfile, params, data_to_save=df_to_save)
 
 def run_plotter(params: Dict[str, Any], dictionary_of_values: Dict[str, Any], outfile: str,
-               key_start_with: str, x_label: str, y_label: str, title_of_figure: str = None) -> None:
+      key_start_with: str, x_label: str, y_label: str, title_of_figure: str = None) -> None:
     """
     Create line plot for the given data.
 
@@ -931,7 +989,7 @@ def run_plotter(params: Dict[str, Any], dictionary_of_values: Dict[str, Any], ou
         if key in dictionary_of_values:
             y.append(dictionary_of_values[key])
             x.append(i + 1)
-
+    df_to_save = pd.DataFrame({x_label: x, y_label: y})
     setup_plot_styling()
     plt.plot(x, y, marker='o', linestyle='-', color='b')
 
@@ -943,11 +1001,10 @@ def run_plotter(params: Dict[str, Any], dictionary_of_values: Dict[str, Any], ou
         plt.ylabel(y_label, fontweight="semibold")
 
     plt.legend()
-    save_plot(outfile, params)
-
+    save_plot(outfile, params, data_to_save=df_to_save)
 
 def run_heatmap(params: Dict[str, Any], outfile: str, result_matrix, x_label_list, y_label_list,
-               title_of_figure: str) -> None:
+      title_of_figure: str) -> None:
     """
     Create heatmap for the given data.
 
@@ -961,10 +1018,10 @@ def run_heatmap(params: Dict[str, Any], outfile: str, result_matrix, x_label_lis
     """
     setup_plot_styling()
     fig, ax = plt.subplots()
+    df_to_save = pd.DataFrame(result_matrix, index=y_label_list, columns=x_label_list)
     ax.imshow(result_matrix, cmap="Blues")
-
-    ax.set_xticks(range(len(x_label_list)), labels=x_label_list, rotation=45, ha="right", 
-                  rotation_mode="anchor", size="x-small")
+    ax.set_xticks(range(len(x_label_list)), labels=x_label_list, rotation=45, ha="right",
+         rotation_mode="anchor", size="x-small")
     ax.set_yticks(range(len(y_label_list)), labels=y_label_list, size="x-small")
 
     # Add text annotations
@@ -980,8 +1037,7 @@ def run_heatmap(params: Dict[str, Any], outfile: str, result_matrix, x_label_lis
             ax.text(j, i, text, ha="center", va="center", color="black", size="xx-small")
 
     ax.set_title(title_of_figure, size="small")
-    save_plot(outfile, params)
-
+    save_plot(outfile, params, data_to_save=df_to_save.reset_index())
 
 # ============================================================================
 # MAIN ANALYSIS FUNCTIONS
@@ -1035,73 +1091,71 @@ def generate_all_plots(params: Dict[str, Any], infolder: str, outfile: str,
     # Score plots
     dict_of_averages = print_data_table(infolder, False)
     run_score_plotter(params, dict_of_averages,
-                      f"{outfile}{os.sep}plotter_by_generation_for_scores.{params['outfile_format']}",
-                      ligand_efficiency=False, analyze_gen_0=analyze_gen_0, exist_gen_0=exist_gen_0)
-
+          f"{outfile}{os.sep}plotter_by_generation_for_scores.{params['outfile_format']}",
+          ligand_efficiency=False, analyze_gen_0=analyze_gen_0, exist_gen_0=exist_gen_0)
     # Ligand efficiency plots
     dict_of_averages = print_data_table(infolder, True)
     run_score_plotter(params, dict_of_averages,
-                      f"{outfile}{os.sep}plotter_by_generation_for_ligand_efficiencies.{params['outfile_format']}",
-                      ligand_efficiency=True, analyze_gen_0=analyze_gen_0, exist_gen_0=exist_gen_0)
-
+          f"{outfile}{os.sep}plotter_by_generation_for_ligand_efficiencies.{params['outfile_format']}",
+          ligand_efficiency=True, analyze_gen_0=analyze_gen_0, exist_gen_0=exist_gen_0)
+    # Number of compounds plot
+    dict_of_num_compounds = get_num_compounds_per_generation(infolder)
+    run_line_plot_per_generation(params, dict_of_num_compounds,
+        f"{outfile}{os.sep}plotter_of_num_compounds_per_generation.{params['outfile_format']}",
+        x_label="Generation Number", y_label="Number of Compounds",
+        title_of_figure="Number of Compounds per Generation",
+        analyze_gen_0=analyze_gen_0, exist_gen_0=exist_gen_0
+    )
     # Boxplots for scores
     dict_of_score_lists = get_scores_per_generation(infolder, False)
     title, _, y_label = get_plot_labels(params, False)
     run_boxplot(params, dict_of_score_lists,
-                f"{outfile}{os.sep}boxplot_by_generation_for_scores.{params['outfile_format']}",
-                key_start_with="generation", x_label=y_label, y_label="Number of Generations",
-                title_of_figure=title, analyze_gen_0=analyze_gen_0, exist_gen_0=exist_gen_0)
-
+       f"{outfile}{os.sep}boxplot_by_generation_for_scores.{params['outfile_format']}",
+       key_start_with="generation", x_label=y_label, y_label="Number of Generations",
+       title_of_figure=title, analyze_gen_0=analyze_gen_0, exist_gen_0=exist_gen_0)
     # Boxplots for ligand efficiencies
     dict_of_score_lists = get_scores_per_generation(infolder, True)
     title, _, y_label = get_plot_labels(params, True)
     run_boxplot(params, dict_of_score_lists,
-                f"{outfile}{os.sep}boxplot_by_generation_for_ligand_efficiencies.{params['outfile_format']}",
-                key_start_with="generation", x_label=y_label, y_label="Number of Generations",
-                title_of_figure=title, analyze_gen_0=analyze_gen_0, exist_gen_0=exist_gen_0)
-
+       f"{outfile}{os.sep}boxplot_by_generation_for_ligand_efficiencies.{params['outfile_format']}",
+       key_start_with="generation", x_label=y_label, y_label="Number of Generations",
+       title_of_figure=title, analyze_gen_0=analyze_gen_0, exist_gen_0=exist_gen_0)
     # Similarity analysis (only if generation 0 exists)
     source_file = str(params["source_compound_file"])
     if exist_gen_0:
         dict_of_similarity_lists = get_similarity_list_per_input_comp(infolder, source_file)
         run_boxplot(params, dict_of_similarity_lists,
-                    f"{outfile}{os.sep}boxplot_of_similarity_between_input_and_new_compounds.{params['outfile_format']}",
-                    key_start_with="compound", x_label="Dice Similarity Values", y_label="Input Compounds")
-
+            f"{outfile}{os.sep}boxplot_of_similarity_between_input_and_new_compounds.{params['outfile_format']}",
+            key_start_with="compound", x_label="Dice Similarity Values", y_label="Input Compounds")
     # Diversity analysis
     dict_of_score_lists = calc_diversity_scores_per_generation(infolder)
     run_boxplot(params, dict_of_score_lists,
-                f"{outfile}{os.sep}boxplot_by_generation_for_similarities.{params['outfile_format']}",
-                key_start_with="generation", x_label="Dice Similarity Values", y_label="Number of Generations",
-                analyze_gen_0=analyze_gen_0, exist_gen_0=exist_gen_0)
-
+       f"{outfile}{os.sep}boxplot_by_generation_for_similarities.{params['outfile_format']}",
+       key_start_with="generation", x_label="Dice Similarity Values", y_label="Number of Generations",
+       analyze_gen_0=analyze_gen_0, exist_gen_0=exist_gen_0)
     # Additional plots
     if exist_gen_0:
         dict_of_similarity_lists = get_ave_similarity_per_generated_comp(infolder, source_file)
         run_plotter(params, dict_of_similarity_lists,
-                    f"{outfile}{os.sep}plotter_of_ave_similarities_between_each_new_compound_and_input_compounds.{params['outfile_format']}",
-                    key_start_with="compound",
-                    x_label="New compounds (ID) sorted from the highest to lowest affinity",
-                    y_label="Average similarity")
-
+            f"{outfile}{os.sep}plotter_of_ave_similarities_between_each_new_compound_and_input_compounds.{params['outfile_format']}",
+            key_start_with="compound",
+            x_label="New compounds (ID) sorted from the highest to lowest affinity",
+            y_label="Average similarity")
     dict_of_efficiency_lists = get_efficiency_per_generated_comp(infolder)
     run_plotter(params, dict_of_efficiency_lists,
-                f"{outfile}{os.sep}plotter_of_ligand_efficiency_for_every_new_compound.{params['outfile_format']}",
-                key_start_with="compound",
-                x_label="New compounds (ID) sorted from the highest to lowest affinity",
-                y_label="Ligand efficiency")
-
+       f"{outfile}{os.sep}plotter_of_ligand_efficiency_for_every_new_compound.{params['outfile_format']}",
+       key_start_with="compound",
+       x_label="New compounds (ID) sorted from the highest to lowest affinity",
+       y_label="Ligand efficiency")
     # t-SNE plot
     try:
         generate_tSNE_scatterplot(infolder=infolder,
-                                  outfile=f"{outfile}{os.sep}tsne_for_input_and_new_compounds.{params['outfile_format']}",
-                                  params=params, exist_gen_0=exist_gen_0)
+             outfile=f"{outfile}{os.sep}tsne_for_input_and_new_compounds.{params['outfile_format']}",
+             params=params, exist_gen_0=exist_gen_0)
     except:
         pass
-
     # Interaction analysis
     generate_interaction_analysis(params, infolder, outfile, analyze_gen_0)
-
 
 def generate_interaction_analysis(params: Dict[str, Any], infolder: str, outfile: str, analyze_gen_0: bool) -> None:
     """

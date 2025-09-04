@@ -14,7 +14,8 @@ import sys
 from typing import Any, Dict, Optional
 from autogrow.accessory_scripts.plot_autogrow_run import main as plot_autogrow_run
 from autogrow import program_info
-from autogrow.config.argparser import get_user_params
+from autogrow.config.argparser import get_user_params, filter_inactive_plugin_params
+from autogrow.config.json_config_utils import save_vars_as_json
 import autogrow.docking.execute_docking as DockingClass
 import autogrow.docking.ranking.ranking_mol as Ranking
 from autogrow.operators.populate_generation import populate_generation
@@ -22,7 +23,6 @@ from autogrow.summary import generate_summary_html, generate_summary_txt
 from autogrow.utils.logging import LogLevel, create_logger, log_info, log_warning
 from autogrow.plugins.registry_base import plugin_managers
 from autogrow.operators.populate_generation import _get_source_compounds_or_raise
-
 
 def dock_input_compounds(params: Optional[Dict[str, Any]]) -> None:
     cur_gen_dir = f"{params['output_directory']}generation_{0}_input_compounds{os.sep}"
@@ -62,18 +62,22 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
             or other constraints.
     """
     start_time = str(datetime.datetime.now())
-
     multiprocessing.freeze_support()
-
-    create_logger(logging.DEBUG)
-
+    
     if params is None:
         params = get_user_params()
-
+    
+    # Create logger AFTER params are loaded and output_directory is known and created.
+    log_file_path = os.path.join(params["output_directory"], "log.txt")
+    create_logger(logging.DEBUG, file_path=log_file_path)
+    
     # Setup all plugin managers
     plugin_managers.setup_plugin_managers(params)
-    managers_dict = plugin_managers.get_managers_dict()
 
+    params = filter_inactive_plugin_params(params)
+
+    # Now that defaults are set, save vars.json
+    save_vars_as_json(params)
     # Now toolkit should be initialized
     chemtoolkit = plugin_managers.ChemToolkit
     if chemtoolkit is None or chemtoolkit.toolkit is None:
@@ -130,32 +134,28 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
 
         log_info(f"Creating generation {gen_num}")
         with LogLevel():
-            for manager in managers_dict.values():
-                manager.create_log_file(params, gen_num)
-
             populate_generation(
                 params, gen_num, cur_gen_dir, smiles_already_generated
             )
-
+        
             log_info("Writing partial summary files")
             with LogLevel():
                 html_summary = generate_summary_html(params["output_directory"])
                 summary_tsv, summary_sdf = generate_summary_txt(params["output_directory"])
-
-            log_info(f"Generating graphics to interpret results until generation {gen_num}.")
-            graphic_output_dir = f"{params['output_directory']}graphics{os.sep}generation_{gen_num}{os.sep}"
-            os.makedirs(graphic_output_dir, exist_ok=True)
+            
+            log_info(f"Generating analysis plots to interpret results until generation {gen_num}.")
+            analysis_output_dir = f"{params['output_directory']}analysis{os.sep}generation_{gen_num}{os.sep}"
+            os.makedirs(analysis_output_dir, exist_ok=True)
             plot_args = {
                 "infolder": params["output_directory"],
-                "outfile": graphic_output_dir,
+                "outfile": analysis_output_dir,
                 "outfile_format": "png",
             }
             plot_autogrow_run(**plot_args)
-            os.rename(html_summary, f"{graphic_output_dir}{os.sep}summary.html")
-            os.rename(summary_tsv, f"{graphic_output_dir}{os.sep}summary_tsv.tsv")
-            os.rename(summary_sdf, f"{graphic_output_dir}{os.sep}summary_sdf.sdf")
-
-        sys.stdout.flush()
+            os.rename(html_summary, f"{analysis_output_dir}{os.sep}summary.html")
+            os.rename(summary_tsv, f"{analysis_output_dir}{os.sep}summary_tsv.tsv")
+            os.rename(summary_sdf, f"{analysis_output_dir}{os.sep}summary_sdf.sdf")
+            sys.stdout.flush()
 
     log_info("Writing summary files")
     with LogLevel():
@@ -166,19 +166,17 @@ def main(params: Optional[Dict[str, Any]] = None) -> None:
     with LogLevel():
         log_info(f"AutoGrow5 run started at:   {start_time}")
         log_info(f"AutoGrow5 run completed at: {str(datetime.datetime.now())}")
-
-    # Generate the final graphics only when the 'process_input_compounds' parameter is True.
-    # Otherwise, the final graphics coincide with the graphics of the last generation in the 'graphics' directory.
+    # Generate the final analysis plots only when the 'process_input_compounds' parameter is True.
+    # Otherwise, the final analysis plots coincide with the analysis plots of the last generation in the 'analysis' directory.
     if bool(params["process_input_compounds"]):
         log_info("Docking input compounds for further analysis")
         dock_input_compounds(params)
-
-        log_info("Generating graphics to interpret results.")
-        graphic_output_dir = f"{params['output_directory']}graphics{os.sep}"
-        os.makedirs(graphic_output_dir, exist_ok=True)
+        log_info("Generating analysis plots to interpret results.")
+        analysis_output_dir = f"{params['output_directory']}analysis{os.sep}"
+        os.makedirs(analysis_output_dir, exist_ok=True)
         plot_args = {
             "infolder": params["output_directory"],
-            "outfile": graphic_output_dir,
+            "outfile": analysis_output_dir,
             "outfile_format": "png",
             "process_input_compounds": "True"
         }

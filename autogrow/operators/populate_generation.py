@@ -1,7 +1,7 @@
 """
 Populates an AutoGrow generation via mutation, crossover, and elitism.
 
-This module handles the creation of a new generation of compounds in the 
+This module handles the creation of a new generation of compounds in the
 AutoGrow evolutionary algorithm. It includes functions for generating mutations
 and crossovers, selecting elite compounds, and managing the overall population
 generation process. It also handles filtering and conversion of SMILES to 3D SDFs.
@@ -58,7 +58,11 @@ def populate_generation(
     # params dict than as a separate argument to plugin.run() methods.
     params["cur_gen_dir"] = cur_gen_dir
     params["generation_num"] = generation_num
-
+    # Re-setup all plugin managers to ensure they have the latest params for this generation.
+    plugin_managers.setup_plugin_managers(params)
+    managers_dict = plugin_managers.get_managers_dict()
+    for manager in managers_dict.values():
+        manager.create_log_file(params, generation_num)
     # Get the number of crossovers, mutations, and elite compounds to generate
     num_crossovers, num_mutations, num_elite_prev_gen = _get_subpop_sizes(
         generation_num, params
@@ -257,7 +261,7 @@ def _make_mutations(cur_gen_dir: str, params: Dict[str, Any], generation_num: in
                     log_warning("No mutations made, per user settings")
                     mut_predock_cmpds: List[Compound] = []
                 cache.data = mut_predock_cmpds
-        log_info(f"Created {len(mut_predock_cmpds)} mutant compounds")
+        log_info(f"Selected {len(mut_predock_cmpds)} mutant compounds")
     return mut_predock_cmpds
 
 
@@ -311,7 +315,7 @@ def _make_crossovers(
                     cross_predock_cmpds: List[Compound] = []
                 cache.data = cross_predock_cmpds
 
-        log_info(f"Created {len(cross_predock_cmpds)} crossover compounds")
+        log_info(f"Selected {len(cross_predock_cmpds)} crossover compounds")
     return cross_predock_cmpds
 
 

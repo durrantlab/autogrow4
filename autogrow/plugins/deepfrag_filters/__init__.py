@@ -2,7 +2,7 @@
 Defines the base class for managing the execution of DeepFrag plugins.
 """
 
-from typing import List, cast, Type
+from typing import List, cast, Type, Optional
 from autogrow.plugins.plugin_manager_base import PluginManagerBase
 from autogrow.types import Compound
 from autogrow.plugins.deepfrag_filters.deepfrag_filter import DeepFragFilterBase
@@ -15,6 +15,10 @@ class DeepFragFilterManager(PluginManagerBase):
 
     This class is responsible for selecting and executing DeepFrag plugins.
     """
+    @property
+    def default_plugin(self) -> Optional[str]:
+        """Return the name of the default plugin for this manager."""
+        return None
 
     def __init__(self, plugin_base_class: Type[PluginBase]):
         self.setup_filter_logger_file = True

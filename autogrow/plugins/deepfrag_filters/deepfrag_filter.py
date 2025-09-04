@@ -58,7 +58,8 @@ class DeepFragFilter(DeepFragFilterBase):
     def validate(self, params: dict):
         """Validate the provided arguments."""
         super().validate(params)
-        self.cpu = bool(params["deepfrag_on_cpu"]) or not torch.cuda.is_available()
+        # Always runs deepfrag on CPU. It's fast enough, not worth the GPU hassle.
+        self.cpu = True
         if "deepfrag_model" not in params:
             raise Exception("The path of a DeepFrag model should be given as input using"
                 " the '--deepfrag_model' parameter.")
@@ -151,6 +152,15 @@ class DeepFragFilter(DeepFragFilterBase):
         return result
 
     def add_arguments(self) -> List[ArgumentVars]:
+        """
+        Add command-line arguments required by the plugin. This method defines
+        the command-line arguments specific to the DeepFrag filter. It allows
+        users to enable the filter via command-line options.
+
+        Returns:
+            List[ArgumentVars]: A list of ArgumentVars objects defining the
+            command-line arguments.
+        """
         parent_args = super().add_arguments()
         child_args = [
             ArgumentVars(
@@ -158,12 +168,6 @@ class DeepFragFilter(DeepFragFilterBase):
                 type=str,
                 default=None,
                 help=f"Path to a DeepFrag model checkpoint (.ckpt) file, or the name of a built-in model (i.e., {', '.join(self.url_by_in_house_model.keys())}).",
-            ),
-            ArgumentVars(
-                name="deepfrag_on_cpu",
-                action="store_true",
-                default=False,
-                help="Force DeepFrag to run on the CPU, even if a GPU is available.",
             ),
         ]
         return parent_args + child_args

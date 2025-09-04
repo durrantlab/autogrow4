@@ -343,6 +343,7 @@ class ChemToolkitBase(PluginBase):
         mols_per_row: int,
         sub_img_size: Tuple[int, int],
         highlight_atom_lists: Optional[List[List[int]]] = None,
+        legends: Optional[List[str]] = None,
     ) -> Any:
         """Create a grid image of molecules."""
         pass
@@ -503,6 +504,10 @@ class ChemToolkitBase(PluginBase):
         pass
 class ChemToolkitPluginManager(PluginManagerBase):
     """Plugin manager for chemistry toolkits."""
+    @property
+    def default_plugin(self) -> Optional[str]:
+        """Return the name of the default plugin for this manager."""
+        return "RDKitToolkit"
 
     def __init__(self, plugin_base_class: Type[PluginBase]):
         """
