@@ -149,7 +149,30 @@ def save_plot(outfile: str, params: Dict[str, Any], data_to_save: Optional[pd.Da
         data_to_save.to_csv(f"{base_outfile}.tsv", sep="\t", index=False)
 
 def get_plot_labels(params: Dict[str, Any], ligand_efficiency: bool = False) -> Tuple[str, str, str]:
-    # No changes made to this function
+    """
+    Get standard plot labels based on parameters.
+    
+    Args:
+        params: Parameters dictionary.
+        ligand_efficiency: Whether calculating ligand efficiency.
+        
+    Returns:
+        Tuple of (title, x_label, y_label).
+    """
+    receptor_name = os.path.basename(params["receptor_path"])
+    
+    if ligand_efficiency:
+        title = f"Ligand efficiencies for {receptor_name}"
+        y_label = "Ligand Efficiency"
+    else:
+        title = f"Docking scores for {receptor_name}"
+        scoring_type = params.get("docking_executable", "")
+        if "vina" in str(scoring_type):
+            y_label = "Docking Score"
+        else:
+            y_label = "Fitness Score"
+    
+    return title, "Generation Number", y_label
 
 # ============================================================================
 # CORE ANALYSIS FUNCTIONS
