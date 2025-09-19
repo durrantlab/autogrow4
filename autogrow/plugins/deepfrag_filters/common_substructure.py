@@ -219,7 +219,7 @@ def _find_single_fragment_mcs(mol1: Any, mol2: Any) -> Optional[str]:
         for idx in sorted(list(problem_mcs_indices), reverse=True):
             chemtoolkit.remove_atom_from_editable_mol(emol, idx)
         pruned_mcs_mol_base = chemtoolkit.get_noneditable_mol(emol)
-        sub_frags = chemtoolkit.get_mol_frags(pruned_mcs_mol_base, as_mols=True)
+        sub_frags = chemtoolkit.get_mol_frags(pruned_mcs_mol_base, as_mols=True, sanitize_frags=False)
         if sub_frags:
             largest_sub_frag = max(sub_frags, key=lambda m: chemtoolkit.get_num_atoms(m))
             try:
@@ -259,7 +259,7 @@ def _find_single_fragment_mcs(mol1: Any, mol2: Any) -> Optional[str]:
                 emol = chemtoolkit.get_editable_mol(current_mcs_mol)
                 chemtoolkit.remove_atom_from_editable_mol(emol, chemtoolkit.get_idx(atom))
                 # Removing an atom can disconnect the MCS itself. We take the largest resulting piece.
-                sub_frags = chemtoolkit.get_mol_frags(chemtoolkit.get_noneditable_mol(emol), as_mols=True)
+                sub_frags = chemtoolkit.get_mol_frags(chemtoolkit.get_noneditable_mol(emol), as_mols=True, sanitize_frags=False)
                 if not sub_frags:
                     continue
                 largest_sub_frag = max(sub_frags, key=lambda m: chemtoolkit.get_num_atoms(m))
@@ -675,7 +675,7 @@ if __name__ == "__main__":
     assert mcs_smarts == "[#6]1-[#6]-[#6]-[#6]-[#6]-[#6]-1"
 
     # Try a case that will take a long time to find a valid MCS
-    print("\n\nHI\n\n")
+    # print("\n\nHI\n\n")
     parent_child_smiles = ("CC(=O)N(CC(C)F)C(=O)NC(C)C(=O)Oc1n[nH]c(=O)c2ccccc12", "CC(=O)N(CC(C)OC(=O)NC(=S)NCC(=O)OCCC=CO)C(=O)NC(C)C(=O)Oc1n[nH]c(=O)c2ccccc12")
     mcs_mol, frag_mol, frag_info_dict, mcs_smarts, con_pts_dict = test_find_mcs_and_fragments(parent_child_smiles)
 

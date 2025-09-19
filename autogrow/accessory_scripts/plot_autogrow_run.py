@@ -944,8 +944,8 @@ def run_line_plot_per_generation(params: Dict[str, Any], dictionary_of_values: D
     save_plot(outfile, params, data_to_save=df_to_save)
 
 def run_boxplot(params: Dict[str, Any], dictionary_of_values: Dict[str, List[float]], outfile: str,
-      key_start_with: str, x_label: str, y_label: str, title_of_figure: str = None,
-      analyze_gen_0: bool = False, exist_gen_0: bool = False) -> None:
+   key_start_with: str, x_label: str, y_label: str, title_of_figure: str = None,
+   analyze_gen_0: bool = False, exist_gen_0: bool = False) -> None:
     """
     Create boxplot for the given data.
 
@@ -966,11 +966,11 @@ def run_boxplot(params: Dict[str, Any], dictionary_of_values: Dict[str, List[flo
     num_generations = len(dictionary_of_values) - (1 if exist_gen_0 and not analyze_gen_0 else 0)
     
     for i in range(num_generations):
-        key = f"{key_start_with}_{i + 1 if not analyze_gen_0 else i}"
-        if key in dictionary_of_values:
-            data.append(dictionary_of_values[key])
-            yticklabels.append(key)
-    df_to_save = pd.DataFrame(dictionary_of_values)
+       key = f"{key_start_with}_{i + 1 if not analyze_gen_0 else i}"
+       if key in dictionary_of_values:
+           data.append(dictionary_of_values[key])
+           yticklabels.append(key)
+    df_to_save = pd.DataFrame.from_dict(dictionary_of_values, orient='index').transpose()
     setup_plot_styling()
     fig = plt.figure(figsize=(10, 7))
     ax = fig.add_subplot(111)
@@ -979,7 +979,6 @@ def run_boxplot(params: Dict[str, Any], dictionary_of_values: Dict[str, List[flo
         meanprops={"markerfacecolor": "black", "markeredgecolor": "black"})
     for median in bp['medians']:
         median.set_color('black')
-
     # Setting x-axis labels
 
     plt.xlabel(x_label, fontweight="semibold")
