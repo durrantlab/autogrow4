@@ -12,6 +12,7 @@ if __name__ != "__main__":
     from autogrow.plugins.registry_base import plugin_managers
     from autogrow.utils.logging import log_info, log_warning
 
+
 def _find_bridge_atoms(mol: Any) -> List[int]:
     """Identifies bridge atoms in a molecule.
 
@@ -92,56 +93,54 @@ def _get_atoms_sorted_by_connectivity(mol: Any) -> List[Any]:
 
 def _is_valid_mcs(parent: Any, child: Any, mcs_mol: Any) -> bool:
     """
-    Checks if an MCS candidate is valid by our two main rules:
-    1. It must not fragment the parent or child molecule.
-    2. It must not create a fragment connected by a bond that has
-       inappropriately changed order (e.g., single to double).
+    Checks if an MCS candidate is valid for DeepFrag analysis.
+
+    An MCS is considered valid if it meets two criteria:
+    1.  It must not fragment the child molecule into multiple pieces when removed. This
+        ensures we are identifying a single, continuous fragment.
+    2.  In the child molecule, all bonds connecting the MCS to the resulting fragment
+        must be single bonds. This is because DeepFrag was trained on fragments
+        connected via single bonds.
+
+    Args:
+        parent (Any): The parent RDKit molecule (used for context but not for
+            fragmentation check).
+        child (Any): The child RDKit molecule.
+        mcs_mol (Any): The MCS candidate molecule.
+
+    Returns:
+        bool: True if the MCS is valid, False otherwise.
     """
     chemtoolkit = plugin_managers.ChemToolkit.toolkit
 
-    # Rule 1: Check for fragmentation
-    if len(_get_fragments_for_mol(parent, mcs_mol)) > 1:
-        return False
+    # Rule 1: Check for fragmentation in the child molecule only.
     if len(_get_fragments_for_mol(child, mcs_mol)) > 1:
         return False
 
-    # Rule 2: Check for invalid bond order changes
-    parent_match = chemtoolkit.get_substruct_match(parent, mcs_mol)
+    # Rule 2: The fragment must be connected to the MCS via a single bond in the child.
     child_match = chemtoolkit.get_substruct_match(child, mcs_mol)
-    if not parent_match or not child_match:
-        return False # Should not happen if fragmentation check passed
 
-    parent_to_mcs_map = {p_idx: mcs_idx for mcs_idx, p_idx in enumerate(parent_match)}
-    child_to_mcs_map = {c_idx: mcs_idx for mcs_idx, c_idx in enumerate(child_match)}
+    if not child_match:
+        # This should not happen if the fragmentation check passed, but as a safeguard.
+        return False
 
-    # Find connection bonds in the child and check their order
-    for child_idx, mcs_idx in child_to_mcs_map.items():
-        child_atom = chemtoolkit.get_atom_with_idx(child, child_idx)
-        for neighbor in chemtoolkit.get_neighbors(child_atom):
+    child_mcs_atom_indices = set(child_match)
+
+    # Find all bonds connecting the MCS to the rest of the child molecule.
+    for child_mcs_idx in child_mcs_atom_indices:
+        mcs_atom = chemtoolkit.get_atom_with_idx(child, child_mcs_idx)
+        for neighbor in chemtoolkit.get_neighbors(mcs_atom):
             neighbor_idx = chemtoolkit.get_idx(neighbor)
 
-            # Check if neighbor is a fragment atom (not in MCS)
-            if neighbor_idx not in child_to_mcs_map:
-                bond = chemtoolkit.get_bond_between_atoms(child, child_idx, neighbor_idx)
-                # If the connection is a multiple bond, investigate further
-                if chemtoolkit.get_bond_type(bond) != chemtoolkit.get_single_bond_type():
-                    parent_idx = parent_match[mcs_idx]
-                    parent_atom = chemtoolkit.get_atom_with_idx(parent, parent_idx)
-                    
-                    is_problem = True
-                    for p_neighbor in chemtoolkit.get_neighbors(parent_atom):
-                        p_neighbor_idx = chemtoolkit.get_idx(p_neighbor)
-                        # Check if this neighbor in parent is also a fragment
-                        if p_neighbor_idx not in parent_to_mcs_map:
-                            p_bond = chemtoolkit.get_bond_between_atoms(parent, parent_idx, p_neighbor_idx)
-                            # If the parent also had a bond of the same high order to a
-                            # fragment, then it's not a problematic transformation.
-                            if chemtoolkit.get_bond_type(p_bond) == chemtoolkit.get_bond_type(bond):
-                                is_problem = False
-                                break
-                    if is_problem:
-                        return False # This MCS is invalid
+            # Check if this neighbor is a fragment atom (i.e., not in the MCS).
+            if neighbor_idx not in child_mcs_atom_indices:
+                bond = chemtoolkit.get_bond_between_atoms(child, child_mcs_idx, neighbor_idx)
 
+                # The bond connecting the fragment to the core MUST be a single bond.
+                if chemtoolkit.get_bond_type(bond) != chemtoolkit.get_single_bond_type():
+                    return False  # Invalid MCS: connection is not a single bond.
+
+    # If all connection bonds are single, the MCS is valid.
     return True
 
 
