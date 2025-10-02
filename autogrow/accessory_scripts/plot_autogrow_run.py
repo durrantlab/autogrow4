@@ -970,7 +970,7 @@ def run_boxplot(params: Dict[str, Any], dictionary_of_values: Dict[str, List[flo
         if key in dictionary_of_values:
             data.append(dictionary_of_values[key])
             yticklabels.append(key)
-    df_to_save = pd.DataFrame(dictionary_of_values)
+    df_to_save = pd.DataFrame.from_dict(dictionary_of_values, orient='index').transpose()
     setup_plot_styling()
     fig = plt.figure(figsize=(10, 7))
     ax = fig.add_subplot(111)
