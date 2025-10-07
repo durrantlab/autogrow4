@@ -944,8 +944,8 @@ def run_line_plot_per_generation(params: Dict[str, Any], dictionary_of_values: D
     save_plot(outfile, params, data_to_save=df_to_save)
 
 def run_boxplot(params: Dict[str, Any], dictionary_of_values: Dict[str, List[float]], outfile: str,
-      key_start_with: str, x_label: str, y_label: str, title_of_figure: str = None,
-      analyze_gen_0: bool = False, exist_gen_0: bool = False) -> None:
+   key_start_with: str, x_label: str, y_label: str, title_of_figure: str = None,
+   analyze_gen_0: bool = False, exist_gen_0: bool = False) -> None:
     """
     Create boxplot for the given data.
 
@@ -979,7 +979,6 @@ def run_boxplot(params: Dict[str, Any], dictionary_of_values: Dict[str, List[flo
         meanprops={"markerfacecolor": "black", "markeredgecolor": "black"})
     for median in bp['medians']:
         median.set_color('black')
-
     # Setting x-axis labels
 
     plt.xlabel(x_label, fontweight="semibold")
