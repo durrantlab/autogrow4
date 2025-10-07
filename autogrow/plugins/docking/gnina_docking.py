@@ -159,6 +159,7 @@ class GNINADocking(VinaDockingBase):
                         continue  # Skip if property is missing or not a float
 
             if best_compound:
+                chemtoolkit.set_prop(best_compound, '_Name', "Compound from " + lig_new_filename)
                 chemtoolkit.mol_to_sdf_file(best_compound, lig_output_file)
 
     def process_results_before_exit(self, predocked_cmpds, out_files):
