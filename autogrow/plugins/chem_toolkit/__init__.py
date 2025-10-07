@@ -385,6 +385,11 @@ class ChemToolkitBase(PluginBase):
         pass
 
     @abstractmethod
+    def set_prop(self, mol: Any, prop_name: str, prop_val: str) -> Any:
+        """Set a property for a molecule."""
+        pass
+
+    @abstractmethod
     def mol_to_pdb_block(self, mol: Any) -> str:
         """Convert molecule to a PDB block string."""
         pass
