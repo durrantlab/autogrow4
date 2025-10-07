@@ -12,6 +12,7 @@ if __name__ != "__main__":
     from autogrow.plugins.registry_base import plugin_managers
     from autogrow.utils.logging import log_info, log_warning
 
+
 def _find_bridge_atoms(mol: Any) -> List[int]:
     """Identifies bridge atoms in a molecule.
 
@@ -92,56 +93,54 @@ def _get_atoms_sorted_by_connectivity(mol: Any) -> List[Any]:
 
 def _is_valid_mcs(parent: Any, child: Any, mcs_mol: Any) -> bool:
     """
-    Checks if an MCS candidate is valid by our two main rules:
-    1. It must not fragment the parent or child molecule.
-    2. It must not create a fragment connected by a bond that has
-       inappropriately changed order (e.g., single to double).
+    Checks if an MCS candidate is valid for DeepFrag analysis.
+
+    An MCS is considered valid if it meets two criteria:
+    1.  It must not fragment the child molecule into multiple pieces when removed. This
+        ensures we are identifying a single, continuous fragment.
+    2.  In the child molecule, all bonds connecting the MCS to the resulting fragment
+        must be single bonds. This is because DeepFrag was trained on fragments
+        connected via single bonds.
+
+    Args:
+        parent (Any): The parent RDKit molecule (used for context but not for
+            fragmentation check).
+        child (Any): The child RDKit molecule.
+        mcs_mol (Any): The MCS candidate molecule.
+
+    Returns:
+        bool: True if the MCS is valid, False otherwise.
     """
     chemtoolkit = plugin_managers.ChemToolkit.toolkit
 
-    # Rule 1: Check for fragmentation
-    if len(_get_fragments_for_mol(parent, mcs_mol)) > 1:
-        return False
+    # Rule 1: Check for fragmentation in the child molecule only.
     if len(_get_fragments_for_mol(child, mcs_mol)) > 1:
         return False
 
-    # Rule 2: Check for invalid bond order changes
-    parent_match = chemtoolkit.get_substruct_match(parent, mcs_mol)
+    # Rule 2: The fragment must be connected to the MCS via a single bond in the child.
     child_match = chemtoolkit.get_substruct_match(child, mcs_mol)
-    if not parent_match or not child_match:
-        return False # Should not happen if fragmentation check passed
 
-    parent_to_mcs_map = {p_idx: mcs_idx for mcs_idx, p_idx in enumerate(parent_match)}
-    child_to_mcs_map = {c_idx: mcs_idx for mcs_idx, c_idx in enumerate(child_match)}
+    if not child_match:
+        # This should not happen if the fragmentation check passed, but as a safeguard.
+        return False
 
-    # Find connection bonds in the child and check their order
-    for child_idx, mcs_idx in child_to_mcs_map.items():
-        child_atom = chemtoolkit.get_atom_with_idx(child, child_idx)
-        for neighbor in chemtoolkit.get_neighbors(child_atom):
+    child_mcs_atom_indices = set(child_match)
+
+    # Find all bonds connecting the MCS to the rest of the child molecule.
+    for child_mcs_idx in child_mcs_atom_indices:
+        mcs_atom = chemtoolkit.get_atom_with_idx(child, child_mcs_idx)
+        for neighbor in chemtoolkit.get_neighbors(mcs_atom):
             neighbor_idx = chemtoolkit.get_idx(neighbor)
 
-            # Check if neighbor is a fragment atom (not in MCS)
-            if neighbor_idx not in child_to_mcs_map:
-                bond = chemtoolkit.get_bond_between_atoms(child, child_idx, neighbor_idx)
-                # If the connection is a multiple bond, investigate further
-                if chemtoolkit.get_bond_type(bond) != chemtoolkit.get_single_bond_type():
-                    parent_idx = parent_match[mcs_idx]
-                    parent_atom = chemtoolkit.get_atom_with_idx(parent, parent_idx)
-                    
-                    is_problem = True
-                    for p_neighbor in chemtoolkit.get_neighbors(parent_atom):
-                        p_neighbor_idx = chemtoolkit.get_idx(p_neighbor)
-                        # Check if this neighbor in parent is also a fragment
-                        if p_neighbor_idx not in parent_to_mcs_map:
-                            p_bond = chemtoolkit.get_bond_between_atoms(parent, parent_idx, p_neighbor_idx)
-                            # If the parent also had a bond of the same high order to a
-                            # fragment, then it's not a problematic transformation.
-                            if chemtoolkit.get_bond_type(p_bond) == chemtoolkit.get_bond_type(bond):
-                                is_problem = False
-                                break
-                    if is_problem:
-                        return False # This MCS is invalid
+            # Check if this neighbor is a fragment atom (i.e., not in the MCS).
+            if neighbor_idx not in child_mcs_atom_indices:
+                bond = chemtoolkit.get_bond_between_atoms(child, child_mcs_idx, neighbor_idx)
 
+                # The bond connecting the fragment to the core MUST be a single bond.
+                if chemtoolkit.get_bond_type(bond) != chemtoolkit.get_single_bond_type():
+                    return False  # Invalid MCS: connection is not a single bond.
+
+    # If all connection bonds are single, the MCS is valid.
     return True
 
 
@@ -219,7 +218,7 @@ def _find_single_fragment_mcs(mol1: Any, mol2: Any) -> Optional[str]:
         for idx in sorted(list(problem_mcs_indices), reverse=True):
             chemtoolkit.remove_atom_from_editable_mol(emol, idx)
         pruned_mcs_mol_base = chemtoolkit.get_noneditable_mol(emol)
-        sub_frags = chemtoolkit.get_mol_frags(pruned_mcs_mol_base, as_mols=True)
+        sub_frags = chemtoolkit.get_mol_frags(pruned_mcs_mol_base, as_mols=True, sanitize_frags=False)
         if sub_frags:
             largest_sub_frag = max(sub_frags, key=lambda m: chemtoolkit.get_num_atoms(m))
             try:
@@ -259,7 +258,7 @@ def _find_single_fragment_mcs(mol1: Any, mol2: Any) -> Optional[str]:
                 emol = chemtoolkit.get_editable_mol(current_mcs_mol)
                 chemtoolkit.remove_atom_from_editable_mol(emol, chemtoolkit.get_idx(atom))
                 # Removing an atom can disconnect the MCS itself. We take the largest resulting piece.
-                sub_frags = chemtoolkit.get_mol_frags(chemtoolkit.get_noneditable_mol(emol), as_mols=True)
+                sub_frags = chemtoolkit.get_mol_frags(chemtoolkit.get_noneditable_mol(emol), as_mols=True, sanitize_frags=False)
                 if not sub_frags:
                     continue
                 largest_sub_frag = max(sub_frags, key=lambda m: chemtoolkit.get_num_atoms(m))
@@ -675,7 +674,7 @@ if __name__ == "__main__":
     assert mcs_smarts == "[#6]1-[#6]-[#6]-[#6]-[#6]-[#6]-1"
 
     # Try a case that will take a long time to find a valid MCS
-    print("\n\nHI\n\n")
+    # print("\n\nHI\n\n")
     parent_child_smiles = ("CC(=O)N(CC(C)F)C(=O)NC(C)C(=O)Oc1n[nH]c(=O)c2ccccc12", "CC(=O)N(CC(C)OC(=O)NC(=S)NCC(=O)OCCC=CO)C(=O)NC(C)C(=O)Oc1n[nH]c(=O)c2ccccc12")
     mcs_mol, frag_mol, frag_info_dict, mcs_smarts, con_pts_dict = test_find_mcs_and_fragments(parent_child_smiles)
 

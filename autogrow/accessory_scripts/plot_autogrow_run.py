@@ -149,7 +149,30 @@ def save_plot(outfile: str, params: Dict[str, Any], data_to_save: Optional[pd.Da
         data_to_save.to_csv(f"{base_outfile}.tsv", sep="\t", index=False)
 
 def get_plot_labels(params: Dict[str, Any], ligand_efficiency: bool = False) -> Tuple[str, str, str]:
-    # No changes made to this function
+    """
+    Get standard plot labels based on parameters.
+    
+    Args:
+        params: Parameters dictionary.
+        ligand_efficiency: Whether calculating ligand efficiency.
+        
+    Returns:
+        Tuple of (title, x_label, y_label).
+    """
+    receptor_name = os.path.basename(params["receptor_path"])
+    
+    if ligand_efficiency:
+        title = f"Ligand efficiencies for {receptor_name}"
+        y_label = "Ligand Efficiency"
+    else:
+        title = f"Docking scores for {receptor_name}"
+        scoring_type = params.get("docking_executable", "")
+        if "vina" in str(scoring_type):
+            y_label = "Docking Score"
+        else:
+            y_label = "Fitness Score"
+    
+    return title, "Generation Number", y_label
 
 # ============================================================================
 # CORE ANALYSIS FUNCTIONS
@@ -921,8 +944,8 @@ def run_line_plot_per_generation(params: Dict[str, Any], dictionary_of_values: D
     save_plot(outfile, params, data_to_save=df_to_save)
 
 def run_boxplot(params: Dict[str, Any], dictionary_of_values: Dict[str, List[float]], outfile: str,
-      key_start_with: str, x_label: str, y_label: str, title_of_figure: str = None,
-      analyze_gen_0: bool = False, exist_gen_0: bool = False) -> None:
+   key_start_with: str, x_label: str, y_label: str, title_of_figure: str = None,
+   analyze_gen_0: bool = False, exist_gen_0: bool = False) -> None:
     """
     Create boxplot for the given data.
 
@@ -943,11 +966,11 @@ def run_boxplot(params: Dict[str, Any], dictionary_of_values: Dict[str, List[flo
     num_generations = len(dictionary_of_values) - (1 if exist_gen_0 and not analyze_gen_0 else 0)
     
     for i in range(num_generations):
-        key = f"{key_start_with}_{i + 1 if not analyze_gen_0 else i}"
-        if key in dictionary_of_values:
-            data.append(dictionary_of_values[key])
-            yticklabels.append(key)
-    df_to_save = pd.DataFrame(dictionary_of_values)
+       key = f"{key_start_with}_{i + 1 if not analyze_gen_0 else i}"
+       if key in dictionary_of_values:
+           data.append(dictionary_of_values[key])
+           yticklabels.append(key)
+    df_to_save = pd.DataFrame.from_dict(dictionary_of_values, orient='index').transpose()
     setup_plot_styling()
     fig = plt.figure(figsize=(10, 7))
     ax = fig.add_subplot(111)
@@ -956,7 +979,6 @@ def run_boxplot(params: Dict[str, Any], dictionary_of_values: Dict[str, List[flo
         meanprops={"markerfacecolor": "black", "markeredgecolor": "black"})
     for median in bp['medians']:
         median.set_color('black')
-
     # Setting x-axis labels
 
     plt.xlabel(x_label, fontweight="semibold")

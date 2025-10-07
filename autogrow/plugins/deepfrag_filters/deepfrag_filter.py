@@ -14,25 +14,6 @@ import sys
 from autogrow.utils.logging import log_info
 from autogrow.plugins.registry_base import plugin_managers
 
-try:
-    import torch
-    import prody
-    from io import StringIO
-    from collagen.util import rand_rot
-    from collagen.core.molecules.mol import Mol
-    from apps.deepfrag.model import DeepFragModel
-    from collagen.core.voxelization.voxelizer import VoxelParamsDefault
-
-    numba_logger = logging.getLogger("numba")
-    numba_logger.setLevel(logging.WARNING)
-    prody.LOGGER._logger.disabled = True
-except ImportError as e:
-    print(
-        "DeepFrag environment (e.g., torch, prody) is not installed. DeepFrag filters will not be available. "
-        + str(e)
-        + "\n"
-    )
-
 
 class DeepFragFilter(DeepFragFilterBase):
     """
@@ -57,6 +38,34 @@ class DeepFragFilter(DeepFragFilterBase):
 
     def validate(self, params: dict):
         """Validate the provided arguments."""
+        try:
+            import torch
+            import prody
+            from io import StringIO
+            from collagen.util import rand_rot
+            from collagen.core.molecules.mol import Mol
+            from collagen.apps.deepfrag.model import DeepFragModel
+            from collagen.core.voxelization.voxelizer import VoxelParamsDefault
+
+            self.torch = torch
+            self.prody = prody
+            self.StringIO = StringIO
+            self.rand_rot = rand_rot
+            self.Mol = Mol
+            self.DeepFragModel = DeepFragModel
+            self.VoxelParamsDefault = VoxelParamsDefault
+
+            numba_logger = logging.getLogger("numba")
+            numba_logger.setLevel(logging.WARNING)
+            self.prody.LOGGER._logger.disabled = True
+        except ImportError as e:
+            print(
+                "DeepFrag environment (e.g., torch, prody) is not installed. DeepFrag filters will not be available. "
+                + str(e)
+                + "\n"
+            )
+            raise e
+
         super().validate(params)
         # Always runs deepfrag on CPU. It's fast enough, not worth the GPU hassle.
         self.cpu = True
@@ -71,9 +80,9 @@ class DeepFragFilter(DeepFragFilterBase):
             raise Exception(f"DeepFrag model {df_model} is not an in-house model, or does not exist in "
                 f"the path specified.")
         self.ckpt_filename = params["deepfrag_model"]
-        self.model = DeepFragModel.load_from_checkpoint(self.ckpt_filename)
+        self.model = self.DeepFragModel.load_from_checkpoint(self.ckpt_filename)
         if not self.cpu:
-            self.model = self.model.to(torch.device('cuda'))
+            self.model = self.model.to(self.torch.device('cuda'))
         self.model.eval()
 
     def get_prediction_for_parent_receptor(self, parent_mol, receptor, branching_point):
@@ -86,7 +95,7 @@ class DeepFragFilter(DeepFragFilterBase):
             branching_point: coordinates of the branching point.
 
         Returns:
-           Numpy array containing the DeepFrag fingerprints.
+                Numpy array containing the DeepFrag fingerprints.
         """
         chemtoolkit = plugin_managers.ChemToolkit.toolkit
         # The receptor doesn't change, so the parent molecule and the branching
@@ -106,18 +115,15 @@ class DeepFragFilter(DeepFragFilterBase):
         center = np.array([branching_point.x, branching_point.y, branching_point.z])
 
         # Load the ligand
-        lig = Mol.from_rdkit(parent_mol, strict=False)
-
-        voxel_params = VoxelParamsDefault.DeepFrag
-
+        lig = self.Mol.from_rdkit(parent_mol, strict=False)
+        voxel_params = self.VoxelParamsDefault.DeepFrag
         # Load the receptor. Note that it is loaded only once (first time, when
         # self.recep is still None)
         if self.recep is None:
             with open(receptor, "r") as f:
-                m = prody.parsePDBStream(StringIO(f.read()), model=1)
+                m = self.prody.parsePDBStream(self.StringIO(f.read()), model=1)
             prody_mol = m.select("all")
-            self.recep = Mol.from_prody(prody_mol)
-
+            self.recep = self.Mol.from_prody(prody_mol)
         print(f"Using checkpoint {self.ckpt_filename}")
 
         # You're iterating through multiple checkpoints. This allows output
@@ -125,8 +131,7 @@ class DeepFragFilter(DeepFragFilterBase):
         fps = []
         for r in range(8):
             # Random rotations, unless debugging voxels
-            rot = rand_rot()
-
+            rot = self.rand_rot()
             # NOTE: the receptor voxel cannot be cached because of the random
             # rotation applied.
             voxel = self.recep.voxelize(
@@ -138,11 +143,9 @@ class DeepFragFilter(DeepFragFilterBase):
             )
 
             if not self.cpu:
-                voxel = voxel.to(torch.device('cuda'))
-
+                voxel = voxel.to(self.torch.device('cuda'))
             fps.append(self.model.forward(voxel))
-
-        avg_over_ckpts_of_avgs = torch.mean(torch.stack(fps), dim=0)
+        avg_over_ckpts_of_avgs = self.torch.mean(self.torch.stack(fps), dim=0)
         result = avg_over_ckpts_of_avgs.cpu().detach().numpy()[0]
 
         # Cache the result for future use
