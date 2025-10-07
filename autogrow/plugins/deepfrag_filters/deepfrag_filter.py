@@ -20,7 +20,7 @@ try:
     from io import StringIO
     from collagen.util import rand_rot
     from collagen.core.molecules.mol import Mol
-    from apps.deepfrag.model import DeepFragModel
+    from collagen.apps.deepfrag.model import DeepFragModel
     from collagen.core.voxelization.voxelizer import VoxelParamsDefault
 
     numba_logger = logging.getLogger("numba")
